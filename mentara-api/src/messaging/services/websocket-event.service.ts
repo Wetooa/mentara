@@ -21,16 +21,12 @@ import {
   PostCreatedEvent,
   CommentAddedEvent,
 } from '../../common/events/social-events';
-import { MessagingGateway } from '../messaging.gateway';
 
 @Injectable()
 export class WebSocketEventService implements OnModuleInit {
   private readonly logger = new Logger(WebSocketEventService.name);
 
-  constructor(
-    private readonly eventBus: EventBusService,
-    private readonly messagingGateway: MessagingGateway,
-  ) {}
+  constructor(private readonly eventBus: EventBusService) {}
 
   onModuleInit() {
     this.subscribeToEvents();
@@ -39,7 +35,6 @@ export class WebSocketEventService implements OnModuleInit {
 
   private subscribeToEvents(): void {
     // Subscribe to messaging events
-    this.subscribeToMessagingEvents();
 
     // Subscribe to booking events
     this.subscribeToBookingEvents();
@@ -51,195 +46,6 @@ export class WebSocketEventService implements OnModuleInit {
     this.subscribeToSocialEvents();
 
     this.logger.log('Subscribed to all WebSocket event handlers');
-  }
-
-  private subscribeToMessagingEvents(): void {
-    // Message sent event - broadcast to conversation participants
-    this.eventBus.subscribe(
-      'MessageSentEvent',
-      async (event: DomainEvent<any>) => {
-        const messageEvent = event as MessageSentEvent;
-        const {
-          conversationId,
-          messageId,
-          senderId,
-          content,
-          messageType,
-          sentAt,
-          recipientIds,
-        } = messageEvent.eventData;
-
-        // Broadcast message to conversation participants via WebSocket
-        // Frontend expects MessageEventData format with 'message' property
-        this.messagingGateway.broadcastMessage(conversationId, {
-          message: {
-            id: messageId,
-            conversationId,
-            senderId,
-            content,
-            messageType,
-            sentAt,
-            createdAt: sentAt,
-            updatedAt: sentAt,
-            isRead: false,
-            isEdited: false,
-            isDeleted: false,
-            replyToId: messageEvent.eventData.replyToMessageId || null,
-            attachmentUrls: messageEvent.eventData.fileAttachments || [],
-            attachmentNames: [],
-            attachmentSizes: [],
-            editedAt: null,
-            sender: null, // Will be populated by client
-            replyTo: null,
-            reactions: [],
-            readReceipts: [],
-          },
-          eventType: 'message_sent',
-        });
-
-        // Send delivery confirmations
-        for (const recipientId of recipientIds) {
-          this.messagingGateway.server
-            .to(this.getUserSocketRoom(recipientId))
-            .emit('message_delivered', {
-              messageId,
-              conversationId,
-              deliveredAt: new Date(),
-              eventType: 'message_delivered',
-            });
-        }
-
-        this.logger.debug(`Broadcasted message sent event: ${messageId}`);
-      },
-    );
-
-    // Message read event - broadcast read receipt
-    this.eventBus.subscribe(
-      'MessageReadEvent',
-      async (event: DomainEvent<any>) => {
-        const readEvent = event as MessageReadEvent;
-        const { messageId, conversationId, readBy } = readEvent.eventData;
-
-        this.messagingGateway.broadcastReadReceipt(
-          conversationId,
-          messageId,
-          readBy,
-        );
-
-        this.logger.debug(
-          `Broadcasted message read event: ${messageId} by ${readBy}`,
-        );
-      },
-    );
-
-    // Conversation created event - notify participants
-    this.eventBus.subscribe(
-      'ConversationCreatedEvent',
-      async (event: DomainEvent<any>) => {
-        const conversationEvent = event as ConversationCreatedEvent;
-        const {
-          conversationId,
-          createdBy,
-          participantIds,
-          conversationType,
-          title,
-        } = conversationEvent.eventData;
-
-        this.logger.debug('Conversation created event data:', event.eventData);
-
-        // Notify all participants about new conversation
-        for (const participantId of participantIds) {
-          this.messagingGateway.server
-            .to(this.getUserSocketRoom(participantId))
-            .emit('conversation_created', {
-              conversationId,
-              createdBy,
-              conversationType,
-              title,
-              participantIds,
-              eventType: 'conversation_created',
-              timestamp: new Date(),
-            });
-        }
-
-        this.logger.debug(
-          `Broadcasted conversation created event: ${conversationId}`,
-        );
-      },
-    );
-
-    // Participant joined event - notify conversation
-    this.eventBus.subscribe(
-      'ParticipantJoinedEvent',
-      async (event: DomainEvent<any>) => {
-        const joinEvent = event as ParticipantJoinedEvent;
-        const { conversationId, participantId, addedBy, joinedAt, role } =
-          joinEvent.eventData;
-
-        this.messagingGateway.server
-          .to(conversationId)
-          .emit('participant_joined', {
-            conversationId,
-            participantId,
-            addedBy,
-            joinedAt,
-            role,
-            eventType: 'participant_joined',
-          });
-
-        this.logger.debug(
-          `Broadcasted participant joined event: ${participantId} to ${conversationId}`,
-        );
-      },
-    );
-
-    // Participant left event - notify conversation
-    this.eventBus.subscribe(
-      'ParticipantLeftEvent',
-      async (event: DomainEvent<any>) => {
-        const leftEvent = event as ParticipantLeftEvent;
-        const { conversationId, participantId, leftAt, leftReason } =
-          leftEvent.eventData;
-
-        this.messagingGateway.server
-          .to(conversationId)
-          .emit('participant_left', {
-            conversationId,
-            participantId,
-            leftAt,
-            leftReason,
-            eventType: 'participant_left',
-          });
-
-        this.logger.debug(
-          `Broadcasted participant left event: ${participantId} from ${conversationId}`,
-        );
-      },
-    );
-
-    // Typing indicator event - relay to conversation
-    this.eventBus.subscribe(
-      'TypingIndicatorEvent',
-      async (event: DomainEvent<any>) => {
-        const typingEvent = event as TypingIndicatorEvent;
-        const { conversationId, userId, isTyping, timestamp } =
-          typingEvent.eventData;
-
-        this.messagingGateway.server
-          .to(conversationId)
-          .emit('typing_indicator', {
-            conversationId,
-            userId,
-            isTyping,
-            timestamp,
-            eventType: 'typing_indicator',
-          });
-
-        this.logger.debug(
-          `Relayed typing indicator: ${userId} in ${conversationId} - ${isTyping}`,
-        );
-      },
-    );
   }
 
   private subscribeToBookingEvents(): void {
@@ -267,24 +73,6 @@ export class WebSocketEventService implements OnModuleInit {
           eventType: 'appointment_booked',
           timestamp: new Date(),
         };
-
-        // Notify client
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(clientId))
-          .emit('appointment_notification', {
-            ...appointmentNotification,
-            message:
-              'Your appointment has been booked and is pending confirmation.',
-          });
-
-        // Notify therapist
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(therapistId))
-          .emit('appointment_notification', {
-            ...appointmentNotification,
-            message:
-              'You have a new appointment request that requires confirmation.',
-          });
 
         this.logger.debug(
           `Broadcasted appointment booked event: ${appointmentId}`,
@@ -328,22 +116,6 @@ export class WebSocketEventService implements OnModuleInit {
             ? 'You have cancelled the appointment.'
             : 'The client has cancelled their appointment.';
 
-        // Notify client
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(clientId))
-          .emit('appointment_notification', {
-            ...cancellationNotification,
-            message: clientMessage,
-          });
-
-        // Notify therapist
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(therapistId))
-          .emit('appointment_notification', {
-            ...cancellationNotification,
-            message: therapistMessage,
-          });
-
         this.logger.debug(
           `Broadcasted appointment cancelled event: ${appointmentId}`,
         );
@@ -360,19 +132,6 @@ export class WebSocketEventService implements OnModuleInit {
         const { userId, firstName, lastName, role } =
           registrationEvent.eventData;
 
-        // Send welcome notification to the new user
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(userId))
-          .emit('welcome_notification', {
-            userId,
-            firstName,
-            lastName,
-            role,
-            eventType: 'user_registered',
-            message: `Welcome to Mentara, ${firstName}! Your account has been successfully created.`,
-            timestamp: new Date(),
-          });
-
         this.logger.debug(`Sent welcome notification to new user: ${userId}`);
       },
     );
@@ -383,15 +142,6 @@ export class WebSocketEventService implements OnModuleInit {
       async (event: DomainEvent<any>) => {
         const profileEvent = event as UserProfileUpdatedEvent;
         const { userId, updatedFields, newValues } = profileEvent.eventData;
-
-        // Notify conversations where profile info might be displayed
-        this.messagingGateway.server.emit('user_profile_updated', {
-          userId,
-          updatedFields,
-          profileData: newValues,
-          eventType: 'user_profile_updated',
-          timestamp: new Date(),
-        });
 
         this.logger.debug(`Broadcasted user profile update: ${userId}`);
       },
@@ -415,24 +165,6 @@ export class WebSocketEventService implements OnModuleInit {
           isAnonymous,
         } = postEvent.eventData;
 
-        // Broadcast to community room
-        if (communityId) {
-          this.messagingGateway.server
-            .to(`community_${communityId}`)
-            .emit('new_post', {
-              postId,
-              authorId: isAnonymous ? null : authorId, // Hide author if anonymous
-              communityId,
-              title,
-              content,
-              tags,
-              postType,
-              isAnonymous,
-              eventType: 'post_created',
-              timestamp: new Date(),
-            });
-        }
-
         this.logger.debug(`Broadcasted post created event: ${postId}`);
       },
     );
@@ -443,30 +175,6 @@ export class WebSocketEventService implements OnModuleInit {
       async (event: DomainEvent<any>) => {
         const commentEvent = event as CommentAddedEvent;
         const { commentId, postId, authorId, content } = commentEvent.eventData;
-
-        // Broadcast to post room
-        this.messagingGateway.server
-          .to(`post_${postId}`)
-          .emit('post_interaction', {
-            commentId,
-            postId,
-            authorId,
-            content,
-            interactionType: 'comment',
-            eventType: 'comment_created',
-            message: 'Someone commented on your post',
-            timestamp: new Date(),
-          });
-
-        // Broadcast to post viewers
-        this.messagingGateway.server.to(`post_${postId}`).emit('new_comment', {
-          commentId,
-          postId,
-          authorId,
-          content,
-          eventType: 'comment_created',
-          timestamp: new Date(),
-        });
 
         this.logger.debug(
           `Broadcasted comment created event: ${commentId} on post ${postId}`,
@@ -487,7 +195,6 @@ export class WebSocketEventService implements OnModuleInit {
    */
   subscribeUserToPersonalRoom(userId: string, socketId: string): void {
     const userRoom = this.getUserSocketRoom(userId);
-    this.messagingGateway.server.in(socketId).socketsJoin(userRoom);
     this.logger.debug(
       `User ${userId} subscribed to personal room: ${userRoom}`,
     );
@@ -498,7 +205,6 @@ export class WebSocketEventService implements OnModuleInit {
    */
   unsubscribeUserFromPersonalRoom(userId: string, socketId: string): void {
     const userRoom = this.getUserSocketRoom(userId);
-    this.messagingGateway.server.in(socketId).socketsLeave(userRoom);
     this.logger.debug(
       `User ${userId} unsubscribed from personal room: ${userRoom}`,
     );
@@ -507,13 +213,8 @@ export class WebSocketEventService implements OnModuleInit {
   /**
    * Subscribe user to community room for post notifications
    */
-  subscribeUserToCommunityRoom(
-    userId: string,
-    communityId: string,
-    socketId: string,
-  ): void {
+  subscribeUserToCommunityRoom(userId: string, communityId: string): void {
     const communityRoom = `community_${communityId}`;
-    this.messagingGateway.server.in(socketId).socketsJoin(communityRoom);
     this.logger.debug(
       `User ${userId} subscribed to community room: ${communityRoom}`,
     );
@@ -528,7 +229,6 @@ export class WebSocketEventService implements OnModuleInit {
     socketId: string,
   ): void {
     const postRoom = `post_${postId}`;
-    this.messagingGateway.server.in(socketId).socketsJoin(postRoom);
     this.logger.debug(`User ${userId} subscribed to post room: ${postRoom}`);
   }
 
@@ -536,11 +236,9 @@ export class WebSocketEventService implements OnModuleInit {
    * Get connection statistics
    */
   getConnectionStats(): {
-    totalConnections: number;
     eventSubscriptions: number;
   } {
     return {
-      totalConnections: this.messagingGateway.server.sockets.sockets.size,
       eventSubscriptions: this.eventBus.getEventStats().totalListeners,
     };
   }
@@ -552,13 +250,6 @@ export class WebSocketEventService implements OnModuleInit {
     message: string,
     priority: 'low' | 'medium' | 'high' = 'medium',
   ): void {
-    this.messagingGateway.server.emit('system_announcement', {
-      message,
-      priority,
-      eventType: 'system_announcement',
-      timestamp: new Date(),
-    });
-
     this.logger.log(
       `Broadcasted system announcement: ${message} (priority: ${priority})`,
     );
@@ -568,16 +259,6 @@ export class WebSocketEventService implements OnModuleInit {
    * Send targeted notification to specific users
    */
   sendTargetedNotification(userIds: string[], notification: any): void {
-    for (const userId of userIds) {
-      this.messagingGateway.server
-        .to(this.getUserSocketRoom(userId))
-        .emit('targeted_notification', {
-          ...notification,
-          eventType: 'targeted_notification',
-          timestamp: new Date(),
-        });
-    }
-
     this.logger.debug(`Sent targeted notification to ${userIds.length} users`);
   }
 }

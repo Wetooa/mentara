@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MessagingController } from './messaging.controller';
 import { MessagingService } from './messaging.service';
-import { MessagingGateway } from './messaging.gateway';
 import { WebSocketAuthService } from './services/websocket-auth.service';
 import { WebSocketEventService } from './services/websocket-event.service';
 // MessageEncryptionService removed - encryption functionality not supported by schema
@@ -21,17 +20,11 @@ import { EventBusService } from '../common/events/event-bus.service';
   controllers: [MessagingController],
   providers: [
     MessagingService,
-    MessagingGateway,
     WebSocketAuthService,
     WebSocketEventService,
     PrismaService,
     EventBusService,
   ],
-  exports: [
-    MessagingService,
-    MessagingGateway,
-    WebSocketAuthService,
-    WebSocketEventService,
-  ],
+  exports: [MessagingService, WebSocketAuthService, WebSocketEventService],
 })
 export class MessagingModule {}
