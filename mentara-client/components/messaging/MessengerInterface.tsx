@@ -746,15 +746,15 @@ export function MessengerInterface({
         className
       )}
     >
-      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full w-full overflow-hidden">
         <ResizablePanel
           defaultSize={25}
           minSize={20}
           maxSize={40}
-          className="min-w-[280px]"
+          className="min-w-[280px] overflow-hidden"
         >
           {/* Sidebar - Conversations List */}
-          <div className="w-full h-full border-r border-gray-200 flex flex-col">
+          <div className="w-full h-full border-r border-gray-200 flex flex-col overflow-hidden">
             {/* Header */}
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between mb-3">
@@ -851,8 +851,8 @@ export function MessengerInterface({
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle className="w-1.5 bg-gray-200/60 hover:bg-blue-400/40 transition-colors duration-200" />
-        <ResizablePanel defaultSize={75} className="h-full">
-          <div className="h-full flex flex-col">
+        <ResizablePanel defaultSize={75} className="h-full overflow-hidden">
+          <div className="h-full flex flex-col overflow-hidden">
             {selectedConversationId ? (
               <>
                 {/* Chat Header */}
@@ -929,8 +929,8 @@ export function MessengerInterface({
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 flex flex-col min-h-0">
-                  <ScrollArea className="flex-1 p-4">
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                  <ScrollArea className="flex-1 h-0 p-4">
                     {isLoadingMessages ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>

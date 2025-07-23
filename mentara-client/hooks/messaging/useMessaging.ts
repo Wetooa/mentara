@@ -97,7 +97,7 @@ export function useMessaging(
     ...params,
   };
 
-  // WebSocket state
+  // Enhanced WebSocket state with better debugging
   const [connectionState, setConnectionState] =
     useState<WebSocketConnectionState>({
       isConnected: false,
@@ -105,6 +105,10 @@ export function useMessaging(
       error: null,
       lastConnected: null,
     });
+
+  // Track connection attempts for debugging
+  const connectionAttemptsRef = useRef(0);
+  const lastConnectionAttemptRef = useRef<number>(0);
 
   const [typingUsers, setTypingUsers] = useState<Map<string, TypingStatus>>(
     new Map()
@@ -314,21 +318,33 @@ export function useMessaging(
   // ============ WEBSOCKET CONNECTION MANAGEMENT ============
 
   const connectWebSocket = useCallback(async () => {
+    const attemptId = ++connectionAttemptsRef.current;
+    const attemptTimestamp = Date.now();
+    lastConnectionAttemptRef.current = attemptTimestamp;
+    
+    console.log(`🔄 [useMessaging] Connection attempt #${attemptId} starting...`);
+    
     if (!accessToken || !user || !config.enableRealtime) {
       console.log(
-        "⏭️ [useMessaging] WebSocket connection skipped - missing auth or realtime disabled"
+        "⏭️ [useMessaging] WebSocket connection skipped - missing auth or realtime disabled",
+        {
+          hasAccessToken: !!accessToken,
+          hasUser: !!user,
+          realtimeEnabled: config.enableRealtime
+        }
       );
       setConnectionState({
         isConnected: false,
         isReconnecting: false,
-        error: null,
+        error: "Authentication or realtime disabled",
         lastConnected: null,
       });
       return;
     }
 
+    // Check if we already have a connected socket
     if (socketRef.current?.connected) {
-      console.log("✅ [useMessaging] WebSocket already connected");
+      console.log("✅ [useMessaging] WebSocket already connected:", socketRef.current.id);
       setConnectionState((prev) => ({
         ...prev,
         isConnected: true,
@@ -340,15 +356,18 @@ export function useMessaging(
     }
 
     try {
-      console.log("🔄 [useMessaging] Connecting to messaging WebSocket...");
+      console.log(`🔄 [useMessaging] Connecting to messaging WebSocket (attempt #${attemptId})...`);
 
-      // Set connecting state (not reconnecting for first attempt)
+      // Set connecting state immediately with proper reconnecting flag
+      const isReconnecting = reconnectAttemptsRef.current > 0;
       setConnectionState((prev) => ({
         ...prev,
         isConnected: false,
-        isReconnecting: reconnectAttemptsRef.current > 0,
+        isReconnecting,
         error: null,
       }));
+
+      console.log(`📊 [useMessaging] Connection state set: { isConnected: false, isReconnecting: ${isReconnecting} }`);
 
       // Use the centralized socket system with proper namespace
       const socket = getMessagingSocket(accessToken);
@@ -359,27 +378,34 @@ export function useMessaging(
       // Store socket reference before connection attempt
       socketRef.current = socket;
 
+      console.log(`🎯 [useMessaging] Initiating socket connection (attempt #${attemptId})...`);
+      
       // Attempt connection with timeout handling
       await connectMessagingSocket(accessToken);
 
-      console.log("✅ [useMessaging] WebSocket connection initiated successfully");
+      console.log(`✅ [useMessaging] Socket connection initiated successfully (attempt #${attemptId})`);
       
       // Note: Final connection state will be set in the 'connect' event handler
       // to ensure we only mark as connected when the socket is actually ready
       
     } catch (error) {
-      console.error("❌ [useMessaging] Failed to connect WebSocket:", error);
+      console.error(`❌ [useMessaging] Connection attempt #${attemptId} failed:`, error);
       
       // Clear socket reference on connection failure
-      socketRef.current = null;
+      if (socketRef.current) {
+        socketRef.current.removeAllListeners();
+        socketRef.current = null;
+      }
       
+      const errorMessage = error instanceof Error ? error.message : "Failed to connect";
       setConnectionState((prev) => ({
         ...prev,
         isConnected: false,
-        error: error instanceof Error ? error.message : "Failed to connect",
+        error: errorMessage,
         isReconnecting: false,
       }));
       
+      console.error(`💥 [useMessaging] Connection state updated with error: ${errorMessage}`);
       scheduleReconnect();
     }
   }, [accessToken, user, config.enableRealtime]);
@@ -389,16 +415,29 @@ export function useMessaging(
       // Remove any existing listeners to prevent duplicates
       socket.removeAllListeners();
 
-      // Connection events
+      // Connection events with enhanced state management
       socket.on("connect", () => {
+        const connectedAt = new Date();
         console.log("✅ [useMessaging] WebSocket connected:", socket.id);
+        console.log("🎯 [useMessaging] Connection details:", {
+          socketId: socket.id,
+          transport: socket.io.engine.transport.name,
+          connected: socket.connected,
+          attemptCount: connectionAttemptsRef.current
+        });
+        
+        // Update connection state immediately and definitively
         setConnectionState({
           isConnected: true,
           isReconnecting: false,
           error: null,
-          lastConnected: new Date(),
+          lastConnected: connectedAt,
         });
+        
+        // Reset reconnection attempts
         reconnectAttemptsRef.current = 0;
+        
+        console.log("🎉 [useMessaging] Connection state updated to CONNECTED");
 
         // Join conversation room if specified
         if (config.conversationId) {
@@ -414,11 +453,20 @@ export function useMessaging(
 
       socket.on("disconnect", (reason) => {
         console.log("❌ [useMessaging] WebSocket disconnected:", reason);
+        console.log("💔 [useMessaging] Disconnect details:", {
+          reason,
+          socketId: socket.id,
+          connected: socket.connected,
+          timestamp: new Date().toISOString()
+        });
+        
         setConnectionState((prev) => ({
           ...prev,
           isConnected: false,
           isReconnecting: false,
         }));
+        
+        console.log("📊 [useMessaging] Connection state updated to DISCONNECTED");
 
         // Auto-reconnect unless it was a manual disconnect or server shutdown
         if (reason !== "io server disconnect" && reason !== "io client disconnect") {
@@ -429,12 +477,23 @@ export function useMessaging(
 
       socket.on("connect_error", (error) => {
         console.error("🚫 [useMessaging] WebSocket connection error:", error);
+        console.error("💥 [useMessaging] Error details:", {
+          message: error.message || 'No message',
+          type: error.type || 'No type',
+          description: error.description || 'No description',
+          context: error.context || 'No context',
+          transport: error.transport || 'No transport'
+        });
+        
+        const errorMessage = error instanceof Error ? error.message : "Connection error";
         setConnectionState((prev) => ({
           ...prev,
           isConnected: false,
-          error: error instanceof Error ? error.message : "Connection error",
+          error: errorMessage,
           isReconnecting: false,
         }));
+        
+        console.error(`💥 [useMessaging] Connection state updated with error: ${errorMessage}`);
         scheduleReconnect();
       });
 
@@ -563,6 +622,8 @@ export function useMessaging(
   }, []);
 
   const scheduleReconnect = useCallback(() => {
+    console.log(`🔄 [useMessaging] scheduleReconnect called (current attempts: ${reconnectAttemptsRef.current})`);
+    
     // Don't reconnect if offline
     if (!navigator.onLine) {
       console.log("🌐 [useMessaging] Device is offline, skipping reconnection attempt");
@@ -607,8 +668,17 @@ export function useMessaging(
       isReconnecting: true,
       error: null,
     }));
+    
+    console.log("🔄 [useMessaging] Connection state updated to RECONNECTING");
+
+    // Clear any existing timeout to prevent multiple reconnect attempts
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
 
     reconnectTimeoutRef.current = setTimeout(() => {
+      console.log(`⏰ [useMessaging] Reconnect timeout fired, initiating connection attempt #${reconnectAttemptsRef.current}`);
       connectWebSocket();
     }, finalDelay);
   }, [connectWebSocket]);
@@ -842,10 +912,47 @@ export function useMessaging(
 
   const reconnectWebSocket = useCallback(() => {
     console.log("🔄 [useMessaging] Manual reconnection requested");
+    
+    // Log current state for debugging
+    console.log("📊 [useMessaging] Pre-reconnect state:", {
+      isConnected: connectionState.isConnected,
+      isReconnecting: connectionState.isReconnecting,
+      error: connectionState.error,
+      socketConnected: socketRef.current?.connected,
+      socketId: socketRef.current?.id,
+      attempts: reconnectAttemptsRef.current,
+      lastAttempt: new Date(lastConnectionAttemptRef.current).toISOString()
+    });
+    
     disconnectWebSocket();
     reconnectAttemptsRef.current = 0;
     setTimeout(connectWebSocket, 1000);
-  }, [connectWebSocket, disconnectWebSocket]);
+  }, [connectWebSocket, disconnectWebSocket, connectionState]);
+
+  // Connection state monitoring - helps detect stuck connections
+  const monitorConnectionState = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastAttempt = now - lastConnectionAttemptRef.current;
+    const isStuckConnecting = !connectionState.isConnected && 
+                             !connectionState.isReconnecting && 
+                             !connectionState.error &&
+                             timeSinceLastAttempt > 30000; // 30 seconds
+    
+    if (isStuckConnecting) {
+      console.warn("⚠️ [useMessaging] Connection appears stuck, forcing reconnect");
+      console.warn("📊 [useMessaging] Stuck connection details:", {
+        isConnected: connectionState.isConnected,
+        isReconnecting: connectionState.isReconnecting,
+        error: connectionState.error,
+        timeSinceLastAttempt,
+        socketConnected: socketRef.current?.connected,
+        socketId: socketRef.current?.id
+      });
+      
+      // Force a reconnection attempt
+      reconnectWebSocket();
+    }
+  }, [connectionState, reconnectWebSocket]);
 
   // ============ EFFECTS ============
 
@@ -895,12 +1002,53 @@ export function useMessaging(
     };
   }, [connectionState.isConnected, config.enableRealtime, accessToken, user, connectWebSocket]);
 
+  // Connection state monitoring effect
+  useEffect(() => {
+    const monitorInterval = setInterval(() => {
+      monitorConnectionState();
+    }, 10000); // Check every 10 seconds
+
+    return () => {
+      clearInterval(monitorInterval);
+    };
+  }, [monitorConnectionState]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       disconnectWebSocket();
     };
   }, [disconnectWebSocket]);
+
+  // ============ DEBUGGING UTILITIES ============
+
+  const getConnectionDiagnostics = useCallback(() => {
+    return {
+      connectionState,
+      socketState: {
+        exists: !!socketRef.current,
+        connected: socketRef.current?.connected || false,
+        id: socketRef.current?.id || null,
+        transport: socketRef.current?.io.engine?.transport?.name || null,
+        readyState: socketRef.current?.io.engine?.readyState || null
+      },
+      attempts: {
+        total: connectionAttemptsRef.current,
+        reconnect: reconnectAttemptsRef.current,
+        lastAttempt: lastConnectionAttemptRef.current ? new Date(lastConnectionAttemptRef.current).toISOString() : null
+      },
+      config: {
+        enableRealtime: config.enableRealtime,
+        conversationId: config.conversationId,
+        hasAccessToken: !!accessToken,
+        hasUser: !!user
+      },
+      network: {
+        online: navigator.onLine,
+        effectiveType: (navigator as any).connection?.effectiveType || 'unknown'
+      }
+    };
+  }, [connectionState, config, accessToken, user]);
 
   // ============ RETURN API ============
 
@@ -941,6 +1089,7 @@ export function useMessaging(
     refetchConversations,
     refetchMessages,
     reconnectWebSocket,
+    getConnectionDiagnostics,
 
     // Advanced features
     searchMessages: (query: string) =>

@@ -44,12 +44,12 @@ export default function ClientMessagesPage() {
   };
 
   return (
-    <div className="h-full w-full p-6">
-      <div className="h-full">
+    <div className="h-full w-full p-6 flex flex-col">
+      <div className="flex-1 min-h-0">
         <MessengerInterface
           onCallInitiate={handleCallInitiate}
           onVideoMeetingJoin={handleVideoMeetingJoin}
-          className="h-full"
+          className="h-full w-full"
           targetUserId={targetUserId || undefined}
         />
       </div>
