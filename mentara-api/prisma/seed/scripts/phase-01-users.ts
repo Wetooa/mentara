@@ -16,7 +16,7 @@ interface UsersPhaseData {
 
 export async function runPhase01Users(
   prisma: PrismaClient,
-  config: 'comprehensive' | 'simple'
+  config: 'comprehensive' | 'simple',
 ): Promise<PhaseResult> {
   console.log(`👥 PHASE 1: Creating users (${config} mode)...`);
 
@@ -24,8 +24,10 @@ export async function runPhase01Users(
     // Check if users already exist (idempotent check)
     const existingUsersCount = await prisma.user.count();
     if (existingUsersCount > 0) {
-      console.log(`⏭️ Found ${existingUsersCount} existing users, skipping phase`);
-      
+      console.log(
+        `⏭️ Found ${existingUsersCount} existing users, skipping phase`,
+      );
+
       // Return existing data for next phases
       const existingUsers = await prisma.user.findMany({
         include: {
@@ -36,10 +38,14 @@ export async function runPhase01Users(
 
       const existingData = {
         users: existingUsers,
-        clients: existingUsers.filter(u => u.role === 'client').map(u => ({ user: u, client: u.client })),
-        therapists: existingUsers.filter(u => u.role === 'therapist').map(u => ({ user: u, therapist: u.therapist })),
-        moderators: existingUsers.filter(u => u.role === 'moderator'),
-        admins: existingUsers.filter(u => u.role === 'admin'),
+        clients: existingUsers
+          .filter((u) => u.role === 'client')
+          .map((u) => ({ user: u, client: u.client })),
+        therapists: existingUsers
+          .filter((u) => u.role === 'therapist')
+          .map((u) => ({ user: u, therapist: u.therapist })),
+        moderators: existingUsers.filter((u) => u.role === 'moderator'),
+        admins: existingUsers.filter((u) => u.role === 'admin'),
       };
 
       return {
@@ -51,7 +57,7 @@ export async function runPhase01Users(
     }
 
     let result: UsersPhaseData;
-    
+
     if (config === 'simple') {
       result = await createSimpleUsers(prisma);
     } else {
@@ -70,7 +76,6 @@ export async function runPhase01Users(
       message: `Created ${totalUsers} users successfully`,
       data: result,
     };
-
   } catch (error) {
     console.error('❌ Phase 1 failed:', error);
     return {
@@ -80,7 +85,9 @@ export async function runPhase01Users(
   }
 }
 
-async function createComprehensiveUsers(prisma: PrismaClient): Promise<UsersPhaseData> {
+async function createComprehensiveUsers(
+  prisma: PrismaClient,
+): Promise<UsersPhaseData> {
   const users: any[] = [];
   const clients: any[] = [];
   const therapists: any[] = [];
@@ -89,19 +96,37 @@ async function createComprehensiveUsers(prisma: PrismaClient): Promise<UsersPhas
   console.log('🧪 Creating test accounts...');
 
   // Create test admin users
+  // Create test admin users
   for (const adminData of TEST_ACCOUNTS.ADMINS) {
     const userData = SeedDataGenerator.generateUserData('admin', adminData);
     const user = await prisma.user.create({ data: userData });
+
+    // Create the corresponding admin record
+    const admin = await prisma.admin.create({
+      data: {
+        userId: user.id,
+        permissions: ['user_management', 'therapist_approval', 'system_admin'],
+        adminLevel: 'admin',
+      },
+    });
+
     users.push(user);
-    console.log(`✅ Created test admin: ${adminData.firstName} ${adminData.lastName}`);
+    console.log(
+      `✅ Created test admin: ${adminData.firstName} ${adminData.lastName}`,
+    );
   }
 
   // Create test moderator users
   for (const moderatorData of TEST_ACCOUNTS.MODERATORS) {
-    const userData = SeedDataGenerator.generateUserData('moderator', moderatorData);
+    const userData = SeedDataGenerator.generateUserData(
+      'moderator',
+      moderatorData,
+    );
     const user = await prisma.user.create({ data: userData });
     users.push(user);
-    console.log(`✅ Created test moderator: ${moderatorData.firstName} ${moderatorData.lastName}`);
+    console.log(
+      `✅ Created test moderator: ${moderatorData.firstName} ${moderatorData.lastName}`,
+    );
   }
 
   // Create test client users
@@ -116,12 +141,17 @@ async function createComprehensiveUsers(prisma: PrismaClient): Promise<UsersPhas
     });
     clients.push({ user, client });
     users.push(user);
-    console.log(`✅ Created test client: ${clientData.firstName} ${clientData.lastName}`);
+    console.log(
+      `✅ Created test client: ${clientData.firstName} ${clientData.lastName}`,
+    );
   }
 
   // Create test therapist users
   for (const therapistData of TEST_ACCOUNTS.THERAPISTS) {
-    const userData = SeedDataGenerator.generateUserData('therapist', therapistData);
+    const userData = SeedDataGenerator.generateUserData(
+      'therapist',
+      therapistData,
+    );
     const user = await prisma.user.create({ data: userData });
     const therapistProfileData = SeedDataGenerator.generateTherapistData();
     const therapist = await prisma.therapist.create({
@@ -133,14 +163,17 @@ async function createComprehensiveUsers(prisma: PrismaClient): Promise<UsersPhas
     });
     therapists.push({ user, therapist });
     users.push(user);
-    console.log(`✅ Created test therapist: ${therapistData.firstName} ${therapistData.lastName}`);
+    console.log(
+      `✅ Created test therapist: ${therapistData.firstName} ${therapistData.lastName}`,
+    );
   }
 
   // Create additional fake users for testing
   console.log('🤖 Creating additional fake users...');
 
   // Create additional admin users
-  const additionalAdmins = SEED_CONFIG.USERS.ADMINS - TEST_ACCOUNTS.ADMINS.length;
+  const additionalAdmins =
+    SEED_CONFIG.USERS.ADMINS - TEST_ACCOUNTS.ADMINS.length;
   for (let i = 0; i < additionalAdmins; i++) {
     const userData = SeedDataGenerator.generateUserData('admin', {
       id: `fake_admin_${i + 1}`,
@@ -150,11 +183,14 @@ async function createComprehensiveUsers(prisma: PrismaClient): Promise<UsersPhas
     });
     const user = await prisma.user.create({ data: userData });
     users.push(user);
-    console.log(`✅ Created additional admin: ${userData.firstName} ${userData.lastName}`);
+    console.log(
+      `✅ Created additional admin: ${userData.firstName} ${userData.lastName}`,
+    );
   }
 
   // Create additional moderator users
-  const additionalModerators = SEED_CONFIG.USERS.MODERATORS - TEST_ACCOUNTS.MODERATORS.length;
+  const additionalModerators =
+    SEED_CONFIG.USERS.MODERATORS - TEST_ACCOUNTS.MODERATORS.length;
   for (let i = 0; i < additionalModerators; i++) {
     const userData = SeedDataGenerator.generateUserData('moderator', {
       id: `fake_moderator_${i + 1}`,
@@ -164,11 +200,14 @@ async function createComprehensiveUsers(prisma: PrismaClient): Promise<UsersPhas
     });
     const user = await prisma.user.create({ data: userData });
     users.push(user);
-    console.log(`✅ Created additional moderator: ${userData.firstName} ${userData.lastName}`);
+    console.log(
+      `✅ Created additional moderator: ${userData.firstName} ${userData.lastName}`,
+    );
   }
 
   // Create additional client users
-  const additionalClients = SEED_CONFIG.USERS.CLIENTS - TEST_ACCOUNTS.CLIENTS.length;
+  const additionalClients =
+    SEED_CONFIG.USERS.CLIENTS - TEST_ACCOUNTS.CLIENTS.length;
   for (let i = 0; i < additionalClients; i++) {
     const userData = SeedDataGenerator.generateUserData('client', {
       id: `fake_client_${i + 1}`,
@@ -182,11 +221,14 @@ async function createComprehensiveUsers(prisma: PrismaClient): Promise<UsersPhas
     });
     clients.push({ user, client });
     users.push(user);
-    console.log(`✅ Created additional client: ${userData.firstName} ${userData.lastName}`);
+    console.log(
+      `✅ Created additional client: ${userData.firstName} ${userData.lastName}`,
+    );
   }
 
   // Create additional therapist users
-  const additionalTherapists = SEED_CONFIG.USERS.THERAPISTS - TEST_ACCOUNTS.THERAPISTS.length;
+  const additionalTherapists =
+    SEED_CONFIG.USERS.THERAPISTS - TEST_ACCOUNTS.THERAPISTS.length;
   for (let i = 0; i < additionalTherapists; i++) {
     const userData = SeedDataGenerator.generateUserData('therapist', {
       id: `fake_therapist_${i + 1}`,
@@ -202,17 +244,21 @@ async function createComprehensiveUsers(prisma: PrismaClient): Promise<UsersPhas
     });
     therapists.push({ user, therapist });
     users.push(user);
-    console.log(`✅ Created additional therapist: ${userData.firstName} ${userData.lastName}`);
+    console.log(
+      `✅ Created additional therapist: ${userData.firstName} ${userData.lastName}`,
+    );
   }
 
   // Extract moderators and admins from users array
-  const moderators = users.filter(user => user.role === 'moderator');
-  const admins = users.filter(user => user.role === 'admin');
+  const moderators = users.filter((user) => user.role === 'moderator');
+  const admins = users.filter((user) => user.role === 'admin');
 
   return { users, clients, therapists, moderators, admins };
 }
 
-async function createSimpleUsers(prisma: PrismaClient): Promise<UsersPhaseData> {
+async function createSimpleUsers(
+  prisma: PrismaClient,
+): Promise<UsersPhaseData> {
   const users: any[] = [];
   const clients: any[] = [];
   const therapists: any[] = [];
@@ -245,7 +291,9 @@ async function createSimpleUsers(prisma: PrismaClient): Promise<UsersPhaseData> 
 
     users.push(clientUser);
     clients.push({ user: clientUser, client });
-    console.log(`✅ Created dev client: ${clientUser.firstName} ${clientUser.lastName}`);
+    console.log(
+      `✅ Created dev client: ${clientUser.firstName} ${clientUser.lastName}`,
+    );
   }
 
   // Create therapists
@@ -282,7 +330,7 @@ async function createSimpleUsers(prisma: PrismaClient): Promise<UsersPhaseData> 
         compliesWithDataPrivacyAct: true,
         willingToAbideByPlatformGuidelines: true,
         sessionLength: '60 minutes',
-        hourlyRate: 100.00,
+        hourlyRate: 100.0,
         expertise: ['General Therapy'],
         approaches: ['CBT'],
         languages: ['English'],
@@ -294,7 +342,9 @@ async function createSimpleUsers(prisma: PrismaClient): Promise<UsersPhaseData> 
 
     users.push(therapistUser);
     therapists.push({ user: therapistUser, therapist });
-    console.log(`✅ Created dev therapist: ${therapistUser.firstName} ${therapistUser.lastName}`);
+    console.log(
+      `✅ Created dev therapist: ${therapistUser.firstName} ${therapistUser.lastName}`,
+    );
   }
 
   // Create admins
@@ -322,7 +372,9 @@ async function createSimpleUsers(prisma: PrismaClient): Promise<UsersPhaseData> 
 
     users.push(adminUser);
     admins.push(adminUser);
-    console.log(`✅ Created dev admin: ${adminUser.firstName} ${adminUser.lastName}`);
+    console.log(
+      `✅ Created dev admin: ${adminUser.firstName} ${adminUser.lastName}`,
+    );
   }
 
   // Create moderators
@@ -350,7 +402,9 @@ async function createSimpleUsers(prisma: PrismaClient): Promise<UsersPhaseData> 
 
     users.push(moderatorUser);
     moderators.push(moderatorUser);
-    console.log(`✅ Created dev moderator: ${moderatorUser.firstName} ${moderatorUser.lastName}`);
+    console.log(
+      `✅ Created dev moderator: ${moderatorUser.firstName} ${moderatorUser.lastName}`,
+    );
   }
 
   return { users, clients, therapists, moderators, admins };

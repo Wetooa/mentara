@@ -219,7 +219,9 @@ export class TherapistAuthService {
                   ...registerData.therapeuticApproachesUsedList.filter(
                     (t) => t !== 'other',
                   ),
-                  ...(Array.isArray(registerData.therapeuticApproachesUsedList_specify) 
+                  ...(Array.isArray(
+                    registerData.therapeuticApproachesUsedList_specify,
+                  )
                     ? registerData.therapeuticApproachesUsedList_specify
                     : [registerData.therapeuticApproachesUsedList_specify]),
                 ]
@@ -244,7 +246,9 @@ export class TherapistAuthService {
                 ...registerData.therapeuticApproachesUsedList.filter(
                   (t) => t !== 'other',
                 ),
-                ...(Array.isArray(registerData.therapeuticApproachesUsedList_specify) 
+                ...(Array.isArray(
+                  registerData.therapeuticApproachesUsedList_specify,
+                )
                   ? registerData.therapeuticApproachesUsedList_specify
                   : [registerData.therapeuticApproachesUsedList_specify]),
               ]
@@ -274,22 +278,20 @@ export class TherapistAuthService {
       userResult.user.role,
     );
 
-    // Send verification email
-    await this.emailVerificationService.sendVerificationEmail(
-      userResult.user.id,
-    );
-
     // Send therapist registration success email
     try {
       await this.emailService.sendTherapistRegistrationSuccess(
         userResult.user.email,
         `${userResult.user.firstName || ''} ${userResult.user.lastName || ''}`.trim() ||
           'Therapist',
-        'Welcome to Mentara - Your Therapist Application Has Been Submitted'
+        'Welcome to Mentara - Your Therapist Application Has Been Submitted',
       );
       console.log('Therapist registration success email sent successfully');
     } catch (error) {
-      console.error('Failed to send therapist registration success email:', error);
+      console.error(
+        'Failed to send therapist registration success email:',
+        error,
+      );
       // Don't fail the entire operation if email fails
     }
 
@@ -376,11 +378,14 @@ export class TherapistAuthService {
         result.user.email,
         `${result.user.firstName || ''} ${result.user.lastName || ''}`.trim() ||
           'Therapist',
-        'Welcome to Mentara - Your Therapist Registration Was Successful'
+        'Welcome to Mentara - Your Therapist Registration Was Successful',
       );
       console.log('Therapist registration success email sent successfully');
     } catch (error) {
-      console.error('Failed to send therapist registration success email:', error);
+      console.error(
+        'Failed to send therapist registration success email:',
+        error,
+      );
       // Don't fail the entire operation if email fails
     }
 
@@ -742,7 +747,7 @@ export class TherapistAuthService {
             application.user.email,
             `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() ||
               'Therapist',
-            'Congratulations! Your Therapist Application Has Been Approved'
+            'Congratulations! Your Therapist Application Has Been Approved',
           );
           console.log('Approval email notification sent successfully');
         } catch (error) {
@@ -756,7 +761,7 @@ export class TherapistAuthService {
             application.user.email,
             `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() ||
               'Therapist',
-            'Update on Your Therapist Application'
+            'Update on Your Therapist Application',
           );
           console.log('Rejection email notification sent successfully');
         } catch (error) {
