@@ -1,22 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
-  Users,
-  MessageSquare,
-  FileText,
-  Calendar,
-  UserCheck,
   Menu,
   X,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
-  UsersRound,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
@@ -57,203 +48,119 @@ export default function TherapistLayout({
     }
   };
 
-  // Sidebar state management
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Load sidebar state from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("therapist-sidebar-expanded");
-    if (saved !== null) {
-      setIsSidebarExpanded(JSON.parse(saved));
-    }
-  }, []);
-
-  // Save sidebar state to localStorage
-  const toggleSidebar = () => {
-    const newState = !isSidebarExpanded;
-    setIsSidebarExpanded(newState);
-    localStorage.setItem(
-      "therapist-sidebar-expanded",
-      JSON.stringify(newState)
-    );
-  };
 
   // Navigation menu items for therapist
   const navItems = [
     {
       name: "Dashboard",
       path: "/therapist/dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
+      icon: "/icons/dashboard.svg",
       id: "dashboard",
     },
     {
       name: "Patients",
-      path: "/therapist/patients",
-      icon: <Users className="h-5 w-5" />,
+      path: "/therapist/patients", 
+      icon: "/icons/therapist.svg", // Using therapist icon for patients
       id: "patients",
+    },
+    {
+      name: "Sessions",
+      path: "/therapist/schedule", // Renamed Schedule to Sessions
+      icon: "/icons/sessions.svg",
+      id: "sessions",
+    },
+    {
+      name: "Community",
+      path: "/therapist/community",
+      icon: "/icons/community.svg",
+      id: "community",
     },
     {
       name: "Messages",
       path: "/therapist/messages",
-      icon: <MessageSquare className="h-5 w-5" />,
+      icon: "/icons/messages.svg",
       id: "messages",
     },
     {
       name: "Worksheets",
       path: "/therapist/worksheets",
-      icon: <FileText className="h-5 w-5" />,
+      icon: "/icons/worksheets.svg",
       id: "worksheets",
-    },
-    {
-      name: "Schedule",
-      path: "/therapist/schedule",
-      icon: <Calendar className="h-5 w-5" />,
-      id: "schedule",
-    },
-    {
-      name: "Requests",
-      path: "/therapist/requests",
-      icon: <UserCheck className="h-5 w-5" />,
-      id: "requests",
-    },
-    {
-      name: "Community",
-      path: "/therapist/community",
-      icon: <UsersRound className="h-5 w-5" />,
-      id: "community",
     },
   ];
 
   return (
     <div className="flex h-screen w-full bg-white">
       {/* Desktop Sidebar Navigation */}
-      <nav
-        className={cn(
-          "hidden md:flex fixed left-0 top-0 z-10 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
-          isSidebarExpanded ? "w-64" : "w-[70px]"
-        )}
-      >
-        {/* Header with Logo and Toggle */}
-        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-          <Link
-            href="/therapist/dashboard"
-            className={cn(
-              "flex items-center transition-all duration-300",
-              isSidebarExpanded ? "" : "justify-center"
-            )}
-          >
-            <Image
-              src="/mentara-icon.png"
-              alt="Mentara Logo"
-              width={32}
-              height={32}
-              priority
-              className="flex-shrink-0"
-            />
-            {isSidebarExpanded && (
-              <span className="ml-3 text-lg font-semibold text-gray-900 transition-all duration-300">
-                Therapist
-              </span>
-            )}
-          </Link>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className={cn(
-              "h-8 w-8 transition-all duration-300",
-              !isSidebarExpanded && "opacity-0 hover:opacity-100"
-            )}
-          >
-            {isSidebarExpanded ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-
-        {/* Navigation Items */}
-        <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
+      <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
+        <Link href="/therapist/dashboard" className="mb-8 px-2">
+          <Image
+            src="/icons/mentara/mentara-icon.png"
+            alt="Mentara Logo"
+            width={50}
+            height={50}
+            priority
+            className="hover:scale-110 transition-transform duration-300"
+          />
+        </Link>
+        <div className="flex flex-1 flex-col items-center gap-6">
           {navItems.map((item) => {
-            const isActive =
-              pathname === item.path || pathname.startsWith(`${item.path}/`);
+            const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
             return (
               <Link
                 key={item.id}
                 href={item.path}
                 className={cn(
-                  "relative group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 ease-in-out",
+                  "relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out",
                   isActive
-                    ? "bg-blue-50 text-blue-600 shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-blue-600",
-                  !isSidebarExpanded && "justify-center px-2"
+                    ? "text-amber-600"
+                    : "text-muted-foreground hover:text-amber-600"
                 )}
-                title={!isSidebarExpanded ? item.name : undefined}
               >
-                {/* Left accent indicator */}
                 <div
                   className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-blue-600 rounded-r-full transition-all duration-300 ease-in-out",
+                    "absolute inset-0 transition-all duration-400 ease-in-out",
+                    isActive
+                      ? "bg-amber-100 rounded-2xl scale-100"
+                      : "bg-transparent rounded-full scale-75 group-hover:bg-amber-50 group-hover:rounded-2xl group-hover:scale-100"
+                  )}
+                />
+                <div
+                  className={cn(
+                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-amber-600 rounded-r-full transition-all duration-300 ease-in-out",
                     isActive
                       ? "h-8 opacity-100"
                       : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
                   )}
                 />
-
-                {/* Discord-style bevel background */}
-                <div
-                  className={cn(
-                    "absolute inset-0 transition-all duration-400 ease-in-out",
-                    isActive
-                      ? "bg-blue-50 rounded-xl scale-100"
-                      : "bg-transparent rounded-full scale-75 group-hover:bg-blue-50/50 group-hover:rounded-xl group-hover:scale-100"
-                  )}
-                />
-
-                <div className="relative z-10 flex items-center gap-3">
-                  <div
+                <div className="relative z-10 flex flex-col items-center justify-center">
+                  <Image
+                    src={item.icon}
+                    alt={item.name}
+                    width={24}
+                    height={24}
                     className={cn(
                       "transition-all duration-300",
                       isActive
-                        ? "text-blue-600 scale-110"
-                        : "text-gray-500 group-hover:text-blue-600 group-hover:scale-110"
+                        ? "scale-110"
+                        : "group-hover:scale-110"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "mt-1 text-center text-[9px] font-medium transition-all duration-300",
+                      isActive
+                        ? "text-amber-600 opacity-100"
+                        : "text-muted-foreground opacity-75 group-hover:text-amber-600 group-hover:opacity-100"
                     )}
                   >
-                    {item.icon}
-                  </div>
-
-                  {isSidebarExpanded && (
-                    <span
-                      className={cn(
-                        "transition-all duration-300",
-                        isActive
-                          ? "text-blue-600"
-                          : "text-gray-700 group-hover:text-blue-600"
-                      )}
-                    >
-                      {item.name}
-                    </span>
-                  )}
+                    {item.name}
+                  </span>
                 </div>
               </Link>
             );
           })}
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-gray-200 p-4">
-          {isSidebarExpanded ? (
-            <p className="text-xs text-gray-500 text-center">
-              © 2025 Mentara Therapist
-            </p>
-          ) : (
-            <div className="flex justify-center">
-              <div className="h-2 w-2 rounded-full bg-gray-300" />
-            </div>
-          )}
         </div>
       </nav>
 
@@ -300,16 +207,16 @@ export default function TherapistLayout({
                       className={cn(
                         "relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300",
                         isActive
-                          ? "bg-blue-50 text-blue-600"
-                          : "text-gray-700 hover:bg-blue-50/50 hover:text-blue-600"
+                          ? "bg-amber-50 text-amber-600"
+                          : "text-gray-700 hover:bg-amber-50/50 hover:text-amber-600"
                       )}
                     >
                       <div
                         className={cn(
                           "transition-all duration-300",
                           isActive
-                            ? "text-blue-600 scale-110"
-                            : "text-gray-500 group-hover:text-blue-600 group-hover:scale-105"
+                            ? "text-amber-600 scale-110"
+                            : "text-gray-500 group-hover:text-amber-600 group-hover:scale-105"
                         )}
                       >
                         {item.icon}
@@ -318,8 +225,8 @@ export default function TherapistLayout({
                         className={cn(
                           "font-medium transition-all duration-300",
                           isActive
-                            ? "text-blue-600"
-                            : "text-gray-700 group-hover:text-blue-600"
+                            ? "text-amber-600"
+                            : "text-gray-700 group-hover:text-amber-600"
                         )}
                       >
                         {item.name}
@@ -343,24 +250,10 @@ export default function TherapistLayout({
         </div>
       )}
 
-      {/* Main Content Area - Responsive padding */}
-      <div
-        className={cn(
-          "flex flex-1 flex-col w-full h-screen transition-all duration-300",
-          "md:ml-0",
-          isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
-        )}
-      >
-        {/* Top Header - Responsive */}
-        <header
-          className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm"
-          style={{
-            width: isSidebarExpanded
-              ? "calc(100% - 256px)"
-              : "calc(100% - 70px)",
-            ...(window.innerWidth < 768 && { width: "100%" }),
-          }}
-        >
+      {/* Main Content Area - Fixed 70px padding */}
+      <div className="flex flex-1 flex-col w-full h-screen md:ml-[70px]">
+        {/* Top Header - Fixed width for 70px sidebar */}
+        <header className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm w-full md:w-[calc(100%-70px)]">
           {/* Mobile menu button and title */}
           <div className="flex items-center gap-3 md:hidden">
             <Button
@@ -393,9 +286,9 @@ export default function TherapistLayout({
                 placeholder="Search patients, colleagues..."
                 onUserSelect={handleUserSelect}
                 showRoleFilter={false}
-                className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-lg ring-1 ring-border/50 rounded-xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-blue-300 focus-within:shadow-xl transition-all duration-300"
+                className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-lg ring-1 ring-border/50 rounded-xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-amber-300 focus-within:shadow-xl transition-all duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-blue-500/5 rounded-xl pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5 rounded-xl pointer-events-none" />
             </div>
           </div>
 
@@ -405,7 +298,7 @@ export default function TherapistLayout({
               variant="default"
               maxNotifications={5}
               showConnectionStatus={true}
-              className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-blue-200"
+              className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-amber-50 text-gray-600 hover:text-amber-600 transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-amber-200"
             />
 
             <div className="flex items-center gap-3">
@@ -422,10 +315,10 @@ export default function TherapistLayout({
 
               <button
                 onClick={handleAvatarClick}
-                className="relative group focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 rounded-full transition-all duration-300"
+                className="relative group focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 rounded-full transition-all duration-300"
                 title="Go to profile"
               >
-                <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-blue-100 to-blue-200 ring-2 ring-border/50 group-hover:ring-blue-300 transition-all duration-300 shadow-sm group-hover:shadow-md cursor-pointer">
+                <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-amber-100 to-amber-200 ring-2 ring-border/50 group-hover:ring-amber-300 transition-all duration-300 shadow-sm group-hover:shadow-md cursor-pointer">
                   <Image
                     src={user?.avatarUrl || "/avatar-placeholder.png"}
                     alt="User Avatar"
@@ -460,9 +353,9 @@ export default function TherapistLayout({
               placeholder="Search patients..."
               onUserSelect={handleUserSelect}
               showRoleFilter={false}
-              className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-md ring-1 ring-border/50 rounded-xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-blue-300 focus-within:shadow-lg transition-all duration-300"
+              className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-md ring-1 ring-border/50 rounded-xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-amber-300 focus-within:shadow-lg transition-all duration-300"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-blue-500/5 rounded-xl pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5 rounded-xl pointer-events-none" />
           </div>
         </div>
 
@@ -486,16 +379,16 @@ export default function TherapistLayout({
                   className={cn(
                     "relative group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0",
                     isActive
-                      ? "text-blue-600"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-amber-600"
+                      : "text-gray-600 hover:text-amber-600"
                   )}
                 >
                   <div
                     className={cn(
                       "transition-all duration-300",
                       isActive
-                        ? "text-blue-600 scale-110"
-                        : "text-gray-600 group-hover:text-blue-600 group-hover:scale-105"
+                        ? "text-amber-600 scale-110"
+                        : "text-gray-600 group-hover:text-amber-600 group-hover:scale-105"
                     )}
                   >
                     {item.icon}
@@ -504,8 +397,8 @@ export default function TherapistLayout({
                     className={cn(
                       "text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300",
                       isActive
-                        ? "text-blue-600 font-medium"
-                        : "text-gray-600 group-hover:text-blue-600"
+                        ? "text-amber-600 font-medium"
+                        : "text-gray-600 group-hover:text-amber-600"
                     )}
                   >
                     {item.name}

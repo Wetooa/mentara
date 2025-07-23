@@ -89,6 +89,7 @@ export default function MainLayout({
               width={50}
               height={50}
               priority
+              className="hover:scale-110 transition-transform duration-300"
             />
           </Link>
           <div className="flex flex-1 flex-col items-center gap-6">

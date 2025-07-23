@@ -4,8 +4,9 @@ import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
 import { Message, Attachment, Contact } from "./types";
 import { useSimpleMessaging } from "@/hooks/messaging/useSimpleMessaging";
-import { createMessagingApiService } from "@/lib/messaging-api";
+import { useApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 
 // Import a simple emoji picker or use a library like emoji-mart
 import dynamic from "next/dynamic";
@@ -21,6 +22,7 @@ export function MessageChatArea({
   enableRealtime = true,
 }: MessageChatAreaProps) {
   const { accessToken } = useAuth();
+  const api = useApi();
   
   // Use the modern messaging hook
   const {
@@ -36,13 +38,34 @@ export function MessageChatArea({
     enableRealtime,
   });
 
+  // Fetch contact data using proper React Query + useApi() pattern
+  const {
+    data: contacts = [],
+    isLoading: isLoadingContact,
+    error: contactError,
+  } = useQuery({
+    queryKey: ["messaging", "contacts"],
+    queryFn: () => api.messaging.getContacts(),
+    enabled: !!accessToken && !!contactId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Derive contact from contacts list
+  const contact = contacts.find((c) => c.id === contactId) || {
+    id: contactId,
+    name: "Unknown Contact",
+    status: "offline" as const,
+    lastMessage: "",
+    time: "",
+    unread: 0,
+    avatar: "/avatar-placeholder.png",
+  };
+
   // Local UI state
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [contact, setContact] = useState<Contact | null>(null);
-  const [isLoadingContact, setIsLoadingContact] = useState(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -68,52 +91,6 @@ export function MessageChatArea({
     scrollToBottom();
   }, [messageGroups]);
 
-  // Fetch contact data using real messaging API
-  useEffect(() => {
-    const fetchContact = async () => {
-      if (!accessToken || !contactId) return;
-      
-      setIsLoadingContact(true);
-      try {
-        const messagingApi = createMessagingApiService(() => Promise.resolve(accessToken));
-        const contacts = await messagingApi.fetchContacts();
-        
-        // Find the contact with the matching conversation ID
-        const foundContact = contacts.find(c => c.id === contactId);
-        if (foundContact) {
-          setContact(foundContact);
-        } else {
-          console.warn(`Contact not found for conversation ID: ${contactId}`);
-          // Create a fallback contact if not found
-          setContact({
-            id: contactId,
-            name: "Unknown Contact",
-            status: "offline",
-            lastMessage: "",
-            time: "",
-            unread: 0,
-            avatar: "/avatar-placeholder.png",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching contact:", error);
-        // Set a fallback contact on error
-        setContact({
-          id: contactId,
-          name: "Unknown Contact",
-          status: "offline", 
-          lastMessage: "",
-          time: "",
-          unread: 0,
-          avatar: "/avatar-placeholder.png",
-        });
-      } finally {
-        setIsLoadingContact(false);
-      }
-    };
-
-    fetchContact();
-  }, [accessToken, contactId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -214,12 +191,12 @@ export function MessageChatArea({
               <div className="h-3 w-16 bg-gray-200 rounded mt-1 animate-pulse"></div>
             </div>
           </div>
-        ) : contact ? (
-          <ChatHeader contact={contact} />
-        ) : (
+        ) : contactError ? (
           <div className="flex items-center px-4 py-2 border-b border-gray-200">
-            <div className="text-red-500 text-sm">Contact information unavailable</div>
+            <div className="text-red-500 text-sm">Failed to load contact information</div>
           </div>
+        ) : (
+          <ChatHeader contact={contact} />
         )}
       </div>
 

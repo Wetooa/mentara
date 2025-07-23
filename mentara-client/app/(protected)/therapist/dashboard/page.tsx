@@ -115,7 +115,7 @@ export default function TherapistDashboardPage() {
 
       {/* Matched Clients Section - High Priority */}
       <div>
-        <h2 className="text-xl font-semibold mb-4 text-amber-800">Client Matches & Requests</h2>
+        <h2 className="text-xl font-semibold mb-4 text-amber-800">Client Matches</h2>
         <MatchedClientsSection />
       </div>
 

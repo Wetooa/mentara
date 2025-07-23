@@ -98,6 +98,8 @@ const MessageBubble: React.FC<{
   message: MessagingMessage;
   isOwn: boolean;
   showAvatar: boolean;
+  showTime?: boolean;
+  messagePosition?: 'single' | 'first' | 'middle' | 'last';
   onReact: (emoji: string) => void;
   onReply: () => void;
   onEdit?: () => void;
@@ -109,6 +111,8 @@ const MessageBubble: React.FC<{
   message,
   isOwn,
   showAvatar,
+  showTime = true,
+  messagePosition = 'single',
   onReact,
   onReply,
   onEdit,
@@ -151,13 +155,17 @@ const MessageBubble: React.FC<{
       )}
     >
       {/* Avatar */}
-      {showAvatar && !isOwn && (
-        <Avatar className="h-8 w-8 flex-shrink-0">
-          <AvatarImage src="/avatar-placeholder.png" />
-          <AvatarFallback className="text-xs">U</AvatarFallback>
-        </Avatar>
+      {!isOwn && (
+        showAvatar ? (
+          <Avatar className="h-8 w-8 flex-shrink-0 self-end">
+            <AvatarImage src="/avatar-placeholder.png" />
+            <AvatarFallback className="text-xs">U</AvatarFallback>
+          </Avatar>
+        ) : (
+          <div className="w-8 flex-shrink-0" /> {/* Spacer for consecutive messages */}
+        )
       )}
-      {showAvatar && isOwn && <div className="w-8" />}
+      {isOwn && <div className="w-8 flex-shrink-0" />}
 
       {/* Message Content */}
       <div
@@ -182,10 +190,14 @@ const MessageBubble: React.FC<{
         {/* Message bubble */}
         <div
           className={cn(
-            "relative px-3 py-2 rounded-2xl text-sm",
-            isOwn
-              ? "bg-blue-500 text-white rounded-br-md"
-              : "bg-gray-100 text-gray-900 rounded-bl-md",
+            "relative px-3 py-2 text-sm",
+            // Base styling
+            isOwn ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900",
+            // Dynamic border radius based on message position
+            messagePosition === 'single' && (isOwn ? "rounded-2xl rounded-br-md" : "rounded-2xl rounded-bl-md"),
+            messagePosition === 'first' && (isOwn ? "rounded-2xl rounded-br-sm" : "rounded-2xl rounded-bl-sm"),
+            messagePosition === 'middle' && (isOwn ? "rounded-l-2xl rounded-r-sm" : "rounded-r-2xl rounded-l-sm"),
+            messagePosition === 'last' && (isOwn ? "rounded-2xl rounded-tr-sm rounded-br-md" : "rounded-2xl rounded-tl-sm rounded-bl-md"),
             message.isEdited && "opacity-90"
           )}
           onMouseEnter={() => setShowReactions(true)}
@@ -267,15 +279,17 @@ const MessageBubble: React.FC<{
         </div>
 
         {/* Message metadata */}
-        <div
-          className={cn(
-            "flex items-center gap-2 text-xs text-muted-foreground",
-            isOwn ? "flex-row-reverse" : "flex-row"
-          )}
-        >
-          <span>{formatMessageTime(message.createdAt)}</span>
-          {getMessageStatus()}
-        </div>
+        {showTime && (
+          <div
+            className={cn(
+              "flex items-center gap-2 text-xs text-muted-foreground mt-1",
+              isOwn ? "flex-row-reverse" : "flex-row"
+            )}
+          >
+            <span>{formatMessageTime(message.createdAt)}</span>
+            {getMessageStatus()}
+          </div>
+        )}
       </div>
 
       {/* Message actions */}
@@ -881,26 +895,53 @@ export function MessengerInterface({
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-4">
+                      <div className="space-y-1">
                         {messages.map((message, index) => {
                           const isOwn = message.senderId === user?.id;
                           const prevMessage = messages[index - 1];
-                          const showAvatar = !prevMessage || prevMessage.senderId !== message.senderId;
+                          const nextMessage = messages[index + 1];
+                          
+                          // Determine message grouping position
+                          const isConsecutiveFromPrev = prevMessage && prevMessage.senderId === message.senderId;
+                          const isConsecutiveToNext = nextMessage && nextMessage.senderId === message.senderId;
+                          
+                          const showAvatar = !isConsecutiveFromPrev;
+                          const showTime = !isConsecutiveToNext || (isConsecutiveToNext && 
+                            differenceInMinutes(new Date(nextMessage.createdAt), new Date(message.createdAt)) > 5);
+                          
+                          // Determine message position in group for border radius
+                          let messagePosition: 'single' | 'first' | 'middle' | 'last' = 'single';
+                          if (isConsecutiveFromPrev && isConsecutiveToNext) {
+                            messagePosition = 'middle';
+                          } else if (isConsecutiveFromPrev) {
+                            messagePosition = 'last';
+                          } else if (isConsecutiveToNext) {
+                            messagePosition = 'first';
+                          }
                           
                           return (
-                            <MessageBubble
+                            <div 
                               key={message.id}
-                              message={message}
-                              isOwn={isOwn}
-                              showAvatar={showAvatar}
-                              onReact={(emoji) => addReaction(message.id, emoji)}
-                              onReply={() => setReplyToMessage(message)}
-                              onEdit={isOwn ? () => setEditingMessage(message) : undefined}
-                              onDelete={isOwn ? () => {/* TODO: implement delete */} : undefined}
-                              onCopy={() => {/* Already handled in MessageBubble */}}
-                              onForward={() => {/* TODO: implement forward */}}
-                              onReport={() => {/* TODO: implement report */}}
-                            />
+                              className={cn(
+                                "transition-all duration-200",
+                                !isConsecutiveFromPrev ? "mt-4" : "mt-1"
+                              )}
+                            >
+                              <MessageBubble
+                                message={message}
+                                isOwn={isOwn}
+                                showAvatar={showAvatar}
+                                showTime={showTime}
+                                messagePosition={messagePosition}
+                                onReact={(emoji) => addReaction(message.id, emoji)}
+                                onReply={() => setReplyToMessage(message)}
+                                onEdit={isOwn ? () => setEditingMessage(message) : undefined}
+                                onDelete={isOwn ? () => {/* TODO: implement delete */} : undefined}
+                                onCopy={() => {/* Already handled in MessageBubble */}}
+                                onForward={() => {/* TODO: implement forward */}}
+                                onReport={() => {/* TODO: implement report */}}
+                              />
+                            </div>
                           );
                         })}
                       </div>
