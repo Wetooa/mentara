@@ -25,6 +25,8 @@ export default function CreateWorksheetModal({
   const [dueDate, setDueDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [materials, setMaterials] = useState<File[]>([]);
+  const [materialErrors, setMaterialErrors] = useState<string | null>(null);
 
   // Fetch patients directly from API service
   useEffect(() => {
@@ -66,6 +68,7 @@ export default function CreateWorksheetModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    setMaterialErrors(null);
     if (!title || !selectedPatient || !dueDate) {
       setFormError("Please fill in all required fields.");
       return;
@@ -77,16 +80,19 @@ export default function CreateWorksheetModal({
     setSubmitting(true);
     // Convert dueDate (YYYY-MM-DD) to ISO string (UTC midnight)
     const dueDateISO = new Date(dueDate + 'T00:00:00Z').toISOString();
-    const worksheetData: WorksheetCreateInputDto = {
-      title,
-      instructions,
-      dueDate: dueDateISO,
-      userId: selectedPatient,
-      therapistId: user.id,
-      // materials: [] // Add if/when file upload is implemented
-    };
-    createWorksheetMutation.mutate(worksheetData);
-    console.log('Worksheet data:', worksheetData);
+
+    // Build FormData for multipart/form-data request
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('instructions', instructions);
+    formData.append('dueDate', dueDateISO);
+    formData.append('userId', selectedPatient);
+    formData.append('therapistId', user.id);
+    materials.forEach(file => formData.append('files', file));
+
+    // Use the API mutation, but pass FormData
+    createWorksheetMutation.mutate(formData as any);
+    // No need to log worksheetData, as it's now FormData
   };
 
   if (!isOpen) return null;
@@ -197,27 +203,28 @@ export default function CreateWorksheetModal({
                 ></textarea>
               </div>
 
-              {/* Reference Materials (not implemented) */}
+              {/* Reference Materials */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Reference Materials
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-md p-4 sm:p-6 flex flex-col items-center">
-                  <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 mb-2" />
-                  <p className="text-xs sm:text-sm text-gray-500 mb-1 text-center">
-                    Drag and drop files here, or click to select files
-                  </p>
-                  <p className="text-xs text-gray-400 text-center">
-                    PDF, DOC, DOCX, JPG, PNG (max 10MB)
-                  </p>
-                  <button
-                    type="button"
-                    className="mt-3 sm:mt-4 px-3 py-2 sm:px-4 sm:py-2 bg-[#129316]/15 text-[#436B00] rounded-md hover:bg-[#129316]/20 focus:outline-none focus:ring-2 focus:ring-[#436B00] focus:ring-offset-2 text-sm"
-                    disabled
-                  >
-                    Select Files
-                  </button>
-                </div>
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  onChange={e => {
+                    const files = Array.from(e.target.files || []);
+                    setMaterials(files);
+                  }}
+                  disabled={submitting}
+                  className="mb-2"
+                />
+                {materials.length > 0 && (
+                  <ul className="text-xs text-gray-600 mb-2">
+                    {materials.map((file, i) => <li key={i}>{file.name}</li>)}
+                  </ul>
+                )}
+                {materialErrors && <div className="text-red-500 text-xs">{materialErrors}</div>}
               </div>
             </div>
 

@@ -40,9 +40,18 @@ export function createWorksheetService(client: AxiosInstance) {
      * Create a new worksheet
      * POST /worksheets
      */
-    async create(data: WorksheetCreateInputDto): Promise<Worksheet> {
-      const response = await client.post("worksheets", data);
-      return response.data;
+    async create(data: WorksheetCreateInputDto | FormData): Promise<Worksheet> {
+      if (typeof FormData !== 'undefined' && data instanceof FormData) {
+        const response = await client.post("worksheets", data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data;
+      } else {
+        const response = await client.post("worksheets", data);
+        return response.data;
+      }
     },
 
     /**

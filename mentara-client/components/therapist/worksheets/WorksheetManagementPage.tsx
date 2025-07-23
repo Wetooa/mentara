@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,12 +26,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Worksheet } from '@/types/api/worksheets';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import CreateWorksheetModal from '@/components/worksheets/CreateWorksheetModal';
 
 export function WorksheetManagementPage() {
   const api = useApi();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [viewWorksheet, setViewWorksheet] = useState<Worksheet | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // Fetch therapist's worksheets
   const { data: worksheetData, isLoading: worksheetsLoading } = useQuery({
@@ -49,8 +53,24 @@ export function WorksheetManagementPage() {
 
   const worksheets = worksheetData?.worksheets || [];
 
+  // Filter worksheets for each tab
+  const completedWorksheets = worksheets.filter((w) => w.status === 'SUBMITTED');
+  const nonCompletedWorksheets = worksheets.filter((w) => w.status !== 'SUBMITTED');
+
   // Fetch matched clients for quick assignment
   const { data: matchedClientsData, isLoading: clientsLoading } = useMatchedClients();
+
+  const queryClient = useQueryClient();
+
+  // Mutation for marking worksheet as reviewed
+  const markAsReviewedMutation = useMutation({
+    mutationFn: async (worksheetId: string) => {
+      return api.worksheets.update(worksheetId, { status: 'REVIEWED' as any });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['therapist', 'worksheets'] });
+    },
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -120,10 +140,16 @@ export function WorksheetManagementPage() {
       </div>
 
       <Tabs defaultValue="worksheets" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-          <TabsTrigger value="worksheets">My Worksheets</TabsTrigger>
-          <TabsTrigger value="assign">Quick Assign</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center gap-4 mb-4">
+          <Button onClick={() => setCreateModalOpen(true)} variant="default">
+            + Create Worksheet
+          </Button>
+          <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+            <TabsTrigger value="worksheets">My Worksheets</TabsTrigger>
+            <TabsTrigger value="assign">Client Submissions</TabsTrigger>
+          </TabsList>
+        </div>
+        <CreateWorksheetModal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} />
 
         {/* Worksheets Tab */}
         <TabsContent value="worksheets" className="space-y-6">
@@ -154,25 +180,25 @@ export function WorksheetManagementPage() {
                 Assigned
               </Button>
               <Button
-                variant={statusFilter === 'IN_PROGRESS' ? 'default' : 'outline'}
+                variant={statusFilter === 'OVERDUE' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setStatusFilter('IN_PROGRESS')}
+                onClick={() => setStatusFilter('OVERDUE')}
               >
-                In Progress
+                Overdue
               </Button>
               <Button
-                variant={statusFilter === 'COMPLETED' ? 'default' : 'outline'}
+                variant={statusFilter === 'REVIEWED' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setStatusFilter('COMPLETED')}
+                onClick={() => setStatusFilter('REVIEWED')}
               >
-                Completed
+                Reviewed
               </Button>
             </div>
           </div>
 
           {/* Worksheets List */}
           <div className="space-y-4">
-            {filteredWorksheets.length === 0 ? (
+            {nonCompletedWorksheets.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -183,7 +209,7 @@ export function WorksheetManagementPage() {
                 </CardContent>
               </Card>
             ) : (
-              filteredWorksheets.map((worksheet: Worksheet) => (
+              nonCompletedWorksheets.map((worksheet: Worksheet) => (
                 <Card key={worksheet.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
@@ -227,7 +253,7 @@ export function WorksheetManagementPage() {
                       </div>
                       
                       <div className="flex gap-2 ml-4">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => setViewWorksheet(worksheet)}>
                           View
                         </Button>
                         <Button variant="outline" size="sm">
@@ -244,63 +270,79 @@ export function WorksheetManagementPage() {
 
         {/* Quick Assign Tab */}
         <TabsContent value="assign" className="space-y-6">
+          {/* Completed Worksheets Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Active Clients</CardTitle>
+              <CardTitle>Completed Worksheets</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Quickly assign worksheets to your active clients
+                Worksheets that have been completed by your clients
               </p>
             </CardHeader>
             <CardContent>
-              {activeClients.length === 0 ? (
+              {completedWorksheets.length === 0 ? (
                 <div className="text-center py-8">
-                  <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="font-semibold mb-2">No Active Clients</h3>
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="font-semibold mb-2">No Completed Worksheets</h3>
                   <p className="text-muted-foreground">
-                    You don't have any active clients yet.
+                    {searchTerm ? 'No completed worksheets match your search.' : 'No worksheets have been completed yet.'}
                   </p>
                 </div>
               ) : (
-                <div className="grid gap-4">
-                  {activeClients.map((match) => (
-                    <div
-                      key={match.client.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={match.client.profilePicture} />
-                          <AvatarFallback>
-                            {match.client.firstName[0]}{match.client.lastName[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">
-                            {match.client.firstName} {match.client.lastName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {match.client.email}
-                          </p>
+                <div className="space-y-4">
+                  {completedWorksheets.map((worksheet: Worksheet) => (
+                    <Card key={worksheet.id} className="hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold">{worksheet.title}</h3>
+                              <Badge variant="outline" className={getStatusColor(worksheet.status)}>
+                                {getStatusIcon(worksheet.status)}
+                                {worksheet.status.replace('_', ' ')}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                <Avatar className="h-6 w-6">
+                                  <AvatarImage src={worksheet.client.user.avatarUrl} />
+                                  <AvatarFallback className="text-xs">
+                                    {worksheet.client.user.firstName[0]}{worksheet.client.user.lastName[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span>{worksheet.client.user.firstName} {worksheet.client.user.lastName}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4" />
+                                <span>Created {format(new Date(worksheet.createdAt), 'MMM d, yyyy')}</span>
+                              </div>
+                              {worksheet.dueDate && (
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4" />
+                                  <span>Due {format(new Date(worksheet.dueDate), 'MMM d, yyyy')}</span>
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {worksheet.instructions || ""}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-2 ml-4 items-end">
+                            <Button variant="outline" size="sm" onClick={() => setViewWorksheet(worksheet)}>
+                              View
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              disabled={markAsReviewedMutation.isPending && markAsReviewedMutation.variables === worksheet.id}
+                              onClick={() => markAsReviewedMutation.mutate(worksheet.id)}
+                            >
+                              {markAsReviewedMutation.isPending && markAsReviewedMutation.variables === worksheet.id ? 'Marking...' : 'Mark as Reviewed'}
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <WorksheetAssignmentDialog
-                        client={{
-                          id: match.client.id,
-                          firstName: match.client.firstName,
-                          lastName: match.client.lastName,
-                          email: match.client.email,
-                          profilePicture: match.client.profilePicture,
-                          assessmentInfo: match.assessmentInfo,
-                        }}
-                        trigger={
-                          <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Assign Worksheet
-                          </Button>
-                        }
-                      />
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
@@ -308,6 +350,76 @@ export function WorksheetManagementPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Worksheet View Modal */}
+      <Dialog open={!!viewWorksheet} onOpenChange={open => !open && setViewWorksheet(null)}>
+        <DialogContent>
+          {viewWorksheet && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-2xl font-bold mb-2">
+                  <FileText className="h-6 w-6 text-blue-500" />
+                  {viewWorksheet.title}
+                </DialogTitle>
+                <DialogDescription>
+                  <div className="flex flex-col gap-3 mt-2">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-gray-500" />
+                      <span className="font-medium">{viewWorksheet.client.user.firstName} {viewWorksheet.client.user.lastName}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className="capitalize" variant="outline">{viewWorksheet.status.toLowerCase()}</Badge>
+                      <Calendar className="h-4 w-4 text-gray-500 ml-2" />
+                      <span className="text-xs">Created {format(new Date(viewWorksheet.createdAt), 'MMM d, yyyy')}</span>
+                      {viewWorksheet.dueDate && (
+                        <>
+                          <Clock className="h-4 w-4 text-gray-500 ml-2" />
+                          <span className="text-xs">Due {format(new Date(viewWorksheet.dueDate), 'MMM d, yyyy')}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-8 mt-8">
+                {/* Instructions */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3 text-lg font-semibold">
+                    <FileText className="h-5 w-5 text-blue-400" />
+                    Instructions
+                  </div>
+                  <div className="rounded-md bg-gray-50 p-4 text-sm text-gray-700 min-h-[60px] border whitespace-pre-line">
+                    {viewWorksheet.instructions || <span className="italic text-gray-400">No instructions provided.</span>}
+                  </div>
+                </div>
+                {/* Reference Materials */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3 text-lg font-semibold">
+                    <FileText className="h-5 w-5 text-green-400" />
+                    Reference Materials
+                  </div>
+                  <div className="rounded-md bg-gray-50 p-4 min-h-[60px] border">
+                    {viewWorksheet.materialUrls && viewWorksheet.materialUrls.length > 0 ? (
+                      <ul className="list-disc pl-5 space-y-3">
+                        {viewWorksheet.materialUrls.map((url, idx) => (
+                          <li key={url} className="flex items-center gap-2">
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium flex items-center gap-1">
+                              <FileText className="h-4 w-4 text-blue-400" />
+                              {viewWorksheet.materialNames[idx] || `Material ${idx + 1}`}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="italic text-gray-400">No reference materials attached.</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
