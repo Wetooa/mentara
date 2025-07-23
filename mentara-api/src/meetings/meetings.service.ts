@@ -99,6 +99,8 @@ export class MeetingsService {
    * Get user's upcoming meetings
    */
   async getUpcomingMeetings(userId: string, limit = 10) {
+    this.logger.log(`Getting upcoming meetings for user ${userId} with limit ${limit}`);
+
     // First validate that user exists as either client or therapist
     const userExists = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -117,6 +119,36 @@ export class MeetingsService {
       this.logger.warn(`User ${userId} is not a client or therapist`);
       throw new NotFoundException('User must be a client or therapist to access meetings');
     }
+
+    this.logger.log(`User ${userId} validated - Client: ${!!userExists.client}, Therapist: ${!!userExists.therapist}`);
+
+    // Check for any meetings first (for debugging)
+    const totalMeetingsCount = await this.prisma.meeting.count({
+      where: {
+        OR: [{ clientId: userId }, { therapistId: userId }],
+      },
+    });
+
+    this.logger.log(`Total meetings for user ${userId}: ${totalMeetingsCount}`);
+
+    // Check for meetings with different statuses (for debugging)
+    const allMeetings = await this.prisma.meeting.findMany({
+      where: {
+        OR: [{ clientId: userId }, { therapistId: userId }],
+      },
+      select: {
+        id: true,
+        status: true,
+        startTime: true,
+      },
+    });
+
+    this.logger.log(`All meetings for user ${userId}:`, allMeetings.map(m => ({
+      id: m.id.substring(0, 8),
+      status: m.status,
+      startTime: m.startTime,
+      isPast: m.startTime < new Date()
+    })));
 
     const meetings = await this.prisma.meeting.findMany({
       where: {
@@ -152,7 +184,26 @@ export class MeetingsService {
       take: limit,
     });
 
-    this.logger.log(`Found ${meetings.length} upcoming meetings for user ${userId}`);
+    this.logger.log(`Found ${meetings.length} upcoming meetings for user ${userId} (filtered by status: SCHEDULED/CONFIRMED and future dates)`);
+
+    // If no upcoming meetings but user has meetings, log details about existing meetings
+    if (meetings.length === 0 && totalMeetingsCount > 0) {
+      const pastMeetingsCount = await this.prisma.meeting.count({
+        where: {
+          OR: [{ clientId: userId }, { therapistId: userId }],
+          startTime: { lt: new Date() },
+        },
+      });
+
+      const completedMeetingsCount = await this.prisma.meeting.count({
+        where: {
+          OR: [{ clientId: userId }, { therapistId: userId }],
+          status: 'COMPLETED',
+        },
+      });
+
+      this.logger.log(`Debug info for user ${userId}: ${pastMeetingsCount} past meetings, ${completedMeetingsCount} completed meetings`);
+    }
 
     return {
       meetings,
