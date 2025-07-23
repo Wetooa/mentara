@@ -1,14 +1,14 @@
 'use client'
 
 import { ProfilePage } from '@/components/profile';
-import { useEffect } from 'react';
+import { useEffect, use } from 'react';
 
 interface ClientProfilePageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function ClientProfilePage({ params }: ClientProfilePageProps) {
-  const { id } = params;
+  const { id } = use(params);
 
   // Set up client-side metadata
   useEffect(() => {
