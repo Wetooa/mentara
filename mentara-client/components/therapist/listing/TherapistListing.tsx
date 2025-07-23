@@ -5,7 +5,7 @@ import TherapistCard from "@/components/therapist/listing/TherapistCard";
 import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
 import BookingModal from "@/components/booking/BookingModal";
 import Pagination from "@/components/ui/pagination";
-import { useFilteredTherapists } from "@/hooks/therapist/useTherapists";
+import { useAllTherapistsWithFilters } from "@/hooks/therapist/useAllTherapists";
 import { useFilters } from "@/hooks/utils/useFilters";
 import FilterBar from "@/components/therapist/filters/FilterBar";
 import { AlertCircle, RefreshCw } from "lucide-react";
@@ -112,7 +112,7 @@ export default function TherapistListing() {
     resetFilters,
   } = useFilters();
 
-  // Simplified to use only useFilteredTherapists (it handles empty filters internally)
+  // Use new clean useAllTherapistsWithFilters hook that always fetches all therapists
   const { 
     therapists, 
     totalCount,
@@ -123,10 +123,9 @@ export default function TherapistListing() {
     isLoading, 
     error, 
     refetch 
-  } = useFilteredTherapists(searchQuery, selectedFilter, { 
+  } = useAllTherapistsWithFilters(searchQuery, selectedFilter, filters, { 
     page: currentPage, 
     pageSize: 12,
-    advancedFilters: filters 
   });
 
   // Reset page when search/filter changes
