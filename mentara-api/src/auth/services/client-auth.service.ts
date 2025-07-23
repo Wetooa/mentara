@@ -68,14 +68,10 @@ export class ClientAuthService {
         registerDto.preassessmentAnswers.length > 0
       ) {
         // Import scoring utilities
-        const { calculateAllScoresFromFlatArray, generateSeverityLevels } = await import('../../pre-assessment/pre-assessment.utils');
+        const { processPreAssessmentAnswers } = await import('../../pre-assessment/pre-assessment.utils');
         
         // Calculate scores from flat answers array
-        const calculatedScores = calculateAllScoresFromFlatArray(registerDto.preassessmentAnswers);
-        const scores = Object.fromEntries(
-          Object.entries(calculatedScores).map(([key, value]) => [key, value.score])
-        );
-        const severityLevels = generateSeverityLevels(calculatedScores);
+        const { scores, severityLevels } = processPreAssessmentAnswers(registerDto.preassessmentAnswers);
 
         preAssessment = await tx.preAssessment.create({
           data: {

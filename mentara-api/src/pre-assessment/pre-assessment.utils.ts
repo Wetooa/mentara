@@ -29,21 +29,55 @@ interface QuestionnaireIndexRange {
   itemCount: number;
 }
 
+export const LIST_OF_QUESTIONNAIRES = [
+  'Stress',
+  'Anxiety',
+  'Depression',
+  'Drug Abuse',
+  'Insomnia',
+  'Panic',
+  'Bipolar disorder (BD)',
+  'Obsessive compulsive disorder (OCD)',
+  'Post-traumatic stress disorder (PTSD)',
+  'Social anxiety',
+  'Phobia',
+  'Burnout',
+  'Binge eating / Eating disorders',
+  'ADD / ADHD',
+  'Substance or Alcohol Use Issues',
+] as const;
+
 const QUESTIONNAIRE_INDEX_MAPPING: Record<string, QuestionnaireIndexRange> = {
-  'Depression': { startIndex: 0, endIndex: 14, itemCount: 15 }, // PHQ  
+  Depression: { startIndex: 0, endIndex: 14, itemCount: 15 }, // PHQ
   'ADD / ADHD': { startIndex: 15, endIndex: 32, itemCount: 18 }, // ASRS
-  'Substance or Alcohol Use Issues': { startIndex: 33, endIndex: 42, itemCount: 10 }, // AUDIT
-  'Binge eating / Eating disorders': { startIndex: 43, endIndex: 58, itemCount: 16 }, // BES
+  'Substance or Alcohol Use Issues': {
+    startIndex: 33,
+    endIndex: 42,
+    itemCount: 10,
+  }, // AUDIT
+  'Binge eating / Eating disorders': {
+    startIndex: 43,
+    endIndex: 58,
+    itemCount: 16,
+  }, // BES
   'Drug Issues': { startIndex: 59, endIndex: 68, itemCount: 10 }, // DAST10
-  'Anxiety': { startIndex: 69, endIndex: 75, itemCount: 7 }, // GAD7
-  'Insomnia': { startIndex: 76, endIndex: 82, itemCount: 7 }, // ISI
-  'Burnout': { startIndex: 83, endIndex: 104, itemCount: 22 }, // MBI
+  Anxiety: { startIndex: 69, endIndex: 75, itemCount: 7 }, // GAD7
+  Insomnia: { startIndex: 76, endIndex: 82, itemCount: 7 }, // ISI
+  Burnout: { startIndex: 83, endIndex: 104, itemCount: 22 }, // MBI
   'Bipolar disorder (BD)': { startIndex: 105, endIndex: 119, itemCount: 15 }, // MDQ
-  'Obsessive compulsive disorder (OCD)': { startIndex: 120, endIndex: 137, itemCount: 18 }, // OCI_R
-  'Post-traumatic stress disorder (PTSD)': { startIndex: 138, endIndex: 157, itemCount: 20 }, // PCL5
-  'Panic': { startIndex: 158, endIndex: 164, itemCount: 7 }, // PDSS
+  'Obsessive compulsive disorder (OCD)': {
+    startIndex: 120,
+    endIndex: 137,
+    itemCount: 18,
+  }, // OCI_R
+  'Post-traumatic stress disorder (PTSD)': {
+    startIndex: 138,
+    endIndex: 157,
+    itemCount: 20,
+  }, // PCL5
+  Panic: { startIndex: 158, endIndex: 164, itemCount: 7 }, // PDSS
   'Depression Secondary': { startIndex: 165, endIndex: 173, itemCount: 9 }, // PHQ9
-  'Stress': { startIndex: 174, endIndex: 183, itemCount: 10 }, // PSS
+  Stress: { startIndex: 174, endIndex: 183, itemCount: 10 }, // PSS
   'Social anxiety': { startIndex: 184, endIndex: 200, itemCount: 17 }, // SPIN
 };
 
@@ -260,10 +294,12 @@ export function calculateAllScoresFromFlatArray(
   const scores: QuestionnaireScores = {};
 
   // Calculate scores for each questionnaire using fixed index ranges
-  for (const [questionnaireName, indexRange] of Object.entries(QUESTIONNAIRE_INDEX_MAPPING)) {
+  for (const [questionnaireName, indexRange] of Object.entries(
+    QUESTIONNAIRE_INDEX_MAPPING,
+  )) {
     const questionnaireAnswers = flatAnswers.slice(
       indexRange.startIndex,
-      indexRange.endIndex + 1
+      indexRange.endIndex + 1,
     );
 
     if (questionnaireAnswers.length === indexRange.itemCount) {
@@ -309,4 +345,23 @@ export function generateSeverityLevels(
   }
 
   return severityLevels;
+}
+
+/**
+ * Helper function to process flat answers and generate scores and severity levels
+ * This eliminates code duplication across services
+ */
+export function processPreAssessmentAnswers(flatAnswers: number[]): {
+  scores: Record<string, number>;
+  severityLevels: Record<string, string>;
+} {
+  const calculatedScores = calculateAllScoresFromFlatArray(flatAnswers);
+  
+  const scores = Object.fromEntries(
+    Object.entries(calculatedScores).map(([key, value]) => [key, value.score]),
+  );
+  
+  const severityLevels = generateSeverityLevels(calculatedScores);
+  
+  return { scores, severityLevels };
 }

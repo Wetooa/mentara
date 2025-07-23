@@ -7,8 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
-  calculateAllScoresFromFlatArray,
-  generateSeverityLevels,
+  processPreAssessmentAnswers,
   LIST_OF_QUESTIONNAIRES,
 } from './pre-assessment.utils';
 import { PreAssessment } from '@prisma/client';
@@ -138,14 +137,9 @@ export class PreAssessmentService {
         this.logger.debug(
           'Calculating scores and severity levels from flat answers',
         );
-        const calculatedScores = calculateAllScoresFromFlatArray(data.answers);
-        scores = Object.fromEntries(
-          Object.entries(calculatedScores).map(([key, value]) => [
-            key,
-            value.score,
-          ]),
-        );
-        severityLevels = generateSeverityLevels(calculatedScores);
+        const result = processPreAssessmentAnswers(data.answers);
+        scores = result.scores;
+        severityLevels = result.severityLevels;
       }
 
       // Attempt AI prediction with flat answers
@@ -352,14 +346,9 @@ export class PreAssessmentService {
       if (data.answers && (!data.scores || !data.severityLevels)) {
         this.validateFlatAnswers(data.answers);
 
-        const calculatedScores = calculateAllScoresFromFlatArray(data.answers);
-        scores = Object.fromEntries(
-          Object.entries(calculatedScores).map(([key, value]) => [
-            key,
-            value.score,
-          ]),
-        );
-        severityLevels = generateSeverityLevels(calculatedScores);
+        const result = processPreAssessmentAnswers(data.answers);
+        scores = result.scores;
+        severityLevels = result.severityLevels;
 
         // Attempt to get new AI estimate if answers changed
         try {
