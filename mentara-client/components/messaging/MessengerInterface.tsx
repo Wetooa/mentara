@@ -742,7 +742,7 @@ export function MessengerInterface({
   return (
     <div
       className={cn(
-        "h-full bg-white rounded-lg shadow-lg overflow-hidden flex",
+        "h-full bg-white rounded-lg shadow-lg overflow-hidden",
         className
       )}
     >
@@ -929,9 +929,8 @@ export function MessengerInterface({
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                  <ScrollArea className="flex-1 h-full">
-                    <div className="p-4">
+                <div className="flex-1 flex flex-col min-h-0">
+                  <ScrollArea className="flex-1 p-4">
                     {isLoadingMessages ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -1005,9 +1004,8 @@ export function MessengerInterface({
                       <TypingIndicator users={currentTypingUsers} />
                     )}
                       
-                      {/* Auto-scroll anchor */}
-                      <div ref={messagesEndRef} />
-                    </div>
+                    {/* Auto-scroll anchor */}
+                    <div ref={messagesEndRef} />
                   </ScrollArea>
 
                   {/* Reply indicator */}
