@@ -91,3 +91,56 @@ export interface TherapistRecommendationResponseDto {
   data: TherapistRecommendationResponse;
   message?: string;
 }
+
+// Therapist List DTOs - for basic therapist listing (non-AI)
+export interface TherapistListQuery {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  specialties?: string[];
+  languages?: string[];
+  province?: string;
+  minHourlyRate?: number;
+  maxHourlyRate?: number;
+  minRating?: number;
+  minExperience?: number;
+  maxExperience?: number;
+  sortBy?: 'rating' | 'experience' | 'hourlyRate' | 'name';
+  sortOrder?: 'asc' | 'desc';
+  includeInactive?: boolean;
+}
+
+export interface TherapistListItem {
+  id: string;
+  userId: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+    bio?: string;
+  };
+  specialties: string[];
+  languages: string[];
+  areasOfExpertise: string[];
+  approaches: string[];
+  province: string;
+  hourlyRate: number;
+  rating: number;
+  reviewCount: number;
+  yearsOfExperience: number;
+  isActive: boolean;
+  licenseVerified: boolean;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TherapistListResponse {
+  therapists: TherapistListItem[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
