@@ -15,13 +15,14 @@ export interface WorksheetUpdateInputDto {
   dueDate?: string;
   isCompleted?: boolean;
   feedback?: string;
+  status?: WorksheetStatus;
 }
 
 export interface Worksheet {
   id: string;
   title: string;
   instructions?: string;
-  dueDate: string;
+  dueDate: string; 
   status: WorksheetStatus;
   clientId: string;
   client: {

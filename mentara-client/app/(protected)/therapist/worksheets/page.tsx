@@ -23,7 +23,7 @@ export default function TherapistWorksheetsPage() {
     return (
       <div className="min-h-screen">
         {/* View Toggle & Create Button */}
-        <div className="bg-white border-b px-6 py-3">
+        {/* <div className="bg-white border-b px-6 py-3">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold">Worksheet Management</h1>
             <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export default function TherapistWorksheetsPage() {
               </Button>
             </div>
           </div>
-        </div>
+        </div> */}
         {/* Enhanced Worksheet Management */}
         <WorksheetManagementPage />
         {/* Modal */}
