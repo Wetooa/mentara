@@ -44,7 +44,7 @@ export class TherapistsController {
     @Query('offset') offset?: number,
   ) {
     try {
-      const take = limit ? Math.min(limit, 100) : 50; // Default 50, max 100
+      const take = limit ? Math.min(limit, 1000) : undefined; // Allow unlimited, max 1000 for safety
       const skip = offset ? Math.max(offset, 0) : 0;
 
       // Get all approved therapists with their user information
@@ -145,14 +145,17 @@ export class TherapistsController {
         };
       });
 
+      // Handle pagination calculation safely
+      const pageSize = take || totalCount || 1; // Use take if provided, otherwise totalCount, or 1 as fallback
+      
       return {
         success: true,
         data: {
           therapists: transformedTherapists,
           totalCount,
-          currentPage: Math.floor(skip / take) + 1,
-          totalPages: Math.ceil(totalCount / take),
-          hasNextPage: skip + take < totalCount,
+          currentPage: take ? Math.floor(skip / take) + 1 : 1,
+          totalPages: Math.ceil(totalCount / pageSize),
+          hasNextPage: take ? skip + take < totalCount : false,
           hasPreviousPage: skip > 0,
         },
       };
