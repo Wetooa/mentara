@@ -438,6 +438,9 @@ export function MessengerInterface({
   const [replyToMessage, setReplyToMessage] = useState<MessagingMessage | null>(
     null
   );
+  const [editingMessage, setEditingMessage] = useState<MessagingMessage | null>(
+    null
+  );
   const [isTyping, setIsTyping] = useState(false);
   
 

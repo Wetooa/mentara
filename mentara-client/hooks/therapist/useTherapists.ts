@@ -97,6 +97,35 @@ export function useTherapistCards(params: TherapistSearchParams = {}) {
 }
 
 /**
+ * Hook for fetching all therapists (when no filters applied)
+ */
+export function useAllTherapists(params: TherapistSearchParams = {}) {
+  const api = useApi();
+
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ['therapists', 'all', params],
+    queryFn: (): Promise<TherapistRecommendationResponse> => {
+      return api.therapists.getTherapistList(params);
+    },
+    select: (response) => response.data || { therapists: [], totalCount: 0 },
+    enabled: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const therapistCards: TherapistCardData[] = data?.therapists?.map(transformTherapistForCard) || [];
+
+  return {
+    therapists: therapistCards,
+    totalCount: data?.totalCount || 0,
+    userConditions: data?.userConditions || [],
+    matchCriteria: data?.matchCriteria,
+    isLoading,
+    error,
+    refetch,
+  };
+}
+
+/**
  * Hook for filtering therapists with hybrid server/client-side filtering and pagination
  * Used primarily by TherapistListing and FavoritesSection components
  * 
@@ -153,10 +182,29 @@ export function useFilteredTherapists(
     return hasClientSideFilters ? Math.min(pageSize * 2, 50) : pageSize;
   }, [pageSize, searchQuery, filter, advancedFilters]);
 
-  const { therapists, isLoading, error, refetch, totalCount, userConditions, matchCriteria } = useTherapistCards({
-    ...serverSideParams,
-    limit: fetchLimit,
-  });
+  // Choose appropriate API endpoint based on whether we have filters/search
+  const hasAnyFilters = 
+    searchQuery?.trim() ||
+    filter !== "All" || 
+    (advancedFilters && (
+      advancedFilters.specialties?.length > 0 ||
+      advancedFilters.location ||
+      advancedFilters.rating > 0 ||
+      advancedFilters.priceRange ||
+      advancedFilters.experienceLevel ||
+      advancedFilters.languages?.length > 0 ||
+      (advancedFilters.availability && Object.values(advancedFilters.availability).some(Boolean))
+    ));
+  
+  const { therapists, isLoading, error, refetch, totalCount, userConditions, matchCriteria } = hasAnyFilters 
+    ? useTherapistCards({
+        ...serverSideParams,
+        limit: fetchLimit,
+      })
+    : useAllTherapists({
+        ...serverSideParams,
+        limit: fetchLimit,
+      });
 
   // Memoized client-side filtering logic to avoid unnecessary recalculations
   const filteredTherapists = React.useMemo(() => {

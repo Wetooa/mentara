@@ -3,13 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Loader2, AlertCircle } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useTherapistMeetings } from "@/hooks/therapist/useTherapistDashboard";
+import { useUpcomingSessions } from "@/hooks/sessions/useSessions";
 import { format, parseISO } from "date-fns";
 
 export default function MeetingsSection() {
-  // Fetch meetings using React Query
-  const { data: meetingsData, isLoading, error } = useTherapistMeetings({ limit: 3 });
-  const meetings = meetingsData || [];
+  // Fetch upcoming meetings using React Query
+  const { data: meetingsResponse, isLoading, error } = useUpcomingSessions(3);
+  const meetings = meetingsResponse?.meetings || [];
   
   // Handle loading state
   if (isLoading) {
@@ -80,37 +80,41 @@ export default function MeetingsSection() {
       <div className="space-y-4">
         {displayMeetings
           .map((meeting) => {
-          // Check if dateTime exists before parsing
-          if (!meeting.dateTime) {
-            console.warn('Meeting missing dateTime:', meeting);
+          // Check if startTime exists before parsing
+          if (!meeting.startTime) {
+            console.warn('Meeting missing startTime:', meeting);
             return null;
           }
           
           // Parse the date from ISO string
-          const meetingDate = parseISO(meeting.dateTime);
+          const meetingDate = parseISO(meeting.startTime);
           const formattedDate = format(meetingDate, "MMM d, yyyy");
           const formattedTime =
             format(meetingDate, "h:mm a") +
             " - " +
             format(
-              parseISO(meeting.dateTime).setMinutes(
-                parseISO(meeting.dateTime).getMinutes() + meeting.duration
-              ),
+              new Date(meetingDate.getTime() + meeting.duration * 60000),
               "h:mm a"
             );
 
-          // Generate initials for the avatar
-          const initials = meeting.therapistName
-            ? meeting.therapistName
-                .split(" ")
-                .map((name) => name.charAt(0))
-                .join("")
+          // Generate therapist name and initials
+          const therapistName = meeting.therapist
+            ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
+            : "Unknown Therapist";
+            
+          const initials = meeting.therapist
+            ? `${meeting.therapist.user.firstName.charAt(0)}${meeting.therapist.user.lastName.charAt(0)}`
             : "??";
+
+          // Map status to UI states (API uses uppercase, UI expects lowercase)
+          const statusLower = meeting.status.toLowerCase();
+          const isStarted = statusLower === "in_progress";
+          const isScheduled = statusLower === "scheduled" || statusLower === "confirmed";
 
           return (
             <Card
               key={meeting.id}
-              className={`overflow-hidden ${meeting.status === "started" ? "bg-green-50" : ""}`}
+              className={`overflow-hidden ${isStarted ? "bg-green-50" : ""}`}
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -119,21 +123,20 @@ export default function MeetingsSection() {
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-bold">{meeting.title}</h3>
+                      <h3 className="font-bold">{meeting.title || "Therapy Session"}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {meeting.therapistName}
+                        {therapistName}
                       </p>
-                      {meeting.status === "started" && (
+                      {isStarted && (
                         <p className="text-xs text-green-600 mt-1">
                           The session has started
                         </p>
                       )}
-                      {meeting.status === "scheduled" &&
-                        meeting.timeToStart && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            The session is {meeting.timeToStart}
-                          </p>
-                        )}
+                      {isScheduled && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Upcoming session
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -146,7 +149,7 @@ export default function MeetingsSection() {
                       {formattedTime}
                     </div>
                     <Button size="sm" className="mt-auto">
-                      {meeting.status === "started" ? "Join" : "View"}
+                      {isStarted ? "Join" : "View"}
                     </Button>
                   </div>
                 </div>

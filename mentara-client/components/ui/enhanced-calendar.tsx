@@ -4,7 +4,7 @@ import * as React from "react"
 import { useState, useCallback, useRef } from "react"
 import { DayPicker, DayProps } from "react-day-picker"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { format, isSameDay, parseISO } from "date-fns"
+import { format, isSameDay, parseISO, isValid } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -65,9 +65,11 @@ function DayWithMeetings({
   const leaveTimeoutRef = useRef<NodeJS.Timeout>()
 
   // Get meetings for this specific date
-  const dayMeetings = meetings.filter(meeting => 
-    isSameDay(parseISO(meeting.startTime), date)
-  )
+  const dayMeetings = meetings.filter(meeting => {
+    if (!meeting.startTime || !date || !isValid(date)) return false;
+    const meetingDate = parseISO(meeting.startTime);
+    return isValid(meetingDate) && isSameDay(meetingDate, date);
+  })
 
   const handleMouseEnter = useCallback(() => {
     // Clear any existing leave timeout
@@ -121,7 +123,7 @@ function DayWithMeetings({
           props.className
         )}
       >
-        {format(date, 'd')}
+        {date && isValid(date) ? format(date, 'd') : '?'}
         
         {/* Meeting indicators */}
         {dayMeetings.length > 0 && (
@@ -150,7 +152,7 @@ function DayWithMeetings({
           <CardContent className="p-4">
             <div className="space-y-3">
               <div className="font-medium text-sm border-b pb-2">
-                {format(date, 'EEEE, MMMM d, yyyy')}
+                {date && isValid(date) ? format(date, 'EEEE, MMMM d, yyyy') : 'Invalid Date'}
               </div>
               
               {dayMeetings.map((meeting) => (
@@ -165,7 +167,10 @@ function DayWithMeetings({
                     <div className="flex-1">
                       <div className="font-medium text-sm">{meeting.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {format(parseISO(meeting.startTime), 'h:mm a')} - {format(parseISO(meeting.endTime), 'h:mm a')}
+                        {meeting.startTime && meeting.endTime ? 
+                          `${isValid(parseISO(meeting.startTime)) ? format(parseISO(meeting.startTime), 'h:mm a') : 'Invalid'} - ${isValid(parseISO(meeting.endTime)) ? format(parseISO(meeting.endTime), 'h:mm a') : 'Invalid'}` 
+                          : 'Time not available'
+                        }
                       </div>
                     </div>
                   </div>

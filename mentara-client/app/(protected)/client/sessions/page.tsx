@@ -160,7 +160,7 @@ export default function SessionsPage() {
               <TabsTrigger 
                 key={tab.id} 
                 value={tab.id}
-                className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="flex items-center gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted"
               >
                 {tab.icon}
                 <span className="hidden sm:inline">{tab.label}</span>

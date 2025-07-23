@@ -29,6 +29,7 @@ interface SessionFiltersProps {
 }
 
 const presetButtons = [
+  { key: 'all', label: 'All', description: 'All sessions' },
   { key: 'today', label: 'Today', description: 'Sessions today' },
   { key: 'thisWeek', label: 'This Week', description: 'Sessions this week' },
   { key: 'upcoming', label: 'Upcoming', description: 'Scheduled sessions' },
@@ -62,6 +63,42 @@ export function SessionFilters({
   showPresets = true,
   compact = false
 }: SessionFiltersProps) {
+  // Helper function to detect which preset is currently active
+  const getActivePreset = (): string | null => {
+    const today = new Date().toISOString().split('T')[0];
+    const thisWeekStart = new Date();
+    thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay());
+    const thisWeekEnd = new Date(thisWeekStart);
+    thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
+
+    // Check if no filters are active (ALL)
+    if (!filters.status && !filters.dateFrom && !filters.dateTo && (!filters.search || filters.search === '')) {
+      return 'all';
+    }
+
+    // Check for today
+    if (filters.dateFrom === today && filters.dateTo === today && !filters.status) {
+      return 'today';
+    }
+
+    // Check for this week
+    if (filters.dateFrom === thisWeekStart.toISOString().split('T')[0] && 
+        filters.dateTo === thisWeekEnd.toISOString().split('T')[0] && 
+        !filters.status) {
+      return 'thisWeek';
+    }
+
+    // Check for status-based presets
+    if (!filters.dateFrom && !filters.dateTo) {
+      if (filters.status === 'SCHEDULED') return 'upcoming';
+      if (filters.status === 'COMPLETED') return 'completed';
+      if (filters.status === 'CANCELLED') return 'cancelled';
+    }
+
+    return null;
+  };
+
+  const activePreset = getActivePreset();
   const handleDateFromSelect = (date: Date | undefined) => {
     onFilterUpdate('dateFrom', date ? date.toISOString().split('T')[0] : undefined);
   };
@@ -149,17 +186,42 @@ export function SessionFilters({
     >
       {showPresets && (
         <div className="flex flex-wrap gap-2">
-          {presetButtons.map((preset) => (
+          {presetButtons.map((preset) => {
+            const isActive = activePreset === preset.key;
+            return (
+              <Button
+                key={preset.key}
+                variant={isActive ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (preset.key === 'all') {
+                    onReset();
+                  } else {
+                    presetFilters[preset.key as keyof typeof presetFilters]();
+                  }
+                }}
+                className={cn(
+                  "h-8 text-sm transition-all",
+                  isActive && "bg-primary text-primary-foreground shadow-sm"
+                )}
+              >
+                {preset.label}
+              </Button>
+            );
+          })}
+          
+          {/* Clear filters button */}
+          {activeFilterCount > 0 && activePreset !== 'all' && (
             <Button
-              key={preset.key}
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={() => presetFilters[preset.key as keyof typeof presetFilters]()}
-              className="h-8 text-sm"
+              onClick={onReset}
+              className="h-8 text-sm text-muted-foreground hover:text-foreground"
             >
-              {preset.label}
+              <X className="h-3 w-3 mr-1" />
+              Clear
             </Button>
-          ))}
+          )}
         </div>
       )}
 

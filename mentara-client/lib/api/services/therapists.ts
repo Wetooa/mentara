@@ -103,6 +103,71 @@ export function createTherapistService(axios: AxiosInstance) {
       const { data } = await axios.get("/therapist/matches/me");
       return data;
     },
+
+    /**
+     * Patients sub-service for therapists to manage their assigned patients
+     */
+    patients: {
+      /**
+       * Get list of assigned patients for the authenticated therapist
+       */
+      async getList() {
+        const { data } = await axios.get("/therapist/clients/assigned");
+        return data;
+      },
+
+      /**
+       * Get detailed patient information by ID
+       */
+      async getById(patientId: string) {
+        const { data } = await axios.get(`/therapist/clients/${patientId}`);
+        return data;
+      },
+
+      /**
+       * Get patient's session history - uses general meetings API filtered by client
+       */
+      async getSessions(patientId: string) {
+        const { data } = await axios.get(`/meetings`, { 
+          params: { 
+            clientId: patientId,
+            limit: 50 
+          } 
+        });
+        return data;
+      },
+
+      /**
+       * Get patient's worksheets - uses therapist worksheets API filtered by client
+       */
+      async getWorksheets(patientId: string) {
+        const { data } = await axios.get(`/therapist/worksheets`, { 
+          params: { 
+            clientId: patientId 
+          } 
+        });
+        return data;
+      },
+
+      /**
+       * Update session notes for a patient - uses meetings API
+       */
+      async updateNotes(patientId: string, sessionId: string, notes: string) {
+        const { data } = await axios.post(`/meetings/${sessionId}/session`, { 
+          notes,
+          sessionData: { notes }
+        });
+        return data;
+      },
+
+      /**
+       * Assign worksheet to a patient - uses specific client worksheet assignment endpoint
+       */
+      async assignWorksheet(patientId: string, worksheetData: any) {
+        const { data } = await axios.post(`/therapist/clients/${patientId}/worksheets`, worksheetData);
+        return data;
+      },
+    },
   };
 }
 
