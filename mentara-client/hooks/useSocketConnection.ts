@@ -179,6 +179,37 @@ export function useSocketConnection({
     };
   }, [connectionState.isConnected, enableHeartbeat, startHeartbeat, stopHeartbeat]);
 
+  // Subscribe to a socket event (moved up to fix TDZ issue)
+  const subscribeToEvent = useCallback((
+    event: string, 
+    callback: (...args: any[]) => void
+  ): (() => void) => {
+    if (!enableRealtime) {
+      console.warn(`⚠️ [USE-SOCKET] Cannot subscribe to ${event} - realtime disabled`);
+      return () => {};
+    }
+
+    console.log(`📡 [USE-SOCKET] ${subscriberId} subscribing to event: ${event}`);
+    
+    const subscription = { event, callback };
+    eventSubscriptionsRef.current.push(subscription);
+
+    const unsubscribe = socketManager.subscribeToEvent(subscriberId, event, callback);
+
+    return () => {
+      // Remove from local tracking
+      const index = eventSubscriptionsRef.current.findIndex(
+        sub => sub.event === event && sub.callback === callback
+      );
+      if (index !== -1) {
+        eventSubscriptionsRef.current.splice(index, 1);
+      }
+      
+      // Unsubscribe from socket manager
+      unsubscribe();
+    };
+  }, [subscriberId, enableRealtime]);
+
   // Setup pong event listener
   useEffect(() => {
     if (!enableHeartbeat || !enableRealtime) return;
@@ -231,36 +262,7 @@ export function useSocketConnection({
     };
   }, []);
 
-  // Subscribe to a socket event
-  const subscribeToEvent = useCallback((
-    event: string, 
-    callback: (...args: any[]) => void
-  ): (() => void) => {
-    if (!enableRealtime) {
-      console.warn(`⚠️ [USE-SOCKET] Cannot subscribe to ${event} - realtime disabled`);
-      return () => {};
-    }
 
-    console.log(`📡 [USE-SOCKET] ${subscriberId} subscribing to event: ${event}`);
-    
-    const subscription = { event, callback };
-    eventSubscriptionsRef.current.push(subscription);
-
-    const unsubscribe = socketManager.subscribeToEvent(subscriberId, event, callback);
-
-    return () => {
-      // Remove from local tracking
-      const index = eventSubscriptionsRef.current.findIndex(
-        sub => sub.event === event && sub.callback === callback
-      );
-      if (index !== -1) {
-        eventSubscriptionsRef.current.splice(index, 1);
-      }
-      
-      // Unsubscribe from socket manager
-      unsubscribe();
-    };
-  }, [subscriberId, enableRealtime]);
 
   // Emit event to socket
   const emit = useCallback((event: string, data: any) => {

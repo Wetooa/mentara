@@ -20,6 +20,8 @@ export class ClientAuthService {
   ) {}
 
   async registerClient(registerDto: RegisterClientDto) {
+    console.log('Registering client with preassessment data:', registerDto);
+
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
@@ -213,7 +215,8 @@ export class ClientAuthService {
       therapistId:
         user.client?.assignedTherapists?.[0]?.therapist?.user?.id || undefined,
       createdAt: user.createdAt.toISOString(),
-      hasSeenTherapistRecommendations: user.client?.hasSeenTherapistRecommendations || false,
+      hasSeenTherapistRecommendations:
+        user.client?.hasSeenTherapistRecommendations || false,
     };
   }
 
@@ -234,22 +237,36 @@ export class ClientAuthService {
     }
 
     // Return in the expected OnboardingStatusResponse format
-    const profileCompleted = !!(user.firstName && user.lastName && user.birthDate);
+    const profileCompleted = !!(
+      user.firstName &&
+      user.lastName &&
+      user.birthDate
+    );
     const assessmentCompleted = false; // TODO: implement assessment completion check
     const completedSteps: string[] = [];
-    
+
     if (profileCompleted) completedSteps.push('profile');
-    if (user.client.hasSeenTherapistRecommendations) completedSteps.push('recommendations');
+    if (user.client.hasSeenTherapistRecommendations)
+      completedSteps.push('recommendations');
     if (assessmentCompleted) completedSteps.push('assessment');
-    
+
     return {
       isFirstSignIn: !user.lastLoginAt,
       hasSeenRecommendations: user.client.hasSeenTherapistRecommendations,
       profileCompleted,
       assessmentCompleted,
-      isOnboardingComplete: profileCompleted && user.client.hasSeenTherapistRecommendations && assessmentCompleted,
+      isOnboardingComplete:
+        profileCompleted &&
+        user.client.hasSeenTherapistRecommendations &&
+        assessmentCompleted,
       completedSteps,
-      nextStep: !profileCompleted ? 'profile' : !user.client.hasSeenTherapistRecommendations ? 'recommendations' : !assessmentCompleted ? 'assessment' : undefined,
+      nextStep: !profileCompleted
+        ? 'profile'
+        : !user.client.hasSeenTherapistRecommendations
+          ? 'recommendations'
+          : !assessmentCompleted
+            ? 'assessment'
+            : undefined,
     };
   }
 
@@ -298,7 +315,7 @@ export class ClientAuthService {
 
     // Use EmailVerificationService to verify the OTP
     const result = await this.emailVerificationService.verifyEmail(otpCode);
-    
+
     if (result.success) {
       // Update emailVerified flag for client
       await this.prisma.user.update({

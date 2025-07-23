@@ -42,8 +42,7 @@ export class ClientAuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
-    @Body(new ZodValidationPipe(RegisterClientDtoSchema))
-    registerDto: RegisterClientDto,
+    @Body() registerDto: RegisterClientDto,
   ): Promise<ClientAuthResponse> {
     const result = await this.clientAuthService.registerClient(registerDto);
 
