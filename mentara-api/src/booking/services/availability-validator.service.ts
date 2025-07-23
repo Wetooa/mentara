@@ -159,7 +159,10 @@ export class AvailabilityValidatorService {
     startTime: Date,
     duration: number,
   ): Promise<boolean> {
-    const dayOfWeek = startTime.getDay();
+    // Convert numeric day to day name string to match database schema
+    const dayOfWeek = startTime
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toUpperCase();
     const startTimeStr = this.formatTime(startTime);
     const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
     const endTimeStr = this.formatTime(endTime);
@@ -167,7 +170,7 @@ export class AvailabilityValidatorService {
     const availability = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek: dayOfWeek.toString(),
+        dayOfWeek,
         startTime: { lte: startTimeStr },
         endTime: { gte: endTimeStr },
         isAvailable: true,
@@ -333,11 +336,16 @@ export class AvailabilityValidatorService {
       );
     }
 
+    // Convert numeric day to day name string to match database schema
+    const dayOfWeekString = new Date(2024, 0, dayOfWeek) // Use dummy date with desired day
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toUpperCase();
+
     // Check for overlapping availability
     const overlapping = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek: dayOfWeek.toString(),
+        dayOfWeek: dayOfWeekString,
         OR: [
           {
             startTime: { lt: endTime },
