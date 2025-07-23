@@ -9,6 +9,7 @@ import { TokenService } from './token.service';
 import { EmailService } from '../../email/email.service';
 import { EmailVerificationService } from './email-verification.service';
 import * as bcrypt from 'bcrypt';
+import { processPreAssessmentAnswers } from '../../pre-assessment/pre-assessment.utils';
 
 @Injectable()
 export class ClientAuthService {
@@ -68,10 +69,11 @@ export class ClientAuthService {
         registerDto.preassessmentAnswers.length > 0
       ) {
         // Import scoring utilities
-        const { processPreAssessmentAnswers } = await import('../../pre-assessment/pre-assessment.utils');
-        
+
         // Calculate scores from flat answers array
-        const { scores, severityLevels } = processPreAssessmentAnswers(registerDto.preassessmentAnswers);
+        const { scores, severityLevels } = processPreAssessmentAnswers(
+          registerDto.preassessmentAnswers,
+        );
 
         preAssessment = await tx.preAssessment.create({
           data: {
