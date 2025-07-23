@@ -119,7 +119,8 @@ export function useMessaging(
 
   // Constants
   const maxReconnectAttempts = 5;
-  const reconnectDelay = 3000;
+  const baseReconnectDelay = 1000; // Start with 1 second
+  const maxReconnectDelay = 30000; // Max 30 seconds
 
   // Query keys for consistent cache management
   const queryKeys = {
@@ -562,6 +563,18 @@ export function useMessaging(
   }, []);
 
   const scheduleReconnect = useCallback(() => {
+    // Don't reconnect if offline
+    if (!navigator.onLine) {
+      console.log("🌐 [useMessaging] Device is offline, skipping reconnection attempt");
+      setConnectionState((prev) => ({
+        ...prev,
+        isConnected: false,
+        isReconnecting: false,
+        error: "Device is offline",
+      }));
+      return;
+    }
+
     if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
       console.error("❌ [useMessaging] Max reconnection attempts reached");
       setConnectionState((prev) => ({
@@ -575,12 +588,16 @@ export function useMessaging(
 
     reconnectAttemptsRef.current++;
     const delay = Math.min(
-      reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1),
-      30000 // Cap at 30 seconds
+      baseReconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1),
+      maxReconnectDelay
     );
 
+    // Add jitter to prevent thundering herd (±25% random variance)
+    const jitter = delay * 0.25 * (Math.random() - 0.5);
+    const finalDelay = Math.max(delay + jitter, 500); // Minimum 500ms
+
     console.log(
-      `🔄 [useMessaging] Scheduling reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
+      `🔄 [useMessaging] Scheduling reconnect in ${Math.round(finalDelay)}ms (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts}) with jitter`
     );
 
     // Set reconnecting state immediately
@@ -593,7 +610,7 @@ export function useMessaging(
 
     reconnectTimeoutRef.current = setTimeout(() => {
       connectWebSocket();
-    }, delay);
+    }, finalDelay);
   }, [connectWebSocket]);
 
   // ============ WEBSOCKET EVENT HANDLERS ============
@@ -848,6 +865,35 @@ export function useMessaging(
     accessToken,
     user,
   ]);
+
+  // Handle network state changes
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("🌐 [useMessaging] Device came back online, attempting reconnection");
+      if (!connectionState.isConnected && config.enableRealtime && accessToken && user) {
+        reconnectAttemptsRef.current = 0; // Reset attempts when coming back online
+        connectWebSocket();
+      }
+    };
+
+    const handleOffline = () => {
+      console.log("🌐 [useMessaging] Device went offline");
+      setConnectionState((prev) => ({
+        ...prev,
+        isConnected: false,
+        isReconnecting: false,
+        error: "Device is offline",
+      }));
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [connectionState.isConnected, config.enableRealtime, accessToken, user, connectWebSocket]);
 
   // Cleanup on unmount
   useEffect(() => {
