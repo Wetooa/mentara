@@ -18,7 +18,7 @@ export default function RecommendedSection() {
     isLoading, 
     error 
   } = useQuery({
-    queryKey: ['therapist-recommendations', 'personalized'],
+    queryKey: ['therapists', 'recommendations', 'personalized'],
     queryFn: () => api.therapists.getPersonalizedRecommendations(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
