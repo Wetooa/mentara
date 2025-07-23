@@ -111,18 +111,16 @@ export class TherapistListService {
       }
 
       // Add rate filters
-      if (query.minHourlyRate !== undefined) {
-        whereClause.hourlyRate = {
-          ...whereClause.hourlyRate,
-          gte: query.minHourlyRate,
-        };
-      }
-
-      if (query.maxHourlyRate !== undefined) {
-        whereClause.hourlyRate = {
-          ...whereClause.hourlyRate,
-          lte: query.maxHourlyRate,
-        };
+      if (query.minHourlyRate !== undefined || query.maxHourlyRate !== undefined) {
+        whereClause.hourlyRate = {};
+        
+        if (query.minHourlyRate !== undefined) {
+          whereClause.hourlyRate.gte = query.minHourlyRate;
+        }
+        
+        if (query.maxHourlyRate !== undefined) {
+          whereClause.hourlyRate.lte = query.maxHourlyRate;
+        }
       }
 
       // Add experience filters
@@ -192,8 +190,8 @@ export class TherapistListService {
             id: therapist.user.id,
             firstName: therapist.user.firstName,
             lastName: therapist.user.lastName,
-            avatarUrl: therapist.user.avatarUrl,
-            bio: therapist.user.bio,
+            avatarUrl: therapist.user.avatarUrl || undefined,
+            bio: therapist.user.bio || undefined,
           },
           specialties: therapist.areasOfExpertise || [],
           languages: therapist.languagesOffered || [],
@@ -306,8 +304,8 @@ export class TherapistListService {
           id: therapist.user.id,
           firstName: therapist.user.firstName,
           lastName: therapist.user.lastName,
-          avatarUrl: therapist.user.avatarUrl,
-          bio: therapist.user.bio,
+          avatarUrl: therapist.user.avatarUrl || undefined,
+          bio: therapist.user.bio || undefined,
         },
         specialties: therapist.areasOfExpertise || [],
         languages: therapist.languagesOffered || [],
