@@ -303,14 +303,34 @@ export function useGlobalConnectionStatus() {
   const socketRef = React.useRef<any>(null);
   const heartbeatIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  // Helper function to get token from localStorage (client-side only)
+  const getAuthToken = React.useCallback(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return localStorage.getItem('token');
+    } catch (error) {
+      console.warn('Failed to retrieve auth token from localStorage:', error);
+      return null;
+    }
+  }, []);
+
   // Import socket functions dynamically to avoid SSR issues
   const initializeSocket = React.useCallback(async () => {
     try {
       const { getSocket, connectSocket, isSocketConnected } = await import('@/lib/websocket');
       
+      // Check if already connected
       if (isSocketConnected()) {
         setConnectionState("connected");
         setLastHeartbeat(Date.now());
+        return;
+      }
+
+      // Get authentication token
+      const token = getAuthToken();
+      if (!token) {
+        setConnectionState("error");
+        setLastError('Authentication token not found. Please sign in again.');
         return;
       }
 
@@ -322,6 +342,7 @@ export function useGlobalConnectionStatus() {
 
       // Set up connection event listeners
       socket.on('connect', () => {
+        console.log('✅ WebSocket connected successfully');
         setConnectionState("connected");
         setIsConnecting(false);
         setLastError(null);
@@ -330,18 +351,43 @@ export function useGlobalConnectionStatus() {
       });
 
       socket.on('disconnect', (reason) => {
+        console.log('🔌 WebSocket disconnected:', reason);
         setConnectionState("disconnected");
         setIsConnecting(false);
         if (reason === 'io server disconnect') {
           setLastError('Server disconnected');
+        } else if (reason === 'io client disconnect') {
+          // Client-initiated disconnect, not an error
+          setLastError(null);
+        } else {
+          setLastError(`Disconnected: ${reason}`);
         }
       });
 
       socket.on('connect_error', (error) => {
+        console.error('❌ WebSocket connection error:', error);
         setConnectionState("error");
         setIsConnecting(false);
-        setLastError(error.message || 'Connection failed');
+        
+        // Provide more specific error messages
+        let errorMessage = 'Connection failed';
+        if (error.message?.includes('unauthorized') || error.message?.includes('authentication')) {
+          errorMessage = 'Authentication failed. Please sign in again.';
+        } else if (error.message?.includes('timeout')) {
+          errorMessage = 'Connection timeout. Please check your network.';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        setLastError(errorMessage);
         setReconnectAttempts(prev => prev + 1);
+      });
+
+      socket.on('auth_error', (data) => {
+        console.error('🔒 WebSocket authentication error:', data);
+        setConnectionState("error");
+        setIsConnecting(false);
+        setLastError(data.message || 'Authentication failed');
       });
 
       // Set up heartbeat monitoring
@@ -355,42 +401,71 @@ export function useGlobalConnectionStatus() {
         }
       }, 30000); // Update heartbeat every 30 seconds
 
-      // Connect the socket
-      await connectSocket();
+      // Connect the socket with authentication token
+      console.log('🔄 Initiating WebSocket connection with authentication...');
+      await connectSocket(undefined, token);
       
     } catch (error) {
+      console.error('💥 Failed to initialize WebSocket connection:', error);
       setConnectionState("error");
       setIsConnecting(false);
       setLastError('Failed to initialize socket connection');
     }
-  }, []);
+  }, [getAuthToken]);
 
   const reconnect = React.useCallback(async () => {
     if (isConnecting) return;
     
+    console.log('🔄 Attempting to reconnect WebSocket...');
     setIsConnecting(true);
     setLastError(null);
     
     try {
+      const token = getAuthToken();
+      if (!token) {
+        setConnectionState("error");
+        setIsConnecting(false);
+        setLastError('Authentication token not found. Please sign in again.');
+        return;
+      }
+
       const { connectSocket } = await import('@/lib/websocket');
-      await connectSocket();
+      await connectSocket(undefined, token);
     } catch (error) {
+      console.error('❌ WebSocket reconnection failed:', error);
       setConnectionState("error");
       setIsConnecting(false);
-      setLastError('Reconnection failed');
+      
+      let errorMessage = 'Reconnection failed';
+      if (error instanceof Error) {
+        if (error.message?.includes('unauthorized') || error.message?.includes('authentication')) {
+          errorMessage = 'Authentication failed. Please sign in again.';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      }
+      
+      setLastError(errorMessage);
       setReconnectAttempts(prev => prev + 1);
     }
-  }, [isConnecting]);
+  }, [isConnecting, getAuthToken]);
 
   // Initialize socket connection on mount
   React.useEffect(() => {
-    initializeSocket();
-    
-    return () => {
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-      }
-    };
+    // Only initialize on client-side
+    if (typeof window !== 'undefined') {
+      // Small delay to ensure auth context is ready  
+      const timer = setTimeout(() => {
+        initializeSocket();
+      }, 100);
+      
+      return () => {
+        clearTimeout(timer);
+        if (heartbeatIntervalRef.current) {
+          clearInterval(heartbeatIntervalRef.current);
+        }
+      };
+    }
   }, [initializeSocket]);
 
   return {
