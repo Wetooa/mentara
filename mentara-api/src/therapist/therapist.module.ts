@@ -8,6 +8,7 @@ import { TherapistManagementService } from './therapist-management.service';
 import { TherapistProfileController } from './controllers/therapist-profile.controller';
 import { TherapistClientController } from './controllers/therapist-client.controller';
 import { TherapistWorksheetController } from './controllers/therapist-worksheet.controller';
+import { TherapistMatchController } from './therapist-match.controller';
 import { WorksheetsService } from '../worksheets/worksheets.service';
 import { AdvancedMatchingService } from './services/advanced-matching.service';
 import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
@@ -28,6 +29,7 @@ import { CommunitiesModule } from '../communities/communities.module';
     TherapistProfileController,
     TherapistClientController,
     TherapistWorksheetController,
+    TherapistMatchController,
   ],
   providers: [
     TherapistRecommendationService,
