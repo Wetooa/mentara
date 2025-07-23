@@ -13,7 +13,7 @@ import {
   ResetPasswordDto,
   SuccessMessageResponse,
   TherapistAuthResponse,
-  VerifyOtpDto
+  VerifyOtpDto,
 } from "@/types/auth";
 
 /**
@@ -51,7 +51,9 @@ export function createAuthService(client: AxiosInstance) {
      * Request password reset
      * POST /auth/request-password-reset
      */
-    async requestPasswordReset(data: RequestPasswordResetDto): Promise<SuccessMessageResponse> {
+    async requestPasswordReset(
+      data: RequestPasswordResetDto
+    ): Promise<SuccessMessageResponse> {
       const response = await client.post("auth/request-password-reset", data);
       return response.data;
     },
@@ -60,7 +62,9 @@ export function createAuthService(client: AxiosInstance) {
      * Reset password with token
      * POST /auth/reset-password
      */
-    async resetPassword(data: ResetPasswordDto): Promise<SuccessMessageResponse> {
+    async resetPassword(
+      data: ResetPasswordDto
+    ): Promise<SuccessMessageResponse> {
       const response = await client.post("auth/reset-password", data);
       return response.data;
     },
@@ -69,8 +73,12 @@ export function createAuthService(client: AxiosInstance) {
      * Validate reset token
      * GET /auth/validate-reset-token?token={token}
      */
-    async validateResetToken(token: string): Promise<{ valid: boolean; message: string }> {
-      const response = await client.get(`auth/validate-reset-token?token=${token}`);
+    async validateResetToken(
+      token: string
+    ): Promise<{ valid: boolean; message: string }> {
+      const response = await client.get(
+        `auth/validate-reset-token?token=${token}`
+      );
       return response.data;
     },
 
