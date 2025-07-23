@@ -130,13 +130,11 @@ export function useAllTherapists(params: TherapistSearchParams = {}) {
 }
 
 /**
- * Hook for filtering therapists with hybrid server/client-side filtering and pagination
- * Used primarily by TherapistListing and FavoritesSection components
+ * @deprecated This hook has been replaced by useAllTherapists and useAllTherapistsWithFilters
+ * The complex conditional logic in this hook was causing issues where not all therapists were displayed.
+ * Use useAllTherapists for simple listing or useAllTherapistsWithFilters for filtering needs.
  * 
- * FIXED: Removed over-fetching pattern and improved filtering efficiency
- * - Uses server-side filtering for province and price when available
- * - Implements proper pagination with awareness of client-side filtering
- * - Fetches larger batches intelligently based on filter complexity
+ * This hook will be removed in a future version.
  */
 export function useFilteredTherapists(
   searchQuery: string,
