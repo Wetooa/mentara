@@ -64,11 +64,16 @@ function DayWithMeetings({
   const hoverTimeoutRef = useRef<NodeJS.Timeout>()
   const leaveTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // Get meetings for this specific date
+  // Get meetings for this specific date with robust error handling
   const dayMeetings = meetings.filter(meeting => {
-    if (!meeting.startTime || !date || !isValid(date)) return false;
-    const meetingDate = parseISO(meeting.startTime);
-    return isValid(meetingDate) && isSameDay(meetingDate, date);
+    try {
+      if (!meeting?.startTime || !date || !isValid(date)) return false;
+      const meetingDate = parseISO(meeting.startTime);
+      return isValid(meetingDate) && isSameDay(meetingDate, date);
+    } catch (error) {
+      console.warn('Error filtering meeting for date:', error);
+      return false;
+    }
   })
 
   const handleMouseEnter = useCallback(() => {
@@ -167,10 +172,23 @@ function DayWithMeetings({
                     <div className="flex-1">
                       <div className="font-medium text-sm">{meeting.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {meeting.startTime && meeting.endTime ? 
-                          `${isValid(parseISO(meeting.startTime)) ? format(parseISO(meeting.startTime), 'h:mm a') : 'Invalid'} - ${isValid(parseISO(meeting.endTime)) ? format(parseISO(meeting.endTime), 'h:mm a') : 'Invalid'}` 
-                          : 'Time not available'
-                        }
+                        {(() => {
+                          try {
+                            if (!meeting.startTime) return 'Time not available';
+                            const startDate = parseISO(meeting.startTime);
+                            if (!isValid(startDate)) return 'Invalid start time';
+                            
+                            if (meeting.endTime) {
+                              const endDate = parseISO(meeting.endTime);
+                              if (isValid(endDate)) {
+                                return `${format(startDate, 'h:mm a')} - ${format(endDate, 'h:mm a')}`;
+                              }
+                            }
+                            return format(startDate, 'h:mm a');
+                          } catch {
+                            return 'Time unavailable';
+                          }
+                        })()}
                       </div>
                     </div>
                   </div>

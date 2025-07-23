@@ -82,7 +82,11 @@ export function CalendarModal({ trigger, isOpen, onOpenChange }: CalendarModalPr
 
   const formatTime = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'h:mm a');
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid time';
+      }
+      return format(date, 'h:mm a');
     } catch {
       return 'Invalid time';
     }

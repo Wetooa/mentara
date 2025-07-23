@@ -23,10 +23,14 @@ export default function UpcomingSessionsCalendar({ className }: UpcomingSessions
     limit: 100 // Get more meetings to show past and future
   });
   
-  // Get today's sessions for quick stats
-  const todaysSessions = meetings.filter(meeting => 
-    isToday(new Date(meeting.startTime))
-  );
+  // Get today's sessions for quick stats with error handling
+  const todaysSessions = meetings.filter(meeting => {
+    try {
+      return meeting.startTime && isToday(new Date(meeting.startTime));
+    } catch {
+      return false;
+    }
+  });
   
   const formatRelativeDate = (date: Date) => {
     if (isToday(date)) return 'Today';
