@@ -24,49 +24,40 @@ import { WorksheetAssignmentDialog } from './WorksheetAssignmentDialog';
 import { useMatchedClients } from '@/hooks/therapist/useMatchedClients';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
-
-interface Worksheet {
-  id: string;
-  title: string;
-  instructions: string;
-  dueDate?: string;
-  status: 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'OVERDUE';
-  createdAt: string;
-  client: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    profilePicture?: string;
-  };
-  submission?: {
-    id: string;
-    submittedAt: string;
-    content: string;
-  };
-}
+import { useAuth } from '@/contexts/AuthContext';
+import type { Worksheet } from '@/types/api/worksheets';
 
 export function WorksheetManagementPage() {
   const api = useApi();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Fetch therapist's worksheets
-  const { data: worksheets, isLoading: worksheetsLoading } = useQuery({
-    queryKey: ['therapist', 'worksheets', statusFilter],
+  const { data: worksheetData, isLoading: worksheetsLoading } = useQuery({
+    queryKey: ['therapist', 'worksheets', statusFilter, user?.id],
     queryFn: async () => {
-      return await api.worksheets.getAssigned(statusFilter !== 'all' ? { status: statusFilter } : {});
+      if (!user?.id) return { worksheets: [], total: 0, hasMore: false };
+      const params: any = { therapistId: user.id };
+      if (statusFilter !== 'all') {
+        params.status = statusFilter;
+      }
+      return await api.worksheets.getAll(params);
     },
+    enabled: !!user?.id,
   });
+
+  const worksheets = worksheetData?.worksheets || [];
 
   // Fetch matched clients for quick assignment
   const { data: matchedClientsData, isLoading: clientsLoading } = useMatchedClients();
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'SUBMITTED':
       case 'COMPLETED':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'IN_PROGRESS':
+      case 'ASSIGNED':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'OVERDUE':
         return 'bg-red-100 text-red-800 border-red-200';
@@ -77,6 +68,7 @@ export function WorksheetManagementPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'SUBMITTED':
       case 'COMPLETED':
         return <CheckCircle className="h-3 w-3" />;
       case 'OVERDUE':
@@ -86,10 +78,10 @@ export function WorksheetManagementPage() {
     }
   };
 
-  const filteredWorksheets = worksheets?.filter((worksheet: Worksheet) =>
+  const filteredWorksheets = worksheets.filter((worksheet: Worksheet) =>
     worksheet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    `${worksheet.client.firstName} ${worksheet.client.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+    `${worksheet.client?.user?.firstName || ''} ${worksheet.client?.user?.lastName || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const activeClients = [
     ...(matchedClientsData?.recentMatches || []),
@@ -188,9 +180,6 @@ export function WorksheetManagementPage() {
                   <p className="text-muted-foreground mb-4">
                     {searchTerm ? 'No worksheets match your search.' : 'You haven\'t created any worksheets yet.'}
                   </p>
-                  <Button onClick={() => setSearchTerm('')}>
-                    {searchTerm ? 'Clear Search' : 'Create First Worksheet'}
-                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -211,12 +200,12 @@ export function WorksheetManagementPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4" />
                             <Avatar className="h-6 w-6">
-                              <AvatarImage src={worksheet.client.profilePicture} />
+                              <AvatarImage src={worksheet.client.user.avatarUrl} />
                               <AvatarFallback className="text-xs">
-                                {worksheet.client.firstName[0]}{worksheet.client.lastName[0]}
+                                {worksheet.client.user.firstName[0]}{worksheet.client.user.lastName[0]}
                               </AvatarFallback>
                             </Avatar>
-                            <span>{worksheet.client.firstName} {worksheet.client.lastName}</span>
+                            <span>{worksheet.client.user.firstName} {worksheet.client.user.lastName}</span>
                           </div>
                           
                           <div className="flex items-center gap-2">
@@ -233,7 +222,7 @@ export function WorksheetManagementPage() {
                         </div>
                         
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {worksheet.instructions}
+                          {worksheet.instructions || ""}
                         </p>
                       </div>
                       
