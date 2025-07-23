@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { formatFileSize } from '@/lib/utils/common';
 
 interface AttachedFile {
   id: string;
@@ -122,13 +123,6 @@ export function useFileAttachment({
     },
   });
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
 
   const getFileIcon = (type: string) => {
     // This would return icon components based on file type

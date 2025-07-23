@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { MentaraApiError } from '@/lib/api/errorHandler';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Meeting, MeetingsQueryOptions } from '@/lib/api/services/meetings';
 
 /**
@@ -10,7 +11,7 @@ export function useSessions(options: MeetingsQueryOptions = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['sessions', 'all', options],
+    queryKey: queryKeys.sessions.list(options),
     queryFn: () => api.meetings.getAllMeetings(options),
     staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes
     retry: (failureCount, error: MentaraApiError) => {
@@ -30,7 +31,7 @@ export function useUpcomingSessions(limit = 10) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['sessions', 'upcoming', limit],
+    queryKey: queryKeys.sessions.upcoming(limit),
     queryFn: () => api.meetings.getUpcomingMeetings(limit),
     staleTime: 1000 * 60 * 1, // Sessions change frequently, refresh every minute
     refetchInterval: 1000 * 60 * 5, // Auto-refresh every 5 minutes

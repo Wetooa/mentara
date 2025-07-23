@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
 
 import type {
   TherapistRecommendationResponse,
@@ -26,7 +27,7 @@ export function useTherapistRecommendations(
   const api = useApi();
 
   return useQuery({
-    queryKey: ['therapists', 'recommendations', params],
+    queryKey: queryKeys.therapists.recommendations(params),
     queryFn: (): Promise<TherapistRecommendationResponse> => {
       return api.therapists.getRecommendations(params);
     },

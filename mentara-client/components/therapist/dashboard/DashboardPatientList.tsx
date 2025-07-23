@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
+import { getInitials } from "@/lib/utils/common";
 
 interface Appointment {
   id: string;
@@ -99,7 +100,7 @@ export default function DashboardPatientList({
                     alt={appointment.patientName} 
                   />
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {appointment.patientName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                    {getInitials(appointment.patientName)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">

@@ -7,6 +7,7 @@ import { useSimpleMessaging } from "@/hooks/messaging/useSimpleMessaging";
 import { useApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
 
 // Import a simple emoji picker or use a library like emoji-mart
 import dynamic from "next/dynamic";
@@ -44,7 +45,7 @@ export function MessageChatArea({
     isLoading: isLoadingContact,
     error: contactError,
   } = useQuery({
-    queryKey: ["messaging", "contacts"],
+    queryKey: queryKeys.messaging.contacts(),
     queryFn: () => api.messaging.getContacts(),
     enabled: !!accessToken && !!contactId,
     staleTime: 1000 * 60 * 5, // 5 minutes
