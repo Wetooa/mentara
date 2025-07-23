@@ -1,24 +1,49 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCarouselRecommendations } from "@/hooks/therapist/useRecommendedTherapists";
+import { toast } from "sonner";
 
 export default function RecommendedSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
   
   // Use clean hook for carousel recommendations with fallback to therapist cards
   const { 
     therapists, 
     therapistCards,
     isLoading, 
-    error 
+    error,
+    refetch
   } = useCarouselRecommendations();
 
   // Get the appropriate therapist data to display
   const displayTherapists = therapistCards || therapists;
+
+  // Enhanced retry logic for recommendations
+  const handleRecommendationRetry = async () => {
+    setIsRetrying(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800)); // Brief delay
+      await refetch();
+      setRetryCount(prev => prev + 1);
+      toast.success("Recommendations refreshed!");
+    } catch (retryError) {
+      console.error('Recommendation retry failed:', retryError);
+      if (retryCount < 2) {
+        toast.error(`Failed to refresh. Trying again...`);
+        setTimeout(() => handleRecommendationRetry(), 1500);
+      } else {
+        toast.error("Unable to load recommendations. Please refresh the page.");
+      }
+    } finally {
+      setIsRetrying(false);
+    }
+  };
 
   const checkScrollButtons = useCallback(() => {
     if (!carouselRef.current) return;
@@ -48,27 +73,84 @@ export default function RecommendedSection() {
     });
   };
 
-  // Handle loading state
+  // Enhanced loading state with modern skeleton cards
   if (isLoading) {
     return (
       <div className="space-y-4 h-full flex flex-col">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">Recommended</h2>
-          <Button variant="ghost" size="sm" disabled>
-            See all
-          </Button>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold">Recommended</h2>
+            <div className="flex items-center gap-2 text-blue-600">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm font-medium animate-pulse">Finding perfect matches...</span>
+            </div>
+          </div>
+          <div className="h-8 w-16 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"></div>
         </div>
-        <div className="flex-grow flex items-center justify-center">
-          <div className="flex items-center gap-2 text-muted-foreground" data-testid="recommendations-loading">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Loading recommendations...</span>
+        
+        {/* Enhanced skeleton carousel */}
+        <div className="relative flex-grow">
+          <div className="flex overflow-x-hidden h-full pb-2 pt-2 gap-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="relative flex-none w-[300px] h-full overflow-hidden"
+                data-testid="recommendation-skeleton"
+              >
+                <Card className="relative overflow-hidden h-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+                  {/* Animated shimmer overlay */}
+                  <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
+                  
+                  {/* Background image placeholder */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 animate-pulse"></div>
+                  
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+
+                  {/* Plus button placeholder */}
+                  <div className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-r from-blue-200 to-blue-300 rounded-full animate-pulse"></div>
+
+                  {/* Content */}
+                  <CardContent className="p-4 relative z-20 flex flex-col items-center justify-end h-full text-white mt-auto">
+                    <div className="w-full mb-3">
+                      <div className="flex gap-2 flex-wrap mb-3">
+                        <div className="bg-white/80 rounded-sm px-2 py-1 h-6 w-20 animate-pulse"></div>
+                        <div className="bg-white/80 rounded-sm px-2 py-1 h-6 w-16 animate-pulse"></div>
+                        <div className="bg-white/80 rounded-sm px-2 py-1 h-6 w-24 animate-pulse"></div>
+                      </div>
+                    </div>
+
+                    <div className="bg-black/40 backdrop-blur-sm rounded-lg p-3 w-full">
+                      <div className="h-5 bg-white/30 rounded w-3/4 mb-2 animate-pulse"></div>
+                      <div className="space-y-1 mb-2">
+                        <div className="h-3 bg-white/20 rounded animate-pulse"></div>
+                        <div className="h-3 bg-white/20 rounded w-4/5 animate-pulse"></div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="h-3 w-3 bg-white/30 rounded animate-pulse"></div>
+                        <div className="h-3 bg-white/20 rounded w-16 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
           </div>
         </div>
+
+        {/* Custom shimmer animation styles */}
+        <style jsx>{`
+          @keyframes shimmer {
+            100% {
+              transform: translateX(100%);
+            }
+          }
+        `}</style>
       </div>
     );
   }
 
-  // Handle error state
+  // Enhanced error state with contextual help
   if (error) {
     return (
       <div className="space-y-4 h-full flex flex-col">
@@ -79,9 +161,56 @@ export default function RecommendedSection() {
           </Button>
         </div>
         <div className="flex-grow flex items-center justify-center">
-          <div className="flex items-center gap-2 text-destructive" data-testid="error-message">
-            <AlertCircle className="h-5 w-5" />
-            <span>Failed to load recommendations. Please try again later.</span>
+          <div className="text-center max-w-md" data-testid="error-message">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <div className="flex items-center justify-center mb-3">
+                <div className="bg-red-100 p-2 rounded-full">
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                </div>
+              </div>
+              <h3 className="font-semibold text-red-900 mb-2">
+                Recommendations Unavailable
+              </h3>
+              <p className="text-red-700 text-sm mb-4">
+                We're having trouble loading personalized recommendations right now.
+              </p>
+              
+              {/* Retry options */}
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <Button 
+                  onClick={handleRecommendationRetry}
+                  disabled={isRetrying}
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  {isRetrying ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Retrying...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Try Again
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/client/therapists'}
+                  className="border-red-200 text-red-700 hover:bg-red-50"
+                >
+                  Browse All Therapists
+                </Button>
+              </div>
+              
+              {retryCount > 0 && (
+                <div className="text-xs text-red-500 mt-2">
+                  Retry attempts: {retryCount}/3
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
