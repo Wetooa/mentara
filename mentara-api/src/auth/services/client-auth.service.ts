@@ -85,7 +85,7 @@ export class ClientAuthService {
             answers: registerDto.preassessmentAnswers, // Flat array of 201 responses
             scores, // Calculated scores by questionnaire
             severityLevels, // Severity classifications
-            aiEstimate: aiEvaluationData, // Realistic AI evaluation data
+            aiEstimate: aiEvaluationData as any, // Realistic AI evaluation data - cast to satisfy Prisma JSON type
             isProcessed: true, // Mark as processed since we calculated scores
             processedAt: new Date(),
           },
