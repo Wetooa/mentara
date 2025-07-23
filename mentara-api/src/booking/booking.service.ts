@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MeetingStatus } from '@prisma/client';
+import { ACTIVE_MEETING_STATUSES } from './constants/meeting-status.constants';
 import type {
   MeetingCreateDto,
   MeetingUpdateDto,
@@ -72,13 +73,13 @@ export class BookingService {
                 therapistId,
                 startTime: { lt: endTimeDate },
                 endTime: { gt: startTimeDate },
-                status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
+                status: { in: ACTIVE_MEETING_STATUSES },
               },
               {
                 clientId,
                 startTime: { lt: endTimeDate },
                 endTime: { gt: startTimeDate },
-                status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
+                status: { in: ACTIVE_MEETING_STATUSES },
               },
             ],
           },

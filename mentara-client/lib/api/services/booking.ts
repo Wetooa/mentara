@@ -147,7 +147,7 @@ export function createBookingService(axios: AxiosInstance) {
         amount: number;
         currency?: string;
       }) {
-        const { data } = await axios.post("/billing/session-payment", payload);
+        const { data } = await axios.post("/billing/payments/session", payload);
         return data;
       },
 

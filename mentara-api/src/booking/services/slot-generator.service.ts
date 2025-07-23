@@ -133,7 +133,7 @@ export class SlotGeneratorService {
       where: {
         therapistId,
         startTime: { gte: startOfDay, lte: endOfDay },
-        status: { in: ['SCHEDULED', 'CONFIRMED'] },
+        status: { in: ACTIVE_MEETING_STATUSES },
       },
       orderBy: { startTime: 'asc' },
     });
