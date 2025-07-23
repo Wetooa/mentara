@@ -5,6 +5,7 @@
  */
 
 import { io, Socket } from 'socket.io-client';
+import { TOKEN_STORAGE_KEY } from '@/lib/constants/auth';
 
 interface WebSocketConfig {
   url?: string;
@@ -176,7 +177,7 @@ class SimpleWebSocket {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Attempt to reconnect with token
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
       await this.connect(token || undefined);
       
       console.log('✅ Manual recovery successful');
@@ -293,7 +294,7 @@ class SimpleWebSocket {
           }
           
           // Attempt to reconnect with current token (if available)
-          const token = localStorage.getItem('authToken');
+          const token = localStorage.getItem(TOKEN_STORAGE_KEY);
           await this.connect(token || undefined);
           
           console.log('✅ Successfully recovered from TransportError');
