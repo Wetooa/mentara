@@ -186,8 +186,8 @@ export class BillingService {
         amount: data.amount,
         currency: data.currency || 'USD',
         status: 'COMPLETED', // Mock payment is always successful
-        clientId: data.clientId,
-        therapistId: data.therapistId,
+        client: { connect: { userId: data.clientId } },
+        therapist: { connect: { userId: data.therapistId } },
         meetingId: data.meetingId,
         paymentMethodId: null, // No payment method needed for mock
         processedAt: new Date(),
@@ -246,17 +246,23 @@ export class BillingService {
     }
 
     // Create payment record
+    const paymentData: any = {
+      amount: data.amount,
+      currency: data.currency || 'USD',
+      status: PaymentStatus.PENDING,
+      client: { connect: { userId: data.clientId } },
+      therapist: { connect: { userId: data.therapistId } },
+      paymentMethodId: data.paymentMethodId,
+      failureReason: null,
+    };
+
+    // Only include meetingId if it's defined
+    if (data.meetingId) {
+      paymentData.meetingId = data.meetingId;
+    }
+
     const payment = await this.prisma.payment.create({
-      data: {
-        amount: data.amount,
-        currency: data.currency || 'USD',
-        status: PaymentStatus.PENDING,
-        clientId: data.clientId,
-        therapistId: data.therapistId,
-        meetingId: data.meetingId,
-        paymentMethodId: data.paymentMethodId,
-        failureReason: null,
-      },
+      data: paymentData,
       include: {
         client: {
           select: { 
