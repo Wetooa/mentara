@@ -15,7 +15,9 @@ export function createTherapistService(axios: AxiosInstance) {
     /**
      * Get personalized therapist recommendations for welcome page
      */
-    async getPersonalizedRecommendations(params?: WelcomeRecommendationQuery): Promise<TherapistRecommendationResponse> {
+    async getPersonalizedRecommendations(
+      params?: WelcomeRecommendationQuery
+    ): Promise<TherapistRecommendationResponse> {
       const { data } = await axios.get("/therapist-recommendations/welcome");
       return data;
     },
@@ -23,17 +25,20 @@ export function createTherapistService(axios: AxiosInstance) {
     /**
      * Get standard therapist recommendations with filters
      */
-    async getRecommendations(params?: TherapistRecommendationQuery): Promise<TherapistRecommendationResponse> {
-      const { data } = await axios.get("/therapist-recommendations", { params });
+    async getRecommendations(
+      params?: TherapistRecommendationQuery
+    ): Promise<TherapistRecommendationResponse> {
+      const { data } = await axios.get("/therapist-recommendations", {
+        params,
+      });
+      console.log("Therapist recommendations data:", data);
       return data;
     },
 
     /**
      * Create automatic matches with selected therapists
      */
-    async createMatches(payload: { 
-      therapistIds: string[] 
-    }): Promise<{
+    async createMatches(payload: { therapistIds: string[] }): Promise<{
       success: boolean;
       message: string;
       data?: {
@@ -41,7 +46,7 @@ export function createTherapistService(axios: AxiosInstance) {
         failedMatches: number;
         details: Array<{
           therapistId: string;
-          status: 'success' | 'failed';
+          status: "success" | "failed";
           reason?: string;
         }>;
       };
@@ -54,7 +59,9 @@ export function createTherapistService(axios: AxiosInstance) {
      * Get compatibility analysis between client and therapist
      */
     async getCompatibilityAnalysis(therapistId: string) {
-      const { data } = await axios.get(`/therapist-recommendations/compatibility/${therapistId}`);
+      const { data } = await axios.get(
+        `/therapist-recommendations/compatibility/${therapistId}`
+      );
       return data;
     },
 
@@ -63,6 +70,7 @@ export function createTherapistService(axios: AxiosInstance) {
      */
     async getTherapistList(params?: TherapistSearchParams) {
       const { data } = await axios.get("/therapists", { params });
+      console.log("Therapist list data:", data);
       return data;
     },
 
@@ -89,7 +97,7 @@ export function createTherapistService(axios: AxiosInstance) {
       therapistId: string;
       startTime: string;
       duration: number;
-      sessionType: 'video' | 'audio';
+      sessionType: "video" | "audio";
       notes?: string;
     }) {
       const { data } = await axios.post("/booking", payload);
@@ -128,11 +136,11 @@ export function createTherapistService(axios: AxiosInstance) {
        * Get patient's session history - uses general meetings API filtered by client
        */
       async getSessions(patientId: string) {
-        const { data } = await axios.get(`/meetings`, { 
-          params: { 
+        const { data } = await axios.get(`/meetings`, {
+          params: {
             clientId: patientId,
-            limit: 50 
-          } 
+            limit: 50,
+          },
         });
         return data;
       },
@@ -141,10 +149,10 @@ export function createTherapistService(axios: AxiosInstance) {
        * Get patient's worksheets - uses therapist worksheets API filtered by client
        */
       async getWorksheets(patientId: string) {
-        const { data } = await axios.get(`/therapist/worksheets`, { 
-          params: { 
-            clientId: patientId 
-          } 
+        const { data } = await axios.get(`/therapist/worksheets`, {
+          params: {
+            clientId: patientId,
+          },
         });
         return data;
       },
@@ -153,9 +161,9 @@ export function createTherapistService(axios: AxiosInstance) {
        * Update session notes for a patient - uses meetings API
        */
       async updateNotes(patientId: string, sessionId: string, notes: string) {
-        const { data } = await axios.post(`/meetings/${sessionId}/session`, { 
+        const { data } = await axios.post(`/meetings/${sessionId}/session`, {
           notes,
-          sessionData: { notes }
+          sessionData: { notes },
         });
         return data;
       },
@@ -164,7 +172,10 @@ export function createTherapistService(axios: AxiosInstance) {
        * Assign worksheet to a patient - uses specific client worksheet assignment endpoint
        */
       async assignWorksheet(patientId: string, worksheetData: any) {
-        const { data } = await axios.post(`/therapist/clients/${patientId}/worksheets`, worksheetData);
+        const { data } = await axios.post(
+          `/therapist/clients/${patientId}/worksheets`,
+          worksheetData
+        );
         return data;
       },
     },
