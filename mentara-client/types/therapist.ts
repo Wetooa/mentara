@@ -91,21 +91,50 @@ export interface TherapistCardData {
 
 // Helper function to transform API response to frontend format
 export function transformTherapistForCard(therapist: TherapistRecommendation): TherapistCardData {
-  return {
-    id: therapist.id || therapist.userId,
-    name: therapist.name || `${therapist.firstName} ${therapist.lastName}`,
+  // Validate required fields
+  if (!therapist?.userId) {
+    console.error('Therapist missing userId:', therapist);
+    throw new Error('Therapist data is missing required userId field');
+  }
+
+  if (!therapist?.firstName && !therapist?.lastName && !therapist?.name) {
+    console.error('Therapist missing name data:', therapist);
+  }
+
+  // Debug logging for data validation in development
+  if (process.env.NODE_ENV === 'development') {
+    if (!therapist.specialties || therapist.specialties.length === 0) {
+      console.debug('Therapist has no specialties:', {
+        id: therapist.userId,
+        name: therapist.name || `${therapist.firstName} ${therapist.lastName}`,
+        areasOfExpertise: therapist.areasOfExpertise
+      });
+    }
+  }
+
+  const transformed = {
+    id: therapist.userId, // Backend always returns userId as primary identifier
+    name: therapist.name || `${therapist.firstName || ''} ${therapist.lastName || ''}`.trim() || 'Unknown Therapist',
     title: therapist.title || 'Licensed Therapist',
-    specialties: therapist.specialties || therapist.areasOfExpertise || [],
-    experience: therapist.experience || therapist.yearsOfExperience || 0,
+    specialties: Array.isArray(therapist.specialties) ? therapist.specialties : 
+                Array.isArray(therapist.areasOfExpertise) ? therapist.areasOfExpertise : [],
+    experience: Math.max(0, therapist.experience || therapist.yearsOfExperience || 0),
     availableTimes: [], // This would need to come from a separate availability API
-    isActive: therapist.isActive,
+    isActive: therapist.isActive ?? true, // Use nullish coalescing for boolean
     bio: therapist.bio || '',
     imageUrl: therapist.profileImage || therapist.avatarUrl || '/team/default-therapist.jpg',
-    rating: therapist.rating || 0,
+    rating: Math.max(0, Math.min(5, therapist.rating || 0)), // Clamp rating between 0-5
     sessionPrice: therapist.sessionPrice || `$${therapist.hourlyRate || 120}`,
     sessionDuration: 45, // Default session duration
-    location: therapist.location || therapist.province,
-    languages: therapist.languages,
-    totalReviews: therapist.totalReviews,
+    location: therapist.location || therapist.province || '',
+    languages: Array.isArray(therapist.languages) ? therapist.languages : [],
+    totalReviews: Math.max(0, therapist.totalReviews || 0),
   };
+
+  // Final validation of transformed data
+  if (!transformed.id || !transformed.name.trim()) {
+    console.error('Transform produced invalid therapist data:', { original: therapist, transformed });
+  }
+
+  return transformed;
 }
