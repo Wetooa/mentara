@@ -13,7 +13,7 @@ export enum UserRole {
 // Meeting statuses
 export enum MeetingStatus {
   SCHEDULED = 'scheduled',
-  ONGOING = 'ongoing', 
+  ONGOING = 'ongoing',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
   MISSED = 'missed',
@@ -52,7 +52,7 @@ export enum MessageType {
   SYSTEM = 'system',
 }
 
-// Message status  
+// Message status
 export enum MessageStatus {
   SENT = 'sent',
   DELIVERED = 'delivered',

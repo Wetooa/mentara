@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
-  calculateAllScoresFromFlatArray,
-  generateSeverityLevels,
+  processPreAssessmentAnswers,
+  LIST_OF_QUESTIONNAIRES,
 } from './pre-assessment.utils';
 import { PreAssessment } from '@prisma/client';
 import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
@@ -134,15 +134,12 @@ export class PreAssessmentService {
 
       // Calculate scores if not provided
       if (!data.scores || !data.severityLevels) {
-        this.logger.debug('Calculating scores and severity levels from flat answers');
-        const calculatedScores = calculateAllScoresFromFlatArray(data.answers);
-        scores = Object.fromEntries(
-          Object.entries(calculatedScores).map(([key, value]) => [
-            key,
-            value.score,
-          ]),
+        this.logger.debug(
+          'Calculating scores and severity levels from flat answers',
         );
-        severityLevels = generateSeverityLevels(calculatedScores);
+        const result = processPreAssessmentAnswers(data.answers);
+        scores = result.scores;
+        severityLevels = result.severityLevels;
       }
 
       // Attempt AI prediction with flat answers
@@ -187,14 +184,14 @@ export class PreAssessmentService {
         // Convert scores to QuestionnaireScores format for analysis
         const questionnaireScores: QuestionnaireScores = {};
         const severityLevelsForAnalysis = severityLevels;
-        
+
         // Get all questionnaire names from the calculated scores
         const questionnaires = Object.keys(scores);
-        questionnaires.forEach(questionnaire => {
+        questionnaires.forEach((questionnaire) => {
           if (scores[questionnaire] !== undefined) {
             questionnaireScores[questionnaire] = {
               score: scores[questionnaire],
-              severity: severityLevelsForAnalysis[questionnaire] || 'Unknown'
+              severity: severityLevelsForAnalysis[questionnaire] || 'Unknown',
             };
           }
         });
@@ -313,16 +310,19 @@ export class PreAssessmentService {
       const existingAssessment = await this.prisma.preAssessment.findUnique({
         where: { clientId: userId },
       });
-      
+
       if (!existingAssessment) {
         throw new NotFoundException('Pre-assessment not found');
       }
 
       // Extract current data from existing assessment
-      const currentScores = existingAssessment.scores as Record<string, number> || {};
-      const currentSeverityLevels = existingAssessment.severityLevels as Record<string, string> || {};
-      const currentAiEstimate = existingAssessment.aiEstimate as Record<string, boolean> || {};
-      
+      const currentScores =
+        (existingAssessment.scores as Record<string, number>) || {};
+      const currentSeverityLevels =
+        (existingAssessment.severityLevels as Record<string, string>) || {};
+      const currentAiEstimate =
+        (existingAssessment.aiEstimate as Record<string, boolean>) || {};
+
       let scores: Record<string, number>;
       let severityLevels: Record<string, string>;
       let aiEstimate: Record<string, boolean> = currentAiEstimate;
@@ -345,16 +345,11 @@ export class PreAssessmentService {
       // Recalculate scores if new answers provided
       if (data.answers && (!data.scores || !data.severityLevels)) {
         this.validateFlatAnswers(data.answers);
-        
-        const calculatedScores = calculateAllScoresFromFlatArray(data.answers);
-        scores = Object.fromEntries(
-          Object.entries(calculatedScores).map(([key, value]) => [
-            key,
-            value.score,
-          ]),
-        );
-        severityLevels = generateSeverityLevels(calculatedScores);
-        
+
+        const result = processPreAssessmentAnswers(data.answers);
+        scores = result.scores;
+        severityLevels = result.severityLevels;
+
         // Attempt to get new AI estimate if answers changed
         try {
           const aiResult = await this.getAiEstimate(data.answers);
@@ -370,7 +365,7 @@ export class PreAssessmentService {
       const preAssessment = await this.prisma.preAssessment.update({
         where: { clientId: userId },
         data: {
-          answers: data.answers || existingAssessment.answers as number[],
+          answers: data.answers || (existingAssessment.answers as number[]),
           scores,
           severityLevels,
           aiEstimate,
@@ -458,22 +453,21 @@ export class PreAssessmentService {
         throw new NotFoundException('Pre-assessment not found for user');
       }
 
-      // Extract data from the answers JSON field
-      const answers = preAssessment.answers as any;
-      const questionnaires = answers?.questionnaires as string[];
-      const scores = answers?.scores as Record<string, number>;
-      const severityLevels = answers?.severityLevels as Record<
-        string,
-        string
-      >;
+      // Extract data from the separate database fields (correct approach)
+      const flatAnswers = preAssessment.answers as number[];
+      const scores = preAssessment.scores as Record<string, number>;
+      const severityLevels = preAssessment.severityLevels as Record<string, string>;
+      
+      // Use the questionnaire list from utils
+      const questionnaires = [...LIST_OF_QUESTIONNAIRES] as string[];
 
-      if (!questionnaires || !scores || !severityLevels) {
+      if (!flatAnswers || !scores || !severityLevels) {
         throw new BadRequestException('Invalid pre-assessment data structure');
       }
 
       // Convert scores to QuestionnaireScores format
       const questionnaireScores: QuestionnaireScores = {};
-
+      
       questionnaires.forEach((questionnaire) => {
         if (scores[questionnaire] !== undefined) {
           questionnaireScores[questionnaire] = {
