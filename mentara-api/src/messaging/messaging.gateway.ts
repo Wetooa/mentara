@@ -54,11 +54,20 @@ export class MessagingGateway
   async handleConnection(client: AuthenticatedSocket) {
     try {
       this.logger.log(`🔌 [MessagingGateway] New WebSocket connection attempt: ${client.id}`);
+      this.logger.log(`🔍 [MessagingGateway] Connection details:`, {
+        ip: client.handshake.address,
+        userAgent: client.handshake.headers['user-agent'] || 'unknown',
+        origin: client.handshake.headers.origin || 'unknown',
+        referer: client.handshake.headers.referer || 'unknown'
+      });
       this.logger.debug(`🔍 [MessagingGateway] Client handshake:`, {
         headers: Object.keys(client.handshake.headers),
-        auth: client.handshake.auth,
+        auth: client.handshake.auth ? 'present' : 'missing',
+        authToken: client.handshake.auth?.token ? 'present' : 'missing',
         query: client.handshake.query,
         url: client.handshake.url,
+        hasAuthHeader: !!client.handshake.headers.authorization,
+        transport: client.conn.transport.name
       });
 
       // Authenticate the socket connection using the new auth service
@@ -66,9 +75,17 @@ export class MessagingGateway
 
       if (!authResult) {
         this.logger.warn(`❌ [MessagingGateway] Client ${client.id} authentication failed`);
+        this.logger.warn(`🔍 [MessagingGateway] Auth failure details:`, {
+          hasToken: !!client.handshake.auth?.token,
+          hasAuthHeader: !!client.handshake.headers.authorization,
+          origin: client.handshake.headers.origin,
+          transport: client.conn.transport.name,
+          ip: client.handshake.address
+        });
         client.emit('auth_error', {
           message: 'Authentication failed. Please provide a valid token.',
           code: 'AUTH_FAILED',
+          timestamp: new Date().toISOString(),
         });
         client.disconnect(true);
         return;

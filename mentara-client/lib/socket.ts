@@ -126,13 +126,40 @@ export const clearConnectionTimeline = (namespace: string) => {
   connectionTimelines[namespace] = [];
 };
 
-// Type for socket options with auth
+// Enhanced socket options with optimized retry and performance settings
 interface SocketOptions {
   autoConnect: boolean;
   withCredentials: boolean;
   transports: string[];
   timeout: number;
   forceNew: boolean;
+  
+  // Reconnection optimization
+  reconnection: boolean;
+  reconnectionAttempts: number;
+  reconnectionDelay: number;
+  reconnectionDelayMax: number;
+  randomizationFactor: number;
+  
+  // Performance optimization
+  upgrade: boolean;
+  rememberUpgrade: boolean;
+  
+  // Connection quality optimization
+  pingTimeout: number;
+  pingInterval: number;
+  
+  // Transport-specific optimization
+  transportOptions?: {
+    websocket?: {
+      compression?: boolean;
+      perMessageDeflate?: boolean;
+    };
+    polling?: {
+      extraHeaders?: Record<string, string>;
+    };
+  };
+  
   auth?: {
     token?: string;
   };
@@ -189,12 +216,47 @@ export const getSocket = (namespace?: string, token?: string): Socket => {
       }
     }
     
+    // Optimized socket configuration for better performance and reliability
     const socketOptions: SocketOptions = {
       autoConnect: false,
       withCredentials: true,
+      
+      // Transport optimization - prefer WebSocket but allow polling fallback
       transports: ['websocket', 'polling'],
-      timeout: 20000,
+      
+      // Connection timeouts (reduced for faster failure detection)
+      timeout: 15000, // Reduced from 20s to 15s for faster detection
+      
+      // Connection management
       forceNew: false,
+      
+      // Enhanced reconnection settings
+      reconnection: true,
+      reconnectionAttempts: 8, // Increased from default 5
+      reconnectionDelay: 1000, // Start with 1 second
+      reconnectionDelayMax: 10000, // Max 10 seconds (reduced from default 30s)
+      randomizationFactor: 0.3, // 30% jitter to prevent thundering herd
+      
+      // Performance optimization
+      upgrade: true, // Allow transport upgrades
+      rememberUpgrade: true, // Remember successful upgrades
+      
+      // Ping/Pong optimization for connection health
+      pingTimeout: 15000, // 15 seconds ping timeout
+      pingInterval: 25000, // 25 seconds ping interval
+      
+      // Transport-specific optimizations
+      transportOptions: {
+        websocket: {
+          compression: true, // Enable compression for WebSocket
+          perMessageDeflate: true, // Enable per-message deflate
+        },
+        polling: {
+          extraHeaders: {
+            'X-Requested-With': 'socket.io-client',
+          },
+        },
+      },
     };
 
     // Add authentication token if provided
@@ -336,12 +398,47 @@ export const getNamespacedSocket = (namespace: string, token?: string): Socket =
       }
     }
     
+    // Optimized socket configuration for namespaced connections
     const socketOptions: SocketOptions = {
       autoConnect: false,
       withCredentials: true,
+      
+      // Transport optimization - prefer WebSocket but allow polling fallback
       transports: ['websocket', 'polling'],
-      timeout: 20000,
+      
+      // Connection timeouts (reduced for faster failure detection)
+      timeout: 15000, // Reduced from 20s to 15s for faster detection
+      
+      // Connection management
       forceNew: false,
+      
+      // Enhanced reconnection settings
+      reconnection: true,
+      reconnectionAttempts: 8, // Increased from default 5
+      reconnectionDelay: 1000, // Start with 1 second
+      reconnectionDelayMax: 10000, // Max 10 seconds (reduced from default 30s)
+      randomizationFactor: 0.3, // 30% jitter to prevent thundering herd
+      
+      // Performance optimization
+      upgrade: true, // Allow transport upgrades
+      rememberUpgrade: true, // Remember successful upgrades
+      
+      // Ping/Pong optimization for connection health
+      pingTimeout: 15000, // 15 seconds ping timeout
+      pingInterval: 25000, // 25 seconds ping interval
+      
+      // Transport-specific optimizations
+      transportOptions: {
+        websocket: {
+          compression: true, // Enable compression for WebSocket
+          perMessageDeflate: true, // Enable per-message deflate
+        },
+        polling: {
+          extraHeaders: {
+            'X-Requested-With': 'socket.io-client',
+          },
+        },
+      },
     };
 
     // Add authentication token if provided
@@ -473,23 +570,33 @@ export const connectSocket = (namespace?: string, token?: string): Promise<Socke
       return;
     }
 
+    // Adaptive timeout based on network conditions and previous connection attempts
+    const baseTimeout = 8000; // Reduced base timeout from 10s to 8s
+    const networkMultiplier = navigator.onLine ? 1 : 2; // Double timeout when offline detected
+    const adaptiveTimeout = baseTimeout * networkMultiplier;
+    
     const timeoutId = setTimeout(() => {
       trackConnectionEvent(namespaceLabel, 'CONNECTION_TIMEOUT', {
-        timeoutMs: 10000,
+        timeoutMs: adaptiveTimeout,
         connected: socketInstance.connected,
         disconnected: socketInstance.disconnected,
         transport: socketInstance.io.engine?.transport?.name,
-        readyState: socketInstance.io.engine?.readyState
+        readyState: socketInstance.io.engine?.readyState,
+        networkOnline: navigator.onLine,
+        adaptiveTimeout,
+        baseTimeout
       });
       
-      console.error(`⏰ [SOCKET] Connection timeout [${namespaceLabel}] after 10 seconds`);
+      console.error(`⏰ [SOCKET] Connection timeout [${namespaceLabel}] after ${adaptiveTimeout}ms`);
       console.error(`🔍 [SOCKET] Final connection state [${namespaceLabel}]:`, {
         connected: socketInstance.connected,
         disconnected: socketInstance.disconnected,
         transport: socketInstance.io.engine?.transport?.name,
+        networkOnline: navigator.onLine,
+        effectiveType: (navigator as any).connection?.effectiveType || 'unknown'
       });
-      reject(new Error('Socket connection timeout after 10 seconds'));
-    }, 10000); // 10 second timeout
+      reject(new Error(`Socket connection timeout after ${adaptiveTimeout}ms`));
+    }, adaptiveTimeout);
 
     const onConnect = () => {
       clearTimeout(timeoutId);
@@ -633,3 +740,163 @@ export const connectMeetingsSocket = (token?: string) => connectSocket('/meeting
 
 export const isMessagingConnected = () => isSocketConnected('/messaging');
 export const isMeetingsConnected = () => isSocketConnected('/meetings');
+
+// Advanced connection utilities for performance monitoring
+export const getConnectionQuality = (namespace?: string): 'excellent' | 'good' | 'poor' | 'unknown' => {
+  const socketInstance = namespace ? sockets[namespace] : socket;
+  if (!socketInstance?.connected) return 'unknown';
+  
+  try {
+    const engine = socketInstance.io.engine;
+    const transport = engine.transport.name;
+    const ping = engine.ping || 0;
+    
+    // Quality assessment based on transport and ping
+    if (transport === 'websocket') {
+      if (ping < 50) return 'excellent';
+      if (ping < 150) return 'good';
+      return 'poor';
+    } else if (transport === 'polling') {
+      if (ping < 200) return 'good';
+      return 'poor';
+    }
+    
+    return 'unknown';
+  } catch (error) {
+    console.warn('⚠️ [SOCKET] Could not determine connection quality:', error);
+    return 'unknown';
+  }
+};
+
+export const getConnectionStats = (namespace?: string) => {
+  const socketInstance = namespace ? sockets[namespace] : socket;
+  if (!socketInstance) return null;
+  
+  try {
+    const engine = socketInstance.io.engine;
+    const timeline = getConnectionTimeline(namespace || 'main');
+    
+    return {
+      connected: socketInstance.connected,
+      transport: engine.transport.name,
+      ping: engine.ping || 0,
+      readyState: engine.readyState,
+      quality: getConnectionQuality(namespace),
+      eventCount: timeline.length,
+      lastEvent: timeline[timeline.length - 1] || null,
+      networkInfo: {
+        online: navigator.onLine,
+        effectiveType: (navigator as any).connection?.effectiveType || 'unknown',
+        downlink: (navigator as any).connection?.downlink || 0,
+        rtt: (navigator as any).connection?.rtt || 0
+      }
+    };
+  } catch (error) {
+    console.warn('⚠️ [SOCKET] Could not gather connection stats:', error);
+    return null;
+  }
+};
+
+// Proactive connection health monitoring
+export const monitorConnectionHealth = (namespace?: string, callback?: (stats: any) => void) => {
+  const intervalId = setInterval(() => {
+    const stats = getConnectionStats(namespace);
+    if (stats) {
+      const quality = stats.quality;
+      
+      // Log quality changes
+      if (quality === 'poor') {
+        console.warn(`⚠️ [SOCKET] Poor connection quality detected [${namespace || 'main'}]:`, {
+          ping: stats.ping,
+          transport: stats.transport,
+          networkType: stats.networkInfo.effectiveType
+        });
+      }
+      
+      // Callback for custom handling
+      if (callback) {
+        callback(stats);
+      }
+      
+      // Track quality metrics in timeline
+      trackConnectionEvent(namespace || 'main', 'QUALITY_CHECK', {
+        quality,
+        ping: stats.ping,
+        transport: stats.transport,
+        networkOnline: stats.networkInfo.online
+      });
+    }
+  }, 10000); // Check every 10 seconds
+  
+  return intervalId;
+};
+
+// Enhanced reconnection with backoff strategy
+export const smartReconnect = async (namespace?: string, maxRetries: number = 5): Promise<boolean> => {
+  const label = namespace || 'main';
+  let attempt = 0;
+  
+  while (attempt < maxRetries) {
+    attempt++;
+    
+    try {
+      trackConnectionEvent(label, 'SMART_RECONNECT_ATTEMPT', {
+        attempt,
+        maxRetries,
+        networkOnline: navigator.onLine
+      });
+      
+      console.log(`🔄 [SOCKET] Smart reconnect attempt ${attempt}/${maxRetries} [${label}]`);
+      
+      // Check network connectivity first
+      if (!navigator.onLine) {
+        console.log(`🌐 [SOCKET] Device offline, waiting for network [${label}]`);
+        await new Promise(resolve => {
+          const onOnline = () => {
+            window.removeEventListener('online', onOnline);
+            resolve(void 0);
+          };
+          window.addEventListener('online', onOnline);
+        });
+      }
+      
+      // Exponential backoff with jitter
+      if (attempt > 1) {
+        const baseDelay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+        const jitter = baseDelay * 0.3 * Math.random();
+        const delay = baseDelay + jitter;
+        
+        console.log(`⏳ [SOCKET] Waiting ${Math.round(delay)}ms before reconnect [${label}]`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      
+      // Attempt connection
+      const socketInstance = await connectSocket(namespace);
+      
+      trackConnectionEvent(label, 'SMART_RECONNECT_SUCCESS', {
+        attempt,
+        socketId: socketInstance.id,
+        transport: socketInstance.io.engine.transport.name
+      });
+      
+      console.log(`✅ [SOCKET] Smart reconnection successful [${label}] after ${attempt} attempts`);
+      return true;
+      
+    } catch (error) {
+      trackConnectionEvent(label, 'SMART_RECONNECT_FAILED', {
+        attempt,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        willRetry: attempt < maxRetries
+      });
+      
+      console.warn(`❌ [SOCKET] Smart reconnect attempt ${attempt} failed [${label}]:`, error);
+      
+      if (attempt >= maxRetries) {
+        console.error(`💀 [SOCKET] Smart reconnection failed after ${maxRetries} attempts [${label}]`);
+        return false;
+      }
+    }
+  }
+  
+  return false;
+};
