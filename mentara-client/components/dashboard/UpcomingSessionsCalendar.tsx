@@ -98,7 +98,7 @@ export default function UpcomingSessionsCalendar({ className }: UpcomingSessions
             onDateSelect={handleDateSelect}
             selected={selectedDate}
             hoverDelay={1000} // Fast hover for dashboard
-            className="scale-90 border-0 p-0"
+            className="border-0 p-2"
             showMeetingIndicators={true}
           />
         </div>

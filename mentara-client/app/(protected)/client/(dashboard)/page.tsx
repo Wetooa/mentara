@@ -201,11 +201,13 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Column - Sessions and Worksheets */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Sessions Calendar - Full Width for Better Visibility */}
+          <UpcomingSessionsCalendar />
+          
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
-            <UpcomingSessionsCalendar />
+            <WorksheetStatus worksheets={dashboardData.worksheets} />
           </div>
-          <WorksheetStatus worksheets={dashboardData.worksheets} />
         </div>
 
         {/* Right Column 1 - Therapist and Communications */}

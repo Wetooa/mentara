@@ -1,46 +1,5 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
-THIS IS A LONG TASK. SPLIT IT INTO PHASES
-
-
-Therapist User Pages Issues
-
-
-Therapist Sidebar
-- The therapist sidebar is trash compared to the Clients
-- first off, design wise, it should be the as the clients but with the main difference being the border color being different. i think its best we use the color brown for this as its the secondary color in the brand palette.
-- the names are also missing
-- its also kinda small in width
-- the mentara-logo is also not showing properly here
-- i would like this logo to scale bigger when its hoevered over (this should be the same for the client sidebar)
-
-
-
-Therapist Dashboard
-- the therapist dashboard is not showing correctly,
-Error: Invalid time value
-
-components/ui/enhanced-calendar.tsx (124:16) @ DayWithMeetings
-
-  122 |         )}
-  123 |       >
-> 124 |         {format(date, 'd')}
-      |                ^
-  125 |         
-  126 |         {/* Meeting indicators */}
-  127 |         {dayMeetings.length > 0 && (
-
-- for UI inspo, check out the client dashboard. it doesnt have to be one to one, but use it as a reference
-
-Therapist Patients Page
-- its telling me failed to load patient records
-- the calendar here is also not quite interactive.
-
-
-Community Page
-- i notice that the community page is not present on the therapists side. the community page should be present on the therapists side as well, and it should be the same as the clients side.
-
-<<<NEED TO ADD MORE>>>>
 
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
