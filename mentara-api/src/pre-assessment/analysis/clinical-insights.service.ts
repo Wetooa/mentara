@@ -202,7 +202,16 @@ export class ClinicalInsightsService {
 
     for (const questionnaire of questionnaires) {
       const scoreData = scores[questionnaire];
-      if (!scoreData) continue;
+      if (!scoreData) {
+        this.logger.debug(`No score data available for questionnaire: ${questionnaire}`);
+        continue;
+      }
+
+      // Validate score data structure
+      if (typeof scoreData.score !== 'number' || !scoreData.severity) {
+        this.logger.warn(`Invalid score data for ${questionnaire}:`, scoreData);
+        continue;
+      }
 
       const insight = this.createConditionInsight(
         questionnaire,
@@ -213,6 +222,9 @@ export class ClinicalInsightsService {
 
       if (insight) {
         insights.push(insight);
+        this.logger.debug(`Generated insight for ${questionnaire} with priority ${insight.priority}`);
+      } else {
+        this.logger.warn(`Failed to create insight for questionnaire: ${questionnaire}`);
       }
     }
 
