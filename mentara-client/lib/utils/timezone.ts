@@ -16,7 +16,12 @@ export function formatUTCDate(date: Date | string, format: string = 'yyyy-MM-dd'
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
   if (format === 'yyyy-MM-dd') {
-    return dateObj.toISOString().split('T')[0];
+    // For date-only formats, use local date without timezone conversion
+    // to prevent date shifting when user selects a local date
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
   
   // For display format like "MMM d, yyyy h:mm a", use user's local time
