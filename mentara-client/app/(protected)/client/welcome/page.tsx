@@ -720,7 +720,7 @@ export default function ClientWelcomePage() {
               </p>
               <Button onClick={handleSkipForNow} className="w-full">
                 <ArrowRight className="h-4 w-4 mr-2" />
-                Skip this step
+                Skip for now
               </Button>
             </CardContent>
           </Card>

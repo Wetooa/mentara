@@ -14,20 +14,19 @@ export default function TherapistPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
-  
-  const {
-    filters,
-    updateFilters,
-    resetFilters,
-  } = useFilters();
+
+  const { filters, updateFilters, resetFilters } = useFilters();
 
   return (
     <div className="w-full h-full p-6 space-y-6 bg-gradient-to-br from-blue-50/30 via-white to-green-50/20 min-h-screen">
       {/* Page Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">Find Your Therapist</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Find Your Therapist
+        </h1>
         <p className="text-gray-600 leading-relaxed">
-          Connect with licensed mental health professionals who understand your needs and can guide you toward wellness.
+          Connect with licensed mental health professionals who understand your
+          needs and can guide you toward wellness.
         </p>
       </div>
 
@@ -56,22 +55,30 @@ export default function TherapistPage() {
         {/* Primary Therapist Listings */}
         <div className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">Available Therapists</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Available Therapists
+            </h2>
             {hasActiveFilters && (
               <span className="text-sm text-blue-600 font-medium">
                 Filtered results
               </span>
             )}
           </div>
-          
+
           <TherapistListingErrorWrapper
             onError={(error, errorInfo) => {
-              console.error('Therapist listing error:', { error, errorInfo, searchQuery, selectedFilter, filters });
+              console.error("Therapist listing error:", {
+                error,
+                errorInfo,
+                searchQuery,
+                selectedFilter,
+                filters,
+              });
             }}
           >
-            <TherapistListing 
-              searchQuery={searchQuery} 
-              filter={selectedFilter} 
+            <TherapistListing
+              searchQuery={searchQuery}
+              filter={selectedFilter}
               advancedFilters={filters}
             />
           </TherapistListingErrorWrapper>
@@ -90,7 +97,7 @@ export default function TherapistPage() {
               </button>
             </div>
           </div>
-          
+
           <MeetingsSection />
           <RecommendedSection />
         </div>
