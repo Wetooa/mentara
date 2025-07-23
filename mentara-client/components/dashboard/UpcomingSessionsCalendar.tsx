@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EnhancedCalendar } from "@/components/ui/enhanced-calendar";
+import AppointmentCalendar from "@/components/calendar-02";
 import { useCalendarMeetings } from "@/hooks/calendar/useCalendarMeetings";
 import { CalendarDays, ArrowRight, RefreshCw, Maximize2 } from "lucide-react";
 import { format, isToday, isTomorrow, isYesterday } from "date-fns";
@@ -106,15 +106,14 @@ export default function UpcomingSessionsCalendar({ className }: UpcomingSessions
           )}
         </div>
         
-        {/* Enhanced Calendar with meeting indicators */}
-        <div className="flex justify-center">
-          <EnhancedCalendar
+        {/* Appointment Calendar */}
+        <div className="w-full">
+          <AppointmentCalendar
             meetings={meetings}
-            onDateSelect={handleDateSelect}
             selected={selectedDate}
-            hoverDelay={1000} // Fast hover for dashboard
-            className="border-0 p-2"
-            showMeetingIndicators={true}
+            onSelect={handleDateSelect}
+            showMeetingDetails={false}
+            className="scale-90 origin-center"
           />
         </div>
         
