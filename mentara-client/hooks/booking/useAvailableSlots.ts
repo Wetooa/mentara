@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { TimezoneUtils } from "@/lib/utils/timezone";
 
 
 export interface TimeSlot {
@@ -71,7 +72,7 @@ export function useAvailableSlots(therapistId: string, date: string) {
 
   const getTimeSlots = () => {
     return slots?.map(slot => ({
-      time: new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: TimezoneUtils.format(new Date(slot.startTime), 'h:mm a'),
       startTime: slot.startTime,
       endTime: slot.endTime || slot.startTime, // Use endTime if available, otherwise use startTime
       availableDurations: slot.availableDurations,

@@ -45,7 +45,7 @@ export function useTherapistProfile(therapistId: string | null) {
 
   return useQuery({
     queryKey: ['therapists', 'detail', therapistId || ""],
-    queryFn: () => api.therapists.getProfile(therapistId!),
+    queryFn: () => api.therapists.getTherapistProfile(therapistId!),
     enabled: !!therapistId,
     staleTime: 1000 * 60 * 10, // Profile data is more stable
   });
@@ -327,7 +327,7 @@ export function usePrefetchTherapistProfile() {
   return (therapistId: string) => {
     queryClient.prefetchQuery({
       queryKey: ['therapists', 'detail', therapistId],
-      queryFn: () => api.therapists.getProfile(therapistId),
+      queryFn: () => api.therapists.getTherapistProfile(therapistId),
       staleTime: 1000 * 60 * 10,
     });
   };

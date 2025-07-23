@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
 import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
+import { TimezoneUtils } from "@/lib/utils/timezone";
 
 interface BookingCalendarProps {
   therapistId: string;
@@ -32,10 +33,10 @@ export function BookingCalendar({
   onDateSelect,
   className,
 }: BookingCalendarProps) {
-  const [calendarDate, setCalendarDate] = useState<Date>(selectedDate || new Date());
+  const [calendarDate, setCalendarDate] = useState<Date>(selectedDate || TimezoneUtils.getCurrent());
   
-  // Format date for API
-  const dateString = calendarDate ? calendarDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+  // Format date for API using Manila timezone
+  const dateString = calendarDate ? TimezoneUtils.format(calendarDate, 'yyyy-MM-dd') : TimezoneUtils.format(TimezoneUtils.getCurrent(), 'yyyy-MM-dd');
   
   const {
     timeSlots,
@@ -60,9 +61,8 @@ export function BookingCalendar({
 
   // Check if date has available slots (for calendar day highlighting)
   const isDayAvailable = (date: Date) => {
-    // For now, allow all future dates
-    // In a real implementation, you might want to check availability for each day
-    return date >= new Date();
+    // Check if date is in the future (Manila time) and can be booked
+    return !TimezoneUtils.isPast(date) && TimezoneUtils.canBook(date);
   };
 
   return (
@@ -81,10 +81,8 @@ export function BookingCalendar({
             selected={calendarDate}
             onSelect={handleDateSelect}
             disabled={(date) => {
-              // Disable past dates
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              return date < today;
+              // Disable past dates and dates that can't be booked (Manila timezone)
+              return TimezoneUtils.isPast(date) || !TimezoneUtils.canBook(date, 0.5);
             }}
             modifiers={{
               available: isDayAvailable,
@@ -104,7 +102,7 @@ export function BookingCalendar({
             <Clock className="h-5 w-5" />
             Available Time Slots
             <Badge variant="secondary" className="ml-auto">
-              {calendarDate.toLocaleDateString()}
+              {TimezoneUtils.formatForDisplay(calendarDate)}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -215,11 +213,11 @@ export function BookingCalendar({
           onClick={() => {
             const prevDay = new Date(calendarDate);
             prevDay.setDate(prevDay.getDate() - 1);
-            if (prevDay >= new Date()) {
+            if (!TimezoneUtils.isPast(prevDay) && TimezoneUtils.canBook(prevDay)) {
               handleDateSelect(prevDay);
             }
           }}
-          disabled={calendarDate <= new Date()}
+          disabled={TimezoneUtils.isPast(calendarDate) || !TimezoneUtils.canBook(calendarDate)}
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
           Previous Day

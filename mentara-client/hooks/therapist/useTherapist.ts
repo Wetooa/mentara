@@ -160,9 +160,44 @@ export function useAssignedTherapists() {
   });
 }
 
+/**
+ * Hook for getting therapist profile by ID
+ */
+export function useTherapistProfile(therapistId: string, enabled: boolean = true) {
+  const api = useApi();
+
+  return useQuery({
+    queryKey: ['therapist-profile', therapistId],
+    queryFn: async () => {
+      try {
+        console.log('Fetching therapist profile for ID:', therapistId);
+        const result = await api.therapists.getTherapistProfile(therapistId);
+        console.log('Therapist profile result:', result);
+        return result;
+      } catch (error) {
+        console.error('Failed to fetch therapist profile:', error);
+        // Re-throw to let React Query handle it
+        throw error;
+      }
+    },
+    enabled: enabled && !!therapistId,
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    retry: (failureCount, error: MentaraApiError) => {
+      console.log('Retry attempt', failureCount, 'for therapist profile error:', error);
+      // Don't retry on 404 (therapist not found) or 401 (unauthorized)
+      if (error?.response?.status === 404 || error?.response?.status === 401) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+}
+
 // Export namespace for better organization
 export const TherapistHooks = {
   useAssignedTherapist,
   useAssignedTherapists,
   useTherapistAssignment,
+  useTherapistProfile,
 };

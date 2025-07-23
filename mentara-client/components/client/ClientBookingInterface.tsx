@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import {
   Select,
   SelectContent,
@@ -34,38 +35,10 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
-import { useApi } from "@/lib/api";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { BookingCalendar } from "@/components/booking/BookingCalendar";
+import { useClientBooking } from "@/hooks/booking";
+import { TimezoneUtils } from "@/lib/utils/timezone";
 
-interface TherapistProfile {
-  id: string;
-  name: string;
-  title: string;
-  specialties: string[];
-  hourlyRate: number;
-  rating: number;
-  avatarUrl?: string;
-  bio?: string;
-}
-
-interface TimeSlot {
-  time: string;
-  startTime: string;
-  endTime: string;
-  availableDurations: Array<{
-    id: string;
-    name: string;
-    duration: number;
-  }>;
-}
-
-interface BookingStep {
-  step: number;
-  title: string;
-  description: string;
-}
 
 interface ClientBookingInterfaceProps {
   therapistId: string;
@@ -74,159 +47,70 @@ interface ClientBookingInterfaceProps {
   onSuccess?: () => void;
 }
 
-const BOOKING_STEPS: BookingStep[] = [
-  {
-    step: 1,
-    title: "Select Date & Time",
-    description: "Choose when you'd like to meet with your therapist",
-  },
-  {
-    step: 2,
-    title: "Session Details",
-    description: "Add session information and preferences",
-  },
-  {
-    step: 3,
-    title: "Payment & Confirmation",
-    description: "Review and confirm your booking",
-  },
-];
-
 export function ClientBookingInterface({
   therapistId,
   isOpen,
   onClose,
   onSuccess,
 }: ClientBookingInterfaceProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState<{
-    id: string;
-    name: string;
-    duration: number;
-  } | null>(null);
-  const [sessionTitle, setSessionTitle] = useState("");
-  const [sessionDescription, setSessionDescription] = useState("");
-  const [paymentMethodId, setPaymentMethodId] = useState("");
-
-  const api = useApi();
-  const queryClient = useQueryClient();
-
-  // Get therapist profile
+  // Use the comprehensive booking hook that handles all business logic
   const {
-    data: therapist,
-    isLoading: therapistLoading,
-    error: therapistError,
-  } = useQuery({
-    queryKey: ["therapist-profile", therapistId],
-    queryFn: () => api.therapists.getTherapistProfile(therapistId),
-    enabled: isOpen && !!therapistId,
-  });
-
-  // Get payment methods
-  const {
-    data: paymentMethods = [],
-    isLoading: paymentMethodsLoading,
-  } = useQuery({
-    queryKey: ["payment-methods"],
-    queryFn: () => api.booking.payment.getPaymentMethods(),
-    enabled: currentStep === 3,
-  });
-
-  // Get durations
-  const {
-    data: durations = [],
-    isLoading: durationsLoading,
-  } = useQuery({
-    queryKey: ["meeting-durations"],
-    queryFn: () => api.booking.durations.getAll(),
+    // Form state
+    currentStep,
+    selectedDate,
+    setSelectedDate,
+    selectedTimeSlot,
+    selectedDuration,
+    setSelectedDuration,
+    sessionTitle,
+    setSessionTitle,
+    sessionDescription,
+    setSessionDescription,
+    paymentMethodId,
+    setPaymentMethodId,
+    
+    // Data
+    therapist,
+    paymentMethods,
+    durations,
+    
+    // Loading states
+    therapistLoading,
+    paymentMethodsLoading,
+    durationsLoading,
+    isBooking,
+    
+    // Error states
+    therapistError,
+    bookingError,
+    
+    // Actions
+    handleSlotSelect,
+    handleNextStep,
+    handlePrevStep,
+    handleConfirmBooking,
+    
+    // Validation
+    isStep1Complete,
+    isStep2Complete,
+    isStep3Complete,
+    
+    // Constants
+    BOOKING_STEPS,
+  } = useClientBooking({
+    therapistId,
     enabled: isOpen,
+    onSuccess,
+    onClose,
   });
-
-  // Create booking mutation
-  const createBookingMutation = useMutation({
-    mutationFn: async () => {
-      if (!selectedTimeSlot || !selectedDuration || !paymentMethodId) {
-        throw new Error("Missing required booking information");
-      }
-
-      // Create the meeting first
-      const meeting = await api.booking.meetings.create({
-        therapistId,
-        startTime: selectedTimeSlot.startTime,
-        duration: selectedDuration.duration,
-        title: sessionTitle || `Session with ${therapist?.name}`,
-        description: sessionDescription,
-        meetingType: "video",
-      });
-
-      // Process payment for the session
-      const payment = await api.booking.payment.processSessionPayment({
-        meetingId: meeting.id,
-        paymentMethodId,
-        amount: therapist?.hourlyRate * (selectedDuration.duration / 60) || 0,
-        currency: "USD",
-      });
-
-      return { meeting, payment };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["available-slots"] });
-      toast.success("Session booked successfully!");
-      onSuccess?.();
-      onClose();
-      resetForm();
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Failed to book session. Please try again.");
-    },
-  });
-
-  const resetForm = () => {
-    setCurrentStep(1);
-    setSelectedDate(undefined);
-    setSelectedTimeSlot(null);
-    setSelectedDuration(null);
-    setSessionTitle("");
-    setSessionDescription("");
-    setPaymentMethodId("");
-  };
-
-  const handleSlotSelect = (date: string, timeSlot: TimeSlot) => {
-    setSelectedTimeSlot(timeSlot);
-    // Auto-select first duration if only one available
-    if (timeSlot.availableDurations.length === 1) {
-      setSelectedDuration(timeSlot.availableDurations[0]);
-    }
-    setCurrentStep(2);
-  };
-
-  const handleNextStep = () => {
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleConfirmBooking = () => {
-    createBookingMutation.mutate();
-  };
-
-  const isStep1Complete = selectedTimeSlot && selectedDuration;
-  const isStep2Complete = sessionTitle.trim() && isStep1Complete;
-  const isStep3Complete = paymentMethodId && isStep2Complete;
 
   if (therapistLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <VisuallyHidden.Root asChild>
+            <DialogTitle>Loading Booking Interface</DialogTitle>
+          </VisuallyHidden.Root>
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-64 w-full" />
@@ -241,6 +125,9 @@ export function ClientBookingInterface({
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-md">
+          <VisuallyHidden.Root asChild>
+            <DialogTitle>Booking Error</DialogTitle>
+          </VisuallyHidden.Root>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -370,7 +257,7 @@ export function ClientBookingInterface({
                   <div>
                     <div className="text-sm text-muted-foreground">Date & Time</div>
                     <div className="font-medium">
-                      {selectedDate?.toLocaleDateString()} at {selectedTimeSlot.time}
+                      {selectedDate ? TimezoneUtils.format(selectedDate, 'MMM d, yyyy') : ''} at {selectedTimeSlot.time}
                     </div>
                   </div>
                   <div>
@@ -559,10 +446,10 @@ export function ClientBookingInterface({
                     <CardTitle>Booking Review</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">Therapist:</span>
-                        <div className="font-medium">{therapist.name}</div>
+                        <div className="font-medium">{therapist?.name}</div>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Session:</span>
@@ -571,7 +458,7 @@ export function ClientBookingInterface({
                       <div>
                         <span className="text-muted-foreground">Date & Time:</span>
                         <div className="font-medium">
-                          {selectedDate?.toLocaleDateString()} at {selectedTimeSlot?.time}
+                          {selectedDate ? TimezoneUtils.format(selectedDate, 'MMM d, yyyy') : ''} at {selectedTimeSlot?.time}
                         </div>
                       </div>
                       <div>
@@ -596,12 +483,12 @@ export function ClientBookingInterface({
         </div>
 
         {/* Error Display */}
-        {createBookingMutation.error && (
+        {bookingError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {createBookingMutation.error instanceof Error
-                ? createBookingMutation.error.message
+              {bookingError instanceof Error
+                ? bookingError.message
                 : "Failed to book session. Please try again."}
             </AlertDescription>
           </Alert>
@@ -640,10 +527,10 @@ export function ClientBookingInterface({
             {currentStep === 3 && (
               <Button
                 onClick={handleConfirmBooking}
-                disabled={!isStep3Complete || createBookingMutation.isPending}
+                disabled={!isStep3Complete || isBooking}
                 className="bg-green-600 hover:bg-green-700"
               >
-                {createBookingMutation.isPending ? (
+                {isBooking ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Booking...
