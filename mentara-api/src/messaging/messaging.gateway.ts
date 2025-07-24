@@ -72,8 +72,8 @@ export class MessagingGateway
   afterInit(server: Server) {
     this.server = server;
     this.logger.log('✅ WebSocket server initialized successfully');
-    this.logger.log(`🔌 WebSocket namespace: ${server.name}`);
-    this.logger.log(`🌐 CORS origins: ${JSON.stringify(server.engine.opts.cors?.origin)}`);
+    this.logger.log(`🔌 WebSocket namespace: /messaging`);
+    this.logger.log(`🌐 Server ready for connections`);
   }
 
   async handleConnection(client: AuthenticatedSocket) {
@@ -443,12 +443,7 @@ export class MessagingGateway
     userId: string,
   ) {
     try {
-      console.log('🏠 [ROOM MANAGEMENT] joinUserConversations called');
-      console.log('👤 [USER]', userId);
-      console.log('🔌 [SOCKET]', client.id);
-      
       // Get all active conversations for the user
-      console.log('🔍 [DATABASE] Querying user conversations...');
       const conversations = await this.prisma.conversation.findMany({
         where: {
           participants: {
@@ -464,44 +459,30 @@ export class MessagingGateway
         },
       });
 
-      console.log('📋 [CONVERSATIONS FOUND]', {
-        count: conversations.length,
-        conversationIds: conversations.map(c => c.id),
-      });
+      this.logger.debug(`Found ${conversations.length} conversations for user ${userId}`);
 
       // Join all conversation rooms
       for (const conversation of conversations) {
-        console.log(`🚪 [JOINING] Socket ${client.id} joining conversation room: ${conversation.id}`);
-        
         // Join the room
         await client.join(conversation.id);
         
         // Verify the join was successful
         const isInRoom = client.rooms.has(conversation.id);
-        console.log(`✅ [ROOM JOIN] Socket ${client.id} ${isInRoom ? 'successfully joined' : 'FAILED to join'} room ${conversation.id}`);
+        if (!isInRoom) {
+          this.logger.warn(`Failed to join room ${conversation.id} for socket ${client.id}`);
+        }
 
         // Add to tracking
         if (!this.conversationParticipants.has(conversation.id)) {
           this.conversationParticipants.set(conversation.id, new Set());
         }
         this.conversationParticipants.get(conversation.id)!.add(userId);
-        
-        console.log(`👥 [TRACKING] Added user ${userId} to conversation ${conversation.id} tracking`);
       }
-
-      // Log final room state for this socket
-      console.log('🏠 [FINAL ROOM STATE]', {
-        socketId: client.id,
-        userId,
-        roomsJoined: Array.from(client.rooms),
-        conversationsJoined: conversations.length,
-      });
 
       this.logger.log(
         `User ${userId} joined ${conversations.length} conversation rooms`,
       );
     } catch (error) {
-      console.error('❌ [ROOM MANAGEMENT] Error joining user conversations:', error);
       this.logger.error('Error joining user conversations:', error);
     }
   }
@@ -659,20 +640,15 @@ export class MessagingGateway
   ) {
     const userRoom = `user:${userId}`;
     
-    console.log('👤 [PERSONAL ROOM] Subscribing user to personal room');
-    console.log('🔌 [SOCKET]', client.id);
-    console.log('👤 [USER]', userId);
-    console.log('🏠 [ROOM]', userRoom);
-    
     await client.join(userRoom);
     
     // Verify the join was successful
     const isInPersonalRoom = client.rooms.has(userRoom);
-    console.log(`✅ [PERSONAL ROOM] Socket ${client.id} ${isInPersonalRoom ? 'successfully joined' : 'FAILED to join'} personal room ${userRoom}`);
-    
-    this.logger.debug(
-      `User ${userId} subscribed to personal room: ${userRoom}`,
-    );
+    if (!isInPersonalRoom) {
+      this.logger.warn(`Failed to join personal room ${userRoom} for socket ${client.id}`);
+    } else {
+      this.logger.debug(`User ${userId} subscribed to personal room: ${userRoom}`);
+    }
   }
 
   async unsubscribeUserFromPersonalRoom(

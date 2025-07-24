@@ -59,7 +59,6 @@ export class WebSocketEventService implements OnModuleInit {
       'MessageSentEvent',
       async (event: DomainEvent<any>) => {
         try {
-          console.log('📡 [WEBSOCKET EVENT SERVICE] MessageSentEvent received from event bus');
           const messageEvent = event as MessageSentEvent;
           const {
             conversationId,
@@ -71,31 +70,14 @@ export class WebSocketEventService implements OnModuleInit {
             recipientIds,
           } = messageEvent.eventData;
 
-          console.log('📨 [MESSAGE EVENT DATA]', {
-            conversationId,
-            messageId,
-            senderId,
-            content: content?.substring(0, 50) + (content?.length > 50 ? '...' : ''),
-            messageType,
-            recipientCount: recipientIds?.length || 0,
-            recipientIds,
-            recipientIdsType: typeof recipientIds,
-            isArray: Array.isArray(recipientIds),
-          });
-
           this.logger.debug('MessageSentEvent received:', {
             conversationId,
             messageId,
-            recipientIds,
-            recipientIdsType: typeof recipientIds,
-            isArray: Array.isArray(recipientIds),
+            recipientCount: recipientIds?.length || 0,
           });
 
           // Broadcast message to conversation participants via WebSocket
           // Frontend expects MessageEventData format with 'message' property
-          console.log('🚨 [DEBUG] About to call broadcastMessage');
-          console.log('🚨 [DEBUG] Gateway exists:', !!this.messagingGateway);
-          
           this.messagingGateway.broadcastMessage(conversationId, {
             message: {
               id: messageId,
@@ -121,8 +103,6 @@ export class WebSocketEventService implements OnModuleInit {
             },
             eventType: 'message_sent',
           });
-          
-          console.log('🚨 [DEBUG] broadcastMessage call completed');
 
           // Send delivery confirmations with safe iteration
           const safeRecipientIds = this.ensureArray(recipientIds, 'recipientIds');

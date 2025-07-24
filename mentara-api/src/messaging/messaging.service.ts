@@ -377,14 +377,7 @@ export class MessagingService {
     attachmentNames: string[] = [],
     attachmentSizes: number[] = [],
   ) {
-    console.log('🔄 [MESSAGING SERVICE] sendMessage called');
-    console.log('👤 [SENDER]', userId);
-    console.log('💬 [CONVERSATION]', conversationId);
-    console.log('📝 [MESSAGE]', {
-      content: sendMessageDto.content?.substring(0, 50) + (sendMessageDto.content?.length > 50 ? '...' : ''),
-      type: sendMessageDto.messageType,
-      hasReplyTo: !!sendMessageDto.replyToId,
-    });
+    this.logger.debug(`Sending message from ${userId} to conversation ${conversationId}`);
     
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
@@ -421,7 +414,7 @@ export class MessagingService {
     // Note: Message encryption functionality removed to match Prisma schema
     // Messages are stored as plaintext as the schema doesn't support encryption fields
 
-    console.log('💾 [MESSAGING SERVICE] Saving message to database...');
+    this.logger.debug('Saving message to database...');
     const message = await this.prisma.message.create({
       data: {
         conversationId,
@@ -483,14 +476,7 @@ export class MessagingService {
       },
     });
     
-    console.log('✅ [MESSAGING SERVICE] Message saved to database successfully');
-    console.log('📨 [MESSAGE SAVED]', {
-      id: message.id,
-      content: message.content?.substring(0, 50) + (message.content?.length > 50 ? '...' : ''),
-      conversationId: message.conversationId,
-      senderId: message.senderId,
-      createdAt: message.createdAt,
-    });
+    this.logger.debug(`Message ${message.id} saved successfully to conversation ${message.conversationId}`);
 
     // Update conversation lastMessageAt
     await this.prisma.conversation.update({
@@ -506,10 +492,7 @@ export class MessagingService {
         .map((p) => p.userId)
         .filter((id) => id !== userId) || [];
 
-    console.log('👥 [MESSAGING SERVICE] Identified message recipients');
-    console.log('👥 [CONVERSATION PARTICIPANTS]', conversation?.participants?.map(p => ({ userId: p.userId, isActive: p.isActive })));
-    console.log('📨 [RECIPIENT IDS]', recipientIds);
-    console.log('📤 [EVENT] Emitting MessageSentEvent to event bus...');
+    this.logger.debug(`Broadcasting message to ${recipientIds.length} recipients`);
 
     // Publish message sent event
     const messageEvent = new MessageSentEvent({
@@ -533,17 +516,8 @@ export class MessagingService {
           : undefined,
     });
     
-    console.log('🚀 [EVENT DETAILS]', {
-      eventType: messageEvent.eventType,
-      messageId: messageEvent.eventData.messageId,
-      conversationId: messageEvent.eventData.conversationId,
-      senderId: messageEvent.eventData.senderId,
-      recipientCount: messageEvent.eventData.recipientIds?.length || 0,
-      recipientIds: messageEvent.eventData.recipientIds,
-    });
-    
     await this.eventBus.emit(messageEvent);
-    console.log('✅ [MESSAGING SERVICE] MessageSentEvent emitted to event bus successfully');
+    this.logger.debug(`MessageSentEvent emitted for message ${message.id}`);
 
     // Return message as-is (no encryption)
     return message;

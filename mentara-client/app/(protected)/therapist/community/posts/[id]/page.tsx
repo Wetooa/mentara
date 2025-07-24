@@ -1,12 +1,14 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { usePostDetail } from "@/hooks/community";
+import { PostDetail } from "@/components/community/PostDetail";
+import { MentaraApiError } from "@/lib/api/errorHandler";
 
 interface PostDetailPageProps {
   params: { id: string };
@@ -17,43 +19,89 @@ function PostDetailContent() {
   const router = useRouter();
   const postId = params.id as string;
 
+  const { 
+    post, 
+    isLoading, 
+    isError, 
+    error, 
+    updatePost, 
+    deletePost,
+    isUpdating,
+    isDeleting 
+  } = usePostDetail(postId);
+
   const handleBackToCommunity = () => {
     router.push("/therapist/community");
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Back Navigation */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={handleBackToCommunity}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Community
-          </Button>
-        </div>
+  const handleEdit = (post: any) => {
+    // TODO: Implement edit functionality
+    console.log("Edit post:", post);
+  };
 
-        {/* Post Detail Container */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="text-center">
-                <h1 className="text-2xl font-bold mb-4">Post Detail</h1>
-                <p className="text-muted-foreground mb-4">
-                  Loading post with ID: {postId}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  This is a placeholder. The PostDetail component will be implemented next.
-                </p>
+  const handleDelete = (postId: string) => {
+    if (confirm("Are you sure you want to delete this post?")) {
+      deletePost();
+      setTimeout(() => {
+        router.push("/therapist/community");
+      }, 1000);
+    }
+  };
+
+  if (isLoading) {
+    return <PostDetailLoading />;
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          {/* Back Navigation */}
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              onClick={handleBackToCommunity}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Community
+            </Button>
+          </div>
+
+          {/* Error Display */}
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="text-center">
+                  <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
+                  <h1 className="text-2xl font-bold mb-4">Post Not Found</h1>
+                  <p className="text-muted-foreground mb-4">
+                    {error instanceof MentaraApiError && error.status === 404
+                      ? "The post you're looking for doesn't exist or has been deleted."
+                      : "Unable to load the post. Please try again later."}
+                  </p>
+                  <Button onClick={handleBackToCommunity}>
+                    Return to Community
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  if (!post) {
+    return <PostDetailLoading />;
+  }
+
+  return (
+    <PostDetail 
+      post={post}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+    />
   );
 }
 
