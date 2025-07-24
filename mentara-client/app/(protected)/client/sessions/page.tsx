@@ -6,9 +6,10 @@ import { SessionsList, SessionStats } from "@/components/sessions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, CheckCircle, XCircle, Plus } from "lucide-react";
+import { Calendar, Clock, CheckCircle, XCircle, Plus, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Meeting } from "@/lib/api/services/meetings";
+import { PaymentMethodsSheet } from "@/components/billing";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -36,6 +37,7 @@ const itemVariants = {
 export default function SessionsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
+  const [paymentMethodsOpen, setPaymentMethodsOpen] = useState(false);
 
   const handleScheduleSession = () => {
     router.push('/client/booking');
@@ -43,6 +45,10 @@ export default function SessionsPage() {
 
   const handleSessionClick = (session: Meeting) => {
     router.push(`/client/sessions/${session.id}`);
+  };
+
+  const handleManagePaymentMethods = () => {
+    setPaymentMethodsOpen(true);
   };
 
   const tabs = [
@@ -111,7 +117,7 @@ export default function SessionsPage() {
             <CardTitle className="text-lg">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Button 
                 variant="outline" 
                 className="justify-start gap-2 h-12"
@@ -145,6 +151,18 @@ export default function SessionsPage() {
                 <div className="text-left">
                   <div className="font-medium">Find Therapist</div>
                   <div className="text-xs text-muted-foreground">Browse available therapists</div>
+                </div>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="justify-start gap-2 h-12"
+                onClick={handleManagePaymentMethods}
+              >
+                <CreditCard className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-medium">Payment Methods</div>
+                  <div className="text-xs text-muted-foreground">Manage payment options</div>
                 </div>
               </Button>
             </div>
@@ -187,6 +205,12 @@ export default function SessionsPage() {
           ))}
         </Tabs>
       </motion.div>
+
+      {/* Payment Methods Sheet */}
+      <PaymentMethodsSheet
+        open={paymentMethodsOpen}
+        onOpenChange={setPaymentMethodsOpen}
+      />
     </motion.div>
   );
 }

@@ -61,7 +61,7 @@ import {
   useSubscriptionStatus,
   useBillingSummary,
 } from '@/hooks/billing';
-import { PaymentMethodForm } from './PaymentMethodForm';
+// import { PaymentMethodForm } from './PaymentMethodForm';
 
 interface BillingDashboardProps {
   className?: string;
@@ -803,15 +803,13 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
       {/* Add Payment Method Modal */}
       {showAddPaymentMethod && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-background rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <PaymentMethodForm
-              onSuccess={() => {
-                setShowAddPaymentMethod(false);
-                toast.success('Payment method added successfully!');
-              }}
-              onCancel={() => setShowAddPaymentMethod(false)}
-              setAsDefault={!defaultPaymentMethod}
-            />
+          <div className="bg-background rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="text-center text-muted-foreground">
+              Payment method form would go here (requires Stripe setup)
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setShowAddPaymentMethod(false)}>Close</Button>
+            </div>
           </div>
         </div>
       )}

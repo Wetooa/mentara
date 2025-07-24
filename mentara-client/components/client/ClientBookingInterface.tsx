@@ -35,6 +35,8 @@ import {
   ArrowRight,
   ArrowLeft,
   MapPin,
+  Building,
+  Smartphone,
 } from "lucide-react";
 import { useClientBooking } from "@/hooks/booking";
 import { TimezoneUtils } from "@/lib/utils/timezone";
@@ -573,15 +575,31 @@ export function ClientBookingInterface({
                           {paymentMethods.map(
                             (method: {
                               id: string;
-                              cardBrand: string;
-                              cardLast4: string;
+                              type: string;
+                              nickname?: string;
+                              cardBrand?: string;
+                              cardLast4?: string;
+                              gcashNumber?: string;
+                              mayaNumber?: string;
+                              walletProvider?: string;
+                              bankName?: string;
+                              accountLast4?: string;
                               isDefault?: boolean;
                             }) => (
                               <SelectItem key={method.id} value={method.id}>
                                 <div className="flex items-center gap-2">
-                                  <CreditCard className="h-4 w-4" />
+                                  {method.type === 'CARD' && <CreditCard className="h-4 w-4" />}
+                                  {method.type === 'BANK_ACCOUNT' && <Building className="h-4 w-4" />}
+                                  {(method.type === 'GCASH' || method.type === 'MAYA' || method.type === 'DIGITAL_WALLET') && <Smartphone className="h-4 w-4" />}
                                   <span>
-                                    {method.cardBrand} •••• {method.cardLast4}
+                                    {method.nickname || 
+                                      (method.type === 'CARD' && `${method.cardBrand} •••• ${method.cardLast4}`) ||
+                                      (method.type === 'BANK_ACCOUNT' && `${method.bankName} •••• ${method.accountLast4}`) ||
+                                      (method.type === 'GCASH' && `GCash ${method.gcashNumber?.slice(-4)}`) ||
+                                      (method.type === 'MAYA' && `Maya ${method.mayaNumber?.slice(-4)}`) ||
+                                      (method.type === 'DIGITAL_WALLET' && method.walletProvider) ||
+                                      'Payment Method'
+                                    }
                                     {method.isDefault && (
                                       <Badge
                                         variant="secondary"

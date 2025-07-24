@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { SessionsList, SessionStats } from "@/components/sessions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Calendar, ArrowLeft, Bell, Video } from "lucide-react";
+import { Clock, Calendar, ArrowLeft, Bell, Video, CreditCard } from "lucide-react";
 import { CalendarModal } from "@/components/calendar/CalendarModal";
 import { motion } from "framer-motion";
 import type { Meeting } from "@/lib/api/services/meetings";
+import { PaymentMethodsSheet } from "@/components/billing";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -49,9 +50,14 @@ export default function UpcomingSessionsPage() {
   };
 
   const [calendarModalOpen, setCalendarModalOpen] = useState(false);
+  const [paymentMethodsOpen, setPaymentMethodsOpen] = useState(false);
 
   const handleViewCalendar = () => {
     setCalendarModalOpen(true);
+  };
+
+  const handleManagePaymentMethods = () => {
+    setPaymentMethodsOpen(true);
   };
 
   return (
@@ -107,7 +113,7 @@ export default function UpcomingSessionsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Button
                 variant="outline"
                 className="h-auto p-4 justify-start"
@@ -141,6 +147,18 @@ export default function UpcomingSessionsPage() {
                 <div className="text-left">
                   <div className="font-medium">Message Therapist</div>
                   <div className="text-xs text-muted-foreground">Ask questions</div>
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-auto p-4 justify-start"
+                onClick={handleManagePaymentMethods}
+              >
+                <CreditCard className="h-5 w-5 mr-3 text-blue-600" />
+                <div className="text-left">
+                  <div className="font-medium">Payment Methods</div>
+                  <div className="text-xs text-muted-foreground">Manage payments</div>
                 </div>
               </Button>
             </div>
@@ -182,6 +200,12 @@ export default function UpcomingSessionsPage() {
       <CalendarModal
         isOpen={calendarModalOpen}
         onOpenChange={setCalendarModalOpen}
+      />
+
+      {/* Payment Methods Sheet */}
+      <PaymentMethodsSheet
+        open={paymentMethodsOpen}
+        onOpenChange={setPaymentMethodsOpen}
       />
     </motion.div>
   );

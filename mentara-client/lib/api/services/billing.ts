@@ -19,7 +19,55 @@ export interface SubscriptionPlan {
 
 export interface PaymentMethod {
   id: string;
+  userId: string;
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA';
+  nickname?: string;
+  isDefault: boolean;
+  isActive: boolean;
+  lastUsed?: string;
+  
+  // Card-specific fields
+  cardLast4?: string;
+  cardBrand?: string;
+  cardholderName?: string;
+  cardNumber?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  cardType?: string;
+  
+  // Bank account fields
+  bankName?: string;
+  accountHolderName?: string;
+  accountType?: string;
+  routingNumber?: string;
+  accountLast4?: string;
+  
+  // Digital wallet fields
+  walletProvider?: string;
+  walletEmail?: string;
+  walletAccountName?: string;
+  
+  // GCash fields
+  gcashNumber?: string;
+  gcashName?: string;
+  isVerified?: boolean;
+  gcashEmail?: string;
+  
+  // Maya fields
+  mayaNumber?: string;
+  mayaName?: string;
+  mayaVerified?: boolean;
+  mayaEmail?: string;
+  
+  // Address
+  billingAddress?: any;
+  
+  createdAt: string;
+  updatedAt: string;
+  
+  // Legacy field for backwards compatibility
   is_default?: boolean;
+  last4?: string;
 }
 
 export interface Invoice {
@@ -50,7 +98,40 @@ export interface UpdateSubscriptionRequest {
 }
 
 export interface CreatePaymentMethodRequest {
-  type: string;
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA';
+  nickname?: string;
+  
+  // Card-specific fields
+  cardholderName?: string;
+  cardNumber?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  cardType?: string;
+  
+  // Bank account fields
+  bankName?: string;
+  accountHolderName?: string;
+  accountType?: string;
+  routingNumber?: string;
+  accountNumber?: string;
+  
+  // Digital wallet fields
+  walletProvider?: string;
+  walletEmail?: string;
+  walletAccountName?: string;
+  
+  // GCash fields
+  gcashNumber?: string;
+  gcashName?: string;
+  gcashEmail?: string;
+  
+  // Maya fields
+  mayaNumber?: string;
+  mayaName?: string;
+  mayaEmail?: string;
+  
+  // Address
+  billingAddress?: any;
 }
 
 export interface CreatePaymentIntentRequest {

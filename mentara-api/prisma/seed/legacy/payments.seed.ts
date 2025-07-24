@@ -23,6 +23,23 @@ const DIGITAL_WALLETS = [
   'Amazon Pay',
 ];
 
+// Philippine mobile number prefixes for GCash and Maya
+const PH_MOBILE_PREFIXES = [
+  '0917', '0918', '0919', '0920', '0921', '0928', '0929',
+  '0939', '0949', '0950', '0951', '0961', '0962', '0963',
+  '0905', '0906', '0915', '0916', '0926', '0927', '0935',
+  '0936', '0937', '0938', '0945', '0953', '0954', '0955',
+  '0956', '0965', '0966', '0967', '0975', '0976', '0977',
+  '0978', '0979', '0995', '0996', '0997', '0998', '0999'
+];
+
+// Generate Philippine mobile number
+function generatePhilippineMobile(): string {
+  const prefix = faker.helpers.arrayElement(PH_MOBILE_PREFIXES);
+  const suffix = faker.string.numeric(7);
+  return `${prefix}${suffix}`;
+}
+
 export async function seedPaymentMethods(
   prisma: PrismaClient,
   users: any[]
@@ -43,26 +60,83 @@ export async function seedPaymentMethods(
         'CARD', // Weight towards cards
         'BANK_ACCOUNT',
         'DIGITAL_WALLET',
+        'GCASH',
+        'MAYA',
       ]);
       
-      let cardLast4: string | undefined = undefined;
-      let cardBrand: string | undefined = undefined;
+      // Initialize all possible fields
+      let methodData: any = {
+        userId: user.id,
+        type: methodType,
+        isDefault: isFirstMethod,
+        isActive: true,
+        nickname: undefined,
+        billingAddress: {
+          street: faker.location.streetAddress(),
+          city: faker.location.city(),
+          state: faker.location.state(),
+          zipCode: faker.location.zipCode(),
+          country: methodType === 'GCASH' || methodType === 'MAYA' ? 'Philippines' : 'United States'
+        }
+      };
       
       if (methodType === 'CARD') {
-        cardLast4 = faker.string.numeric(4);
-        cardBrand = faker.helpers.arrayElement(CARD_BRANDS);
+        const cardBrand = faker.helpers.arrayElement(CARD_BRANDS);
+        methodData = {
+          ...methodData,
+          cardLast4: faker.string.numeric(4),
+          cardBrand,
+          cardholderName: faker.person.fullName(),
+          cardNumber: `****-****-****-${faker.string.numeric(4)}`,
+          expiryMonth: faker.number.int({ min: 1, max: 12 }),
+          expiryYear: faker.number.int({ min: 2024, max: 2030 }),
+          cardType: cardBrand,
+          nickname: `My ${cardBrand} Card`
+        };
+      } else if (methodType === 'BANK_ACCOUNT') {
+        const accountType = faker.helpers.arrayElement(['Checking', 'Savings']);
+        methodData = {
+          ...methodData,
+          bankName: faker.helpers.arrayElement(['Chase Bank', 'Bank of America', 'Wells Fargo', 'Citibank']),
+          accountHolderName: faker.person.fullName(),
+          accountType,
+          routingNumber: `****${faker.string.numeric(5)}`,
+          accountLast4: faker.string.numeric(4),
+          nickname: `My ${accountType} Account`
+        };
       } else if (methodType === 'DIGITAL_WALLET') {
-        cardBrand = faker.helpers.arrayElement(DIGITAL_WALLETS);
+        const walletProvider = faker.helpers.arrayElement(DIGITAL_WALLETS);
+        methodData = {
+          ...methodData,
+          walletProvider,
+          walletEmail: faker.internet.email(),
+          walletAccountName: faker.person.fullName(),
+          nickname: `My ${walletProvider}`
+        };
+      } else if (methodType === 'GCASH') {
+        const gcashNumber = generatePhilippineMobile();
+        methodData = {
+          ...methodData,
+          gcashNumber,
+          gcashName: faker.person.fullName(),
+          isVerified: faker.datatype.boolean(0.8), // 80% verified
+          gcashEmail: faker.internet.email(),
+          nickname: `GCash ${gcashNumber.slice(-4)}`
+        };
+      } else if (methodType === 'MAYA') {
+        const mayaNumber = generatePhilippineMobile();
+        methodData = {
+          ...methodData,
+          mayaNumber,
+          mayaName: faker.person.fullName(),
+          mayaVerified: faker.datatype.boolean(0.75), // 75% verified
+          mayaEmail: faker.internet.email(),
+          nickname: `Maya ${mayaNumber.slice(-4)}`
+        };
       }
       
       const method = await prisma.paymentMethod.create({
-        data: {
-          userId: user.id,
-          type: methodType,
-          cardLast4,
-          cardBrand,
-          isDefault: isFirstMethod, // First method is default
-        },
+        data: methodData,
       });
       
       paymentMethods.push(method);

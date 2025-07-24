@@ -653,3 +653,6 @@ export function PaymentMethodForm(props: PaymentMethodFormProps) {
     </Elements>
   );
 }
+
+// Export the PaymentMethodsSheet component for client sessions
+export { PaymentMethodsSheet } from './PaymentMethodsSheet';
