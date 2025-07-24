@@ -490,9 +490,135 @@ export default function TherapistCommunity() {
               </div>
               <div className="flex-1 min-h-0 overflow-y-auto bg-neutral-50">
                 <div className="p-4">
-                  <div className="text-center py-8">
-                    <p className="text-neutral-600">Mobile room content loading...</p>
-                  </div>
+                  {postsLoading ? (
+                    // Mobile Loading state
+                    <div className="space-y-4">
+                      {[1, 2, 3].map(i => (
+                        <Card key={i}>
+                          <CardHeader>
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="h-8 w-8 rounded-full" />
+                              <div className="space-y-1">
+                                <Skeleton className="h-3 w-20" />
+                                <Skeleton className="h-2 w-12" />
+                              </div>
+                            </div>
+                            <CardTitle>
+                              <Skeleton className="h-4 w-3/4" />
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <Skeleton className="h-16 w-full" />
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : postsError ? (
+                    // Mobile Error state
+                    <Card>
+                      <CardContent className="text-center py-6">
+                        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+                        <CardTitle className="text-base mb-2">Failed to load posts</CardTitle>
+                        <p className="text-neutral-600 text-sm mb-4">
+                          There was an error loading posts from this room.
+                        </p>
+                        <Button onClick={retryLoadPosts} size="sm">
+                          Try Again
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : !postsData?.posts.length ? (
+                    // Mobile Empty state
+                    <Card>
+                      <CardContent className="text-center py-6">
+                        <MessageCircle className="h-8 w-8 text-neutral-400 mx-auto mb-3" />
+                        <CardTitle className="text-base mb-2">No discussions yet</CardTitle>
+                        <p className="text-neutral-600 text-sm mb-4">
+                          Be the first to share professional insights!
+                        </p>
+                        {isPostingAllowed() && (
+                          <Button onClick={() => setIsCreatePostOpen(true)} size="sm">
+                            <Plus className="h-3 w-3 mr-2" />
+                            Start Discussion
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    // Mobile Posts list with proper scrolling
+                    <div className="space-y-4">
+                      {(postsData.posts as unknown as PostData[]).map((post: PostData) => (
+                        <Card key={post.id} className="hover:shadow-sm transition-shadow">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={post.user.avatarUrl} />
+                                <AvatarFallback className="text-xs">
+                                  {getUserInitials(post.user.firstName, post.user.lastName)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1">
+                                  <h3 className="font-medium text-neutral-800 text-sm truncate">
+                                    {post.user.firstName} {post.user.lastName}
+                                  </h3>
+                                  {post.user?.role === 'therapist' && (
+                                    <Badge variant="secondary" className="text-xs px-1">
+                                      <Stethoscope className="h-2 w-2 mr-1" />
+                                      T
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-neutral-500">
+                                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                                </p>
+                              </div>
+                            </div>
+                            <CardTitle className="text-base mt-2">
+                              {post.title}
+                            </CardTitle>
+                          </CardHeader>
+                          
+                          <CardContent className="pt-0">
+                            <p className="text-neutral-700 text-sm leading-relaxed line-clamp-3">
+                              {post.content}
+                            </p>
+                            
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-200">
+                              <div className="flex items-center gap-4 text-xs">
+                                <button
+                                  onClick={() => handleHeartPost(post as unknown as Post)}
+                                  className={cn(
+                                    "flex items-center gap-1 hover:text-red-500 transition-colors",
+                                    isPostHearted(post as unknown as Post) && "text-red-500"
+                                  )}
+                                  disabled={heartPostMutation.isPending}
+                                >
+                                  <Heart className={cn("h-3 w-3", isPostHearted(post as unknown as Post) && "fill-current")} />
+                                  <span>{post._count.hearts}</span>
+                                </button>
+                                
+                                <div className="flex items-center gap-1 text-neutral-500">
+                                  <MessageCircle className="h-3 w-3" />
+                                  <span>{post._count.comments}</span>
+                                </div>
+                              </div>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewPost(post.id)}
+                                className="text-xs py-1 px-2 h-auto"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                View
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
