@@ -230,6 +230,7 @@ export interface TherapistCardData {
   languages?: string[];
   approaches?: string[];
   totalReviews?: number;
+  relationshipStatus?: 'active' | 'inactive' | null; // Client-therapist relationship status
 }
 
 // Helper function to transform API response to frontend format
@@ -256,6 +257,7 @@ export function transformTherapistForCard(therapist: any): TherapistCardData {
       languages: therapist.languages || [],
       approaches: therapist.approaches || [],
       totalReviews: therapist.reviewCount || 0,
+      relationshipStatus: therapist.clientTherapistStatus || null,
     };
   }
 

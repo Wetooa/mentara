@@ -1,4 +1,4 @@
-import type { Worksheet, WorksheetSubmission } from "@/types/api/worksheets";
+import type { Worksheet } from "@/types/api/worksheets";
 
 export interface TaskFile {
   id?: string;
@@ -20,7 +20,14 @@ export interface Task {
   therapistName?: string;
   patientName?: string;
   date: string;
-  status: "upcoming" | "past_due" | "completed" | "assigned" | "in_progress" | "overdue";
+  status:
+    | "upcoming"
+    | "past_due"
+    | "completed"
+    | "assigned"
+    | "in_progress"
+    | "overdue"
+    | "reviewed";
   isCompleted: boolean;
   instructions?: string;
   materials?: TaskFile[];
@@ -35,59 +42,62 @@ export function transformWorksheetAssignmentToTask(
 ): Task {
   // Backend returns singular submission
   const latestSubmission = assignment.submission;
-  
-  // Map materials from backend arrays to frontend objects
-  const materials: TaskFile[] = (assignment.materialUrls || []).map((url: string, index: number) => ({
-    id: `material-${index}`,
-    filename: assignment.materialNames?.[index] || 'Unknown',
-    url,
-    type: 'material'
-  }));
 
-  // Map submission files to myWork
-  const myWork: TaskFile[] = latestSubmission ? [
-    {
-      id: latestSubmission.id,
-      filename: latestSubmission.fileNames?.[0] || 'Submission',
-      url: latestSubmission.fileUrls?.[0] || '',
-      type: 'submission',
-      submittedAt: latestSubmission.submittedAt
-    }
-  ] : [];
+  // Map materials from backend arrays to frontend objects
+  const materials: TaskFile[] = (assignment.materialUrls || []).map(
+    (url: string, index: number) => ({
+      id: `material-${index}`,
+      filename: assignment.materialNames?.[index] || "Unknown",
+      url,
+      type: "material",
+    })
+  );
+
+  // Map submission files to myWork - handle all files in the arrays
+  const myWork: TaskFile[] =
+    latestSubmission && latestSubmission.fileUrls && latestSubmission.fileNames
+      ? latestSubmission.fileUrls.map((url: string, index: number) => ({
+          id: `${latestSubmission.id}-${index}`,
+          filename:
+            latestSubmission.fileNames?.[index] || `Submission ${index + 1}`,
+          url,
+          type: "submission",
+          submittedAt: latestSubmission.submittedAt,
+        }))
+      : [];
 
   // Determine status based on worksheet status and due date
-  let status: Task['status'] = 'assigned';
-  if (assignment.status === 'SUBMITTED') {
-    status = 'completed';
-  } else if (assignment.status === 'OVERDUE') {
-    status = 'past_due';
+  let status: Task["status"] = "assigned";
+  if (assignment.status === "SUBMITTED") {
+    status = "completed";
+  } else if (assignment.status === "REVIEWED") {
+    status = "reviewed";
+  } else if (assignment.status === "OVERDUE") {
+    status = "past_due";
   } else if (new Date(assignment.dueDate) < new Date()) {
-    status = 'past_due';
+    status = "past_due";
   } else {
-    status = 'upcoming';
+    status = "assigned";
   }
-  
+
   return {
     id: assignment.id,
-    title: assignment.title || 'Untitled Worksheet',
+    title: assignment.title || "Untitled Worksheet",
     // Handle nested user structures from backend
-    therapistName: assignment.therapist?.user 
+    therapistName: assignment.therapist?.user
       ? `${assignment.therapist.user.firstName} ${assignment.therapist.user.lastName}`
-      : assignment.therapist?.firstName 
-      ? `${assignment.therapist.firstName} ${assignment.therapist.lastName}`
-      : 'Unknown Therapist',
-    patientName: assignment.client?.user 
+      : "Unknown Therapist",
+    patientName: assignment.client?.user
       ? `${assignment.client.user.firstName} ${assignment.client.user.lastName}`
-      : assignment.user?.firstName 
-      ? `${assignment.user.firstName} ${assignment.user.lastName}`
-      : 'Unknown Patient',
+      : "Unknown Patient",
     date: assignment.dueDate,
     status,
-    isCompleted: assignment.status === 'SUBMITTED',
+    isCompleted:
+      assignment.status === "SUBMITTED" || assignment.status === "REVIEWED",
     instructions: assignment.instructions,
     materials,
     myWork,
     submittedAt: latestSubmission?.submittedAt,
-    feedback: latestSubmission?.feedback || assignment.feedback,
+    feedback: latestSubmission?.feedback,
   };
 }

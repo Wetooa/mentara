@@ -21,6 +21,7 @@ export interface PublicProfileResponse {
     areasOfExpertise?: string[];
     languages?: string[];
   };
+  connectionStatus?: 'connected' | 'pending' | null; // Connection status to this user/therapist
   mutualCommunities: Array<{
     id: string;
     name: string;

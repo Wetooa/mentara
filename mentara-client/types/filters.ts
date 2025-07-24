@@ -11,7 +11,6 @@ export interface TherapistFilters {
     evening: boolean;
     weekends: boolean;
   };
-  insurance: string[];
   languages: string[];
   experienceLevel: {
     min: number;
@@ -53,7 +52,6 @@ export const DEFAULT_FILTERS: TherapistFilters = {
     evening: false,
     weekends: false,
   },
-  insurance: [],
   languages: [],
   experienceLevel: {
     min: 0,
@@ -82,18 +80,6 @@ export const SPECIALTY_OPTIONS: FilterOption[] = [
   { value: 'adolescent', label: 'Adolescent Therapy' },
 ];
 
-export const INSURANCE_OPTIONS: FilterOption[] = [
-  { value: 'aetna', label: 'Aetna' },
-  { value: 'bcbs', label: 'Blue Cross Blue Shield' },
-  { value: 'cigna', label: 'Cigna' },
-  { value: 'humana', label: 'Humana' },
-  { value: 'kaiser', label: 'Kaiser Permanente' },
-  { value: 'medicare', label: 'Medicare' },
-  { value: 'medicaid', label: 'Medicaid' },
-  { value: 'unitedhealthcare', label: 'UnitedHealthcare' },
-  { value: 'tricare', label: 'Tricare' },
-  { value: 'out-of-network', label: 'Out of Network' },
-];
 
 export const LANGUAGE_OPTIONS: FilterOption[] = [
   { value: 'english', label: 'English' },

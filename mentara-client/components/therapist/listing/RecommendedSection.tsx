@@ -1,11 +1,20 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import {
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCarouselRecommendations } from "@/hooks/therapist/useRecommendedTherapists";
 import { toast } from "sonner";
 
 export default function RecommendedSection() {
+  const router = useRouter();
   const carouselRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -13,13 +22,8 @@ export default function RecommendedSection() {
   const [isRetrying, setIsRetrying] = useState(false);
 
   // Use clean hook for carousel recommendations with fallback to therapist cards
-  const {
-    therapists,
-    therapistCards,
-    isLoading,
-    error,
-    refetch
-  } = useCarouselRecommendations();
+  const { therapists, therapistCards, isLoading, error, refetch } =
+    useCarouselRecommendations();
 
   // Get the appropriate therapist data to display
   const displayTherapists = therapistCards || therapists;
@@ -28,12 +32,12 @@ export default function RecommendedSection() {
   const handleRecommendationRetry = async () => {
     setIsRetrying(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 800)); // Brief delay
+      await new Promise((resolve) => setTimeout(resolve, 800)); // Brief delay
       await refetch();
-      setRetryCount(prev => prev + 1);
+      setRetryCount((prev) => prev + 1);
       toast.success("Recommendations refreshed!");
     } catch (retryError) {
-      console.error('Recommendation retry failed:', retryError);
+      console.error("Recommendation retry failed:", retryError);
       if (retryCount < 2) {
         toast.error(`Failed to refresh. Trying again...`);
         setTimeout(() => handleRecommendationRetry(), 1500);
@@ -82,7 +86,9 @@ export default function RecommendedSection() {
             <h2 className="text-xl font-bold">Recommended</h2>
             <div className="flex items-center gap-2 text-blue-600">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm font-medium animate-pulse">Finding perfect matches...</span>
+              <span className="text-sm font-medium animate-pulse">
+                Finding perfect matches...
+              </span>
             </div>
           </div>
           <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
@@ -107,7 +113,7 @@ export default function RecommendedSection() {
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
-                  {/* Plus button placeholder */}
+                  {/* View Profile button placeholder */}
                   <div className="absolute top-2 right-2 w-8 h-8 bg-blue-200 rounded-full animate-pulse"></div>
 
                   {/* Content */}
@@ -156,9 +162,6 @@ export default function RecommendedSection() {
       <div className="space-y-4 h-full flex flex-col">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold">Recommended</h2>
-          <Button variant="ghost" size="sm" disabled>
-            See all
-          </Button>
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="text-center max-w-md" data-testid="error-message">
@@ -172,7 +175,8 @@ export default function RecommendedSection() {
                 Recommendations Unavailable
               </h3>
               <p className="text-red-700 text-sm mb-4">
-                We&apos;re having trouble loading personalized recommendations right now.
+                We&apos;re having trouble loading personalized recommendations
+                right now.
               </p>
 
               {/* Retry options */}
@@ -198,7 +202,7 @@ export default function RecommendedSection() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.href = '/client/therapists'}
+                  onClick={() => (window.location.href = "/client/therapists")}
                   className="border-red-200 text-red-700 hover:bg-red-50"
                 >
                   Browse All Therapists
@@ -223,12 +227,12 @@ export default function RecommendedSection() {
       <div className="space-y-4 h-full flex flex-col">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold">Recommended</h2>
-          <Button variant="ghost" size="sm" disabled>
-            See all
-          </Button>
         </div>
         <div className="flex-grow flex items-center justify-center">
-          <div className="text-center text-muted-foreground" data-testid="empty-state">
+          <div
+            className="text-center text-muted-foreground"
+            data-testid="empty-state"
+          >
             <p>No therapist recommendations available at the moment.</p>
             <p className="text-sm">Please check back later.</p>
           </div>
@@ -241,12 +245,12 @@ export default function RecommendedSection() {
     <div className="space-y-4 h-full flex flex-col">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Recommended</h2>
-        <Button variant="ghost" size="sm">
-          See all
-        </Button>
       </div>
 
-      <div className="relative flex-grow" data-testid="therapist-recommendations">
+      <div
+        className="relative flex-grow"
+        data-testid="therapist-recommendations"
+      >
         {/* Scroll buttons */}
         {canScrollLeft && (
           <Button
@@ -283,13 +287,17 @@ export default function RecommendedSection() {
               className="relative flex-none w-[300px] h-full snap-start"
               data-testid="therapist-card"
             >
-              {/* Plus Button */}
+              {/* View Profile Button */}
               <Button
                 size="icon"
-                aria-label="Add therapist to favorites"
+                aria-label="View therapist profile"
                 className="absolute top-2 right-2 z-20 bg-primary text-white hover:bg-white hover:text-primary transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/client/profile/${therapist.id}`);
+                }}
               >
-                <Plus className="w-5 h-5" />
+                <User className="w-5 h-5" />
               </Button>
 
               <Card className="relative overflow-hidden h-full z-0 flex flex-col">
@@ -297,7 +305,7 @@ export default function RecommendedSection() {
                 <div
                   className="absolute inset-0 bg-cover bg-center"
                   style={{
-                    backgroundImage: `url(${therapist.imageUrl || '/placeholder-therapist.jpg'})`
+                    backgroundImage: `url(${therapist.imageUrl || "/placeholder-therapist.jpg"})`,
                   }}
                 />
                 {/* Overlay */}
@@ -307,17 +315,19 @@ export default function RecommendedSection() {
                 <CardContent className="p-4 relative z-20 flex flex-col items-center justify-end h-full text-white mt-auto">
                   <div className="w-full">
                     <div className="flex gap-2 flex-wrap mb-3">
-                      {therapist.specialties?.slice(0, 3).map((specialty, i) => (
-                        <div
-                          key={i}
-                          className="bg-white rounded-sm px-2 py-0.5"
-                          data-testid="therapist-specialties"
-                        >
-                          <span className="text-primary text-xs font-medium">
-                            {specialty}
-                          </span>
-                        </div>
-                      ))}
+                      {therapist.specialties
+                        ?.slice(0, 3)
+                        .map((specialty, i) => (
+                          <div
+                            key={i}
+                            className="bg-white rounded-sm px-2 py-0.5"
+                            data-testid="therapist-specialties"
+                          >
+                            <span className="text-primary text-xs font-medium">
+                              {specialty}
+                            </span>
+                          </div>
+                        ))}
                       {therapist.experience > 0 && (
                         <div className="bg-white rounded-sm px-2 py-0.5">
                           <span className="text-primary text-xs font-medium">
@@ -329,20 +339,30 @@ export default function RecommendedSection() {
                   </div>
 
                   <div className="bg-black/80 rounded-lg p-3 w-full">
-                    <h3 className="font-semibold mb-1" data-testid="therapist-name">
+                    <h3
+                      className="font-semibold mb-1"
+                      data-testid="therapist-name"
+                    >
                       {therapist.name}
                     </h3>
                     <p className="text-sm text-white/90 line-clamp-2">
-                      {therapist.bio || 'Experienced therapist dedicated to helping you achieve your mental health goals.'}
+                      {therapist.bio ||
+                        "Experienced therapist dedicated to helping you achieve your mental health goals."}
                     </p>
                     {therapist.rating > 0 && (
-                      <div className="flex items-center gap-1 mt-2" data-testid="therapist-rating">
-                        <span className="text-xs">⭐ {therapist.rating.toFixed(1)}</span>
-                        {therapist.totalReviews && therapist.totalReviews > 0 && (
-                          <span className="text-xs text-white/70">
-                            ({therapist.totalReviews} reviews)
-                          </span>
-                        )}
+                      <div
+                        className="flex items-center gap-1 mt-2"
+                        data-testid="therapist-rating"
+                      >
+                        <span className="text-xs">
+                          ⭐ {therapist.rating.toFixed(1)}
+                        </span>
+                        {therapist.totalReviews &&
+                          therapist.totalReviews > 0 && (
+                            <span className="text-xs text-white/70">
+                              ({therapist.totalReviews} reviews)
+                            </span>
+                          )}
                       </div>
                     )}
                   </div>

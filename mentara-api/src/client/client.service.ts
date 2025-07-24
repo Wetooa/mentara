@@ -182,7 +182,7 @@ export class ClientService {
       province: therapist.province,
       isActive: therapist.status === 'APPROVED',
       bio: therapist.user.bio || undefined,
-      profileImage: undefined,
+      profileImage: therapist.user.avatarUrl || undefined,
     };
   }
 
@@ -207,7 +207,7 @@ export class ClientService {
     }
 
     // Transform the Prisma results to match TherapistRecommendation type
-    return assignments.map(assignment => {
+    return assignments.map((assignment) => {
       const therapist = assignment.therapist;
       return {
         id: therapist.userId,
@@ -220,7 +220,7 @@ export class ClientService {
         province: therapist.province,
         isActive: therapist.status === 'APPROVED',
         bio: therapist.user.bio || undefined,
-        profileImage: undefined,
+        profileImage: therapist.user.avatarUrl || undefined,
       };
     });
   }
@@ -325,6 +325,106 @@ export class ClientService {
         status: 'inactive',
       },
     });
+  }
+
+  async requestTherapist(
+    userId: string,
+    therapistId: string,
+  ): Promise<TherapistRecommendation> {
+    try {
+      // Check if client exists
+      const client = await this.prisma.client.findUnique({
+        where: { userId },
+      });
+      if (!client) {
+        this.logger.warn(`Client not found for request, userId: ${userId}`);
+        throw new NotFoundException('Client not found');
+      }
+
+      // Check if therapist exists and is approved
+      const therapist = await this.prisma.therapist.findUnique({
+        where: { userId: therapistId },
+        include: { user: true },
+      });
+      if (!therapist) {
+        this.logger.warn(
+          `Therapist not found for request, therapistId: ${therapistId}`,
+        );
+        throw new NotFoundException('Therapist not found');
+      }
+
+      if (therapist.status !== 'APPROVED') {
+        throw new BadRequestException('Therapist is not approved');
+      }
+
+      // Check if this request already exists
+      const existingRequest = await this.prisma.clientTherapist.findUnique({
+        where: {
+          clientId_therapistId: {
+            clientId: userId,
+            therapistId: therapistId,
+          },
+        },
+      });
+
+      if (existingRequest) {
+        if (existingRequest.status === 'active') {
+          throw new BadRequestException(
+            'You are already connected to this therapist',
+          );
+        }
+        if (existingRequest.status === 'inactive') {
+          throw new BadRequestException(
+            'Request already sent to this therapist',
+          );
+        }
+      }
+
+      // Create new therapist request with inactive status
+      await this.prisma.clientTherapist.create({
+        data: {
+          clientId: userId,
+          therapistId: therapistId,
+          status: 'inactive', // Request pending
+        },
+      });
+
+      // Return therapist information
+      return {
+        id: therapist.userId,
+        firstName: therapist.user.firstName,
+        lastName: therapist.user.lastName,
+        title: 'Therapist',
+        specialties: therapist.areasOfExpertise,
+        hourlyRate: Number(therapist.hourlyRate),
+        experience: therapist.yearsOfExperience || 0,
+        province: therapist.province,
+        isActive: therapist.status === 'APPROVED',
+        bio: therapist.user.bio || undefined,
+        profileImage: undefined,
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        this.logger.error(
+          `Database error in requestTherapist: ${error.code} - ${error.message}`,
+        );
+        throw new InternalServerErrorException(
+          'Failed to send therapist request',
+        );
+      }
+
+      this.logger.error(
+        `Unexpected error in requestTherapist: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
   }
 
   private transformPrismaUserToDTO(user: any): ClientProfileDto {

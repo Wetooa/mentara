@@ -176,14 +176,11 @@
       "Bash(curl -X GET \"http://localhost:3001/api/users\" -H \"Content-Type: application/json\")",
       "Bash(timeout 10 npm run build:*)",
       "mcp__serena__insert_before_symbol",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "WebFetch(domain:socket.io)",
+      "mcp__serena__insert_before_symbol"
     ]
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "supabase",
-    "Prisma-Local",
-    "clerk",
-    "puppeteer"
-  ]
+  "enabledMcpjsonServers": ["supabase", "Prisma-Local", "clerk", "puppeteer"]
 }

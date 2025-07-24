@@ -8,6 +8,7 @@ import { Edit, MapPin, Calendar, Shield, Star } from "lucide-react";
 import { PublicProfileResponse } from "@/lib/api/services/profile";
 import { format, parseISO } from "date-fns";
 import { ChatButton } from "./ChatButton";
+import { ConnectTherapistButton } from "./ConnectTherapistButton";
 
 interface ProfileHeaderProps {
   profile: PublicProfileResponse;
@@ -85,15 +86,30 @@ export function ProfileHeader({
           </Button>
         )}
 
-        {/* Chat Button (Other Profiles Only) */}
+        {/* Buttons for Other Profiles */}
         {!isOwnProfile && (
-          <ChatButton
-            targetUserId={user.id}
-            targetUserName={displayName}
-            variant="secondary"
-            size="sm"
-            className="absolute top-4 right-4 bg-white/90 hover:bg-white"
-          />
+          <div className="absolute top-4 right-4 flex gap-2">
+            {/* Connect with Therapist Button (Therapist Profiles Only) */}
+            {user.role === "therapist" && (
+              <ConnectTherapistButton
+                therapistId={user.id}
+                connectionStatus={profile.connectionStatus || null}
+                therapistName={displayName}
+                variant="secondary"
+                size="sm"
+                className="bg-white/90 hover:bg-white text-gray-900"
+              />
+            )}
+            
+            {/* Chat Button */}
+            <ChatButton
+              targetUserId={user.id}
+              targetUserName={displayName}
+              variant="secondary"
+              size="sm"
+              className="bg-white/90 hover:bg-white text-gray-900"
+            />
+          </div>
         )}
       </div>
 

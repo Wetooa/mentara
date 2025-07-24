@@ -21,7 +21,7 @@ export interface TherapistRecommendation {
   province: string | null;
   isActive: boolean;
   bio?: string;
-  profileImage?: string;
+  profileImage?: string | undefined;
 }
 
 // Client profile DTO interface

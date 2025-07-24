@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PhoneCall, MessageSquare, Calendar, Heart } from "lucide-react";
+import { User, UserPlus, MessageSquare, Calendar, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { TherapistCardData } from "@/types/therapist";
 import { Badge } from "@/components/ui/badge";
 import { useFavorites } from "@/hooks/user/useFavorites";
@@ -9,62 +10,41 @@ import { useTherapistReviewStats } from "@/hooks/reviews/useReviews";
 
 interface TherapistCardProps {
   therapist: TherapistCardData;
-  onViewProfile?: (therapist: TherapistCardData) => void;
-  onBooking?: (therapistId: string) => void;
-  onMessage?: (therapistId: string) => void;
 }
 
-export default function TherapistCard({
-  therapist,
-  onViewProfile,
-  onBooking,
-  onMessage
-}: TherapistCardProps) {
+export default function TherapistCard({ therapist }: TherapistCardProps) {
+  const router = useRouter();
   const nextAvailableTime = therapist.availableTimes?.[0];
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const isTherapistFavorited = isFavorite(therapist.id);
 
   // Fetch review stats for this therapist
   const { data: reviewStats } = useTherapistReviewStats(therapist.id);
 
-  const handleToggleFavorite = (e: React.MouseEvent) => {
+  const handleViewProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleFavorite(therapist.id);
+    router.push(`/client/profile/${therapist.id}`);
   };
 
   return (
-    <Card className="w-full overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white transition-all duration-200 hover:border-primary/30 group cursor-pointer">
+    <Card className="w-full overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white transition-all duration-200 hover:border-primary/30 group">
       <CardContent className="p-0">
-        <div
-          className="p-6 flex flex-col h-full"
-          onClick={() => onViewProfile?.(therapist)}
-        >
+        <div className="p-6 flex flex-col h-full">
           {/* Professional Status and Price Section */}
           <div className="flex items-center mb-4 justify-between">
             <div className="flex items-center">
               <div
-                className={`w-2.5 h-2.5 rounded-full mr-2 ${therapist.isActive ? "bg-green-500" : "bg-gray-400"
-                  }`}
+                className={`w-2.5 h-2.5 rounded-full mr-2 ${
+                  therapist.isActive ? "bg-green-500" : "bg-gray-400"
+                }`}
               ></div>
-              <span className={`text-xs font-medium ${therapist.isActive ? "text-green-700" : "text-gray-500"
-                }`}>
+              <span
+                className={`text-xs font-medium ${
+                  therapist.isActive ? "text-green-700" : "text-gray-500"
+                }`}
+              >
                 {therapist.isActive ? "Available Now" : "Currently Offline"}
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleToggleFavorite}
-                className="p-1.5 h-8 w-8 rounded-full hover:bg-gray-50 transition-colors duration-200"
-              >
-                <Heart
-                  className={`h-4 w-4 transition-colors duration-200 ${isTherapistFavorited
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-400 hover:text-red-400"
-                    }`}
-                />
-              </Button>
               <div className="bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
                 <span className="text-sm font-semibold text-gray-900">
                   {therapist.sessionPrice}
@@ -114,10 +94,13 @@ export default function TherapistCard({
                   {specialty}
                 </Badge>
               )) || (
-                  <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                    General Therapy
-                  </Badge>
-                )}
+                <Badge
+                  variant="outline"
+                  className="text-xs bg-gray-50 text-gray-700 border-gray-200"
+                >
+                  General Therapy
+                </Badge>
+              )}
             </div>
 
             {/* Professional Available Time */}
@@ -125,7 +108,9 @@ export default function TherapistCard({
               <div className="flex items-center text-sm mb-3 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
                 <Calendar size={14} className="text-green-600 mr-3" />
                 <div>
-                  <div className="font-medium text-green-800">Next Available</div>
+                  <div className="font-medium text-green-800">
+                    Next Available
+                  </div>
                   <div className="text-xs text-green-600">
                     {nextAvailableTime.day}, {nextAvailableTime.time}
                   </div>
@@ -136,33 +121,20 @@ export default function TherapistCard({
             {/* Professional Bio Section */}
             <div className="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-100">
               <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
-                {therapist.bio || "Experienced therapist dedicated to helping you achieve your mental health goals."}
+                {therapist.bio ||
+                  "Experienced therapist dedicated to helping you achieve your mental health goals."}
               </p>
             </div>
 
             {/* Professional Action Buttons */}
-            <div className="flex gap-3 mt-auto">
+            <div className="flex flex-col gap-2 mt-auto">
               <Button
                 variant="default"
-                className="flex-1 gap-2 bg-primary hover:bg-primary/90 text-white transition-colors duration-200 font-medium"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onBooking?.(therapist.id);
-                }}
+                className="w-full gap-2 bg-primary hover:bg-primary/90 text-white transition-colors duration-200 font-medium"
+                onClick={handleViewProfile}
               >
-                <PhoneCall size={16} />
-                Book Session
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1 gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 font-medium"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMessage?.(therapist.id);
-                }}
-              >
-                <MessageSquare size={16} />
-                Message
+                <User size={16} />
+                View Profile
               </Button>
             </div>
           </div>
