@@ -41,19 +41,18 @@ import type {
   RecommendationInteractionDto,
   RecommendationQueryDto,
 } from '../types';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { PrismaService } from 'src/providers/prisma-client.provider';
 
-@ApiTags('Community Recommendations')
-@ApiTags('community-recommendation')
-@ApiBearerAuth('JWT-auth')
-@Controller('communities/recommendations')
-@UseGuards(JwtAuthGuard, RoleBasedAccessGuard)
-@ApiBearerAuth()
+@Controller('communities-recommendations')
+@UseGuards(JwtAuthGuard)
 export class CommunityRecommendationController {
   private readonly logger = new Logger(CommunityRecommendationController.name);
 
   constructor(
     private readonly communityRecommendationService: CommunityRecommendationService,
-  ) {}
+    private readonly prisma: PrismaService,
+  ) { }
 
   @Post('generate')
   @Roles('client', 'therapist', 'moderator', 'admin')
@@ -422,56 +421,68 @@ export class CommunityRecommendationController {
   }
 
   @Post('join')
-  @Roles('client', 'therapist', 'moderator', 'admin') 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Join recommended communities immediately',
-    description: 'Allows users to join multiple recommended communities at once',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Successfully joined communities',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid community slugs provided',
-  })
   async joinRecommendedCommunities(
-    @GetUser() user: any,
+    @CurrentUserId() userId: string,
     @Body() dto: { communitySlugs: string[] },
   ) {
     try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
       // Input validation
       if (!dto.communitySlugs || !Array.isArray(dto.communitySlugs)) {
-        this.logger.warn(`Invalid communitySlugs provided by user ${user.id}:`, dto);
-        throw new BadRequestException('Invalid community slugs provided - must be an array');
+        this.logger.warn(
+          `Invalid communitySlugs provided by user ${user.id}:`,
+          dto,
+        );
+        throw new BadRequestException(
+          'Invalid community slugs provided - must be an array',
+        );
       }
 
       if (dto.communitySlugs.length === 0) {
-        this.logger.warn(`Empty communitySlugs array provided by user ${user.id}`);
-        throw new BadRequestException('At least one community slug must be provided');
+        this.logger.warn(
+          `Empty communitySlugs array provided by user ${user.id}`,
+        );
+        throw new BadRequestException(
+          'At least one community slug must be provided',
+        );
       }
 
       if (dto.communitySlugs.length > 10) {
-        this.logger.warn(`Too many community slugs provided by user ${user.id}: ${dto.communitySlugs.length}`);
-        throw new BadRequestException('Cannot join more than 10 communities at once');
+        this.logger.warn(
+          `Too many community slugs provided by user ${user.id}: ${dto.communitySlugs.length}`,
+        );
+        throw new BadRequestException(
+          'Cannot join more than 10 communities at once',
+        );
       }
 
       // Validate slug format (basic validation)
-      const invalidSlugs = dto.communitySlugs.filter(slug => 
-        !slug || typeof slug !== 'string' || slug.trim().length === 0
+      const invalidSlugs = dto.communitySlugs.filter(
+        (slug) => !slug || typeof slug !== 'string' || slug.trim().length === 0,
       );
       if (invalidSlugs.length > 0) {
-        this.logger.warn(`Invalid slug format provided by user ${user.id}:`, invalidSlugs);
-        throw new BadRequestException('All community slugs must be valid non-empty strings');
+        this.logger.warn(
+          `Invalid slug format provided by user ${user.id}:`,
+          invalidSlugs,
+        );
+        throw new BadRequestException(
+          'All community slugs must be valid non-empty strings',
+        );
       }
 
-      this.logger.log(`User ${user.id} attempting to join ${dto.communitySlugs.length} communities: [${dto.communitySlugs.join(', ')}]`);
-
-      const joinResults = await this.communityRecommendationService.joinRecommendedCommunities(
-        user.id,
-        dto.communitySlugs,
+      this.logger.log(
+        `User ${user.id} attempting to join ${dto.communitySlugs.length} communities: [${dto.communitySlugs.join(', ')}]`,
       );
+
+      const joinResults =
+        await this.communityRecommendationService.joinRecommendedCommunities(
+          user.id,
+          dto.communitySlugs,
+        );
 
       // Enhanced response messaging
       let message = '';
@@ -490,10 +501,12 @@ export class CommunityRecommendationController {
       if (failureCount > 0) {
         this.logger.warn(
           `Partial success for user ${user.id}: ${successCount} succeeded, ${failureCount} failed`,
-          { failures: joinResults.failedJoins }
+          { failures: joinResults.failedJoins },
         );
       } else {
-        this.logger.log(`Complete success for user ${user.id}: joined ${successCount} communities`);
+        this.logger.log(
+          `Complete success for user ${user.id}: joined ${successCount} communities`,
+        );
       }
 
       return {
@@ -504,9 +517,8 @@ export class CommunityRecommendationController {
           totalAttempted: dto.communitySlugs.length,
           successful: successCount,
           failed: failureCount,
-        }
+        },
       };
-
     } catch (error) {
       // Enhanced error logging and handling
       if (error instanceof BadRequestException) {
@@ -522,12 +534,12 @@ export class CommunityRecommendationController {
           stack: error instanceof Error ? error.stack : undefined,
           userId: user.id,
           communitySlugs: dto.communitySlugs,
-        }
+        },
       );
 
       // Return a user-friendly error
       throw new InternalServerErrorException(
-        'An unexpected error occurred while joining communities. Please try again.'
+        'An unexpected error occurred while joining communities. Please try again.',
       );
     }
   }

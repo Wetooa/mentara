@@ -103,7 +103,7 @@ export function createCommunityService(axios: AxiosInstance) {
       data: CommunityRecommendation[];
       message: string;
     }> {
-      const { data } = await axios.get("/communities/recommendations/me");
+      const { data } = await axios.get("/communities-recommendations/me");
       return data;
     },
 
@@ -115,7 +115,7 @@ export function createCommunityService(axios: AxiosInstance) {
       data: CommunityRecommendation[];
       message: string;
     }> {
-      const { data } = await axios.post("/communities/recommendations/generate", { force });
+      const { data } = await axios.post("/communities-recommendations/generate", { force });
       return data;
     },
 
@@ -125,19 +125,19 @@ export function createCommunityService(axios: AxiosInstance) {
     async joinCommunities(communitySlugs: string[]): Promise<{
       success: boolean;
       data: {
-        successfulJoins: Array<{ 
-          communityId: string; 
-          communityName: string; 
-          slug: string; 
+        successfulJoins: Array<{
+          communityId: string;
+          communityName: string;
+          slug: string;
         }>;
-        failedJoins: Array<{ 
-          slug: string; 
-          reason: string; 
+        failedJoins: Array<{
+          slug: string;
+          reason: string;
         }>;
       };
       message: string;
     }> {
-      const { data } = await axios.post("/communities/recommendations/join", {
+      const data = await axios.post("/communities-recommendations/join", {
         communitySlugs
       });
       return data;
@@ -150,7 +150,7 @@ export function createCommunityService(axios: AxiosInstance) {
       success: boolean;
       message: string;
     }> {
-      const { data } = await axios.post("/communities/recommendations/refresh");
+      const { data } = await axios.post("/communities-recommendations/refresh");
       return data;
     },
 
@@ -216,11 +216,11 @@ export function createCommunityService(axios: AxiosInstance) {
      * Interact with recommendation (accept/reject)
      */
     async interactWithRecommendation(
-      recommendationId: string, 
+      recommendationId: string,
       action: 'accept' | 'reject'
     ) {
       const { data } = await axios.put(
-        `/communities/recommendations/${recommendationId}/interact`,
+        `/communities-recommendations/${recommendationId}/interact`,
         { action }
       );
       return data;
@@ -230,7 +230,7 @@ export function createCommunityService(axios: AxiosInstance) {
      * Get recommendation statistics
      */
     async getRecommendationStats() {
-      const { data } = await axios.get("/communities/recommendations/stats/me");
+      const { data } = await axios.get("/communities-recommendations/stats/me");
       return data;
     },
 
@@ -339,7 +339,7 @@ export function createCommunityService(axios: AxiosInstance) {
         formData.append('title', postData.title);
         formData.append('content', postData.content);
         formData.append('roomId', postData.roomId);
-        
+
         // Append each file
         postData.files.forEach((file) => {
           formData.append('files', file);
