@@ -21,14 +21,13 @@ export class EventBusService implements IEventBus {
         correlationId: event.metadata.correlationId,
       });
 
-      // Emit the specific event type
+      // Emit the specific event type ONLY
       await this.eventEmitter.emitAsync(event.eventType, event);
 
-      // Emit a wildcard event for global listeners
-      await this.eventEmitter.emitAsync('*', event);
-
-      // Emit aggregate-specific events for aggregate listeners
-      await this.eventEmitter.emitAsync(`${event.aggregateType}.*`, event);
+      // REMOVED: Wildcard emissions causing event routing chaos
+      // These were causing MessageSentEvent to trigger ALL event handlers
+      // await this.eventEmitter.emitAsync('*', event);
+      // await this.eventEmitter.emitAsync(`${event.aggregateType}.*`, event);
 
       this.logger.debug(`Event emitted successfully: ${event.eventType}`);
     } catch (error) {

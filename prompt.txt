@@ -7,7 +7,6 @@ Video Call Feature In Messenger
 - i would like simplicity here, currently when clicking on it, it redirects the user to a different page. this is fine. 
 - when the user calls, the other one should recieve an pop up on the upper right corner of the screen with a button to accept or reject the call
 
-
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 
 - data flow is >> page > components > hooks > lib/api axios > REST > backend controller
