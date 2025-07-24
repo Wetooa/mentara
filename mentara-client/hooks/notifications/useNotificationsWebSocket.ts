@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAuthToken } from '@/lib/constants/auth';
 import { 
@@ -43,39 +43,46 @@ export function useNotificationsWebSocket(callbacks: NotificationCallbacks = {})
   const [connectionState, setConnectionState] = useState<ConnectionState>(getConnectionState());
   const [error, setError] = useState<string | null>(null);
   const [lastNotification, setLastNotification] = useState<NotificationData | null>(null);
+  const connectAttemptRef = useRef<boolean>(false); // Prevent multiple connection attempts
+  
+  // Handle incoming notifications with useRef to avoid recreating handlers
+  const callbacksRef = useRef(callbacks);
+  callbacksRef.current = callbacks;
 
   const connect = useCallback(async () => {
     const token = getAuthToken();
-    if (connectionState.isConnected || !token) return;
+    if (connectionState.isConnected || !token || connectAttemptRef.current) return;
 
     try {
+      connectAttemptRef.current = true;
       setError(null);
       await connectWebSocket(token);
     } catch (err) {
       const errorMessage = 'Failed to connect to notification service';
       setError(errorMessage);
-      callbacks.onError?.(errorMessage);
+      callbacksRef.current.onError?.(errorMessage);
+    } finally {
+      connectAttemptRef.current = false;
     }
-  }, [connectionState.isConnected, callbacks]);
+  }, [connectionState.isConnected]); // Removed callbacks from dependency array
 
   const disconnect = useCallback(() => {
     disconnectWebSocket();
   }, []);
 
-  // Handle incoming notifications
   const handleNotification = useCallback((notification: NotificationData) => {
     console.log('🔔 [NOTIFICATIONS] Received real-time notification:', notification);
     
     setLastNotification(notification);
-    callbacks.onNewNotification?.(notification);
-  }, [callbacks]);
+    callbacksRef.current.onNewNotification?.(notification);
+  }, []); // No dependencies - callbacks accessed via ref
 
   // Handle unread count updates
   const handleUnreadCountUpdate = useCallback((data: UnreadCountData) => {
     console.log('🔢 [NOTIFICATIONS] Unread count updated:', data.count);
     
-    callbacks.onUnreadCountUpdate?.(data);
-  }, [callbacks]);
+    callbacksRef.current.onUnreadCountUpdate?.(data);
+  }, []); // No dependencies - callbacks accessed via ref
 
   // Handle WebSocket errors
   const handleWebSocketError = useCallback((error: any) => {
@@ -83,8 +90,8 @@ export function useNotificationsWebSocket(callbacks: NotificationCallbacks = {})
     
     const errorMessage = error?.message || 'WebSocket connection error';
     setError(errorMessage);
-    callbacks.onError?.(errorMessage);
-  }, [callbacks]);
+    callbacksRef.current.onError?.(errorMessage);
+  }, []); // No dependencies - callbacks accessed via ref
 
   // Subscribe to notification events
   useEffect(() => {
@@ -112,18 +119,26 @@ export function useNotificationsWebSocket(callbacks: NotificationCallbacks = {})
       
       if (state.error) {
         setError(state.error);
-        callbacks.onError?.(state.error);
+        callbacksRef.current.onError?.(state.error);
       }
     });
     
     return unsubscribe;
-  }, [callbacks]);
+  }, []); // No dependencies - callbacks accessed via ref
 
-  // Auto-connect when authenticated and not connected
+  // Auto-connect when authenticated and not connected (with debounce)
   useEffect(() => {
-    if (isAuthenticated && !connectionState.isConnected && !connectionState.isConnecting) {
+    if (isAuthenticated && !connectionState.isConnected && !connectionState.isConnecting && !connectAttemptRef.current) {
       console.log('🔔 [NOTIFICATIONS] Auto-connecting for notifications');
-      connect();
+      
+      // Small delay to avoid rapid reconnection attempts
+      const timeoutId = setTimeout(() => {
+        if (!connectionState.isConnected && !connectAttemptRef.current) {
+          connect();
+        }
+      }, 500);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [isAuthenticated, connectionState.isConnected, connectionState.isConnecting, connect]);
 

@@ -243,12 +243,12 @@ export default function MainLayout({
               />
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              {/* <NotificationDropdown */}
-              {/*   variant="default" */}
-              {/*   maxNotifications={5} */}
-              {/*   showConnectionStatus={true} */}
-              {/*   className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-primary/30" */}
-              {/* /> */}
+              <NotificationDropdown
+                variant="default"
+                maxNotifications={5}
+                showConnectionStatus={true}
+                className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-primary/30"
+              />
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex">
                   <UserDisplay
