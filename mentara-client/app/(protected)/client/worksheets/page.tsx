@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
-import { Task } from "@/components/worksheets/types";
+import { Task, transformWorksheetAssignmentToTask } from "@/components/worksheets/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
 
@@ -27,30 +27,15 @@ export default function WorksheetsPage() {
         setIsLoading(true);
         setError(null);
 
-        // Convert activeFilter to status filter for API
-        let isCompleted: boolean | undefined;
-        if (activeFilter === "completed") {
-          isCompleted = true;
-        } else if (activeFilter === "pending") {
-          isCompleted = false;
-        }
-
-        // Call the API to get worksheets
+        // Call the API to get all worksheets (no filtering on API level)
         const worksheetsResponse = await api.worksheets.getAll({
           userId,
-          isCompleted,
           limit: 100
         });
         
-        // Transform worksheets to match Task interface
+        // Transform worksheets using the proper transformation function
         const transformedTasks: Task[] = Array.isArray(worksheetsResponse.worksheets) 
-          ? worksheetsResponse.worksheets.map(worksheet => ({
-              ...worksheet,
-              date: worksheet.createdAt,
-              status: 'assigned' as const,
-              isCompleted: false,
-              therapistName: undefined,
-            }))
+          ? worksheetsResponse.worksheets.map(worksheet => transformWorksheetAssignmentToTask(worksheet))
           : [];
         
         setTasks(transformedTasks);
@@ -63,7 +48,7 @@ export default function WorksheetsPage() {
     }
 
     fetchWorksheets();
-  }, [userId, activeFilter, api.worksheets]);
+  }, [userId, api.worksheets]);
 
   // Filter tasks based on selected filters
   const getFilteredTasks = () => {
@@ -74,6 +59,22 @@ export default function WorksheetsPage() {
     if (!Array.isArray(tasks)) return [];
 
     let filtered = [...tasks];
+
+    // Apply status filter based on activeFilter
+    if (activeFilter !== "everything") {
+      filtered = filtered.filter((task) => {
+        switch (activeFilter) {
+          case "upcoming":
+            return task.status === "upcoming";
+          case "past_due":
+            return task.status === "past_due";
+          case "completed":
+            return task.status === "completed";
+          default:
+            return true;
+        }
+      });
+    }
 
     // Apply therapist filter if selected
     if (therapistFilter) {
