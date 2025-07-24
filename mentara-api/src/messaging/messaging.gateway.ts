@@ -4,6 +4,7 @@ import {
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
@@ -51,7 +52,7 @@ interface AuthenticatedSocket extends Socket {
   allowEIO3: true, // Allow Engine.IO v3 clients (compatibility)
 })
 export class MessagingGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
   @WebSocketServer()
   server!: Server;
@@ -67,6 +68,13 @@ export class MessagingGateway
     private readonly prisma: PrismaService,
     private readonly webSocketAuth: WebSocketAuthService,
   ) {}
+
+  afterInit(server: Server) {
+    this.server = server;
+    this.logger.log('✅ WebSocket server initialized successfully');
+    this.logger.log(`🔌 WebSocket namespace: ${server.name}`);
+    this.logger.log(`🌐 CORS origins: ${JSON.stringify(server.engine.opts.cors?.origin)}`);
+  }
 
   async handleConnection(client: AuthenticatedSocket) {
     try {
@@ -363,22 +371,22 @@ export class MessagingGateway
 
   // Broadcast new message to conversation participants
   broadcastMessage(conversationId: string, message: any) {
-    console.log('🚨 [GATEWAY] broadcastMessage CALLED');
-    console.log('🚨 [GATEWAY] conversationId:', conversationId);
-    console.log('🚨 [GATEWAY] message object:', message);
+    this.logger.debug(`Broadcasting message to conversation: ${conversationId}`);
+    
+    // Check if server is initialized
+    if (!this.server) {
+      this.logger.error('WebSocket server not initialized - cannot broadcast message');
+      return;
+    }
     
     // Check how many sockets are in the conversation room
     const conversationRoom = this.server.sockets.adapter.rooms.get(conversationId);
     const socketsInRoom = conversationRoom ? conversationRoom.size : 0;
-    console.log('🚨 [GATEWAY] socketsInRoom:', socketsInRoom);
+    this.logger.debug(`Broadcasting to ${socketsInRoom} sockets in conversation ${conversationId}`);
     
-    // Just emit to the room
-    console.log('🚨 [GATEWAY] Emitting new_message to room:', conversationId);
+    // Emit to the conversation room
     this.server.to(conversationId).emit('new_message', message);
-    console.log('🚨 [GATEWAY] Emit completed');
-
-    // Don't call push notifications to avoid the error for now
-    // this.sendPushNotifications(conversationId, message);
+    this.logger.debug(`Message broadcasted to conversation ${conversationId}`);
   }
 
   // Broadcast message update (edit/delete)

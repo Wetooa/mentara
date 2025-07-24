@@ -535,11 +535,11 @@ export class MessagingService {
     
     console.log('🚀 [EVENT DETAILS]', {
       eventType: messageEvent.eventType,
-      messageId: messageEvent.messageId,
-      conversationId: messageEvent.conversationId,
-      senderId: messageEvent.senderId,
-      recipientCount: messageEvent.recipientIds?.length || 0,
-      recipientIds: messageEvent.recipientIds,
+      messageId: messageEvent.eventData.messageId,
+      conversationId: messageEvent.eventData.conversationId,
+      senderId: messageEvent.eventData.senderId,
+      recipientCount: messageEvent.eventData.recipientIds?.length || 0,
+      recipientIds: messageEvent.eventData.recipientIds,
     });
     
     await this.eventBus.emit(messageEvent);

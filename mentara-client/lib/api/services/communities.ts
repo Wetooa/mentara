@@ -510,6 +510,14 @@ export function createCommunityService(axios: AxiosInstance) {
       const { data } = await axios.delete(`/posts/${postId}`);
       return data;
     },
+
+    /**
+     * Get individual post by ID with full details (comments, hearts, etc.)
+     */
+    async getPost(postId: string): Promise<PostData> {
+      const { data } = await axios.get(`/posts/${postId}`);
+      return data;
+    },
   };
 }
 
