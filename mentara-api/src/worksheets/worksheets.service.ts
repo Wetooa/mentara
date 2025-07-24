@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import type {
   WorksheetCreateInputDto,
@@ -33,7 +37,11 @@ export class WorksheetsService {
 
     // Handle status filtering with dynamic overdue calculation
     if (status) {
-      if (status === 'OVERDUE' || status === 'overdue' || status === 'past_due') {
+      if (
+        status === 'OVERDUE' ||
+        status === 'overdue' ||
+        status === 'past_due'
+      ) {
         // Dynamic overdue: worksheets that are ASSIGNED but past due date
         where['status'] = 'ASSIGNED';
         where['dueDate'] = {
@@ -180,7 +188,9 @@ export class WorksheetsService {
         );
 
         if (!validation.isValid) {
-          throw new BadRequestException(`File validation failed for ${file.originalname}: ${validation.error}`);
+          throw new BadRequestException(
+            `File validation failed for ${file.originalname}: ${validation.error}`,
+          );
         }
 
         // Upload file to Supabase Storage
@@ -232,7 +242,11 @@ export class WorksheetsService {
     return this.findById(id);
   }
 
-  async updateByTherapist(id: string, therapistId: string, data: WorksheetUpdateInputDto) {
+  async updateByTherapist(
+    id: string,
+    therapistId: string,
+    data: WorksheetUpdateInputDto,
+  ) {
     // Check if worksheet exists and belongs to the therapist
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
@@ -389,7 +403,9 @@ export class WorksheetsService {
     }
 
     if (!worksheet.submission) {
-      throw new NotFoundException(`No submission found for worksheet with ID ${id}`);
+      throw new NotFoundException(
+        `No submission found for worksheet with ID ${id}`,
+      );
     }
 
     // Delete the submission
@@ -408,7 +424,11 @@ export class WorksheetsService {
     return { success: true, message: 'Submission deleted successfully' };
   }
 
-  async markAsReviewedByTherapist(id: string, therapistId: string, feedback?: string) {
+  async markAsReviewedByTherapist(
+    id: string,
+    therapistId: string,
+    feedback?: string,
+  ) {
     // Check if worksheet exists and belongs to the therapist
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
@@ -473,7 +493,7 @@ export class WorksheetsService {
           status: 'SUBMITTED',
         },
       });
-      
+
       return {
         success: true,
         message: 'Worksheet turned in successfully',
@@ -528,9 +548,9 @@ export class WorksheetsService {
     }
 
     // Delete the submission
-    await this.prisma.worksheetSubmission.delete({
-      where: { worksheetId: id },
-    });
+    // await this.prisma.worksheetSubmission.delete({
+    //   where: { worksheetId: id },
+    // });
 
     // Reset worksheet status back to ASSIGNED
     await this.prisma.worksheet.update({

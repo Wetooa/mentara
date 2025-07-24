@@ -9,7 +9,6 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-
   BadRequestException,
   NotFoundException,
   ForbiddenException,
@@ -31,7 +30,12 @@ import type {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
 } from '../types';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('therapist-worksheets')
 @ApiBearerAuth('JWT-auth')
@@ -88,7 +92,7 @@ export class TherapistWorksheetController {
       category: createWorksheetDto.category || 'therapy-assignment', // Default category
       clientIds: [createWorksheetDto.clientId], // Transform single clientId to array
     };
-    
+
     return this.worksheetsService.create(
       canonicalDto,
       createWorksheetDto.clientId,
@@ -107,14 +111,19 @@ export class TherapistWorksheetController {
     @Param('id') worksheetId: string,
     @Body() updateWorksheetDto: WorksheetUpdateInputDto,
   ) {
-    return this.worksheetsService.updateByTherapist(worksheetId, therapistId, updateWorksheetDto);
+    return this.worksheetsService.updateByTherapist(
+      worksheetId,
+      therapistId,
+      updateWorksheetDto,
+    );
   }
 
   @Post('worksheets/:id/review')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Mark worksheet as reviewed',
-    description: 'Mark a worksheet as reviewed/completed, optionally adding feedback',
+    description:
+      'Mark a worksheet as reviewed/completed, optionally adding feedback',
   })
   @ApiResponse({
     status: 200,
@@ -135,8 +144,6 @@ export class TherapistWorksheetController {
       reviewDto.feedback,
     );
   }
-
-
 
   // NEW MODULE 2 ENDPOINT
   @Post('clients/:clientId/worksheets')
@@ -198,7 +205,10 @@ export class TherapistWorksheetController {
       throw new BadRequestException('Worksheet title is required');
     }
 
-    if (!createWorksheetDto.instructions || createWorksheetDto.instructions.trim() === '') {
+    if (
+      !createWorksheetDto.instructions ||
+      createWorksheetDto.instructions.trim() === ''
+    ) {
       throw new BadRequestException('Worksheet instructions are required');
     }
 

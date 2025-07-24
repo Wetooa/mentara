@@ -34,7 +34,9 @@ export class WorksheetsController {
   @Get()
   findAll(
     @CurrentUserId() userId: string,
-    @Query() query: PaginationQuery & FilterQuery & { isCompleted?: boolean; limit?: number },
+    @Query()
+    query: PaginationQuery &
+      FilterQuery & { isCompleted?: boolean; limit?: number },
   ) {
     // Convert isCompleted boolean to status string for service compatibility
     let status: string | undefined = query.status;
@@ -66,7 +68,7 @@ export class WorksheetsController {
     },
     @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ) {
-    console.log(createWorksheetDto)
+    console.log(createWorksheetDto);
     return this.worksheetsService.create(
       createWorksheetDto,
       createWorksheetDto.userId,
@@ -116,18 +118,12 @@ export class WorksheetsController {
   }
 
   @Post(':id/turn-in')
-  turnInWorksheet(
-    @CurrentUserId() userId: string,
-    @Param('id') id: string,
-  ) {
+  turnInWorksheet(@CurrentUserId() userId: string, @Param('id') id: string) {
     return this.worksheetsService.turnInWorksheet(id, userId);
   }
 
   @Post(':id/unturn-in')
-  unturnInWorksheet(
-    @CurrentUserId() userId: string,
-    @Param('id') id: string,
-  ) {
+  unturnInWorksheet(@CurrentUserId() userId: string, @Param('id') id: string) {
     return this.worksheetsService.unturnInWorksheet(id, userId);
   }
 }

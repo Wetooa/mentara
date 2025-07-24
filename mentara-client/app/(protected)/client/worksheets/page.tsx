@@ -57,7 +57,7 @@ export default function WorksheetsPage() {
         )
           ? worksheetsResponse.worksheets.map((worksheet) => ({
               ...worksheet,
-              date: worksheet.createdAt,
+              date: worksheet.dueDate,
               status: mapWorksheetStatus(worksheet.status, worksheet.dueDate),
               isCompleted: worksheet.status === "REVIEWED",
               therapistName: worksheet.therapist?.user

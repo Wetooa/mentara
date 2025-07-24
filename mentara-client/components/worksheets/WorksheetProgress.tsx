@@ -1,4 +1,3 @@
-
 import { CheckCircle, Clock, AlertTriangle, Circle } from "lucide-react";
 import { Task } from "./types";
 
@@ -27,7 +26,7 @@ export default function WorksheetProgress({
           color: "text-red-500",
           bgColor: "bg-red-50",
         };
-      case "submitted":
+      case "in_progress":
         return {
           icon: <CheckCircle className="h-5 w-5 text-blue-500" />,
           label: "Submitted",
@@ -69,7 +68,9 @@ export default function WorksheetProgress({
   return (
     <div className="space-y-3">
       {/* Status Badge */}
-      <div className={`inline-flex items-center px-3 py-2 rounded-lg ${statusInfo.bgColor}`}>
+      <div
+        className={`inline-flex items-center px-3 py-2 rounded-lg ${statusInfo.bgColor}`}
+      >
         {statusInfo.icon}
         <span className={`ml-2 text-sm font-medium ${statusInfo.color}`}>
           {statusInfo.label}
