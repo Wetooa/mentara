@@ -16,10 +16,12 @@ export default function TherapistDashboardPage() {
   const router = useRouter();
   const { data, isLoading, error, refetch } = useTherapistDashboard();
 
-  // Destructure from data object for backward compatibility
+  // Destructure from updated backend response structure
   const therapist = data?.therapist;
-  const stats = data?.stats;
-  const upcomingAppointments = data?.upcomingAppointments || [];
+  const patients = data?.patients;
+  const schedule = data?.schedule;
+  const earnings = data?.earnings;
+  const performance = data?.performance;
 
   // Navigation handlers for clickable dashboard elements
   const handlePatientsClick = () => {
@@ -111,7 +113,7 @@ export default function TherapistDashboardPage() {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Enhanced Page Header */}
         <div className="text-center md:text-left">
-          <DashboardGreeting name={therapist?.name || 'Therapist'} />
+          <DashboardGreeting name={therapist ? `${therapist.firstName} ${therapist.lastName}` : 'Therapist'} />
           <p className="text-amber-700 mt-2 text-lg">Manage your client relationships and grow your practice</p>
         </div>
 
@@ -133,15 +135,15 @@ export default function TherapistDashboardPage() {
             <p className="text-amber-700">Your schedule and practice metrics</p>
           </div>
           <DashboardStats
-            stats={stats || {
-              activePatients: 0,
-              rescheduled: 0,
-              cancelled: 0,
-              income: 0,
+            stats={{
+              activePatients: patients?.active || 0,
+              rescheduled: 0, // Not available in new structure
+              cancelled: 0, // Not available in new structure
+              income: earnings?.thisMonth || 0,
               patientStats: {
-                total: 0,
-                percentage: 0,
-                months: 0,
+                total: patients?.total || 0,
+                percentage: 0, // Not available in new structure
+                months: 6, // Default to 6 months
                 chartData: [] as Array<{ month: string; value: number }>
               }
             }}
@@ -163,7 +165,7 @@ export default function TherapistDashboardPage() {
                     Today's Schedule
                   </h3>
                   <p className="text-amber-700 text-sm">
-                    {upcomingAppointments.length} appointment{upcomingAppointments.length !== 1 ? 's' : ''} scheduled
+                    {schedule?.today?.length || 0} appointment{(schedule?.today?.length || 0) !== 1 ? 's' : ''} scheduled
                   </p>
                 </div>
                 <Button
@@ -176,13 +178,17 @@ export default function TherapistDashboardPage() {
                 </Button>
               </div>
               <DashboardPatientList
-                appointments={upcomingAppointments.map(apt => ({
-                  ...apt,
+                appointments={(schedule?.today || []).map(appointment => ({
+                  id: appointment.id,
+                  patientId: appointment.id, // Using appointment id as patient id
+                  patientName: appointment.patientName,
                   patientAvatar: "/avatar-placeholder.png",
-                  condition: "General consultation"
+                  time: new Date(appointment.startTime).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  }),
+                  condition: appointment.type || "Session"
                 }))}
-                onPatientClick={handlePatientsClick}
-                onScheduleClick={handleScheduleClick}
               />
             </section>
           </div>
@@ -195,13 +201,12 @@ export default function TherapistDashboardPage() {
                 <p className="text-amber-700 text-sm">Your growth and engagement metrics</p>
               </div>
               <DashboardOverview
-                patientStats={stats?.patientStats || {
-                  total: 0,
-                  percentage: 0,
-                  months: 0,
-                  chartData: []
+                patientStats={{
+                  total: patients?.total || 0,
+                  percentage: 0, // Not available in new structure
+                  months: 6, // Default to 6 months
+                  chartData: [] // Not available in new structure, could be added later
                 }}
-                onPatientsClick={handlePatientsClick}
               />
             </section>
           </div>

@@ -39,12 +39,12 @@ export default function DashboardOverview({
   return (
     <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/50 backdrop-blur-sm group">
       {/* Accent line */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600" />
       
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-primary/10 p-3 text-primary">
+            <div className="rounded-xl bg-amber-100 p-3 text-amber-700">
               <Users className="h-5 w-5" />
             </div>
             <div>
@@ -107,7 +107,7 @@ export default function DashboardOverview({
                 >
                   <div className="relative w-full group/bar">
                     <motion.div
-                      className="w-full bg-gradient-to-t from-primary to-primary/50 rounded-t-md hover:from-primary/80 hover:to-primary/30 transition-colors duration-200"
+                      className="w-full bg-gradient-to-t from-amber-500 to-amber-400 rounded-t-md hover:from-amber-600 hover:to-amber-500 transition-colors duration-200"
                       style={{
                         height: `${Math.max(heightPercentage, 8)}%`,
                       }}
@@ -129,7 +129,7 @@ export default function DashboardOverview({
         </div>
 
         {/* Subtle gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </CardContent>
     </Card>
   );

@@ -161,46 +161,46 @@ export function MatchedClientsSection() {
     <div className="space-y-6">
       {/* Enhanced Summary Cards with professional healthcare theme */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200 hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="bg-blue-500 p-3 rounded-xl shadow-sm">
+              <div className="bg-amber-500 p-3 rounded-xl shadow-sm">
                 <UserCheck className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-blue-700">Recent Matches</p>
-                <p className="text-xs text-blue-600 mb-1">Last 30 days</p>
-                <p className="text-2xl font-bold text-blue-900">{summary.totalRecentMatches}</p>
+                <p className="text-sm font-medium text-amber-700">Recent Matches</p>
+                <p className="text-xs text-amber-600 mb-1">Last 30 days</p>
+                <p className="text-2xl font-bold text-amber-900">{summary.totalRecentMatches}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-slate-50 to-slate-100/50 border-slate-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200 hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="bg-slate-600 p-3 rounded-xl shadow-sm">
+              <div className="bg-amber-600 p-3 rounded-xl shadow-sm">
                 <Users className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-700">Total Clients</p>
-                <p className="text-xs text-slate-600 mb-1">All time</p>
-                <p className="text-2xl font-bold text-slate-900">{summary.totalMatches}</p>
+                <p className="text-sm font-medium text-amber-700">Total Clients</p>
+                <p className="text-xs text-amber-600 mb-1">All time</p>
+                <p className="text-2xl font-bold text-amber-900">{summary.totalMatches}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-slate-50 border-slate-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200 hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="bg-blue-600 p-3 rounded-xl shadow-sm">
+              <div className="bg-amber-700 p-3 rounded-xl shadow-sm">
                 <Activity className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-700">Active Rate</p>
-                <p className="text-xs text-slate-600 mb-1">Client engagement</p>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-sm font-medium text-amber-700">Active Rate</p>
+                <p className="text-xs text-amber-600 mb-1">Client engagement</p>
+                <p className="text-2xl font-bold text-amber-900">
                   {summary.totalMatches > 0 ? Math.round((summary.totalRecentMatches / summary.totalMatches) * 100) : 0}%
                 </p>
               </div>
@@ -211,19 +211,19 @@ export function MatchedClientsSection() {
 
       {/* Enhanced Recent Matches Section */}
       {recentMatches.length > 0 && (
-        <Card className="bg-gradient-to-br from-blue-50/30 to-white border-blue-200">
+        <Card className="bg-gradient-to-br from-amber-50/30 to-white border-amber-200">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-blue-600 p-2 rounded-lg">
+                <div className="bg-amber-600 p-2 rounded-lg">
                   <UserCheck className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-blue-900">Recent Client Matches</h3>
-                  <p className="text-sm text-blue-700">New connections from the last 30 days</p>
+                  <h3 className="text-lg font-semibold text-amber-900">Recent Client Matches</h3>
+                  <p className="text-sm text-amber-700">New connections from the last 30 days</p>
                 </div>
               </div>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
+              <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-300">
                 {recentMatches.length} new
               </Badge>
             </CardTitle>
@@ -234,31 +234,31 @@ export function MatchedClientsSection() {
                 key={match.relationshipId}
                 className={cn(
                   "group flex items-center justify-between p-4 rounded-xl border transition-all duration-300",
-                  "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-white",
-                  "border-slate-200 hover:border-blue-300 hover:shadow-md"
+                  "bg-white hover:bg-gradient-to-r hover:from-amber-50 hover:to-white",
+                  "border-slate-200 hover:border-amber-300 hover:shadow-md"
                 )}
               >
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <Avatar className="h-12 w-12 ring-2 ring-blue-200 group-hover:ring-blue-300 transition-all">
+                    <Avatar className="h-12 w-12 ring-2 ring-amber-200 group-hover:ring-amber-300 transition-all">
                       <AvatarImage src={match.client.profilePicture} />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-800 font-semibold">
+                      <AvatarFallback className="bg-gradient-to-br from-amber-100 to-amber-200 text-amber-800 font-semibold">
                         {match.client.firstName[0]}{match.client.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
                   <div className="space-y-1">
-                    <p className="font-semibold text-gray-900 group-hover:text-blue-900 transition-colors">
+                    <p className="font-semibold text-gray-900 group-hover:text-amber-900 transition-colors">
                       {match.client.firstName} {match.client.lastName}
                     </p>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-blue-600" />
+                        <Calendar className="h-3 w-3 text-amber-600" />
                         <span className="font-medium">{match.matchInfo.daysSinceMatch}</span> days ago
                       </span>
                       {match.assessmentInfo.hasAssessment && (
-                        <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
+                        <Badge variant="outline" className="text-xs bg-amber-50 border-amber-200 text-amber-700">
                           {match.assessmentInfo.assessmentType}
                         </Badge>
                       )}
@@ -269,7 +269,7 @@ export function MatchedClientsSection() {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    className="border-amber-300 text-amber-700 hover:bg-amber-100"
                     onClick={() => handleStartConversation(
                       match.client.id, 
                       `${match.client.firstName} ${match.client.lastName}`
@@ -293,7 +293,7 @@ export function MatchedClientsSection() {
                   />
                   <Button 
                     size="sm" 
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-amber-600 hover:bg-amber-700 text-white"
                   >
                     Schedule
                   </Button>
@@ -306,33 +306,33 @@ export function MatchedClientsSection() {
 
       {/* Enhanced Empty State */}
       {summary.totalMatches === 0 && (
-        <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-200">
+        <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-200">
           <CardContent className="p-12 text-center">
-            <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-2xl w-fit mx-auto mb-6 shadow-sm">
-              <Users className="h-12 w-12 text-blue-700" />
+            <div className="bg-gradient-to-br from-amber-100 to-amber-200 p-6 rounded-2xl w-fit mx-auto mb-6 shadow-sm">
+              <Users className="h-12 w-12 text-amber-700" />
             </div>
-            <h3 className="text-xl font-bold text-blue-900 mb-3">Welcome to Your Client Dashboard!</h3>
-            <p className="text-blue-700 mb-6 max-w-md mx-auto leading-relaxed">
+            <h3 className="text-xl font-bold text-amber-900 mb-3">Welcome to Your Client Dashboard!</h3>
+            <p className="text-amber-700 mb-6 max-w-md mx-auto leading-relaxed">
               Your matched clients will appear here once the matching algorithm connects you with clients who need your expertise. 
               Great things are coming!
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button 
                 variant="outline" 
-                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                className="border-amber-300 text-amber-700 hover:bg-amber-100"
               >
                 <UserCheck className="h-4 w-4 mr-2" />
                 Review Profile
               </Button>
               <Button 
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-amber-600 hover:bg-amber-700 text-white"
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
                 View Analytics
               </Button>
             </div>
-            <div className="mt-8 p-4 bg-blue-100/50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800">
+            <div className="mt-8 p-4 bg-amber-100/50 rounded-lg border border-amber-200">
+              <p className="text-sm text-amber-800">
                 <strong>💡 Tip:</strong> Make sure your profile is complete and your specializations are up-to-date to attract the right clients.
               </p>
             </div>
