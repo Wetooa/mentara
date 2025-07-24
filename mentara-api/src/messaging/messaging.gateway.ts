@@ -227,9 +227,9 @@ export class MessagingGateway
     const room = this.getConversationRoom(conversationId);
     this.logger.debug(`Broadcasting message to conversation room: ${room}`);
 
-    this.server.to(room).emit('message_sent', {
+    this.server.to(room).emit('new_message', {
       ...messageData,
-      eventType: 'message_sent',
+      eventType: 'new_message',
       timestamp: new Date(),
     });
   }
