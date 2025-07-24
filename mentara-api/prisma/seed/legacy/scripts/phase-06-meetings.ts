@@ -33,15 +33,40 @@ export async function runPhase06Meetings(
     }
 
     // Get relationships and users from previous phases
-    const relationships = relationshipsData?.relationships || [];
+    let relationships = relationshipsData?.relationships || [];
     const users = usersData?.users || [];
     const therapists = usersData?.therapists || [];
 
+    // Validation and fallback logic for relationships data
     if (relationships.length === 0) {
-      return {
-        success: false,
-        message: 'No relationships found for meeting creation',
-      };
+      console.log('⚠️ No relationships found in metadata, attempting to query database directly...');
+      
+      try {
+        // Fallback: Query the database directly for existing relationships
+        const existingRelationships = await prisma.clientTherapist.findMany({
+          include: {
+            client: { include: { user: true } },
+            therapist: { include: { user: true } },
+          },
+        });
+        
+        if (existingRelationships.length > 0) {
+          relationships = existingRelationships;
+          console.log(`✅ Found ${relationships.length} existing relationships in database`);
+        } else {
+          return {
+            success: false,
+            message: 'No relationships found for meeting creation - neither in metadata nor in database. Please ensure Phase 4 (relationships) completed successfully.',
+          };
+        }
+      } catch (error) {
+        return {
+          success: false,
+          message: `Failed to query relationships from database: ${error instanceof Error ? error.message : String(error)}`,
+        };
+      }
+    } else {
+      console.log(`✅ Found ${relationships.length} relationships from Phase 4 metadata`);
     }
 
     // Create meetings for client-therapist relationships
@@ -57,6 +82,12 @@ export async function runPhase06Meetings(
     const paymentMethods = await seedPaymentMethods(prisma, users);
 
     console.log(`✅ Phase 6 completed: Created ${meetings.length} meetings, ${meetingNotes.length} meeting notes, ${availability.length} availability slots, ${paymentMethods.length} payment methods`);
+    console.log(`📊 Phase 6 data validation:`, {
+      relationshipsUsed: relationships.length,
+      meetingsCreated: meetings.length,
+      paymentMethodsCreated: paymentMethods.length,
+      therapistsWithAvailability: availability.length,
+    });
 
     return {
       success: true,
