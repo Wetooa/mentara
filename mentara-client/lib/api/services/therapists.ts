@@ -179,6 +179,69 @@ export function createTherapistService(axios: AxiosInstance) {
         return data;
       },
     },
+
+    /**
+     * Worksheets sub-service for therapists to manage worksheets
+     */
+    worksheets: {
+      /**
+       * Get list of worksheets for the authenticated therapist
+       */
+      async getList(params?: { status?: string; clientId?: string }) {
+        const { data } = await axios.get("/therapist/worksheets", { params });
+        return data;
+      },
+
+      /**
+       * Get worksheet details by ID
+       */
+      async getById(worksheetId: string) {
+        const { data } = await axios.get(`/therapist/worksheets/${worksheetId}`);
+        return data;
+      },
+
+      /**
+       * Edit/update worksheet content
+       */
+      async edit(worksheetId: string, updateData: {
+        title?: string;
+        instructions?: string;
+        dueDate?: string;
+        status?: string;
+      }) {
+        const { data } = await axios.put(`/therapist/worksheets/${worksheetId}`, updateData);
+        return data;
+      },
+
+      /**
+       * Mark worksheet as reviewed/completed
+       */
+      async markAsReviewed(worksheetId: string, feedback?: string) {
+        const { data } = await axios.post(`/therapist/worksheets/${worksheetId}/review`, {
+          feedback,
+        });
+        return data;
+      },
+
+      /**
+       * Upload reference file for worksheet
+       */
+      async uploadReferenceFile(worksheetId: string, file: File) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const { data } = await axios.post(
+          `/therapist/worksheets/${worksheetId}/reference-file`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+        return data;
+      },
+    },
   };
 }
 
