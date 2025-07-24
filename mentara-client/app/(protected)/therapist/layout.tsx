@@ -44,13 +44,13 @@ export default function TherapistLayout({
   const navItems = [
     {
       name: "Dashboard",
-      path: "/therapist/dashboard",
+      path: "/therapist",
       icon: "/icons/dashboard.svg",
       id: "dashboard",
     },
     {
       name: "Patients",
-      path: "/therapist/patients", 
+      path: "/therapist/patients",
       icon: "/icons/therapist.svg", // Using therapist icon for patients
       id: "patients",
     },
@@ -84,7 +84,7 @@ export default function TherapistLayout({
     <div className="flex h-screen w-full bg-white">
       {/* Desktop Sidebar Navigation */}
       <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
-        <Link href="/therapist/dashboard" className="mb-8 px-2">
+        <Link href="/therapist" className="mb-8 px-2">
           <Image
             src="/icons/mentara/mentara-icon.png"
             alt="Mentara Logo"
@@ -96,7 +96,7 @@ export default function TherapistLayout({
         </Link>
         <div className="flex flex-1 flex-col items-center gap-6">
           {navItems.map((item) => {
-            const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
+            const isActive = pathname === item.path;
             return (
               <Link
                 key={item.id}

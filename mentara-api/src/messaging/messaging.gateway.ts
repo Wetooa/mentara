@@ -1,18 +1,17 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  SubscribeMessage,
-  MessageBody,
-  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { EventBusService } from '../common/events/event-bus.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { WebSocketAuthService } from './services/websocket-auth.service';
 import { WebSocketEventService } from './services/websocket-event.service';
 
 interface ConnectedUser {
@@ -32,22 +31,7 @@ interface NotificationData {
   actionText?: string;
 }
 
-import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import {
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
-  WebSocketGateway,
-  WebSocketServer,
-  SubscribeMessage,
-  MessageBody,
-  ConnectedSocket,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { EventBusService } from '../common/events/event-bus.service';
-import { PrismaService } from '../providers/prisma-client.provider';
 import { WebSocketAuthMiddleware } from './services/websocket-auth.service';
-import { WebSocketEventService } from './services/websocket-event.service';
 
 interface ConnectedUser {
   userId: string;
@@ -93,7 +77,8 @@ interface NotificationData {
   },
 })
 export class MessagingGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server!: Server;
 
@@ -113,7 +98,7 @@ export class MessagingGateway
   afterInit() {
     // Apply authentication middleware using Socket.IO best practices
     this.server.use(this.authMiddleware.createAuthMiddleware());
-    
+
     this.logger.log(
       'Messaging WebSocket Gateway initialized with connection state recovery and auth middleware',
     );
@@ -126,7 +111,9 @@ export class MessagingGateway
       const user = (client as any).user;
 
       if (!userId || !user) {
-        this.logger.error(`Socket ${client.id} reached handleConnection without proper auth data`);
+        this.logger.error(
+          `Socket ${client.id} reached handleConnection without proper auth data`,
+        );
         client.disconnect();
         return;
       }
@@ -194,16 +181,16 @@ export class MessagingGateway
     if (!existingConnection) return;
 
     this.logger.log(`Handling existing connection for user ${userId}`);
-    
+
     // Clean up existing connection data without disconnecting the socket
     // Let the old socket naturally disconnect to avoid connection flicker
     this.connectedUsers.delete(userId);
-    
+
     const oldSocketId = this.userToSocket.get(userId);
     if (oldSocketId) {
       this.userToSocket.delete(userId);
       this.socketToUser.delete(oldSocketId);
-      
+
       // Optionally notify the old socket about replacement
       const oldSocket = this.server.sockets.sockets.get(oldSocketId);
       if (oldSocket) {
@@ -239,7 +226,7 @@ export class MessagingGateway
   broadcastMessage(conversationId: string, messageData: any): void {
     const room = this.getConversationRoom(conversationId);
     this.logger.debug(`Broadcasting message to conversation room: ${room}`);
-    
+
     this.server.to(room).emit('message_sent', {
       ...messageData,
       eventType: 'message_sent',
@@ -250,10 +237,16 @@ export class MessagingGateway
   /**
    * Broadcast read receipt to conversation participants
    */
-  broadcastReadReceipt(conversationId: string, messageId: string, readBy: string): void {
+  broadcastReadReceipt(
+    conversationId: string,
+    messageId: string,
+    readBy: string,
+  ): void {
     const room = this.getConversationRoom(conversationId);
-    this.logger.debug(`Broadcasting read receipt for message ${messageId} to room: ${room}`);
-    
+    this.logger.debug(
+      `Broadcasting read receipt for message ${messageId} to room: ${room}`,
+    );
+
     this.server.to(room).emit('message_read', {
       conversationId,
       messageId,
@@ -266,8 +259,11 @@ export class MessagingGateway
   /**
    * Send notification to specific users
    */
-  sendNotificationToUsers(userIds: string[], notification: NotificationData): void {
-    userIds.forEach(userId => {
+  sendNotificationToUsers(
+    userIds: string[],
+    notification: NotificationData,
+  ): void {
+    userIds.forEach((userId) => {
       const userRoom = this.getUserRoom(userId);
       this.server.to(userRoom).emit('notification', {
         id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -284,7 +280,10 @@ export class MessagingGateway
   /**
    * Subscribe user to conversation room - simplified version
    */
-  subscribeUserToConversationRoom(userId: string, conversationId: string): void {
+  subscribeUserToConversationRoom(
+    userId: string,
+    conversationId: string,
+  ): void {
     const socketId = this.userToSocket.get(userId);
     if (!socketId) {
       this.logger.warn(`No socket found for user ${userId}`);
@@ -293,13 +292,15 @@ export class MessagingGateway
 
     const conversationRoom = this.getConversationRoom(conversationId);
     this.server.in(socketId).socketsJoin(conversationRoom);
-    
+
     const connectedUser = this.connectedUsers.get(userId);
     if (connectedUser) {
       connectedUser.rooms.add(conversationRoom);
     }
 
-    this.logger.debug(`User ${userId} subscribed to conversation room: ${conversationRoom}`);
+    this.logger.debug(
+      `User ${userId} subscribed to conversation room: ${conversationRoom}`,
+    );
   }
 
   /**
@@ -336,7 +337,7 @@ export class MessagingGateway
     if (!userId) return;
 
     this.subscribeUserToConversationRoom(userId, data.conversationId);
-    
+
     client.emit('conversation_joined', {
       conversationId: data.conversationId,
       timestamp: new Date(),
@@ -353,7 +354,7 @@ export class MessagingGateway
 
     const conversationRoom = this.getConversationRoom(data.conversationId);
     client.leave(conversationRoom);
-    
+
     const connectedUser = this.connectedUsers.get(userId);
     if (connectedUser) {
       connectedUser.rooms.delete(conversationRoom);
@@ -411,9 +412,10 @@ export class MessagingGateway
   @SubscribeMessage('send_message_with_ack')
   async handleSendMessageWithAck(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { 
-      conversationId: string; 
-      content: string; 
+    @MessageBody()
+    data: {
+      conversationId: string;
+      content: string;
       type?: 'TEXT' | 'IMAGE' | 'AUDIO' | 'VIDEO';
       replyToMessageId?: string;
     },
@@ -440,17 +442,20 @@ export class MessagingGateway
       this.broadcastMessage(data.conversationId, messageData);
 
       // Return acknowledgment
-      return { 
-        success: true, 
+      return {
+        success: true,
         messageId: messageData.id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      this.logger.error(`Error sending message with ack for user ${userId}:`, error);
-      return { 
-        success: false, 
+      this.logger.error(
+        `Error sending message with ack for user ${userId}:`,
+        error,
+      );
+      return {
+        success: false,
         error: 'Failed to send message',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -467,18 +472,23 @@ export class MessagingGateway
     if (!userId) return;
 
     try {
-      this.logger.debug(`Message ${data.messageId} acknowledged as ${data.type} by user ${userId}`);
-      
+      this.logger.debug(
+        `Message ${data.messageId} acknowledged as ${data.type} by user ${userId}`,
+      );
+
       // This would typically update the message status in the database
       // For now, we'll just broadcast the acknowledgment to other participants
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         acknowledged: true,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      this.logger.error(`Error acknowledging message ${data.messageId}:`, error);
+      this.logger.error(
+        `Error acknowledging message ${data.messageId}:`,
+        error,
+      );
       return { success: false, error: 'Failed to acknowledge message' };
     }
   }
