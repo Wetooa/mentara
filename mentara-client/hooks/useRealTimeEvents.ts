@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useUser } from "@clerk/nextjs";
 import { Socket } from "socket.io-client";
 import { RealTimeEventManager, BaseEvent, EventHandlerConfig } from "@/lib/realtime/realtime-event-manager";
 import { getNamespacedSocket } from "@/lib/websocket";
@@ -26,7 +25,6 @@ interface UseRealTimeEventsConfig extends Partial<EventHandlerConfig> {
 }
 
 export function useRealTimeEvents(config: UseRealTimeEventsConfig = {}) {
-  const { user } = useUser();
   const queryClient = useQueryClient();
   const eventManagerRef = useRef<RealTimeEventManager | null>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -258,10 +256,10 @@ export function useRealTimeEvents(config: UseRealTimeEventsConfig = {}) {
     // Connection state
     isConnected: socketRef.current?.connected ?? false,
     socket: socketRef.current,
-    
+
     // Event manager
     eventManager: eventManagerRef.current,
-    
+
     // Actions
     sendMessage,
     subscribe,
@@ -269,12 +267,12 @@ export function useRealTimeEvents(config: UseRealTimeEventsConfig = {}) {
     connect,
     disconnect,
     updateConfig,
-    
+
     // Helper to get supported event types
     getSupportedEvents: () => eventManagerRef.current?.getEventTypes() ?? [],
-    
+
     // Helper to check if event type is supported
-    hasEventHandler: (eventType: string) => 
+    hasEventHandler: (eventType: string) =>
       eventManagerRef.current?.hasHandler(eventType) ?? false,
   };
 }
