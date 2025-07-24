@@ -106,18 +106,30 @@ export function MatchedClientsSection() {
     );
   }
 
-  // Enhanced error state with better UX
+  // Enhanced error state with better UX and user-friendly messaging
   if (error) {
+    // Check if this might be a "no clients" scenario rather than a real error
+    const errorMessage = (error as any)?.response?.status === 404 
+      ? "No clients assigned yet - please wait for client assignments"
+      : "Unable to load client information at the moment";
+    
     return (
-      <Alert className="border-amber-200 bg-amber-50">
-        <AlertCircle className="h-4 w-4 text-amber-600" />
-        <AlertDescription className="flex items-center justify-between text-amber-800">
-          <span>Failed to load matched clients. This might be due to no assigned clients yet.</span>
+      <Alert className="border-blue-200 bg-blue-50">
+        <AlertCircle className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="flex items-center justify-between text-blue-800">
+          <div className="space-y-1">
+            <span className="font-medium">{errorMessage}</span>
+            {(error as any)?.response?.status === 404 && (
+              <p className="text-sm text-blue-700">
+                New therapists typically receive client assignments within 24-48 hours of profile completion.
+              </p>
+            )}
+          </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => refetch()}
-            className="ml-4 border-amber-300 text-amber-700 hover:bg-amber-100"
+            className="ml-4 border-blue-300 text-blue-700 hover:bg-blue-100"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
@@ -147,48 +159,48 @@ export function MatchedClientsSection() {
 
   return (
     <div className="space-y-6">
-      {/* Enhanced Summary Cards with amber theme */}
+      {/* Enhanced Summary Cards with professional healthcare theme */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-white border-gray-200 hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="bg-amber-500 p-3 rounded-xl shadow-sm">
                 <UserCheck className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-amber-700">Recent Matches</p>
-                <p className="text-xs text-amber-600 mb-1">Last 30 days</p>
-                <p className="text-2xl font-bold text-amber-900">{summary.totalRecentMatches}</p>
+                <p className="text-sm font-medium text-gray-700">Recent Matches</p>
+                <p className="text-xs text-gray-500 mb-1">Last 30 days</p>
+                <p className="text-2xl font-bold text-gray-900">{summary.totalRecentMatches}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-white border-gray-200 hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="bg-blue-500 p-3 rounded-xl shadow-sm">
+              <div className="bg-amber-600 p-3 rounded-xl shadow-sm">
                 <Users className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-blue-700">Total Clients</p>
-                <p className="text-xs text-blue-600 mb-1">All time</p>
-                <p className="text-2xl font-bold text-blue-900">{summary.totalMatches}</p>
+                <p className="text-sm font-medium text-gray-700">Total Clients</p>
+                <p className="text-xs text-gray-500 mb-1">All time</p>
+                <p className="text-2xl font-bold text-gray-900">{summary.totalMatches}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100/50 border-green-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-white border-gray-200 hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="bg-green-500 p-3 rounded-xl shadow-sm">
+              <div className="bg-amber-700 p-3 rounded-xl shadow-sm">
                 <Activity className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-green-700">Active Rate</p>
-                <p className="text-xs text-green-600 mb-1">Client engagement</p>
-                <p className="text-2xl font-bold text-green-900">
+                <p className="text-sm font-medium text-gray-700">Active Rate</p>
+                <p className="text-xs text-gray-500 mb-1">Client engagement</p>
+                <p className="text-2xl font-bold text-gray-900">
                   {summary.totalMatches > 0 ? Math.round((summary.totalRecentMatches / summary.totalMatches) * 100) : 0}%
                 </p>
               </div>
@@ -199,16 +211,16 @@ export function MatchedClientsSection() {
 
       {/* Enhanced Recent Matches Section */}
       {recentMatches.length > 0 && (
-        <Card className="bg-gradient-to-br from-amber-50/30 to-white border-amber-200">
+        <Card className="bg-white border-gray-200">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-amber-500 p-2 rounded-lg">
+                <div className="bg-amber-600 p-2 rounded-lg">
                   <UserCheck className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-amber-900">Recent Client Matches</h3>
-                  <p className="text-sm text-amber-700">New connections from the last 30 days</p>
+                  <h3 className="text-lg font-semibold text-gray-900">Recent Client Matches</h3>
+                  <p className="text-sm text-gray-600">New connections from the last 30 days</p>
                 </div>
               </div>
               <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-300">
@@ -223,7 +235,7 @@ export function MatchedClientsSection() {
                 className={cn(
                   "group flex items-center justify-between p-4 rounded-xl border transition-all duration-300",
                   "bg-white hover:bg-gradient-to-r hover:from-amber-50 hover:to-white",
-                  "border-amber-200 hover:border-amber-300 hover:shadow-md"
+                  "border-slate-200 hover:border-amber-300 hover:shadow-md"
                 )}
               >
                 <div className="flex items-center gap-4">
@@ -246,7 +258,7 @@ export function MatchedClientsSection() {
                         <span className="font-medium">{match.matchInfo.daysSinceMatch}</span> days ago
                       </span>
                       {match.assessmentInfo.hasAssessment && (
-                        <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
+                        <Badge variant="outline" className="text-xs bg-amber-50 border-amber-200 text-amber-700">
                           {match.assessmentInfo.assessmentType}
                         </Badge>
                       )}
@@ -277,7 +289,7 @@ export function MatchedClientsSection() {
                     }}
                     variant="outline"
                     size="sm"
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    className="border-slate-300 text-slate-700 hover:bg-slate-100"
                   />
                   <Button 
                     size="sm" 
@@ -294,20 +306,20 @@ export function MatchedClientsSection() {
 
       {/* Enhanced Empty State */}
       {summary.totalMatches === 0 && (
-        <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-200">
+        <Card className="bg-white border-gray-200">
           <CardContent className="p-12 text-center">
             <div className="bg-gradient-to-br from-amber-100 to-amber-200 p-6 rounded-2xl w-fit mx-auto mb-6 shadow-sm">
               <Users className="h-12 w-12 text-amber-700" />
             </div>
-            <h3 className="text-xl font-bold text-amber-900 mb-3">Welcome to Your Client Dashboard!</h3>
-            <p className="text-amber-700 mb-6 max-w-md mx-auto leading-relaxed">
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Welcome to Your Client Dashboard!</h3>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
               Your matched clients will appear here once the matching algorithm connects you with clients who need your expertise. 
               Great things are coming!
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button 
                 variant="outline" 
-                className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 <UserCheck className="h-4 w-4 mr-2" />
                 Review Profile
@@ -319,7 +331,7 @@ export function MatchedClientsSection() {
                 View Analytics
               </Button>
             </div>
-            <div className="mt-8 p-4 bg-amber-100/50 rounded-lg border border-amber-200">
+            <div className="mt-8 p-4 bg-amber-50 rounded-lg border border-amber-200">
               <p className="text-sm text-amber-800">
                 <strong>💡 Tip:</strong> Make sure your profile is complete and your specializations are up-to-date to attract the right clients.
               </p>

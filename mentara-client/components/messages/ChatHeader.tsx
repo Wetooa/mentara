@@ -5,10 +5,12 @@ import { Contact } from "./types";
 
 interface ChatHeaderProps {
   contact: Contact;
+  onCallInitiate?: (contactId: string, type: 'audio' | 'video') => void;
 }
 
 export default function ChatHeader({
   contact,
+  onCallInitiate,
 }: ChatHeaderProps) {
   const [showSettings, setShowSettings] = useState(false);
 
@@ -64,16 +66,20 @@ export default function ChatHeader({
       <div className="flex items-center space-x-2">
         {/* Call Button */}
         <button
-          className="p-2 rounded-full hover:bg-gray-100"
+          className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Voice call"
+          onClick={() => onCallInitiate?.(contact.id, 'audio')}
+          disabled={!onCallInitiate}
         >
           <Phone className="h-5 w-5 text-gray-500" />
         </button>
 
         {/* Video Call Button */}
         <button
-          className="p-2 rounded-full hover:bg-gray-100"
+          className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Video call"
+          onClick={() => onCallInitiate?.(contact.id, 'video')}
+          disabled={!onCallInitiate}
         >
           <Video className="h-5 w-5 text-gray-500" />
         </button>

@@ -368,6 +368,111 @@ export class MessagingService {
     }
   }
 
+  /**
+   * Get a specific conversation by ID with participant details
+   * Used for video call functionality to get recipient information
+   */
+  async getConversationById(userId: string, conversationId: string) {
+    console.log('🔍 [MESSAGING SERVICE] getConversationById called');
+    console.log('📊 [PARAMETERS]', { userId, conversationId });
+
+    try {
+      const conversation = await this.prisma.conversation.findFirst({
+        where: {
+          id: conversationId,
+          participants: {
+            some: {
+              userId,
+              isActive: true,
+            },
+          },
+          isActive: true,
+        },
+        include: {
+          participants: {
+            where: { isActive: true },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  avatarUrl: true,
+                  role: true,
+                },
+              },
+            },
+          },
+          messages: {
+            take: 1,
+            orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              content: true,
+              createdAt: true,
+              messageType: true,
+            },
+          },
+        },
+      });
+
+      if (!conversation) {
+        throw new NotFoundException('Conversation not found');
+      }
+
+      console.log('✅ [DATABASE SUCCESS] Conversation found:', {
+        id: conversation.id,
+        type: conversation.type,
+        participantCount: conversation.participants.length,
+      });
+
+      // Transform the data to match frontend expectations
+      const result = {
+        id: conversation.id,
+        type: conversation.type.toLowerCase(),
+        title: conversation.title,
+        description: null, // Not in schema, set to null
+        avatarUrl: null, // Not in schema, set to null
+        isArchived: false, // Not in schema, default to false
+        isMuted: false, // Not at conversation level, default to false
+        createdAt: conversation.createdAt.toISOString(),
+        updatedAt: conversation.updatedAt.toISOString(),
+        participants: conversation.participants.map(p => ({
+          id: p.id,
+          conversationId: p.conversationId,
+          userId: p.userId,
+          role: p.role.toLowerCase(),
+          joinedAt: p.joinedAt.toISOString(),
+          leftAt: null, // Not in schema, set to null
+          isMuted: p.isMuted,
+          user: {
+            id: p.user.id,
+            firstName: p.user.firstName,
+            lastName: p.user.lastName,
+            email: p.user.email,
+            avatarUrl: p.user.avatarUrl,
+            role: p.user.role.toLowerCase(),
+          },
+        })),
+        lastMessage: conversation.messages[0] ? {
+          id: conversation.messages[0].id,
+          content: conversation.messages[0].content,
+          createdAt: conversation.messages[0].createdAt.toISOString(),
+          messageType: conversation.messages[0].messageType.toLowerCase(),
+        } : undefined,
+      };
+
+      return result;
+    } catch (error) {
+      console.error('❌ [DATABASE ERROR] getConversationById failed:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to fetch conversation');
+    }
+  }
+
   // Message Management
   async sendMessage(
     userId: string,

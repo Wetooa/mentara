@@ -8,6 +8,7 @@ import CommentSection from "@/components/community/CommentSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -430,7 +431,7 @@ export default function UserCommunity() {
             </div>
 
             {/* Posts Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto bg-community-warm/10 relative mentara-scrollbar">
+            <ScrollArea className="flex-1 min-h-0 bg-community-warm/10 relative">
               {/* Background decoration */}
               <div className="absolute inset-0 bg-community-gradient opacity-20" />
               <div className="relative max-w-4xl mx-auto p-4 lg:p-6">
@@ -717,7 +718,7 @@ export default function UserCommunity() {
                   </div>
                 )}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         )}
           </ResizablePanel>
@@ -781,13 +782,13 @@ export default function UserCommunity() {
                   {selectedRoom?.name}
                 </h1>
               </div>
-              <div className="flex-1 min-h-0 overflow-y-auto bg-community-warm/10 mentara-scrollbar">
+              <ScrollArea className="flex-1 min-h-0 bg-community-warm/10">
                 <div className="p-4">
                   <div className="text-center py-8">
                     <p className="text-community-soothing-foreground">Mobile room content loading...</p>
                   </div>
                 </div>
-              </div>
+              </ScrollArea>
             </div>
           )}
         </div>

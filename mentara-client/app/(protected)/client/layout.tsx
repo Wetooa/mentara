@@ -8,6 +8,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getProfileUrl } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
 import { LayoutOmniSearchBar } from "@/components/search";
 import { DashboardPageMetadata } from "@/components/metadata/SimplePageMetadata";
 import { UserDisplay } from "@/components/common/UserDisplay";
@@ -303,6 +304,9 @@ export default function MainLayout({
             {/* Extra space for mobile search */}
             {children}
           </main>
+
+          {/* Video Call Notifications - Fixed position in upper right */}
+          <IncomingCallNotificationContainer />
 
           {/* Mobile Bottom Navigation */}
           <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200">

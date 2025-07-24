@@ -182,13 +182,13 @@ export function MeetingCalendar({
         )}
         
         {/* Appointment Calendar - handles meeting details automatically */}
-        <div className="flex justify-center">
+        <div className="w-full">
           <AppointmentCalendar
             meetings={meetings}
             onSelect={handleDateSelect}
             selected={selectedDate}
             showMeetingDetails={true}
-            className="border-0"
+            className="border-0 w-full"
           />
         </div>
       </CardContent>

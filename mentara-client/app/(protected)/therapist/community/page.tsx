@@ -8,6 +8,7 @@ import CommentSection from "@/components/community/CommentSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -140,41 +141,41 @@ export default function TherapistCommunity() {
               onRoomSelect={handleRoomSelect}
             />
           </ResizablePanel>
-          <ResizableHandle withHandle className="w-1.5 bg-amber-100/60 hover:bg-amber-200/80 transition-colors duration-200" />
+          <ResizableHandle withHandle className="w-1.5 bg-slate-100/60 hover:bg-blue-200/80 transition-colors duration-200" />
           <ResizablePanel defaultSize={80}>
             {/* Desktop Main Content Area */}
         {/* Main Content Area */}
         {!selectedRoomId ? (
-          // Welcome/No Room Selected State - Enhanced for Therapists
-          <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+          // Welcome/No Room Selected State - Professional Healthcare Design
+          <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
             <div className="text-center max-w-md">
-              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Stethoscope className="h-8 w-8 text-green-600" />
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border border-blue-100">
+                <Stethoscope className="h-8 w-8 text-blue-600" />
               </div>
-              <h2 className="text-2xl font-bold text-neutral-800 mb-2">Therapist Community Hub</h2>
-              <p className="text-neutral-600 mb-6">
+              <h2 className="text-2xl font-bold text-blue-900 mb-2">Therapist Community Hub</h2>
+              <p className="text-slate-600 mb-6">
                 Connect with fellow therapists, share insights, and engage with clients in a supportive environment.
               </p>
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <Activity className="h-5 w-5 text-green-600 mx-auto mb-1" />
-                  <p className="font-medium">Active Communities</p>
-                  <p className="text-neutral-500">{communityStats?.totalCommunities || 0}</p>
+                <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
+                  <Activity className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                  <p className="font-medium text-slate-700">Active Communities</p>
+                  <p className="text-slate-500">{communityStats?.totalCommunities || 0}</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
+                <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
                   <MessageCircle className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-                  <p className="font-medium">Professional Posts</p>
-                  <p className="text-neutral-500">{communityStats?.totalPosts || 0}</p>
+                  <p className="font-medium text-slate-700">Professional Posts</p>
+                  <p className="text-slate-500">{communityStats?.totalPosts || 0}</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <UserCheck className="h-5 w-5 text-purple-600 mx-auto mb-1" />
-                  <p className="font-medium">Active Members</p>
-                  <p className="text-neutral-500">{communityStats?.totalMembers || 0}</p>
+                <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
+                  <UserCheck className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                  <p className="font-medium text-slate-700">Active Members</p>
+                  <p className="text-slate-500">{communityStats?.totalMembers || 0}</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <Users className="h-5 w-5 text-indigo-600 mx-auto mb-1" />
-                  <p className="font-medium">Therapists Online</p>
-                  <p className="text-neutral-500">{communityStats?.totalMembers || 0}</p>
+                <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
+                  <Users className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                  <p className="font-medium text-slate-700">Therapists Online</p>
+                  <p className="text-slate-500">{communityStats?.totalMembers || 0}</p>
                 </div>
               </div>
             </div>
@@ -287,7 +288,7 @@ export default function TherapistCommunity() {
             </div>
 
             {/* Posts Content */}
-            <div className="flex-1 overflow-y-auto bg-neutral-50">
+            <ScrollArea className="flex-1 bg-neutral-50">
               <div className="max-w-4xl mx-auto p-6">
                 {postsLoading ? (
                   // Loading state
@@ -427,7 +428,7 @@ export default function TherapistCommunity() {
                   </div>
                 )}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         )}
           </ResizablePanel>
@@ -451,7 +452,7 @@ export default function TherapistCommunity() {
                   setIsSidebarOpen(true);
                 }
               }}
-              className="border-amber-300 text-amber-600"
+              className="border-blue-300 text-blue-600"
             >
               <Hash className="h-4 w-4 mr-1" />
               {selectedCommunityId ? 'Communities' : 'Select Community'}
@@ -459,7 +460,7 @@ export default function TherapistCommunity() {
             {selectedRoom && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>/</span>
-                <span className="font-medium text-amber-700">{selectedRoom.name}</span>
+                <span className="font-medium text-blue-700">{selectedRoom.name}</span>
               </div>
             )}
           </div>
@@ -468,14 +469,14 @@ export default function TherapistCommunity() {
         {/* Mobile Main Content */}
         <div className="flex-1 flex flex-col h-full">
           {!selectedRoomId ? (
-            // Mobile Welcome State
-            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+            // Mobile Welcome State - Professional Healthcare Design
+            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
               <div className="text-center max-w-md p-4">
-                <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Stethoscope className="h-8 w-8 text-green-600" />
+                <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border border-blue-100">
+                  <Stethoscope className="h-8 w-8 text-blue-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-800 mb-2">Therapist Community Hub</h2>
-                <p className="text-neutral-600 mb-6">
+                <h2 className="text-2xl font-bold text-blue-900 mb-2">Therapist Community Hub</h2>
+                <p className="text-slate-600 mb-6">
                   Tap Communities above to connect with fellow therapists and clients.
                 </p>
               </div>
@@ -488,13 +489,139 @@ export default function TherapistCommunity() {
                   {selectedRoom?.name}
                 </h1>
               </div>
-              <div className="flex-1 min-h-0 overflow-y-auto bg-neutral-50">
+              <ScrollArea className="flex-1 min-h-0 bg-neutral-50">
                 <div className="p-4">
-                  <div className="text-center py-8">
-                    <p className="text-neutral-600">Mobile room content loading...</p>
-                  </div>
+                  {postsLoading ? (
+                    // Mobile Loading state
+                    <div className="space-y-4">
+                      {[1, 2, 3].map(i => (
+                        <Card key={i}>
+                          <CardHeader>
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="h-8 w-8 rounded-full" />
+                              <div className="space-y-1">
+                                <Skeleton className="h-3 w-20" />
+                                <Skeleton className="h-2 w-12" />
+                              </div>
+                            </div>
+                            <CardTitle>
+                              <Skeleton className="h-4 w-3/4" />
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <Skeleton className="h-16 w-full" />
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : postsError ? (
+                    // Mobile Error state
+                    <Card>
+                      <CardContent className="text-center py-6">
+                        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+                        <CardTitle className="text-base mb-2">Failed to load posts</CardTitle>
+                        <p className="text-neutral-600 text-sm mb-4">
+                          There was an error loading posts from this room.
+                        </p>
+                        <Button onClick={retryLoadPosts} size="sm">
+                          Try Again
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : !postsData?.posts.length ? (
+                    // Mobile Empty state
+                    <Card>
+                      <CardContent className="text-center py-6">
+                        <MessageCircle className="h-8 w-8 text-neutral-400 mx-auto mb-3" />
+                        <CardTitle className="text-base mb-2">No discussions yet</CardTitle>
+                        <p className="text-neutral-600 text-sm mb-4">
+                          Be the first to share professional insights!
+                        </p>
+                        {isPostingAllowed() && (
+                          <Button onClick={() => setIsCreatePostOpen(true)} size="sm">
+                            <Plus className="h-3 w-3 mr-2" />
+                            Start Discussion
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    // Mobile Posts list with proper scrolling
+                    <div className="space-y-4">
+                      {(postsData.posts as unknown as PostData[]).map((post: PostData) => (
+                        <Card key={post.id} className="hover:shadow-sm transition-shadow">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={post.user.avatarUrl} />
+                                <AvatarFallback className="text-xs">
+                                  {getUserInitials(post.user.firstName, post.user.lastName)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1">
+                                  <h3 className="font-medium text-neutral-800 text-sm truncate">
+                                    {post.user.firstName} {post.user.lastName}
+                                  </h3>
+                                  {post.user?.role === 'therapist' && (
+                                    <Badge variant="secondary" className="text-xs px-1">
+                                      <Stethoscope className="h-2 w-2 mr-1" />
+                                      T
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-neutral-500">
+                                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                                </p>
+                              </div>
+                            </div>
+                            <CardTitle className="text-base mt-2">
+                              {post.title}
+                            </CardTitle>
+                          </CardHeader>
+                          
+                          <CardContent className="pt-0">
+                            <p className="text-neutral-700 text-sm leading-relaxed line-clamp-3">
+                              {post.content}
+                            </p>
+                            
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-200">
+                              <div className="flex items-center gap-4 text-xs">
+                                <button
+                                  onClick={() => handleHeartPost(post as unknown as Post)}
+                                  className={cn(
+                                    "flex items-center gap-1 hover:text-red-500 transition-colors",
+                                    isPostHearted(post as unknown as Post) && "text-red-500"
+                                  )}
+                                  disabled={heartPostMutation.isPending}
+                                >
+                                  <Heart className={cn("h-3 w-3", isPostHearted(post as unknown as Post) && "fill-current")} />
+                                  <span>{post._count.hearts}</span>
+                                </button>
+                                
+                                <div className="flex items-center gap-1 text-neutral-500">
+                                  <MessageCircle className="h-3 w-3" />
+                                  <span>{post._count.comments}</span>
+                                </div>
+                              </div>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewPost(post.id)}
+                                className="text-xs py-1 px-2 h-auto"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                View
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
+              </ScrollArea>
             </div>
           )}
         </div>

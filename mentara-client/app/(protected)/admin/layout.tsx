@@ -11,6 +11,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
 import Image from "next/image";
 
 export default function AdminLayout({
@@ -316,6 +317,9 @@ export default function AdminLayout({
         <main className="flex-1 w-full h-full pt-16 pb-16 md:pb-0 overflow-y-auto bg-gray-50">
           <div className="p-4 md:p-6">{children}</div>
         </main>
+
+        {/* Video Call Notifications - Fixed position in upper right */}
+        <IncomingCallNotificationContainer />
 
         {/* Mobile Bottom Navigation */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 shadow-lg">
