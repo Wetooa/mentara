@@ -10,10 +10,6 @@ import { usePostDetail } from "@/hooks/community";
 import { PostDetail } from "@/components/community/PostDetail";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
-interface PostDetailPageProps {
-  params: { id: string };
-}
-
 function PostDetailContent() {
   const params = useParams();
   const router = useRouter();
@@ -24,22 +20,19 @@ function PostDetailContent() {
     isLoading, 
     isError, 
     error, 
-    updatePost, 
-    deletePost,
-    isUpdating,
-    isDeleting 
+    deletePost
   } = usePostDetail(postId);
 
   const handleBackToCommunity = () => {
     router.push("/client/community");
   };
 
-  const handleEdit = (post: any) => {
+  const handleEdit = () => {
     // TODO: Implement edit functionality
-    console.log("Edit post:", post);
+    console.log("Edit post functionality not yet implemented");
   };
 
-  const handleDelete = (postId: string) => {
+  const handleDelete = () => {
     if (confirm("Are you sure you want to delete this post?")) {
       deletePost();
       setTimeout(() => {
@@ -133,7 +126,7 @@ function PostDetailLoading() {
   );
 }
 
-export default function PostDetailPage({ params }: PostDetailPageProps) {
+export default function PostDetailPage() {
   return (
     <Suspense fallback={<PostDetailLoading />}>
       <PostDetailContent />

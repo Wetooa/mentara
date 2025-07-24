@@ -30,7 +30,6 @@ import {
   X,
   Edit3,
   Trash2,
-  MoreHorizontal,
   Eye
 } from "lucide-react";
 import {
@@ -39,8 +38,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useCommunityPage } from "@/hooks/community/useCommunityPage";
-import { useCommunityStats } from "@/hooks/community";
-import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/api/communities";
 
@@ -59,7 +56,6 @@ export default function UserCommunity() {
     heartPostMutation,
     // Edit post functionality
     isEditPostOpen,
-    editingPost,
     editPostTitle,
     editPostContent,
     editPostMutation,
@@ -88,7 +84,6 @@ export default function UserCommunity() {
     selectedFiles,
   } = useCommunityPage();
 
-  const { user } = useAuth();
   const router = useRouter();
 
   // Mobile sidebar visibility state
