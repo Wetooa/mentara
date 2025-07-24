@@ -36,6 +36,9 @@ export async function generateTherapyData(
     meetingNotes: [],
   };
 
+  // Create therapist availability first (required for meeting scheduling)
+  await createTherapistAvailability(prisma, usersData);
+
   // Create meetings for each client-therapist relationship
   await createMeetings(prisma, config, relationshipsData, result);
 
@@ -301,6 +304,57 @@ async function createMeetingNotes(
       console.log(`    ⚠️  Failed to create meeting notes: ${error}`);
     }
   }
+}
+
+/**
+ * Create therapist availability schedules
+ */
+async function createTherapistAvailability(
+  prisma: PrismaClient,
+  usersData: UsersData
+): Promise<void> {
+  console.log('    Creating therapist availability...');
+  
+  for (const therapistData of usersData.therapists) {
+    const therapist = therapistData.user;
+    
+    // Create availability for weekdays (Monday=1 to Friday=5)
+    // Note: JavaScript getDay() returns 0=Sunday, 1=Monday, 2=Tuesday, etc.
+    const weekdays = [1, 2, 3, 4, 5]; // Monday to Friday
+    const selectedDays = randomChoices(weekdays, randomInt(3, 5)); // 3-5 days per therapist
+
+    for (const dayOfWeek of selectedDays) {
+      // Generate realistic availability hours
+      const startHours = [8, 9, 10]; // 8am, 9am, or 10am start
+      const endHours = [16, 17, 18]; // 4pm, 5pm, or 6pm end
+      
+      const startHour = randomChoice(startHours);
+      const endHour = randomChoice(endHours.filter(h => h > startHour + 4)); // At least 4 hours
+      
+      try {
+        await prisma.therapistAvailability.create({
+          data: {
+            therapistId: therapist.id,
+            dayOfWeek: dayOfWeek.toString(), // Store as string: "1", "2", etc.
+            startTime: `${startHour.toString().padStart(2, '0')}:00`,
+            endTime: `${endHour.toString().padStart(2, '0')}:00`,
+            timezone: 'Asia/Manila', // Default timezone
+            isAvailable: true,
+            notes: `Available for ${endHour - startHour} hours on ${getDayName(dayOfWeek)}`,
+          },
+        });
+      } catch (error) {
+        console.log(`    ⚠️  Failed to create availability for therapist ${therapist.firstName}: ${error}`);
+      }
+    }
+    
+    console.log(`    ✅ Created availability for therapist ${therapist.firstName} ${therapist.lastName}`);
+  }
+}
+
+function getDayName(dayOfWeek: number): string {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days[dayOfWeek] || 'Unknown';
 }
 
 /**

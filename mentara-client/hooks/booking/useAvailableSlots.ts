@@ -28,19 +28,32 @@ export function useAvailableSlots(therapistId: string, date: string) {
   } = useQuery({
     queryKey: ['booking', 'slots', therapistId, date],
     queryFn: async () => {
+      console.log(`[useAvailableSlots] Fetching slots for therapist ${therapistId} on ${date}`);
       try {
-        return await api.booking.availability.getSlots(therapistId, date);
+        const result = await api.booking.availability.getSlots(therapistId, date);
+        console.log(`[useAvailableSlots] Successfully fetched ${result?.length || 0} slots:`, result);
+        return result;
       } catch (error: unknown) {
+        console.error(`[useAvailableSlots] Error fetching slots:`, error);
         // Add more context to error messages
         const err = error as { response?: { status: number; data?: { message?: string } }; message?: string };
+        
         if (err.response?.status === 400 && err.response?.data?.message?.includes('advance')) {
           throw new Error('Bookings must be made at least 30 minutes in advance');
         } else if (err.response?.status === 404) {
-          throw new Error('Therapist availability not found');
+          throw new Error(`No availability found for this therapist on ${date}. The therapist may not have set their availability for this day.`);
         } else if (err.response?.status === 401) {
-          throw new Error('Authentication required');
+          throw new Error('Authentication required - please sign in again');
         } else {
-          throw new Error(err.response?.data?.message || err.message || 'Failed to load available slots');
+          const errorMessage = err.response?.data?.message || err.message || 'Failed to load available slots';
+          console.error(`[useAvailableSlots] Full error details:`, {
+            status: err.response?.status,
+            data: err.response?.data,
+            message: err.message,
+            therapistId,
+            date,
+          });
+          throw new Error(errorMessage);
         }
       }
     },
@@ -48,6 +61,7 @@ export function useAvailableSlots(therapistId: string, date: string) {
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
     retry: (failureCount, error: Error) => {
+      console.log(`[useAvailableSlots] Retry attempt ${failureCount + 1} for error:`, error.message);
       // Don't retry on authentication or validation errors
       if (error.message?.includes('Authentication') || error.message?.includes('advance')) {
         return false;
