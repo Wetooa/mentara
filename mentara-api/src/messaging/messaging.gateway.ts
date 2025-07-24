@@ -225,13 +225,25 @@ export class MessagingGateway
    */
   broadcastMessage(conversationId: string, messageData: any): void {
     const room = this.getConversationRoom(conversationId);
-    this.logger.debug(`Broadcasting message to conversation room: ${room}`);
+    this.logger.log(`🚀 [BROADCAST] Broadcasting message to conversation room: ${room}`);
+    this.logger.debug(`📨 [BROADCAST] Message data:`, {
+      messageId: messageData?.message?.id,
+      senderId: messageData?.message?.senderId,
+      content: messageData?.message?.content?.substring(0, 50),
+      eventType: 'new_message'
+    });
+
+    // Get connected sockets in this room for debugging
+    const socketsInRoom = this.server.sockets.adapter.rooms.get(room);
+    this.logger.log(`👥 [BROADCAST] Sockets in room ${room}: ${socketsInRoom?.size || 0}`);
 
     this.server.to(room).emit('new_message', {
       ...messageData,
       eventType: 'new_message',
       timestamp: new Date(),
     });
+    
+    this.logger.log(`✅ [BROADCAST] Message broadcasted successfully to room: ${room}`);
   }
 
   /**
@@ -286,7 +298,7 @@ export class MessagingGateway
   ): void {
     const socketId = this.userToSocket.get(userId);
     if (!socketId) {
-      this.logger.warn(`No socket found for user ${userId}`);
+      this.logger.warn(`❌ [ROOM JOIN] No socket found for user ${userId}`);
       return;
     }
 
@@ -298,8 +310,10 @@ export class MessagingGateway
       connectedUser.rooms.add(conversationRoom);
     }
 
-    this.logger.debug(
-      `User ${userId} subscribed to conversation room: ${conversationRoom}`,
+    // Log room membership after joining
+    const socketsInRoom = this.server.sockets.adapter.rooms.get(conversationRoom);
+    this.logger.log(
+      `✅ [ROOM JOIN] User ${userId} (socket: ${socketId}) joined room: ${conversationRoom}. Total in room: ${socketsInRoom?.size || 0}`,
     );
   }
 
