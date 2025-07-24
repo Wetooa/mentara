@@ -40,15 +40,6 @@ export class TherapistClientController {
     return this.therapistManagementService.getMatchedClients(therapistId);
   }
 
-  @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  async getClientById(
-    @CurrentUserId() therapistId: string,
-    @Param('id') clientId: string,
-  ): Promise<any> {
-    return this.therapistManagementService.getClientById(therapistId, clientId);
-  }
-
   @Get('requests')
   @HttpCode(HttpStatus.OK)
   async getPendingRequests(
@@ -56,6 +47,15 @@ export class TherapistClientController {
   ): Promise<any[]> {
     console.log('Fetching pending requests for therapist:', therapistId);
     return this.therapistManagementService.getPendingRequests(therapistId);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getClientById(
+    @CurrentUserId() therapistId: string,
+    @Param('id') clientId: string,
+  ): Promise<any> {
+    return this.therapistManagementService.getClientById(therapistId, clientId);
   }
 
   @Post(':clientId/accept')

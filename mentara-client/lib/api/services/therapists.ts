@@ -218,6 +218,7 @@ export function createTherapistService(axios: AxiosInstance) {
        */
       async getRequests() {
         const { data } = await axios.get("/therapist/clients/requests");
+        console.log("Pending patient requests data:", data);
         return data;
       },
 

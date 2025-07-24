@@ -16,16 +16,25 @@ export function useTherapistRequest() {
     },
     onSuccess: (data, therapistId) => {
       // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapists });
-      queryClient.invalidateQueries({ queryKey: queryKeys.therapists.all });
-      
-      toast.success(`Connection request sent to ${data.therapist.name}`, {
-        description: "They will be notified of your request and can accept or decline.",
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.client.assignedTherapists,
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapists.all });
+
+      toast.success(
+        `Connection request sent to ${data.therapist.firstName} ${data.therapist.lastName}`,
+        {
+          description:
+            "They will be notified of your request and can accept or decline.",
+        }
+      );
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to send request";
-      
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to send request";
+
       if (errorMessage.includes("already connected")) {
         toast.error("Already Connected", {
           description: "You are already connected to this therapist.",

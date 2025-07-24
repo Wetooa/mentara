@@ -33,10 +33,12 @@ export function usePatientsList() {
 export function usePatientsRequests() {
   const api = useApi();
 
+  console.log("Fetching patient requests...");
+
   return useQuery({
     queryKey: ["clients", "requests"],
     queryFn: () => api.therapists.patients.getRequests(),
-    select: (response) => response.data || [],
+    select: (response) => response || [],
     staleTime: 1000 * 60 * 2, // Patient requests might change more frequently
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if not authorized to access patient data

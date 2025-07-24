@@ -52,6 +52,8 @@ export default function PatientsLayout({
     refetch: refetchRequests,
   } = usePatientsRequests();
 
+  console.log("Patient Requests Data:", patientRequests);
+
   // Mutations
   const acceptRequest = useAcceptPatientRequest();
   const denyRequest = useDenyPatientRequest();
