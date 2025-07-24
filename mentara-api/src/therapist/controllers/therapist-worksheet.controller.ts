@@ -9,13 +9,12 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  UseInterceptors,
-  UploadedFile,
+
   BadRequestException,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RoleGuard } from '../../auth/guards/role.guard';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
@@ -23,7 +22,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { WorksheetsService } from '../../worksheets/worksheets.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../providers/prisma-client.provider';
-import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
+
 // import {
 //   WorksheetCreateInputDtoSchema,
 //   WorksheetUpdateInputDtoSchema,
@@ -44,7 +43,6 @@ export class TherapistWorksheetController {
     private readonly worksheetsService: WorksheetsService,
     private readonly notificationsService: NotificationsService,
     private readonly prisma: PrismaService,
-    private readonly supabaseStorageService: SupabaseStorageService,
   ) {}
 
   @Get('worksheets')
@@ -138,94 +136,7 @@ export class TherapistWorksheetController {
     );
   }
 
-  @Post('worksheets/:id/reference-file')
-  @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({
-    summary: 'Upload reference file to worksheet',
-    description: 'Upload a reference file that clients can view for this worksheet',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Reference file uploaded successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Worksheet not found or not owned by therapist',
-  })
-  async uploadReferenceFile(
-    @CurrentUserId() therapistId: string,
-    @Param('id') worksheetId: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
 
-    // Verify worksheet ownership
-    const worksheet = await this.prisma.worksheet.findUnique({
-      where: { id: worksheetId },
-    });
-
-    if (!worksheet) {
-      throw new NotFoundException(`Worksheet with ID ${worksheetId} not found`);
-    }
-
-    if (worksheet.therapistId !== therapistId) {
-      throw new NotFoundException(`Worksheet with ID ${worksheetId} not found`);
-    }
-
-    // Validate file
-    const allowedMimeTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain',
-      'image/jpeg',
-      'image/png',
-    ];
-
-    const validation = this.supabaseStorageService.validateFile(
-      file,
-      10 * 1024 * 1024, // 10MB limit for reference files
-      allowedMimeTypes,
-    );
-
-    if (!validation.isValid) {
-      throw new BadRequestException(`File validation failed: ${validation.error}`);
-    }
-
-    // Upload file to Supabase Storage
-    const uploadResult = await this.supabaseStorageService.uploadFile(
-      file,
-      SupabaseStorageService.getSupportedBuckets().WORKSHEETS,
-    );
-
-    // Update worksheet with reference file
-    await this.prisma.worksheet.update({
-      where: { id: worksheetId },
-      data: {
-        materialUrls: {
-          push: uploadResult.url,
-        },
-        materialNames: {
-          push: file.originalname,
-        },
-      },
-    });
-
-    return {
-      success: true,
-      message: 'Reference file uploaded successfully',
-      data: {
-        id: uploadResult.filename,
-        filename: file.originalname,
-        url: uploadResult.url,
-        fileSize: file.size,
-        fileType: file.mimetype,
-      },
-    };
-  }
 
   // NEW MODULE 2 ENDPOINT
   @Post('clients/:clientId/worksheets')
