@@ -39,6 +39,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
+  const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const api = useApi();
 
@@ -204,6 +205,9 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   const handleDeleteAttachment = async (filename: string) => {
     if (!task) return;
 
+    // Add filename to deleting set
+    setDeletingFiles((prev) => new Set(prev).add(filename));
+
     try {
       // Delete the file from the server using worksheetId and filename
       await api.worksheets.deleteSubmission(taskId, filename);
@@ -217,6 +221,13 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
     } catch (err) {
       console.error("Error deleting file:", err);
       toast.error("Failed to delete file. Please try again.");
+    } finally {
+      // Remove filename from deleting set
+      setDeletingFiles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(filename);
+        return newSet;
+      });
     }
   };
   if (isLoading) {
@@ -421,54 +432,93 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                 ))}
 
                 {/* Show existing files */}
-                {task.myWork?.map((work) => (
-                  <div
-                    key={work.id}
-                    className="flex items-center justify-between p-3 rounded-md bg-gray-100"
-                  >
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 mr-3 text-primary" />
-                      <div className="flex flex-col">
-                        <span className="text-secondary">{work.filename}</span>
+                {task.myWork?.map((work) => {
+                  const isDeleting = Boolean(work.filename && deletingFiles.has(work.filename));
+                  
+                  return (
+                    <div
+                      key={work.id}
+                      className={`flex items-center justify-between p-3 rounded-md transition-colors ${
+                        isDeleting 
+                          ? "bg-red-50 border border-red-200 opacity-70"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <FileText className={`h-5 w-5 mr-3 ${
+                          isDeleting ? "text-red-500" : "text-primary"
+                        }`} />
+                        <div className="flex flex-col">
+                          <span className={`${
+                            isDeleting ? "text-red-700" : "text-secondary"
+                          }`}>
+                            {work.filename}
+                          </span>
+                          {isDeleting && (
+                            <span className="text-xs text-red-600">
+                              Deleting...
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {/* Show spinner when deleting */}
+                        {isDeleting && (
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500"></div>
+                        )}
+                        
+                        {/* View button - disabled when deleting */}
+                        <button
+                          className={`p-2 rounded-md transition-colors ${
+                            isDeleting
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "text-gray-500 hover:text-primary hover:bg-gray-200"
+                          }`}
+                          onClick={() => !isDeleting && handleDownload(work)}
+                          disabled={isDeleting}
+                          title={isDeleting ? "File is being deleted" : "View file"}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+
+                        {/* Delete button - only if task is editable */}
+                        {isTaskEditable && (
+                          <button
+                            className={`p-2 rounded-md transition-colors ${
+                              isDeleting
+                                ? "text-gray-400 cursor-not-allowed"
+                                : "text-gray-500 hover:text-red-600 hover:bg-red-50"
+                            }`}
+                            onClick={() =>
+                              !isDeleting && work.filename && handleDeleteAttachment(work.filename)
+                            }
+                            disabled={isDeleting}
+                            title={isDeleting ? "Deleting..." : "Delete file"}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {/* View button */}
-                      <button
-                        className="text-gray-500 hover:text-primary p-2 rounded-md hover:bg-gray-200 transition-colors"
-                        onClick={() => handleDownload(work)}
-                        title="View file"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-
-                      {/* Delete button - only if task is editable */}
-                      {isTaskEditable && (
-                        <button
-                          className="text-gray-500 hover:text-red-600 p-2 rounded-md hover:bg-red-50 transition-colors"
-                          onClick={() =>
-                            work.filename && handleDeleteAttachment(work.filename)
-                          }
-                          title="Delete file"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Add More Attachments Button - only if task is not completed */}
                 {isTaskEditable && (
                   <button
                     onClick={handleAddAttachment}
-                    disabled={uploadFileMutation.isPending}
+                    disabled={uploadFileMutation.isPending || deletingFiles.size > 0}
                     className="flex items-center justify-center w-full py-3 border border-dashed border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {uploadFileMutation.isPending ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2"></div>
                         <span className="text-primary">Processing...</span>
+                      </>
+                    ) : deletingFiles.size > 0 ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500 mr-2"></div>
+                        <span className="text-red-500">Deleting files...</span>
                       </>
                     ) : (
                       <>
@@ -488,10 +538,20 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                     <p className="mb-4 text-gray-600">No work submitted yet</p>
                     <button
                       onClick={handleAddAttachment}
-                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition"
+                      disabled={deletingFiles.size > 0}
+                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <UploadIcon className="h-4 w-4 mr-2 inline" />
-                      Add Work
+                      {deletingFiles.size > 0 ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                          Deleting files...
+                        </>
+                      ) : (
+                        <>
+                          <UploadIcon className="h-4 w-4 mr-2 inline" />
+                          Add Work
+                        </>
+                      )}
                     </button>
                   </>
                 ) : (
@@ -520,7 +580,8 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                       onClick={() => unturnInMutation.mutate()}
                       disabled={
                         unturnInMutation.isPending ||
-                        Array.from(uploadingFiles).length > 0
+                        Array.from(uploadingFiles).length > 0 ||
+                        deletingFiles.size > 0
                       }
                       className="flex items-center px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -528,6 +589,11 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
                           Unturning in...
+                        </>
+                      ) : deletingFiles.size > 0 ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-2"></div>
+                          Deleting files...
                         </>
                       ) : (
                         <>
@@ -541,7 +607,8 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                       onClick={() => turnInMutation.mutate()}
                       disabled={
                         turnInMutation.isPending ||
-                        Array.from(uploadingFiles).length > 0
+                        Array.from(uploadingFiles).length > 0 ||
+                        deletingFiles.size > 0
                       }
                       className="flex items-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -554,6 +621,11 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                           Uploading files...
+                        </>
+                      ) : deletingFiles.size > 0 ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Deleting files...
                         </>
                       ) : (
                         <>
