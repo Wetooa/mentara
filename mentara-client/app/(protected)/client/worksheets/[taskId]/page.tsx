@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -12,12 +12,18 @@ import {
   Plus,
   Trash2,
   Upload as UploadIcon,
+  Send,
+  RotateCcw,
+  AlertCircle,
+  Eye,
 } from "lucide-react";
 import { Task, TaskFile, transformWorksheetAssignmentToTask } from "@/components/worksheets/types";
 import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
 import { toast } from "sonner";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { WorksheetStatus } from "@/types/api/worksheets";
 import { use } from "react";
 
 interface TaskDetailPageProps {
@@ -34,8 +40,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [showFileOptions, setShowFileOptions] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const api = useApi();
 
   // Use React Query to fetch worksheet data
@@ -72,6 +77,32 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
     onError: (error) => {
       console.error("Error uploading file:", error);
       toast.error("Failed to upload file. Please try again.");
+    }
+  });
+
+  // Turn in worksheet mutation
+  const turnInMutation = useMutation({
+    mutationFn: () => api.worksheets.turnIn(taskId),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.byId(taskId) });
+      toast.success("Worksheet turned in successfully!");
+    },
+    onError: (error) => {
+      console.error("Error turning in worksheet:", error);
+      toast.error("Failed to turn in worksheet. Please try again.");
+    }
+  });
+
+  // Unturn in worksheet mutation
+  const unturnInMutation = useMutation({
+    mutationFn: () => api.worksheets.unturnIn(taskId),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.byId(taskId) });
+      toast.success("Worksheet turned back in for editing!");
+    },
+    onError: (error) => {
+      console.error("Error unturning in worksheet:", error);
+      toast.error("Failed to unturn in worksheet. Please try again.");
     }
   });
 
@@ -181,43 +212,12 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
     setShowFileOptions((prevId) => (prevId === fileId ? null : fileId));
   };
 
-  const handleSubmitWork = async () => {
-    if (!task) return;
+  const handleTurnIn = () => {
+    turnInMutation.mutate();
+  };
 
-    // Start submitting process
-    setSubmitting(true);
-
-    try {
-      if (task.isCompleted) {
-        // Unsubmit work - update assignment status
-        // Note: This would need to be an assignment update API method
-        // For now, we'll update local state since the API method may not exist yet
-        setTask({
-          ...task,
-          status: 'assigned',
-          isCompleted: false,
-          submittedAt: undefined,
-        });
-      } else {
-        // Submit work - update assignment status  
-        // Note: This would need to be an assignment update API method
-        // For now, we'll update local state since the API method may not exist yet
-        setTask({
-          ...task,
-          status: 'completed',
-          isCompleted: true,
-          submittedAt: new Date().toISOString(),
-        });
-        toast.success(
-          task.isCompleted ? "Worksheet unsubmitted successfully" : "Worksheet submitted successfully"
-        );
-      }
-    } catch (err) {
-      console.error("Error submitting worksheet:", err);
-      toast.error("Failed to submit worksheet. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+  const handleUnturnIn = () => {
+    unturnInMutation.mutate();
   };
 
   if (isLoading) {
@@ -558,43 +558,46 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                     Submitted on {formatDate(task.submittedAt)}
                   </p>
                 )}
-                <button
-                  onClick={handleSubmitWork}
-                  disabled={submitting}
-                  className={`px-6 py-2 rounded-md transition ${
-                    task.isCompleted
-                      ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      : "bg-primary text-white hover:bg-primary/90"
-                  } ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
-                >
-                  {submitting ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      {task.isCompleted ? "Unsubmitting..." : "Submitting..."}
-                    </span>
+                <div className="flex gap-3">
+                  {/* Turn In/Unturn In Button */}
+                  {worksheetData?.status === WorksheetStatus.SUBMITTED ? (
+                    <button
+                      onClick={handleUnturnIn}
+                      disabled={unturnInMutation.isPending}
+                      className="flex items-center px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {unturnInMutation.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                          Unturning in...
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          Unturn In
+                        </>
+                      )}
+                    </button>
                   ) : (
-                    <>{task.isCompleted ? "Unsubmit Work" : "Submit Work"}</>
+                    <button
+                      onClick={handleTurnIn}
+                      disabled={turnInMutation.isPending}
+                      className="flex items-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {turnInMutation.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Turning in...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" />
+                          Turn In
+                        </>
+                      )}
+                    </button>
                   )}
-                </button>
+                </div>
               </div>
             )}
         </div>
