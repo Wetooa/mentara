@@ -55,6 +55,50 @@ export function createWorksheetService(client: AxiosInstance) {
     },
 
     /**
+     * Create worksheet with files (convenience method)
+     * Handles FormData creation for worksheet + file uploads
+     */
+    async createWithFiles(
+      worksheetData: WorksheetCreateInputDto,
+      files: File[] = []
+    ): Promise<Worksheet> {
+      if (files.length === 0) {
+        // No files, use regular JSON submission
+        return this.create(worksheetData);
+      }
+
+      // Create FormData for multipart submission
+      const formData = new FormData();
+      
+      // Add worksheet fields
+      formData.append('title', worksheetData.title);
+      formData.append('instructions', worksheetData.instructions || '');
+      
+      if (worksheetData.dueDate) {
+        formData.append('dueDate', worksheetData.dueDate instanceof Date 
+          ? worksheetData.dueDate.toISOString() 
+          : worksheetData.dueDate);
+      }
+      
+      if (worksheetData.clientIds && worksheetData.clientIds.length > 0) {
+        worksheetData.clientIds.forEach(clientId => {
+          formData.append('clientIds[]', clientId);
+        });
+      }
+      
+      if (worksheetData.category) {
+        formData.append('category', worksheetData.category);
+      }
+
+      // Add files
+      files.forEach((file, index) => {
+        formData.append('files', file);
+      });
+
+      return this.create(formData);
+    },
+
+    /**
      * Update an existing worksheet
      * PUT /worksheets/:id
      */
