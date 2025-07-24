@@ -214,8 +214,8 @@ export class ClientService {
         firstName: therapist.user.firstName,
         lastName: therapist.user.lastName,
         title: 'Therapist',
-        specialties: therapist.areasOfExpertise,
-        hourlyRate: Number(therapist.hourlyRate),
+        specialties: therapist.areasOfExpertise || [], // Fixed: map areasOfExpertise to specialties
+        hourlyRate: Number(therapist.hourlyRate || 0),
         experience: therapist.yearsOfExperience || 0,
         province: therapist.province,
         isActive: therapist.status === 'APPROVED',

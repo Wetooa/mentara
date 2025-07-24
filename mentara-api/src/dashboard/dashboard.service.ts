@@ -609,7 +609,10 @@ export class DashboardService {
     }
   }
 
-  async getTherapistAnalytics(therapistId: string, dateRange?: { start: Date; end: Date }) {
+  async getTherapistAnalytics(
+    therapistId: string,
+    dateRange?: { start: Date; end: Date },
+  ) {
     try {
       // Validate therapist exists
       const therapist = await this.prisma.therapist.findUnique({
@@ -622,7 +625,8 @@ export class DashboardService {
       }
 
       // Define date range for queries
-      const startDate = dateRange?.start || new Date(new Date().getFullYear(), 0, 1); // Start of current year
+      const startDate =
+        dateRange?.start || new Date(new Date().getFullYear(), 0, 1); // Start of current year
       const endDate = dateRange?.end || new Date(); // Today
 
       // Get meetings within date range
@@ -649,44 +653,52 @@ export class DashboardService {
       // Calculate revenue statistics
       const totalRevenue = meetings.reduce((sum, meeting) => {
         const meetingRevenue = meeting.payments.reduce((paySum, payment) => {
-          return paySum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
+          return (
+            paySum +
+            (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+          );
         }, 0);
         return sum + meetingRevenue;
       }, 0);
 
       // If no payment data, estimate from hourly rate
-      const estimatedRevenue = meetings.length * parseFloat(therapist.hourlyRate?.toString() || '120');
+      const estimatedRevenue =
+        meetings.length * parseFloat(therapist.hourlyRate?.toString() || '120');
       const finalRevenue = totalRevenue > 0 ? totalRevenue : estimatedRevenue;
 
       // Sessions by status
       const sessionsByStatus = {
-        completed: meetings.filter(m => m.status === 'COMPLETED').length,
-        scheduled: meetings.filter(m => m.status === 'SCHEDULED').length,
-        confirmed: meetings.filter(m => m.status === 'CONFIRMED').length,
-        cancelled: meetings.filter(m => m.status === 'CANCELLED').length,
-        no_show: meetings.filter(m => m.status === 'NO_SHOW').length,
+        completed: meetings.filter((m) => m.status === 'COMPLETED').length,
+        scheduled: meetings.filter((m) => m.status === 'SCHEDULED').length,
+        confirmed: meetings.filter((m) => m.status === 'CONFIRMED').length,
+        cancelled: meetings.filter((m) => m.status === 'CANCELLED').length,
+        no_show: meetings.filter((m) => m.status === 'NO_SHOW').length,
       };
 
       // Monthly revenue breakdown
       const monthlyRevenue = {};
-      meetings.forEach(meeting => {
+      meetings.forEach((meeting) => {
         const month = meeting.startTime.toISOString().slice(0, 7); // YYYY-MM format
         const meetingRevenue = meeting.payments.reduce((sum, payment) => {
-          return sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
+          return (
+            sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+          );
         }, 0);
-        
+
         if (!monthlyRevenue[month]) {
           monthlyRevenue[month] = 0;
         }
-        monthlyRevenue[month] += meetingRevenue || parseFloat(therapist.hourlyRate?.toString() || '120');
+        monthlyRevenue[month] +=
+          meetingRevenue ||
+          parseFloat(therapist.hourlyRate?.toString() || '120');
       });
 
       // Top clients by session count
       const clientSessions = {};
-      meetings.forEach(meeting => {
+      meetings.forEach((meeting) => {
         const clientId = meeting.clientId;
         const clientName = `${meeting.client.user.firstName} ${meeting.client.user.lastName}`;
-        
+
         if (!clientSessions[clientId]) {
           clientSessions[clientId] = {
             name: clientName,
@@ -694,12 +706,15 @@ export class DashboardService {
             revenue: 0,
           };
         }
-        
+
         clientSessions[clientId].sessions++;
-        const sessionRevenue = meeting.payments.reduce((sum, payment) => {
-          return sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
-        }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
-        
+        const sessionRevenue =
+          meeting.payments.reduce((sum, payment) => {
+            return (
+              sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+            );
+          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
+
         clientSessions[clientId].revenue += sessionRevenue;
       });
 
@@ -710,27 +725,36 @@ export class DashboardService {
       // Session completion rate
       const totalSessions = meetings.length;
       const completedSessions = sessionsByStatus.completed;
-      const completionRate = totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
+      const completionRate =
+        totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
 
       // Average session duration
-      const completedMeetings = meetings.filter(m => m.status === 'COMPLETED');
-      const averageDuration = completedMeetings.length > 0 
-        ? completedMeetings.reduce((sum, m) => sum + m.duration, 0) / completedMeetings.length
-        : 0;
+      const completedMeetings = meetings.filter(
+        (m) => m.status === 'COMPLETED',
+      );
+      const averageDuration =
+        completedMeetings.length > 0
+          ? completedMeetings.reduce((sum, m) => sum + m.duration, 0) /
+            completedMeetings.length
+          : 0;
 
       // Today's stats
       const today = new Date();
       const startOfDay = new Date(today.setHours(0, 0, 0, 0));
       const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-      const todayMeetings = meetings.filter(m => 
-        m.startTime >= startOfDay && m.startTime <= endOfDay
+      const todayMeetings = meetings.filter(
+        (m) => m.startTime >= startOfDay && m.startTime <= endOfDay,
       );
 
       const todayRevenue = todayMeetings.reduce((sum, meeting) => {
-        const meetingRevenue = meeting.payments.reduce((paySum, payment) => {
-          return paySum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
-        }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
+        const meetingRevenue =
+          meeting.payments.reduce((paySum, payment) => {
+            return (
+              paySum +
+              (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+            );
+          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
         return sum + meetingRevenue;
       }, 0);
 
@@ -739,21 +763,29 @@ export class DashboardService {
       startOfWeek.setDate(today.getDate() - today.getDay());
       startOfWeek.setHours(0, 0, 0, 0);
 
-      const weekMeetings = meetings.filter(m => m.startTime >= startOfWeek);
+      const weekMeetings = meetings.filter((m) => m.startTime >= startOfWeek);
       const weekRevenue = weekMeetings.reduce((sum, meeting) => {
-        const meetingRevenue = meeting.payments.reduce((paySum, payment) => {
-          return paySum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
-        }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
+        const meetingRevenue =
+          meeting.payments.reduce((paySum, payment) => {
+            return (
+              paySum +
+              (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+            );
+          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
         return sum + meetingRevenue;
       }, 0);
 
       // This month's stats
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const monthMeetings = meetings.filter(m => m.startTime >= startOfMonth);
+      const monthMeetings = meetings.filter((m) => m.startTime >= startOfMonth);
       const monthRevenue = monthMeetings.reduce((sum, meeting) => {
-        const meetingRevenue = meeting.payments.reduce((paySum, payment) => {
-          return paySum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
-        }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
+        const meetingRevenue =
+          meeting.payments.reduce((paySum, payment) => {
+            return (
+              paySum +
+              (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+            );
+          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
         return sum + meetingRevenue;
       }, 0);
 
@@ -762,7 +794,7 @@ export class DashboardService {
           id: therapist.userId,
           name: `${therapist.user.firstName} ${therapist.user.lastName}`,
           email: therapist.user.email,
-          specialization: therapist.specialization,
+          specialization: therapist.specialCertifications,
           hourlyRate: parseFloat(therapist.hourlyRate?.toString() || '120'),
         },
         dateRange: {
@@ -792,23 +824,29 @@ export class DashboardService {
           },
         },
         sessionsByStatus,
-        monthlyRevenue: Object.entries(monthlyRevenue).map(([month, revenue]) => ({
-          month,
-          revenue: Math.round(revenue as number),
-        })),
+        monthlyRevenue: Object.entries(monthlyRevenue).map(
+          ([month, revenue]) => ({
+            month,
+            revenue: Math.round(revenue as number),
+          }),
+        ),
         topClients: topClients.map((client: any) => ({
           ...client,
           revenue: Math.round(client.revenue),
         })),
-        recentSessions: meetings.slice(0, 10).map(meeting => ({
+        recentSessions: meetings.slice(0, 10).map((meeting) => ({
           id: meeting.id,
           startTime: meeting.startTime,
           duration: meeting.duration,
           status: meeting.status,
           clientName: `${meeting.client.user.firstName} ${meeting.client.user.lastName}`,
-          revenue: meeting.payments.reduce((sum, payment) => {
-            return sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
-          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120'),
+          revenue:
+            meeting.payments.reduce((sum, payment) => {
+              return (
+                sum +
+                (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+              );
+            }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120'),
         })),
       };
     } catch (error) {

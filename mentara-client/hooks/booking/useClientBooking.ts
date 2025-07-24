@@ -43,6 +43,7 @@ interface UseClientBookingProps {
   therapistId: string;
   selectedSlot: TimeSlot;
   selectedDate: Date;
+  sessionType?: 'video' | 'in-person';
   enabled?: boolean;
   onSuccess?: () => void;
   onClose?: () => void;
@@ -55,6 +56,7 @@ export function useClientBooking({
   therapistId, 
   selectedSlot,
   selectedDate: initialSelectedDate,
+  sessionType = 'video',
   enabled = true, 
   onSuccess, 
   onClose 
@@ -146,7 +148,7 @@ export function useClientBooking({
         duration: selectedDuration.duration,
         title: sessionTitle || `Session with ${therapist?.name}`,
         description: sessionDescription,
-        meetingType: "video",
+        meetingType: sessionType,
       });
 
       // Process payment for the session
@@ -161,7 +163,7 @@ export function useClientBooking({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["available-slots"] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'slots'] }); // Match useAvailableSlots pattern
       toast.success("Session booked successfully!");
       onSuccess?.();
       onClose?.();
@@ -287,7 +289,7 @@ export function useSimpleBooking(therapistId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["available-slots"] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'slots'] }); // Match useAvailableSlots pattern
       toast.success("Session booked successfully!");
     },
     onError: (error: any) => {

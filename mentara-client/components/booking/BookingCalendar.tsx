@@ -44,6 +44,7 @@ export function BookingCalendar({
     error,
     hasSlots,
     getAvailableDurationsForSlot,
+    refetch, // Add refetch function
   } = useAvailableSlots(therapistId, dateString);
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -159,7 +160,7 @@ export function BookingCalendar({
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => window.location.reload()}
+                  onClick={() => refetch()}
                   className="mt-2"
                 >
                   Retry

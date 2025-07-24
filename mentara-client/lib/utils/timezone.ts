@@ -24,6 +24,15 @@ export function formatUTCDate(date: Date | string, format: string = 'yyyy-MM-dd'
     return `${year}-${month}-${day}`;
   }
   
+  // For time-only format like "h:mm a"
+  if (format === 'h:mm a') {
+    return dateObj.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+  
   // For display format like "MMM d, yyyy h:mm a", use user's local time
   if (format === 'MMM d, yyyy h:mm a') {
     return dateObj.toLocaleDateString('en-US', {

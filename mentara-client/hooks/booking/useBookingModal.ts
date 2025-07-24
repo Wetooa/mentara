@@ -134,7 +134,7 @@ export function useBookingModal(
     isLoading: slotsLoading,
     error: slotsError,
   } = useQuery({
-    queryKey: ["available-slots", therapist?.id, selectedDate?.toISOString()],
+    queryKey: ['booking', 'slots', therapist?.id, selectedDate?.toISOString()?.split('T')[0]],
     queryFn: () => {
       if (!therapist || !selectedDate) return [];
       return api.booking.availability.getSlots(
@@ -167,7 +167,7 @@ export function useBookingModal(
     onSuccess: (data) => {
       toast.success("Session booked successfully!");
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["available-slots"] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'slots'] });
       onSuccess?.(data);
       onClose?.();
 

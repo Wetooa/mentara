@@ -88,7 +88,7 @@ export function useBookingFlow(therapistId?: string): UseBookingFlowReturn {
     isLoading: slotsLoading,
     error: slotsError,
   } = useQuery({
-    queryKey: ["available-slots", therapistId, selectedDate?.toISOString()],
+    queryKey: ['booking', 'slots', therapistId, selectedDate?.toISOString()?.split('T')[0]],
     queryFn: () => {
       if (!therapistId || !selectedDate) {
         return Promise.resolve([]);
@@ -124,7 +124,7 @@ export function useBookingFlow(therapistId?: string): UseBookingFlowReturn {
     onSuccess: () => {
       toast.success("Meeting booked successfully!");
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["available-slots"] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'slots'] });
       resetForm();
     },
     onError: (error: any) => {

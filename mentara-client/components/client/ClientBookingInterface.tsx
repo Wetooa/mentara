@@ -34,6 +34,7 @@ import {
   Loader2,
   ArrowRight,
   ArrowLeft,
+  MapPin,
 } from "lucide-react";
 import { useClientBooking } from "@/hooks/booking";
 import { TimezoneUtils } from "@/lib/utils/timezone";
@@ -56,6 +57,10 @@ export function ClientBookingInterface({
   onClose,
   onSuccess,
 }: ClientBookingInterfaceProps) {
+  // Local state for session type
+  const [sessionType, setSessionType] = React.useState<"video" | "in-person">(
+    "video"
+  );
   // Use the comprehensive booking hook that handles all business logic
   const {
     // Form state
@@ -69,36 +74,37 @@ export function ClientBookingInterface({
     setSessionDescription,
     paymentMethodId,
     setPaymentMethodId,
-    
+
     // Data
     therapist,
     paymentMethods,
-    
+
     // Loading states
     therapistLoading,
     paymentMethodsLoading,
     isBooking,
-    
+
     // Error states
     therapistError,
     bookingError,
-    
+
     // Actions
     handleNextStep,
     handlePrevStep,
     handleConfirmBooking,
-    
+
     // Validation
     isStep1Complete,
     isStep2Complete,
     isStep3Complete,
-    
+
     // Constants
     BOOKING_STEPS,
   } = useClientBooking({
     therapistId,
     selectedSlot,
     selectedDate,
+    sessionType,
     enabled: isOpen,
     onSuccess,
     onClose,
@@ -221,7 +227,11 @@ export function ClientBookingInterface({
                   <div className="text-sm font-medium mb-2">Specialties</div>
                   <div className="flex flex-wrap gap-1">
                     {therapist.specialties?.slice(0, 3).map((specialty) => (
-                      <Badge key={specialty} variant="outline" className="text-xs">
+                      <Badge
+                        key={specialty}
+                        variant="outline"
+                        className="text-xs"
+                      >
                         {specialty}
                       </Badge>
                     ))}
@@ -255,26 +265,50 @@ export function ClientBookingInterface({
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <div className="text-sm text-muted-foreground">Date & Time</div>
+                    <div className="text-sm text-muted-foreground">
+                      Date & Time
+                    </div>
                     <div className="font-medium">
-                      {selectedDate ? TimezoneUtils.format(selectedDate, 'MMM d, yyyy') : ''} at {selectedTimeSlot.time}
+                      {selectedDate
+                        ? new Date(selectedDate).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "2-digit",
+                          })
+                        : ""}{" "}
+                      at {selectedTimeSlot.time}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Duration</div>
+                    <div className="text-sm text-muted-foreground">
+                      Duration
+                    </div>
                     <div className="font-medium">{selectedDuration.name}</div>
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">Type</div>
                     <div className="flex items-center gap-1">
-                      <Video className="h-4 w-4" />
-                      <span className="font-medium">Video Call</span>
+                      {sessionType === "video" ? (
+                        <Video className="h-4 w-4" />
+                      ) : (
+                        <MapPin className="h-4 w-4" />
+                      )}
+                      <span className="font-medium">
+                        {sessionType === "video" ? "Video Call" : "In Person"}
+                      </span>
                     </div>
                   </div>
                   <div className="border-t pt-3">
-                    <div className="text-sm text-muted-foreground">Total Cost</div>
+                    <div className="text-sm text-muted-foreground">
+                      Total Cost
+                    </div>
                     <div className="text-lg font-bold text-green-600">
-                      ${((therapist.hourlyRate || 0) * selectedDuration.duration / 60).toFixed(2)}
+                      $
+                      {(
+                        ((therapist.hourlyRate || 0) *
+                          selectedDuration.duration) /
+                        60
+                      ).toFixed(2)}
                     </div>
                   </div>
                 </CardContent>
@@ -288,7 +322,9 @@ export function ClientBookingInterface({
             {currentStep === 1 && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Session Details</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Session Details
+                  </h3>
                   <p className="text-muted-foreground mb-4">
                     Confirm your selected time and session preferences
                   </p>
@@ -307,17 +343,32 @@ export function ClientBookingInterface({
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-semibold text-lg">
-                            {TimezoneUtils.format(selectedDate, 'EEEE, MMMM do, yyyy')}
+                            {new Date(selectedDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "2-digit",
+                              }
+                            )}
                           </div>
                           <div className="text-blue-600 font-medium">
                             {selectedTimeSlot?.time}
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm text-muted-foreground">Session Type</div>
+                          <div className="text-sm text-muted-foreground">
+                            Session Type
+                          </div>
                           <div className="flex items-center gap-1 font-medium">
-                            <Video className="h-4 w-4" />
-                            Video Call
+                            {sessionType === "video" ? (
+                              <Video className="h-4 w-4" />
+                            ) : (
+                              <MapPin className="h-4 w-4" />
+                            )}
+                            {sessionType === "video"
+                              ? "Video Call"
+                              : "In Person"}
                           </div>
                         </div>
                       </div>
@@ -326,49 +377,69 @@ export function ClientBookingInterface({
                 </Card>
 
                 {/* Duration Selection */}
-                {selectedTimeSlot && selectedTimeSlot.availableDurations.length > 1 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Session Duration</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-3">
-                        {selectedTimeSlot.availableDurations.map((duration) => (
-                          <Card
-                            key={duration.id}
-                            className={`cursor-pointer transition-colors ${
-                              selectedDuration?.id === duration.id
-                                ? "ring-2 ring-green-500 bg-green-50"
-                                : "hover:bg-gray-50"
-                            }`}
-                            onClick={() => setSelectedDuration(duration)}
-                          >
-                            <CardContent className="p-3 text-center">
-                              <div className="font-medium">{duration.name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {duration.duration} minutes
-                              </div>
-                              <div className="text-sm font-medium text-green-600">
-                                ${((therapist.hourlyRate || 0) * duration.duration / 60).toFixed(2)}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                {selectedTimeSlot &&
+                  selectedTimeSlot.availableDurations.length > 1 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Session Duration</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-3">
+                          {selectedTimeSlot.availableDurations.map(
+                            (duration) => (
+                              <Card
+                                key={duration.id}
+                                className={`cursor-pointer transition-colors ${
+                                  selectedDuration?.id === duration.id
+                                    ? "ring-2 ring-green-500 bg-green-50"
+                                    : "hover:bg-gray-50"
+                                }`}
+                                onClick={() => setSelectedDuration(duration)}
+                              >
+                                <CardContent className="p-3 text-center">
+                                  <div className="font-medium">
+                                    {duration.name}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {duration.duration} minutes
+                                  </div>
+                                  <div className="text-sm font-medium text-green-600">
+                                    $
+                                    {(
+                                      ((therapist.hourlyRate || 0) *
+                                        duration.duration) /
+                                      60
+                                    ).toFixed(2)}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            )
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
-                {/* Session Type Confirmation */}
+                {/* Session Type Selection */}
                 <Card>
                   <CardHeader>
                     <CardTitle>Session Preferences</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      {/* Video Session Option */}
+                      <div
+                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                          sessionType === "video"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:bg-gray-50"
+                        }`}
+                        onClick={() => setSessionType("video")}
+                      >
                         <div className="flex items-center gap-3">
-                          <Video className="h-5 w-5 text-blue-500" />
+                          <Video
+                            className={`h-5 w-5 ${sessionType === "video" ? "text-blue-500" : "text-gray-400"}`}
+                          />
                           <div>
                             <div className="font-medium">Video Session</div>
                             <div className="text-sm text-muted-foreground">
@@ -376,7 +447,34 @@ export function ClientBookingInterface({
                             </div>
                           </div>
                         </div>
-                        <Badge variant="default">Selected</Badge>
+                        {sessionType === "video" && (
+                          <Badge variant="default">Selected</Badge>
+                        )}
+                      </div>
+
+                      {/* In Person Session Option */}
+                      <div
+                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                          sessionType === "in-person"
+                            ? "border-green-500 bg-green-50"
+                            : "border-gray-200 hover:bg-gray-50"
+                        }`}
+                        onClick={() => setSessionType("in-person")}
+                      >
+                        <div className="flex items-center gap-3">
+                          <MapPin
+                            className={`h-5 w-5 ${sessionType === "in-person" ? "text-green-500" : "text-gray-400"}`}
+                          />
+                          <div>
+                            <div className="font-medium">In Person Session</div>
+                            <div className="text-sm text-muted-foreground">
+                              Meet with your therapist at their office location
+                            </div>
+                          </div>
+                        </div>
+                        {sessionType === "in-person" && (
+                          <Badge variant="default">Selected</Badge>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -390,7 +488,8 @@ export function ClientBookingInterface({
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Session Notes</h3>
                   <p className="text-muted-foreground mb-4">
-                    Add notes about what you&apos;d like to discuss in your session
+                    Add notes about what you&apos;d like to discuss in your
+                    session
                   </p>
                 </div>
 
@@ -423,7 +522,8 @@ export function ClientBookingInterface({
                   <Alert>
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      Your session information is confidential and will only be shared with your therapist.
+                      Your session information is confidential and will only be
+                      shared with your therapist.
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -434,7 +534,9 @@ export function ClientBookingInterface({
             {currentStep === 3 && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Payment & Confirmation</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Payment & Confirmation
+                  </h3>
                   <p className="text-muted-foreground mb-4">
                     Review your booking and complete payment
                   </p>
@@ -455,30 +557,44 @@ export function ClientBookingInterface({
                       <Alert>
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription>
-                          No payment methods available. Please add a payment method first.
+                          No payment methods available. Please add a payment
+                          method first.
                         </AlertDescription>
                       </Alert>
                     ) : (
-                      <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
+                      <Select
+                        value={paymentMethodId}
+                        onValueChange={setPaymentMethodId}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select payment method" />
                         </SelectTrigger>
                         <SelectContent>
-                          {paymentMethods.map((method: { id: string; cardBrand: string; cardLast4: string; isDefault?: boolean }) => (
-                            <SelectItem key={method.id} value={method.id}>
-                              <div className="flex items-center gap-2">
-                                <CreditCard className="h-4 w-4" />
-                                <span>
-                                  {method.cardBrand} •••• {method.cardLast4}
-                                  {method.isDefault && (
-                                    <Badge variant="secondary" className="ml-2">
-                                      Default
-                                    </Badge>
-                                  )}
-                                </span>
-                              </div>
-                            </SelectItem>
-                          ))}
+                          {paymentMethods.map(
+                            (method: {
+                              id: string;
+                              cardBrand: string;
+                              cardLast4: string;
+                              isDefault?: boolean;
+                            }) => (
+                              <SelectItem key={method.id} value={method.id}>
+                                <div className="flex items-center gap-2">
+                                  <CreditCard className="h-4 w-4" />
+                                  <span>
+                                    {method.cardBrand} •••• {method.cardLast4}
+                                    {method.isDefault && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="ml-2"
+                                      >
+                                        Default
+                                      </Badge>
+                                    )}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            )
+                          )}
                         </SelectContent>
                       </Select>
                     )}
@@ -491,9 +607,11 @@ export function ClientBookingInterface({
                     <CardTitle>Booking Review</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Therapist:</span>
+                        <span className="text-muted-foreground">
+                          Therapist:
+                        </span>
                         <div className="font-medium">{therapist?.name}</div>
                       </div>
                       <div>
@@ -501,22 +619,43 @@ export function ClientBookingInterface({
                         <div className="font-medium">{sessionTitle}</div>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Date & Time:</span>
+                        <span className="text-muted-foreground">
+                          Date & Time:
+                        </span>
                         <div className="font-medium">
-                          {selectedDate ? TimezoneUtils.format(selectedDate, 'MMM d, yyyy') : ''} at {selectedTimeSlot?.time}
+                          {selectedDate
+                            ? new Date(selectedDate).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "2-digit",
+                                }
+                              )
+                            : ""}{" "}
+                          at {selectedTimeSlot?.time}
                         </div>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Duration:</span>
-                        <div className="font-medium">{selectedDuration?.name}</div>
+                        <div className="font-medium">
+                          {selectedDuration?.name}
+                        </div>
                       </div>
                     </div>
-                    
+
                     <div className="border-t pt-3">
                       <div className="flex items-center justify-between text-lg font-semibold">
                         <span>Total Amount:</span>
                         <span className="text-green-600">
-                          ${selectedDuration ? (((therapist.hourlyRate || 0) * selectedDuration.duration) / 60).toFixed(2) : '0.00'}
+                          $
+                          {selectedDuration
+                            ? (
+                                ((therapist.hourlyRate || 0) *
+                                  selectedDuration.duration) /
+                                60
+                              ).toFixed(2)
+                            : "0.00"}
                         </span>
                       </div>
                     </div>
