@@ -265,6 +265,49 @@ export function createMeetingsService(axios: AxiosInstance) {
     async getMeetingsInDateRange(dateFrom: string, dateTo: string, limit?: number): Promise<Meeting[]> {
       return this.getAllMeetings({ dateFrom, dateTo, limit });
     },
+
+    /**
+     * Get booking requests for therapist (SCHEDULED meetings awaiting approval)
+     * @param limit - Maximum number of booking requests to fetch
+     */
+    async getBookingRequests(limit?: number): Promise<Meeting[]> {
+      const params = limit ? { limit } : {};
+      const { data } = await axios.get("/meetings/booking-requests", { params });
+      return data;
+    },
+
+    /**
+     * Accept a booking request
+     * @param meetingId - The meeting ID to accept
+     */
+    async acceptBookingRequest(meetingId: string): Promise<Meeting> {
+      const { data } = await axios.put(`/meetings/${meetingId}/accept`);
+      return data;
+    },
+
+    /**
+     * Deny a booking request
+     * @param meetingId - The meeting ID to deny
+     * @param reason - Optional reason for denial
+     */
+    async denyBookingRequest(meetingId: string, reason?: string): Promise<Meeting> {
+      const { data } = await axios.put(`/meetings/${meetingId}/deny`, { reason });
+      return data;
+    },
+
+    /**
+     * Get therapist analytics data
+     * @param startDate - Optional start date for analytics range
+     * @param endDate - Optional end date for analytics range
+     */
+    async getTherapistAnalytics(startDate?: string, endDate?: string) {
+      const params: any = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+      
+      const { data } = await axios.get("/dashboard/therapist/analytics", { params });
+      return data;
+    },
   };
 }
 

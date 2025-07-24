@@ -54,6 +54,9 @@ export interface TherapistRecommendation {
   isActive: boolean;
   bio?: string;
   profileImage?: string | undefined;
+  // Optional fields for pending requests
+  requestedAt?: string;
+  requestId?: string;
 }
 
 export interface TherapistRecommendationResponse {

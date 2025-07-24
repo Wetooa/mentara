@@ -327,6 +327,107 @@ export class ClientService {
     });
   }
 
+  async getPendingTherapistRequests(
+    userId: string,
+  ): Promise<TherapistRecommendation[]> {
+    try {
+      const pendingRequests = await this.prisma.clientTherapist.findMany({
+        where: {
+          clientId: userId,
+          status: 'inactive', // Pending requests
+        },
+        include: {
+          therapist: {
+            include: { user: true },
+          },
+        },
+        orderBy: { assignedAt: 'desc' },
+      });
+
+      if (!pendingRequests || pendingRequests.length === 0) {
+        return [];
+      }
+
+      // Transform the Prisma results to match TherapistRecommendation type
+      return pendingRequests.map((request) => {
+        const therapist = request.therapist;
+        return {
+          id: therapist.userId,
+          firstName: therapist.user.firstName,
+          lastName: therapist.user.lastName,
+          title: 'Therapist',
+          specialties: therapist.areasOfExpertise,
+          hourlyRate: Number(therapist.hourlyRate),
+          experience: therapist.yearsOfExperience || 0,
+          province: therapist.province,
+          isActive: therapist.status === 'APPROVED',
+          bio: therapist.user.bio || undefined,
+          profileImage: therapist.user.avatarUrl || undefined,
+          requestedAt: request.assignedAt.toISOString(),
+          requestId: request.id,
+        };
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error getting pending therapist requests for userId ${userId}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to get pending therapist requests',
+      );
+    }
+  }
+
+  async cancelTherapistRequest(
+    userId: string,
+    therapistId: string,
+  ): Promise<void> {
+    try {
+      // Check if client exists
+      const client = await this.prisma.client.findUnique({
+        where: { userId },
+      });
+      if (!client) {
+        this.logger.warn(`Client not found for cancel request, userId: ${userId}`);
+        throw new NotFoundException('Client not found');
+      }
+
+      // Find and delete the pending request
+      const deletedRequest = await this.prisma.clientTherapist.deleteMany({
+        where: {
+          clientId: userId,
+          therapistId: therapistId,
+          status: 'inactive', // Only cancel pending requests
+        },
+      });
+
+      if (deletedRequest.count === 0) {
+        throw new NotFoundException('Pending request not found');
+      }
+
+      this.logger.log(
+        `Successfully cancelled therapist request for client ${userId} to therapist ${therapistId}`,
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        this.logger.error(
+          `Database error in cancelTherapistRequest: ${error.code} - ${error.message}`,
+        );
+        throw new InternalServerErrorException(
+          'Failed to cancel therapist request',
+        );
+      }
+
+      this.logger.error(
+        `Unexpected error in cancelTherapistRequest: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
+  }
+
   async requestTherapist(
     userId: string,
     therapistId: string,

@@ -206,6 +206,11 @@ const createQueryKeys = () => {
       assignedTherapists: [...base.client.all, 'assigned-therapists'] as const,
       profile: [...base.client.all, 'profile'] as const,
       recommendations: [...base.client.all, 'recommendations'] as const,
+      pendingRequests: [...base.client.all, 'pending-requests'] as const,
+      therapistRequests: {
+        pending: () => [...base.client.all, 'therapist-requests', 'pending'] as const,
+        all: () => [...base.client.all, 'therapist-requests'] as const,
+      },
     },
   };
 };

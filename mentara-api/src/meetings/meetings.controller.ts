@@ -64,6 +64,14 @@ export class MeetingsController {
     return this.meetingsService.getInProgressMeetings(userId, limit);
   }
 
+  @Get('booking-requests')
+  async getBookingRequests(
+    @CurrentUserId() userId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.meetingsService.getBookingRequests(userId, limit);
+  }
+
   @Get(':id')
   async getMeeting(
     @Param('id') meetingId: string,
@@ -85,6 +93,25 @@ export class MeetingsController {
       userId,
       updateStatusDto,
     );
+  }
+
+  @Put(':id/accept')
+  @HttpCode(HttpStatus.OK)
+  async acceptBookingRequest(
+    @Param('id') meetingId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.meetingsService.acceptBookingRequest(meetingId, userId);
+  }
+
+  @Put(':id/deny')
+  @HttpCode(HttpStatus.OK)
+  async denyBookingRequest(
+    @Param('id') meetingId: string,
+    @CurrentUserId() userId: string,
+    @Body() body?: { reason?: string },
+  ) {
+    return this.meetingsService.denyBookingRequest(meetingId, userId, body?.reason);
   }
 
   // ===== VIDEO CALL INTEGRATION ENDPOINTS =====

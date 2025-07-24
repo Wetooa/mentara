@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Query } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RoleBasedAccessGuard } from '../auth/guards/role-based-access.guard';
@@ -26,6 +26,21 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard, TherapistDashboardAccessGuard)
   getTherapistDashboard(@CurrentUserId() userId: string) {
     return this.dashboardService.getTherapistDashboardData(userId);
+  }
+
+  @Get('therapist/analytics')
+  @TherapistOnly()
+  getTherapistAnalytics(
+    @CurrentUserId() userId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const dateRange = startDate && endDate ? {
+      start: new Date(startDate),
+      end: new Date(endDate),
+    } : undefined;
+
+    return this.dashboardService.getTherapistAnalytics(userId, dateRange);
   }
 
   @Get('admin')

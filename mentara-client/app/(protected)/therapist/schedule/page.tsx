@@ -8,22 +8,23 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 // Alert components not used in this page
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import {
   Calendar,
+  BarChart3,
+  Inbox,
   Clock,
-  Video,
-  User,
   Settings,
-  Eye,
-  Edit,
-  Trash2,
+  Users,
+  TrendingUp,
 } from "lucide-react";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { GoogleCalendarView } from "@/components/calendar-02";
+import { MeetingDetailsSheet } from "@/components/MeetingDetailsSheet";
+import { BookingRequestsTab } from "@/components/BookingRequestsTab";
+import { TherapistAnalyticsDashboard } from "@/components/TherapistAnalyticsDashboard";
+import { UpcomingSessionsToday } from "@/components/UpcomingSessionsToday";
 import { TherapistAvailabilityCalendar } from "@/components/therapist/TherapistAvailabilityCalendar";
-import { MeetingCalendar } from "@/components/calendar/MeetingCalendar";
-import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
-import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
-import { MeetingStatus } from "@/types/booking";
+import { useMeetings, useBookingRequests } from "@/hooks/booking/useBooking";
 import { toast } from "sonner";
 
 // Animation variants
@@ -49,85 +50,57 @@ const cardVariants = {
 };
 
 export default function TherapistSchedulePage() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState("schedule");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
+  const [isMeetingSheetOpen, setIsMeetingSheetOpen] = useState(false);
 
-  // Format date for API
-  const dateString = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-
-  // Get meetings for the selected date
-  const { meetings, isLoading: meetingsLoading } = useMeetings({
-    limit: 50,
+  // Get meetings data
+  const { meetings, isLoading: meetingsLoading, refetch: refetchMeetings } = useMeetings({
+    limit: 100,
   });
 
-  // Get available slots for the selected date (to show availability)
-  const {
-    timeSlots,
-  } = useAvailableSlots("current-therapist", dateString); // In real app, get current therapist ID
-
-  // Get all upcoming meetings
-  const { meetings: allMeetings, isLoading: allMeetingsLoading } = useMeetings({
-    status: 'SCHEDULED,CONFIRMED,IN_PROGRESS',
-    limit: 20,
-  });
-
-  const { updateMeeting, cancelMeeting, isUpdating, isCancelling } = useBooking();
-
-  const handleUpdateMeetingStatus = async (meetingId: string, status: MeetingStatus) => {
-    try {
-      await updateMeeting(meetingId, { status });
-      toast.success("Meeting status updated");
-    } catch {
-      toast.error("Failed to update meeting status");
-    }
-  };
-
-  const handleCancelMeeting = async (meetingId: string) => {
-    if (confirm("Are you sure you want to cancel this meeting?")) {
-      try {
-        await cancelMeeting(meetingId);
-        toast.success("Meeting cancelled");
-      } catch {
-        toast.error("Failed to cancel meeting");
-      }
-    }
-  };
-
-  const getStatusBadge = (status: MeetingStatus) => {
-    switch (status) {
-      case MeetingStatus.SCHEDULED:
-        return <Badge variant="secondary">Scheduled</Badge>;
-      case MeetingStatus.CONFIRMED:
-        return <Badge variant="default">Confirmed</Badge>;
-      case MeetingStatus.IN_PROGRESS:
-        return <Badge variant="destructive">In Progress</Badge>;
-      case MeetingStatus.COMPLETED:
-        return <Badge variant="outline">Completed</Badge>;
-      case MeetingStatus.CANCELLED:
-        return <Badge variant="outline">Cancelled</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
-
-  const getMeetingTypeIcon = () => {
-    // All meetings are video-only now
-    return <Video className="h-4 w-4" />;
-  };
-
+  // Get booking requests data
+  const { bookingRequests } = useBookingRequests();
 
   const meetingsArray = Array.isArray(meetings) ? meetings : meetings?.meetings || [];
-  const todaysMeetings = meetingsArray?.filter((meeting) => {
-    const meetingDate = new Date(meeting.startTime).toDateString();
-    return meetingDate === selectedDate.toDateString();
-  }) || [];
 
-  const allMeetingsArray = Array.isArray(allMeetings) ? allMeetings : allMeetings?.meetings || [];
-  const upcomingMeetings = allMeetingsArray?.filter((meeting) => {
-    const meetingDate = new Date(meeting.startTime);
-    return meetingDate >= new Date() && 
-           (meeting.status === "scheduled" || meeting.status === "confirmed");
-  }) || [];
+  const handleMeetingClick = (meeting: Meeting) => {
+    setSelectedMeeting(meeting);
+    setIsMeetingSheetOpen(true);
+  };
+
+  const handleMeetingUpdate = (updatedMeeting: Meeting) => {
+    setSelectedMeeting(updatedMeeting);
+    refetchMeetings();
+    toast.success("Meeting updated successfully");
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
+  const getTabBadgeCount = (tab: string) => {
+    switch (tab) {
+      case "requests":
+        return bookingRequests?.length || 0;
+      case "overview":
+        const todayMeetings = meetingsArray.filter((meeting) => {
+          try {
+            const today = new Date();
+            const meetingDate = new Date(meeting.startTime);
+            return (
+              meetingDate.toDateString() === today.toDateString() &&
+              (meeting.status === "SCHEDULED" || meeting.status === "CONFIRMED")
+            );
+          } catch {
+            return false;
+          }
+        });
+        return todayMeetings.length;
+      default:
+        return null;
+    }
+  };
 
   return (
     <motion.div 
@@ -337,7 +310,21 @@ export default function TherapistSchedulePage() {
               </Card>
             </motion.div>
           </div>
-        </TabsContent>
+          <div className="flex items-center gap-3">
+            {bookingRequests?.length > 0 && (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                onClick={() => setActiveTab("requests")}
+                className="flex items-center gap-2 px-3 py-2 bg-orange-100 text-orange-800 rounded-lg cursor-pointer"
+              >
+                <Inbox className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {bookingRequests.length} Pending Request{bookingRequests.length !== 1 ? "s" : ""}
+                </span>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
 
         {/* Availability Management Tab */}
         <TabsContent value="availability" className="space-y-6">

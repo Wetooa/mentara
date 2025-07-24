@@ -192,3 +192,93 @@ export function useMeetings(filters: { status?: string; limit?: number; offset?:
     refetch,
   };
 }
+
+/**
+ * Hook for managing booking requests (therapists only)
+ */
+export function useBookingRequests(limit?: number) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  // Get booking requests
+  const {
+    data: bookingRequests,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['meetings', 'booking-requests', limit],
+    queryFn: () => api.meetings.getBookingRequests(limit),
+    staleTime: 1000 * 60 * 1, // 1 minute (more frequent updates for pending requests)
+  });
+
+  // Accept booking request mutation
+  const acceptRequestMutation = useMutation({
+    mutationFn: (meetingId: string) => api.meetings.acceptBookingRequest(meetingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meetings', 'booking-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      toast.success("Booking request accepted successfully");
+    },
+    onError: (error: MentaraApiError) => {
+      if (error.message.includes('conflicts')) {
+        toast.error("Cannot accept booking: time slot conflicts with existing confirmed meeting");
+      } else {
+        toast.error(error.message || "Failed to accept booking request");
+      }
+    },
+  });
+
+  // Deny booking request mutation
+  const denyRequestMutation = useMutation({
+    mutationFn: ({ meetingId, reason }: { meetingId: string; reason?: string }) => 
+      api.meetings.denyBookingRequest(meetingId, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meetings', 'booking-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      toast.success("Booking request denied");
+    },
+    onError: (error: MentaraApiError) => {
+      toast.error(error.message || "Failed to deny booking request");
+    },
+  });
+
+  return {
+    bookingRequests: bookingRequests || [],
+    isLoading,
+    error,
+    refetch,
+    acceptRequest: (meetingId: string) => acceptRequestMutation.mutate(meetingId),
+    denyRequest: (meetingId: string, reason?: string) => 
+      denyRequestMutation.mutate({ meetingId, reason }),
+    isAccepting: acceptRequestMutation.isPending,
+    isDenying: denyRequestMutation.isPending,
+  };
+}
+
+/**
+ * Hook for getting therapist analytics
+ */
+export function useTherapistAnalytics(dateRange?: { start: string; end: string }) {
+  const api = useApi();
+
+  const {
+    data: analytics,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['therapist', 'analytics', dateRange?.start, dateRange?.end],
+    queryFn: () => api.meetings.getTherapistAnalytics(dateRange?.start, dateRange?.end),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  return {
+    analytics,
+    isLoading,
+    error,
+    refetch,
+  };
+}

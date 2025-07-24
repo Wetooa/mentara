@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '@/lib/api';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useApi } from "@/lib/api";
 // import { useSubscriptionStatus } from '@/hooks/billing'; // Removed - subscriptions are outdated
-import { toast } from 'sonner';
-import { TherapistCardData } from '@/types/therapist';
+import { toast } from "sonner";
+import { TherapistCardData } from "@/types/therapist";
 
 interface AvailableSlot {
   id: string;
@@ -19,7 +19,8 @@ interface MeetingDuration {
 }
 
 enum MeetingType {
-  VIDEO = "video",
+  ONLINE = "online",
+  IN_PERSON = "in_person",
 }
 
 interface CreateMeetingRequest {
@@ -45,30 +46,30 @@ interface UseBookingModalReturn {
   setTitle: (title: string) => void;
   description: string;
   setDescription: (description: string) => void;
-  
+
   // Data
   availableSlots: AvailableSlot[];
-  
+
   // Loading states
   slotsLoading: boolean;
   slotsError: Error | null;
   subscriptionLoading: boolean;
-  
+
   // Payment status
   isActive: boolean;
   isTrial: boolean;
   isPastDue: boolean;
   hasPaymentIssue: boolean;
   needsPaymentMethod: boolean;
-  
+
   // Actions
   handleBooking: () => void;
   resetForm: (therapist?: TherapistCardData) => void;
-  
+
   // Mutations
   isCreatingMeeting: boolean;
   createMeetingError: Error | null;
-  
+
   // Validation
   isFormValid: boolean;
   canBook: boolean;
@@ -82,12 +83,15 @@ export function useBookingModal(
 ): UseBookingModalReturn {
   const api = useApi();
   const queryClient = useQueryClient();
-  
+
   // Local state
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState<MeetingDuration | null>(null);
-  const [meetingType, setMeetingType] = useState<MeetingType>(MeetingType.VIDEO);
+  const [selectedDuration, setSelectedDuration] =
+    useState<MeetingDuration | null>(null);
+  const [meetingType, setMeetingType] = useState<MeetingType>(
+    MeetingType.VIDEO
+  );
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -95,7 +99,7 @@ export function useBookingModal(
   const [isLocked, setIsLocked] = useState(false);
   const lastBookingAttemptRef = useRef<number>(0);
   const cooldownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const MINIMUM_BOOKING_INTERVAL = 2000; // 2 seconds minimum between booking attempts
   const COOLDOWN_PERIOD = 3000; // 3 seconds cooldown after successful booking
 
@@ -148,12 +152,12 @@ export function useBookingModal(
     },
     // Use mutation scope to serialize booking mutations for the same therapist
     scope: {
-      id: therapist?.id ? `booking-${therapist.id}` : 'booking-default',
+      id: therapist?.id ? `booking-${therapist.id}` : "booking-default",
     },
     onMutate: () => {
       // Set lock state to prevent additional attempts
       setIsLocked(true);
-      
+
       // Clear any existing cooldown
       if (cooldownTimeoutRef.current) {
         clearTimeout(cooldownTimeoutRef.current);
@@ -166,7 +170,7 @@ export function useBookingModal(
       queryClient.invalidateQueries({ queryKey: ["available-slots"] });
       onSuccess?.(data);
       onClose?.();
-      
+
       // Set cooldown period to prevent immediate retry
       cooldownTimeoutRef.current = setTimeout(() => {
         setIsLocked(false);
@@ -177,8 +181,10 @@ export function useBookingModal(
       setTimeout(() => {
         setIsLocked(false);
       }, 1000);
-      
-      toast.error(error?.message || "Failed to book session. Please try again.");
+
+      toast.error(
+        error?.message || "Failed to book session. Please try again."
+      );
     },
     onSettled: () => {
       // Update last attempt timestamp
@@ -188,17 +194,14 @@ export function useBookingModal(
 
   // Form validation
   const isFormValid = !!(
-    selectedDate && 
-    selectedSlot && 
-    selectedDuration && 
+    selectedDate &&
+    selectedSlot &&
+    selectedDuration &&
     title.trim()
   );
 
   // Enhanced validation including deduplication states
-  const canBook = !!(
-    !isLocked &&
-    !createMeetingMutation.isPending
-  );
+  const canBook = !!(!isLocked && !createMeetingMutation.isPending);
 
   const handleBooking = useCallback(() => {
     // Basic validation
@@ -243,7 +246,7 @@ export function useBookingModal(
     isLocked,
     title,
     description,
-    meetingType
+    meetingType,
   ]);
 
   const resetForm = (therapist?: TherapistCardData) => {
@@ -274,30 +277,30 @@ export function useBookingModal(
     setTitle,
     description,
     setDescription,
-    
+
     // Data
     availableSlots,
-    
+
     // Loading states
     slotsLoading,
     slotsError,
     subscriptionLoading,
-    
+
     // Payment status
     isActive,
     isTrial,
     isPastDue,
     hasPaymentIssue,
     needsPaymentMethod,
-    
+
     // Actions
     handleBooking,
     resetForm,
-    
+
     // Mutations
     isCreatingMeeting: createMeetingMutation.isPending,
     createMeetingError: createMeetingMutation.error,
-    
+
     // Validation
     isFormValid,
     canBook: isFormValid && canBook,
