@@ -159,12 +159,31 @@ export class WorksheetsService {
     };
   }
 
+  // Helper method to validate due date
+  private validateDueDate(dueDate: string | Date): void {
+    const dueDateObj = typeof dueDate === 'string' ? new Date(dueDate) : dueDate;
+    const now = new Date();
+    
+    if (isNaN(dueDateObj.getTime())) {
+      throw new BadRequestException('Invalid due date format');
+    }
+    
+    if (dueDateObj <= now) {
+      throw new BadRequestException('Due date must be in the future');
+    }
+  }
+
   async create(
     data: WorksheetCreateInputDto,
     userId: string,
     therapistId: string,
     files: Express.Multer.File[] = [],
   ) {
+    // Validate due date
+    if (data.dueDate) {
+      this.validateDueDate(data.dueDate);
+    }
+    
     let materialUrls: string[] = [];
     let materialNames: string[] = [];
 
@@ -230,6 +249,11 @@ export class WorksheetsService {
 
     if (!exists) {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // Validate due date if provided
+    if (data.dueDate) {
+      this.validateDueDate(data.dueDate);
     }
 
     // Update the worksheet
