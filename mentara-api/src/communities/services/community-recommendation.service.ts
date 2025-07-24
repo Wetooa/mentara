@@ -6,6 +6,10 @@ import {
   getCommunityBySlug
 } from '../../config/community-configs';
 import { AiServiceClient } from '../../pre-assessment/services/ai-service.client';
+import { 
+  processPreAssessmentAnswers,
+  QuestionnaireScores
+} from '../../pre-assessment/pre-assessment.utils';
 
 export interface CommunityRecommendation {
   id: string;
@@ -68,17 +72,18 @@ export class CommunityRecommendationService {
       let disorderPredictions: Record<string, boolean> = {};
       try {
         const assessmentAnswers = user.client.preAssessment.answers as any;
-        if (assessmentAnswers?.questionnaires && Array.isArray(assessmentAnswers.questionnaires)) {
-          const aiResult = await this.aiServiceClient.predict(assessmentAnswers.questionnaires);
+        if (assessmentAnswers && Array.isArray(assessmentAnswers) && assessmentAnswers.length === 201) {
+          const aiResult = await this.aiServiceClient.predict(assessmentAnswers);
           disorderPredictions = aiResult.predictions || {};
           this.logger.log(`AI predictions obtained for user ${userId}: ${Object.keys(disorderPredictions).filter(k => disorderPredictions[k]).join(', ')}`);
         } else {
           this.logger.warn(`Invalid preassessment data format for user ${userId}`);
-          return this.getFallbackRecommendations(userId);
+          return this.getFallbackRecommendations(userId, assessmentAnswers);
         }
       } catch (error) {
         this.logger.error(`Failed to get AI predictions for user ${userId}:`, error);
-        return this.getFallbackRecommendations(userId);
+        const assessmentAnswers = user.client.preAssessment.answers as any;
+        return this.getFallbackRecommendations(userId, assessmentAnswers);
       }
 
       // Get user's current communities to exclude from recommendations
@@ -89,7 +94,8 @@ export class CommunityRecommendationService {
       
       if (aiRecommendations.length === 0) {
         this.logger.log(`No AI-based recommendations for user ${userId}, using fallback`);
-        return this.getFallbackRecommendations(userId);
+        const assessmentAnswers = user.client.preAssessment.answers as any;
+        return this.getFallbackRecommendations(userId, assessmentAnswers);
       }
 
       // Get database communities that match recommendations
@@ -219,9 +225,12 @@ export class CommunityRecommendationService {
   }
 
   /**
-   * Get fallback community recommendations when AI predictions are not available
+   * Get community recommendations using manual questionnaire scoring when AI is unavailable
    */
-  private async getFallbackRecommendations(userId: string): Promise<CommunityRecommendation[]> {
+  private async getFallbackRecommendations(
+    userId: string, 
+    questionnaireAnswers?: number[]
+  ): Promise<CommunityRecommendation[]> {
     try {
       // Get user's current communities to exclude
       const user = await this.prisma.user.findUnique({
@@ -235,7 +244,192 @@ export class CommunityRecommendationService {
 
       const currentCommunityIds = user?.memberships.map((m) => m.communityId) || [];
 
-      // Get popular communities (by member count) as fallback
+      // If we have questionnaire data, use manual scoring for personalized recommendations
+      if (questionnaireAnswers && Array.isArray(questionnaireAnswers) && questionnaireAnswers.length === 201) {
+        this.logger.log(`Using manual questionnaire scoring for fallback recommendations for user ${userId}`);
+        return this.getQuestionnaireBasedRecommendations(userId, questionnaireAnswers, currentCommunityIds);
+      }
+
+      // Otherwise, fall back to popular communities
+      this.logger.log(`Using popular communities fallback for user ${userId} (no questionnaire data)`);
+      return this.getPopularCommunitiesFallback(userId, currentCommunityIds);
+
+    } catch (error) {
+      this.logger.error(`Error getting fallback recommendations for user ${userId}:`, error);
+      return this.getPopularCommunitiesFallback(userId, []);
+    }
+  }
+
+  /**
+   * Get recommendations based on manual questionnaire scoring
+   */
+  private async getQuestionnaireBasedRecommendations(
+    userId: string,
+    questionnaireAnswers: number[],
+    currentCommunityIds: string[]
+  ): Promise<CommunityRecommendation[]> {
+    try {
+      // Process questionnaire answers using manual scoring system
+      const assessmentResult = processPreAssessmentAnswers(questionnaireAnswers);
+      const scores = assessmentResult.scores;
+      const severityLevels = assessmentResult.severityLevels;
+
+      this.logger.debug(`Manual scoring results for user ${userId}:`, {
+        scores: Object.keys(scores).reduce((acc, key) => ({ ...acc, [key]: scores[key] }), {}),
+        severityLevels: Object.keys(severityLevels).reduce((acc, key) => ({ ...acc, [key]: severityLevels[key] }), {})
+      });
+
+      // Create disorder predictions based on severity levels
+      const manualPredictions = this.createDisorderPredictionsFromSeverity(severityLevels);
+
+      // Get community recommendations using the same logic as AI predictions
+      const communityRecommendations = getCommunityRecommendationsWithScores(manualPredictions);
+
+      if (communityRecommendations.length === 0) {
+        this.logger.warn(`No communities found for manual predictions for user ${userId}`);
+        return this.getPopularCommunitiesFallback(userId, currentCommunityIds);
+      }
+
+      // Get database communities that match manual recommendations
+      const recommendedSlugs = communityRecommendations.map(rec => rec.slug);
+      const communities = await this.prisma.community.findMany({
+        where: {
+          slug: { in: recommendedSlugs },
+          id: { notIn: currentCommunityIds },
+        },
+        include: {
+          _count: {
+            select: { memberships: true },
+          },
+        },
+      });
+
+      // Create final recommendations with manual scoring data
+      const recommendations: CommunityRecommendation[] = [];
+      const now = new Date();
+
+      for (const community of communities) {
+        const recommendation = communityRecommendations.find(rec => rec.slug === community.slug);
+        if (recommendation) {
+          recommendations.push({
+            id: community.id,
+            name: community.name,
+            slug: community.slug,
+            description: community.description,
+            imageUrl: community.imageUrl || '/images/communities/default.jpg',
+            memberCount: community._count.memberships,
+            compatibilityScore: recommendation.score,
+            score: recommendation.score,
+            reason: this.generateManualScoringReason(severityLevels, community.slug),
+            status: 'pending',
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+      }
+
+      // Sort by compatibility score
+      const sortedRecommendations = recommendations
+        .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
+        .slice(0, 8);
+
+      this.logger.log(`Generated ${sortedRecommendations.length} manual scoring-based recommendations for user ${userId}`);
+      return sortedRecommendations;
+
+    } catch (error) {
+      this.logger.error(`Error in questionnaire-based recommendations for user ${userId}:`, error);
+      return this.getPopularCommunitiesFallback(userId, currentCommunityIds);
+    }
+  }
+
+  /**
+   * Convert severity levels to disorder predictions (similar to AI format)
+   */
+  private createDisorderPredictionsFromSeverity(severityLevels: Record<string, string>): Record<string, boolean> {
+    const predictions: Record<string, boolean> = {};
+
+    // Map questionnaire names to canonical disorder IDs
+    const severityToDisorderMapping: Record<string, string> = {
+      'PHQ-9': 'depression',
+      'GAD-7': 'anxiety', 
+      'ASRS': 'adhd',
+      'AUDIT': 'alcohol',
+      'BES': 'binge-eating',
+      'DAST-10': 'drug-abuse',
+      'ISI': 'insomnia',
+      'MBI': 'burnout',
+      'MDQ': 'mood-disorder',
+      'OCI-R': 'obsessional-compulsive',
+      'PCL-5': 'ptsd',
+      'PDSS': 'panic-disorder',
+      'PSS': 'stress',
+      'SPIN': 'social-phobia',
+      'Phobia': 'phobia'
+    };
+
+    // Convert severity levels to boolean predictions
+    // Consider 'mild' and above as positive predictions
+    Object.entries(severityLevels).forEach(([questionnaire, severity]) => {
+      const disorderId = severityToDisorderMapping[questionnaire];
+      if (disorderId) {
+        predictions[disorderId] = severity !== 'subclinical' && severity !== 'minimal';
+      }
+    });
+
+    this.logger.debug('Manual predictions from severity levels:', predictions);
+    return predictions;
+  }
+
+  /**
+   * Generate recommendation reason based on manual scoring
+   */
+  private generateManualScoringReason(severityLevels: Record<string, string>, communitySlug: string): string {
+    // Find which assessments led to this community recommendation
+    const relevantAssessments: string[] = [];
+
+    // Map community slugs back to assessment types
+    const communityToAssessmentMapping: Record<string, string[]> = {
+      'depression-support': ['PHQ-9'],
+      'anxiety-warriors': ['GAD-7'],
+      'social-anxiety-support': ['SPIN'],
+      'ptsd-support': ['PCL-5'],
+      'panic-disorder-support': ['PDSS'],
+      'bipolar-support': ['MDQ'], 
+      'ocd-support': ['OCI-R'],
+      'insomnia-support': ['ISI'],
+      'stress-support': ['PSS'],
+      'burnout-recovery': ['MBI'],
+      'eating-disorder-recovery': ['BES'],
+      'adhd-support': ['ASRS'],
+      'alcohol-recovery-support': ['AUDIT'],
+      'substance-recovery-support': ['DAST-10'],
+      'phobia-support': ['Phobia']
+    };
+
+    const assessments = communityToAssessmentMapping[communitySlug] || [];
+    
+    for (const assessment of assessments) {
+      const severity = severityLevels[assessment];
+      if (severity && severity !== 'subclinical' && severity !== 'minimal') {
+        relevantAssessments.push(`${severity} ${assessment.toLowerCase().replace('-', ' ')}`);
+      }
+    }
+
+    if (relevantAssessments.length > 0) {
+      return `Recommended based on your ${relevantAssessments.join(' and ')} assessment results`;
+    }
+
+    return 'Recommended based on your mental health assessment responses';
+  }
+
+  /**
+   * Fallback to popular communities when no other options available
+   */
+  private async getPopularCommunitiesFallback(
+    userId: string, 
+    currentCommunityIds: string[]
+  ): Promise<CommunityRecommendation[]> {
+    try {
       const communities = await this.prisma.community.findMany({
         where: {
           id: { notIn: currentCommunityIds },
@@ -261,16 +455,15 @@ export class CommunityRecommendationService {
         description: community.description,
         imageUrl: community.imageUrl || '/images/communities/default.jpg',
         memberCount: community._count.memberships,
-        compatibilityScore: 0.6 - (index * 0.05), // Decreasing score based on popularity
+        compatibilityScore: 0.6 - (index * 0.05),
         score: 0.6 - (index * 0.05),
         reason: 'Popular community that might interest you',
         status: 'pending',
         createdAt: now,
         updatedAt: now,
       }));
-
     } catch (error) {
-      this.logger.error(`Error getting fallback recommendations for user ${userId}:`, error);
+      this.logger.error(`Error getting popular communities fallback for user ${userId}:`, error);
       return [];
     }
   }
