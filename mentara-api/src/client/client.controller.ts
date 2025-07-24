@@ -230,4 +230,40 @@ export class ClientController {
       );
     }
   }
+
+  @Post('therapist/request')
+  @ApiOperation({
+    summary: 'Send therapist connection request',
+    description: 'Send a connection request to a therapist (creates inactive ClientTherapist relationship)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Request sent successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request - Request already exists or therapist not approved' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Client or Therapist not found' })
+  async requestTherapist(
+    @CurrentUserId() id: string,
+    @Body() data: { therapistId: string },
+  ): Promise<{ therapist: TherapistRecommendation }> {
+    try {
+      const therapist = await this.clientService.requestTherapist(
+        id,
+        data.therapistId,
+      );
+      return { therapist };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to send therapist request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error && error.message.includes('not found')
+          ? HttpStatus.NOT_FOUND
+          : error instanceof Error && error.message.includes('already')
+          ? HttpStatus.BAD_REQUEST
+          : error instanceof Error && error.message.includes('not approved')
+          ? HttpStatus.BAD_REQUEST
+          : HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
