@@ -37,7 +37,7 @@ export default function DashboardOverview({
   const maxValue = Math.max(...values) || 1;
 
   return (
-    <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/50 backdrop-blur-sm group">
+    <Card className="relative overflow-hidden border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-white group">
       {/* Accent line */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600" />
       

@@ -109,7 +109,7 @@ export default function TherapistDashboardPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20 p-4 md:p-6 lg:p-8">
+    <div className="w-full min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Enhanced Page Header */}
         <div className="text-center md:text-left">

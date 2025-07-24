@@ -58,13 +58,13 @@ export default function DashboardPatientList({
 
   if (appointments.length === 0) {
     return (
-      <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+      <Card className="border-gray-200 shadow-lg bg-white">
         <CardContent className="p-12 text-center">
-          <div className="rounded-xl bg-muted/50 p-4 w-fit mx-auto mb-4">
-            <Clock className="h-8 w-8 text-muted-foreground" />
+          <div className="rounded-xl bg-gray-50 p-4 w-fit mx-auto mb-4">
+            <Clock className="h-8 w-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">No appointments today</h3>
-          <p className="text-muted-foreground">
+          <h3 className="text-lg font-semibold mb-2 text-gray-900">No appointments today</h3>
+          <p className="text-gray-600">
             Your schedule is clear. Enjoy your free time!
           </p>
         </CardContent>
@@ -87,7 +87,7 @@ export default function DashboardPatientList({
           onMouseEnter={() => setHoveredAppointment(appointment.id)}
           onMouseLeave={() => setHoveredAppointment(null)}
         >
-          <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/50 backdrop-blur-sm group">
+          <Card className="relative overflow-hidden border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-white group">
             {/* Accent line */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600" />
             
