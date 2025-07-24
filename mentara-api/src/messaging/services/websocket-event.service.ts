@@ -33,8 +33,13 @@ export class WebSocketEventService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
+    this.logger.log('🚀 [INIT] WebSocketEventService initializing...');
+    this.logger.log('🔍 [INIT] Dependencies check:');
+    this.logger.log(`   - EventBus exists: ${!!this.eventBus}`);
+    this.logger.log(`   - MessagingGateway exists: ${!!this.messagingGateway}`);
+    
     this.subscribeToEvents();
-    this.logger.log('WebSocket event handlers initialized successfully');
+    this.logger.log('✅ [INIT] WebSocket event handlers initialized successfully');
   }
 
   private subscribeToEvents(): void {
@@ -54,10 +59,15 @@ export class WebSocketEventService implements OnModuleInit {
   }
 
   private subscribeToMessagingEvents(): void {
+    this.logger.log('🔧 [EVENT SUBSCRIPTION] Subscribing to messaging events...');
+    
     // Message sent event - broadcast to conversation participants
+    this.logger.log('📡 [EVENT SUBSCRIPTION] Registering MessageSentEvent handler...');
     this.eventBus.subscribe(
       'MessageSentEvent',
       async (event: DomainEvent<any>) => {
+        this.logger.log('🚨 [EVENT RECEIVED] MessageSentEvent received in WebSocketEventService!');
+        this.logger.debug('📨 [EVENT DATA]', event.eventData);
         try {
           const messageEvent = event as MessageSentEvent;
           const {
@@ -78,6 +88,9 @@ export class WebSocketEventService implements OnModuleInit {
 
           // Broadcast message to conversation participants via WebSocket
           // Frontend expects MessageEventData format with 'message' property
+          this.logger.log(`🚀 [WEBSOCKET] About to call MessagingGateway.broadcastMessage for conversation ${conversationId}`);
+          this.logger.debug(`🚀 [WEBSOCKET] Gateway exists: ${!!this.messagingGateway}`);
+          
           this.messagingGateway.broadcastMessage(conversationId, {
             message: {
               id: messageId,
@@ -103,19 +116,30 @@ export class WebSocketEventService implements OnModuleInit {
             },
             eventType: 'message_sent',
           });
+          
+          this.logger.log(`✅ [WEBSOCKET] MessagingGateway.broadcastMessage completed for conversation ${conversationId}`);
 
           // Send delivery confirmations with safe iteration
           const safeRecipientIds = this.ensureArray(recipientIds, 'recipientIds');
           for (const recipientId of safeRecipientIds) {
             if (recipientId && typeof recipientId === 'string') {
-              this.messagingGateway.server
-                .to(this.getUserSocketRoom(recipientId))
-                .emit('message_delivered', {
-                  messageId,
-                  conversationId,
-                  deliveredAt: new Date(),
-                  eventType: 'message_delivered',
-                });
+              try {
+                // Check if server is available before sending delivery confirmations
+                if (this.messagingGateway.server?.sockets) {
+                  this.messagingGateway.server
+                    .to(this.getUserSocketRoom(recipientId))
+                    .emit('message_delivered', {
+                      messageId,
+                      conversationId,
+                      deliveredAt: new Date(),
+                      eventType: 'message_delivered',
+                    });
+                } else {
+                  this.logger.warn(`WebSocket server not ready for delivery confirmation to ${recipientId}`);
+                }
+              } catch (error) {
+                this.logger.error(`Error sending delivery confirmation to ${recipientId}:`, error);
+              }
             } else {
               this.logger.warn(`Invalid recipientId in MessageSentEvent: ${recipientId}`, {
                 messageId,
@@ -203,17 +227,25 @@ export class WebSocketEventService implements OnModuleInit {
           // Notify all participants about new conversation
           for (const participantId of safeParticipantIds) {
             if (participantId && typeof participantId === 'string') {
-              this.messagingGateway.server
-                .to(this.getUserSocketRoom(participantId))
-                .emit('conversation_created', {
-                  conversationId,
-                  createdBy,
-                  conversationType,
-                  title,
-                  participantIds: safeParticipantIds, // Send normalized array
-                  eventType: 'conversation_created',
-                  timestamp: new Date(),
-                });
+              try {
+                if (this.messagingGateway.server?.sockets) {
+                  this.messagingGateway.server
+                    .to(this.getUserSocketRoom(participantId))
+                    .emit('conversation_created', {
+                      conversationId,
+                      createdBy,
+                      conversationType,
+                      title,
+                      participantIds: safeParticipantIds, // Send normalized array
+                      eventType: 'conversation_created',
+                      timestamp: new Date(),
+                    });
+                } else {
+                  this.logger.warn(`WebSocket server not ready for conversation notification to ${participantId}`);
+                }
+              } catch (error) {
+                this.logger.error(`Error notifying participant ${participantId} of conversation creation:`, error);
+              }
             } else {
               this.logger.warn(`Invalid participantId in ConversationCreatedEvent: ${participantId}`, {
                 conversationId,
@@ -246,16 +278,20 @@ export class WebSocketEventService implements OnModuleInit {
           const { conversationId, participantId, addedBy, joinedAt, role } =
             joinEvent.eventData;
 
-          this.messagingGateway.server
-            .to(conversationId)
-            .emit('participant_joined', {
-              conversationId,
-              participantId,
-              addedBy,
-              joinedAt,
-              role,
-              eventType: 'participant_joined',
-            });
+          if (this.messagingGateway.server?.sockets) {
+            this.messagingGateway.server
+              .to(conversationId)
+              .emit('participant_joined', {
+                conversationId,
+                participantId,
+                addedBy,
+                joinedAt,
+                role,
+                eventType: 'participant_joined',
+              });
+          } else {
+            this.logger.warn('WebSocket server not ready for participant joined event');
+          }
 
           this.logger.debug(
             `Broadcasted participant joined event: ${participantId} to ${conversationId}`,
@@ -278,15 +314,19 @@ export class WebSocketEventService implements OnModuleInit {
           const { conversationId, participantId, leftAt, leftReason } =
             leftEvent.eventData;
 
-          this.messagingGateway.server
-            .to(conversationId)
-            .emit('participant_left', {
-              conversationId,
-              participantId,
-              leftAt,
-              leftReason,
-              eventType: 'participant_left',
-            });
+          if (this.messagingGateway.server?.sockets) {
+            this.messagingGateway.server
+              .to(conversationId)
+              .emit('participant_left', {
+                conversationId,
+                participantId,
+                leftAt,
+                leftReason,
+                eventType: 'participant_left',
+              });
+          } else {
+            this.logger.warn('WebSocket server not ready for participant left event');
+          }
 
           this.logger.debug(
             `Broadcasted participant left event: ${participantId} from ${conversationId}`,
@@ -309,15 +349,19 @@ export class WebSocketEventService implements OnModuleInit {
           const { conversationId, userId, isTyping, timestamp } =
             typingEvent.eventData;
 
-          this.messagingGateway.server
-            .to(conversationId)
-            .emit('typing_indicator', {
-              conversationId,
-              userId,
-              isTyping,
-              timestamp,
-              eventType: 'typing_indicator',
-            });
+          if (this.messagingGateway.server?.sockets) {
+            this.messagingGateway.server
+              .to(conversationId)
+              .emit('typing_indicator', {
+                conversationId,
+                userId,
+                isTyping,
+                timestamp,
+                eventType: 'typing_indicator',
+              });
+          } else {
+            this.logger.warn('WebSocket server not ready for typing indicator event');
+          }
 
           this.logger.debug(
             `Relayed typing indicator: ${userId} in ${conversationId} - ${isTyping}`,

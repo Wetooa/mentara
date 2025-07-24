@@ -137,7 +137,7 @@ export default function FilterBar({
   }, [activeFiltersData.length, onFiltersChange]);
 
   const handleFilterRemove = (filterType: string, value?: any) => {
-    let newFilters = { ...filters };
+    const newFilters = { ...filters };
     
     switch (filterType) {
       case 'specialty':

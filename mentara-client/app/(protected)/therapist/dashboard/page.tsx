@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 export default function TherapistDashboardPage() {
   const router = useRouter();
   const { data, isLoading, error, refetch } = useTherapistDashboard();
-  
+
   // Destructure from data object for backward compatibility
   const therapist = data?.therapist;
   const stats = data?.stats;
@@ -122,7 +122,7 @@ export default function TherapistDashboardPage() {
       {/* Stats Overview */}
       <div>
         <h2 className="text-xl font-semibold mb-4 text-amber-800">Today&apos;s Agenda</h2>
-        <DashboardStats 
+        <DashboardStats
           stats={stats || {
             activePatients: 0,
             rescheduled: 0,
@@ -150,7 +150,7 @@ export default function TherapistDashboardPage() {
             <h2 className="text-lg font-medium mb-4 text-amber-800">
               Today&apos;s Upcoming Patients ({upcomingAppointments.length})
             </h2>
-            <DashboardPatientList 
+            <DashboardPatientList
               appointments={upcomingAppointments.map(apt => ({
                 ...apt,
                 patientAvatar: "/avatar-placeholder.png",
@@ -166,7 +166,7 @@ export default function TherapistDashboardPage() {
         <div className="space-y-6">
           <div>
             <h2 className="text-lg font-medium mb-4 text-amber-800">Overview</h2>
-            <DashboardOverview 
+            <DashboardOverview
               patientStats={stats?.patientStats || {
                 total: 0,
                 percentage: 0,
@@ -179,15 +179,15 @@ export default function TherapistDashboardPage() {
         </div>
 
         {/* Right Column 2 - Calendar and Quick Actions */}
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-lg font-medium mb-4 text-amber-800">Schedule</h2>
-            <DashboardCalendarWidget 
-              onDateClick={handleScheduleClick}
-              onViewSchedule={handleScheduleClick}
-            />
-          </div>
-        </div>
+        {/* <div className="space-y-6"> */}
+        {/*   <div> */}
+        {/*     <h2 className="text-lg font-medium mb-4 text-amber-800">Schedule</h2> */}
+        {/*     <DashboardCalendarWidget */}
+        {/*       onDateClick={handleScheduleClick} */}
+        {/*       onViewSchedule={handleScheduleClick} */}
+        {/*     /> */}
+        {/*   </div> */}
+        {/* </div> */}
       </div>
     </div>
   );

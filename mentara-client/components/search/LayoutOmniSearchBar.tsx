@@ -111,10 +111,10 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
         }
         break;
       case 'posts':
-        router.push(`/community/posts/${result.id}`);
+        router.push(`/${userRole}/community/posts/${result.id}`);
         break;
       case 'communities':
-        router.push(`/community/${result.id}`);
+        router.push(`/${userRole}/community`);
         break;
       case 'worksheets':
         if (userRole === 'therapist') {

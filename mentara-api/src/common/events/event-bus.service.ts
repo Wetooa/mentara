@@ -21,6 +21,20 @@ export class EventBusService implements IEventBus {
         correlationId: event.metadata.correlationId,
       });
 
+      // Check if there are listeners for this event
+      const listenerCount = this.eventEmitter.listenerCount(event.eventType);
+      this.logger.debug(`📡 [EVENT DELIVERY] Event ${event.eventType} has ${listenerCount} listeners`);
+      
+      if (listenerCount === 0) {
+        this.logger.warn(`⚠️ [EVENT DELIVERY] No listeners registered for event: ${event.eventType}`);
+      }
+
+      // Special logging for MessageSentEvent
+      if (event.eventType === 'MessageSentEvent') {
+        this.logger.log(`🚨 [MESSAGE EVENT] Emitting MessageSentEvent to ${listenerCount} listeners`);
+        this.logger.debug(`🚨 [MESSAGE EVENT] Event data:`, event.eventData);
+      }
+
       // Emit the specific event type ONLY
       await this.eventEmitter.emitAsync(event.eventType, event);
 
@@ -30,6 +44,11 @@ export class EventBusService implements IEventBus {
       // await this.eventEmitter.emitAsync(`${event.aggregateType}.*`, event);
 
       this.logger.debug(`Event emitted successfully: ${event.eventType}`);
+      
+      // Special confirmation for MessageSentEvent
+      if (event.eventType === 'MessageSentEvent') {
+        this.logger.log(`✅ [MESSAGE EVENT] MessageSentEvent emission completed`);
+      }
     } catch (error) {
       this.logger.error(`Failed to emit event: ${event.eventType}`, {
         eventId: event.eventId,
@@ -50,6 +69,11 @@ export class EventBusService implements IEventBus {
       options,
     });
 
+    // Special logging for MessageSentEvent subscription
+    if (eventType === 'MessageSentEvent') {
+      this.logger.log(`🔔 [EVENT SUBSCRIPTION] MessageSentEvent handler registered! Handler: ${handler.name || 'anonymous'}`);
+    }
+
     const wrappedHandler = async (event: DomainEvent<T>) => {
       try {
         this.logger.debug(`Handling event: ${event.eventType}`, {
@@ -57,12 +81,22 @@ export class EventBusService implements IEventBus {
           handlerName: handler.name,
         });
 
+        // Special logging for MessageSentEvent handling
+        if (event.eventType === 'MessageSentEvent') {
+          this.logger.log(`🎯 [EVENT HANDLER] MessageSentEvent being handled by ${handler.name || 'anonymous'}`);
+        }
+
         await handler(event);
 
         this.logger.debug(`Event handled successfully: ${event.eventType}`, {
           eventId: event.eventId,
           handlerName: handler.name,
         });
+        
+        // Special confirmation for MessageSentEvent handling
+        if (event.eventType === 'MessageSentEvent') {
+          this.logger.log(`✅ [EVENT HANDLER] MessageSentEvent handled successfully by ${handler.name || 'anonymous'}`);
+        }
       } catch (error) {
         this.logger.error(`Event handler failed: ${event.eventType}`, {
           eventId: event.eventId,

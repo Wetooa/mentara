@@ -2,8 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotificationsWebSocket } from "./useNotificationsWebSocket";
 
 interface Notification {
   id: string;
@@ -20,8 +21,8 @@ interface Notification {
 }
 
 /**
- * Simplified hook for managing user notifications
- * Uses HTTP polling instead of complex WebSocket integration
+ * Enhanced hook for managing user notifications
+ * Combines HTTP API with real-time WebSocket notifications
  */
 export function useNotifications(
   params: {
@@ -29,6 +30,7 @@ export function useNotifications(
     offset?: number;
     isRead?: boolean;
     enableToasts?: boolean;
+    enableRealTime?: boolean;
   } = {}
 ) {
   const api = useApi();
@@ -38,8 +40,78 @@ export function useNotifications(
   // Configuration with defaults
   const config = {
     enableToasts: true,
+    enableRealTime: true,
     ...params,
   };
+
+  // Real-time WebSocket integration
+  const webSocketState = useNotificationsWebSocket({
+    onNewNotification: useCallback((notification) => {
+      console.log('🔔 [useNotifications] Received real-time notification:', notification);
+      
+      // Add new notification to the cache optimistically
+      queryClient.setQueryData(
+        ["notifications", "list", params],
+        (oldData: Notification[] | undefined) => {
+          if (!oldData) return [notification];
+          // Add to beginning of array (most recent first)
+          return [notification, ...oldData];
+        }
+      );
+
+      // Update unread count optimistically
+      queryClient.setQueryData(
+        ["notifications", "unreadCount"],
+        (oldData: { count: number } | undefined) => ({
+          count: (oldData?.count || 0) + 1,
+        })
+      );
+
+      // Show toast notification if enabled
+      if (config.enableToasts && config.enableRealTime) {
+        const toastConfig = {
+          description: notification.message,
+          action: notification.actionUrl ? {
+            label: "View",
+            onClick: () => window.location.href = notification.actionUrl!,
+          } : undefined,
+        };
+
+        // Show different toast types based on notification priority
+        switch (notification.priority) {
+          case 'urgent':
+          case 'high':
+            toast.error(notification.title, toastConfig);
+            break;
+          case 'medium':
+            toast.warning(notification.title, toastConfig);
+            break;
+          default:
+            toast.info(notification.title, toastConfig);
+        }
+      }
+    }, [queryClient, params, config.enableToasts, config.enableRealTime]),
+
+    onUnreadCountUpdate: useCallback((data) => {
+      console.log('🔢 [useNotifications] Real-time unread count update:', data.count);
+      
+      // Update unread count in cache
+      queryClient.setQueryData(
+        ["notifications", "unreadCount"],
+        { count: data.count }
+      );
+    }, [queryClient]),
+
+    onError: useCallback((error) => {
+      console.error('❌ [useNotifications] WebSocket error:', error);
+      
+      if (config.enableToasts) {
+        toast.error("Notification connection issue", {
+          description: "Using fallback mode. Some notifications may be delayed.",
+        });
+      }
+    }, [config.enableToasts]),
+  });
 
   // Get notifications
   const {
@@ -141,8 +213,20 @@ export function useNotifications(
     isMarkingAllAsRead: markAllAsReadMutation.isPending,
     isDeleting: deleteNotificationMutation.isPending,
 
+    // Real-time WebSocket state
+    realTime: {
+      isConnected: webSocketState.isConnected,
+      isConnecting: webSocketState.isConnecting,
+      error: webSocketState.error,
+      canReceiveNotifications: webSocketState.canReceiveNotifications,
+      lastNotification: webSocketState.lastNotification,
+      connect: webSocketState.connect,
+      disconnect: webSocketState.disconnect,
+    },
+
     // Configuration
     enableToasts: config.enableToasts,
+    enableRealTime: config.enableRealTime,
 
     // Utility functions
     getNotificationsByCategory: (category: string) =>
