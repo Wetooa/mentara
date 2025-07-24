@@ -5,7 +5,6 @@ import { queryKeys } from "@/lib/queryKeys";
 import { 
   TherapistCardData,
   transformTherapistForCard,
-  transformApiTherapistForCard,
   ApiTherapistResponse
 } from "@/types/therapist";
 
@@ -51,14 +50,8 @@ export function useAllTherapists() {
         return [];
       }
       
-      // Check if we have the actual API structure (with user nested object)
-      if (therapists[0]?.user) {
-        // Use the new transform function for actual API data
-        return therapists.map((therapist: ApiTherapistResponse) => transformApiTherapistForCard(therapist));
-      } else {
-        // Fallback to the old transform function for backward compatibility
-        return therapists.map(transformTherapistForCard);
-      }
+      // Use the unified transform function that handles both API formats
+      return therapists.map(transformTherapistForCard);
     } catch (error) {
       console.error('Error transforming all therapists data:', error);
       return [];

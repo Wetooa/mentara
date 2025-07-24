@@ -36,7 +36,7 @@ export function useNotifications(
   const api = useApi();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  
+
   // Configuration with defaults
   const config = {
     enableToasts: true,
@@ -48,7 +48,7 @@ export function useNotifications(
   const webSocketState = useNotificationsWebSocket({
     onNewNotification: useCallback((notification) => {
       console.log('🔔 [useNotifications] Received real-time notification:', notification);
-      
+
       // Add new notification to the cache optimistically
       queryClient.setQueryData(
         ["notifications", "list", params],
@@ -94,7 +94,7 @@ export function useNotifications(
 
     onUnreadCountUpdate: useCallback((data) => {
       console.log('🔢 [useNotifications] Real-time unread count update:', data.count);
-      
+
       // Update unread count in cache
       queryClient.setQueryData(
         ["notifications", "unreadCount"],
@@ -104,7 +104,7 @@ export function useNotifications(
 
     onError: useCallback((error) => {
       console.error('❌ [useNotifications] WebSocket error:', error);
-      
+
       if (config.enableToasts) {
         toast.error("Notification connection issue", {
           description: "Using fallback mode. Some notifications may be delayed.",

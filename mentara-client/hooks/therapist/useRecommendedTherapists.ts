@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { TherapistRecommendation } from "@/lib/api/services/therapists";
-import { TherapistCardData, transformTherapistForCard, transformApiTherapistForCard, ApiTherapistResponse } from "@/types/therapist";
+import { TherapistCardData, transformTherapistForCard, ApiTherapistResponse } from "@/types/therapist";
 
 export interface UseTherapistRecommendationsOptions {
   /** Maximum number of therapists to fetch */
@@ -240,14 +240,8 @@ export function useCarouselRecommendations(
       // Handle both the API response and the transformed therapists
       const therapists = recommendationsData.therapists || [];
       
-      // Check if we have the actual API structure (with user nested object)
-      if (therapists.length > 0 && therapists[0].user) {
-        // Use the new transform function for actual API data
-        return therapists.map((therapist: ApiTherapistResponse) => transformApiTherapistForCard(therapist));
-      } else {
-        // Fallback to the old transform function for backward compatibility
-        return therapists.map(transformTherapistForCard);
-      }
+      // Use the unified transform function that handles both API formats
+      return therapists.map(transformTherapistForCard);
     } catch (error) {
       console.error('Error transforming therapist data for cards:', error);
       return [];

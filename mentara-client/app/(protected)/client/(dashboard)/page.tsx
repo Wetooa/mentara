@@ -220,11 +220,11 @@ export default function DashboardPage() {
             onContactSelect={handleContactSelect}
           />
           <ProgressTracking progress={dashboardData.progress} />
-          <NotificationCenter 
-            className="h-96" 
-            showSettings={false} 
-            maxHeight="384px" 
-          />
+          {/* <NotificationCenter  */}
+          {/*   className="h-96"  */}
+          {/*   showSettings={false}  */}
+          {/*   maxHeight="384px"  */}
+          {/* /> */}
         </div>
       </div>
     </div>
