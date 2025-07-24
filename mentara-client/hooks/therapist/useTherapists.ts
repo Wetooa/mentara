@@ -6,11 +6,8 @@ import {
 } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
-<<<<<<< HEAD
 import { useAllTherapists } from "@/hooks/therapist/useAllTherapists";
 
-=======
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
 import type {
   TherapistSearchParams,
   TherapistRecommendationResponse,
@@ -47,13 +44,8 @@ export function useTherapistProfile(therapistId: string | null) {
   const api = useApi();
 
   return useQuery({
-<<<<<<< HEAD
-    queryKey: ['therapists', 'detail', therapistId || ""],
-    queryFn: () => api.therapists.getTherapistProfile(therapistId!),
-=======
     queryKey: ["therapists", "detail", therapistId || ""],
     queryFn: () => api.therapists.getProfile(therapistId!),
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
     enabled: !!therapistId,
     staleTime: 1000 * 60 * 10, // Profile data is more stable
   });
@@ -114,66 +106,6 @@ export function useTherapistCards(params: TherapistSearchParams = {}) {
 }
 
 /**
- * @deprecated Duplicate function removed - use useAllTherapists from @/hooks/therapist/useAllTherapists instead
- * This duplicate implementation has been consolidated into the new useAllTherapists hook
- * which provides better filtering, pagination, and React Query patterns.
- */
-<<<<<<< HEAD
-
-/**
- * @deprecated This hook has been replaced by useAllTherapists and useAllTherapistsWithFilters
- * The complex conditional logic in this hook was causing issues where not all therapists were displayed.
- * Use useAllTherapists for simple listing or useAllTherapistsWithFilters for filtering needs.
- * 
- * This hook will be removed in a future version.
-=======
-export function useAllTherapists(params: TherapistSearchParams = {}) {
-  const api = useApi();
-
-  const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ["therapists", "all", params],
-    queryFn: () => {
-      return api.therapists.getTherapistList(params);
-    },
-    select: (response) => {
-      // Handle both new therapist list API and old recommendation API responses
-      if (response?.therapists && Array.isArray(response.therapists)) {
-        // New therapist list API response
-        return {
-          therapists: response.therapists,
-          totalCount: response.totalCount || response.therapists.length,
-          currentPage: response.currentPage || 1,
-          totalPages: response.totalPages || 1,
-          hasNextPage: response.hasNextPage || false,
-          hasPreviousPage: response.hasPreviousPage || false,
-        };
-      }
-      // Fallback for old format
-      return response?.data || { therapists: [], totalCount: 0 };
-    },
-    enabled: true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  const therapistCards: TherapistCardData[] =
-    data?.therapists?.map(transformTherapistForCard) || [];
-
-  return {
-    therapists: therapistCards,
-    totalCount: data?.totalCount || 0,
-    userConditions: data?.userConditions || [],
-    matchCriteria: data?.matchCriteria,
-    currentPage: data?.currentPage || 1,
-    totalPages: data?.totalPages || 1,
-    hasNextPage: data?.hasNextPage || false,
-    hasPreviousPage: data?.hasPreviousPage || false,
-    isLoading,
-    error,
-    refetch,
-  };
-}
-
-/**
  * Hook for filtering therapists with hybrid server/client-side filtering and pagination
  * Used primarily by TherapistListing and FavoritesSection components
  *
@@ -181,7 +113,6 @@ export function useAllTherapists(params: TherapistSearchParams = {}) {
  * - Uses server-side filtering for province and price when available
  * - Implements proper pagination with awareness of client-side filtering
  * - Fetches larger batches intelligently based on filter complexity
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
  */
 export function useFilteredTherapists(
   searchQuery: string,
@@ -399,13 +330,8 @@ export function usePrefetchTherapistProfile() {
 
   return (therapistId: string) => {
     queryClient.prefetchQuery({
-<<<<<<< HEAD
-      queryKey: ['therapists', 'detail', therapistId],
-      queryFn: () => api.therapists.getTherapistProfile(therapistId),
-=======
       queryKey: ["therapists", "detail", therapistId],
       queryFn: () => api.therapists.getProfile(therapistId),
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
       staleTime: 1000 * 60 * 10,
     });
   };

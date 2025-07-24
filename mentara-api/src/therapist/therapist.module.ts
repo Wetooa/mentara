@@ -31,11 +31,8 @@ import { CommunitiesModule } from '../communities/communities.module';
     TherapistProfileController,
     TherapistClientController,
     TherapistWorksheetController,
-<<<<<<< HEAD
     TherapistMatchController,
-=======
     TherapistListController,
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
   ],
   providers: [
     TherapistRecommendationService,

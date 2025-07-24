@@ -22,15 +22,12 @@ export default function MainLayout({
   const { logout, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-<<<<<<< HEAD
-=======
   console.log("Current user:", user);
 
   const handleUserSelect = (user: User) => {
     console.log("Selected user:", user);
     router.push(`/client/profile/${user.id}`);
   };
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
 
   const handleLogout = () => {
     logout();

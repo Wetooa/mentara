@@ -17,15 +17,18 @@ export function createTherapistService(axios: AxiosInstance) {
      * Get ALL approved therapists (no personalization, simple listing)
      * Best for: Main therapist page, browse all functionality
      */
-<<<<<<< HEAD
     async getAllTherapists(params?: TherapistSearchParams) {
       const { data } = await axios.get("/therapists", { params });
-=======
+      return data;
+    },
+
+    /**
+     * Get personalized recommendations for welcome page
+     */
     async getPersonalizedRecommendations(
       params?: WelcomeRecommendationQuery
     ): Promise<TherapistRecommendationResponse> {
       const { data } = await axios.get("/therapist-recommendations/welcome");
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
       return data;
     },
 
@@ -97,18 +100,6 @@ export function createTherapistService(axios: AxiosInstance) {
     },
 
     /**
-<<<<<<< HEAD
-=======
-     * Get compatibility analysis between client and therapist
-     */
-    async getCompatibilityAnalysis(therapistId: string) {
-      const { data } = await axios.get(
-        `/therapist-recommendations/compatibility/${therapistId}`
-      );
-      return data;
-    },
-
-    /**
      * Get list of therapists with filters
      */
     async getTherapistList(params?: TherapistSearchParams) {
@@ -120,21 +111,12 @@ export function createTherapistService(axios: AxiosInstance) {
     /**
      * Get detailed therapist profile
      */
-    async getTherapistProfile(therapistId: string) {
+    async getProfile(therapistId: string) {
       const { data } = await axios.get(`/therapists/${therapistId}`);
       return data;
     },
 
     /**
-     * Get therapist reviews
-     */
-    async getTherapistReviews(therapistId: string) {
-      const { data } = await axios.get(`/therapists/${therapistId}/reviews`);
-      return data;
-    },
-
-    /**
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
      * Book session with therapist
      */
     async bookSession(payload: {

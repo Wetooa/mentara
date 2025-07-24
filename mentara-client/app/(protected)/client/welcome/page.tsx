@@ -1,25 +1,14 @@
 "use client";
 
-<<<<<<< HEAD
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '@/lib/api';
-import { useWelcomeRecommendations } from '@/hooks/therapist/useRecommendedTherapists';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-=======
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { useWelcomeRecommendations } from "@/hooks/therapist/useRecommendedTherapists";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
 // Removed unused import: Separator
 import {
   // Heart,
@@ -55,7 +44,6 @@ export default function ClientWelcomePage() {
     | "complete"
   >("loading");
 
-<<<<<<< HEAD
   // Use unified hook for recommendations
   const { 
     therapists: recommendedTherapists,
@@ -67,19 +55,6 @@ export default function ClientWelcomePage() {
     isFirstTime,
     averageMatchScore
   } = useWelcomeRecommendations();
-=======
-  // Fetch personalized recommendations
-  const {
-    data: recommendations,
-    isLoading: recommendationsLoading,
-    error: recommendationsError,
-    refetch: refetchRecommendations,
-  } = useQuery({
-    queryKey: ["therapist-recommendations", "personalized"],
-    queryFn: () => api.therapists.getPersonalizedRecommendations(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
 
   // Communities are now included in the main recommendations response
 
@@ -132,18 +107,10 @@ export default function ClientWelcomePage() {
   useEffect(() => {
     if (!recommendationsLoading && recommendedTherapists) {
       // Debug logging for received recommendations
-<<<<<<< HEAD
       console.log('[DEBUG] Welcome page received recommendations:', {
         recommendationsCount: recommendedTherapists?.length || 0,
         communitiesCount: recommendedCommunities?.length || 0,
         hasWelcomeMessage: !!welcomeMessage,
-=======
-      console.log("[DEBUG] Welcome page received recommendations:", {
-        recommendationsCount: recommendations?.recommendations?.length || 0,
-        communitiesCount: recommendations?.communities?.length || 0,
-        hasWelcomeMessage: !!recommendations?.welcomeMessage,
-        fullData: recommendations,
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
       });
       setCurrentStep("recommendations");
     }
@@ -403,7 +370,6 @@ export default function ClientWelcomePage() {
             </div>
           </div>
 
-<<<<<<< HEAD
         {/* Community Recommendations */}
         {(recommendedCommunities?.length ?? 0) > 0 ? (
           <div className="space-y-6">
@@ -414,28 +380,17 @@ export default function ClientWelcomePage() {
                   <div className="flex items-center gap-4">
                     <div className="bg-gradient-to-br from-emerald-500 to-blue-500 p-3 rounded-xl shadow-lg">
                       <Users className="h-6 w-6 text-white" />
-=======
-          {/* Community Recommendations */}
-          {(recommendations?.communities?.length ?? 0) > 0 ? (
-            <div className="space-y-6">
-              {/* Enhanced Community Match Summary */}
-              <Card className="bg-gradient-to-br from-emerald-50/80 via-white to-blue-50/80 border-emerald-200/50 shadow-xl backdrop-blur-sm">
-                <CardContent className="p-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-gradient-to-br from-emerald-500 to-blue-500 p-3 rounded-xl shadow-lg">
-                        <Users className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">
-                          Personalized Community Matches
-                        </h3>
-                        <p className="text-gray-600 font-medium">
-                          Found {recommendations?.communities?.length || 0}{" "}
-                          meaningful communities based on your unique assessment
-                        </p>
-                      </div>
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">
+                        Personalized Community Matches
+                      </h3>
+                      <p className="text-gray-600 font-medium">
+                        Found {recommendedCommunities?.length || 0}{" "}
+                        meaningful communities based on your unique assessment
+                      </p>
+                    </div>
+                  </div>
                     </div>
                     <Badge className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 py-2 text-sm font-bold shadow-lg">
                       AI-Powered Matching
@@ -492,11 +447,6 @@ export default function ClientWelcomePage() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-<<<<<<< HEAD
-                      <h3 className="text-xl font-bold text-gray-900">Personalized Community Matches</h3>
-                      <p className="text-gray-600 font-medium">
-                        Found {recommendedCommunities?.length || 0} meaningful communities based on your unique assessment
-=======
                       <h3 className="font-semibold mb-1">
                         Ready to join communities?
                       </h3>
@@ -504,7 +454,6 @@ export default function ClientWelcomePage() {
                         {selectedCommunities.length > 0
                           ? `You've selected ${selectedCommunities.length} communities to join`
                           : "You can skip this step if you prefer to explore communities later"}
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
                       </p>
                     </div>
                     <div className="flex gap-3">
@@ -574,10 +523,10 @@ export default function ClientWelcomePage() {
                   }
                 />
               ))}
-=======
-                </CardContent>
-              </Card>
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
+            </div>
+
+            {/* Community Action Buttons moved up earlier in the file */}
+          </div>
             </div>
           ) : (
             // No community recommendations available
@@ -695,7 +644,6 @@ export default function ClientWelcomePage() {
           </div>
         </div>
 
-<<<<<<< HEAD
       {/* Recommendations */}
       {(recommendedTherapists?.length ?? 0) > 0 ? (
         <div className="space-y-6">
@@ -776,61 +724,12 @@ export default function ClientWelcomePage() {
                 <Button variant="outline" onClick={handleSkipForNow}>
                   Continue to Dashboard
                 </Button>
-=======
-        {/* Recommendations */}
-        {(recommendations?.recommendations?.length ?? 0) > 0 ? (
-          <div className="space-y-6">
-            {/* Enhanced Match Summary */}
-            <Card className="bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 border-blue-200/50 shadow-xl backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-gradient-to-br from-blue-500 to-purple-500 p-3 rounded-xl shadow-lg">
-                      <Users className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">
-                        Personalized Matches
-                      </h3>
-                      <p className="text-gray-600 font-medium">
-                        Found {recommendations?.recommendations?.length || 0}{" "}
-                        exceptional therapists matching your unique preferences
-                      </p>
-                    </div>
-                  </div>
-                  <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-sm font-bold shadow-lg">
-                    {Math.round(recommendations?.averageMatchScore || 0)}% Match
-                    Score
-                  </Badge>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-gray-700">
-                      AI-powered matching
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
-                    <UserCheck className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-gray-700">
-                      Verified professionals
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
-                    <Clock className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-gray-700">
-                      Available for sessions
-                    </span>
-                  </div>
-                </div>
->>>>>>> ae0c63ed89776ab3d3e135ed136ca0e10bca53e0
               </CardContent>
             </Card>
 
             {/* Therapist Recommendations */}
             <div className="grid gap-6">
-              {(recommendations?.recommendations || []).map(
+              {(recommendedTherapists || []).map(
                 (therapist, index) => (
                   <TherapistRecommendationCard
                     key={therapist.id}
@@ -854,7 +753,7 @@ export default function ClientWelcomePage() {
             {selectedTherapists.length > 0 && (
               <TherapistSelectionSummary
                 selectedTherapists={selectedTherapists}
-                therapists={recommendations?.recommendations || []}
+                therapists={recommendedTherapists || []}
                 onSendRequests={handleCreateMatches}
                 onSkipForNow={handleSkipForNow}
                 isLoading={
