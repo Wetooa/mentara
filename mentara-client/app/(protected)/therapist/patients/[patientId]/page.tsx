@@ -54,14 +54,14 @@ export default function PatientDetailPage(
           </div>
 
           <div className="flex space-x-2">
-            <button className="p-2 rounded-md bg-green-100 text-primary">
+            <button className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors duration-200" title="Start Video Call">
               <Video className="h-5 w-5" />
             </button>
-            <button className="p-2 rounded-md bg-green-100 text-primary">
+            <button className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors duration-200" title="Send Message">
               <MessageSquare className="h-5 w-5" />
             </button>
             <button 
-              className="p-2 rounded-md bg-green-100 text-primary hover:bg-green-200 transition-colors"
+              className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors duration-200"
               onClick={() => setIsSchedulingModalOpen(true)}
               title="Schedule Session"
             >
@@ -243,30 +243,30 @@ export default function PatientDetailPage(
         <div className="flex space-x-6">
           <button
             onClick={() => setActiveTab("notes")}
-            className={`py-2 ${
+            className={`py-2 px-1 transition-colors duration-200 ${
               activeTab === "notes"
-                ? "text-primary border-b-2 border-primary"
-                : "text-gray-500"
+                ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                : "text-slate-500 hover:text-blue-600"
             }`}
           >
             Session Notes
           </button>
           <button
             onClick={() => setActiveTab("worksheets")}
-            className={`py-2 ${
+            className={`py-2 px-1 transition-colors duration-200 ${
               activeTab === "worksheets"
-                ? "text-primary border-b-2 border-primary"
-                : "text-gray-500"
+                ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                : "text-slate-500 hover:text-blue-600"
             }`}
           >
             Worksheets
           </button>
           <button
             onClick={() => setActiveTab("progress")}
-            className={`py-2 ${
+            className={`py-2 px-1 transition-colors duration-200 ${
               activeTab === "progress"
-                ? "text-primary border-b-2 border-primary"
-                : "text-gray-500"
+                ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                : "text-slate-500 hover:text-blue-600"
             }`}
           >
             Progress

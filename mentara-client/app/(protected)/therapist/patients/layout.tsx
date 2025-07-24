@@ -81,10 +81,10 @@ export default function PatientsLayout({
     <div className="flex h-full">
       {/* Left sidebar for patient list */}
       <div className="w-64 md:w-72 lg:w-80 border-r border-gray-200 bg-white flex flex-col">
-        {/* Availability button */}
-        <div className="p-2 md:p-3 border-b border-gray-200">
-          <button className="w-full py-2 px-3 md:px-4 bg-teal-500 hover:bg-teal-600 text-white rounded-md flex justify-between items-center text-sm md:text-base">
-            <span>Availability</span>
+        {/* Availability button with professional healthcare styling */}
+        <div className="p-2 md:p-3 border-b border-slate-200">
+          <button className="w-full py-2 px-3 md:px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex justify-between items-center text-sm md:text-base transition-colors duration-200 shadow-sm">
+            <span className="font-medium">Manage Availability</span>
             <svg
               width="16"
               height="16"
@@ -94,32 +94,33 @@ export default function PatientsLayout({
               className="md:w-[18px] md:h-[18px]"
             >
               <path
-                d="M15.2324 5.23242L5.23242 15.2324M5.23242 5.23242L15.2324 15.2324"
+                d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </button>
         </div>
 
-        {/* Calendar section */}
-        <div className="p-2 md:p-3 border-b border-gray-200">
+        {/* Calendar section with professional styling */}
+        <div className="p-2 md:p-3 border-b border-slate-200">
           <div className="flex justify-between items-center mb-2 md:mb-3">
-            <h3 className="font-medium text-sm md:text-base text-amber-800">Appointments</h3>
-            <span className="text-xs text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-              {meetingsData?.meetings?.length || 0}
+            <h3 className="font-semibold text-sm md:text-base text-blue-900">Appointments</h3>
+            <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-md border border-blue-200">
+              {meetingsData?.meetings?.length || 0} scheduled
             </span>
           </div>
 
-          {/* Appointment Calendar */}
-          <div className="appointment-calendar-container">
+          {/* Full-width Appointment Calendar */}
+          <div className="appointment-calendar-container bg-white rounded-lg border border-slate-200 p-2">
             <AppointmentCalendar
               meetings={meetingsData?.meetings || []}
               selected={selectedDate}
               onSelect={setSelectedDate}
               showMeetingDetails={false}
-              className="scale-75 origin-top-left w-[133%] -ml-2"
+              className="w-full"
             />
           </div>
         </div>
@@ -127,44 +128,44 @@ export default function PatientsLayout({
         {/* Patient list section */}
         <div className="p-2 md:p-3 flex-1 overflow-hidden flex flex-col">
           <div className="mb-2 md:mb-3 flex items-center justify-between">
-            <h3 className="font-medium text-sm md:text-base">My Patients</h3>
+            <h3 className="font-semibold text-sm md:text-base text-blue-900">My Patients</h3>
             <button
               onClick={refreshPatients}
-              className="p-1.5 text-gray-500 hover:text-primary rounded-md hover:bg-gray-100"
+              className="p-1.5 text-slate-500 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200"
               title="Refresh patients list"
             >
               <RefreshCw className={`h-3 w-3 md:h-4 md:w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
-          {/* Error notification */}
+          {/* Error notification with professional styling */}
           {error && (
-            <div className="mb-2 md:mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+            <div className="mb-2 md:mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-center">
-                <AlertCircle className="h-3 w-3 md:h-4 md:w-4 text-yellow-600 mr-2" />
-                <p className="text-[10px] md:text-xs text-yellow-800">
+                <AlertCircle className="h-3 w-3 md:h-4 md:w-4 text-blue-600 mr-2" />
+                <p className="text-[10px] md:text-xs text-blue-800">
                   {error.message.includes("mock data") 
-                    ? "Using offline data - API unavailable"
-                    : "Failed to load patients"}
+                    ? "No assigned clients yet - new assignments will appear here"
+                    : "Unable to load patient data"}
                 </p>
               </div>
             </div>
           )}
 
-          {/* Search and filter */}
+          {/* Search and filter with professional styling */}
           <div className="relative mb-2 md:mb-3">
-            <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
+            <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search patients..."
               value={searchQuery}
               onChange={(e) => searchPatients(e.target.value)}
-              className="w-full pl-7 md:pl-9 pr-4 py-1.5 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-xs md:text-sm"
+              className="w-full pl-7 md:pl-9 pr-4 py-1.5 md:py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs md:text-sm transition-colors duration-200"
               disabled={isLoading}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center">
               <button
-                className="text-gray-500 hover:text-gray-700 flex items-center text-[10px] md:text-xs"
+                className="text-slate-500 hover:text-blue-600 flex items-center text-[10px] md:text-xs transition-colors duration-200"
                 onClick={() => setFilterOpen(!filterOpen)}
                 disabled={isLoading}
               >
@@ -178,16 +179,16 @@ export default function PatientsLayout({
             </div>
           </div>
 
-          {/* Filter dropdown */}
+          {/* Filter dropdown with professional styling */}
           {filterOpen && (
-            <div className="mb-2 md:mb-3 p-2 bg-gray-50 rounded-md border">
+            <div className="mb-2 md:mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
               <div className="space-y-2">
                 <div>
-                  <label className="text-[10px] md:text-xs font-medium text-gray-700">Status</label>
+                  <label className="text-[10px] md:text-xs font-medium text-slate-700">Status</label>
                   <select
                     value={filters.status || 'all'}
                     onChange={(e) => updateFilters({ status: e.target.value as 'active' | 'inactive' | 'completed' | 'all' })}
-                    className="w-full mt-1 text-[10px] md:text-xs border border-gray-300 rounded px-2 py-1"
+                    className="w-full mt-1 text-[10px] md:text-xs border border-slate-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="all">All Patients</option>
                     <option value="active">Active</option>
@@ -229,8 +230,8 @@ export default function PatientsLayout({
                     href={`/therapist/patients/${patient.id}`}
                   >
                     <div
-                      className={`flex items-center p-1.5 md:p-2 rounded-md mb-1.5 md:mb-2 ${
-                        isActive ? "bg-primary/10" : "hover:bg-gray-100"
+                      className={`flex items-center p-1.5 md:p-2 rounded-lg mb-1.5 md:mb-2 transition-colors duration-200 ${
+                        isActive ? "bg-blue-50 border-l-4 border-blue-500" : "hover:bg-slate-50"
                       }`}
                     >
                       <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden mr-2 md:mr-3 bg-gray-200 flex-shrink-0">
@@ -244,7 +245,7 @@ export default function PatientsLayout({
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4
-                          className={`text-xs md:text-sm truncate ${isActive ? "font-medium" : ""}`}
+                          className={`text-xs md:text-sm truncate ${isActive ? "font-semibold text-blue-900" : "font-medium"}`}
                         >
                           {patient.name}
                         </h4>
@@ -341,8 +342,8 @@ export default function PatientsLayout({
         {isPatientSelected ? (
           children
         ) : (
-          <div className="flex flex-col items-center justify-center h-full bg-gray-50 text-center p-6">
-            <div className="rounded-full bg-primary/10 p-6 mb-4">
+          <div className="flex flex-col items-center justify-center h-full bg-slate-50 text-center p-6">
+            <div className="rounded-full bg-blue-100 p-6 mb-4 shadow-sm">
               <svg
                 width="48"
                 height="48"
@@ -352,7 +353,7 @@ export default function PatientsLayout({
               >
                 <path
                   d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21"
-                  stroke="#658e32"
+                  stroke="#2563eb"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -361,30 +362,30 @@ export default function PatientsLayout({
                   cx="9"
                   cy="9"
                   r="4"
-                  stroke="#658e32"
+                  stroke="#2563eb"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
                 <path
                   d="M23 21V19C22.9986 17.1771 21.765 15.5857 20 15.13"
-                  stroke="#658e32"
+                  stroke="#2563eb"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
                 <path
                   d="M16 3.13C17.7699 3.58317 19.0078 5.17885 19.0078 7.005C19.0078 8.83115 17.7699 10.4268 16 10.88"
-                  stroke="#658e32"
+                  stroke="#2563eb"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-medium mb-2">No Patient Selected</h2>
-            <p className="text-gray-600 max-w-md">
-              Please select a patient from the sidebar to view their profile,
+            <h2 className="text-xl font-semibold text-blue-900 mb-2">Select a Patient</h2>
+            <p className="text-slate-600 max-w-md">
+              Choose a patient from the sidebar to view their profile,
               treatment plan, and session history.
             </p>
           </div>
