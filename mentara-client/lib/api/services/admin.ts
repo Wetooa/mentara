@@ -247,6 +247,79 @@ export function createAdminService(axios: AxiosInstance) {
         }
       },
     },
+
+    // Analytics Methods
+    analytics: {
+      /**
+       * Get system statistics
+       * Endpoint: GET /admin/analytics/system-stats
+       * @throws MentaraApiError on request failure
+       */
+      async getSystemStats() {
+        try {
+          const { data } = await axios.get("/admin/analytics/system-stats");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get user growth analytics
+       * Endpoint: GET /admin/analytics/user-growth
+       * @throws MentaraApiError on request failure
+       */
+      async getUserGrowth(params?: { startDate?: string; endDate?: string }) {
+        try {
+          const { data } = await axios.get("/admin/analytics/user-growth", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get engagement analytics
+       * Endpoint: GET /admin/analytics/engagement
+       * @throws MentaraApiError on request failure
+       */
+      async getEngagement(params?: { startDate?: string; endDate?: string }) {
+        try {
+          const { data } = await axios.get("/admin/analytics/engagement", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get platform overview analytics
+       * Endpoint: GET /admin/analytics/platform-overview
+       * @throws MentaraApiError on request failure
+       */
+      async getPlatformOverview() {
+        try {
+          const { data } = await axios.get("/admin/analytics/platform-overview");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get user statistics
+       * Endpoint: GET /admin/analytics/user-stats
+       * @throws MentaraApiError on request failure
+       */
+      async getUserStats() {
+        try {
+          const { data } = await axios.get("/admin/analytics/user-stats");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+    },
   };
 }
 

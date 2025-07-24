@@ -369,7 +369,7 @@ export function useAdminSystemStats() {
   
   return useQuery({
     queryKey: ['admin', 'analytics', 'systemStats'],
-    queryFn: () => api.dashboard.getPlatformAnalytics(),
+    queryFn: () => api.admin.analytics.getSystemStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

@@ -239,12 +239,81 @@ export class DashboardService {
       });
 
       const totalClientsCount = await this.prisma.clientTherapist.count({
-        where: { therapistId: userId },
+        where: { therapistId: userId, status: 'active' },
       });
 
       const pendingWorksheetsCount = await this.prisma.worksheet.count({
         where: { therapistId: userId, status: { in: ['ASSIGNED', 'OVERDUE'] } },
       });
+
+      // Calculate additional stats needed by frontend components
+      const today = new Date();
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+      // Rescheduled meetings (meetings that were updated today with status changes)
+      const rescheduledCount = await this.prisma.meeting.count({
+        where: {
+          therapistId: userId,
+          updatedAt: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+          // Meetings that were rescheduled would have been updated recently
+          NOT: {
+            startTime: {
+              gte: startOfDay,
+              lte: endOfDay,
+            }
+          }
+        },
+      });
+
+      // Cancelled meetings today
+      const cancelledCount = await this.prisma.meeting.count({
+        where: {
+          therapistId: userId,
+          status: 'CANCELLED',
+          updatedAt: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      });
+
+      // Today's income from completed meetings
+      const todayCompletedMeetings = await this.prisma.meeting.findMany({
+        where: {
+          therapistId: userId,
+          status: 'COMPLETED',
+          endTime: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+        include: {
+          payments: {
+            where: {
+              status: 'completed',
+            },
+          },
+        },
+      });
+
+      // Calculate income from completed meetings today
+      let todayIncome = 0;
+      for (const meeting of todayCompletedMeetings) {
+        const meetingIncome = meeting.payments.reduce((sum, payment) => {
+          return sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
+        }, 0);
+        todayIncome += meetingIncome;
+      }
+
+      // If no payments recorded, estimate from therapist hourly rate
+      if (todayIncome === 0 && todayCompletedMeetings.length > 0) {
+        const therapistRate = parseFloat(therapist.hourlyRate?.toString() || '0');
+        todayIncome = todayCompletedMeetings.length * therapistRate;
+      }
 
       // Get recent completed meetings (replacing session logs)
       const recentSessions = await this.prisma.meeting.findMany({
@@ -271,15 +340,36 @@ export class DashboardService {
         therapist: {
           ...therapist,
           // Map database fields to frontend-expected fields
+          name: `${therapist.user.firstName} ${therapist.user.lastName}`,
           specialties: therapist.areasOfExpertise || [],
         },
         stats: {
+          // Map backend data to frontend-expected field names
+          activePatients: totalClientsCount,
+          rescheduled: rescheduledCount,
+          cancelled: cancelledCount,
+          income: Math.round(todayIncome), // Round to nearest peso
+          // Keep additional stats for backward compatibility
           totalClients: totalClientsCount,
           completedMeetings: completedMeetingsCount,
           upcomingMeetings: therapist.meetings.length,
           pendingWorksheets: pendingWorksheetsCount,
+          patientStats: {
+            total: totalClientsCount,
+            percentage: totalClientsCount > 0 ? Math.round((completedMeetingsCount / totalClientsCount) * 100) : 0,
+            months: Math.floor((Date.now() - therapist.createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30)),
+            chartData: [] // Will be populated with actual chart data if needed
+          }
         },
-        upcomingMeetings: therapist.meetings,
+        upcomingAppointments: therapist.meetings.map(meeting => ({
+          id: meeting.id,
+          patientName: `${meeting.client.user.firstName} ${meeting.client.user.lastName}`,
+          time: meeting.startTime,
+          duration: meeting.duration,
+          type: meeting.meetingType,
+          status: meeting.status,
+          clientId: meeting.clientId,
+        })),
         assignedClients: therapist.assignedClients.map((ct) => ct.client),
         pendingWorksheets: therapist.worksheets,
         recentSessions,

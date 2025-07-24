@@ -1,19 +1,16 @@
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import {
-  WebSocketGateway,
-  WebSocketServer,
-  SubscribeMessage,
-  MessageBody,
-  ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger, Injectable, Inject, forwardRef } from '@nestjs/common';
+import { EventBusService } from '../common/events/event-bus.service';
+import { PrismaService } from '../providers/prisma-client.provider';
 import { WebSocketAuthService } from './services/websocket-auth.service';
 import { WebSocketEventService } from './services/websocket-event.service';
-import { PrismaService } from '../providers/prisma-client.provider';
-import { EventBusService } from '../common/events/event-bus.service';
 
 interface ConnectedUser {
   userId: string;
@@ -38,8 +35,8 @@ interface NotificationData {
   cors: {
     origin: [
       process.env.FRONTEND_URL || 'http://localhost:3000',
-      'http://localhost:3000',  // Explicit fallback
-      'http://127.0.0.1:3000',  // Alternative localhost
+      'http://localhost:3000', // Explicit fallback
+      'http://127.0.0.1:3000', // Alternative localhost
     ],
     methods: ['GET', 'POST'],
     credentials: true,
@@ -52,8 +49,7 @@ interface NotificationData {
   },
 })
 export class MessagingGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server;
 
@@ -68,17 +64,21 @@ export class MessagingGateway
     private readonly eventBus: EventBusService,
     @Inject(forwardRef(() => WebSocketEventService))
     private readonly webSocketEventService: WebSocketEventService,
-  ) {}
+  ) { }
 
   afterInit() {
-    this.logger.log('Messaging WebSocket Gateway initialized with connection state recovery');
+    this.logger.log(
+      'Messaging WebSocket Gateway initialized with connection state recovery',
+    );
   }
 
   async handleConnection(client: Socket) {
     try {
       // Log connection recovery status
       if ((client as any).recovered) {
-        this.logger.log(`User ${(client as any).handshake?.auth?.userId || 'unknown'} connected with state recovery`);
+        this.logger.log(
+          `User ${(client as any).handshake?.auth?.userId || 'unknown'} connected with state recovery`,
+        );
       }
 
       const user = await this.websocketAuth.authenticateSocket(client);
@@ -91,9 +91,12 @@ export class MessagingGateway
       // Remove any existing connection for this user
       const existingSocketId = this.userToSocket.get(user.userId);
       if (existingSocketId) {
-        const existingSocket = this.server.sockets.sockets.get(existingSocketId);
+        const existingSocket =
+          this.server.sockets.sockets.get(existingSocketId);
         if (existingSocket) {
-          this.logger.log(`Disconnecting existing socket for user ${user.userId}`);
+          this.logger.log(
+            `Disconnecting existing socket for user ${user.userId}`,
+          );
           existingSocket.disconnect();
         }
         this.cleanupUserConnection(user.userId);
@@ -117,7 +120,7 @@ export class MessagingGateway
       connectedUser.rooms.add(personalRoom);
 
       this.logger.log(`User ${user.userId} connected to messaging gateway`);
-      
+
       // Send connection confirmation
       client.emit('connected', {
         userId: user.userId,
@@ -125,9 +128,9 @@ export class MessagingGateway
         message: 'Connected to messaging service',
         recovered: (client as any).recovered || false,
       });
-
     } catch (error) {
       this.logger.error('Connection failed:', error);
       client.disconnect();
     }
   }
+}
