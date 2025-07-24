@@ -183,15 +183,20 @@ export class TherapistManagementService {
         where: { userId: therapistId },
       });
 
-      // Find all clients assigned to this therapist
+      // Find all active clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
-        where: { therapistId: therapist.userId },
+        where: { 
+          therapistId: therapist.userId,
+          status: 'active'
+        },
         include: { client: { include: { user: true } } },
       });
 
       return assignedClients.map((ct) => ({
         ...ct.client,
         user: ct.client.user,
+        relationshipId: ct.id,
+        assignedAt: ct.assignedAt,
       }));
     } catch (error) {
       console.error(
@@ -201,6 +206,141 @@ export class TherapistManagementService {
 
       throw new InternalServerErrorException(
         'Failed to retrieve assigned patients',
+      );
+    }
+  }
+
+  async getPendingRequests(therapistId: string): Promise<any[]> {
+    try {
+      const therapist = await this.prisma.therapist.findUniqueOrThrow({
+        where: { userId: therapistId },
+      });
+
+      // Find all pending client requests for this therapist
+      const pendingRequests = await this.prisma.clientTherapist.findMany({
+        where: { 
+          therapistId: therapist.userId,
+          status: 'inactive'
+        },
+        include: { client: { include: { user: true } } },
+        orderBy: { assignedAt: 'desc' },
+      });
+
+      return pendingRequests.map((ct) => ({
+        ...ct.client,
+        user: ct.client.user,
+        relationshipId: ct.id,
+        requestedAt: ct.assignedAt,
+      }));
+    } catch (error) {
+      console.error(
+        'Error retrieving pending requests:',
+        error instanceof Error ? error.message : error,
+      );
+
+      throw new InternalServerErrorException(
+        'Failed to retrieve pending requests',
+      );
+    }
+  }
+
+  async acceptPatientRequest(therapistId: string, clientId: string): Promise<void> {
+    try {
+      const relationship = await this.prisma.clientTherapist.findFirst({
+        where: {
+          therapistId: therapistId,
+          clientId: clientId,
+          status: 'inactive'
+        },
+      });
+
+      if (!relationship) {
+        throw new NotFoundException('Patient request not found');
+      }
+
+      await this.prisma.clientTherapist.update({
+        where: { id: relationship.id },
+        data: { status: 'active' },
+      });
+    } catch (error) {
+      console.error(
+        'Error accepting patient request:',
+        error instanceof Error ? error.message : error,
+      );
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'Failed to accept patient request',
+      );
+    }
+  }
+
+  async denyPatientRequest(therapistId: string, clientId: string): Promise<void> {
+    try {
+      const relationship = await this.prisma.clientTherapist.findFirst({
+        where: {
+          therapistId: therapistId,
+          clientId: clientId,
+          status: 'inactive'
+        },
+      });
+
+      if (!relationship) {
+        throw new NotFoundException('Patient request not found');
+      }
+
+      await this.prisma.clientTherapist.delete({
+        where: { id: relationship.id },
+      });
+    } catch (error) {
+      console.error(
+        'Error denying patient request:',
+        error instanceof Error ? error.message : error,
+      );
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'Failed to deny patient request',
+      );
+    }
+  }
+
+  async removePatient(therapistId: string, clientId: string): Promise<void> {
+    try {
+      const relationship = await this.prisma.clientTherapist.findFirst({
+        where: {
+          therapistId: therapistId,
+          clientId: clientId,
+          status: 'active'
+        },
+      });
+
+      if (!relationship) {
+        throw new NotFoundException('Active patient relationship not found');
+      }
+
+      await this.prisma.clientTherapist.update({
+        where: { id: relationship.id },
+        data: { status: 'inactive' },
+      });
+    } catch (error) {
+      console.error(
+        'Error removing patient:',
+        error instanceof Error ? error.message : error,
+      );
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'Failed to remove patient',
       );
     }
   }
