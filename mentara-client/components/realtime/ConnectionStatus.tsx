@@ -16,275 +16,166 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
+import { useWebSocket } from "@/contexts/WebSocketContext";
 
 interface ConnectionStatusProps {
-  isConnected: boolean;
-  isConnecting: boolean;
-  connectionState: "connecting" | "connected" | "disconnected" | "error";
-  lastError?: string | null;
-  reconnectAttempts?: number;
-  maxReconnectAttempts?: number;
-  lastHeartbeat?: number | null;
-  onReconnect?: () => void;
-  onDismissError?: () => void;
   className?: string;
   showDetails?: boolean;
-  compact?: boolean;
-  position?: "fixed" | "relative";
+  onDismissError?: () => void;
 }
 
-export function ConnectionStatus({
-  isConnected,
-  isConnecting,
-  connectionState,
-  lastError,
-  reconnectAttempts = 0,
-  maxReconnectAttempts = 5,
-  lastHeartbeat,
-  onReconnect,
-  onDismissError,
+/**
+ * Simplified ConnectionStatus component using WebSocket Context
+ * Shows current websocket connection state and provides reconnection controls
+ */
+export default function ConnectionStatus({ 
   className,
   showDetails = false,
-  compact = false,
-  position = "relative",
+  onDismissError 
 }: ConnectionStatusProps) {
-  const getSignalStrength = () => {
-    if (!isConnected || !lastHeartbeat) return 0;
-    
-    const timeSinceHeartbeat = Date.now() - lastHeartbeat;
-    
-    // Signal strength based on heartbeat freshness
-    if (timeSinceHeartbeat < 30000) return 3; // Excellent (< 30s)
-    if (timeSinceHeartbeat < 60000) return 2; // Good (30s-60s)
-    if (timeSinceHeartbeat < 120000) return 1; // Poor (60s-120s)
-    return 0; // Very poor (> 120s)
-  };
+  const { 
+    isConnected, 
+    connectionState, 
+    reconnect 
+  } = useWebSocket();
 
-  const getStatusIcon = () => {
-    if (isConnecting) {
-      return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
-    }
+  const [isReconnecting, setIsReconnecting] = React.useState(false);
+  const [showError, setShowError] = React.useState(true);
+
+  const handleReconnect = async () => {
+    if (isReconnecting) return;
     
-    switch (connectionState) {
-      case "connected":
-        const signalStrength = getSignalStrength();
-        if (signalStrength >= 3) {
-          return <Wifi className="h-4 w-4 text-green-500" />; // Excellent signal
-        } else if (signalStrength === 2) {
-          return <Wifi className="h-4 w-4 text-yellow-500" />; // Good signal  
-        } else if (signalStrength === 1) {
-          return <Wifi className="h-4 w-4 text-orange-500" />; // Poor signal
-        } else {
-          return <Wifi className="h-4 w-4 text-red-400" />; // Very poor signal
-        }
-      case "error":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case "disconnected":
-        return <WifiOff className="h-4 w-4 text-gray-500" />;
-      default:
-        return <WifiOff className="h-4 w-4 text-gray-500" />;
+    setIsReconnecting(true);
+    try {
+      await reconnect();
+    } catch (error) {
+      console.error('Manual reconnect failed:', error);
+    } finally {
+      setIsReconnecting(false);
     }
   };
 
-  const getStatusText = () => {
-    if (isConnecting) {
-      return reconnectAttempts > 0 
-        ? `Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`
-        : "Connecting...";
+  const handleDismissError = () => {
+    setShowError(false);
+    onDismissError?.();
+  };
+
+  const getConnectionColor = () => {
+    if (connectionState.isConnecting || isReconnecting) return "text-yellow-500";
+    if (connectionState.isConnected) return "text-green-500";
+    return "text-red-500";
+  };
+
+  const getConnectionIcon = () => {
+    if (connectionState.isConnecting || isReconnecting) {
+      return <Loader2 className="h-4 w-4 animate-spin" />;
     }
-    
-    switch (connectionState) {
-      case "connected":
-        const signalStrength = getSignalStrength();
-        const signalLabels = ["Very Poor", "Poor", "Good", "Excellent"];
-        return `Connected (${signalLabels[signalStrength]} Signal)`;
-      case "error":
-        return lastError || "Connection error";
-      case "disconnected":
-        return "Disconnected";
-      default:
-        return "Unknown";
+    if (connectionState.isConnected) {
+      return <Wifi className="h-4 w-4" />;
     }
+    return <WifiOff className="h-4 w-4" />;
   };
 
-  const getStatusColor = () => {
-    if (isConnecting) return "text-blue-600";
-    
-    switch (connectionState) {
-      case "connected":
-        return "text-green-600";
-      case "error":
-        return "text-red-600";
-      case "disconnected":
-        return "text-gray-600";
-      default:
-        return "text-gray-600";
-    }
+  const getConnectionText = () => {
+    if (isReconnecting) return "Reconnecting...";
+    if (connectionState.isConnecting) return "Connecting...";
+    if (connectionState.isConnected) return "Connected";
+    return "Disconnected";
   };
 
-  const getBadgeVariant = () => {
-    switch (connectionState) {
-      case "connected":
-        return "default";
-      case "error":
-        return "destructive";
-      case "disconnected":
-        return "secondary";
-      default:
-        return "secondary";
-    }
+  const getConnectionStatus = () => {
+    if (connectionState.isConnecting || isReconnecting) return "connecting";
+    if (connectionState.isConnected) return "connected";
+    return "disconnected";
   };
 
-  const shouldShowReconnectButton = () => {
-    return (connectionState === "error" || connectionState === "disconnected") && 
-           !isConnecting && 
-           onReconnect;
-  };
-
-  const getHeartbeatStatus = () => {
-    if (!lastHeartbeat || !isConnected) return null;
-    
-    const timeSinceHeartbeat = Date.now() - lastHeartbeat;
-    const isStale = timeSinceHeartbeat > 60000; // 1 minute
-    
-    return {
-      isStale,
-      timeAgo: Math.floor(timeSinceHeartbeat / 1000),
-    };
-  };
-
-  const heartbeatStatus = getHeartbeatStatus();
-
-  if (compact) {
-    return (
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      {/* Connection Indicator */}
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className={cn("flex items-center gap-1", className)}>
-              {getStatusIcon()}
+            <div className="flex items-center gap-2">
+              <motion.div
+                animate={{ 
+                  scale: connectionState.isConnected ? [1, 1.1, 1] : 1,
+                  opacity: connectionState.isConnected ? 1 : 0.7
+                }}
+                transition={{ 
+                  duration: connectionState.isConnected ? 2 : 0.3,
+                  repeat: connectionState.isConnected ? Infinity : 0,
+                  repeatType: "reverse"
+                }}
+                className={cn("flex items-center", getConnectionColor())}
+              >
+                {getConnectionIcon()}
+              </motion.div>
+              
               {showDetails && (
-                <span className={cn("text-xs", getStatusColor())}>
-                  {getStatusText()}
-                </span>
+                <Badge 
+                  variant={connectionState.isConnected ? "default" : "destructive"}
+                  className="text-xs"
+                >
+                  {getConnectionText()}
+                </Badge>
               )}
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <div className="space-y-1">
-              <p className="font-medium">{getStatusText()}</p>
-              {heartbeatStatus && (
-                <p className="text-xs">
-                  Last heartbeat: {heartbeatStatus.timeAgo}s ago
-                  {heartbeatStatus.isStale && " (stale)"}
-                </p>
+            <div className="text-sm">
+              <div>Status: {getConnectionText()}</div>
+              {connectionState.lastConnected && (
+                <div className="text-xs text-muted-foreground">
+                  Last connected: {connectionState.lastConnected.toLocaleTimeString()}
+                </div>
+              )}
+              {connectionState.error && (
+                <div className="text-xs text-red-400 mt-1">
+                  Error: {connectionState.error}
+                </div>
               )}
             </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    );
-  }
 
-  return (
-    <div className={cn(
-      className,
-      position === "fixed" && "fixed bottom-4 right-4 z-50"
-    )}>
-      <AnimatePresence>
-        {/* Connection Status Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          className="w-full max-w-sm"
+      {/* Reconnect Button */}
+      {!connectionState.isConnected && !connectionState.isConnecting && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleReconnect}
+          disabled={isReconnecting}
+          className="h-8 px-2"
         >
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {getStatusIcon()}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Real-time Connection</span>
-                      <Badge variant={getBadgeVariant()}>
-                        {getStatusText()}
-                      </Badge>
-                    </div>
-                    {showDetails && heartbeatStatus && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Last heartbeat: {heartbeatStatus.timeAgo}s ago
-                        {heartbeatStatus.isStale && (
-                          <span className="text-yellow-600 ml-1">(stale)</span>
-                        )}
-                      </p>
-                    )}
-                  </div>
-                </div>
+          <RefreshCw className={cn("h-3 w-3", isReconnecting && "animate-spin")} />
+          {showDetails && <span className="ml-1">Reconnect</span>}
+        </Button>
+      )}
 
-                <div className="flex items-center gap-1">
-                  {shouldShowReconnectButton() && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={onReconnect}
-                      className="h-8"
-                    >
-                      <RefreshCw className="h-3 w-3 mr-1" />
-                      Retry
-                    </Button>
-                  )}
-                  
-                  {onDismissError && connectionState === "error" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={onDismissError}
-                      className="h-8 w-8 p-0"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Error Alert */}
-        {connectionState === "error" && lastError && (
+      {/* Error Alert */}
+      <AnimatePresence>
+        {connectionState.error && showError && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mt-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="fixed top-4 right-4 z-50 max-w-sm"
           >
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                {lastError}
-                {reconnectAttempts >= maxReconnectAttempts && (
-                  <span className="block mt-1 text-xs">
-                    Max retry attempts reached. Please refresh the page or check your connection.
-                  </span>
-                )}
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-
-        {/* Reconnection Progress */}
-        {isConnecting && reconnectAttempts > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mt-2"
-          >
-            <Alert>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <AlertDescription>
-                Attempting to reconnect ({reconnectAttempts}/{maxReconnectAttempts})...
+              <AlertDescription className="flex items-center justify-between">
+                <span className="flex-1">
+                  Connection error: {connectionState.error}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDismissError}
+                  className="h-auto p-1 hover:bg-transparent"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               </AlertDescription>
             </Alert>
           </motion.div>
@@ -292,323 +183,4 @@ export function ConnectionStatus({
       </AnimatePresence>
     </div>
   );
-}
-
-// Global connection status hook for easy usage
-export function useGlobalConnectionStatus() {
-  const [connectionState, setConnectionState] = React.useState<"connecting" | "connected" | "disconnected" | "error">("disconnected");
-  const [isConnecting, setIsConnecting] = React.useState(false);
-  const [lastError, setLastError] = React.useState<string | null>(null);
-  const [reconnectAttempts, setReconnectAttempts] = React.useState(0);
-  const [lastHeartbeat, setLastHeartbeat] = React.useState<number | null>(null);
-  const socketRef = React.useRef<any>(null);
-  const heartbeatIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  // Debug function to help troubleshoot authentication issues
-  const debugAuthFlow = React.useCallback(() => {
-    console.group('🔍 [ConnectionStatus] Authentication Debug Information');
-    
-    try {
-      const token = getAuthToken();
-      console.log('Token present:', !!token);
-      
-      if (token) {
-        // Basic JWT structure validation
-        const parts = token.split('.');
-        console.log('Token parts count:', parts.length);
-        console.log('Token preview:', token.substring(0, 20) + '...');
-        
-        try {
-          // Decode JWT payload (without verification)
-          const payload = JSON.parse(atob(parts[1]));
-          console.log('Token payload:', {
-            sub: payload.sub ? 'present' : 'missing',
-            email: payload.email ? 'present' : 'missing',
-            iat: payload.iat ? new Date(payload.iat * 1000).toISOString() : 'missing',
-            exp: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'missing',
-            isExpired: payload.exp ? Date.now() / 1000 > payload.exp : 'unknown',
-          });
-        } catch (decodeError) {
-          console.error('Failed to decode token payload:', decodeError);
-        }
-      }
-      
-      // Check environment configuration
-      console.log('WebSocket URL:', process.env.NEXT_PUBLIC_WS_URL || 'not set (using default)');
-      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL || 'not set (using default)');
-      console.log('Current connection state:', connectionState);
-      console.log('Is connecting:', isConnecting);
-      console.log('Last error:', lastError);
-      console.log('Retry attempts:', reconnectAttempts);
-      
-    } catch (error) {
-      console.error('Error during auth debug:', error);
-    }
-    
-    console.groupEnd();
-  }, [getAuthToken, connectionState, isConnecting, lastError, reconnectAttempts]);
-
-  // Helper function to get token from localStorage (client-side only)
-  const getAuthToken = React.useCallback(() => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-      // Additional validation: ensure token is non-empty and properly formatted
-      if (!token || token.trim().length === 0) {
-        console.warn('🔑 [ConnectionStatus] No authentication token found in localStorage');
-        return null;
-      }
-      
-      // Basic JWT format validation (should have 3 parts separated by dots)
-      const parts = token.split('.');
-      if (parts.length !== 3) {
-        console.warn('🔑 [ConnectionStatus] Invalid token format found in localStorage');
-        return null;
-      }
-      
-      return token.trim();
-    } catch (error) {
-      console.warn('🔑 [ConnectionStatus] Failed to retrieve auth token from localStorage:', error);
-      return null;
-    }
-  }, []);
-
-  // Import socket functions dynamically to avoid SSR issues
-  const initializeSocket = React.useCallback(async () => {
-    try {
-      const { getMessagingSocket, connectMessagingSocket, isMessagingConnected } = await import('@/lib/websocket');
-      
-      // Check if already connected
-      if (isMessagingConnected()) {
-        setConnectionState("connected");
-        setLastHeartbeat(Date.now());
-        return;
-      }
-
-      // Get authentication token with enhanced validation
-      const token = getAuthToken();
-      if (!token) {
-        console.error('🔑 [ConnectionStatus] Failed to initialize WebSocket - no valid authentication token');
-        debugAuthFlow(); // Debug authentication issues
-        setConnectionState("error");
-        setLastError('Authentication token not found or invalid. Please sign in again.');
-        return;
-      }
-      
-      console.log('🔑 [ConnectionStatus] Authentication token retrieved successfully for WebSocket connection');
-
-      setIsConnecting(true);
-      setConnectionState("connecting");
-      
-      const socket = getMessagingSocket(token);
-      socketRef.current = socket;
-
-      // Set up connection event listeners
-      socket.on('connect', () => {
-        console.log('✅ [ConnectionStatus] WebSocket connected successfully');
-        setConnectionState("connected");
-        setIsConnecting(false);
-        setLastError(null);
-        setReconnectAttempts(0);
-        setLastHeartbeat(Date.now());
-      });
-
-      socket.on('disconnect', (reason) => {
-        console.log('🔌 [ConnectionStatus] WebSocket disconnected:', reason);
-        setConnectionState("disconnected");
-        setIsConnecting(false);
-        
-        // Handle different disconnect reasons with appropriate error messages
-        if (reason === 'io server disconnect') {
-          setLastError('Server disconnected unexpectedly');
-        } else if (reason === 'io client disconnect') {
-          // Client-initiated disconnect, not an error
-          setLastError(null);
-          console.log('🔌 [ConnectionStatus] Client-initiated disconnect');
-        } else if (reason === 'transport close' || reason === 'transport error') {
-          setLastError('Connection lost due to network issues');
-        } else if (reason === 'ping timeout') {
-          setLastError('Connection timeout - poor network connectivity');
-        } else {
-          setLastError(`Connection lost: ${reason}`);
-        }
-      });
-
-      socket.on('connect_error', (error) => {
-        console.error('❌ [ConnectionStatus] WebSocket connection error:', error);
-        setConnectionState("error");
-        setIsConnecting(false);
-        
-        // Enhanced error categorization and user-friendly messages
-        let errorMessage = 'Connection failed';
-        let shouldRetry = true;
-        
-        if (error.message?.includes('unauthorized') || error.message?.includes('authentication') || error.message?.includes('auth')) {
-          errorMessage = 'Authentication failed. Please sign in again.';
-          shouldRetry = false; // Don't auto-retry auth errors
-        } else if (error.message?.includes('timeout')) {
-          errorMessage = 'Connection timeout. Please check your network.';
-        } else if (error.message?.includes('Network Error') || error.message?.includes('ECONNREFUSED')) {
-          errorMessage = 'Unable to reach server. Please check your internet connection.';
-        } else if (error.message?.includes('CORS')) {
-          errorMessage = 'Cross-origin request blocked. Please contact support.';
-          shouldRetry = false;
-        } else if (error.message) {
-          errorMessage = `Connection error: ${error.message}`;
-        }
-        
-        setLastError(errorMessage);
-        
-        // Only increment retry count for retryable errors
-        if (shouldRetry) {
-          setReconnectAttempts(prev => prev + 1);
-        }
-      });
-
-      socket.on('auth_error', (data) => {
-        console.error('🔒 [ConnectionStatus] WebSocket authentication error:', data);
-        setConnectionState("error");
-        setIsConnecting(false);
-        
-        // Enhanced auth error handling with specific messages
-        let authErrorMessage = 'Authentication failed';
-        if (data.code === 'AUTH_FAILED') {
-          authErrorMessage = 'Invalid authentication token. Please sign in again.';
-        } else if (data.code === 'USER_NOT_FOUND') {
-          authErrorMessage = 'User account not found or inactive. Please contact support.';
-        } else if (data.code === 'TOKEN_EXPIRED') {
-          authErrorMessage = 'Session expired. Please sign in again.';
-        } else if (data.message) {
-          authErrorMessage = data.message;
-        }
-        
-        setLastError(authErrorMessage);
-        
-        // Log detailed auth error for debugging
-        console.error('🔍 [ConnectionStatus] Auth error details:', {
-          code: data.code,
-          message: data.message,
-          timestamp: data.timestamp,
-          debug: data.debug,
-        });
-        
-        // Run debug analysis for auth failures
-        debugAuthFlow();
-      });
-
-      // Enhanced heartbeat monitoring with connection health checks
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-      }
-      
-      heartbeatIntervalRef.current = setInterval(() => {
-        if (socket.connected) {
-          setLastHeartbeat(Date.now());
-          console.log('💓 [ConnectionStatus] Heartbeat - connection healthy');
-        } else {
-          console.warn('💔 [ConnectionStatus] Heartbeat - socket disconnected');
-          setConnectionState("disconnected");
-        }
-      }, 30000); // Update heartbeat every 30 seconds
-
-      // Connect the socket with authentication token
-      console.log('🔄 Initiating WebSocket connection with authentication...');
-      await connectMessagingSocket(token);
-      
-    } catch (error) {
-      console.error('💥 Failed to initialize WebSocket connection:', error);
-      setConnectionState("error");
-      setIsConnecting(false);
-      setLastError('Failed to initialize socket connection');
-    }
-  }, [getAuthToken]);
-
-  const reconnect = React.useCallback(async () => {
-    if (isConnecting) return;
-    
-    console.log('🔄 [ConnectionStatus] Attempting to reconnect WebSocket...');
-    setIsConnecting(true);
-    setLastError(null);
-    
-    try {
-      const token = getAuthToken();
-      if (!token) {
-        console.error('🔑 [ConnectionStatus] Failed to reconnect WebSocket - no valid authentication token');
-        setConnectionState("error");
-        setIsConnecting(false);
-        setLastError('Authentication token not found or invalid. Please sign in again.');
-        return;
-      }
-      
-      console.log('🔑 [ConnectionStatus] Authentication token validated for WebSocket reconnection');
-
-      // Try manual recovery first (handles transport errors)
-      const { recoverMessagingConnection, connectMessagingSocket } = await import('@/lib/websocket');
-      
-      const recoverySuccess = await recoverMessagingConnection();
-      if (!recoverySuccess) {
-        // Fallback to regular connection
-        console.log('🔄 [ConnectionStatus] Manual recovery failed, attempting regular connection...');
-        await connectMessagingSocket(token);
-      } else {
-        console.log('✅ [ConnectionStatus] Manual recovery successful');
-      }
-    } catch (error) {
-      console.error('❌ [ConnectionStatus] WebSocket reconnection failed:', error);
-      setConnectionState("error");
-      setIsConnecting(false);
-      
-      let errorMessage = 'Reconnection failed';
-      let shouldIncrementRetries = true;
-      
-      if (error instanceof Error) {
-        if (error.message?.includes('unauthorized') || error.message?.includes('authentication') || error.message?.includes('auth')) {
-          errorMessage = 'Authentication failed. Please sign in again.';
-          shouldIncrementRetries = false; // Don't retry auth errors
-        } else if (error.message?.includes('timeout')) {
-          errorMessage = 'Reconnection timeout. Please check your network.';
-        } else if (error.message?.includes('ECONNREFUSED')) {
-          errorMessage = 'Server unavailable. Please try again later.';
-        } else if (error.message) {
-          errorMessage = `Reconnection error: ${error.message}`;
-        }
-      }
-      
-      setLastError(errorMessage);
-      
-      if (shouldIncrementRetries) {
-        setReconnectAttempts(prev => prev + 1);
-      }
-    }
-  }, [isConnecting, getAuthToken]);
-
-  // Initialize socket connection on mount
-  React.useEffect(() => {
-    // Only initialize on client-side
-    if (typeof window !== 'undefined') {
-      // Small delay to ensure auth context is ready  
-      const timer = setTimeout(() => {
-        initializeSocket();
-      }, 100);
-      
-      return () => {
-        clearTimeout(timer);
-        if (heartbeatIntervalRef.current) {
-          clearInterval(heartbeatIntervalRef.current);
-        }
-      };
-    }
-  }, [initializeSocket]);
-
-  return {
-    isConnected: connectionState === "connected",
-    isConnecting,
-    connectionState,
-    lastError,
-    reconnectAttempts,
-    maxReconnectAttempts: 5,
-    lastHeartbeat,
-    reconnect,
-    debugAuthFlow, // Debug function for troubleshooting
-  };
 }

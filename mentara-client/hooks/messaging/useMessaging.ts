@@ -9,16 +9,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApi } from '@/lib/api';
-import { 
-  connectWebSocket, 
-  disconnectWebSocket, 
-  emitEvent, 
-  onEvent, 
-  onStateChange, 
-  getConnectionState,
-  recoverMessagingConnection,
-  type ConnectionState 
-} from '@/lib/websocket';
 import type { 
   MessagingMessage, 
   MessagingConversation, 
