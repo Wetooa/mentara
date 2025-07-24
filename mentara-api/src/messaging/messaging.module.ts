@@ -3,7 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MessagingController } from './messaging.controller';
 import { MessagingService } from './messaging.service';
 import { MessagingGateway } from './messaging.gateway';
-import { WebSocketAuthService } from './services/websocket-auth.service';
+import { WebSocketAuthService, WebSocketAuthMiddleware } from './services/websocket-auth.service';
 import { WebSocketEventService } from './services/websocket-event.service';
 // MessageEncryptionService removed - encryption functionality not supported by schema
 import { PrismaService } from '../providers/prisma-client.provider';
@@ -22,11 +22,12 @@ import { EventBusService } from '../common/events/event-bus.service';
   providers: [
     MessagingService,
     MessagingGateway,
-    WebSocketAuthService,
+    WebSocketAuthService, // Keep for backward compatibility if needed
+    WebSocketAuthMiddleware, // New simplified middleware
     WebSocketEventService,
     PrismaService,
     EventBusService,
   ],
-  exports: [MessagingService, MessagingGateway, WebSocketAuthService, WebSocketEventService],
+  exports: [MessagingService, MessagingGateway, WebSocketAuthService, WebSocketAuthMiddleware, WebSocketEventService],
 })
 export class MessagingModule {}

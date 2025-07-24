@@ -32,20 +32,61 @@ interface NotificationData {
   actionText?: string;
 }
 
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
+import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { EventBusService } from '../common/events/event-bus.service';
+import { PrismaService } from '../providers/prisma-client.provider';
+import { WebSocketAuthMiddleware } from './services/websocket-auth.service';
+import { WebSocketEventService } from './services/websocket-event.service';
+
+interface ConnectedUser {
+  userId: string;
+  socketId: string;
+  connectedAt: Date;
+  rooms: Set<string>;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+  };
+}
+
+interface NotificationData {
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  data?: Record<string, any>;
+  actionUrl?: string;
+  actionText?: string;
+}
+
 @Injectable()
 @WebSocketGateway({
   namespace: '/messaging',
   cors: {
     origin: [
       process.env.FRONTEND_URL || 'http://localhost:3000',
-      'http://localhost:3000', // Explicit fallback
-      'http://127.0.0.1:3000', // Alternative localhost
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
     ],
     methods: ['GET', 'POST'],
     credentials: true,
     allowedHeaders: ['authorization', 'content-type'],
   },
-  // Enable connection state recovery for better reliability
+  // Enhanced connection state recovery for better reliability
   connectionStateRecovery: {
     maxDisconnectionDuration: 2 * 60 * 1000, // 2 minutes
     skipMiddlewares: true,
@@ -62,74 +103,74 @@ export class MessagingGateway
   private socketToUser = new Map<string, string>();
 
   constructor(
-    private readonly websocketAuth: WebSocketAuthService,
+    private readonly authMiddleware: WebSocketAuthMiddleware,
     private readonly prisma: PrismaService,
     private readonly eventBus: EventBusService,
     @Inject(forwardRef(() => WebSocketEventService))
     private readonly webSocketEventService: WebSocketEventService,
-  ) { }
+  ) {}
 
   afterInit() {
+    // Apply authentication middleware using Socket.IO best practices
+    this.server.use(this.authMiddleware.createAuthMiddleware());
+    
     this.logger.log(
-      'Messaging WebSocket Gateway initialized with connection state recovery',
+      'Messaging WebSocket Gateway initialized with connection state recovery and auth middleware',
     );
   }
 
   async handleConnection(client: Socket) {
     try {
-      // Log connection recovery status
-      if ((client as any).recovered) {
-        this.logger.log(
-          `User ${(client as any).handshake?.auth?.userId || 'unknown'} connected with state recovery`,
-        );
-      }
+      // User is already authenticated by middleware - extract from socket
+      const userId = (client as any).userId;
+      const user = (client as any).user;
 
-      const user = await this.websocketAuth.authenticateSocket(client);
-      if (!user) {
-        this.logger.warn(`Authentication failed for socket ${client.id}`);
+      if (!userId || !user) {
+        this.logger.error(`Socket ${client.id} reached handleConnection without proper auth data`);
         client.disconnect();
         return;
       }
 
-      // Remove any existing connection for this user
-      const existingSocketId = this.userToSocket.get(user.userId);
-      if (existingSocketId) {
-        const existingSocket =
-          this.server.sockets.sockets.get(existingSocketId);
-        if (existingSocket) {
-          this.logger.log(
-            `Disconnecting existing socket for user ${user.userId}`,
-          );
-          existingSocket.disconnect();
-        }
-        this.cleanupUserConnection(user.userId);
+      // Log connection recovery status
+      if ((client as any).recovered) {
+        this.logger.log(`User ${userId} connected with state recovery`);
       }
+
+      // Improved connection management - handle existing connections gracefully
+      await this.handleExistingConnection(userId);
 
       // Set up new connection
       const connectedUser: ConnectedUser = {
-        userId: user.userId,
+        userId,
         socketId: client.id,
         connectedAt: new Date(),
         rooms: new Set(),
+        user,
       };
 
-      this.connectedUsers.set(user.userId, connectedUser);
-      this.userToSocket.set(user.userId, client.id);
-      this.socketToUser.set(client.id, user.userId);
+      this.connectedUsers.set(userId, connectedUser);
+      this.userToSocket.set(userId, client.id);
+      this.socketToUser.set(client.id, userId);
 
       // Subscribe user to their personal notification room
-      const personalRoom = this.getUserRoom(user.userId);
+      const personalRoom = this.getUserRoom(userId);
       await client.join(personalRoom);
       connectedUser.rooms.add(personalRoom);
 
-      this.logger.log(`User ${user.userId} connected to messaging gateway`);
+      this.logger.log(`User ${userId} connected to messaging gateway`);
 
-      // Send connection confirmation
+      // Send connection confirmation with enhanced data
       client.emit('connected', {
-        userId: user.userId,
+        userId,
         timestamp: new Date(),
         message: 'Connected to messaging service',
         recovered: (client as any).recovered || false,
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        },
       });
     } catch (error) {
       this.logger.error('Connection failed:', error);
@@ -145,24 +186,40 @@ export class MessagingGateway
     this.logger.log(`User ${userId} disconnected from messaging gateway`);
   }
 
+  /**
+   * Gracefully handle existing connections without causing flicker
+   */
+  private async handleExistingConnection(userId: string): Promise<void> {
+    const existingConnection = this.connectedUsers.get(userId);
+    if (!existingConnection) return;
+
+    this.logger.log(`Handling existing connection for user ${userId}`);
+    
+    // Clean up existing connection data without disconnecting the socket
+    // Let the old socket naturally disconnect to avoid connection flicker
+    this.connectedUsers.delete(userId);
+    
+    const oldSocketId = this.userToSocket.get(userId);
+    if (oldSocketId) {
+      this.userToSocket.delete(userId);
+      this.socketToUser.delete(oldSocketId);
+      
+      // Optionally notify the old socket about replacement
+      const oldSocket = this.server.sockets.sockets.get(oldSocketId);
+      if (oldSocket) {
+        oldSocket.emit('connection_replaced', {
+          message: 'Connection replaced by new session',
+          timestamp: new Date(),
+        });
+      }
+    }
+  }
+
   private cleanupUserConnection(userId: string) {
     try {
       const connectedUser = this.connectedUsers.get(userId);
       if (connectedUser) {
-        // Leave all rooms - add safety check for server state
-        if (this.server?.sockets?.sockets) {
-          const socket = this.server.sockets.sockets.get(connectedUser.socketId);
-          if (socket) {
-            connectedUser.rooms.forEach(room => {
-              try {
-                socket.leave(room);
-              } catch (error) {
-                this.logger.warn(`Failed to leave room ${room} for user ${userId}:`, error);
-              }
-            });
-          }
-        }
-        
+        // Simplified cleanup - let Socket.IO handle room cleanup automatically
         this.connectedUsers.delete(userId);
       }
 
@@ -173,13 +230,6 @@ export class MessagingGateway
       }
     } catch (error) {
       this.logger.error(`Error during cleanup for user ${userId}:`, error);
-      // Ensure we still clean up the tracking maps even if socket operations fail
-      this.connectedUsers.delete(userId);
-      const socketId = this.userToSocket.get(userId);
-      if (socketId) {
-        this.userToSocket.delete(userId);
-        this.socketToUser.delete(socketId);
-      }
     }
   }
 
@@ -232,109 +282,7 @@ export class MessagingGateway
   }
 
   /**
-   * Update unread count for specific users
-   */
-  updateUnreadCount(userIds: string[], count: number): void {
-    userIds.forEach(userId => {
-      const userRoom = this.getUserRoom(userId);
-      this.server.to(userRoom).emit('unreadCount', { count });
-    });
-
-    this.logger.debug(`Updated unread count to ${count} for ${userIds.length} users`);
-  }
-
-  /**
-   * Broadcast system announcement to all connected users
-   */
-  broadcastSystemAnnouncement(message: string, priority: 'low' | 'medium' | 'high' = 'medium'): void {
-    this.server.emit('system_announcement', {
-      message,
-      priority,
-      eventType: 'system_announcement',
-      timestamp: new Date(),
-    });
-
-    this.logger.log(`Broadcasted system announcement: ${message} (priority: ${priority})`);
-  }
-
-  /**
-   * Send targeted notification to specific users
-   */
-  sendTargetedNotification(userIds: string[], notification: any): void {
-    userIds.forEach(userId => {
-      const userRoom = this.getUserRoom(userId);
-      this.server.to(userRoom).emit('targeted_notification', {
-        ...notification,
-        eventType: 'targeted_notification',
-        timestamp: new Date(),
-      });
-    });
-
-    this.logger.debug(`Sent targeted notification to ${userIds.length} users`);
-  }
-
-  /**
-   * Subscribe user to personal notification room
-   */
-  subscribeUserToPersonalRoom(userId: string, socketId: string): void {
-    const userRoom = this.getUserRoom(userId);
-    this.server.in(socketId).socketsJoin(userRoom);
-    
-    const connectedUser = this.connectedUsers.get(userId);
-    if (connectedUser) {
-      connectedUser.rooms.add(userRoom);
-    }
-
-    this.logger.debug(`User ${userId} subscribed to personal room: ${userRoom}`);
-  }
-
-  /**
-   * Unsubscribe user from personal notification room
-   */
-  unsubscribeUserFromPersonalRoom(userId: string, socketId: string): void {
-    const userRoom = this.getUserRoom(userId);
-    this.server.in(socketId).socketsLeave(userRoom);
-    
-    const connectedUser = this.connectedUsers.get(userId);
-    if (connectedUser) {
-      connectedUser.rooms.delete(userRoom);
-    }
-
-    this.logger.debug(`User ${userId} unsubscribed from personal room: ${userRoom}`);
-  }
-
-  /**
-   * Subscribe user to community room
-   */
-  subscribeUserToCommunityRoom(userId: string, communityId: string, socketId: string): void {
-    const communityRoom = this.getCommunityRoom(communityId);
-    this.server.in(socketId).socketsJoin(communityRoom);
-    
-    const connectedUser = this.connectedUsers.get(userId);
-    if (connectedUser) {
-      connectedUser.rooms.add(communityRoom);
-    }
-
-    this.logger.debug(`User ${userId} subscribed to community room: ${communityRoom}`);
-  }
-
-  /**
-   * Subscribe user to post room
-   */
-  subscribeUserToPostRoom(userId: string, postId: string, socketId: string): void {
-    const postRoom = this.getPostRoom(postId);
-    this.server.in(socketId).socketsJoin(postRoom);
-    
-    const connectedUser = this.connectedUsers.get(userId);
-    if (connectedUser) {
-      connectedUser.rooms.add(postRoom);
-    }
-
-    this.logger.debug(`User ${userId} subscribed to post room: ${postRoom}`);
-  }
-
-  /**
-   * Subscribe user to conversation room
+   * Subscribe user to conversation room - simplified version
    */
   subscribeUserToConversationRoom(userId: string, conversationId: string): void {
     const socketId = this.userToSocket.get(userId);
@@ -359,11 +307,13 @@ export class MessagingGateway
    */
   getConnectionStats(): {
     totalConnections: number;
+    uniqueUsers: number;
     eventSubscriptions: number;
   } {
     return {
       totalConnections: this.server.sockets.sockets.size,
-      eventSubscriptions: 10, // This should match the number of event subscriptions in WebSocketEventService
+      uniqueUsers: this.connectedUsers.size,
+      eventSubscriptions: 10,
     };
   }
 
@@ -374,14 +324,6 @@ export class MessagingGateway
 
   private getConversationRoom(conversationId: string): string {
     return `conv_${conversationId}`;
-  }
-
-  private getCommunityRoom(communityId: string): string {
-    return `community_${communityId}`;
-  }
-
-  private getPostRoom(postId: string): string {
-    return `post_${postId}`;
   }
 
   // Event handlers for client-side events
