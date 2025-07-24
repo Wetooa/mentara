@@ -69,9 +69,64 @@ interface MessageReactionEventData {
 }
 
 /**
- * Simplified messaging hook
- * Handles both HTTP operations (via React Query) and real-time events (via WebSocket)
+ * Simplified messaging hook using WebSocket Context
+ * Uses React Query for HTTP operations + centralized WebSocket for real-time events
+ * Following the pattern: hooks > lib/api axios > REST > backend controller
  */
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { useWebSocket } from '@/contexts/WebSocketContext';
+import { useApi } from '@/lib/api';
+import type { 
+  MessagingMessage, 
+  MessagingConversation, 
+  SendMessageDto 
+} from '@/lib/api/services/messaging';
+
+interface UseMessagingOptions {
+  conversationId?: string;
+  enableRealtime?: boolean;
+  enableTypingIndicators?: boolean;
+}
+
+interface TypingUser {
+  userId: string;
+  conversationId: string;
+  isTyping: boolean;
+}
+
+interface MessageEventData {
+  message: MessagingMessage;
+}
+
+interface TypingEventData {
+  userId: string;
+  conversationId: string;
+  isTyping: boolean;
+}
+
+interface MessageUpdatedEventData {
+  messageId: string;
+  content?: string;
+  isDeleted?: boolean;
+}
+
+interface MessageReadEventData {
+  messageId: string;
+  userId: string;
+  readAt: string;
+}
+
+interface MessageReactionEventData {
+  messageId: string;
+  userId: string;
+  emoji: string;
+  action: 'add' | 'remove';
+}
+
 export function useMessaging(options: UseMessagingOptions = {}) {
   const { 
     conversationId, 
@@ -81,13 +136,18 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   
   const api = useApi();
   const queryClient = useQueryClient();
-  const { user, accessToken } = useAuth();
+  const { user } = useAuth();
+  const { 
+    isConnected, 
+    connectionState, 
+    emit, 
+    on, 
+    reconnect 
+  } = useWebSocket();
   
   // Local state for real-time features
-  const [connectionState, setConnectionState] = useState<ConnectionState>(getConnectionState());
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
-  const [healthStatus, setHealthStatus] = useState<any>(connectionHealthMonitor.getCurrentHealth());
   
   // Refs for cleanup
   const eventUnsubscribers = useRef<(() => void)[]>([]);
@@ -126,7 +186,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     staleTime: 1000 * 30, // 30 seconds
   });
 
-  // Send message mutation
+  // Send message mutation with acknowledgment support
   const sendMessageMutation = useMutation({
     mutationFn: async ({ conversationId, messageData }: { 
       conversationId: string; 
@@ -148,7 +208,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
         conversationId,
         senderId: user?.id || '',
         content: messageData.content,
-        messageType: messageData.type || 'text',
+        messageType: messageData.type || 'TEXT',
         attachmentUrls: [],
         attachmentNames: [],
         attachmentSizes: [],
@@ -193,7 +253,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
         queryKeys.messages(conversationId),
         old => {
           if (!old) return [newMessage];
-          // Remove both temp messages AND any existing message with the same ID to prevent duplicates
+          // Remove temp messages and prevent duplicates
           const filtered = old.filter(msg => 
             !msg.id.startsWith('temp-') && msg.id !== newMessage.id
           );
@@ -229,194 +289,18 @@ export function useMessaging(options: UseMessagingOptions = {}) {
 
   // ============ WEBSOCKET REAL-TIME EVENTS ============
 
-  // Force WebSocket connection on page load - simple and direct approach
+  // Join conversation room when conversationId changes
   useEffect(() => {
-    if (!enableRealtime) return;
+    if (!enableRealtime || !conversationId || !isConnected) return;
 
-    let isMounted = true;
-    let connectionAttempted = false;
-
-    const forceConnection = async () => {
-      if (connectionAttempted) return;
-      connectionAttempted = true;
-
-      console.log('🚀 [FRONTEND] FORCE CONNECTING WebSocket on page load...');
-      
-      try {
-        // Just call the recovery method directly - same as manual button
-        const success = await recoverMessagingConnection();
-        
-        if (!isMounted) return;
-        
-        if (success) {
-          console.log('✅ [FRONTEND] FORCE CONNECTION SUCCESSFUL!');
-          toast.success('Connected to real-time messaging');
-          
-          // Join conversation if we have one
-          if (conversationId) {
-            console.log('🚪 [FRONTEND] Joining conversation room:', conversationId);
-            setTimeout(() => {
-              emitEvent('join_conversation', { conversationId });
-            }, 500); // Small delay to ensure connection is ready
-          }
-        } else {
-          console.error('❌ [FRONTEND] FORCE CONNECTION FAILED');
-          toast.error('Failed to connect. Use the retry button if needed.');
-        }
-      } catch (error) {
-        if (!isMounted) return;
-        console.error('💥 [FRONTEND] FORCE CONNECTION ERROR:', error);
-        
-        // Enhanced error handling with specific messages
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        const isTransportError = errorMessage.includes('Transport') || errorMessage.includes('transport');
-        const isNetworkError = errorMessage.includes('Network') || errorMessage.includes('fetch');
-        
-        if (isTransportError) {
-          toast.error('Transport Error', {
-            description: 'Connection transport failed. Retrying with fallback method...',
-            action: {
-              label: "Manual Retry",
-              onClick: () => forceConnection(),
-            },
-          });
-        } else if (isNetworkError) {
-          toast.error('Network Error', {
-            description: 'Please check your internet connection.',
-            action: {
-              label: "Retry",
-              onClick: () => forceConnection(),
-            },
-          });
-        } else {
-          toast.error('Connection error', {
-            description: 'Use the retry button if needed.',
-            action: {
-              label: "Retry",
-              onClick: () => forceConnection(),
-            },
-          });
-        }
-      }
-    };
-
-    // Call immediately, but also set a backup timer
-    forceConnection();
-    
-    // Backup attempt after 2 seconds in case the first one fails
-    const backupTimer = setTimeout(() => {
-      if (isMounted && !getConnectionState().isConnected) {
-        console.log('🔄 [FRONTEND] Backup connection attempt...');
-        forceConnection();
-      }
-    }, 2000);
+    console.log('🚪 Joining conversation room:', conversationId);
+    emit('join_conversation', { conversationId });
 
     return () => {
-      isMounted = false;
-      clearTimeout(backupTimer);
-      disconnectWebSocket();
+      console.log('🚪 Leaving conversation room:', conversationId);
+      emit('leave_conversation', { conversationId });
     };
-  }, [enableRealtime, conversationId]); // Removed user/token dependencies
-
-  // Secondary effect for auth-dependent setup (fallback)
-  useEffect(() => {
-    if (!enableRealtime || !accessToken || !user) return;
-
-    const currentState = getConnectionState();
-    if (currentState.isConnected) {
-      console.log('🔗 [FRONTEND] Auth effect: Already connected, skipping');
-      return;
-    }
-
-    console.log('🔐 [FRONTEND] Auth effect: Attempting connection with auth token...');
-    
-    // Try one more time with proper auth context
-    setTimeout(async () => {
-      try {
-        const success = await recoverMessagingConnection();
-        if (success) {
-          console.log('✅ [FRONTEND] Auth-based connection successful');
-        }
-      } catch (error) {
-        console.error('❌ [FRONTEND] Auth-based connection failed:', error);
-      }
-    }, 1000);
-
-  }, [accessToken, user, enableRealtime]);
-
-  // Monitor connection state and integrate health monitoring
-  useEffect(() => {
-    if (!enableRealtime) return;
-
-    const unsubscribe = onStateChange((newState) => {
-      // Update local state
-      setConnectionState(newState);
-      
-      // Log detailed connection state changes
-      wsDebugger.logConnectionState(newState, 'useMessaging');
-      
-      // Update connection health monitor with current state
-      // The health monitor will automatically track this state change
-      if (typeof window !== 'undefined') {
-        (window as any).__wsState__ = {
-          isConnected: newState.isConnected,
-          lastConnected: newState.lastConnected?.toISOString(),
-          error: newState.error,
-          retryCount: newState.retryCount,
-          transport: 'websocket', // Default transport type
-        };
-      }
-      
-      // Log specific state transitions
-      if (newState.isConnected && !connectionState.isConnected) {
-        console.log('🟢 [CONNECTION] WebSocket connected successfully');
-        wsDebugger.logAuth('success', { 
-          userId: user?.id,
-          email: user?.email,
-          timestamp: new Date().toISOString()
-        });
-      } else if (!newState.isConnected && connectionState.isConnected) {
-        console.log('🔴 [CONNECTION] WebSocket disconnected');
-      } else if (newState.error && newState.error !== connectionState.error) {
-        console.error('💥 [CONNECTION] New error detected:', newState.error);
-        wsDebugger.logAuth('failure', { 
-          error: newState.error,
-          timestamp: new Date().toISOString()
-        });
-      }
-    });
-    
-    return unsubscribe;
-  }, [enableRealtime, connectionState.isConnected, user?.id, user?.email]);
-
-  // Monitor connection health changes
-  useEffect(() => {
-    if (!enableRealtime) return;
-
-    const unsubscribeHealth = connectionHealthMonitor.onHealthChange((healthResult) => {
-      setHealthStatus(healthResult);
-      
-      // Log health status changes for debugging
-      if (wsDebugger.isEnabled()) {
-        console.group('🏥 [HEALTH] Connection health status changed');
-        console.log('Overall:', healthResult.overall);
-        console.log('WebSocket:', healthResult.websocket);
-        console.log('Network:', healthResult.network);
-        console.log('Quality:', healthResult.metrics.connectionQuality);
-        if (healthResult.recommendations.length > 0) {
-          console.log('Recommendations:', healthResult.recommendations);
-        }
-        console.groupEnd();
-      }
-      
-      // Show user feedback for critical health issues
-      if (healthResult.overall === 'critical' && connectionState.isConnected) {
-        toast.warning('Connection quality is poor. Real-time features may be affected.');
-      }
-    });
-
-    return unsubscribeHealth;
-  }, [enableRealtime, connectionState.isConnected]);
+  }, [conversationId, isConnected, enableRealtime, emit]);
 
   // Setup event listeners
   useEffect(() => {
@@ -424,12 +308,12 @@ export function useMessaging(options: UseMessagingOptions = {}) {
 
     const eventHandlers = [
       // New message received
-      onEvent('new_message', (data: MessageEventData) => {
+      on('new_message', (data: MessageEventData) => {
         try {
-          wsDebugger.logEvent('new_message', data, 'incoming');
+          console.log('📨 New message received:', data);
           
           if (!data || !data.message) {
-            console.warn('⚠️ [FRONTEND] Invalid new_message data received:', data);
+            console.warn('⚠️ Invalid new_message data received:', data);
             return;
           }
           
@@ -444,7 +328,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
                 // Check if message already exists to prevent duplicates
                 const messageExists = old.some(existingMsg => existingMsg.id === message.id);
                 if (messageExists) {
-                  console.log('📝 [FRONTEND] Message already exists, skipping:', message.id);
+                  console.log('📝 Message already exists, skipping:', message.id);
                   return old;
                 }
                 return [...old, message];
@@ -474,18 +358,18 @@ export function useMessaging(options: UseMessagingOptions = {}) {
             });
           }
         } catch (error) {
-          console.error('💥 [FRONTEND] Error handling new_message event:', error, data);
+          console.error('💥 Error handling new_message event:', error, data);
           toast.error('Error processing new message');
         }
       }),
 
       // Message updated
-      onEvent('message_updated', (data: MessageUpdatedEventData) => {
+      on('message_updated', (data: MessageUpdatedEventData) => {
         try {
           if (!conversationId) return;
           
           if (!data || !data.messageId) {
-            console.warn('⚠️ [FRONTEND] Invalid message_updated data received:', data);
+            console.warn('⚠️ Invalid message_updated data received:', data);
             return;
           }
           
@@ -507,13 +391,13 @@ export function useMessaging(options: UseMessagingOptions = {}) {
             }
           );
         } catch (error) {
-          console.error('💥 [FRONTEND] Error handling message_updated event:', error, data);
+          console.error('💥 Error handling message_updated event:', error, data);
           toast.error('Error updating message');
         }
       }),
 
       // Message read
-      onEvent('message_read', (data: MessageReadEventData) => {
+      on('message_read', (data: MessageReadEventData) => {
         if (!conversationId) return;
         
         queryClient.setQueryData<MessagingMessage[]>(
@@ -541,7 +425,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       }),
 
       // Message reaction
-      onEvent('message_reaction', (data: MessageReactionEventData) => {
+      on('message_reaction', (data: MessageReactionEventData) => {
         if (!conversationId) return;
         
         queryClient.setQueryData<MessagingMessage[]>(
@@ -578,12 +462,12 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       }),
 
       // Typing indicators
-      enableTypingIndicators ? onEvent('typing_indicator', (data: TypingEventData) => {
+      enableTypingIndicators ? on('user_typing', (data: TypingEventData) => {
         try {
           if (data.userId === user?.id) return; // Don't show own typing
           
           if (!data || !data.userId || !data.conversationId) {
-            console.warn('⚠️ [FRONTEND] Invalid typing_indicator data received:', data);
+            console.warn('⚠️ Invalid typing_indicator data received:', data);
             return;
           }
           
@@ -600,12 +484,12 @@ export function useMessaging(options: UseMessagingOptions = {}) {
             }
           });
         } catch (error) {
-          console.error('💥 [FRONTEND] Error handling typing_indicator event:', error, data);
+          console.error('💥 Error handling typing_indicator event:', error, data);
         }
       }) : () => {},
 
       // User status changes
-      onEvent('user_status_changed', (data: { userId: string; status: 'online' | 'offline' }) => {
+      on('user_status_changed', (data: { userId: string; status: 'online' | 'offline' }) => {
         setOnlineUsers(prev => {
           const newSet = new Set(prev);
           if (data.status === 'online') {
@@ -625,7 +509,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       eventUnsubscribers.current.forEach(unsubscribe => unsubscribe());
       eventUnsubscribers.current = [];
     };
-  }, [enableRealtime, enableTypingIndicators, conversationId, user?.id, queryClient]);
+  }, [enableRealtime, enableTypingIndicators, conversationId, user?.id, queryClient, on]);
 
   // ============ PUBLIC API ============
 
@@ -633,7 +517,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     content: string,
     options?: {
       replyToMessageId?: string;
-      type?: 'text' | 'image' | 'audio' | 'video';
+      type?: 'TEXT' | 'IMAGE' | 'AUDIO' | 'VIDEO';
       attachments?: { url: string; fileName: string; fileSize: number; mimeType: string; }[];
     }
   ) => {
@@ -644,7 +528,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
 
     const messageData: SendMessageDto = {
       content,
-      type: options?.type || 'text',
+      type: options?.type || 'TEXT',
       replyToMessageId: options?.replyToMessageId,
       attachments: options?.attachments,
     };
@@ -653,11 +537,11 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   }, [conversationId, sendMessageMutation]);
 
   const sendTypingIndicator = useCallback((isTyping: boolean) => {
-    if (!conversationId || !enableTypingIndicators) return;
+    if (!conversationId || !enableTypingIndicators || !isConnected) return;
 
     const eventData = { conversationId, isTyping };
-    wsDebugger.logEvent('typing_indicator', eventData, 'outgoing');
-    emitEvent('typing_indicator', eventData);
+    console.log('⌨️ Sending typing indicator:', eventData);
+    emit(isTyping ? 'typing_start' : 'typing_stop', eventData);
 
     // Auto-stop typing after 3 seconds
     if (isTyping) {
@@ -671,7 +555,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
-  }, [conversationId, enableTypingIndicators]);
+  }, [conversationId, enableTypingIndicators, isConnected, emit]);
 
   const uploadFile = useCallback(async (file: File) => {
     try {
@@ -710,12 +594,9 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     messagesError,
     sendMessageError: sendMessageMutation.error,
 
-    // Connection state
+    // Connection state (from WebSocket context)
     connectionState,
-    isConnected: connectionState.isConnected,
-    healthStatus,
-    connectionQuality: healthStatus?.metrics?.connectionQuality || 'unknown',
-    networkStatus: healthStatus?.network || 'unknown',
+    isConnected,
 
     // Actions
     sendMessage,
@@ -726,38 +607,11 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       api.messaging.removeReaction(messageId, emoji),
     sendTypingIndicator,
     uploadFile,
-    reconnectWebSocket: useCallback(async () => {
-      try {
-        console.log('🔄 [FRONTEND] Manual WebSocket reconnection initiated');
-        wsDebugger.logConnectionState({ isConnecting: true, error: null }, 'manual-reconnect');
-        
-        const success = await recoverMessagingConnection();
-        if (success) {
-          console.log('✅ [FRONTEND] WebSocket reconnection successful');
-          wsDebugger.logConnectionState({ isConnected: true, error: null }, 'manual-reconnect-success');
-          toast.success('Connection restored');
-        } else {
-          console.error('❌ [FRONTEND] WebSocket reconnection failed');
-          wsDebugger.logConnectionState({ isConnected: false, error: 'Manual reconnection failed' }, 'manual-reconnect-failed');
-          toast.error('Failed to restore connection. Please refresh the page.');
-        }
-        return success;
-      } catch (error) {
-        console.error('💥 [FRONTEND] WebSocket reconnection error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        wsDebugger.logConnectionState({ isConnected: false, error: errorMessage }, 'manual-reconnect-error');
-        toast.error('Connection error. Please check your network and try again.');
-        return false;
-      }
-    }, []),
+    reconnectWebSocket: reconnect, // Use the centralized reconnect from context
 
     // Utilities
     refetchConversations,
     refetchMessages,
-    
-    // Health monitoring utilities
-    getHealthSummary: (minutes?: number) => connectionHealthMonitor.getHealthSummary(minutes),
-    forceHealthCheck: () => connectionHealthMonitor.performHealthCheck(),
     
     // Advanced features (HTTP only, no WebSocket complexity)
     searchMessages: (query: string) => 
