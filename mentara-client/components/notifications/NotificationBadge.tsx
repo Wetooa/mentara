@@ -24,8 +24,6 @@ export function NotificationBadge({
   onClick,
   disabled = false,
 }: NotificationBadgeProps) {
-  return <></>
-
   const { unreadCount, connectionState } = useNotifications({
     enableRealtime: true,
     enableToasts: false,
