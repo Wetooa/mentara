@@ -7,6 +7,7 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
+  Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PrismaService } from '../providers/prisma-client.provider';
@@ -92,14 +93,14 @@ export class WorksheetUploadsController {
             materialNames: {
               push: file.originalname,
             },
-
           },
         });
       } else {
         // For submissions, create or update WorksheetSubmission
-        const existingSubmission = await this.prisma.worksheetSubmission.findUnique({
-          where: { worksheetId },
-        });
+        const existingSubmission =
+          await this.prisma.worksheetSubmission.findUnique({
+            where: { worksheetId },
+          });
 
         if (existingSubmission) {
           // Update existing submission

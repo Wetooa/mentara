@@ -7,7 +7,6 @@ import { Task } from "@/components/worksheets/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
 
-
 export default function WorksheetsPage() {
   const [activeFilter, setActiveFilter] = useState<string>("everything");
   const [therapistFilter, setTherapistFilter] = useState<string>("");
@@ -51,20 +50,22 @@ export default function WorksheetsPage() {
           status,
           limit: 100,
         });
-        
+
         // Transform worksheets to match Task interface
-        const transformedTasks: Task[] = Array.isArray(worksheetsResponse.worksheets) 
-          ? worksheetsResponse.worksheets.map(worksheet => ({
+        const transformedTasks: Task[] = Array.isArray(
+          worksheetsResponse.worksheets
+        )
+          ? worksheetsResponse.worksheets.map((worksheet) => ({
               ...worksheet,
               date: worksheet.createdAt,
               status: mapWorksheetStatus(worksheet.status, worksheet.dueDate),
-              isCompleted: worksheet.status === 'REVIEWED',
-              therapistName: worksheet.therapist?.user 
+              isCompleted: worksheet.status === "REVIEWED",
+              therapistName: worksheet.therapist?.user
                 ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}`
                 : undefined,
             }))
           : [];
-        
+
         setTasks(transformedTasks);
       } catch (err) {
         console.error("Error fetching worksheets:", err);
@@ -78,16 +79,19 @@ export default function WorksheetsPage() {
   }, [userId, activeFilter, api.worksheets]);
 
   // Helper function to map backend status to frontend status display
-  const mapWorksheetStatus = (backendStatus: string, dueDate: string): 'assigned' | 'submitted' | 'completed' | 'overdue' => {
-    if (backendStatus === 'REVIEWED') return 'completed';
-    if (backendStatus === 'SUBMITTED') return 'submitted';
-    if (backendStatus === 'ASSIGNED') {
+  const mapWorksheetStatus = (
+    backendStatus: string,
+    dueDate: string
+  ): "assigned" | "submitted" | "completed" | "overdue" => {
+    if (backendStatus === "REVIEWED") return "completed";
+    if (backendStatus === "SUBMITTED") return "submitted";
+    if (backendStatus === "ASSIGNED") {
       // Check if it's overdue
       const due = new Date(dueDate);
       const now = new Date();
-      return due < now ? 'overdue' : 'assigned';
+      return due < now ? "overdue" : "assigned";
     }
-    return 'assigned'; // Default fallback
+    return "assigned"; // Default fallback
   };
 
   // Filter tasks based on selected filters
@@ -132,9 +136,6 @@ export default function WorksheetsPage() {
       ) : (
         <WorksheetsList tasks={getFilteredTasks()} />
       )}
-    </div>
-  );
-}
     </div>
   );
 }
