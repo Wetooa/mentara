@@ -185,9 +185,9 @@ export class TherapistManagementService {
 
       // Find all active clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
-        where: { 
+        where: {
           therapistId: therapist.userId,
-          status: 'active'
+          status: 'active',
         },
         include: { client: { include: { user: true } } },
       });
@@ -218,9 +218,9 @@ export class TherapistManagementService {
 
       // Find all pending client requests for this therapist
       const pendingRequests = await this.prisma.clientTherapist.findMany({
-        where: { 
+        where: {
           therapistId: therapist.userId,
-          status: 'inactive'
+          status: 'inactive',
         },
         include: { client: { include: { user: true } } },
         orderBy: { assignedAt: 'desc' },
@@ -244,13 +244,16 @@ export class TherapistManagementService {
     }
   }
 
-  async acceptPatientRequest(therapistId: string, clientId: string): Promise<void> {
+  async acceptPatientRequest(
+    therapistId: string,
+    clientId: string,
+  ): Promise<void> {
     try {
       const relationship = await this.prisma.clientTherapist.findFirst({
         where: {
           therapistId: therapistId,
           clientId: clientId,
-          status: 'inactive'
+          status: 'inactive',
         },
       });
 
@@ -278,13 +281,16 @@ export class TherapistManagementService {
     }
   }
 
-  async denyPatientRequest(therapistId: string, clientId: string): Promise<void> {
+  async denyPatientRequest(
+    therapistId: string,
+    clientId: string,
+  ): Promise<void> {
     try {
       const relationship = await this.prisma.clientTherapist.findFirst({
         where: {
           therapistId: therapistId,
           clientId: clientId,
-          status: 'inactive'
+          status: 'inactive',
         },
       });
 
@@ -305,9 +311,7 @@ export class TherapistManagementService {
         throw error;
       }
 
-      throw new InternalServerErrorException(
-        'Failed to deny patient request',
-      );
+      throw new InternalServerErrorException('Failed to deny patient request');
     }
   }
 
@@ -317,7 +321,7 @@ export class TherapistManagementService {
         where: {
           therapistId: therapistId,
           clientId: clientId,
-          status: 'active'
+          status: 'active',
         },
       });
 
@@ -339,9 +343,7 @@ export class TherapistManagementService {
         throw error;
       }
 
-      throw new InternalServerErrorException(
-        'Failed to remove patient',
-      );
+      throw new InternalServerErrorException('Failed to remove patient');
     }
   }
 
@@ -446,21 +448,32 @@ export class TherapistManagementService {
 
   async getMatchedClients(therapistId: string): Promise<any> {
     try {
-      console.log('🔍 [DEBUG] getMatchedClients called with therapistId:', therapistId);
-      
+      console.log(
+        '🔍 [DEBUG] getMatchedClients called with therapistId:',
+        therapistId,
+      );
+
       // First, verify the therapist exists
       const therapist = await this.prisma.therapist.findUnique({
         where: { userId: therapistId },
-        select: { userId: true, user: { select: { firstName: true, lastName: true } } }
+        select: {
+          userId: true,
+          user: { select: { firstName: true, lastName: true } },
+        },
       });
-      
-      console.log('🔍 [DEBUG] Therapist found:', therapist ? 
-        `${therapist.user.firstName} ${therapist.user.lastName} (ID: ${therapist.userId})` : 
-        'NOT FOUND');
-      
+
+      console.log(
+        '🔍 [DEBUG] Therapist found:',
+        therapist
+          ? `${therapist.user.firstName} ${therapist.user.lastName} (ID: ${therapist.userId})`
+          : 'NOT FOUND',
+      );
+
       if (!therapist) {
         console.error('❌ [ERROR] Therapist not found with ID:', therapistId);
-        throw new NotFoundException(`Therapist with ID ${therapistId} not found`);
+        throw new NotFoundException(
+          `Therapist with ID ${therapistId} not found`,
+        );
       }
 
       const thirtyDaysAgo = new Date();
@@ -468,42 +481,48 @@ export class TherapistManagementService {
 
       // Get all matched clients (no status needed - all relationships are active)
       const allMatches = await this.prisma.clientTherapist.findMany({
-        where: { 
-          therapistId: therapistId
+        where: {
+          therapistId: therapistId,
         },
-        include: { 
-          client: { 
-            include: { 
+        include: {
+          client: {
+            include: {
               user: true,
               preAssessment: {
                 select: {
                   id: true,
                   createdAt: true,
-                  answers: true
-                }
-              }
-            } 
-          } 
+                  answers: true,
+                },
+              },
+            },
+          },
         },
-        orderBy: { assignedAt: 'desc' }
+        orderBy: { assignedAt: 'desc' },
       });
-      
-      console.log('🔍 [DEBUG] ClientTherapist records found:', allMatches.length);
-      console.log('🔍 [DEBUG] Raw matches:', allMatches.map(m => ({
-        id: m.id,
-        clientId: m.clientId,
-        therapistId: m.therapistId,
-        assignedAt: m.assignedAt,
-        status: m.status
-      })));
 
-      // Separate recent matches (last 30 days) from older ones
-      const recentMatches = allMatches.filter(match => 
-        new Date(match.assignedAt) >= thirtyDaysAgo
+      console.log(
+        '🔍 [DEBUG] ClientTherapist records found:',
+        allMatches.length,
+      );
+      console.log(
+        '🔍 [DEBUG] Raw matches:',
+        allMatches.map((m) => ({
+          id: m.id,
+          clientId: m.clientId,
+          therapistId: m.therapistId,
+          assignedAt: m.assignedAt,
+          status: m.status,
+        })),
       );
 
-      const olderMatches = allMatches.filter(match => 
-        new Date(match.assignedAt) < thirtyDaysAgo
+      // Separate recent matches (last 30 days) from older ones
+      const recentMatches = allMatches.filter(
+        (match) => new Date(match.assignedAt) >= thirtyDaysAgo,
+      );
+
+      const olderMatches = allMatches.filter(
+        (match) => new Date(match.assignedAt) < thirtyDaysAgo,
       );
 
       // Format the response with additional metadata
@@ -521,19 +540,28 @@ export class TherapistManagementService {
           },
           matchInfo: {
             assignedAt: relationship.assignedAt,
-            daysSinceMatch: Math.floor((Date.now() - new Date(relationship.assignedAt).getTime()) / (1000 * 60 * 60 * 24)),
+            daysSinceMatch: Math.floor(
+              (Date.now() - new Date(relationship.assignedAt).getTime()) /
+                (1000 * 60 * 60 * 24),
+            ),
           },
-          assessmentInfo: latestAssessment ? {
-            hasAssessment: true,
-            completedAt: latestAssessment.createdAt,
-            assessmentType: 'Pre-Assessment',
-            daysSinceAssessment: Math.floor((Date.now() - new Date(latestAssessment.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
-          } : {
-            hasAssessment: false,
-            completedAt: null,
-            assessmentType: null,
-            daysSinceAssessment: null,
-          }
+          assessmentInfo: latestAssessment
+            ? {
+                hasAssessment: true,
+                completedAt: latestAssessment.createdAt,
+                assessmentType: 'Pre-Assessment',
+                daysSinceAssessment: Math.floor(
+                  (Date.now() -
+                    new Date(latestAssessment.createdAt).getTime()) /
+                    (1000 * 60 * 60 * 24),
+                ),
+              }
+            : {
+                hasAssessment: false,
+                completedAt: null,
+                assessmentType: null,
+                daysSinceAssessment: null,
+              },
         };
       };
 
@@ -544,7 +572,7 @@ export class TherapistManagementService {
           totalRecentMatches: recentMatches.length,
           totalAllMatches: allMatches.length,
           totalMatches: allMatches.length,
-        }
+        },
       };
     } catch (error) {
       console.error(

@@ -154,6 +154,7 @@ export function createTherapistService(axios: AxiosInstance) {
        */
       async getList() {
         const { data } = await axios.get("/therapist/clients/assigned");
+        console.log("Assigned patients data:", data);
         return data;
       },
 
@@ -224,7 +225,9 @@ export function createTherapistService(axios: AxiosInstance) {
        * Accept a patient connection request
        */
       async acceptRequest(patientId: string) {
-        const { data } = await axios.post(`/therapist/clients/${patientId}/accept`);
+        const { data } = await axios.post(
+          `/therapist/clients/${patientId}/accept`
+        );
         return data;
       },
 
@@ -232,7 +235,9 @@ export function createTherapistService(axios: AxiosInstance) {
        * Deny a patient connection request
        */
       async denyRequest(patientId: string) {
-        const { data } = await axios.post(`/therapist/clients/${patientId}/deny`);
+        const { data } = await axios.post(
+          `/therapist/clients/${patientId}/deny`
+        );
         return data;
       },
 

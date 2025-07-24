@@ -1,7 +1,7 @@
 import {
   Controller,
   Get,
-  Post, 
+  Post,
   Delete,
   Param,
   HttpCode,
@@ -36,9 +36,7 @@ export class TherapistClientController {
 
   @Get('matched')
   @HttpCode(HttpStatus.OK)
-  async getMatchedClients(
-    @CurrentUserId() therapistId: string,
-  ): Promise<any> {
+  async getMatchedClients(@CurrentUserId() therapistId: string): Promise<any> {
     return this.therapistManagementService.getMatchedClients(therapistId);
   }
 
@@ -56,6 +54,7 @@ export class TherapistClientController {
   async getPendingRequests(
     @CurrentUserId() therapistId: string,
   ): Promise<any[]> {
+    console.log('Fetching pending requests for therapist:', therapistId);
     return this.therapistManagementService.getPendingRequests(therapistId);
   }
 
@@ -65,7 +64,10 @@ export class TherapistClientController {
     @CurrentUserId() therapistId: string,
     @Param('clientId') clientId: string,
   ): Promise<{ success: boolean }> {
-    await this.therapistManagementService.acceptPatientRequest(therapistId, clientId);
+    await this.therapistManagementService.acceptPatientRequest(
+      therapistId,
+      clientId,
+    );
     return { success: true };
   }
 
@@ -75,7 +77,10 @@ export class TherapistClientController {
     @CurrentUserId() therapistId: string,
     @Param('clientId') clientId: string,
   ): Promise<{ success: boolean }> {
-    await this.therapistManagementService.denyPatientRequest(therapistId, clientId);
+    await this.therapistManagementService.denyPatientRequest(
+      therapistId,
+      clientId,
+    );
     return { success: true };
   }
 

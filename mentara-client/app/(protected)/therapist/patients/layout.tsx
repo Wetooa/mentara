@@ -119,7 +119,7 @@ export default function PatientsLayout({
 
   // Check if a patient is selected
   const isPatientSelected = pathname.split("/").length > 3;
-  
+
   // Tab state
   const [activeTab, setActiveTab] = useState("patients");
 
@@ -144,7 +144,9 @@ export default function PatientsLayout({
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-medium truncate">{patientName}</h4>
-            <p className="text-xs text-gray-500 truncate">{patient.user?.email}</p>
+            <p className="text-xs text-gray-500 truncate">
+              {patient.user?.email}
+            </p>
             <p className="text-xs text-gray-400 truncate">
               Active since {new Date(patient.assignedAt).toLocaleDateString()}
             </p>
@@ -153,18 +155,30 @@ export default function PatientsLayout({
 
         <div className="flex flex-wrap gap-2">
           <Link href={`/therapist/patients/${patient.userId}`}>
-            <Button size="sm" variant="outline" className="text-xs h-8 lg:h-7 min-w-0">
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs h-8 lg:h-7 min-w-0"
+            >
               <Eye className="w-3 h-3 mr-1 flex-shrink-0" />
               <span className="hidden sm:inline">View Profile</span>
               <span className="sm:hidden">View</span>
             </Button>
           </Link>
-          <Button size="sm" variant="outline" className="text-xs h-8 lg:h-7 min-w-0">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-8 lg:h-7 min-w-0"
+          >
             <MessageCircle className="w-3 h-3 mr-1 flex-shrink-0" />
             <span className="hidden sm:inline">Message</span>
             <span className="sm:hidden">Chat</span>
           </Button>
-          <Button size="sm" variant="outline" className="text-xs h-8 lg:h-7 min-w-0">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-8 lg:h-7 min-w-0"
+          >
             <Calendar className="w-3 h-3 mr-1 flex-shrink-0" />
             <span className="hidden sm:inline">Schedule</span>
             <span className="sm:hidden">Book</span>
@@ -202,7 +216,9 @@ export default function PatientsLayout({
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-medium truncate">{patientName}</h4>
-            <p className="text-xs text-gray-500 truncate">{request.user?.email}</p>
+            <p className="text-xs text-gray-500 truncate">
+              {request.user?.email}
+            </p>
             <p className="text-xs text-gray-400 truncate">
               Requested {new Date(request.requestedAt).toLocaleDateString()}
             </p>
@@ -229,12 +245,20 @@ export default function PatientsLayout({
             <UserX className="w-3 h-3 mr-1 flex-shrink-0" />
             Deny
           </Button>
-          <Button size="sm" variant="outline" className="text-xs h-8 lg:h-7 min-w-0">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-8 lg:h-7 min-w-0"
+          >
             <MessageCircle className="w-3 h-3 mr-1 flex-shrink-0" />
             <span className="hidden sm:inline">Message</span>
             <span className="sm:hidden">Chat</span>
           </Button>
-          <Button size="sm" variant="outline" className="text-xs h-8 lg:h-7 min-w-0">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-8 lg:h-7 min-w-0"
+          >
             <Eye className="w-3 h-3 mr-1 flex-shrink-0" />
             <span className="hidden sm:inline">View Profile</span>
             <span className="sm:hidden">View</span>
@@ -258,7 +282,7 @@ export default function PatientsLayout({
             disabled={loadingPatients || loadingRequests}
           >
             <RefreshCw
-              className={`h-4 w-4 ${(loadingPatients || loadingRequests) ? "animate-spin" : ""}`}
+              className={`h-4 w-4 ${loadingPatients || loadingRequests ? "animate-spin" : ""}`}
             />
           </Button>
         </div>
@@ -276,7 +300,7 @@ export default function PatientsLayout({
         </div>
 
         {/* Mobile Error notifications */}
-        {(patientsError || requestsError) && (
+        {/* {(patientsError || requestsError) && (
           <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
             <div className="flex items-center">
               <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
@@ -285,7 +309,7 @@ export default function PatientsLayout({
               </p>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Mobile Horizontal Tabs */}
         <div className="flex space-x-2">
@@ -324,7 +348,7 @@ export default function PatientsLayout({
             disabled={loadingPatients || loadingRequests}
           >
             <RefreshCw
-              className={`h-4 w-4 ${(loadingPatients || loadingRequests) ? "animate-spin" : ""}`}
+              className={`h-4 w-4 ${loadingPatients || loadingRequests ? "animate-spin" : ""}`}
             />
           </Button>
         </div>
@@ -342,7 +366,7 @@ export default function PatientsLayout({
         </div>
 
         {/* Desktop Error notifications */}
-        {(patientsError || requestsError) && (
+        {/* {(patientsError || requestsError) && (
           <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
             <div className="flex items-center">
               <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
@@ -351,7 +375,7 @@ export default function PatientsLayout({
               </p>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Desktop Vertical Tabs */}
         <div className="space-y-2">
@@ -384,7 +408,9 @@ export default function PatientsLayout({
           <div className="p-4 lg:p-6">
             {activeTab === "patients" ? (
               <>
-                <h2 className="text-lg font-semibold mb-4 hidden lg:block">My Patients</h2>
+                <h2 className="text-lg font-semibold mb-4 hidden lg:block">
+                  My Patients
+                </h2>
                 {loadingPatients ? (
                   <div className="flex items-center justify-center py-12">
                     <RefreshCw className="h-8 w-8 text-gray-400 animate-spin" />
@@ -392,7 +418,9 @@ export default function PatientsLayout({
                 ) : filteredPatients?.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Users className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mb-4" />
-                    <p className="text-base lg:text-lg text-gray-500 mb-2">No active patients</p>
+                    <p className="text-base lg:text-lg text-gray-500 mb-2">
+                      No active patients
+                    </p>
                     <p className="text-sm text-gray-400">
                       Accepted patient requests will appear here
                     </p>
@@ -407,7 +435,9 @@ export default function PatientsLayout({
               </>
             ) : (
               <>
-                <h2 className="text-lg font-semibold mb-4 hidden lg:block">Patient Requests</h2>
+                <h2 className="text-lg font-semibold mb-4 hidden lg:block">
+                  Patient Requests
+                </h2>
                 {loadingRequests ? (
                   <div className="flex items-center justify-center py-12">
                     <RefreshCw className="h-8 w-8 text-gray-400 animate-spin" />
@@ -415,7 +445,9 @@ export default function PatientsLayout({
                 ) : filteredRequests?.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Clock className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mb-4" />
-                    <p className="text-base lg:text-lg text-gray-500 mb-2">No pending requests</p>
+                    <p className="text-base lg:text-lg text-gray-500 mb-2">
+                      No pending requests
+                    </p>
                     <p className="text-sm text-gray-400">
                       Patient connection requests will appear here
                     </p>
@@ -423,7 +455,10 @@ export default function PatientsLayout({
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {filteredRequests?.map((request: any) => (
-                      <PatientRequestCard key={request.userId} request={request} />
+                      <PatientRequestCard
+                        key={request.userId}
+                        request={request}
+                      />
                     ))}
                   </div>
                 )}
