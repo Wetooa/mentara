@@ -9,6 +9,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/contexts/AuthContext';
+import { getAuthToken } from '@/lib/constants/auth';
 import { toast } from 'sonner';
 
 interface ConnectionState {
@@ -54,7 +55,7 @@ export function WebSocketProvider({
   namespace = '/messaging',
   autoConnect = true 
 }: WebSocketProviderProps) {
-  const { accessToken, user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>({
     isConnected: false,
@@ -82,6 +83,7 @@ export function WebSocketProvider({
       return false;
     }
 
+    const accessToken = getAuthToken();
     if (!accessToken) {
       console.warn('Cannot connect WebSocket: No access token available');
       return false;
@@ -316,7 +318,7 @@ export function WebSocketProvider({
 
   // Auto-connect when auth is available
   useEffect(() => {
-    if (autoConnect && accessToken && user && !socketRef.current) {
+    if (autoConnect && isAuthenticated && user && !socketRef.current) {
       console.log('🔐 Auth available, auto-connecting WebSocket');
       connect();
     }
@@ -326,7 +328,7 @@ export function WebSocketProvider({
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [accessToken, user, autoConnect]);
+  }, [isAuthenticated, user, autoConnect]);
 
   // Cleanup on unmount
   useEffect(() => {
