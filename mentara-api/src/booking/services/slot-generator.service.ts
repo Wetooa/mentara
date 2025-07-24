@@ -39,6 +39,9 @@ export class SlotGeneratorService {
   /**
    * Generate available time slots for a therapist on a specific date
    */
+  /**
+   * Generate available time slots for a therapist on a specific date
+   */
   async generateAvailableSlots(
     therapistId: string,
     date: string,
@@ -55,10 +58,10 @@ export class SlotGeneratorService {
     // Validate date is within booking window
     this.validateBookingDate(targetDate, finalConfig);
 
-    // Get therapist availability for this day
+    // Get therapist availability for this day - convert JS day number to string
     const availability = await this.getTherapistAvailability(
       therapistId,
-      dayOfWeek,
+      dayOfWeek.toString(), // Fixed: ensure consistent string conversion
     );
     
     console.log(`[SlotGenerator] Found ${availability.length} availability records:`, availability);
@@ -131,12 +134,12 @@ export class SlotGeneratorService {
 
   private async getTherapistAvailability(
     therapistId: string,
-    dayOfWeek: number,
+    dayOfWeek: string, // Changed: accept string directly to match database schema
   ) {
     return this.prisma.therapistAvailability.findMany({
       where: {
         therapistId,
-        dayOfWeek: dayOfWeek.toString(),
+        dayOfWeek: dayOfWeek, // Use directly since it's already a string
         isAvailable: true,
       },
       orderBy: { startTime: 'asc' },
@@ -270,6 +273,9 @@ export class SlotGeneratorService {
   /**
    * Check if a specific time slot is available
    */
+  /**
+   * Check if a specific time slot is available
+   */
   async isSlotAvailable(
     therapistId: string,
     startTime: Date,
@@ -278,11 +284,11 @@ export class SlotGeneratorService {
     const endTime = new Date(startTime.getTime() + duration * 60000);
     const dayOfWeek = startTime.getDay();
 
-    // Check therapist availability
+    // Check therapist availability - convert JS day number to string
     const availability = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek: dayOfWeek.toString(),
+        dayOfWeek: dayOfWeek.toString(), // Fixed: consistent string conversion
         isAvailable: true,
       },
     });

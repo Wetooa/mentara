@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,13 @@ export default function BookingPage() {
 
   // Get booking utilities
   const { cancelMeeting, isCancelling } = useBooking();
+
+  // Auto-select first therapist if there's only one
+  useEffect(() => {
+    if (!therapistsLoading && !selectedTherapistId && therapists.length === 1) {
+      setSelectedTherapistId(therapists[0].id);
+    }
+  }, [therapists, therapistsLoading, selectedTherapistId]);
 
   const handleSlotSelect = (date: string, timeSlot: TimeSlot) => {
     setSelectedDate(new Date(date));
@@ -103,6 +110,19 @@ export default function BookingPage() {
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
                 Select Therapist
+                {selectedTherapistId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedTherapistId("");
+                      setSelectedDate(undefined);
+                    }}
+                    className="ml-auto text-xs"
+                  >
+                    Clear
+                  </Button>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -135,19 +155,35 @@ export default function BookingPage() {
                         ? "ring-2 ring-blue-500 bg-blue-50"
                         : "hover:bg-gray-50"
                     }`}
-                    onClick={() => setSelectedTherapistId(therapist.id)}
+                    onClick={() => {
+                      setSelectedTherapistId(therapist.id);
+                      // Reset selected date when changing therapist to show fresh availability
+                      setSelectedDate(undefined);
+                    }}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                           <User className="h-5 w-5 text-blue-600" />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <div className="font-medium">{therapist.firstName} {therapist.lastName}</div>
                           <div className="text-sm text-muted-foreground">
                             {therapist.specialties?.join(", ") || "General Therapy"}
                           </div>
+                          {therapist.experience && (
+                            <div className="text-xs text-blue-600 mt-1">
+                              {therapist.experience}+ years experience
+                            </div>
+                          )}
                         </div>
+                        {selectedTherapistId === therapist.id && (
+                          <div className="text-blue-600">
+                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                              ✓
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
