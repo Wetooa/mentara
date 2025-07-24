@@ -46,7 +46,6 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { usePushNotifications } from '@/hooks/notifications/usePushNotifications';
-import { useRealTimeNotifications } from '@/hooks/notifications/useRealTimeNotifications';
 
 interface NotificationCenterProps {
   className?: string;
@@ -125,18 +124,6 @@ export function NotificationCenter({
     needsPermission,
   } = usePushNotifications();
 
-  // Real-time notifications
-  const {
-    // isConnected: rtConnected,
-    // connectionState: rtConnectionState,
-    // markAsRead: rtMarkAsRead,
-    // markAllAsRead: rtMarkAllAsRead,
-    // deleteNotification: rtDeleteNotification,
-    // reconnect: rtReconnect,
-  } = useRealTimeNotifications({
-    userId: "current-user-id", // TODO: Get from auth context
-    enableToasts: false, // Disable toasts in the center to avoid duplicates
-  });
 
   // Filter notifications
   const filteredNotifications = useMemo(() => {
