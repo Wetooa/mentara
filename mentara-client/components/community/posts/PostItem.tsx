@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useReportPost } from '@/hooks/community/useCommunityReporting';
+import { ReportModal } from '@/components/community/ReportModal';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -119,6 +121,10 @@ export function PostItem({
   const queryClient = useQueryClient();
   const { userRole } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  
+  // Report hook
+  const reportPost = useReportPost();
 
   const voteScore = post.votes.upvotes - post.votes.downvotes;
 
@@ -181,8 +187,12 @@ export function PostItem({
   };
 
   const handleReport = () => {
-    // TODO: Implement report functionality
-    toast.info('Report functionality coming soon');
+    setIsReportModalOpen(true);
+  };
+
+  const handleReportSubmit = async (reason: string, content?: string) => {
+    await reportPost.mutateAsync({ postId: post.id, reason, content });
+    setIsReportModalOpen(false);
   };
 
   const getRoleColor = (role?: string) => {
@@ -616,6 +626,16 @@ export function PostItem({
           </div>
         </div>
       </CardContent>
+      
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onSubmit={handleReportSubmit}
+        type="post"
+        contentPreview={post.title}
+        isLoading={reportPost.isPending}
+      />
     </Card>
   );
 }
