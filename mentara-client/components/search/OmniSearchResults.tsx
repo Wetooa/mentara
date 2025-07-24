@@ -90,7 +90,7 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
         subtitle: item.content ? item.content.slice(0, 150) + '...' : '',
         description: `By ${item.user.firstName} ${item.user.lastName} • ${item._count.hearts} hearts`,
         avatarUrl: item.user.avatarUrl,
-        url: `/post/${item.id}`,
+        url: `/community/posts/${item.id}`, // Will be prefixed with role by parent component
       };
     
     case 'comments':
@@ -101,7 +101,7 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
         subtitle: `On post: ${item.post?.title || 'Untitled Post'}`,
         description: `By ${item.user.firstName} ${item.user.lastName} • ${item._count?.hearts || 0} hearts • ${new Date(item.createdAt).toLocaleDateString()}`,
         avatarUrl: item.user.avatarUrl,
-        url: `/post/${item.post?.id}#comment-${item.id}`,
+        url: `/community/posts/${item.post?.id}#comment-${item.id}`, // Will be prefixed with role by parent component
       };
     
     case 'communities':

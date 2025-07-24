@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommunityNavigation } from '@/store/community';
 import { useAuth } from '@/contexts/AuthContext';
@@ -136,7 +135,7 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
         subtitle: item.content ? item.content.slice(0, 150) + '...' : '',
         description: `By ${item.user.firstName} ${item.user.lastName} • ${item._count?.hearts || 0} hearts • ${item._count?.comments || 0} comments`,
         avatarUrl: item.user.avatarUrl,
-        url: `/post/${item.id}`, // Keep as fallback, but we'll use navigation action
+        url: `/post/${item.id}`, // Fallback - will be replaced with role-based URL in handleResultClick
         metadata: {
           community: item.room?.roomGroup?.community?.name,
           communityId: item.room?.roomGroup?.community?.id,
@@ -153,7 +152,7 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
         subtitle: `On post: ${item.post?.title || 'Untitled Post'}`,
         description: `By ${item.user.firstName} ${item.user.lastName} • ${item._count?.hearts || 0} hearts • ${new Date(item.createdAt).toLocaleDateString()}`,
         avatarUrl: item.user.avatarUrl,
-        url: `/post/${item.post?.id}#comment-${item.id}`, // Keep as fallback
+        url: `/post/${item.post?.id}#comment-${item.id}`, // Fallback - will be replaced with role-based URL in handleResultClick
         metadata: {
           community: item.post?.room?.roomGroup?.community?.name,
           communityId: item.post?.room?.roomGroup?.community?.id,
@@ -170,7 +169,7 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
         title: item.name,
         subtitle: item.description,
         description: `${item._count?.memberships || 0} members`,
-        url: `/community/${item.slug}`, // Keep as fallback, but we'll use navigation action
+        url: `/community/${item.slug}`, // Fallback - will be replaced with role-based URL in handleResultClick
         metadata: {
           imageUrl: item.imageUrl,
           slug: item.slug,
@@ -338,33 +337,54 @@ export const TabbedSearchResults: React.FC<TabbedSearchResultsProps> = ({
     // Call the original onResultClick if provided
     onResultClick?.(result);
 
-    // Handle community-specific navigation
-    if (result.type === 'posts' && result.metadata?.communityId && result.metadata?.roomId) {
-      // Navigate to the room where the post is located
-      navigateToRoom(
-        result.metadata.roomId,
-        result.metadata.communityId,
-        router,
-        user?.role || 'client'
-      );
-    } else if (result.type === 'comments' && result.metadata?.communityId && result.metadata?.roomId) {
-      // Navigate to the room where the comment's post is located
-      navigateToRoom(
-        result.metadata.roomId,
-        result.metadata.communityId,
-        router,
-        user?.role || 'client'
-      );
+    const userRole = user?.role || 'client';
+
+    // Handle navigation based on result type
+    if (result.type === 'posts') {
+      if (result.metadata?.communityId && result.metadata?.roomId) {
+        // Navigate to the room where the post is located
+        navigateToRoom(
+          result.metadata.roomId,
+          result.metadata.communityId,
+          router,
+          userRole
+        );
+      } else {
+        // Fallback: navigate to post detail page with role-based routing
+        router.push(`/${userRole}/community/posts/${result.id}`);
+      }
+    } else if (result.type === 'comments') {
+      if (result.metadata?.communityId && result.metadata?.roomId) {
+        // Navigate to the room where the comment's post is located
+        navigateToRoom(
+          result.metadata.roomId,
+          result.metadata.communityId,
+          router,
+          userRole
+        );
+      } else if (result.metadata?.postId) {
+        // Fallback: navigate to post detail page with role-based routing
+        router.push(`/${userRole}/community/posts/${result.metadata.postId}#comment-${result.id}`);
+      }
     } else if (result.type === 'communities') {
       // Navigate to the community
       navigateToCommunity(
         result.id,
         router,
-        user?.role || 'client'
+        userRole
       );
     } else if (result.url) {
-      // Fall back to direct URL navigation for other types
-      router.push(result.url);
+      // For other types, use role-based URL if it's a relative URL
+      if (result.url.startsWith('/')) {
+        // Add role prefix to relative URLs
+        const roleBasedUrl = result.url.startsWith(`/${userRole}/`) 
+          ? result.url 
+          : `/${userRole}${result.url}`;
+        router.push(roleBasedUrl);
+      } else {
+        // External or absolute URLs
+        router.push(result.url);
+      }
     }
   };
 
@@ -448,7 +468,6 @@ export const TabbedSearchResults: React.FC<TabbedSearchResultsProps> = ({
   }
 
   const activeTabResults = allResults.filter(result => result.type === activeTab);
-  const activeTabConfig = TAB_CONFIG.find(tab => tab.key === activeTab);
 
   return (
     <div className={cn('w-full', className)}>
