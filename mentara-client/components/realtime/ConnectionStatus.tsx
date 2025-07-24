@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useWebSocket } from "@/contexts/WebSocketContext";
+import { useMessagingWebSocket } from "@/hooks/messaging/useWebSocket";
 
 interface ConnectionStatusProps {
   className?: string;
@@ -35,9 +35,10 @@ export default function ConnectionStatus({
 }: ConnectionStatusProps) {
   const { 
     isConnected, 
-    connectionState, 
-    reconnect 
-  } = useWebSocket();
+    connectionState,
+    error,
+    connect 
+  } = useMessagingWebSocket();
 
   const [isReconnecting, setIsReconnecting] = React.useState(false);
   const [showError, setShowError] = React.useState(true);
@@ -47,7 +48,7 @@ export default function ConnectionStatus({
     
     setIsReconnecting(true);
     try {
-      await reconnect();
+      await connect();
     } catch (error) {
       console.error('Manual reconnect failed:', error);
     } finally {
@@ -129,9 +130,9 @@ export default function ConnectionStatus({
                   Last connected: {connectionState.lastConnected.toLocaleTimeString()}
                 </div>
               )}
-              {connectionState.error && (
+              {error && (
                 <div className="text-xs text-red-400 mt-1">
-                  Error: {connectionState.error}
+                  Error: {error}
                 </div>
               )}
             </div>
@@ -155,7 +156,7 @@ export default function ConnectionStatus({
 
       {/* Error Alert */}
       <AnimatePresence>
-        {connectionState.error && showError && (
+        {error && showError && (
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -166,7 +167,7 @@ export default function ConnectionStatus({
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="flex items-center justify-between">
                 <span className="flex-1">
-                  Connection error: {connectionState.error}
+                  Connection error: {error}
                 </span>
                 <Button
                   variant="ghost"

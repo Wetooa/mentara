@@ -52,8 +52,16 @@ export function useMessagingWebSocket() {
   }, []);
 
   const joinConversation = useCallback((conversationId: string) => {
+    console.log('🚪 [WEBSOCKET DEBUG] Joining conversation room:', conversationId);
+    console.log('🚪 [WEBSOCKET DEBUG] Connection state:', connectionState);
     emitEvent('join_conversation', { conversationId });
-  }, []);
+    
+    // Listen for join confirmation
+    const unsubscribe = onEvent('conversation_joined', (data) => {
+      console.log('✅ [WEBSOCKET DEBUG] Successfully joined conversation room:', data);
+      unsubscribe();
+    });
+  }, [connectionState]);
 
   const leaveConversation = useCallback((conversationId: string) => {
     emitEvent('leave_conversation', { conversationId });
@@ -65,6 +73,8 @@ export function useMessagingWebSocket() {
 
   const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
     return onEvent('new_message', (data: { message: Message }) => {
+      console.log('🔍 [WEBSOCKET DEBUG] Raw new_message event received:', data);
+      console.log('🔍 [WEBSOCKET DEBUG] Message data:', data.message);
       callback(data.message);
     });
   }, []);
@@ -85,10 +95,17 @@ export function useMessagingWebSocket() {
 
   // Auto-connect when authenticated and not connected
   useEffect(() => {
-    if (isAuthenticated && !connectionState.isConnected) {
+    console.log('🔐 [WEBSOCKET DEBUG] Auth state changed:', { 
+      isAuthenticated, 
+      isConnected: connectionState.isConnected,
+      isConnecting: connectionState.isConnecting 
+    });
+    
+    if (isAuthenticated && !connectionState.isConnected && !connectionState.isConnecting) {
+      console.log('🚀 [WEBSOCKET DEBUG] Attempting to connect...');
       connect();
     }
-  }, [isAuthenticated, connectionState.isConnected, connect]);
+  }, [isAuthenticated, connectionState.isConnected, connectionState.isConnecting, connect]);
 
   return {
     isConnected: connectionState.isConnected,

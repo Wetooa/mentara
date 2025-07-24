@@ -199,11 +199,12 @@ class SimpleWebSocket {
    */
   emit(event: string, data?: any): void {
     if (!this.socket?.connected) {
-      console.warn('⚠️ Cannot emit event - WebSocket not connected:', event);
+      console.warn('⚠️ [WEBSOCKET DEBUG] Cannot emit event - WebSocket not connected:', event, data);
+      console.warn('⚠️ [WEBSOCKET DEBUG] Socket state:', this.socket ? 'exists but not connected' : 'null');
       return;
     }
 
-    console.log('📤 Emitting event:', event, data);
+    console.log('📤 [WEBSOCKET DEBUG] Emitting event:', event, data);
     this.socket.emit(event, data);
   }
 
@@ -214,8 +215,14 @@ class SimpleWebSocket {
     const listener = { event, callback };
     this.eventListeners.push(listener);
 
+    // Add debugging for event subscriptions
+    console.log('📡 [WEBSOCKET DEBUG] Subscribing to event:', event);
+
     if (this.socket) {
-      this.socket.on(event, callback);
+      this.socket.on(event, (...args) => {
+        console.log('📨 [WEBSOCKET DEBUG] Event received:', event, args);
+        callback(...args);
+      });
     }
 
     // Return unsubscribe function
@@ -330,12 +337,13 @@ class SimpleWebSocket {
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('✅ WebSocket connected successfully');
+      console.log('✅ [WEBSOCKET DEBUG] Connected successfully to:', this.config.url + this.config.namespace);
+      console.log('✅ [WEBSOCKET DEBUG] Socket ID:', this.socket?.id);
       
       // Check for connection state recovery
       const recovered = (this.socket as any).recovered;
       if (recovered) {
-        console.log('🔄 Connection state recovered - no missed events');
+        console.log('🔄 [WEBSOCKET DEBUG] Connection state recovered - no missed events');
       }
       
       this.updateConnectionState({
