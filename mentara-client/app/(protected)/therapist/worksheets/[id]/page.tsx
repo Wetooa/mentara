@@ -66,7 +66,7 @@ function WorksheetDetailClient({ worksheetId }: { worksheetId: string }) {
           patientName:
             `${data.client.user.firstName} ${data.client.user.lastName}` ||
             "Unassigned",
-          date: data.createdAt,
+          date: data.dueDate,
           status: mapWorksheetStatusToTaskStatus(data.status),
           isCompleted:
             data.status === "REVIEWED" || data.status === "SUBMITTED",

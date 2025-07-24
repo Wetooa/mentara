@@ -42,6 +42,7 @@ export default function TherapistTaskDetailPage({
   const [editingWorksheet, setEditingWorksheet] = useState<Task | null>(null);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [editDateTimeError, setEditDateTimeError] = useState<string | null>(null);
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -136,10 +137,27 @@ export default function TherapistTaskDetailPage({
     setFilesToRemove((prev) => prev.filter((url) => url !== fileUrl));
   };
 
+  // Validation function for date and time in edit mode
+  const validateEditDateTime = (dateStr: string, timeStr: string): { isValid: boolean; error?: string } => {
+    if (!dateStr || !timeStr) {
+      return { isValid: false, error: "Both date and time are required." };
+    }
+
+    const selectedDateTime = new Date(`${dateStr}T${timeStr}`);
+    const now = new Date();
+
+    if (selectedDateTime <= now) {
+      return { isValid: false, error: "Due date and time must be in the future." };
+    }
+
+    return { isValid: true };
+  };
+
   const handleEditWorksheet = (worksheet: Task) => {
     setEditingWorksheet(worksheet);
     setFilesToRemove([]);
     setNewFiles([]);
+    setEditDateTimeError(null);
   };
 
   if (!task) {
@@ -377,13 +395,24 @@ export default function TherapistTaskDetailPage({
                     <form 
                       onSubmit={(e) => {
                         e.preventDefault();
+                        setEditDateTimeError(null);
                         const formData = new FormData(e.currentTarget);
                         const dueDateValue = formData.get('dueDate') as string;
+                        const dueTimeValue = formData.get('dueTime') as string;
+                        
+                        // Validate date and time if both are provided
+                        if (dueDateValue && dueTimeValue) {
+                          const dateTimeValidation = validateEditDateTime(dueDateValue, dueTimeValue);
+                          if (!dateTimeValidation.isValid) {
+                            setEditDateTimeError(dateTimeValidation.error!);
+                            return;
+                          }
+                        }
                         
                         const updateData = {
                           title: formData.get('title') as string,
                           instructions: formData.get('instructions') as string,
-                          dueDate: dueDateValue ? new Date(dueDateValue).toISOString() : undefined,
+                          dueDate: (dueDateValue && dueTimeValue) ? new Date(`${dueDateValue}T${dueTimeValue}`).toISOString() : undefined,
                         };
                         editWorksheetMutation.mutate({
                           worksheetId: editingWorksheet.id,
@@ -432,17 +461,38 @@ export default function TherapistTaskDetailPage({
                             />
                           </div>
                           
-                          <div className="space-y-2">
-                            <Label htmlFor="dueDate" className="text-sm font-medium text-gray-700">
+                          <div className="space-y-3">
+                            <Label className="text-sm font-medium text-gray-700">
                               Due Date & Time
                             </Label>
-                            <Input
-                              id="dueDate"
-                              name="dueDate"
-                              type="datetime-local"
-                              defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toISOString().slice(0, 16) : ''}
-                              className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
-                            />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div className="space-y-2">
+                                <Label htmlFor="editDueDate" className="text-xs font-medium text-gray-600">Date</Label>
+                                <Input
+                                  id="editDueDate"
+                                  name="dueDate"
+                                  type="date"
+                                  defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toISOString().split('T')[0] : ''}
+                                  min={new Date().toISOString().split('T')[0]}
+                                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                                  onChange={() => setEditDateTimeError(null)}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="editDueTime" className="text-xs font-medium text-gray-600">Time</Label>
+                                <Input
+                                  id="editDueTime"
+                                  name="dueTime"
+                                  type="time"
+                                  defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toTimeString().slice(0, 5) : ''}
+                                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                                  onChange={() => setEditDateTimeError(null)}
+                                />
+                              </div>
+                            </div>
+                            {editDateTimeError && (
+                              <p className="text-red-500 text-sm">{editDateTimeError}</p>
+                            )}
                           </div>
                         </div>
                       </div>

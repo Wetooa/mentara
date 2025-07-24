@@ -1,17 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '@/lib/api';
-import { useWelcomeRecommendations } from '@/hooks/therapist/useRecommendedTherapists';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useApi } from "@/lib/api";
+import {
+  useTherapistRecommendations,
+  useWelcomeRecommendations,
+} from "@/hooks/therapist/useRecommendedTherapists";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 // Removed unused import: Separator
 import {
-  // Heart, 
+  // Heart,
   Users,
   Sparkles,
   ArrowRight,
@@ -19,13 +22,13 @@ import {
   Clock,
   UserCheck,
   AlertCircle,
-  RefreshCw
-} from 'lucide-react';
-import { TherapistRecommendationCard } from '@/components/client/TherapistRecommendationCard';
-import { TherapistSelectionSummary } from '@/components/client/TherapistSelectionSummary';
-import { CommunityRecommendationCard } from '@/components/client/CommunityRecommendationCard';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
+  RefreshCw,
+} from "lucide-react";
+import { TherapistRecommendationCard } from "@/components/client/TherapistRecommendationCard";
+import { TherapistSelectionSummary } from "@/components/client/TherapistSelectionSummary";
+import { CommunityRecommendationCard } from "@/components/client/CommunityRecommendationCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 export default function ClientWelcomePage() {
   const router = useRouter();
@@ -34,7 +37,15 @@ export default function ClientWelcomePage() {
 
   const [selectedTherapists, setSelectedTherapists] = useState<string[]>([]);
   const [selectedCommunities, setSelectedCommunities] = useState<string[]>([]);
-  const [currentStep, setCurrentStep] = useState<'loading' | 'recommendations' | 'selection' | 'sending' | 'communities' | 'joining' | 'complete'>('loading');
+  const [currentStep, setCurrentStep] = useState<
+    | "loading"
+    | "recommendations"
+    | "selection"
+    | "sending"
+    | "communities"
+    | "joining"
+    | "complete"
+  >("loading");
 
   // Use unified hook for recommendations
   const {
@@ -45,7 +56,7 @@ export default function ClientWelcomePage() {
     refetch: refetchRecommendations,
     welcomeMessage,
     isFirstTime,
-    averageMatchScore
+    averageMatchScore,
   } = useWelcomeRecommendations();
 
   // Communities are now included in the main recommendations response
@@ -55,12 +66,16 @@ export default function ClientWelcomePage() {
     mutationFn: (therapistIds: string[]) =>
       api.therapists.createMatches({ therapistIds }),
     onSuccess: () => {
-      toast.success(`Successfully matched with ${selectedTherapists.length} therapist${selectedTherapists.length > 1 ? 's' : ''}!`);
-      queryClient.invalidateQueries({ queryKey: ['user', 'therapist-matches'] });
-      setCurrentStep('communities'); // Move to community recommendations
+      toast.success(
+        `Successfully matched with ${selectedTherapists.length} therapist${selectedTherapists.length > 1 ? "s" : ""}!`
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["user", "therapist-matches"],
+      });
+      setCurrentStep("communities"); // Move to community recommendations
     },
     onError: () => {
-      toast.error('Failed to create therapist matches. Please try again.');
+      toast.error("Failed to create therapist matches. Please try again.");
     },
   });
 
@@ -79,82 +94,93 @@ export default function ClientWelcomePage() {
         toast.warning(`Could not join ${failureCount} communities`);
       }
 
-      queryClient.invalidateQueries({ queryKey: ['user', 'communities'] });
-      setCurrentStep('complete');
+      queryClient.invalidateQueries({ queryKey: ["user", "communities"] });
+      setCurrentStep("complete");
 
       // Redirect to dashboard after a brief delay
       setTimeout(() => {
-        router.push('/client?tab=communities');
+        router.push("/client?tab=communities");
       }, 2000);
     },
     onError: () => {
-      toast.error('Failed to join communities. Please try again.');
+      toast.error("Failed to join communities. Please try again.");
     },
   });
 
   useEffect(() => {
     if (!recommendationsLoading && recommendedTherapists) {
       // Debug logging for received recommendations
-      console.log('[DEBUG] Welcome page received recommendations:', {
+      console.log("[DEBUG] Welcome page received recommendations:", {
         recommendationsCount: recommendedTherapists?.length || 0,
         communitiesCount: recommendedCommunities?.length || 0,
         hasWelcomeMessage: !!welcomeMessage,
       });
-      setCurrentStep('recommendations');
+      setCurrentStep("recommendations");
     }
-  }, [recommendationsLoading, recommendedTherapists, recommendedCommunities, welcomeMessage]);
+  }, [
+    recommendationsLoading,
+    recommendedTherapists,
+    recommendedCommunities,
+    welcomeMessage,
+  ]);
 
   const handleTherapistSelect = (therapistId: string, selected: boolean) => {
     if (selected) {
-      setSelectedTherapists(prev => [...prev, therapistId]);
+      setSelectedTherapists((prev) => [...prev, therapistId]);
     } else {
-      setSelectedTherapists(prev => prev.filter(id => id !== therapistId));
+      setSelectedTherapists((prev) => prev.filter((id) => id !== therapistId));
     }
   };
 
   const handleCommunitySelect = (communitySlug: string, selected: boolean) => {
     if (selected) {
-      setSelectedCommunities(prev => [...prev, communitySlug]);
+      setSelectedCommunities((prev) => [...prev, communitySlug]);
     } else {
-      setSelectedCommunities(prev => prev.filter(slug => slug !== communitySlug));
+      setSelectedCommunities((prev) =>
+        prev.filter((slug) => slug !== communitySlug)
+      );
     }
   };
 
   const handleCreateMatches = async () => {
     if (selectedTherapists.length === 0) {
-      toast.error('Please select at least one therapist');
+      toast.error("Please select at least one therapist");
       return;
     }
 
-    setCurrentStep('sending');
+    setCurrentStep("sending");
     await createMatchesMutation.mutateAsync(selectedTherapists);
   };
 
   const handleJoinCommunities = async () => {
     if (selectedCommunities.length === 0) {
       // User can skip community joining
-      setCurrentStep('complete');
-      router.push('/client');
+      setCurrentStep("complete");
+      router.push("/client");
       return;
     }
 
-    setCurrentStep('joining');
+    setCurrentStep("joining");
     await joinCommunitiesMutation.mutateAsync(selectedCommunities);
   };
 
   const handleSkipCommunities = () => {
-    setCurrentStep('complete');
-    router.push('/client');
+    setCurrentStep("complete");
+    router.push("/client");
   };
 
-  const handleSkipForNow = () => {
-    router.push('/client');
+  const handleSkipForNow = async () => {
+    await api.auth.client.markRecommendationsSeen();
+    toast.info(
+      "You can explore therapist recommendations later from your dashboard."
+    );
+    router.push("/client");
   };
 
   const maxSelections = 5;
   const selectionProgress = (selectedTherapists.length / maxSelections) * 100;
 
-  if (recommendationsLoading || currentStep === 'loading') {
+  if (recommendationsLoading || currentStep === "loading") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20">
         <div className="container mx-auto py-12 space-y-12">
@@ -172,7 +198,9 @@ export default function ClientWelcomePage() {
             <div className="space-y-4">
               <Skeleton className="h-12 w-80 mx-auto bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
               <Skeleton className="h-6 w-96 mx-auto bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
-              <p className="text-blue-600 font-medium animate-pulse">Discovering your perfect therapist matches...</p>
+              <p className="text-blue-600 font-medium animate-pulse">
+                Discovering your perfect therapist matches...
+              </p>
             </div>
 
             {/* Enhanced Loading Progress */}
@@ -189,7 +217,10 @@ export default function ClientWelcomePage() {
                 </div>
                 <div className="relative">
                   <div className="h-3 bg-gray-100/80 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"
+                      style={{ width: "60%" }}
+                    ></div>
                   </div>
                 </div>
                 <p className="text-xs text-center mt-2 text-gray-500">
@@ -202,7 +233,10 @@ export default function ClientWelcomePage() {
           {/* Enhanced Loading Cards */}
           <div className="space-y-6">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100/50 shadow-lg p-6">
+              <div
+                key={i}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100/50 shadow-lg p-6"
+              >
                 <div className="flex items-start gap-4">
                   <div className="flex flex-col items-center gap-3">
                     <Skeleton className="w-10 h-10 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
@@ -219,7 +253,10 @@ export default function ClientWelcomePage() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {Array.from({ length: 4 }).map((_, j) => (
-                        <Skeleton key={j} className="h-10 rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                        <Skeleton
+                          key={j}
+                          className="h-10 rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse"
+                        />
                       ))}
                     </div>
                   </div>
@@ -238,16 +275,26 @@ export default function ClientWelcomePage() {
         <Card className="max-w-md mx-auto">
           <CardContent className="p-8 text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Unable to Load Recommendations</h2>
+            <h2 className="text-xl font-semibold mb-2">
+              Unable to Load Recommendations
+            </h2>
             <p className="text-muted-foreground mb-4">
-              We&apos;re having trouble loading your therapist recommendations. Please try again.
+              We&apos;re having trouble loading your therapist recommendations.
+              Please try again.
             </p>
             <div className="space-y-2">
-              <Button onClick={() => refetchRecommendations()} className="w-full">
+              <Button
+                onClick={() => refetchRecommendations()}
+                className="w-full"
+              >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
-              <Button variant="outline" onClick={handleSkipForNow} className="w-full">
+              <Button
+                variant="outline"
+                onClick={handleSkipForNow}
+                className="w-full"
+              >
                 Continue to Dashboard
               </Button>
             </div>
@@ -260,9 +307,10 @@ export default function ClientWelcomePage() {
   // Community error handling removed since communities are included in main response
 
   // Show community recommendations step
-  if (currentStep === 'communities') {
+  if (currentStep === "communities") {
     const maxCommunitySelections = 5;
-    const communityProgress = (selectedCommunities.length / maxCommunitySelections) * 100;
+    const communityProgress =
+      (selectedCommunities.length / maxCommunitySelections) * 100;
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50/30 via-white to-blue-50/20">
@@ -290,8 +338,12 @@ export default function ClientWelcomePage() {
               </div>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
                 Based on your assessment, we&apos;ve discovered
-                <span className="text-emerald-600 font-semibold"> meaningful communities</span> where you can connect with others
-                who truly understand your journey. Select the communities you&apos;d like to join.
+                <span className="text-emerald-600 font-semibold">
+                  {" "}
+                  meaningful communities
+                </span>{" "}
+                where you can connect with others who truly understand your
+                journey. Select the communities you&apos;d like to join.
               </p>
             </div>
 
@@ -319,7 +371,9 @@ export default function ClientWelcomePage() {
                 </div>
                 {communityProgress > 0 && (
                   <p className="text-xs text-center mt-2 text-gray-500">
-                    Excellent choices! {selectedCommunities.length > 0 && `${Math.round(communityProgress)}% complete`}
+                    Excellent choices!{" "}
+                    {selectedCommunities.length > 0 &&
+                      `${Math.round(communityProgress)}% complete`}
                   </p>
                 )}
               </div>
@@ -338,9 +392,12 @@ export default function ClientWelcomePage() {
                         <Users className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900">Personalized Community Matches</h3>
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Personalized Community Matches
+                        </h3>
                         <p className="text-gray-600 font-medium">
-                          Found {recommendedCommunities?.length || 0} meaningful communities based on your unique assessment
+                          Found {recommendedCommunities?.length || 0} meaningful
+                          communities based on your unique assessment
                         </p>
                       </div>
                     </div>
@@ -352,15 +409,21 @@ export default function ClientWelcomePage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
                       <CheckCircle className="h-5 w-5 text-green-600" />
-                      <span className="font-medium text-gray-700">Smart assessment matching</span>
+                      <span className="font-medium text-gray-700">
+                        Smart assessment matching
+                      </span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
                       <Users className="h-5 w-5 text-green-600" />
-                      <span className="font-medium text-gray-700">Supportive communities</span>
+                      <span className="font-medium text-gray-700">
+                        Supportive communities
+                      </span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
                       <CheckCircle className="h-5 w-5 text-green-600" />
-                      <span className="font-medium text-gray-700">Instant joining available</span>
+                      <span className="font-medium text-gray-700">
+                        Instant joining available
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -374,7 +437,9 @@ export default function ClientWelcomePage() {
                     community={community}
                     rank={index + 1}
                     isSelected={selectedCommunities.includes(community.slug)}
-                    onSelect={(selected) => handleCommunitySelect(community.slug, selected)}
+                    onSelect={(selected) =>
+                      handleCommunitySelect(community.slug, selected)
+                    }
                     showMatchExplanation={true}
                     disabled={
                       !selectedCommunities.includes(community.slug) &&
@@ -389,12 +454,13 @@ export default function ClientWelcomePage() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold mb-1">Ready to join communities?</h3>
+                      <h3 className="font-semibold mb-1">
+                        Ready to join communities?
+                      </h3>
                       <p className="text-sm text-muted-foreground">
                         {selectedCommunities.length > 0
                           ? `You've selected ${selectedCommunities.length} communities to join`
-                          : "You can skip this step if you prefer to explore communities later"
-                        }
+                          : "You can skip this step if you prefer to explore communities later"}
                       </p>
                     </div>
                     <div className="flex gap-3">
@@ -403,10 +469,13 @@ export default function ClientWelcomePage() {
                       </Button>
                       <Button
                         onClick={handleJoinCommunities}
-                        disabled={joinCommunitiesMutation.isPending || currentStep === 'joining'}
+                        disabled={
+                          joinCommunitiesMutation.isPending ||
+                          currentStep === "joining"
+                        }
                         className="min-w-32"
                       >
-                        {currentStep === 'joining' ? (
+                        {currentStep === "joining" ? (
                           <>
                             <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                             Joining...
@@ -417,7 +486,7 @@ export default function ClientWelcomePage() {
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </>
                         ) : (
-                          'Continue to Dashboard'
+                          "Continue to Dashboard"
                         )}
                       </Button>
                     </div>
@@ -430,10 +499,12 @@ export default function ClientWelcomePage() {
             <Card className="max-w-md mx-auto">
               <CardContent className="p-8 text-center">
                 <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No Community Recommendations</h2>
+                <h2 className="text-xl font-semibold mb-2">
+                  No Community Recommendations
+                </h2>
                 <p className="text-muted-foreground mb-4">
-                  We don&apos;t have any community recommendations available at the moment.
-                  You can explore communities from your dashboard.
+                  We don&apos;t have any community recommendations available at
+                  the moment. You can explore communities from your dashboard.
                 </p>
                 <Button onClick={handleSkipCommunities} className="w-full">
                   <ArrowRight className="h-4 w-4 mr-2" />
@@ -448,7 +519,7 @@ export default function ClientWelcomePage() {
   }
 
   // Show completion step
-  if (currentStep === 'complete') {
+  if (currentStep === "complete") {
     return (
       <div className="container mx-auto py-8">
         <Card className="max-w-md mx-auto">
@@ -458,7 +529,8 @@ export default function ClientWelcomePage() {
             </div>
             <h2 className="text-2xl font-semibold mb-2">Welcome Complete!</h2>
             <p className="text-muted-foreground mb-4">
-              You&apos;ve successfully set up your Mentara account. We&apos;re redirecting you to your dashboard.
+              You&apos;ve successfully set up your Mentara account. We&apos;re
+              redirecting you to your dashboard.
             </p>
             <div className="animate-pulse">
               <RefreshCw className="h-5 w-5 mx-auto animate-spin text-primary" />
@@ -494,9 +566,14 @@ export default function ClientWelcomePage() {
               <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
             </div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
-              Based on your personalized assessment, we&apos;ve discovered therapists who are
-              <span className="text-blue-600 font-semibold"> perfectly matched</span> to your unique needs.
-              Select up to {maxSelections} therapists you&apos;d like to connect with.
+              Based on your personalized assessment, we&apos;ve discovered
+              therapists who are
+              <span className="text-blue-600 font-semibold">
+                {" "}
+                perfectly matched
+              </span>{" "}
+              to your unique needs. Select up to {maxSelections} therapists
+              you&apos;d like to connect with.
             </p>
           </div>
 
@@ -524,7 +601,9 @@ export default function ClientWelcomePage() {
               </div>
               {selectionProgress > 0 && (
                 <p className="text-xs text-center mt-2 text-gray-500">
-                  Great progress! {selectedTherapists.length > 0 && `${Math.round(selectionProgress)}% complete`}
+                  Great progress!{" "}
+                  {selectedTherapists.length > 0 &&
+                    `${Math.round(selectionProgress)}% complete`}
                 </p>
               )}
             </div>
@@ -543,9 +622,12 @@ export default function ClientWelcomePage() {
                       <Users className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">Personalized Matches</h3>
+                      <h3 className="text-xl font-bold text-gray-900">
+                        Personalized Matches
+                      </h3>
                       <p className="text-gray-600 font-medium">
-                        Found {recommendedTherapists?.length || 0} exceptional therapists matching your unique preferences
+                        Found {recommendedTherapists?.length || 0} exceptional
+                        therapists matching your unique preferences
                       </p>
                     </div>
                   </div>
@@ -557,15 +639,21 @@ export default function ClientWelcomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-gray-700">AI-powered matching</span>
+                    <span className="font-medium text-gray-700">
+                      AI-powered matching
+                    </span>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
                     <UserCheck className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-gray-700">Verified professionals</span>
+                    <span className="font-medium text-gray-700">
+                      Verified professionals
+                    </span>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
                     <Clock className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-gray-700">Available for sessions</span>
+                    <span className="font-medium text-gray-700">
+                      Available for sessions
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -579,7 +667,9 @@ export default function ClientWelcomePage() {
                   therapist={therapist}
                   rank={index + 1}
                   isSelected={selectedTherapists.includes(therapist.id)}
-                  onSelect={(selected) => handleTherapistSelect(therapist.id, selected)}
+                  onSelect={(selected) =>
+                    handleTherapistSelect(therapist.id, selected)
+                  }
                   showMatchExplanation={true}
                   disabled={
                     !selectedTherapists.includes(therapist.id) &&
@@ -596,7 +686,9 @@ export default function ClientWelcomePage() {
                 therapists={recommendedTherapists || []}
                 onSendRequests={handleCreateMatches}
                 onSkipForNow={handleSkipForNow}
-                isLoading={createMatchesMutation.isPending || currentStep === 'sending'}
+                isLoading={
+                  createMatchesMutation.isPending || currentStep === "sending"
+                }
               />
             )}
 
@@ -604,9 +696,12 @@ export default function ClientWelcomePage() {
             {selectedTherapists.length === 0 && (
               <Card>
                 <CardContent className="p-6 text-center">
-                  <h3 className="font-semibold mb-2">Not ready to choose yet?</h3>
+                  <h3 className="font-semibold mb-2">
+                    Not ready to choose yet?
+                  </h3>
                   <p className="text-muted-foreground mb-4">
-                    You can always find and connect with therapists from your dashboard later.
+                    You can always find and connect with therapists from your
+                    dashboard later.
                   </p>
                   <Button variant="outline" onClick={handleSkipForNow}>
                     Continue to Dashboard
@@ -620,12 +715,18 @@ export default function ClientWelcomePage() {
           <Card className="max-w-md mx-auto">
             <CardContent className="p-8 text-center">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">No Recommendations Available</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                No Recommendations Available
+              </h2>
               <p className="text-muted-foreground mb-4">
-                We don&apos;t have any therapist recommendations available at the moment.
-                You can browse all available therapists from your dashboard.
+                We don&apos;t have any therapist recommendations available at
+                the moment. You can browse all available therapists from your
+                dashboard.
               </p>
-              <Button onClick={() => router.push('/client/therapist')} className="w-full">
+              <Button
+                onClick={() => router.push("/client/therapist")}
+                className="w-full"
+              >
                 <ArrowRight className="h-4 w-4 mr-2" />
                 Browse All Therapists
               </Button>

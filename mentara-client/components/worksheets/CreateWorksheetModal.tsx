@@ -29,6 +29,8 @@ export default function CreateWorksheetModal({
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [dueTime, setDueTime] = useState("");
+  const [dateTimeError, setDateTimeError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [materials, setMaterials] = useState<File[]>([]);
@@ -63,9 +65,11 @@ export default function CreateWorksheetModal({
       setTitle("");
       setInstructions("");
       setDueDate("");
+      setDueTime("");
       setSelectedPatient("");
       setMaterials([]);
       setMaterialErrors(null);
+      setDateTimeError(null);
       toast.success("Worksheet created successfully!");
       onClose();
     },
@@ -152,21 +156,47 @@ export default function CreateWorksheetModal({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  // Validation function for date and time
+  const validateDateTime = (dateStr: string, timeStr: string): { isValid: boolean; error?: string } => {
+    if (!dateStr || !timeStr) {
+      return { isValid: false, error: "Both date and time are required." };
+    }
+
+    const selectedDateTime = new Date(`${dateStr}T${timeStr}`);
+    const now = new Date();
+
+    if (selectedDateTime <= now) {
+      return { isValid: false, error: "Due date and time must be in the future." };
+    }
+
+    return { isValid: true };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     setMaterialErrors(null);
-    if (!title || !selectedPatient || !dueDate) {
+    setDateTimeError(null);
+    
+    if (!title || !selectedPatient || !dueDate || !dueTime) {
       setFormError("Please fill in all required fields.");
       return;
     }
+    
+    // Validate date and time
+    const dateTimeValidation = validateDateTime(dueDate, dueTime);
+    if (!dateTimeValidation.isValid) {
+      setDateTimeError(dateTimeValidation.error!);
+      return;
+    }
+    
     if (!user?.id) {
       setFormError("Therapist ID not found. Please re-login.");
       return;
     }
     setSubmitting(true);
-    // Convert dueDate (YYYY-MM-DD) to ISO string (UTC midnight)
-    const dueDateISO = new Date(dueDate + 'T00:00:00Z').toISOString();
+    // Convert dueDate and dueTime to ISO string
+    const dueDateISO = new Date(`${dueDate}T${dueTime}`).toISOString();
 
     // Build FormData for multipart/form-data request
     const formData = new FormData();
@@ -251,17 +281,43 @@ export default function CreateWorksheetModal({
               )}
             </div>
 
-            {/* Due Date */}
-            <div className="space-y-2">
-              <Label htmlFor="dueDate">Due Date *</Label>
-              <Input
-                id="dueDate"
-                type="date"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-                required
-                disabled={submitting}
-              />
+            {/* Due Date and Time */}
+            <div className="space-y-4">
+              <Label>Due Date & Time *</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="dueDate" className="text-sm">Date</Label>
+                  <Input
+                    id="dueDate"
+                    type="date"
+                    value={dueDate}
+                    onChange={e => {
+                      setDueDate(e.target.value);
+                      setDateTimeError(null);
+                    }}
+                    min={new Date().toISOString().split('T')[0]}
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dueTime" className="text-sm">Time</Label>
+                  <Input
+                    id="dueTime"
+                    type="time"
+                    value={dueTime}
+                    onChange={e => {
+                      setDueTime(e.target.value);
+                      setDateTimeError(null);
+                    }}
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+              </div>
+              {dateTimeError && (
+                <p className="text-red-500 text-sm">{dateTimeError}</p>
+              )}
             </div>
 
             {/* Instructions */}
