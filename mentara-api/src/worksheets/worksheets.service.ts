@@ -651,4 +651,76 @@ export class WorksheetsService {
       },
     };
   }
+
+  async removeMaterialFile(
+    worksheetId: string,
+    fileUrl: string,
+    therapistId: string,
+  ) {
+    // Check if worksheet exists and belongs to the therapist
+    const worksheet = await this.prisma.worksheet.findUnique({
+      where: { id: worksheetId },
+    });
+
+    if (!worksheet) {
+      throw new NotFoundException(`Worksheet with ID ${worksheetId} not found`);
+    }
+
+    // Verify therapist ownership
+    if (worksheet.therapistId !== therapistId) {
+      throw new NotFoundException(`Worksheet with ID ${worksheetId} not found`);
+    }
+
+    // Find the file index by URL
+    const fileIndex = worksheet.materialUrls.findIndex(
+      (url) => url === fileUrl,
+    );
+
+    if (fileIndex === -1) {
+      throw new NotFoundException(`Material file not found in worksheet`);
+    }
+
+    // Get the filename before removing it
+    const filename = worksheet.materialNames[fileIndex] || 'Unknown';
+
+    // Remove the file from all arrays at the same index
+    const updatedFileUrls = [...worksheet.materialUrls];
+    const updatedFileNames = [...worksheet.materialNames];
+
+    updatedFileUrls.splice(fileIndex, 1);
+    updatedFileNames.splice(fileIndex, 1);
+
+    // Update the worksheet in the database
+    await this.prisma.worksheet.update({
+      where: { id: worksheetId },
+      data: {
+        materialUrls: updatedFileUrls,
+        materialNames: updatedFileNames,
+      },
+    });
+
+    // Delete the file from Supabase Storage
+    try {
+      if (fileUrl) {
+        await this.supabaseStorageService.deleteFile(
+          fileUrl,
+          SupabaseStorageService.getSupportedBuckets().WORKSHEETS,
+        );
+      }
+    } catch (error) {
+      // Log error but don't fail the operation if storage deletion fails
+      console.error(`Failed to delete material file from storage: ${error.message}`);
+    }
+
+    return {
+      success: true,
+      message: `Material file "${filename}" removed successfully`,
+      data: {
+        worksheetId,
+        filename,
+        fileUrl,
+        remainingFiles: updatedFileNames.length,
+      },
+    };
+  }
 }

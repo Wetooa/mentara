@@ -285,6 +285,19 @@ export function createTherapistService(axios: AxiosInstance) {
         );
         return data;
       },
+
+      /**
+       * Remove reference file from worksheet
+       */
+      async removeReferenceFile(worksheetId: string, fileUrl: string) {
+        const { data } = await axios.delete(
+          `/therapist/worksheets/${worksheetId}/reference-file`,
+          {
+            data: { fileUrl },
+          }
+        );
+        return data;
+      },
     },
   };
 }
