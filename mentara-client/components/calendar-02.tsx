@@ -375,3 +375,262 @@ export default function AppointmentCalendar({
     </div>
   );
 }
+
+/**
+ * Google Calendar-like view with clickable meeting cards
+ */
+export function GoogleCalendarView({
+  meetings = [],
+  selected,
+  onSelect,
+  onDateClick,
+  className,
+  onMeetingClick,
+}: AppointmentCalendarProps & {
+  onMeetingClick?: (meeting: Meeting) => void;
+}) {
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
+    selected || new Date()
+  );
+  const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date());
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      onSelect?.(date);
+      onDateClick?.(date);
+    }
+  };
+
+  const handleDayClick = (date: Date) => {
+    handleDateSelect(date);
+  };
+
+  const handleMeetingClick = (meeting: Meeting, event: React.MouseEvent) => {
+    event.stopPropagation();
+    onMeetingClick?.(meeting);
+  };
+
+  // Get calendar days for the current month
+  const getCalendarDays = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const calendarStart = startOfWeek(monthStart);
+    const calendarEnd = endOfWeek(monthEnd);
+
+    return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+  };
+
+  const calendarDays = getCalendarDays();
+
+  // Get meetings by date for calendar display
+  const meetingsByDate = React.useMemo(() => {
+    const map = new Map<string, Meeting[]>();
+    meetings.forEach((meeting) => {
+      try {
+        const date = new Date(meeting.startTime);
+        const dateKey = format(date, "yyyy-MM-dd");
+        if (!map.has(dateKey)) {
+          map.set(dateKey, []);
+        }
+        map.get(dateKey)!.push(meeting);
+      } catch {
+        // Skip invalid dates
+      }
+    });
+    return map;
+  }, [meetings]);
+
+  const formatTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Invalid time";
+      return format(date, "h:mm a");
+    } catch {
+      return "Invalid time";
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case "SCHEDULED":
+        return "bg-blue-500";
+      case "CONFIRMED":
+        return "bg-green-500";
+      case "IN_PROGRESS":
+        return "bg-yellow-500";
+      case "COMPLETED":
+        return "bg-gray-500";
+      case "CANCELLED":
+        return "bg-red-500";
+      default:
+        return "bg-blue-500";
+    }
+  };
+
+  const getStatusBorder = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case "SCHEDULED":
+        return "border-blue-200 bg-blue-50";
+      case "CONFIRMED":
+        return "border-green-200 bg-green-50";
+      case "IN_PROGRESS":
+        return "border-yellow-200 bg-yellow-50";
+      case "COMPLETED":
+        return "border-gray-200 bg-gray-50";
+      case "CANCELLED":
+        return "border-red-200 bg-red-50";
+      default:
+        return "border-blue-200 bg-blue-50";
+    }
+  };
+
+  return (
+    <div className={`h-full ${className || ""}`}>
+      <Card className="shadow-sm border-0 bg-gradient-to-br from-white to-gray-50/50 h-full">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900">
+            {format(currentMonth, "MMMM yyyy")}
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setCurrentMonth(
+                  (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1)
+                )
+              }
+              className="h-8 w-8 p-0 hover:bg-teal-50 hover:border-teal-200 transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentMonth(new Date())}
+              className="px-3 h-8 hover:bg-teal-50 hover:border-teal-200 transition-colors text-xs"
+            >
+              Today
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setCurrentMonth(
+                  (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1)
+                )
+              }
+              className="h-8 w-8 p-0 hover:bg-teal-50 hover:border-teal-200 transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 flex-1 overflow-hidden">
+          <div className="h-full flex flex-col">
+            {/* Week days header */}
+            <div className="grid grid-cols-7 gap-px mb-2 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                <div
+                  key={day}
+                  className="h-10 bg-gray-50 flex items-center justify-center text-sm font-medium text-gray-600"
+                >
+                  <span className="hidden sm:inline">{day}</span>
+                  <span className="sm:hidden">{day.slice(0, 1)}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar days grid - Google Calendar style */}
+            <div 
+              className="grid grid-cols-7 gap-px flex-1 bg-gray-200 rounded-lg overflow-hidden"
+              style={{ 
+                minHeight: '0',
+                gridTemplateRows: `repeat(${Math.ceil(calendarDays.length / 7)}, minmax(120px, 1fr))`
+              }}
+            >
+              {calendarDays.map((date, index) => {
+                const dateKey = format(date, "yyyy-MM-dd");
+                const dayMeetings = (meetingsByDate.get(dateKey) || []).sort(
+                  (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+                );
+                const isSelectedDate =
+                  selectedDate && isSameDay(date, selectedDate);
+                const isTodayDate = isToday(date);
+                const isCurrentMonth = isSameMonth(date, currentMonth);
+
+                return (
+                  <div
+                    key={index}
+                    className={`
+                      relative bg-white h-full p-1 sm:p-2
+                      ${!isCurrentMonth ? "bg-gray-50" : ""}
+                      ${isSelectedDate ? "bg-teal-50 ring-2 ring-teal-200 ring-inset" : ""}
+                      hover:bg-gray-50 transition-colors cursor-pointer
+                      flex flex-col
+                    `}
+                    onClick={() => handleDayClick(date)}
+                  >
+                    {/* Date number */}
+                    <div className="flex items-center justify-between mb-1">
+                      <span
+                        className={`
+                          text-xs sm:text-sm font-medium
+                          ${!isCurrentMonth ? "text-gray-400" : "text-gray-700"}
+                          ${isTodayDate ? "bg-teal-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-semibold" : ""}
+                        `}
+                      >
+                        {date.getDate()}
+                      </span>
+                      {dayMeetings.length > 3 && (
+                        <span className="text-[10px] text-gray-500 font-medium">
+                          +{dayMeetings.length - 3}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Meeting cards */}
+                    <div className="space-y-1 overflow-hidden">
+                      {dayMeetings.slice(0, 3).map((meeting) => (
+                        <div
+                          key={meeting.id}
+                          onClick={(e) => handleMeetingClick(meeting, e)}
+                          className={`
+                            group relative text-[10px] sm:text-xs px-1 py-0.5 rounded cursor-pointer 
+                            border transition-all duration-200 hover:shadow-sm hover:scale-105
+                            ${getStatusBorder(meeting.status)}
+                          `}
+                        >
+                          <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l ${getStatusColor(meeting.status)}`} />
+                          <div className="pl-1 truncate">
+                            <div className="font-medium truncate">
+                              {meeting.title || "Therapy Session"}
+                            </div>
+                            <div className="text-gray-600 truncate">
+                              {formatTime(meeting.startTime)}
+                              {(meeting.therapistName || meeting.clientName) && (
+                                <span className="ml-1">
+                                  • {meeting.therapistName || meeting.clientName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Status indicator */}
+                          <div className="absolute right-1 top-1">
+                            <div className={`w-2 h-2 rounded-full ${getStatusColor(meeting.status)}`} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

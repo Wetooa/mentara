@@ -1,374 +1,295 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-// Alert components not used in this page
+import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import {
   Calendar,
+  BarChart3,
+  Inbox,
   Clock,
-  Video,
-  User,
   Settings,
-  Eye,
-  Edit,
-  Trash2,
+  Users,
+  TrendingUp,
 } from "lucide-react";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { GoogleCalendarView } from "@/components/calendar-02";
+import { MeetingDetailsSheet } from "@/components/MeetingDetailsSheet";
+import { BookingRequestsTab } from "@/components/BookingRequestsTab";
+import { TherapistAnalyticsDashboard } from "@/components/TherapistAnalyticsDashboard";
+import { UpcomingSessionsToday } from "@/components/UpcomingSessionsToday";
 import { TherapistAvailabilityCalendar } from "@/components/therapist/TherapistAvailabilityCalendar";
-import { MeetingCalendar } from "@/components/calendar/MeetingCalendar";
-import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
-import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
-import { MeetingStatus } from "@/types/booking";
+import { useMeetings, useBookingRequests } from "@/hooks/booking/useBooking";
 import { toast } from "sonner";
 
+interface Meeting {
+  id: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  duration: number;
+  meetingUrl?: string;
+  notes?: string;
+  client?: {
+    userId: string;
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      profilePicture?: string;
+    };
+  };
+  therapist?: {
+    userId: string;
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      profilePicture?: string;
+    };
+    specialization?: string;
+  };
+}
+
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const headerVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
+
 export default function TherapistSchedulePage() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState("schedule");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
+  const [isMeetingSheetOpen, setIsMeetingSheetOpen] = useState(false);
 
-  // Format date for API
-  const dateString = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-
-  // Get meetings for the selected date
-  const { meetings, isLoading: meetingsLoading } = useMeetings({
-    limit: 50,
+  // Get meetings data
+  const { meetings, isLoading: meetingsLoading, refetch: refetchMeetings } = useMeetings({
+    limit: 100,
   });
 
-  // Get available slots for the selected date (to show availability)
-  const {
-    timeSlots,
-  } = useAvailableSlots("current-therapist", dateString); // In real app, get current therapist ID
-
-  // Get all upcoming meetings
-  const { meetings: allMeetings, isLoading: allMeetingsLoading } = useMeetings({
-    status: 'SCHEDULED,CONFIRMED,IN_PROGRESS',
-    limit: 20,
-  });
-
-  const { updateMeeting, cancelMeeting, isUpdating, isCancelling } = useBooking();
-
-  const handleUpdateMeetingStatus = async (meetingId: string, status: MeetingStatus) => {
-    try {
-      await updateMeeting(meetingId, { status });
-      toast.success("Meeting status updated");
-    } catch {
-      toast.error("Failed to update meeting status");
-    }
-  };
-
-  const handleCancelMeeting = async (meetingId: string) => {
-    if (confirm("Are you sure you want to cancel this meeting?")) {
-      try {
-        await cancelMeeting(meetingId);
-        toast.success("Meeting cancelled");
-      } catch {
-        toast.error("Failed to cancel meeting");
-      }
-    }
-  };
-
-  const getStatusBadge = (status: MeetingStatus) => {
-    switch (status) {
-      case MeetingStatus.SCHEDULED:
-        return <Badge variant="secondary">Scheduled</Badge>;
-      case MeetingStatus.CONFIRMED:
-        return <Badge variant="default">Confirmed</Badge>;
-      case MeetingStatus.IN_PROGRESS:
-        return <Badge variant="destructive">In Progress</Badge>;
-      case MeetingStatus.COMPLETED:
-        return <Badge variant="outline">Completed</Badge>;
-      case MeetingStatus.CANCELLED:
-        return <Badge variant="outline">Cancelled</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
-
-  const getMeetingTypeIcon = () => {
-    // All meetings are video-only now
-    return <Video className="h-4 w-4" />;
-  };
-
+  // Get booking requests data
+  const { bookingRequests } = useBookingRequests();
 
   const meetingsArray = Array.isArray(meetings) ? meetings : meetings?.meetings || [];
-  const todaysMeetings = meetingsArray?.filter((meeting) => {
-    const meetingDate = new Date(meeting.startTime).toDateString();
-    return meetingDate === selectedDate.toDateString();
-  }) || [];
 
-  const allMeetingsArray = Array.isArray(allMeetings) ? allMeetings : allMeetings?.meetings || [];
-  const upcomingMeetings = allMeetingsArray?.filter((meeting) => {
-    const meetingDate = new Date(meeting.startTime);
-    return meetingDate >= new Date() && 
-           (meeting.status === "scheduled" || meeting.status === "confirmed");
-  }) || [];
+  const handleMeetingClick = (meeting: Meeting) => {
+    setSelectedMeeting(meeting);
+    setIsMeetingSheetOpen(true);
+  };
+
+  const handleMeetingUpdate = (updatedMeeting: Meeting) => {
+    setSelectedMeeting(updatedMeeting);
+    refetchMeetings();
+    toast.success("Meeting updated successfully");
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
+  const getTabBadgeCount = (tab: string) => {
+    switch (tab) {
+      case "requests":
+        return bookingRequests?.length || 0;
+      case "overview":
+        const todayMeetings = meetingsArray.filter((meeting) => {
+          try {
+            const today = new Date();
+            const meetingDate = new Date(meeting.startTime);
+            return (
+              meetingDate.toDateString() === today.toDateString() &&
+              (meeting.status === "SCHEDULED" || meeting.status === "CONFIRMED")
+            );
+          } catch {
+            return false;
+          }
+        });
+        return todayMeetings.length;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Schedule Management</h1>
-          <p className="text-muted-foreground">
-            Manage your therapy sessions and availability
-          </p>
-        </div>
-        <Button onClick={() => setActiveTab("availability")}>
-          <Settings className="h-4 w-4 mr-2" />
-          Manage Availability
-        </Button>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="schedule">Today&apos;s Schedule</TabsTrigger>
-          <TabsTrigger value="availability">Manage Availability</TabsTrigger>
-          <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-          <TabsTrigger value="upcoming">All Upcoming</TabsTrigger>
-        </TabsList>
-
-        {/* Today&apos;s Schedule Tab */}
-        <TabsContent value="schedule" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Date Selector */}
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Select Date
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CalendarComponent
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => date && setSelectedDate(date)}
-                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0) - 86400000)}
-                    className="rounded-md border"
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Quick Stats */}
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Today&apos;s Overview</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Sessions</span>
-                    <span className="font-medium">{todaysMeetings.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Available Slots</span>
-                    <span className="font-medium">{timeSlots.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Revenue</span>
-                    <span className="font-medium">$320</span> {/* Placeholder */}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Today's Meetings */}
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Sessions for {selectedDate.toLocaleDateString()}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {meetingsLoading ? (
-                    <div className="space-y-4">
-                      {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-24 w-full" />
-                      ))}
-                    </div>
-                  ) : todaysMeetings.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Calendar className="h-12 w-12 mx-auto mb-2 opacity-30" />
-                      <p>No sessions scheduled for this date</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {todaysMeetings.map((meeting) => (
-                        <Card key={meeting.id} className="border border-gray-200">
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  {getMeetingTypeIcon()}
-                                  <div>
-                                    <h3 className="font-medium">
-                                      {meeting.title || "Therapy Session"}
-                                    </h3>
-                                    <div className="text-sm text-muted-foreground">
-                                      with {meeting.client?.user.firstName} {meeting.client?.user.lastName}
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                  <div className="flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {new Date(meeting.startTime).toLocaleTimeString([], {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })} ({meeting.duration} min)
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <User className="h-3 w-3" />
-                                    Client ID: {meeting.clientId?.slice(-6) || 'N/A'}
-                                  </div>
-                                </div>
-
-                                {meeting.description && (
-                                  <p className="mt-2 text-sm text-muted-foreground">
-                                    {meeting.description}
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="flex flex-col items-end gap-2">
-                                {getStatusBadge(meeting.status as unknown as MeetingStatus)}
-                                
-                                <div className="flex gap-1">
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="h-3 w-3" />
-                                  </Button>
-                                  <Button variant="outline" size="sm">
-                                    <Edit className="h-3 w-3" />
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleCancelMeeting(meeting.id)}
-                                    disabled={isCancelling}
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-
-                                {meeting.status === 'scheduled' && (
-                                  <Button 
-                                    size="sm"
-                                    onClick={() => handleUpdateMeetingStatus(meeting.id, MeetingStatus.CONFIRMED)}
-                                    disabled={isUpdating}
-                                  >
-                                    Confirm
-                                  </Button>
-                                )}
-
-                                {meeting.status === 'confirmed' && (
-                                  <Button 
-                                    size="sm"
-                                    onClick={() => handleUpdateMeetingStatus(meeting.id, MeetingStatus.IN_PROGRESS)}
-                                    disabled={isUpdating}
-                                  >
-                                    Start Session
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="min-h-screen bg-gradient-to-br from-gray-50 to-white"
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        {/* Enhanced Page Header */}
+        <motion.div
+          variants={headerVariants}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        >
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
+              Schedule Management
+            </h1>
+            <p className="text-gray-600 text-base sm:text-lg">
+              Comprehensive practice management and session coordination
+            </p>
           </div>
-        </TabsContent>
+          <div className="flex items-center gap-3">
+            {bookingRequests?.length > 0 && (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                onClick={() => setActiveTab("requests")}
+                className="flex items-center gap-2 px-3 py-2 bg-orange-100 text-orange-800 rounded-lg cursor-pointer"
+              >
+                <Inbox className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {bookingRequests.length} Pending Request{bookingRequests.length !== 1 ? "s" : ""}
+                </span>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
 
-        {/* Availability Management Tab */}
-        <TabsContent value="availability" className="space-y-6">
-          <TherapistAvailabilityCalendar />
-        </TabsContent>
-
-        {/* Calendar View Tab */}
-        <TabsContent value="calendar" className="space-y-6">
-          <MeetingCalendar
-            title="Schedule Calendar"
-            showHeader={true}
-            showStats={true}
-            hoverDelay={3000}
-            onDateSelect={(date) => {
-              setSelectedDate(date);
-              setActiveTab("schedule");
-            }}
-            className="max-w-6xl mx-auto"
-          />
-        </TabsContent>
-
-        {/* All Upcoming Tab */}
-        <TabsContent value="upcoming" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                All Upcoming Sessions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {allMeetingsLoading ? (
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-20 w-full" />
-                  ))}
-                </div>
-              ) : upcomingMeetings.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="h-12 w-12 mx-auto mb-2 opacity-30" />
-                  <p>No upcoming sessions</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {upcomingMeetings.map((meeting) => (
-                    <Card key={meeting.id} className="border border-gray-200">
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {getMeetingTypeIcon()}
-                            <div>
-                              <div className="font-medium">
-                                {meeting.title || "Therapy Session"}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {meeting.client?.user.firstName} {meeting.client?.user.lastName}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-4">
-                            <div className="text-sm text-muted-foreground text-right">
-                              <div>{new Date(meeting.startTime).toLocaleDateString()}</div>
-                              <div>
-                                {new Date(meeting.startTime).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </div>
-                            </div>
-                            {getStatusBadge(meeting.status as unknown as MeetingStatus)}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+        {/* Enhanced Tab Navigation */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-5 h-14 p-1 bg-white/80 backdrop-blur border shadow-sm">
+            <TabsTrigger
+              value="overview"
+              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+            >
+              <Clock className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+              {getTabBadgeCount("overview") > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 min-w-5 text-xs">
+                  {getTabBadgeCount("overview")}
+                </Badge>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+            </TabsTrigger>
+            <TabsTrigger
+              value="schedule"
+              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+            >
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Schedule</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="requests"
+              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+            >
+              <Inbox className="h-4 w-4" />
+              <span className="hidden sm:inline">Requests</span>
+              {getTabBadgeCount("requests") > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 min-w-5 text-xs">
+                  {getTabBadgeCount("requests")}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="analytics"
+              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="availability"
+              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Availability</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab - Today's Sessions & Quick Stats */}
+          <TabsContent value="overview" className="space-y-6 pt-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <UpcomingSessionsToday
+                meetings={meetingsArray}
+                onMeetingUpdate={handleMeetingUpdate}
+              />
+            </motion.div>
+          </TabsContent>
+
+          {/* Schedule Tab - Google Calendar View */}
+          <TabsContent value="schedule" className="space-y-6 pt-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="h-[calc(100vh-280px)] min-h-[600px] max-h-[900px]"
+            >
+              <GoogleCalendarView
+                meetings={meetingsArray}
+                onMeetingClick={handleMeetingClick}
+                className="h-full"
+              />
+            </motion.div>
+          </TabsContent>
+
+          {/* Booking Requests Tab */}
+          <TabsContent value="requests" className="space-y-6 pt-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <BookingRequestsTab />
+            </motion.div>
+          </TabsContent>
+
+          {/* Analytics Tab - Revenue & Performance Dashboard */}
+          <TabsContent value="analytics" className="space-y-6 pt-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <TherapistAnalyticsDashboard />
+            </motion.div>
+          </TabsContent>
+
+          {/* Availability Management Tab */}
+          <TabsContent value="availability" className="space-y-6 pt-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <TherapistAvailabilityCalendar />
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Meeting Details Sheet */}
+        <MeetingDetailsSheet
+          meeting={selectedMeeting}
+          isOpen={isMeetingSheetOpen}
+          onClose={() => {
+            setIsMeetingSheetOpen(false);
+            setSelectedMeeting(null);
+          }}
+          onMeetingUpdate={handleMeetingUpdate}
+        />
+      </div>
+    </motion.div>
   );
 }
