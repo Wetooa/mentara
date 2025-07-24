@@ -123,3 +123,124 @@ export interface WorksheetStats {
   pending: number;
   overdue: number;
 }
+
+export interface UserInfo {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string;
+}
+
+export interface ClientInfo {
+  userId: string;
+  hasSeenTherapistRecommendations: boolean;
+  createdAt: string;
+  updatedAt: string;
+  user: UserInfo;
+}
+
+export interface TherapistInfo {
+  userId: string;
+  mobile: string;
+  province: string;
+  timezone: string;
+  status: string;
+  submissionDate: string;
+  processingDate: string;
+  processedByAdminId: string | null;
+  providerType: string;
+  professionalLicenseType: string;
+  isPRCLicensed: string;
+  prcLicenseNumber: string;
+  expirationDateOfLicense: string;
+  practiceStartDate: string;
+  licenseVerified: boolean;
+  licenseVerifiedAt: string | null;
+  licenseVerifiedBy: string | null;
+  certifications: string | null;
+  certificateUrls: string[];
+  certificateNames: string[];
+  licenseUrls: string[];
+  licenseNames: string[];
+  documentUrls: string[];
+  documentNames: string[];
+  yearsOfExperience: number | null;
+  educationBackground: string | null;
+  specialCertifications: string[];
+  practiceLocation: string | null;
+  acceptsInsurance: boolean;
+  acceptedInsuranceTypes: string[];
+  areasOfExpertise: string[];
+  assessmentTools: string[];
+  therapeuticApproachesUsedList: string[];
+  languagesOffered: string[];
+  providedOnlineTherapyBefore: boolean;
+  comfortableUsingVideoConferencing: boolean;
+  preferredSessionLength: number[];
+  privateConfidentialSpace: string;
+  compliesWithDataPrivacyAct: boolean;
+  professionalLiabilityInsurance: string;
+  complaintsOrDisciplinaryActions: string;
+  willingToAbideByPlatformGuidelines: boolean;
+  expertise: string[];
+  approaches: string[];
+  languages: string[];
+  illnessSpecializations: string[];
+  acceptTypes: string[];
+  treatmentSuccessRates: {
+    trauma: number;
+    anxiety: number;
+    depression: number;
+  };
+  sessionLength: string;
+  hourlyRate: string;
+  createdAt: string;
+  updatedAt: string;
+  user: UserInfo;
+}
+
+export interface WorksheetSubmissionInfo {
+  id: string;
+  worksheetId: string;
+  fileUrls: string[];
+  fileNames: string[];
+  fileSizes: number[];
+  submittedAt: string;
+  feedback: string | null;
+}
+
+export interface WorksheetMaterial {
+  id: string;
+  filename: string;
+  url: string;
+  fileType: string;
+  fileSize: number;
+}
+
+export interface WorksheetDetailDTO {
+  id: string;
+  clientId: string;
+  therapistId: string;
+  title: string;
+  instructions: string;
+  dueDate: string;
+  status: "ASSIGNED" | "SUBMITTED" | "REVIEWED" | "OVERDUE";
+  materialUrls: string[];
+  materialNames: string[];
+  createdAt: string;
+  updatedAt: string;
+  client: ClientInfo;
+  therapist: TherapistInfo;
+  submission: WorksheetSubmissionInfo | null;
+  materials: WorksheetMaterial[];
+}
+
+// Optional: Response wrapper if the API returns additional metadata
+export interface WorksheetDetailResponse {
+  worksheet: WorksheetDetailDTO;
+  assignment?: {
+    clientName: string;
+    assignedAt: string;
+  };
+  submission?: WorksheetSubmissionInfo;
+}
