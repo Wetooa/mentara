@@ -8,6 +8,7 @@ import CommentSection from "@/components/community/CommentSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -287,7 +288,7 @@ export default function TherapistCommunity() {
             </div>
 
             {/* Posts Content */}
-            <div className="flex-1 overflow-y-auto bg-neutral-50">
+            <ScrollArea className="flex-1 bg-neutral-50">
               <div className="max-w-4xl mx-auto p-6">
                 {postsLoading ? (
                   // Loading state
@@ -427,7 +428,7 @@ export default function TherapistCommunity() {
                   </div>
                 )}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         )}
           </ResizablePanel>
@@ -488,7 +489,7 @@ export default function TherapistCommunity() {
                   {selectedRoom?.name}
                 </h1>
               </div>
-              <div className="flex-1 min-h-0 overflow-y-auto bg-neutral-50">
+              <ScrollArea className="flex-1 min-h-0 bg-neutral-50">
                 <div className="p-4">
                   {postsLoading ? (
                     // Mobile Loading state
@@ -620,7 +621,7 @@ export default function TherapistCommunity() {
                     </div>
                   )}
                 </div>
-              </div>
+              </ScrollArea>
             </div>
           )}
         </div>
