@@ -3,7 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -15,6 +15,7 @@ import {
   Users,
   Search,
 } from "lucide-react";
+import { THERAPIST_HOVER, THERAPIST_TAP } from "@/lib/animations";
 import { useRouter } from "next/navigation";
 import { useMyTherapists } from "@/hooks/therapist/useMyTherapists";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,214 +34,161 @@ function ActiveTherapistCard({
   onMessage,
   onSchedule,
 }: ActiveTherapistCardProps) {
-  console.log("Therapist:", therapist);
-  const initials = `${therapist.firstName} ${therapist.lastName}`
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
+  // Generate therapist name and initials
+  const therapistName = `Dr. ${therapist.firstName} ${therapist.lastName}`;
+  const initials = `${therapist.firstName.charAt(0)}${therapist.lastName.charAt(0)}`;
 
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      transition={{ 
-        duration: 0.4, 
-        ease: [0.25, 0.25, 0, 1],
-        layout: { duration: 0.3 }
-      }}
-      whileHover={{ 
-        y: -8, 
-        transition: { duration: 0.2, ease: "easeOut" } 
-      }}
-      className="group"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={THERAPIST_HOVER.cardLift}
+      whileTap={THERAPIST_TAP.card}
     >
-      <Card className="overflow-hidden bg-gradient-to-br from-white via-white to-blue-50/30 border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-        {/* Healthcare Professional Header */}
-        <motion.div 
-          className="bg-gradient-to-r from-blue-500 via-teal-500 to-cyan-500 p-4"
-          whileHover={{ 
-            background: "linear-gradient(to right, rgb(59 130 246), rgb(20 184 166), rgb(6 182 212))",
-            transition: { duration: 0.3 }
-          }}
-        >
-          <div className="flex items-start gap-4">
-            <motion.div 
-              className="relative"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Avatar className="h-16 w-16 border-3 border-white shadow-lg">
-                <AvatarImage
-                  src={therapist.profileImage}
-                  alt={`${therapist.firstName} ${therapist.lastName}`}
-                />
-                <AvatarFallback className="bg-gradient-to-br from-white to-blue-50 text-blue-600 text-lg font-bold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              {/* Professional Status Indicator */}
+      <Card className="overflow-hidden border-l-4 border-l-blue-400 bg-gradient-to-r from-blue-50/30 to-white hover:shadow-lg transition-all duration-200">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+              {/* Therapist Avatar */}
               <motion.div 
-                className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 border-2 border-white rounded-full flex items-center justify-center"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="relative"
+                whileHover={THERAPIST_HOVER.subtle}
               >
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-              </motion.div>
-            </motion.div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <CardTitle className="text-xl font-bold text-white truncate">
-                  Dr. {`${therapist.firstName} ${therapist.lastName}`}
-                </CardTitle>
-                <p className="text-blue-100 font-medium text-sm">{therapist.title}</p>
-              </div>
-              <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 font-medium">
-                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                Active
-              </Badge>
-            </div>
-
-            {/* Professional Rating */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                <Star className="h-4 w-4 fill-yellow-300 text-yellow-300 mr-1" />
-                <span className="text-white font-semibold text-sm">
-                  4.8
-                </span>
-              </div>
-              <span className="text-blue-100 text-sm">
-                (127 reviews)
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <CardContent className="p-6 space-y-5">
-        {/* Professional Bio */}
-        {therapist.bio && (
-          <div className="bg-gray-50/80 rounded-lg p-4 border-l-4 border-l-teal-400">
-            <p className="text-gray-700 text-sm leading-relaxed line-clamp-3 italic">
-              &ldquo;{therapist.bio}&rdquo;
-            </p>
-          </div>
-        )}
-
-        {/* Clinical Specialties */}
-        {therapist.specialties && therapist.specialties.length > 0 && (
-          <div>
-            <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-              Clinical Specialties
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {therapist.specialties.slice(0, 4).map((specialty, index) => (
-                <Badge
-                  key={index}
-                  variant="outline"
-                  className="bg-gradient-to-r from-teal-50 to-blue-50 border-teal-200 text-teal-800 font-medium text-xs hover:from-teal-100 hover:to-blue-100 transition-colors"
+                <Avatar className="h-14 w-14 border-2 border-white shadow-md">
+                  <AvatarImage 
+                    src={therapist.profileImage} 
+                    alt={therapistName} 
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-teal-500 text-white font-semibold text-lg">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Active indicator */}
+                <motion.div 
+                  className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full flex items-center justify-center"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  {specialty}
-                </Badge>
-              ))}
-              {therapist.specialties.length > 4 && (
-                <Badge
-                  variant="outline"
-                  className="bg-gray-50 border-gray-200 text-gray-600 text-xs"
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </motion.div>
+              </motion.div>
+
+              {/* Therapist Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="font-bold text-lg text-gray-900 truncate">
+                    {therapistName}
+                  </h3>
+                  <motion.div whileHover={THERAPIST_HOVER.subtle}>
+                    <Badge 
+                      variant="secondary" 
+                      className="bg-green-100 text-green-800 border-green-200 flex-shrink-0"
+                    >
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                      Active
+                    </Badge>
+                  </motion.div>
+                </div>
+
+                <p className="text-sm text-gray-600 mb-2 font-medium">{therapist.title}</p>
+
+                {/* Specialties */}
+                {therapist.specialties && therapist.specialties.length > 0 && (
+                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                    {therapist.specialties.slice(0, 3).join(" • ")}
+                    {therapist.specialties.length > 3 &&
+                      ` • +${therapist.specialties.length - 3} more`}
+                  </p>
+                )}
+
+                {/* Experience, Rate, and Rating */}
+                <div className="flex items-center gap-2 sm:gap-4 text-sm text-gray-500 flex-wrap">
+                  <span className="flex items-center gap-1">
+                    <User className="h-3 w-3 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{therapist.experience || 8}+ years</span>
+                  </span>
+                  <span className="whitespace-nowrap">${therapist.hourlyRate}/hour</span>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <span className="whitespace-nowrap">4.8 (127 reviews)</span>
+                  </div>
+                </div>
+
+                {/* Connection status */}
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
+                  <p className="text-xs text-green-700 font-medium">
+                    Connected since {new Date().getFullYear() - 1}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:items-end gap-2 sm:ml-4 flex-shrink-0">
+              {/* Primary action - Schedule */}
+              <motion.div
+                whileHover={THERAPIST_HOVER.buttonLift}
+                whileTap={THERAPIST_TAP.button}
+              >
+                <Button
+                  size="sm"
+                  onClick={() => onSchedule(therapist.id)}
+                  className="w-full sm:min-w-[120px] sm:w-auto bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
                 >
-                  +{therapist.specialties.length - 4} more
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule
+                </Button>
+              </motion.div>
 
-        {/* Professional Details */}
-        <div className="grid grid-cols-2 gap-4 p-4 bg-gradient-to-r from-blue-50/50 to-teal-50/50 rounded-xl">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Experience</p>
-              <p className="text-sm font-semibold text-gray-800">{therapist.experience || 8}+ years</p>
+              {/* Secondary actions */}
+              <div className="flex gap-2 w-full sm:w-auto">
+                <motion.div 
+                  whileHover={THERAPIST_HOVER.buttonLift}
+                  whileTap={THERAPIST_TAP.button}
+                  className="flex-1 sm:flex-none"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onMessage(therapist.id)}
+                    className="w-full text-teal-600 border-teal-200 hover:bg-teal-50 hover:border-teal-300 transition-colors"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Message
+                  </Button>
+                </motion.div>
+                
+                <motion.div 
+                  whileHover={THERAPIST_HOVER.buttonLift}
+                  whileTap={THERAPIST_TAP.button}
+                  className="flex-1 sm:flex-none"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewProfile(therapist.id)}
+                    className="w-full text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                </motion.div>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <Clock className="h-4 w-4 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Session Rate</p>
-              <p className="text-sm font-semibold text-gray-800">${therapist.hourlyRate}/hour</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Professional Action Buttons */}
-        <motion.div 
-          className="grid grid-cols-3 gap-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.3 }}
-        >
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onViewProfile(therapist.id)}
-              className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
-            >
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ duration: 0.2 }}
-              >
-                <User className="h-4 w-4 mr-2" />
-              </motion.div>
-              <span className="text-xs font-medium">Profile</span>
-            </Button>
-          </motion.div>
-          
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onMessage(therapist.id)}
-              className="w-full border-teal-200 text-teal-700 hover:bg-teal-50 hover:border-teal-300 transition-all duration-200"
-            >
-              <motion.div
-                whileHover={{ scale: 1.1, x: 2 }}
-                transition={{ duration: 0.2 }}
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-              </motion.div>
-              <span className="text-xs font-medium">Message</span>
-            </Button>
-          </motion.div>
-          
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              size="sm"
-              onClick={() => onSchedule(therapist.id)}
-              className="w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
-            >
-              <motion.div
-                whileHover={{ scale: 1.15, y: -1 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-              </motion.div>
-              <span className="text-xs font-medium">Book</span>
-            </Button>
-          </motion.div>
-        </motion.div>
-      </CardContent>
-    </Card>
+          {/* Optional therapist bio preview */}
+          {therapist.bio && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <p className="text-sm text-gray-600 line-clamp-2 italic">
+                "{therapist.bio.substring(0, 120)}
+                {therapist.bio.length > 120 ? "..." : ""}"
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }
@@ -316,69 +264,34 @@ function EmptyTherapistState() {
 
 function LoadingSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="space-y-4">
       {Array.from({ length: 3 }).map((_, index) => (
-        <Card key={index} className="overflow-hidden bg-gradient-to-br from-white via-white to-blue-50/30 border-0 shadow-lg">
-          {/* Professional Header Skeleton */}
-          <div className="bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 p-4 animate-pulse">
-            <div className="flex items-start gap-4">
-              <div className="relative">
-                <Skeleton className="h-16 w-16 rounded-full bg-white/50" />
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white/50 rounded-full"></div>
-              </div>
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-5 w-32 bg-white/60" />
-                <Skeleton className="h-4 w-24 bg-white/50" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-6 w-16 rounded-full bg-white/50" />
+        <Card key={index} className="overflow-hidden border-l-4 border-l-gray-200 bg-gradient-to-r from-gray-50/30 to-white">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+              <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <div className="relative">
+                  <Skeleton className="h-14 w-14 rounded-full" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-200 rounded-full"></div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-48" />
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <CardContent className="p-6 space-y-5">
-            {/* Bio Skeleton */}
-            <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-l-gray-200">
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-
-            {/* Specialties Skeleton */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 bg-gray-200 rounded-full"></div>
-                <Skeleton className="h-4 w-24" />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Skeleton className="h-6 w-20 rounded-full" />
-                <Skeleton className="h-6 w-24 rounded-full" />
-                <Skeleton className="h-6 w-16 rounded-full" />
-              </div>
-            </div>
-
-            {/* Professional Details Skeleton */}
-            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="flex items-center gap-2">
-                <Skeleton className="w-8 h-8 rounded-full" />
-                <div>
-                  <Skeleton className="h-3 w-16 mb-1" />
-                  <Skeleton className="h-4 w-12" />
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-8 w-24" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-20" />
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Skeleton className="w-8 h-8 rounded-full" />
-                <div>
-                  <Skeleton className="h-3 w-16 mb-1" />
-                  <Skeleton className="h-4 w-12" />
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons Skeleton */}
-            <div className="grid grid-cols-3 gap-2">
-              <Skeleton className="h-8 rounded-lg" />
-              <Skeleton className="h-8 rounded-lg" />
-              <Skeleton className="h-8 rounded-lg" />
             </div>
           </CardContent>
         </Card>
@@ -486,9 +399,9 @@ export default function MyTherapistSection() {
         </div>
       </div>
 
-      {/* Professional Therapist Cards Grid with Staggered Animation */}
+      {/* Professional Therapist Cards with Staggered Animation */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        className="space-y-6"
         initial="hidden"
         animate="visible"
         variants={{

@@ -1004,6 +1004,291 @@ export class MeetingsService {
   }
 
   /**
+   * Get booking requests for therapist (SCHEDULED meetings awaiting approval)
+   */
+  async getBookingRequests(therapistId: string, limit = 10) {
+    this.logger.debug(
+      `getBookingRequests called for therapistId: ${therapistId}, limit: ${limit}`,
+    );
+
+    // Validate therapist exists
+    const therapistExists = await this.prisma.user.findUnique({
+      where: { id: therapistId },
+      include: {
+        therapist: { select: { userId: true } },
+      },
+    });
+
+    if (!therapistExists?.therapist) {
+      this.logger.warn(`Therapist not found: ${therapistId}`);
+      throw new NotFoundException('Therapist not found');
+    }
+
+    const meetings = await this.prisma.meeting.findMany({
+      where: {
+        therapistId,
+        status: 'SCHEDULED', // Booking requests are SCHEDULED meetings awaiting approval
+        startTime: { gte: new Date() }, // Only future meetings
+      },
+      include: {
+        client: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+        payments: {
+          include: {
+            paymentMethod: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
+        },
+      },
+      orderBy: { startTime: 'asc' },
+      take: limit,
+    });
+
+    this.logger.log(
+      `Found ${meetings.length} booking requests for therapist ${therapistId}`,
+    );
+
+    return meetings.map(meeting => this.transformSingleMeeting(meeting));
+  }
+
+  /**
+   * Accept a booking request with conflict validation
+   */
+  async acceptBookingRequest(meetingId: string, therapistId: string) {
+    this.logger.debug(
+      `acceptBookingRequest called for meetingId: ${meetingId}, therapistId: ${therapistId}`,
+    );
+
+    // Get the meeting to validate
+    const meeting = await this.prisma.meeting.findFirst({
+      where: {
+        id: meetingId,
+        therapistId,
+        status: 'SCHEDULED',
+      },
+      include: {
+        client: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!meeting) {
+      throw new NotFoundException('Booking request not found or already processed');
+    }
+
+    // Check for scheduling conflicts
+    const hasConflict = await this.checkSchedulingConflict(
+      therapistId,
+      new Date(meeting.startTime),
+      meeting.duration,
+      meetingId,
+    );
+
+    if (hasConflict) {
+      throw new BadRequestException(
+        'Cannot accept booking: time slot conflicts with existing confirmed meeting',
+      );
+    }
+
+    // Update meeting status to CONFIRMED
+    const updatedMeeting = await this.prisma.meeting.update({
+      where: { id: meetingId },
+      data: {
+        status: 'CONFIRMED',
+      },
+      include: {
+        client: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Emit meeting confirmed event
+    void this.eventBus.emit(
+      new MeetingConfirmedEvent({
+        meetingId,
+        clientId: meeting.clientId,
+        therapistId,
+        confirmedAt: new Date(),
+        startTime: meeting.startTime,
+        duration: meeting.duration,
+      }),
+    );
+
+    this.logger.log(`Booking request ${meetingId} accepted by therapist ${therapistId}`);
+    return this.transformSingleMeeting(updatedMeeting);
+  }
+
+  /**
+   * Deny a booking request
+   */
+  async denyBookingRequest(meetingId: string, therapistId: string, reason?: string) {
+    this.logger.debug(
+      `denyBookingRequest called for meetingId: ${meetingId}, therapistId: ${therapistId}`,
+    );
+
+    // Get the meeting to validate
+    const meeting = await this.prisma.meeting.findFirst({
+      where: {
+        id: meetingId,
+        therapistId,
+        status: 'SCHEDULED',
+      },
+    });
+
+    if (!meeting) {
+      throw new NotFoundException('Booking request not found or already processed');
+    }
+
+    // Update meeting status to CANCELLED
+    const updatedMeeting = await this.prisma.meeting.update({
+      where: { id: meetingId },
+      data: {
+        status: 'CANCELLED',
+      },
+      include: {
+        client: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Add denial reason to meeting notes if provided
+    if (reason) {
+      await this.prisma.meetingNotes.create({
+        data: {
+          id: `denial_${meetingId}_${Date.now()}`,
+          meetingId,
+          notes: `Booking request denied by therapist. Reason: ${reason}`,
+        },
+      });
+    }
+
+    // Emit meeting cancelled event
+    void this.eventBus.emit(
+      new MeetingCancelledEvent({
+        meetingId,
+        clientId: meeting.clientId,
+        therapistId,
+        cancelledBy: therapistId,
+        cancelledAt: new Date(),
+        cancellationReason: reason || 'Booking request denied by therapist',
+        originalStartTime: meeting.startTime,
+      }),
+    );
+
+    this.logger.log(`Booking request ${meetingId} denied by therapist ${therapistId}`);
+    return this.transformSingleMeeting(updatedMeeting);
+  }
+
+  /**
+   * Check for scheduling conflicts
+   */
+  private async checkSchedulingConflict(
+    therapistId: string,
+    startTime: Date,
+    duration: number,
+    excludeMeetingId?: string,
+  ): Promise<boolean> {
+    const endTime = new Date(startTime.getTime() + duration * 60000);
+
+    const conflictingMeetings = await this.prisma.meeting.findMany({
+      where: {
+        therapistId,
+        status: { in: ['CONFIRMED', 'IN_PROGRESS'] },
+        id: excludeMeetingId ? { not: excludeMeetingId } : undefined,
+        OR: [
+          // Meeting starts during the new meeting
+          {
+            startTime: {
+              gte: startTime,
+              lt: endTime,
+            },
+          },
+          // Meeting ends during the new meeting
+          {
+            startTime: {
+              lt: startTime,
+            },
+            // Calculate end time based on start time + duration
+            AND: [
+              {
+                startTime: {
+                  gte: new Date(startTime.getTime() - 4 * 60 * 60 * 1000), // 4 hours buffer for query optimization
+                },
+              },
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        startTime: true,
+        duration: true,
+      },
+    });
+
+    // Additional check for meetings that might overlap
+    const hasConflict = conflictingMeetings.some(meeting => {
+      const meetingEndTime = new Date(meeting.startTime.getTime() + meeting.duration * 60000);
+      return (
+        // New meeting starts during existing meeting
+        (startTime >= meeting.startTime && startTime < meetingEndTime) ||
+        // New meeting ends during existing meeting
+        (endTime > meeting.startTime && endTime <= meetingEndTime) ||
+        // New meeting completely encompasses existing meeting
+        (startTime <= meeting.startTime && endTime >= meetingEndTime)
+      );
+    });
+
+    this.logger.debug(
+      `Conflict check for therapist ${therapistId} at ${startTime.toISOString()}: ${hasConflict ? 'CONFLICT' : 'OK'}`,
+    );
+
+    return hasConflict;
+  }
+
+  /**
    * Helper method to transform meetings data
    */
   private transformMeetings(meetings: any[]) {
