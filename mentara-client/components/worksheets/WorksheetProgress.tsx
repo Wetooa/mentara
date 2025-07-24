@@ -84,29 +84,6 @@ export default function WorksheetProgress({
         </span>
       </div>
 
-      {/* Submission Details */}
-      {task.submittedAt && (
-        <div className="p-3 bg-green-50 rounded-lg">
-          <div className="flex items-center">
-            <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-            <div>
-              <p className="text-sm font-medium text-green-800">
-                Submitted successfully
-              </p>
-              <p className="text-xs text-green-600 mt-1">
-                {new Date(task.submittedAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Feedback Section */}
       {task.feedback && (
         <div className="p-3 bg-blue-50 rounded-lg">

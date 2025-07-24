@@ -6,9 +6,7 @@ import {
   useDashboardData,
   useRecentCommunications,
 } from "@/hooks/dashboard/useClientDashboard";
-import {
-  transformDashboardData,
-} from "@/lib/transformers/dashboardTransformer";
+import { transformDashboardData } from "@/lib/transformers/dashboardTransformer";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
@@ -34,7 +32,6 @@ export default function DashboardPage() {
     refetch: refetchDashboard,
   } = useDashboardData();
 
-
   const { data: communicationsData, isLoading: isCommunicationsLoading } =
     useRecentCommunications();
 
@@ -45,7 +42,7 @@ export default function DashboardPage() {
     }
 
     // DEBUG: Log raw API data to trace dateString.split error
-    console.log('🔍 Dashboard API Data:', {
+    console.log("🔍 Dashboard API Data:", {
       dashboardApiData: JSON.stringify(dashboardApiData, null, 2),
       communicationsData: JSON.stringify(communicationsData, null, 2),
     });
@@ -56,28 +53,30 @@ export default function DashboardPage() {
         Array.isArray(communicationsData) ? communicationsData : []
       );
 
-      console.log('✅ Dashboard data transformed successfully:', transformedData);
+      console.log(
+        "✅ Dashboard data transformed successfully:",
+        transformedData
+      );
       return transformedData;
     } catch (error) {
-      console.error('❌ Error transforming dashboard data:', error);
-      console.error('❌ Error stack:', error.stack);
+      console.error("❌ Error transforming dashboard data:", error);
+      console.error("❌ Error stack:", error.stack);
       throw error; // Re-throw to trigger error boundary
     }
   }, [dashboardApiData, communicationsData]);
 
-  const isLoading =
-    isDashboardLoading || isCommunicationsLoading;
+  const isLoading = isDashboardLoading || isCommunicationsLoading;
 
   const handleMessageTherapist = () => {
-    router.push('/client/messages');
+    router.push("/client/messages");
   };
 
   const handleScheduleSession = () => {
-    router.push('/client/booking');
+    router.push("/client/booking");
   };
 
   const handleViewAllMessages = () => {
-    router.push('/client/messages');
+    router.push("/client/messages");
   };
 
   const handleContactSelect = (contactId: string) => {
@@ -85,7 +84,7 @@ export default function DashboardPage() {
   };
 
   const handleBookSession = () => {
-    router.push('/client/booking');
+    router.push("/client/booking");
   };
 
   const handleRetry = () => {
@@ -94,23 +93,23 @@ export default function DashboardPage() {
 
   // Navigation handlers for clickable dashboard cards
   const handleUpcomingSessionsClick = () => {
-    router.push('/client/sessions/upcoming');
+    router.push("/client/sessions/upcoming");
   };
 
   const handlePendingWorksheetsClick = () => {
-    router.push('/client/worksheets');
+    router.push("/client/worksheets");
   };
 
   const handleCompletedSessionsClick = () => {
-    router.push('/client/sessions/completed');
+    router.push("/client/sessions/completed");
   };
 
   const handleCompletedWorksheetsClick = () => {
-    router.push('/client/worksheets?filter=completed');
+    router.push("/client/worksheets?filter=completed");
   };
 
   const handleTherapistsClick = () => {
-    router.push('/client/therapist');
+    router.push("/client/therapist");
   };
 
   // Show error state
