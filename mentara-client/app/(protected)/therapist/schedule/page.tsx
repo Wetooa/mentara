@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,28 @@ import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
 import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
 import { MeetingStatus } from "@/types/booking";
 import { toast } from "sonner";
+
+// Animation variants
+const pageVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.3 }
+  }
+};
 
 export default function TherapistSchedulePage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -107,23 +130,38 @@ export default function TherapistSchedulePage() {
   }) || [];
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <motion.div 
+      className="container mx-auto p-6 space-y-6"
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Schedule Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-blue-900">Schedule Management</h1>
+          <p className="text-slate-600">
             Manage your therapy sessions and availability
           </p>
         </div>
-        <Button onClick={() => setActiveTab("availability")}>
-          <Settings className="h-4 w-4 mr-2" />
-          Manage Availability
-        </Button>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button 
+            onClick={() => setActiveTab("availability")} 
+            className="bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-300"
+          >
+            <motion.div
+              animate={{ rotate: activeTab === "availability" ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+            </motion.div>
+            Manage Availability
+          </Button>
+        </motion.div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1">
           <TabsTrigger value="schedule">Today&apos;s Schedule</TabsTrigger>
           <TabsTrigger value="availability">Manage Availability</TabsTrigger>
           <TabsTrigger value="calendar">Calendar View</TabsTrigger>
@@ -132,12 +170,12 @@ export default function TherapistSchedulePage() {
 
         {/* Today&apos;s Schedule Tab */}
         <TabsContent value="schedule" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Date Selector */}
-            <div className="lg:col-span-1">
-              <Card>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
+            {/* Date Selector and Stats */}
+            <motion.div className="lg:col-span-1" variants={cardVariants}>
+              <Card className="bg-gradient-to-br from-blue-50 to-slate-50 border-blue-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
                     <Calendar className="h-5 w-5" />
                     Select Date
                   </CardTitle>
@@ -148,38 +186,38 @@ export default function TherapistSchedulePage() {
                     selected={selectedDate}
                     onSelect={(date) => date && setSelectedDate(date)}
                     disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0) - 86400000)}
-                    className="rounded-md border"
+                    className="rounded-md border border-blue-200 w-full"
                   />
                 </CardContent>
               </Card>
 
               {/* Quick Stats */}
-              <Card className="mt-4">
+              <Card className="mt-4 border-slate-200">
                 <CardHeader>
-                  <CardTitle>Today&apos;s Overview</CardTitle>
+                  <CardTitle className="text-blue-900">Today&apos;s Overview</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Sessions</span>
-                    <span className="font-medium">{todaysMeetings.length}</span>
+                    <span className="text-slate-600">Total Sessions</span>
+                    <span className="font-semibold text-blue-900">{todaysMeetings.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Available Slots</span>
-                    <span className="font-medium">{timeSlots.length}</span>
+                    <span className="text-slate-600">Available Slots</span>
+                    <span className="font-semibold text-blue-900">{timeSlots.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Revenue</span>
-                    <span className="font-medium">$320</span> {/* Placeholder */}
+                    <span className="text-slate-600">Revenue</span>
+                    <span className="font-semibold text-blue-900">$320</span> {/* Placeholder */}
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
 
-            {/* Today's Meetings */}
-            <div className="lg:col-span-2">
-              <Card>
+            {/* Today's Meetings - Now spans 3 columns for full width */}
+            <motion.div className="lg:col-span-3" variants={cardVariants}>
+              <Card className="border-slate-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
                     <Clock className="h-5 w-5" />
                     Sessions for {selectedDate.toLocaleDateString()}
                   </CardTitle>
@@ -192,45 +230,49 @@ export default function TherapistSchedulePage() {
                       ))}
                     </div>
                   ) : todaysMeetings.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Calendar className="h-12 w-12 mx-auto mb-2 opacity-30" />
-                      <p>No sessions scheduled for this date</p>
+                    <div className="text-center py-8">
+                      <div className="rounded-full bg-blue-100 p-6 mb-4 mx-auto w-fit">
+                        <Calendar className="h-12 w-12 text-blue-600" />
+                      </div>
+                      <p className="text-slate-600">No sessions scheduled for this date</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {todaysMeetings.map((meeting) => (
-                        <Card key={meeting.id} className="border border-gray-200">
+                        <Card key={meeting.id} className="border border-slate-200 hover:border-blue-300 transition-colors duration-200">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
-                                  {getMeetingTypeIcon()}
+                                  <div className="p-2 rounded-full bg-blue-100">
+                                    {getMeetingTypeIcon()}
+                                  </div>
                                   <div>
-                                    <h3 className="font-medium">
+                                    <h3 className="font-semibold text-blue-900">
                                       {meeting.title || "Therapy Session"}
                                     </h3>
-                                    <div className="text-sm text-muted-foreground">
+                                    <div className="text-sm text-slate-600">
                                       with {meeting.client?.user.firstName} {meeting.client?.user.lastName}
                                     </div>
                                   </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-4 text-sm text-slate-600">
                                   <div className="flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
+                                    <Clock className="h-3 w-3 text-blue-600" />
                                     {new Date(meeting.startTime).toLocaleTimeString([], {
                                       hour: "2-digit",
                                       minute: "2-digit",
                                     })} ({meeting.duration} min)
                                   </div>
                                   <div className="flex items-center gap-1">
-                                    <User className="h-3 w-3" />
+                                    <User className="h-3 w-3 text-blue-600" />
                                     Client ID: {meeting.clientId?.slice(-6) || 'N/A'}
                                   </div>
                                 </div>
 
                                 {meeting.description && (
-                                  <p className="mt-2 text-sm text-muted-foreground">
+                                  <p className="mt-2 text-sm text-slate-600 bg-slate-50 p-2 rounded-md">
                                     {meeting.description}
                                   </p>
                                 )}
@@ -240,20 +282,27 @@ export default function TherapistSchedulePage() {
                                 {getStatusBadge(meeting.status as unknown as MeetingStatus)}
                                 
                                 <div className="flex gap-1">
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="h-3 w-3" />
-                                  </Button>
-                                  <Button variant="outline" size="sm">
-                                    <Edit className="h-3 w-3" />
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleCancelMeeting(meeting.id)}
-                                    disabled={isCancelling}
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
+                                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                                    <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+                                      <Eye className="h-3 w-3" />
+                                    </Button>
+                                  </motion.div>
+                                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                                    <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+                                      <Edit className="h-3 w-3" />
+                                    </Button>
+                                  </motion.div>
+                                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleCancelMeeting(meeting.id)}
+                                      disabled={isCancelling}
+                                      className="hover:bg-red-50 hover:border-red-300 text-red-600 hover:shadow-md transition-all duration-200"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </motion.div>
                                 </div>
 
                                 {meeting.status === 'scheduled' && (
@@ -261,6 +310,7 @@ export default function TherapistSchedulePage() {
                                     size="sm"
                                     onClick={() => handleUpdateMeetingStatus(meeting.id, MeetingStatus.CONFIRMED)}
                                     disabled={isUpdating}
+                                    className="bg-blue-600 hover:bg-blue-700"
                                   >
                                     Confirm
                                   </Button>
@@ -271,6 +321,7 @@ export default function TherapistSchedulePage() {
                                     size="sm"
                                     onClick={() => handleUpdateMeetingStatus(meeting.id, MeetingStatus.IN_PROGRESS)}
                                     disabled={isUpdating}
+                                    className="bg-green-600 hover:bg-green-700"
                                   >
                                     Start Session
                                   </Button>
@@ -284,7 +335,7 @@ export default function TherapistSchedulePage() {
                   )}
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           </div>
         </TabsContent>
 
@@ -293,26 +344,28 @@ export default function TherapistSchedulePage() {
           <TherapistAvailabilityCalendar />
         </TabsContent>
 
-        {/* Calendar View Tab */}
+        {/* Calendar View Tab - Full Width */}
         <TabsContent value="calendar" className="space-y-6">
-          <MeetingCalendar
-            title="Schedule Calendar"
-            showHeader={true}
-            showStats={true}
-            hoverDelay={3000}
-            onDateSelect={(date) => {
-              setSelectedDate(date);
-              setActiveTab("schedule");
-            }}
-            className="max-w-6xl mx-auto"
-          />
+          <div className="w-full">
+            <MeetingCalendar
+              title="Schedule Calendar"
+              showHeader={true}
+              showStats={true}
+              hoverDelay={3000}
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                setActiveTab("schedule");
+              }}
+              className="w-full"
+            />
+          </div>
         </TabsContent>
 
         {/* All Upcoming Tab */}
         <TabsContent value="upcoming" className="space-y-6">
-          <Card>
+          <Card className="border-slate-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-blue-900">
                 <Clock className="h-5 w-5" />
                 All Upcoming Sessions
               </CardTitle>
@@ -325,32 +378,36 @@ export default function TherapistSchedulePage() {
                   ))}
                 </div>
               ) : upcomingMeetings.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="h-12 w-12 mx-auto mb-2 opacity-30" />
-                  <p>No upcoming sessions</p>
+                <div className="text-center py-8">
+                  <div className="rounded-full bg-blue-100 p-6 mb-4 mx-auto w-fit">
+                    <Calendar className="h-12 w-12 text-blue-600" />
+                  </div>
+                  <p className="text-slate-600">No upcoming sessions</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {upcomingMeetings.map((meeting) => (
-                    <Card key={meeting.id} className="border border-gray-200">
-                      <CardContent className="p-3">
+                    <Card key={meeting.id} className="border border-slate-200 hover:border-blue-300 transition-colors duration-200">
+                      <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            {getMeetingTypeIcon()}
+                            <div className="p-2 rounded-full bg-blue-100">
+                              {getMeetingTypeIcon()}
+                            </div>
                             <div>
-                              <div className="font-medium">
+                              <div className="font-semibold text-blue-900">
                                 {meeting.title || "Therapy Session"}
                               </div>
-                              <div className="text-sm text-muted-foreground">
-                                {meeting.client?.user.firstName} {meeting.client?.user.lastName}
+                              <div className="text-sm text-slate-600">
+                                with {meeting.client?.user.firstName} {meeting.client?.user.lastName}
                               </div>
                             </div>
                           </div>
                           
                           <div className="flex items-center gap-4">
-                            <div className="text-sm text-muted-foreground text-right">
-                              <div>{new Date(meeting.startTime).toLocaleDateString()}</div>
-                              <div>
+                            <div className="text-sm text-slate-600 text-right">
+                              <div className="font-medium">{new Date(meeting.startTime).toLocaleDateString()}</div>
+                              <div className="text-blue-600">
                                 {new Date(meeting.startTime).toLocaleTimeString([], {
                                   hour: "2-digit",
                                   minute: "2-digit",
@@ -369,6 +426,6 @@ export default function TherapistSchedulePage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }

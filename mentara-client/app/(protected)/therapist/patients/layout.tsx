@@ -16,6 +16,8 @@ import {
   UserCheck,
   Eye,
   UserMinus,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import {
   usePatientsList,
@@ -24,6 +26,8 @@ import {
   useDenyPatientRequest,
   useRemovePatient,
 } from "@/hooks/therapist/usePatientsList";
+import { useCalendarMeetings } from "@/hooks/calendar/useCalendarMeetings";
+import AppointmentCalendar from "@/components/calendar-02";
 import { useApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
@@ -59,8 +63,34 @@ export default function PatientsLayout({
   const denyRequest = useDenyPatientRequest();
   const removePatient = useRemovePatient();
 
-  // Local state for search
+  // Local state for search and filters
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({ status: 'all' });
+
+  // Fetch meeting data for calendar
+  const {
+    meetings: meetingsData,
+    isLoading: loadingMeetings,
+    error: meetingsError,
+    refetch: refetchMeetings,
+  } = useCalendarMeetings({ limit: 100 });
+
+  // Helper functions
+  const searchPatients = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const updateFilters = (newFilters: any) => {
+    setFilters({ ...filters, ...newFilters });
+  };
+
+  const refreshData = () => {
+    refetchPatients();
+    refetchRequests();
+    refetchMeetings();
+  };
 
   // Filter functions
   const filterBySearch = (patients: any[], query: string) => {
@@ -114,10 +144,6 @@ export default function PatientsLayout({
     }
   };
 
-  const refreshData = () => {
-    refetchPatients();
-    refetchRequests();
-  };
 
   // Check if a patient is selected
   const isPatientSelected = pathname.split("/").length > 3;
@@ -302,18 +328,18 @@ export default function PatientsLayout({
           <div className="flex justify-between items-center mb-2 md:mb-3">
             <h3 className="font-semibold text-sm md:text-base text-blue-900">Appointments</h3>
             <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-md border border-blue-200">
-              {meetingsData?.meetings?.length || 0} scheduled
+              {meetingsData?.length || 0} scheduled
             </span>
           </div>
 
           {/* Full-width Appointment Calendar */}
-          <div className="appointment-calendar-container bg-white rounded-lg border border-slate-200 p-2">
+          <div className="appointment-calendar-container bg-white rounded-lg border border-slate-200">
             <AppointmentCalendar
-              meetings={meetingsData?.meetings || []}
+              meetings={meetingsData || []}
               selected={selectedDate}
               onSelect={setSelectedDate}
               showMeetingDetails={false}
-              className="w-full"
+              className="w-full border-0"
             />
           </div>
         </div>
@@ -323,21 +349,21 @@ export default function PatientsLayout({
           <div className="mb-2 md:mb-3 flex items-center justify-between">
             <h3 className="font-semibold text-sm md:text-base text-blue-900">My Patients</h3>
             <button
-              onClick={refreshPatients}
+              onClick={refreshData}
               className="p-1.5 text-slate-500 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200"
               title="Refresh patients list"
             >
-              <RefreshCw className={`h-3 w-3 md:h-4 md:w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3 w-3 md:h-4 md:w-4 ${loadingPatients ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
           {/* Error notification with professional styling */}
-          {error && (
+          {patientsError && (
             <div className="mb-2 md:mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-center">
                 <AlertCircle className="h-3 w-3 md:h-4 md:w-4 text-blue-600 mr-2" />
                 <p className="text-[10px] md:text-xs text-blue-800">
-                  {error.message.includes("mock data") 
+                  {(patientsError as any)?.message?.includes("mock data") 
                     ? "No assigned clients yet - new assignments will appear here"
                     : "Unable to load patient data"}
                 </p>
@@ -354,13 +380,13 @@ export default function PatientsLayout({
               value={searchQuery}
               onChange={(e) => searchPatients(e.target.value)}
               className="w-full pl-7 md:pl-9 pr-4 py-1.5 md:py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs md:text-sm transition-colors duration-200"
-              disabled={isLoading}
+              disabled={loadingPatients}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center">
               <button
                 className="text-slate-500 hover:text-blue-600 flex items-center text-[10px] md:text-xs transition-colors duration-200"
                 onClick={() => setFilterOpen(!filterOpen)}
-                disabled={isLoading}
+                disabled={loadingPatients}
               >
                 {filters.status === 'all' ? 'All' : filters.status?.charAt(0).toUpperCase() + filters.status?.slice(1)}{" "}
                 {filterOpen ? (
@@ -395,14 +421,14 @@ export default function PatientsLayout({
 
           {/* Patient list */}
           <div className="flex-1 overflow-y-auto">
-            {isLoading && filteredPatients.length === 0 ? (
+            {loadingPatients && (!myPatients || myPatients.length === 0) ? (
               <div className="flex items-center justify-center py-8">
                 <div className="flex flex-col items-center">
                   <RefreshCw className="h-6 w-6 text-gray-400 animate-spin mb-2" />
                   <p className="text-sm text-gray-500">Loading patients...</p>
                 </div>
               </div>
-            ) : filteredPatients.length === 0 ? (
+            ) : (!filteredPatients || filteredPatients.length === 0) ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
                   <p className="text-sm text-gray-500 mb-1">No patients found</p>
@@ -414,13 +440,14 @@ export default function PatientsLayout({
                 </div>
               </div>
             ) : (
-              filteredPatients.map((patient: Patient) => {
-                const isActive = pathname.includes(`/patients/${patient.id}`);
+              filteredPatients.map((patient: any) => {
+                const isActive = pathname.includes(`/patients/${patient.userId}`);
+                const patientName = `${patient.user?.firstName || ""} ${patient.user?.lastName || ""}`;
 
                 return (
                   <Link
-                    key={patient.id}
-                    href={`/therapist/patients/${patient.id}`}
+                    key={patient.userId}
+                    href={`/therapist/patients/${patient.userId}`}
                   >
                     <div
                       className={`flex items-center p-1.5 md:p-2 rounded-lg mb-1.5 md:mb-2 transition-colors duration-200 ${
@@ -429,8 +456,8 @@ export default function PatientsLayout({
                     >
                       <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden mr-2 md:mr-3 bg-gray-200 flex-shrink-0">
                         <Image
-                          src={patient.avatar || "/avatar-placeholder.png"}
-                          alt={patient.name}
+                          src={patient.user?.profilePicture || "/avatar-placeholder.png"}
+                          alt={patientName}
                           width={32}
                           height={32}
                           className="w-full h-full object-cover"
@@ -440,85 +467,24 @@ export default function PatientsLayout({
                         <h4
                           className={`text-xs md:text-sm truncate ${isActive ? "font-semibold text-blue-900" : "font-medium"}`}
                         >
-                          {patient.name}
+                          {patientName}
                         </h4>
                         <p className="text-[10px] md:text-xs text-gray-500 truncate">
-                          {patient.diagnosis}
+                          {patient.user?.email}
                         </p>
                         <div className="flex items-center mt-0.5 md:mt-1">
-                          <div 
-                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full mr-1.5 md:mr-2 ${
-                              patient.currentSession >= patient.totalSessions ? 'bg-blue-400' : 'bg-green-400'
-                            }`}
-                          />
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full mr-1.5 md:mr-2 bg-green-400" />
                           <span className="text-[9px] md:text-xs text-gray-400">
-                            Session {patient.currentSession}/{patient.totalSessions}
+                            Active since {new Date(patient.assignedAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
                       <div className="flex space-x-0.5 md:space-x-1 flex-shrink-0">
                         <button className="p-0.5 md:p-1 text-gray-400 hover:text-gray-600">
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="md:w-4 md:h-4"
-                          >
-                            <rect
-                              x="4"
-                              y="4"
-                              width="16"
-                              height="16"
-                              rx="2"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                            />
-                            <path
-                              d="M16 2V6"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                            />
-                            <path
-                              d="M8 2V6"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                            />
-                            <path
-                              d="M4 10H20"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                            />
-                          </svg>
+                          <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                         </button>
                         <button className="p-0.5 md:p-1 text-gray-400 hover:text-gray-600">
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="md:w-4 md:h-4"
-                          >
-                            <path
-                              d="M12 5V19"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M19 12L5 12"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
+                          <MessageCircle className="w-3 h-3 md:w-4 md:h-4" />
                         </button>
                       </div>
                     </div>
@@ -528,6 +494,32 @@ export default function PatientsLayout({
             )}
           </div>
         </div>
+
+        {/* Desktop Vertical Tabs */}
+        <div className="p-2 md:p-3 border-t border-slate-200">
+          <div className="space-y-2">
+            <button
+              onClick={() => setActiveTab("patients")}
+              className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${
+                activeTab === "patients"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              }`}
+            >
+              My Patients ({filteredPatients?.length || 0})
+            </button>
+            <button
+              onClick={() => setActiveTab("requests")}
+              className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${
+                activeTab === "requests"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              }`}
+            >
+              Requests ({filteredRequests?.length || 0})
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Main content area */}
@@ -535,106 +527,23 @@ export default function PatientsLayout({
         {isPatientSelected ? (
           children
         ) : (
-          <div className="flex flex-col items-center justify-center h-full bg-slate-50 text-center p-6">
-            <div className="rounded-full bg-blue-100 p-6 mb-4 shadow-sm">
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21"
-                  stroke="#2563eb"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle
-                  cx="9"
-                  cy="9"
-                  r="4"
-                  stroke="#2563eb"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M23 21V19C22.9986 17.1771 21.765 15.5857 20 15.13"
-                  stroke="#2563eb"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M16 3.13C17.7699 3.58317 19.0078 5.17885 19.0078 7.005C19.0078 8.83115 17.7699 10.4268 16 10.88"
-                  stroke="#2563eb"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-blue-900 mb-2">Select a Patient</h2>
-            <p className="text-slate-600 max-w-md">
-              Choose a patient from the sidebar to view their profile,
-              treatment plan, and session history.
-            </p>
-          </div>
-        )} */}
-
-        {/* Desktop Vertical Tabs */}
-        <div className="space-y-2">
-          <button
-            onClick={() => setActiveTab("patients")}
-            className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${
-              activeTab === "patients"
-                ? "bg-primary text-white"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-            }`}
-          >
-            My Patients ({filteredPatients?.length || 0})
-          </button>
-          <button
-            onClick={() => setActiveTab("requests")}
-            className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${
-              activeTab === "requests"
-                ? "bg-primary text-white"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-            }`}
-          >
-            Requests ({filteredRequests?.length || 0})
-          </button>
-        </div>
-      </div>
-
-      {/* Main content area - Patient cards */}
-      <div className="flex-1 overflow-auto">
-        {!isPatientSelected ? (
           <div className="p-4 lg:p-6">
             {activeTab === "patients" ? (
               <>
-                <h2 className="text-lg font-semibold mb-4 hidden lg:block">
-                  My Patients
-                </h2>
+                <h2 className="text-lg font-semibold mb-4 hidden lg:block">My Patients</h2>
                 {loadingPatients ? (
                   <div className="flex items-center justify-center py-12">
                     <RefreshCw className="h-8 w-8 text-gray-400 animate-spin" />
                   </div>
-                ) : filteredPatients?.length === 0 ? (
+                ) : (!filteredPatients || filteredPatients.length === 0) ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Users className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mb-4" />
-                    <p className="text-base lg:text-lg text-gray-500 mb-2">
-                      No active patients
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Accepted patient requests will appear here
-                    </p>
+                    <p className="text-base lg:text-lg text-gray-500 mb-2">No active patients</p>
+                    <p className="text-sm text-gray-400">Accepted patient requests will appear here</p>
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                    {filteredPatients?.map((patient: any) => (
+                    {filteredPatients.map((patient: any) => (
                       <MyPatientCard key={patient.userId} patient={patient} />
                     ))}
                   </div>
@@ -642,38 +551,27 @@ export default function PatientsLayout({
               </>
             ) : (
               <>
-                <h2 className="text-lg font-semibold mb-4 hidden lg:block">
-                  Patient Requests
-                </h2>
+                <h2 className="text-lg font-semibold mb-4 hidden lg:block">Patient Requests</h2>
                 {loadingRequests ? (
                   <div className="flex items-center justify-center py-12">
                     <RefreshCw className="h-8 w-8 text-gray-400 animate-spin" />
                   </div>
-                ) : filteredRequests?.length === 0 ? (
+                ) : (!filteredRequests || filteredRequests.length === 0) ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Clock className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mb-4" />
-                    <p className="text-base lg:text-lg text-gray-500 mb-2">
-                      No pending requests
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Patient connection requests will appear here
-                    </p>
+                    <p className="text-base lg:text-lg text-gray-500 mb-2">No pending requests</p>
+                    <p className="text-sm text-gray-400">Patient connection requests will appear here</p>
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                    {filteredRequests?.map((request: any) => (
-                      <PatientRequestCard
-                        key={request.userId}
-                        request={request}
-                      />
+                    {filteredRequests.map((request: any) => (
+                      <PatientRequestCard key={request.userId} request={request} />
                     ))}
                   </div>
                 )}
               </>
             )}
           </div>
-        ) : (
-          children
         )}
       </div>
     </div>
