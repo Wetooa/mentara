@@ -79,13 +79,12 @@ export function useAdminUsers(params: AdminUsersParams = {}): UseAdminUsersRetur
   });
 
   // Fetch user statistics
-  // TODO: Create backend endpoint for user stats
   const { 
     data: userStats, 
     isLoading: statsLoading 
   } = useQuery({
     queryKey: ['admin', 'analytics', 'userStats'],
-    queryFn: () => Promise.resolve({}), // TODO: Replace with api.admin.analytics.getUserStats() when endpoint is created
+    queryFn: () => api.admin.analytics.getUserStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

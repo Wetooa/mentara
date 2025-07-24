@@ -3,7 +3,6 @@ import { useApi } from '@/lib/api';
 
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
-import type { TherapistDashboardData } from '../../types/domain';
 
 import type { Meeting } from "@/types/api/meetings";
 

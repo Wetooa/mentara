@@ -376,42 +376,39 @@ export function useAdminSystemStats() {
 
 /**
  * Hook for fetching user growth analytics (admin functionality)
- * TODO: Create backend endpoint for user growth analytics
  */
 export function useAdminUserGrowth(params: UserGrowthParams = {}) {
   const api = useApi();
   
   return useQuery({
     queryKey: ['admin', 'analytics', 'userGrowth', params],
-    queryFn: () => Promise.resolve({}), // TODO: Replace with api.admin.analytics.getUserGrowth(params) when endpoint is created
+    queryFn: () => api.admin.analytics.getUserGrowth(params),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }
 
 /**
  * Hook for fetching engagement analytics (admin functionality)
- * TODO: Create backend endpoint for engagement analytics
  */
 export function useAdminEngagement(params: EngagementParams = {}) {
   const api = useApi();
   
   return useQuery({
     queryKey: ['admin', 'analytics', 'engagement', params],
-    queryFn: () => Promise.resolve({}), // TODO: Replace with api.admin.analytics.getEngagement(params) when endpoint is created
+    queryFn: () => api.admin.analytics.getEngagement(params),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }
 
 /**
  * Hook for fetching platform overview analytics (admin functionality)
- * TODO: Create backend endpoint for platform overview analytics
  */
 export function useAdminPlatformOverview() {
   const api = useApi();
   
   return useQuery({
     queryKey: ['admin', 'analytics', 'platformOverview'],
-    queryFn: () => Promise.resolve({}), // TODO: Replace with api.admin.analytics.getPlatformOverview() when endpoint is created
+    queryFn: () => api.admin.analytics.getPlatformOverview(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

@@ -246,6 +246,76 @@ export function createAdminService(axios: AxiosInstance) {
           handleApiError(error);
         }
       },
+
+      /**
+       * Delete user
+       * Endpoint: DELETE /admin/users/:id
+       * @throws MentaraApiError on request failure
+       */
+      async delete(userId: string) {
+        try {
+          const { data } = await axios.delete(`/admin/users/${userId}`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Send verification email to user
+       * Endpoint: POST /admin/users/:id/send-verification
+       * @throws MentaraApiError on request failure
+       */
+      async sendVerificationEmail(userId: string) {
+        try {
+          const { data } = await axios.post(`/admin/users/${userId}/send-verification`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update user role
+       * Endpoint: PUT /admin/users/:id/role
+       * @throws MentaraApiError on request failure
+       */
+      async updateRole(userId: string, roleData: { role: string }) {
+        try {
+          const { data } = await axios.put(`/admin/users/${userId}/role`, roleData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Create new user
+       * Endpoint: POST /admin/users
+       * @throws MentaraApiError on request failure
+       */
+      async create(userData: any) {
+        try {
+          const { data } = await axios.post('/admin/users', userData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update user
+       * Endpoint: PUT /admin/users/:id
+       * @throws MentaraApiError on request failure
+       */
+      async update(userId: string, userData: any) {
+        try {
+          const { data } = await axios.put(`/admin/users/${userId}`, userData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
     },
 
     // Analytics Methods
