@@ -17,6 +17,7 @@ import {
   PostCreatedEvent,
   CommentAddedEvent,
 } from '../common/events/social-events';
+import { MessagingGateway } from '../messaging/messaging.gateway';
 
 interface WebSocketServer {
   to(room: string): {
@@ -49,17 +50,27 @@ export class NotificationsService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly messagingGateway: MessagingGateway,
   ) {}
 
   onModuleInit() {
     // Configure WebSocket server for real-time notifications
     // Use a slight delay to ensure MessagingGateway is fully initialized
     setTimeout(() => {
-      // this.setWebSocketServer(this.messagingGateway.server);
+      this.logger.log('🚀 [NOTIFICATIONS] Attempting to connect WebSocket server...');
+      
+      if (this.messagingGateway && this.messagingGateway.server) {
+        this.setWebSocketServer(this.messagingGateway.server);
+        this.logger.log('✅ [NOTIFICATIONS] WebSocket server successfully connected to MessagingGateway');
+      } else {
+        this.logger.error('❌ [NOTIFICATIONS] MessagingGateway or server not available during initialization');
+        this.logger.error('❌ [NOTIFICATIONS] MessagingGateway exists:', !!this.messagingGateway);
+        this.logger.error('❌ [NOTIFICATIONS] MessagingGateway.server exists:', !!(this.messagingGateway && this.messagingGateway.server));
+      }
     }, 1000);
 
     this.logger.log(
-      'NotificationsService initialized with real-time capabilities',
+      '🔔 [NOTIFICATIONS] NotificationsService initialized with real-time capabilities',
     );
   }
 
@@ -68,7 +79,9 @@ export class NotificationsService implements OnModuleInit {
    */
   setWebSocketServer(server: WebSocketServer) {
     this.webSocketServer = server;
-    this.logger.log('WebSocket server configured for real-time notifications');
+    this.logger.log('🔌 [NOTIFICATIONS] WebSocket server configured for real-time notifications');
+    this.logger.log('🔌 [NOTIFICATIONS] Server instance type:', typeof server);
+    this.logger.log('🔌 [NOTIFICATIONS] Server methods available:', Object.getOwnPropertyNames(server));
   }
 
   async create(
@@ -83,6 +96,12 @@ export class NotificationsService implements OnModuleInit {
     },
     deliveryOptions?: NotificationDeliveryOptions,
   ): Promise<Notification> {
+    this.logger.log('🚀 [NOTIFICATIONS] Creating new notification...');
+    this.logger.log('🚀 [NOTIFICATIONS] Target user:', data.userId);
+    this.logger.log('🚀 [NOTIFICATIONS] Type:', data.type);
+    this.logger.log('🚀 [NOTIFICATIONS] Priority:', data.priority || NotificationPriority.NORMAL);
+    this.logger.log('🚀 [NOTIFICATIONS] Title:', data.title);
+
     const notification = await this.prisma.notification.create({
       data: {
         ...data,
@@ -100,6 +119,9 @@ export class NotificationsService implements OnModuleInit {
       },
     });
 
+    this.logger.log('✅ [NOTIFICATIONS] Notification created successfully in database');
+    this.logger.log('✅ [NOTIFICATIONS] Notification ID:', notification.id);
+
     // Default delivery options
     const options = {
       realTime: true,
@@ -109,9 +131,13 @@ export class NotificationsService implements OnModuleInit {
       ...deliveryOptions,
     };
 
+    this.logger.log('📋 [NOTIFICATIONS] Final delivery options:', options);
+
     // Deliver notification immediately since scheduling is not supported
+    this.logger.log('🎯 [NOTIFICATIONS] Starting delivery pipeline...');
     await this.deliverNotification(notification, options);
 
+    this.logger.log('🎉 [NOTIFICATIONS] Notification creation and delivery process completed');
     return notification;
   }
 
@@ -264,26 +290,119 @@ export class NotificationsService implements OnModuleInit {
     notification: Notification & { user: any },
     options: NotificationDeliveryOptions,
   ): Promise<void> {
+    this.logger.log('🎯 [NOTIFICATIONS] Starting notification delivery pipeline...');
+    this.logger.log('🎯 [NOTIFICATIONS] Notification ID:', notification.id);
+    this.logger.log('🎯 [NOTIFICATIONS] Delivery options:', options);
+    this.logger.log('🎯 [NOTIFICATIONS] User ID:', notification.userId);
+    this.logger.log('🎯 [NOTIFICATIONS] Notification type:', notification.type);
+
     try {
-      // Real-time WebSocket delivery
-      if (options.realTime && this.webSocketServer) {
-        await this.deliverRealTimeNotification(notification);
+      let deliveryAttempts = 0;
+      let successfulDeliveries = 0;
+      const errors: string[] = [];
+
+      // Real-time WebSocket delivery with enhanced error handling
+      if (options.realTime) {
+        this.logger.log('🌐 [NOTIFICATIONS] Attempting real-time WebSocket delivery...');
+        deliveryAttempts++;
+        
+        try {
+          if (this.webSocketServer) {
+            await this.deliverRealTimeNotification(notification);
+            successfulDeliveries++;
+            this.logger.log('✅ [NOTIFICATIONS] Real-time delivery completed successfully');
+          } else {
+            const errorMsg = 'WebSocket server not available';
+            this.logger.warn(`⚠️ [NOTIFICATIONS] Real-time delivery failed: ${errorMsg}`);
+            errors.push(`Real-time: ${errorMsg}`);
+          }
+        } catch (realTimeError) {
+          const errorMsg = realTimeError instanceof Error ? realTimeError.message : 'Unknown real-time delivery error';
+          this.logger.error(`❌ [NOTIFICATIONS] Real-time delivery failed: ${errorMsg}`);
+          errors.push(`Real-time: ${errorMsg}`);
+          
+          // Continue with other delivery methods as fallback
+        }
+      } else {
+        this.logger.log('⏭️ [NOTIFICATIONS] Real-time delivery disabled in options');
       }
 
       // Email delivery (if configured)
       if (options.email) {
-        await this.deliverEmailNotification(notification);
+        this.logger.log('📧 [NOTIFICATIONS] Attempting email delivery...');
+        deliveryAttempts++;
+        
+        try {
+          await this.deliverEmailNotification(notification);
+          successfulDeliveries++;
+          this.logger.log('✅ [NOTIFICATIONS] Email delivery completed');
+        } catch (emailError) {
+          const errorMsg = emailError instanceof Error ? emailError.message : 'Unknown email delivery error';
+          this.logger.error(`❌ [NOTIFICATIONS] Email delivery failed: ${errorMsg}`);
+          errors.push(`Email: ${errorMsg}`);
+        }
+      } else {
+        this.logger.log('⏭️ [NOTIFICATIONS] Email delivery disabled in options');
       }
 
       // Push notification delivery (if configured)
       if (options.push) {
-        await this.deliverPushNotification(notification);
+        this.logger.log('📱 [NOTIFICATIONS] Attempting push notification delivery...');
+        deliveryAttempts++;
+        
+        try {
+          await this.deliverPushNotification(notification);
+          successfulDeliveries++;
+          this.logger.log('✅ [NOTIFICATIONS] Push notification delivery completed');
+        } catch (pushError) {
+          const errorMsg = pushError instanceof Error ? pushError.message : 'Unknown push delivery error';
+          this.logger.error(`❌ [NOTIFICATIONS] Push delivery failed: ${errorMsg}`);
+          errors.push(`Push: ${errorMsg}`);
+        }
+      } else {
+        this.logger.log('⏭️ [NOTIFICATIONS] Push notification delivery disabled in options');
       }
+
+      this.logger.log('🏁 [NOTIFICATIONS] Delivery pipeline completed');
+      this.logger.log('📊 [NOTIFICATIONS] Delivery summary:', {
+        notificationId: notification.id,
+        userId: notification.userId,
+        deliveryAttempts,
+        successfulDeliveries,
+        failedDeliveries: deliveryAttempts - successfulDeliveries,
+        deliveryRate: deliveryAttempts > 0 ? `${Math.round((successfulDeliveries / deliveryAttempts) * 100)}%` : '0%',
+        errors: errors.length > 0 ? errors : 'none'
+      });
+
+      // Log warning if no deliveries succeeded but attempts were made
+      if (deliveryAttempts > 0 && successfulDeliveries === 0) {
+        this.logger.warn('⚠️ [NOTIFICATIONS] All delivery methods failed for notification', {
+          notificationId: notification.id,
+          userId: notification.userId,
+          allErrors: errors
+        });
+      }
+
+      // Log success if at least one delivery method worked
+      if (successfulDeliveries > 0) {
+        this.logger.log(`🎉 [NOTIFICATIONS] Notification delivered successfully via ${successfulDeliveries}/${deliveryAttempts} method(s)`);
+      }
+
     } catch (error) {
       this.logger.error(
-        `Error delivering notification ${notification.id}:`,
+        `💥 [NOTIFICATIONS] Unexpected error in delivery pipeline for notification ${notification.id}:`,
         error,
       );
+      this.logger.error('💥 [NOTIFICATIONS] Pipeline error details:', {
+        notificationId: notification.id,
+        userId: notification.userId,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        deliveryOptions: options,
+      });
+
+      // Don't re-throw the error to prevent notification creation from failing
+      // The notification is already saved to the database and can be retrieved via REST API
     }
   }
 
@@ -293,42 +412,100 @@ export class NotificationsService implements OnModuleInit {
   private async deliverRealTimeNotification(
     notification: Notification & { user: any },
   ): Promise<void> {
+    this.logger.log('📨 [NOTIFICATIONS] Starting real-time notification delivery...');
+    this.logger.log('📨 [NOTIFICATIONS] Notification ID:', notification.id);
+    this.logger.log('📨 [NOTIFICATIONS] Target User ID:', notification.userId);
+    this.logger.log('📨 [NOTIFICATIONS] WebSocket server available:', !!this.webSocketServer);
+
     if (!this.webSocketServer) {
-      this.logger.warn(
-        'WebSocket server not configured for real-time notifications',
+      this.logger.error(
+        '❌ [NOTIFICATIONS] WebSocket server not configured for real-time notifications',
       );
-      return;
+      this.logger.error('❌ [NOTIFICATIONS] Real-time delivery FAILED - server unavailable');
+      throw new Error('WebSocket server not available for real-time notification delivery');
     }
 
     try {
-      // Send to user's personal room
-      this.webSocketServer
-        .to(`user:${notification.userId}`)
-        .emit('notification', {
-          id: notification.id,
-          title: notification.title,
-          message: notification.message,
-          type: notification.type,
-          priority: notification.priority,
-          actionUrl: notification.actionUrl,
-          data: notification.data,
-          createdAt: notification.createdAt,
-          isRead: false,
-        });
+      // CRITICAL FIX: Use the same room format as MessagingGateway (user_${userId} not user:${userId})
+      const userRoom = `user_${notification.userId}`;
+      this.logger.log('📍 [NOTIFICATIONS] Target room (corrected format):', userRoom);
 
-      // Send unread count update
-      const unreadCount = await this.getUnreadCount(notification.userId);
+      // Prepare notification payload
+      const notificationPayload = {
+        id: notification.id,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        priority: notification.priority,
+        actionUrl: notification.actionUrl,
+        data: notification.data,
+        createdAt: notification.createdAt,
+        isRead: false,
+      };
+
+      this.logger.log('📦 [NOTIFICATIONS] Notification payload prepared:', {
+        id: notificationPayload.id,
+        title: notificationPayload.title,
+        type: notificationPayload.type,
+        priority: notificationPayload.priority,
+      });
+
+      // Check if server has the 'to' method before attempting to use it
+      if (typeof this.webSocketServer.to !== 'function') {
+        throw new Error('WebSocket server does not have the expected "to" method');
+      }
+
+      // Send to user's personal room
+      this.logger.log('🚀 [NOTIFICATIONS] Emitting notification event to room:', userRoom);
       this.webSocketServer
-        .to(`user:${notification.userId}`)
-        .emit('unreadCount', {
+        .to(userRoom)
+        .emit('notification', notificationPayload);
+
+      this.logger.log('✅ [NOTIFICATIONS] Notification event emitted successfully');
+
+      // Send unread count update with enhanced error handling
+      this.logger.log('🔢 [NOTIFICATIONS] Fetching unread count for user:', notification.userId);
+      
+      try {
+        const unreadCount = await this.getUnreadCount(notification.userId);
+        
+        const unreadCountPayload = {
           count: unreadCount,
-        });
+        };
+
+        this.logger.log('🔢 [NOTIFICATIONS] Unread count:', unreadCount);
+        this.logger.log('🚀 [NOTIFICATIONS] Emitting unreadCount event to room:', userRoom);
+        
+        this.webSocketServer
+          .to(userRoom)
+          .emit('unreadCount', unreadCountPayload);
+
+        this.logger.log('✅ [NOTIFICATIONS] Unread count event emitted successfully');
+      } catch (unreadCountError) {
+        this.logger.error('⚠️ [NOTIFICATIONS] Failed to fetch/send unread count, but notification was sent:', unreadCountError);
+        // Don't throw here as the main notification was sent successfully
+      }
 
       this.logger.log(
-        `Real-time notification delivered to user ${notification.userId}`,
+        `🎉 [NOTIFICATIONS] Real-time notification delivered successfully to user ${notification.userId}`,
       );
+
+      // Return success indicator
+      return Promise.resolve();
+
     } catch (error) {
-      this.logger.error(`Error delivering real-time notification:`, error);
+      this.logger.error('💥 [NOTIFICATIONS] Error delivering real-time notification:', error);
+      this.logger.error('💥 [NOTIFICATIONS] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        notificationId: notification.id,
+        userId: notification.userId,
+        webSocketServerType: typeof this.webSocketServer,
+        webSocketServerMethods: this.webSocketServer ? Object.getOwnPropertyNames(this.webSocketServer) : 'null',
+      });
+
+      // Re-throw the error so the delivery pipeline can handle fallbacks
+      throw new Error(`Real-time notification delivery failed: ${error.message}`);
     }
   }
 
