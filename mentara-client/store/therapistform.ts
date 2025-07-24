@@ -17,10 +17,7 @@ interface TherapistFormState {
   };
   consentChecked: boolean;
 
-  // Auto-save functionality
-  lastSaved: Date | null;
-  isAutoSaving: boolean;
-  autoSaveEnabled: boolean;
+
 
   // Methods
   updateField: (fieldKey: string, value: any) => void;
@@ -37,9 +34,6 @@ interface TherapistFormState {
   ) => void;
   updateConsent: (checked: boolean) => void;
   resetForm: () => void;
-  saveFormData: () => void;
-  setAutoSaving: (saving: boolean) => void;
-  toggleAutoSave: () => void;
 }
 
 const useTherapistForm = create<TherapistFormState>()(
@@ -58,11 +52,6 @@ const useTherapistForm = create<TherapistFormState>()(
         birForm: [],
       },
       consentChecked: false,
-
-      // Auto-save state
-      lastSaved: null,
-      isAutoSaving: false,
-      autoSaveEnabled: true,
 
       // Methods
       updateField: (fieldKey, value) =>
@@ -141,24 +130,7 @@ const useTherapistForm = create<TherapistFormState>()(
           consentChecked: checked,
         })),
 
-      saveFormData: () =>
-        set((state) => ({
-          ...state,
-          lastSaved: new Date(),
-          isAutoSaving: false,
-        })),
 
-      setAutoSaving: (saving) =>
-        set((state) => ({
-          ...state,
-          isAutoSaving: saving,
-        })),
-
-      toggleAutoSave: () =>
-        set((state) => ({
-          ...state,
-          autoSaveEnabled: !state.autoSaveEnabled,
-        })),
 
       resetForm: () =>
         set(() => ({
@@ -173,9 +145,6 @@ const useTherapistForm = create<TherapistFormState>()(
             birForm: [],
           },
           consentChecked: false,
-          lastSaved: null,
-          isAutoSaving: false,
-          autoSaveEnabled: true,
         })),
     }),
     {
@@ -215,7 +184,7 @@ const useTherapistForm = create<TherapistFormState>()(
                   liabilityInsurance: [],
                   birForm: [],
                 },
-                errors: {}, // Don't persist errors
+
               },
             };
             localStorage.setItem(name, JSON.stringify(serializable));
@@ -229,8 +198,6 @@ const useTherapistForm = create<TherapistFormState>()(
         formValues: state.formValues,
         otherSpecify: state.otherSpecify,
         consentChecked: state.consentChecked,
-        lastSaved: state.lastSaved,
-        autoSaveEnabled: state.autoSaveEnabled,
       }),
     }
   )
