@@ -296,14 +296,14 @@ class ConnectionHealthMonitor {
     try {
       const start = performance.now();
       
-      // Try to fetch a small resource to measure latency - use the API base URL
+      // Try to fetch a small resource to measure latency - use the public health endpoint
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-      const response = await fetch(`${apiUrl}/auth/me`, {
+      const response = await fetch(`${apiUrl}/health`, {
         method: 'HEAD',
         cache: 'no-cache',
       });
       
-      // Accept any response (including 401) as a successful latency measurement
+      // Accept any successful response as a latency measurement
       if (response.status < 500) {
         return Math.round(performance.now() - start);
       }
