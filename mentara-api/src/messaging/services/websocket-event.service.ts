@@ -1,5 +1,6 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
 import { EventBusService } from '../../common/events/event-bus.service';
+import { MessagingGateway } from '../messaging.gateway';
 import { DomainEvent } from '../../common/events/interfaces/domain-event.interface';
 import {
   MessageSentEvent,
@@ -25,9 +26,12 @@ import {
 @Injectable()
 export class WebSocketEventService implements OnModuleInit {
   private readonly logger = new Logger(WebSocketEventService.name);
-  private messagingGateway: any; // Will be injected
 
-  constructor(private readonly eventBus: EventBusService) {}
+  constructor(
+    private readonly eventBus: EventBusService,
+    @Inject(forwardRef(() => MessagingGateway))
+    private readonly messagingGateway: MessagingGateway,
+  ) {}
 
   onModuleInit() {
     this.logger.log('🚀 [INIT] WebSocketEventService initializing...');
