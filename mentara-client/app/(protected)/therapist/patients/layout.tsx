@@ -6,10 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, RefreshCw, AlertCircle, Users, Clock, MessageCircle, Calendar, UserX, UserCheck, Eye, UserMinus } from "lucide-react";
 import { usePatientsList, usePatientsRequests, useAcceptPatientRequest, useDenyPatientRequest, useRemovePatient } from "@/hooks/therapist/usePatientsList";
-import AppointmentCalendar from "@/components/calendar-02";
-import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -20,9 +17,6 @@ export default function PatientsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const api = useApi();
-  
   // Fetch data using the hooks
   const { data: myPatients, isLoading: loadingPatients, error: patientsError, refetch: refetchPatients } = usePatientsList();
   const { data: patientRequests, isLoading: loadingRequests, error: requestsError, refetch: refetchRequests } = usePatientsRequests();
@@ -31,13 +25,6 @@ export default function PatientsLayout({
   const acceptRequest = useAcceptPatientRequest();
   const denyRequest = useDenyPatientRequest();
   const removePatient = useRemovePatient();
-  
-  // Fetch meetings/appointments for calendar
-  const { data: meetingsData } = useQuery({
-    queryKey: ['meetings', 'upcoming'],
-    queryFn: () => api.meetings.getUpcomingMeetings(50),
-    staleTime: 5 * 60 * 1000,
-  });
   
   // Local state for search
   const [searchQuery, setSearchQuery] = useState("");
@@ -205,33 +192,7 @@ export default function PatientsLayout({
     <div className="flex h-full">
       {/* Left sidebar */}
       <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
-        {/* Availability button */}
-        <div className="p-3 border-b border-gray-200">
-          <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white">
-            <span>Availability</span>
-          </Button>
-        </div>
-
-        {/* Calendar section */}
-        <div className="p-3 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-medium text-amber-800">Appointments</h3>
-            <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
-              {meetingsData?.meetings?.length || 0}
-            </span>
-          </div>
-          <div className="appointment-calendar-container">
-            <AppointmentCalendar
-              meetings={meetingsData?.meetings || []}
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              showMeetingDetails={false}
-              className="scale-75 origin-top-left w-[133%] -ml-2"
-            />
-          </div>
-        </div>
-
-        {/* Patients section with tabs */}
+{/* Patients section with tabs */}
         <div className="p-3 flex-1 overflow-hidden flex flex-col">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-medium">Patients</h3>
