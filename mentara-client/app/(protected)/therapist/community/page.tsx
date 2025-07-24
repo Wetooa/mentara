@@ -140,41 +140,41 @@ export default function TherapistCommunity() {
               onRoomSelect={handleRoomSelect}
             />
           </ResizablePanel>
-          <ResizableHandle withHandle className="w-1.5 bg-amber-100/60 hover:bg-amber-200/80 transition-colors duration-200" />
+          <ResizableHandle withHandle className="w-1.5 bg-slate-100/60 hover:bg-blue-200/80 transition-colors duration-200" />
           <ResizablePanel defaultSize={80}>
             {/* Desktop Main Content Area */}
         {/* Main Content Area */}
         {!selectedRoomId ? (
-          // Welcome/No Room Selected State - Enhanced for Therapists
-          <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+          // Welcome/No Room Selected State - Professional Healthcare Design
+          <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
             <div className="text-center max-w-md">
-              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Stethoscope className="h-8 w-8 text-green-600" />
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border border-blue-100">
+                <Stethoscope className="h-8 w-8 text-blue-600" />
               </div>
-              <h2 className="text-2xl font-bold text-neutral-800 mb-2">Therapist Community Hub</h2>
-              <p className="text-neutral-600 mb-6">
+              <h2 className="text-2xl font-bold text-blue-900 mb-2">Therapist Community Hub</h2>
+              <p className="text-slate-600 mb-6">
                 Connect with fellow therapists, share insights, and engage with clients in a supportive environment.
               </p>
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <Activity className="h-5 w-5 text-green-600 mx-auto mb-1" />
-                  <p className="font-medium">Active Communities</p>
-                  <p className="text-neutral-500">{communityStats?.totalCommunities || 0}</p>
+                <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
+                  <Activity className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                  <p className="font-medium text-slate-700">Active Communities</p>
+                  <p className="text-slate-500">{communityStats?.totalCommunities || 0}</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
+                <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
                   <MessageCircle className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-                  <p className="font-medium">Professional Posts</p>
-                  <p className="text-neutral-500">{communityStats?.totalPosts || 0}</p>
+                  <p className="font-medium text-slate-700">Professional Posts</p>
+                  <p className="text-slate-500">{communityStats?.totalPosts || 0}</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <UserCheck className="h-5 w-5 text-purple-600 mx-auto mb-1" />
-                  <p className="font-medium">Active Members</p>
-                  <p className="text-neutral-500">{communityStats?.totalMembers || 0}</p>
+                <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
+                  <UserCheck className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                  <p className="font-medium text-slate-700">Active Members</p>
+                  <p className="text-slate-500">{communityStats?.totalMembers || 0}</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <Users className="h-5 w-5 text-indigo-600 mx-auto mb-1" />
-                  <p className="font-medium">Therapists Online</p>
-                  <p className="text-neutral-500">{communityStats?.totalMembers || 0}</p>
+                <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
+                  <Users className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                  <p className="font-medium text-slate-700">Therapists Online</p>
+                  <p className="text-slate-500">{communityStats?.totalMembers || 0}</p>
                 </div>
               </div>
             </div>
@@ -451,7 +451,7 @@ export default function TherapistCommunity() {
                   setIsSidebarOpen(true);
                 }
               }}
-              className="border-amber-300 text-amber-600"
+              className="border-blue-300 text-blue-600"
             >
               <Hash className="h-4 w-4 mr-1" />
               {selectedCommunityId ? 'Communities' : 'Select Community'}
@@ -459,7 +459,7 @@ export default function TherapistCommunity() {
             {selectedRoom && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>/</span>
-                <span className="font-medium text-amber-700">{selectedRoom.name}</span>
+                <span className="font-medium text-blue-700">{selectedRoom.name}</span>
               </div>
             )}
           </div>
@@ -468,14 +468,14 @@ export default function TherapistCommunity() {
         {/* Mobile Main Content */}
         <div className="flex-1 flex flex-col h-full">
           {!selectedRoomId ? (
-            // Mobile Welcome State
-            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+            // Mobile Welcome State - Professional Healthcare Design
+            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
               <div className="text-center max-w-md p-4">
-                <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Stethoscope className="h-8 w-8 text-green-600" />
+                <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border border-blue-100">
+                  <Stethoscope className="h-8 w-8 text-blue-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-800 mb-2">Therapist Community Hub</h2>
-                <p className="text-neutral-600 mb-6">
+                <h2 className="text-2xl font-bold text-blue-900 mb-2">Therapist Community Hub</h2>
+                <p className="text-slate-600 mb-6">
                   Tap Communities above to connect with fellow therapists and clients.
                 </p>
               </div>
