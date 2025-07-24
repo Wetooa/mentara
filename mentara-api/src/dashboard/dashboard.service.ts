@@ -94,9 +94,10 @@ export class DashboardService {
         const therapistId = assignment.therapist.userId;
         try {
           // Check if conversation already exists
-          const existingConversations = await this.messagingService.getUserConversations(userId, 1, 100);
-          const hasConversationWithTherapist = existingConversations.some(conv => 
-            conv.participants?.some(p => p.userId === therapistId)
+          const existingConversations =
+            await this.messagingService.getUserConversations(userId, 1, 100);
+          const hasConversationWithTherapist = existingConversations.some(
+            (conv) => conv.participants?.some((p) => p.userId === therapistId),
           );
 
           if (!hasConversationWithTherapist) {
@@ -106,11 +107,16 @@ export class DashboardService {
               type: 'direct',
               title: `Therapy Session with ${assignment.therapist.user.firstName} ${assignment.therapist.user.lastName}`,
             });
-            console.log(`✅ Auto-created missing conversation between client ${userId} and therapist ${therapistId}`);
+            console.log(
+              `✅ Auto-created missing conversation between client ${userId} and therapist ${therapistId}`,
+            );
           }
         } catch (error) {
           // Log but don't fail dashboard load if conversation creation fails
-          console.warn(`⚠️ Failed to ensure conversation exists between client ${userId} and therapist ${therapistId}:`, error);
+          console.warn(
+            `⚠️ Failed to ensure conversation exists between client ${userId} and therapist ${therapistId}:`,
+            error,
+          );
         }
       }
 
@@ -141,8 +147,10 @@ export class DashboardService {
   }
 
   async getTherapistDashboardData(userId: string) {
-    console.log(`🔍 [DashboardService] Getting therapist dashboard data for userId: ${userId}`);
-    
+    console.log(
+      `🔍 [DashboardService] Getting therapist dashboard data for userId: ${userId}`,
+    );
+
     try {
       // First, verify the user exists and check their role
       const user = await this.prisma.user.findUnique({
@@ -163,11 +171,17 @@ export class DashboardService {
         throw new NotFoundException(`User not found: ${userId}`);
       }
 
-      console.log(`📋 [DashboardService] User found: ${user.email} (${user.firstName} ${user.lastName}), role: ${user.role}, active: ${user.isActive}`);
+      console.log(
+        `📋 [DashboardService] User found: ${user.email} (${user.firstName} ${user.lastName}), role: ${user.role}, active: ${user.isActive}`,
+      );
 
       if (user.role !== 'therapist') {
-        console.error(`❌ [DashboardService] User ${user.email} has role '${user.role}', expected 'therapist'`);
-        throw new NotFoundException(`User ${user.email} does not have therapist role. Current role: ${user.role}`);
+        console.error(
+          `❌ [DashboardService] User ${user.email} has role '${user.role}', expected 'therapist'`,
+        );
+        throw new NotFoundException(
+          `User ${user.email} does not have therapist role. Current role: ${user.role}`,
+        );
       }
 
       if (!user.isActive) {
@@ -176,8 +190,10 @@ export class DashboardService {
       }
 
       // Now attempt to find the therapist record
-      console.log(`🔍 [DashboardService] Looking for Therapist record for userId: ${userId}`);
-      
+      console.log(
+        `🔍 [DashboardService] Looking for Therapist record for userId: ${userId}`,
+      );
+
       const therapist = await this.prisma.therapist.findUnique({
         where: { userId },
         include: {
@@ -213,25 +229,35 @@ export class DashboardService {
       });
 
       if (!therapist) {
-        console.error(`❌ [DashboardService] Therapist record not found for user: ${user.email} (${userId})`);
-        console.error(`❌ [DashboardService] User has role 'therapist' but missing Therapist table record`);
-        
+        console.error(
+          `❌ [DashboardService] Therapist record not found for user: ${user.email} (${userId})`,
+        );
+        console.error(
+          `❌ [DashboardService] User has role 'therapist' but missing Therapist table record`,
+        );
+
         // Additional diagnostic information
         const allTherapistRecords = await this.prisma.therapist.count();
-        console.log(`📊 [DashboardService] Total Therapist records in database: ${allTherapistRecords}`);
-        
+        console.log(
+          `📊 [DashboardService] Total Therapist records in database: ${allTherapistRecords}`,
+        );
+
         throw new NotFoundException(
           `Therapist record not found for user ${user.email} (${userId}). ` +
-          `User has role 'therapist' but is missing corresponding Therapist table record. ` +
-          `This indicates a data consistency issue that needs to be resolved.`
+            `User has role 'therapist' but is missing corresponding Therapist table record. ` +
+            `This indicates a data consistency issue that needs to be resolved.`,
         );
       }
 
-      console.log(`✅ [DashboardService] Therapist record found: ${therapist.user.email}, status: ${therapist.status}`);
+      console.log(
+        `✅ [DashboardService] Therapist record found: ${therapist.user.email}, status: ${therapist.status}`,
+      );
 
       // Validate therapist status
       if (therapist.status !== 'APPROVED') {
-        console.warn(`⚠️ [DashboardService] Therapist ${therapist.user.email} has status: ${therapist.status}`);
+        console.warn(
+          `⚠️ [DashboardService] Therapist ${therapist.user.email} has status: ${therapist.status}`,
+        );
       }
 
       const completedMeetingsCount = await this.prisma.meeting.count({
@@ -264,8 +290,8 @@ export class DashboardService {
             startTime: {
               gte: startOfDay,
               lte: endOfDay,
-            }
-          }
+            },
+          },
         },
       });
 
@@ -294,7 +320,7 @@ export class DashboardService {
         include: {
           payments: {
             where: {
-              status: 'completed',
+              status: 'COMPLETED',
             },
           },
         },
@@ -304,14 +330,18 @@ export class DashboardService {
       let todayIncome = 0;
       for (const meeting of todayCompletedMeetings) {
         const meetingIncome = meeting.payments.reduce((sum, payment) => {
-          return sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0);
+          return (
+            sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+          );
         }, 0);
         todayIncome += meetingIncome;
       }
 
       // If no payments recorded, estimate from therapist hourly rate
       if (todayIncome === 0 && todayCompletedMeetings.length > 0) {
-        const therapistRate = parseFloat(therapist.hourlyRate?.toString() || '0');
+        const therapistRate = parseFloat(
+          therapist.hourlyRate?.toString() || '0',
+        );
         todayIncome = todayCompletedMeetings.length * therapistRate;
       }
 
@@ -334,7 +364,9 @@ export class DashboardService {
         },
       });
 
-      console.log(`📊 [DashboardService] Dashboard stats for ${therapist.user.email}: clients=${totalClientsCount}, completed_meetings=${completedMeetingsCount}, pending_worksheets=${pendingWorksheetsCount}`);
+      console.log(
+        `📊 [DashboardService] Dashboard stats for ${therapist.user.email}: clients=${totalClientsCount}, completed_meetings=${completedMeetingsCount}, pending_worksheets=${pendingWorksheetsCount}`,
+      );
 
       const dashboardData = {
         therapist: {
@@ -356,12 +388,18 @@ export class DashboardService {
           pendingWorksheets: pendingWorksheetsCount,
           patientStats: {
             total: totalClientsCount,
-            percentage: totalClientsCount > 0 ? Math.round((completedMeetingsCount / totalClientsCount) * 100) : 0,
-            months: Math.floor((Date.now() - therapist.createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30)),
-            chartData: [] // Will be populated with actual chart data if needed
-          }
+            percentage:
+              totalClientsCount > 0
+                ? Math.round((completedMeetingsCount / totalClientsCount) * 100)
+                : 0,
+            months: Math.floor(
+              (Date.now() - therapist.createdAt.getTime()) /
+                (1000 * 60 * 60 * 24 * 30),
+            ),
+            chartData: [], // Will be populated with actual chart data if needed
+          },
         },
-        upcomingAppointments: therapist.meetings.map(meeting => ({
+        upcomingAppointments: therapist.meetings.map((meeting) => ({
           id: meeting.id,
           patientName: `${meeting.client.user.firstName} ${meeting.client.user.lastName}`,
           time: meeting.startTime,
@@ -375,16 +413,20 @@ export class DashboardService {
         recentSessions,
       };
 
-      console.log(`✅ [DashboardService] Successfully retrieved dashboard data for ${therapist.user.email}`);
+      console.log(
+        `✅ [DashboardService] Successfully retrieved dashboard data for ${therapist.user.email}`,
+      );
       return dashboardData;
-
     } catch (error) {
       if (error instanceof NotFoundException) {
         // Re-throw NotFoundException with our enhanced error messages
         throw error;
       }
-      
-      console.error(`❌ [DashboardService] Unexpected error getting therapist dashboard data for userId ${userId}:`, error);
+
+      console.error(
+        `❌ [DashboardService] Unexpected error getting therapist dashboard data for userId ${userId}:`,
+        error,
+      );
       throw new InternalServerErrorException(
         `Failed to get therapist dashboard data for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
       );
