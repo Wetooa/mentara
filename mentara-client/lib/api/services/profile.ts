@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axios";
+import { profile } from "console";
 
 export interface PublicProfileResponse {
   user: {
@@ -28,7 +29,7 @@ export interface PublicProfileResponse {
   }>;
   recentActivity: Array<{
     id: string;
-    type: 'post' | 'comment';
+    type: "post" | "comment";
     title?: string; // for posts
     content: string;
     createdAt: string;
@@ -50,9 +51,18 @@ export interface UpdateProfileRequest {
   firstName?: string;
   middleName?: string;
   lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  birthDate?: string;
+  address?: string;
   bio?: string;
   avatarUrl?: string;
   coverImageUrl?: string;
+  timezone?: string;
+  language?: string;
+  theme?: string;
+  isActive?: boolean;
+  role?: string;
 }
 
 export interface UpdateProfileResponse {
@@ -88,8 +98,10 @@ export function createProfileService(axios: AxiosInstance) {
      * Update own profile
      * Only allows updating basic profile fields
      */
-    async updateProfile(profileData: UpdateProfileRequest): Promise<UpdateProfileResponse> {
-      const { data } = await axios.put('/profile', profileData);
+    async updateProfile(
+      profileData: UpdateProfileRequest
+    ): Promise<UpdateProfileResponse> {
+      const { data } = await axios.put("/profile", profileData);
       return data;
     },
 
@@ -98,11 +110,11 @@ export function createProfileService(axios: AxiosInstance) {
      */
     async uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append("avatar", file);
 
-      const { data } = await axios.put('/profile', formData, {
+      const { data } = await axios.put("/profile", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       return { avatarUrl: data.user.avatarUrl };
@@ -113,11 +125,11 @@ export function createProfileService(axios: AxiosInstance) {
      */
     async uploadCoverImage(file: File): Promise<{ coverImageUrl: string }> {
       const formData = new FormData();
-      formData.append('cover', file);
+      formData.append("cover", file);
 
-      const { data } = await axios.put('/profile', formData, {
+      const { data } = await axios.put("/profile", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       return { coverImageUrl: data.user.coverImageUrl };
@@ -128,31 +140,50 @@ export function createProfileService(axios: AxiosInstance) {
      */
     async updateProfileWithFiles(
       profileData: UpdateProfileRequest,
+      userId: string,
       files?: { avatar?: File; cover?: File }
     ): Promise<UpdateProfileResponse> {
-      const formData = new FormData();
+      try {
+        if (files && (files.avatar || files.cover)) {
+          // Use FormData for file uploads
+          const formData = new FormData();
 
-      // Add text fields
-      Object.entries(profileData).forEach(([key, value]) => {
-        if (value !== undefined) {
-          formData.append(key, value);
+          // Add profile data
+          Object.entries(profileData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              formData.append(key, String(value));
+            }
+          });
+
+          // Add files
+          if (files.avatar) {
+            formData.append("avatar", files.avatar);
+          }
+          if (files.cover) {
+            formData.append("cover", files.cover);
+          }
+
+          const { data } = await axios.put(`/users/${userId}`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+
+          return data;
+        } else {
+          // Use JSON for data-only updates
+          const { data } = await axios.put(`/users/${userId}`, profileData, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          return data;
         }
-      });
-
-      // Add files
-      if (files?.avatar) {
-        formData.append('avatar', files.avatar);
+      } catch (error) {
+        console.error("Failed to update user profile:", error);
+        throw error;
       }
-      if (files?.cover) {
-        formData.append('cover', files.cover);
-      }
-
-      const { data } = await axios.put('/profile', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return data;
-    }
+    },
   };
 }

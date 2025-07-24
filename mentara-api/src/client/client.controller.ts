@@ -55,16 +55,6 @@ export class ClientController {
   }
 
   @Put('profile')
-  @ApiOperation({
-    summary: 'Update client profile',
-    description: 'Update client profile information',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Updated successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateProfile(
     @CurrentUserId() id: string,
     @Body() data: UpdateClientDto,

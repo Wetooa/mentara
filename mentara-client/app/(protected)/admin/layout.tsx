@@ -32,7 +32,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { UserDisplay } from "@/components/common/UserDisplay";
-
+import { useApi } from "@/lib/api";
 
 export default function AdminLayout({
   children,
@@ -46,7 +46,7 @@ export default function AdminLayout({
 
   // Load sidebar state from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('admin-sidebar-expanded');
+    const saved = localStorage.getItem("admin-sidebar-expanded");
     if (saved !== null) {
       setIsSidebarExpanded(JSON.parse(saved));
     }
@@ -56,9 +56,8 @@ export default function AdminLayout({
   const toggleSidebar = () => {
     const newState = !isSidebarExpanded;
     setIsSidebarExpanded(newState);
-    localStorage.setItem('admin-sidebar-expanded', JSON.stringify(newState));
+    localStorage.setItem("admin-sidebar-expanded", JSON.stringify(newState));
   };
-
 
   const navItems = [
     {
@@ -110,14 +109,16 @@ export default function AdminLayout({
   return (
     <div className="flex h-screen w-full bg-gray-50">
       {/* Desktop Sidebar Navigation */}
-      <nav className={cn(
-        "hidden md:flex fixed left-0 top-0 z-10 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
-        isSidebarExpanded ? "w-64" : "w-[70px]"
-      )}>
+      <nav
+        className={cn(
+          "hidden md:flex fixed left-0 top-0 z-10 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
+          isSidebarExpanded ? "w-64" : "w-[70px]"
+        )}
+      >
         {/* Header with Logo and Toggle */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-          <Link 
-            href="/admin" 
+          <Link
+            href="/admin"
             className={cn(
               "flex items-center transition-all duration-300",
               isSidebarExpanded ? "" : "justify-center"
@@ -137,7 +138,7 @@ export default function AdminLayout({
               </span>
             )}
           </Link>
-          
+
           <Button
             variant="ghost"
             size="icon"
@@ -158,7 +159,8 @@ export default function AdminLayout({
         {/* Navigation Items */}
         <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}
@@ -181,7 +183,7 @@ export default function AdminLayout({
                       : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
                   )}
                 />
-                
+
                 {/* Discord-style bevel background */}
                 <div
                   className={cn(
@@ -203,7 +205,7 @@ export default function AdminLayout({
                   >
                     {item.icon}
                   </div>
-                  
+
                   {isSidebarExpanded && (
                     <span
                       className={cn(
@@ -221,11 +223,13 @@ export default function AdminLayout({
             );
           })}
         </div>
-        
+
         {/* Footer */}
         <div className="border-t border-gray-200 p-4">
           {isSidebarExpanded ? (
-            <p className="text-xs text-gray-500 text-center">© 2025 Mentara Admin</p>
+            <p className="text-xs text-gray-500 text-center">
+              © 2025 Mentara Admin
+            </p>
           ) : (
             <div className="flex justify-center">
               <div className="h-2 w-2 rounded-full bg-blue-300" />
@@ -251,7 +255,9 @@ export default function AdminLayout({
                   height={32}
                   priority
                 />
-                <span className="text-lg font-semibold text-gray-900">Admin</span>
+                <span className="text-lg font-semibold text-gray-900">
+                  Admin
+                </span>
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -264,7 +270,9 @@ export default function AdminLayout({
             <div className="flex-1 px-4 py-6">
               <div className="space-y-2">
                 {navItems.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const isActive =
+                    pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`);
                   return (
                     <Link
                       key={item.href}
@@ -317,18 +325,21 @@ export default function AdminLayout({
       )}
 
       {/* Main Content Area - Responsive padding */}
-      <div className={cn(
-        "flex flex-1 flex-col w-full h-screen transition-all duration-300",
-        "md:ml-0",
-        isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
-      )}>
+      <div
+        className={cn(
+          "flex flex-1 flex-col w-full h-screen transition-all duration-300",
+          "md:ml-0",
+          isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
+        )}
+      >
         {/* Top Header - Responsive */}
-        <header className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm" 
+        <header
+          className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm"
           style={{
-            width: isSidebarExpanded 
-              ? 'calc(100% - 256px)' 
-              : 'calc(100% - 70px)',
-            ...(window.innerWidth < 768 && { width: '100%' })
+            width: isSidebarExpanded
+              ? "calc(100% - 256px)"
+              : "calc(100% - 70px)",
+            ...(window.innerWidth < 768 && { width: "100%" }),
           }}
         >
           {/* Mobile menu button and title */}
@@ -347,8 +358,9 @@ export default function AdminLayout({
           {/* Desktop title */}
           <div className="hidden md:block">
             <h1 className="text-lg font-semibold text-gray-900">
-              {navItems.find(item => 
-                pathname === item.href || pathname.startsWith(`${item.href}/`)
+              {navItems.find(
+                (item) =>
+                  pathname === item.href || pathname.startsWith(`${item.href}/`)
               )?.title || "Dashboard"}
             </h1>
           </div>

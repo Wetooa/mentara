@@ -1,9 +1,11 @@
-ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
+ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue belowm
 
 
-The Websocket Connection is finally working for the Messaging component
-- its time to integrate the notifications component as well
-- the notifications stuff is already in place, i think you just have to set it up on the frontend and enable it in the backend. if you get confused, implement it like its done in the messaging component
+Websockets Issue
+- we have quite a bit of an issue, see those useRealTime hooks, i think those are deprecated. as far as i konw, the entire messaging system works without using those hooks. if this is true, then delete them since they are depracated
+- however, it seemss that the outdated /hooks/notification files still use these hooks. these are outdated as well. the notification hooks should utilize the same logic or system as the already working messaging system.
+- if there are real time code that is shared between them then just extract that logic
+
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 

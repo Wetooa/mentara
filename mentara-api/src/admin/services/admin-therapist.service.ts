@@ -513,12 +513,15 @@ export class AdminTherapistService {
         const validTransitions = this.getValidStatusTransitions(
           existingTherapist.status,
         );
+
         const upperCaseStatus = statusData.status.toUpperCase();
         if (!validTransitions.includes(upperCaseStatus)) {
           throw new BadRequestException(
             `Invalid status transition from ${existingTherapist.status} to ${upperCaseStatus}`,
           );
         }
+
+        console.log('Admin ID:', adminId);
 
         // 3. Update therapist status
         const updatedTherapist = await tx.therapist.update({
@@ -565,42 +568,54 @@ export class AdminTherapistService {
         }
 
         // Join the therapist to the community
+        // Join the therapist to the community
         if (upperCaseStatus === 'APPROVED') {
           // Map areas of expertise to community slugs
           const areasToCommunityMap: Record<string, string> = {
             stress: 'stress-support',
-            anxiety: 'anxiety-support',
+            anxiety: 'anxiety-warriors',
             depression: 'depression-support',
             insomnia: 'insomnia-support',
             panic: 'panic-disorder-support',
-            bipolar: 'bipolar-disorder-support',
+            bipolar: 'bipolar-support',
             ocd: 'ocd-support',
             ptsd: 'ptsd-support',
             'social-anxiety': 'social-anxiety-support',
             phobia: 'phobia-support',
-            burnout: 'burnout-support',
-            'eating-disorder': 'eating-disorders-support',
+            burnout: 'burnout-recovery',
+            'eating-disorder': 'eating-disorder-recovery',
             adhd: 'adhd-support',
-            'substance-use': 'substance-use-support',
-            'drug-use': 'drug-use-support',
+            'substance-use': 'substance-recovery-support',
+            'drug-use': 'substance-recovery-support',
           };
 
-          // Get community IDs based on therapist's areas of expertise
-          const communityMemberships = updatedTherapist.areasOfExpertise
+          // Get community slugs based on therapist's areas of expertise
+          const communitySlugs = updatedTherapist.areasOfExpertise
             .map((area) => areasToCommunityMap[area])
-            .filter(Boolean) // Remove undefined values
-            .map((communitySlug) => ({
+            .filter(Boolean); // Remove undefined values
+
+          // Always add general support community
+          communitySlugs.push('general-support');
+
+          // Look up actual community IDs by slug
+          const communities = await Promise.all(
+            communitySlugs.map(async (slug) => {
+              const community = await tx.community.findUnique({
+                where: { slug },
+                select: { id: true, slug: true },
+              });
+              return community;
+            }),
+          );
+
+          // Filter out any communities that don't exist and create memberships
+          const communityMemberships = communities
+            .filter(Boolean) // Remove null/undefined communities
+            .map((community) => ({
               userId: therapistId,
-              communityId: `dev_comm_${communitySlug}`, // Using the format from your screenshot
+              communityId: community!.id,
               joinedAt: new Date(),
             }));
-
-          // Also add to general support community
-          communityMemberships.push({
-            userId: therapistId,
-            communityId: 'dev_comm_general-support',
-            joinedAt: new Date(),
-          });
 
           // Create all memberships
           if (communityMemberships.length > 0) {
@@ -609,6 +624,10 @@ export class AdminTherapistService {
               skipDuplicates: true, // Prevent duplicate memberships
             });
           }
+
+          console.log(
+            `Added therapist ${therapistId} to ${communityMemberships.length} communities`,
+          );
         }
 
         // Audit log removed - not needed for student project

@@ -5,16 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Users, 
   Clock, 
   UserCheck, 
   Calendar,
-  MessageCircle
+  MessageCircle,
+  AlertCircle,
+  RefreshCw,
+  TrendingUp,
+  Activity
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { QuickAssignButton } from '../worksheets/WorksheetAssignmentDialog';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface MatchedClient {
   relationshipId: string;
@@ -50,32 +56,74 @@ interface MatchedClientsData {
 }
 
 export function MatchedClientsSection() {
-  const { data, isLoading, error } = useMatchedClients();
+  const { data, isLoading, error, refetch } = useMatchedClients();
 
+  // Enhanced loading state with better skeleton design
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-8 w-20" />
+      <div className="space-y-6">
+        {/* Summary cards skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="bg-amber-50/50">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-full bg-amber-200" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32 bg-amber-200" />
+                    <Skeleton className="h-6 w-16 bg-amber-200" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 w-full" />
-        ))}
+        
+        {/* Recent matches skeleton */}
+        <Card className="bg-amber-50/30">
+          <CardHeader>
+            <Skeleton className="h-6 w-48 bg-amber-200" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-white rounded-lg border border-amber-100">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-full bg-amber-200" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24 bg-amber-200" />
+                    <Skeleton className="h-3 w-32 bg-amber-200" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-20 bg-amber-200" />
+                  <Skeleton className="h-8 w-20 bg-amber-200" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  // Enhanced error state with better UX
   if (error) {
     return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <div className="text-red-500 mb-2">Failed to load matched clients</div>
-          <Button variant="outline" onClick={() => window.location.reload()}>
+      <Alert className="border-amber-200 bg-amber-50">
+        <AlertCircle className="h-4 w-4 text-amber-600" />
+        <AlertDescription className="flex items-center justify-between text-amber-800">
+          <span>Failed to load matched clients. This might be due to no assigned clients yet.</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="ml-4 border-amber-300 text-amber-700 hover:bg-amber-100"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
             Retry
           </Button>
-        </CardContent>
-      </Card>
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -99,126 +147,183 @@ export function MatchedClientsSection() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-green-100 p-2 rounded-full">
-                <UserCheck className="h-4 w-4 text-green-600" />
+      {/* Enhanced Summary Cards with amber theme */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card className="bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200 hover:shadow-md transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-amber-500 p-3 rounded-xl shadow-sm">
+                <UserCheck className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Recent Matches (30 days)</p>
-                <p className="text-2xl font-semibold">{summary.totalRecentMatches}</p>
+                <p className="text-sm font-medium text-amber-700">Recent Matches</p>
+                <p className="text-xs text-amber-600 mb-1">Last 30 days</p>
+                <p className="text-2xl font-bold text-amber-900">{summary.totalRecentMatches}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-100 p-2 rounded-full">
-                <Users className="h-4 w-4 text-blue-600" />
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 hover:shadow-md transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-500 p-3 rounded-xl shadow-sm">
+                <Users className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Clients</p>
-                <p className="text-2xl font-semibold">{summary.totalMatches}</p>
+                <p className="text-sm font-medium text-blue-700">Total Clients</p>
+                <p className="text-xs text-blue-600 mb-1">All time</p>
+                <p className="text-2xl font-bold text-blue-900">{summary.totalMatches}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-50 to-green-100/50 border-green-200 hover:shadow-md transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-green-500 p-3 rounded-xl shadow-sm">
+                <Activity className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-green-700">Active Rate</p>
+                <p className="text-xs text-green-600 mb-1">Client engagement</p>
+                <p className="text-2xl font-bold text-green-900">
+                  {summary.totalMatches > 0 ? Math.round((summary.totalRecentMatches / summary.totalMatches) * 100) : 0}%
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Matches Section */}
+      {/* Enhanced Recent Matches Section */}
       {recentMatches.length > 0 && (
-        <Card>
+        <Card className="bg-gradient-to-br from-amber-50/30 to-white border-amber-200">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5 text-green-600" />
-              Recent Matches ({recentMatches.length})
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-amber-500 p-2 rounded-lg">
+                  <UserCheck className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-amber-900">Recent Client Matches</h3>
+                  <p className="text-sm text-amber-700">New connections from the last 30 days</p>
+                </div>
+              </div>
+              <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-300">
+                {recentMatches.length} new
+              </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-3">
-              {recentMatches.slice(0, 4).map((match) => (
-                <div
-                  key={match.relationshipId}
-                  className="flex items-center justify-between p-3 bg-green-50 rounded-lg border"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar>
+          <CardContent className="pt-0 space-y-4">
+            {recentMatches.slice(0, 4).map((match) => (
+              <div
+                key={match.relationshipId}
+                className={cn(
+                  "group flex items-center justify-between p-4 rounded-xl border transition-all duration-300",
+                  "bg-white hover:bg-gradient-to-r hover:from-amber-50 hover:to-white",
+                  "border-amber-200 hover:border-amber-300 hover:shadow-md"
+                )}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Avatar className="h-12 w-12 ring-2 ring-amber-200 group-hover:ring-amber-300 transition-all">
                       <AvatarImage src={match.client.profilePicture} />
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-gradient-to-br from-amber-100 to-amber-200 text-amber-800 font-semibold">
                         {match.client.firstName[0]}{match.client.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-medium">
-                        {match.client.firstName} {match.client.lastName}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          Connected {match.matchInfo.daysSinceMatch} days ago
-                        </span>
-                        {match.assessmentInfo.hasAssessment && (
-                          <Badge variant="outline" className="text-xs">
-                            {match.assessmentInfo.assessmentType}
-                          </Badge>
-                        )}
-                      </div>
+                    <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white"></div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-semibold text-gray-900 group-hover:text-amber-900 transition-colors">
+                      {match.client.firstName} {match.client.lastName}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3 text-amber-600" />
+                        <span className="font-medium">{match.matchInfo.daysSinceMatch}</span> days ago
+                      </span>
+                      {match.assessmentInfo.hasAssessment && (
+                        <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
+                          {match.assessmentInfo.assessmentType}
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleStartConversation(
-                        match.client.id, 
-                        `${match.client.firstName} ${match.client.lastName}`
-                      )}
-                    >
-                      <MessageCircle className="h-4 w-4 mr-1" />
-                      Message
-                    </Button>
-                    <QuickAssignButton
-                      client={{
-                        id: match.client.id,
-                        firstName: match.client.firstName,
-                        lastName: match.client.lastName,
-                        email: match.client.email,
-                        profilePicture: match.client.profilePicture,
-                        assessmentInfo: match.assessmentInfo,
-                      }}
-                      variant="outline"
-                      size="sm"
-                    />
-                    <Button size="sm">
-                      Schedule
-                    </Button>
-                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                    onClick={() => handleStartConversation(
+                      match.client.id, 
+                      `${match.client.firstName} ${match.client.lastName}`
+                    )}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Message
+                  </Button>
+                  <QuickAssignButton
+                    client={{
+                      id: match.client.id,
+                      firstName: match.client.firstName,
+                      lastName: match.client.lastName,
+                      email: match.client.email,
+                      profilePicture: match.client.profilePicture,
+                      assessmentInfo: match.assessmentInfo,
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  />
+                  <Button 
+                    size="sm" 
+                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                  >
+                    Schedule
+                  </Button>
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}
 
-      {/* Empty State */}
+      {/* Enhanced Empty State */}
       {summary.totalMatches === 0 && (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <div className="bg-gray-100 p-4 rounded-full w-fit mx-auto mb-4">
-              <Users className="h-8 w-8 text-gray-400" />
+        <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-200">
+          <CardContent className="p-12 text-center">
+            <div className="bg-gradient-to-br from-amber-100 to-amber-200 p-6 rounded-2xl w-fit mx-auto mb-6 shadow-sm">
+              <Users className="h-12 w-12 text-amber-700" />
             </div>
-            <h3 className="font-semibold mb-2">No Matched Clients Yet</h3>
-            <p className="text-muted-foreground mb-4">
-              You&apos;ll see client requests and new matches here once clients start sending requests.
+            <h3 className="text-xl font-bold text-amber-900 mb-3">Welcome to Your Client Dashboard!</h3>
+            <p className="text-amber-700 mb-6 max-w-md mx-auto leading-relaxed">
+              Your matched clients will appear here once the matching algorithm connects you with clients who need your expertise. 
+              Great things are coming!
             </p>
-            <Button variant="outline">
-              Review Profile
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button 
+                variant="outline" 
+                className="border-amber-300 text-amber-700 hover:bg-amber-100"
+              >
+                <UserCheck className="h-4 w-4 mr-2" />
+                Review Profile
+              </Button>
+              <Button 
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                <TrendingUp className="h-4 w-4 mr-2" />
+                View Analytics
+              </Button>
+            </div>
+            <div className="mt-8 p-4 bg-amber-100/50 rounded-lg border border-amber-200">
+              <p className="text-sm text-amber-800">
+                <strong>💡 Tip:</strong> Make sure your profile is complete and your specializations are up-to-date to attract the right clients.
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}

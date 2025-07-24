@@ -132,7 +132,7 @@ export class WorksheetsService {
 
   async create(
     data: WorksheetCreateInputDto,
-    clientId: string,
+    userId: string,
     therapistId: string,
     files: Express.Multer.File[] = [],
   ) {
@@ -143,7 +143,7 @@ export class WorksheetsService {
         instructions: data.instructions || '',
         dueDate: data.dueDate || new Date(),
         status: (data as any).status || 'ASSIGNED',
-        clientId,
+        clientId: userId,
         therapistId,
         // Material files can be uploaded separately
         materialUrls: [],

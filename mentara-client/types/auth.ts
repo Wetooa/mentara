@@ -35,6 +35,20 @@ export interface ClientPreferences {
   };
 }
 
+export interface ClientProfileResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: "client";
+  dateOfBirth?: string;
+  phoneNumber?: string;
+  profileComplete: boolean;
+  therapistId?: string;
+  createdAt: string;
+  hasSeenTherapistRecommendations: boolean;
+}
+
 export interface AssessmentResults {
   assessmentId: string;
   completedAt: string;

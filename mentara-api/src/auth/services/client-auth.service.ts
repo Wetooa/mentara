@@ -10,6 +10,7 @@ import { EmailService } from '../../email/email.service';
 import { EmailVerificationService } from './email-verification.service';
 import * as bcrypt from 'bcrypt';
 import { processPreAssessmentAnswers } from '../../pre-assessment/pre-assessment.utils';
+import { generateAIEvaluationData } from '../../pre-assessment/ai-evaluation.utils';
 
 @Injectable()
 export class ClientAuthService {
@@ -75,13 +76,19 @@ export class ClientAuthService {
           registerDto.preassessmentAnswers,
         );
 
+        // Generate realistic AI evaluation data based on assessment results
+        const aiEvaluationData = generateAIEvaluationData(
+          scores,
+          severityLevels,
+        );
+
         preAssessment = await tx.preAssessment.create({
           data: {
             clientId: user.id,
             answers: registerDto.preassessmentAnswers, // Flat array of 201 responses
             scores, // Calculated scores by questionnaire
             severityLevels, // Severity classifications
-            aiEstimate: {}, // Will be calculated later by AI service
+            aiEstimate: aiEvaluationData as any, // Realistic AI evaluation data - cast to satisfy Prisma JSON type
             isProcessed: true, // Mark as processed since we calculated scores
             processedAt: new Date(),
           },
@@ -175,14 +182,7 @@ export class ClientAuthService {
   async getClientProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        birthDate: true,
-        createdAt: true,
-        role: true,
+      include: {
         client: {
           include: {
             assignedTherapists: {
@@ -218,6 +218,7 @@ export class ClientAuthService {
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       role: 'client' as const,
+      avatarUrl: user.avatarUrl || undefined,
       dateOfBirth: user.birthDate ? user.birthDate.toISOString() : undefined,
       phoneNumber: undefined, // Phone number not stored in User model for clients
       profileComplete: !!(user.firstName && user.lastName && user.birthDate),

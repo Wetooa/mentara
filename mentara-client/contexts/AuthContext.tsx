@@ -25,6 +25,7 @@ export interface User {
   firstName?: string;
   lastName?: string;
   avatarUrl?: string;
+  hasSeenTherapistRecommendations?: boolean;
 }
 
 export interface AuthContextType {
@@ -141,14 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // const currentUserProfile = useCurrentUserProfile();
+
   const userRole = (authData as any)?.role as UserRole | null;
   const userId = (authData as any)?.userId || null;
 
   // Fetch profile data if user is authenticated
-  const {
-    data: profileData,
-    refetch: refetchProfile,
-  } = useQuery({
+  const { data: profileData, refetch: refetchProfile } = useQuery({
     queryKey: ["auth", "current-user-profile", userId, userRole],
     queryFn: async () => {
       if (!userRole) {
@@ -177,9 +177,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Normalize the profile data structure
       return {
-        firstName: profileResponse.user?.firstName || profileResponse.firstName || "",
-        lastName: profileResponse.user?.lastName || profileResponse.lastName || "",
+        firstName:
+          profileResponse.user?.firstName || profileResponse.firstName || "",
+        lastName:
+          profileResponse.user?.lastName || profileResponse.lastName || "",
         avatarUrl: profileResponse.user?.avatarUrl || profileResponse.avatarUrl,
+        hasSeenTherapistRecommendations:
+          profileResponse.hasSeenTherapistRecommendations,
       };
     },
     enabled: isClient && !!userId && !!userRole && hasToken === true,
@@ -193,6 +197,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  console.log("Auth Data:", authData);
+  console.log("Profile Data:", profileData);
+
   // Create user object with profile data when available
   const user: User | null =
     userRole && userId
@@ -202,6 +209,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           firstName: profileData?.firstName,
           lastName: profileData?.lastName,
           avatarUrl: profileData?.avatarUrl,
+          hasSeenTherapistRecommendations:
+            profileData?.hasSeenTherapistRecommendations,
         }
       : null;
 
@@ -295,7 +304,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     // Clear React Query cache to prevent stale authentication data
     queryClient.clear();
-    
+
     if (isClient) {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
@@ -355,6 +364,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      // Client welcome redirect logic - ensure clients see welcome page if they haven't seen recommendations
+      if (
+        isAuthenticated &&
+        userRole === "client" &&
+        user?.hasSeenTherapistRecommendations === false
+      ) {
+        if (!pathname.startsWith("/client/welcome")) {
+          router.push("/client/welcome");
+          return;
+        }
+      }
+
       // Authenticated user on protected route
       if (isAuthenticated && isAnyRoleRoute(pathname)) {
         // Check if user has correct role for this route
@@ -378,6 +399,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     isAuthenticated,
     userRole,
+    user,
     pathname,
     router,
     toast,

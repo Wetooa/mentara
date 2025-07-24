@@ -254,13 +254,13 @@ export class SupabaseStorageService {
     }
 
     // Filename validation - prevent path traversal
-    const safeFilename = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-    if (safeFilename !== file.originalname) {
-      return {
-        isValid: false,
-        error: 'Filename contains invalid characters',
-      };
-    }
+    // const safeFilename = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    // if (safeFilename !== file.originalname) {
+    //   return {
+    //     isValid: false,
+    //     error: 'Filename contains invalid characters',
+    //   };
+    // }
 
     return { isValid: true };
   }

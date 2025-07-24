@@ -181,83 +181,122 @@ export default function FilterBar({
   };
 
   return (
-    <Card className={className}>
-      <CardContent className="p-4 space-y-4">
+    <Card className={`${className} shadow-sm border-blue-100 bg-gradient-to-r from-blue-50/30 to-white`}>
+      <CardContent className="p-5 space-y-5">
+        {/* Filter Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-5 w-5 text-blue-600" />
+            <h3 className="font-semibold text-gray-900">Find Your Therapist</h3>
+          </div>
+          {activeFiltersData.length > 0 && (
+            <Badge 
+              variant="secondary" 
+              className="bg-blue-100 text-blue-700 font-medium"
+            >
+              {activeFiltersData.length} filter{activeFiltersData.length !== 1 ? 's' : ''} applied
+            </Badge>
+          )}
+        </div>
+
         {/* Quick Filters Row */}
         <div className="flex flex-wrap gap-3 items-center">
           {/* Specialty Tag Picker */}
-          <SpecialtyTagPicker
-            selectedSpecialties={filters.specialties}
-            onChange={(specialties) => updateFilters('specialties', specialties)}
-          />
+          <div className="flex flex-col">
+            <label className="text-xs font-medium text-gray-600 mb-1">Specialty</label>
+            <SpecialtyTagPicker
+              selectedSpecialties={filters.specialties}
+              onChange={(specialties) => updateFilters('specialties', specialties)}
+            />
+          </div>
           
           {/* Location Tag Picker */}
-          <LocationTagPicker
-            selectedLocation={filters.location}
-            onChange={(location) => updateFilters('location', location)}
-          />
+          <div className="flex flex-col">
+            <label className="text-xs font-medium text-gray-600 mb-1">Location</label>
+            <LocationTagPicker
+              selectedLocation={filters.location}
+              onChange={(location) => updateFilters('location', location)}
+            />
+          </div>
           
           {/* Price Range Visual */}
-          <PriceRangeVisual
-            value={filters.priceRange}
-            onChange={(priceRange) => updateFilters('priceRange', priceRange)}
-          />
+          <div className="flex flex-col">
+            <label className="text-xs font-medium text-gray-600 mb-1">Session Rate</label>
+            <PriceRangeVisual
+              value={filters.priceRange}
+              onChange={(priceRange) => updateFilters('priceRange', priceRange)}
+            />
+          </div>
           
           {/* Advanced Filters Toggle */}
-          <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <SlidersHorizontal className="h-4 w-4" />
-                More Filters
-                {isAdvancedOpen ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </Button>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent className="mt-3">
-              <AdvancedFilterGroup
-                filters={filters}
-                onChange={onChange}
-              />
-            </CollapsibleContent>
-          </Collapsible>
+          <div className="flex flex-col justify-end">
+            <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+              <CollapsibleTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors mt-auto"
+                  aria-expanded={isAdvancedOpen}
+                  aria-controls="advanced-filters"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  More Options
+                  {isAdvancedOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent 
+                className="mt-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm"
+                id="advanced-filters"
+              >
+                <AdvancedFilterGroup
+                  filters={filters}
+                  onChange={onChange}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
         </div>
         
         {/* Active Filters Display */}
         {activeFiltersData.length > 0 && (
-          <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-gray-100">
-            <span className="text-sm text-gray-600 font-medium">Active filters:</span>
-            
-            {activeFiltersData.map((filter, index) => (
-              <Badge
-                key={`${filter.type}-${index}`}
-                variant="secondary"
-                className="gap-1 px-2 py-1 text-xs"
-              >
-                {filter.label}
-                <button
-                  onClick={() => handleFilterRemove(filter.type, filter.value)}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5 transition-colors"
-                  aria-label={`Remove ${filter.label} filter`}
+          <div className="flex flex-wrap gap-2 items-start pt-3 border-t border-blue-100">
+            <div className="flex items-center gap-2 mb-2 w-full">
+              <span className="text-sm text-gray-700 font-semibold">Applied Filters:</span>
+              {activeFiltersData.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAll}
+                  className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-auto px-2 py-1 text-xs font-medium ml-auto"
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
+                  Clear all filters
+                </Button>
+              )}
+            </div>
             
-            {activeFiltersData.length > 1 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearAll}
-                className="text-gray-600 hover:text-gray-800 h-auto p-1 text-xs"
-              >
-                Clear all
-              </Button>
-            )}
+            <div className="flex flex-wrap gap-2 w-full">
+              {activeFiltersData.map((filter, index) => (
+                <Badge
+                  key={`${filter.type}-${index}`}
+                  variant="secondary"
+                  className="gap-1.5 px-3 py-1.5 text-xs bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-50"
+                >
+                  <span className="font-medium">{filter.label}</span>
+                  <button
+                    onClick={() => handleFilterRemove(filter.type, filter.value)}
+                    className="ml-1 hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                    aria-label={`Remove ${filter.label} filter`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
           </div>
         )}
       </CardContent>

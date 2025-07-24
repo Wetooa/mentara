@@ -12,9 +12,11 @@ import {
   NotificationType,
   NotificationPriority,
 } from '@prisma/client';
-import { MessagingGateway } from '../messaging/messaging.gateway';
 import { MessageSentEvent } from '../common/events/messaging-events';
-import { PostCreatedEvent, CommentAddedEvent } from '../common/events/social-events';
+import {
+  PostCreatedEvent,
+  CommentAddedEvent,
+} from '../common/events/social-events';
 
 interface WebSocketServer {
   to(room: string): {
@@ -47,16 +49,15 @@ export class NotificationsService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly messagingGateway: MessagingGateway,
   ) {}
 
   onModuleInit() {
     // Configure WebSocket server for real-time notifications
     // Use a slight delay to ensure MessagingGateway is fully initialized
     setTimeout(() => {
-      this.setWebSocketServer(this.messagingGateway.server);
+      // this.setWebSocketServer(this.messagingGateway.server);
     }, 1000);
-    
+
     this.logger.log(
       'NotificationsService initialized with real-time capabilities',
     );
@@ -248,7 +249,7 @@ export class NotificationsService implements OnModuleInit {
     // Return updated default settings since notificationSettings model doesn't exist
     // This provides a consistent interface while using in-memory defaults
     const currentSettings = await this.getNotificationSettings(userId);
-    
+
     return {
       ...currentSettings,
       ...data,
@@ -605,12 +606,8 @@ export class NotificationsService implements OnModuleInit {
   @OnEvent('MessageSentEvent')
   async handleMessageSent(event: MessageSentEvent) {
     try {
-      const { 
-        senderId, 
-        conversationId, 
-        content, 
-        recipientIds 
-      } = event.eventData;
+      const { senderId, conversationId, content, recipientIds } =
+        event.eventData;
 
       // Get sender details
       const sender = await this.prisma.user.findUnique({
@@ -619,7 +616,9 @@ export class NotificationsService implements OnModuleInit {
       });
 
       if (!sender) {
-        this.logger.warn(`Sender not found for message notification: ${senderId}`);
+        this.logger.warn(
+          `Sender not found for message notification: ${senderId}`,
+        );
         return;
       }
 
@@ -638,7 +637,8 @@ export class NotificationsService implements OnModuleInit {
             data: {
               senderId,
               conversationId,
-              messagePreview: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+              messagePreview:
+                content.substring(0, 100) + (content.length > 100 ? '...' : ''),
               senderName,
             },
           },
@@ -654,10 +654,7 @@ export class NotificationsService implements OnModuleInit {
         `Message notifications sent to ${recipientIds.length} recipients for conversation ${conversationId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling message sent event:`,
-        error,
-      );
+      this.logger.error(`Error handling message sent event:`, error);
     }
   }
 
@@ -667,14 +664,8 @@ export class NotificationsService implements OnModuleInit {
   @OnEvent('PostCreatedEvent')
   async handlePostCreated(event: PostCreatedEvent) {
     try {
-      const { 
-        postId, 
-        authorId, 
-        communityId, 
-        title, 
-        content, 
-        isAnonymous 
-      } = event.eventData;
+      const { postId, authorId, communityId, title, content, isAnonymous } =
+        event.eventData;
 
       // Skip notifications for anonymous posts or posts without community
       if (isAnonymous || !communityId) {
@@ -702,7 +693,9 @@ export class NotificationsService implements OnModuleInit {
       });
 
       if (!author || !community) {
-        this.logger.warn(`Author or community not found for post notification: ${postId}`);
+        this.logger.warn(
+          `Author or community not found for post notification: ${postId}`,
+        );
         return;
       }
 
@@ -738,10 +731,7 @@ export class NotificationsService implements OnModuleInit {
         `Post notification sent to ${notifications.length} community members for post ${postId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling post created event:`,
-        error,
-      );
+      this.logger.error(`Error handling post created event:`, error);
     }
   }
 
@@ -751,21 +741,19 @@ export class NotificationsService implements OnModuleInit {
   @OnEvent('CommentAddedEvent')
   async handleCommentAdded(event: CommentAddedEvent) {
     try {
-      const { 
-        commentId, 
-        postId, 
-        authorId, 
-        content, 
-        parentCommentId 
-      } = event.eventData;
+      const { commentId, postId, authorId, content, parentCommentId } =
+        event.eventData;
 
       // Validate required event data
       if (!authorId) {
-        this.logger.error(`Missing authorId in CommentAddedEvent for comment ${commentId}`, {
-          commentId,
-          postId,
-          eventData: event.eventData
-        });
+        this.logger.error(
+          `Missing authorId in CommentAddedEvent for comment ${commentId}`,
+          {
+            commentId,
+            postId,
+            eventData: event.eventData,
+          },
+        );
         return;
       }
 
@@ -775,7 +763,7 @@ export class NotificationsService implements OnModuleInit {
           postId,
           authorId,
           hasContent: !!content,
-          eventData: event.eventData
+          eventData: event.eventData,
         });
         return;
       }
@@ -799,13 +787,16 @@ export class NotificationsService implements OnModuleInit {
       });
 
       if (!author || !post) {
-        this.logger.warn(`Author or post not found for comment notification: ${commentId}`, {
-          authorFound: !!author,
-          postFound: !!post,
-          authorId,
-          postId,
-          commentId
-        });
+        this.logger.warn(
+          `Author or post not found for comment notification: ${commentId}`,
+          {
+            authorFound: !!author,
+            postFound: !!post,
+            authorId,
+            postId,
+            commentId,
+          },
+        );
         return;
       }
 
@@ -824,7 +815,11 @@ export class NotificationsService implements OnModuleInit {
           select: { userId: true },
         });
 
-        if (parentComment && parentComment.userId !== authorId && parentComment.userId !== post.userId) {
+        if (
+          parentComment &&
+          parentComment.userId !== authorId &&
+          parentComment.userId !== post.userId
+        ) {
           recipients.add(parentComment.userId);
         }
       }
@@ -832,7 +827,9 @@ export class NotificationsService implements OnModuleInit {
       // Create notifications for all recipients
       const notifications = Array.from(recipients).map((recipientId) => ({
         userId: recipientId,
-        title: parentCommentId ? 'New Reply to Your Comment' : 'New Comment on Your Post',
+        title: parentCommentId
+          ? 'New Reply to Your Comment'
+          : 'New Comment on Your Post',
         message: `${authorName} ${parentCommentId ? 'replied to your comment' : 'commented on your post'}: "${content.substring(0, 100)}${content.length > 100 ? '...' : ''}"`,
         type: NotificationType.COMMUNITY_REPLY,
         priority: NotificationPriority.NORMAL,
@@ -859,10 +856,7 @@ export class NotificationsService implements OnModuleInit {
         );
       }
     } catch (error) {
-      this.logger.error(
-        `Error handling comment added event:`,
-        error,
-      );
+      this.logger.error(`Error handling comment added event:`, error);
     }
   }
 
@@ -1249,8 +1243,10 @@ export class NotificationsService implements OnModuleInit {
     // Since scheduledFor and sentAt fields don't exist in the Notification model,
     // this method returns a stub response. In a real implementation with these fields,
     // this would process and send scheduled notifications.
-    this.logger.log('Scheduled notifications check completed (no scheduled fields available)');
-    
+    this.logger.log(
+      'Scheduled notifications check completed (no scheduled fields available)',
+    );
+
     return { sent: 0 };
   }
 
@@ -1263,7 +1259,7 @@ export class NotificationsService implements OnModuleInit {
   async handleAppointmentBooked(event: any) {
     try {
       const { data } = event;
-      
+
       // Get therapist and client details
       const [therapist, client] = await Promise.all([
         this.prisma.user.findUnique({
@@ -1330,10 +1326,7 @@ export class NotificationsService implements OnModuleInit {
         `Appointment booked notifications sent for appointment ${data.appointmentId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling appointment booked event:`,
-        error,
-      );
+      this.logger.error(`Error handling appointment booked event:`, error);
     }
   }
 
@@ -1344,7 +1337,7 @@ export class NotificationsService implements OnModuleInit {
   async handleAppointmentCancelled(event: any) {
     try {
       const { data } = event;
-      
+
       // Get therapist and client details
       const [therapist, client] = await Promise.all([
         this.prisma.user.findUnique({
@@ -1362,11 +1355,13 @@ export class NotificationsService implements OnModuleInit {
       const isCancelledByClient = data.cancelledBy === data.clientId;
 
       // Notify the other party about the cancellation
-      const notifyUserId = isCancelledByClient ? data.therapistId : data.clientId;
-      const cancellerName = isCancelledByClient 
+      const notifyUserId = isCancelledByClient
+        ? data.therapistId
+        : data.clientId;
+      const cancellerName = isCancelledByClient
         ? `${client.firstName} ${client.lastName}`
         : `${therapist.firstName} ${therapist.lastName}`;
-      
+
       await this.create(
         {
           userId: notifyUserId,
@@ -1374,7 +1369,9 @@ export class NotificationsService implements OnModuleInit {
           message: `Your session scheduled for ${new Date(data.originalStartTime).toLocaleDateString()} at ${new Date(data.originalStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} has been cancelled by ${cancellerName}. ${data.cancellationReason}`,
           type: NotificationType.APPOINTMENT_CANCELLED,
           priority: NotificationPriority.HIGH,
-          actionUrl: isCancelledByClient ? '/therapist/schedule' : '/client/booking',
+          actionUrl: isCancelledByClient
+            ? '/therapist/schedule'
+            : '/client/booking',
           data: {
             appointmentId: data.appointmentId,
             cancelledBy: data.cancelledBy,
@@ -1397,7 +1394,9 @@ export class NotificationsService implements OnModuleInit {
           message: `Your session with ${isCancelledByClient ? therapist.firstName + ' ' + therapist.lastName : client.firstName + ' ' + client.lastName} scheduled for ${new Date(data.originalStartTime).toLocaleDateString()} has been successfully cancelled.`,
           type: NotificationType.APPOINTMENT_CANCELLED,
           priority: NotificationPriority.NORMAL,
-          actionUrl: isCancelledByClient ? '/client/booking' : '/therapist/schedule',
+          actionUrl: isCancelledByClient
+            ? '/client/booking'
+            : '/therapist/schedule',
           data: {
             appointmentId: data.appointmentId,
             originalStartTime: data.originalStartTime,
@@ -1415,10 +1414,7 @@ export class NotificationsService implements OnModuleInit {
         `Appointment cancellation notifications sent for appointment ${data.appointmentId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling appointment cancelled event:`,
-        error,
-      );
+      this.logger.error(`Error handling appointment cancelled event:`, error);
     }
   }
 
@@ -1429,7 +1425,7 @@ export class NotificationsService implements OnModuleInit {
   async handleAppointmentRescheduled(event: any) {
     try {
       const { data } = event;
-      
+
       // Get therapist and client details
       const [therapist, client] = await Promise.all([
         this.prisma.user.findUnique({
@@ -1445,13 +1441,15 @@ export class NotificationsService implements OnModuleInit {
       if (!therapist || !client) return;
 
       const isRescheduledByClient = data.rescheduledBy === data.clientId;
-      
+
       // Notify the other party about the reschedule
-      const notifyUserId = isRescheduledByClient ? data.therapistId : data.clientId;
-      const reschedulerName = isRescheduledByClient 
+      const notifyUserId = isRescheduledByClient
+        ? data.therapistId
+        : data.clientId;
+      const reschedulerName = isRescheduledByClient
         ? `${client.firstName} ${client.lastName}`
         : `${therapist.firstName} ${therapist.lastName}`;
-      
+
       await this.create(
         {
           userId: notifyUserId,
@@ -1501,10 +1499,7 @@ export class NotificationsService implements OnModuleInit {
         `Appointment rescheduled notifications sent for appointment ${data.appointmentId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling appointment rescheduled event:`,
-        error,
-      );
+      this.logger.error(`Error handling appointment rescheduled event:`, error);
     }
   }
 
@@ -1515,7 +1510,7 @@ export class NotificationsService implements OnModuleInit {
   async handleAppointmentCompleted(event: any) {
     try {
       const { data } = event;
-      
+
       // Get therapist and client details
       const [therapist, client] = await Promise.all([
         this.prisma.user.findUnique({
@@ -1583,10 +1578,7 @@ export class NotificationsService implements OnModuleInit {
         `Appointment completed notifications sent for appointment ${data.appointmentId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling appointment completed event:`,
-        error,
-      );
+      this.logger.error(`Error handling appointment completed event:`, error);
     }
   }
 }

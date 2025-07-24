@@ -1,4 +1,16 @@
-import { Controller, Get, Put, Param, Body, HttpCode, HttpStatus, UseGuards, ForbiddenException, HttpException, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  ForbiddenException,
+  HttpException,
+  Logger,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -14,9 +26,7 @@ import { ProfileService } from './profile.service';
 export class ProfileController {
   private readonly logger = new Logger(ProfileController.name);
 
-  constructor(
-    private readonly profileService: ProfileService,
-  ) {}
+  constructor(private readonly profileService: ProfileService) {}
 
   /**
    * Get public profile by user ID
@@ -30,7 +40,10 @@ export class ProfileController {
   ) {
     try {
       this.logger.log(`User ${currentUserId} viewing profile ${params.id}`);
-      return await this.profileService.getPublicProfile(params.id, currentUserId);
+      return await this.profileService.getPublicProfile(
+        params.id,
+        currentUserId,
+      );
     } catch (error) {
       this.logger.error(`Failed to fetch profile ${params.id}:`, error);
       throw new HttpException(
@@ -52,9 +65,15 @@ export class ProfileController {
   ) {
     try {
       this.logger.log(`User ${currentUserId} updating their profile`);
-      return await this.profileService.updateProfile(currentUserId, profileData);
+      return await this.profileService.updateProfile(
+        currentUserId,
+        profileData,
+      );
     } catch (error) {
-      this.logger.error(`Failed to update profile for user ${currentUserId}:`, error);
+      this.logger.error(
+        `Failed to update profile for user ${currentUserId}:`,
+        error,
+      );
       throw new HttpException(
         `Failed to update profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,

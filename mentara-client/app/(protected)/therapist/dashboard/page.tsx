@@ -109,85 +109,105 @@ export default function TherapistDashboardPage() {
   }
 
   return (
-    <div className="w-full h-full p-6 space-y-8">
-      {/* Page Header */}
-      <DashboardGreeting name={therapist?.name || 'Therapist'} />
-
-      {/* Matched Clients Section - High Priority */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4 text-amber-800">Client Matches</h2>
-        <MatchedClientsSection />
-      </div>
-
-      {/* Stats Overview */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4 text-amber-800">Today&apos;s Agenda</h2>
-        <DashboardStats
-          stats={stats || {
-            activePatients: 0,
-            rescheduled: 0,
-            cancelled: 0,
-            income: 0,
-            patientStats: {
-              total: 0,
-              percentage: 0,
-              months: 0,
-              chartData: [] as Array<{ month: string; value: number }>
-            }
-          }}
-          onPatientsClick={handlePatientsClick}
-          onScheduleClick={handleScheduleClick}
-          onMessagesClick={handleMessagesClick}
-          onWorksheetsClick={handleWorksheetsClick}
-        />
-      </div>
-
-      {/* Main Dashboard Content - Modern 4-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left Column - Sessions and Patients */}
-        <div className="lg:col-span-2 space-y-6">
-          <div>
-            <h2 className="text-lg font-medium mb-4 text-amber-800">
-              Today&apos;s Upcoming Patients ({upcomingAppointments.length})
-            </h2>
-            <DashboardPatientList
-              appointments={upcomingAppointments.map(apt => ({
-                ...apt,
-                patientAvatar: "/avatar-placeholder.png",
-                condition: "General consultation"
-              }))}
-              onPatientClick={handlePatientsClick}
-              onScheduleClick={handleScheduleClick}
-            />
-          </div>
+    <div className="w-full min-h-screen bg-gradient-to-br from-amber-50/30 via-white to-amber-50/20 p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Enhanced Page Header */}
+        <div className="text-center md:text-left">
+          <DashboardGreeting name={therapist?.name || 'Therapist'} />
+          <p className="text-amber-700 mt-2 text-lg">Manage your client relationships and grow your practice</p>
         </div>
 
-        {/* Right Column 1 - Overview and Analytics */}
-        <div className="space-y-6">
+        {/* Matched Clients Section - Primary Focus */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-amber-900">Client Matches</h2>
+              <p className="text-amber-700">Your assigned clients and recent connections</p>
+            </div>
+          </div>
+          <MatchedClientsSection />
+        </section>
+
+        {/* Stats Overview */}
+        <section className="space-y-4">
           <div>
-            <h2 className="text-lg font-medium mb-4 text-amber-800">Overview</h2>
-            <DashboardOverview
-              patientStats={stats?.patientStats || {
+            <h2 className="text-2xl font-bold text-amber-900">Today's Overview</h2>
+            <p className="text-amber-700">Your schedule and practice metrics</p>
+          </div>
+          <DashboardStats
+            stats={stats || {
+              activePatients: 0,
+              rescheduled: 0,
+              cancelled: 0,
+              income: 0,
+              patientStats: {
                 total: 0,
                 percentage: 0,
                 months: 0,
-                chartData: []
-              }}
-              onPatientsClick={handlePatientsClick}
-            />
+                chartData: [] as Array<{ month: string; value: number }>
+              }
+            }}
+            onPatientsClick={handlePatientsClick}
+            onScheduleClick={handleScheduleClick}
+            onMessagesClick={handleMessagesClick}
+            onWorksheetsClick={handleWorksheetsClick}
+          />
+        </section>
+
+        {/* Enhanced Main Dashboard Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+          {/* Primary Column - Sessions and Patients */}
+          <div className="xl:col-span-2 space-y-6">
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-amber-900">
+                    Today's Schedule
+                  </h3>
+                  <p className="text-amber-700 text-sm">
+                    {upcomingAppointments.length} appointment{upcomingAppointments.length !== 1 ? 's' : ''} scheduled
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleScheduleClick}
+                  className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                >
+                  View All
+                </Button>
+              </div>
+              <DashboardPatientList
+                appointments={upcomingAppointments.map(apt => ({
+                  ...apt,
+                  patientAvatar: "/avatar-placeholder.png",
+                  condition: "General consultation"
+                }))}
+                onPatientClick={handlePatientsClick}
+                onScheduleClick={handleScheduleClick}
+              />
+            </section>
+          </div>
+
+          {/* Secondary Column - Analytics and Quick Actions */}
+          <div className="space-y-6">
+            <section>
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-amber-900">Practice Analytics</h3>
+                <p className="text-amber-700 text-sm">Your growth and engagement metrics</p>
+              </div>
+              <DashboardOverview
+                patientStats={stats?.patientStats || {
+                  total: 0,
+                  percentage: 0,
+                  months: 0,
+                  chartData: []
+                }}
+                onPatientsClick={handlePatientsClick}
+              />
+            </section>
           </div>
         </div>
-
-        {/* Right Column 2 - Calendar and Quick Actions */}
-        {/* <div className="space-y-6"> */}
-        {/*   <div> */}
-        {/*     <h2 className="text-lg font-medium mb-4 text-amber-800">Schedule</h2> */}
-        {/*     <DashboardCalendarWidget */}
-        {/*       onDateClick={handleScheduleClick} */}
-        {/*       onViewSchedule={handleScheduleClick} */}
-        {/*     /> */}
-        {/*   </div> */}
-        {/* </div> */}
       </div>
     </div>
   );

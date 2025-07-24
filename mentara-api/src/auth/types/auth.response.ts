@@ -78,6 +78,7 @@ export interface ClientProfileResponse {
   firstName: string;
   lastName: string;
   role: 'client';
+  avatarUrl?: string;
   dateOfBirth?: string;
   phoneNumber?: string;
   profileComplete: boolean;

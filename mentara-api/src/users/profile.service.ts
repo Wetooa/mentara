@@ -51,19 +51,22 @@ export interface PublicProfileResponse {
 export class ProfileService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getPublicProfile(profileUserId: string, currentUserId: string): Promise<PublicProfileResponse> {
+  async getPublicProfile(
+    profileUserId: string,
+    currentUserId: string,
+  ): Promise<PublicProfileResponse> {
     // Get the target user with their relationships
     const user = await this.prisma.user.findUnique({
-      where: { 
+      where: {
         id: profileUserId,
-        isActive: true // Only show active users
+        isActive: true, // Only show active users
       },
       include: {
         therapist: true,
         memberships: {
           include: {
-            community: true
-          }
+            community: true,
+          },
         },
         posts: {
           include: {
@@ -71,16 +74,16 @@ export class ProfileService {
               include: {
                 roomGroup: {
                   include: {
-                    community: true
-                  }
-                }
-              }
-            }
+                    community: true,
+                  },
+                },
+              },
+            },
           },
           orderBy: {
-            createdAt: 'desc'
+            createdAt: 'desc',
           },
-          take: 10 // Recent posts only
+          take: 10, // Recent posts only
         },
         comments: {
           include: {
@@ -90,20 +93,20 @@ export class ProfileService {
                   include: {
                     roomGroup: {
                       include: {
-                        community: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
+                        community: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
           orderBy: {
-            createdAt: 'desc'
+            createdAt: 'desc',
           },
-          take: 10 // Recent comments only
-        }
-      }
+          take: 10, // Recent comments only
+        },
+      },
     });
 
     if (!user) {
@@ -113,71 +116,80 @@ export class ProfileService {
     // Get current user's communities for filtering
     const currentUserCommunities = await this.prisma.membership.findMany({
       where: { userId: currentUserId },
-      select: { communityId: true }
+      select: { communityId: true },
     });
-    
+
     const currentUserCommunityIds = new Set(
-      currentUserCommunities.map(m => m.communityId)
+      currentUserCommunities.map((m) => m.communityId),
     );
 
     // Get mutual communities
     const mutualCommunities = user.memberships
-      .filter(membership => currentUserCommunityIds.has(membership.communityId))
-      .map(membership => ({
+      .filter((membership) =>
+        currentUserCommunityIds.has(membership.communityId),
+      )
+      .map((membership) => ({
         id: membership.community.id,
         name: membership.community.name,
         slug: membership.community.slug,
-        imageUrl: membership.community.imageUrl
+        imageUrl: membership.community.imageUrl,
       }));
 
     // Filter and transform posts and comments
     const recentActivity: PublicProfileResponse['recentActivity'] = [];
 
     // Add posts to activity
-    user.posts.forEach(post => {
+    user.posts.forEach((post) => {
       if (post.room?.roomGroup?.community) {
         const isFromSharedCommunity = currentUserCommunityIds.has(
-          post.room.roomGroup.community.id
+          post.room.roomGroup.community.id,
         );
-        
+
         recentActivity.push({
           id: post.id,
           type: 'post',
           title: post.title,
-          content: isFromSharedCommunity ? post.content : 'Content from different community',
+          content: isFromSharedCommunity
+            ? post.content
+            : 'Content from different community',
           createdAt: post.createdAt.toISOString(),
           community: {
             name: post.room.roomGroup.community.name,
-            slug: post.room.roomGroup.community.slug
+            slug: post.room.roomGroup.community.slug,
           },
-          isFromSharedCommunity
+          isFromSharedCommunity,
         });
       }
     });
 
     // Add comments to activity
-    user.comments.forEach(comment => {
+    user.comments.forEach((comment) => {
       if (comment.post.room?.roomGroup?.community) {
         const isFromSharedCommunity = currentUserCommunityIds.has(
-          comment.post.room.roomGroup.community.id
+          comment.post.room.roomGroup.community.id,
         );
-        
+
         recentActivity.push({
           id: comment.id,
           type: 'comment',
-          content: isFromSharedCommunity ? comment.content : 'Comment from different community',
+          content: isFromSharedCommunity
+            ? comment.content
+            : 'Comment from different community',
           createdAt: comment.createdAt.toISOString(),
           community: {
             name: comment.post.room.roomGroup.community.name,
-            slug: comment.post.room.roomGroup.community.slug
+            slug: comment.post.room.roomGroup.community.slug,
           },
-          isFromSharedCommunity
+          isFromSharedCommunity,
         });
       }
     });
 
     // Sort activity by date and limit to 20 items
-    recentActivity.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    recentActivity.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
     const limitedActivity = recentActivity.slice(0, 20);
 
     // Calculate stats
@@ -185,7 +197,7 @@ export class ProfileService {
       postsCount: user.posts.length,
       commentsCount: user.comments.length,
       communitiesCount: user.memberships.length,
-      sharedCommunitiesCount: mutualCommunities.length
+      sharedCommunitiesCount: mutualCommunities.length,
     };
 
     // Build response
@@ -199,11 +211,11 @@ export class ProfileService {
         avatarUrl: user.avatarUrl ?? undefined,
         coverImageUrl: user.coverImageUrl ?? undefined,
         role: user.role,
-        createdAt: user.createdAt.toISOString()
+        createdAt: user.createdAt.toISOString(),
       },
       mutualCommunities,
       recentActivity: limitedActivity,
-      stats
+      stats,
     };
 
     // Add therapist info if applicable
@@ -212,9 +224,11 @@ export class ProfileService {
         specializations: user.therapist.areasOfExpertise,
         yearsOfExperience: user.therapist.yearsOfExperience ?? undefined,
         sessionLength: user.therapist.sessionLength,
-        hourlyRate: user.therapist.hourlyRate ? Number(user.therapist.hourlyRate) : undefined,
+        hourlyRate: user.therapist.hourlyRate
+          ? Number(user.therapist.hourlyRate)
+          : undefined,
         areasOfExpertise: user.therapist.areasOfExpertise,
-        languages: user.therapist.languagesOffered
+        languages: user.therapist.languagesOffered,
       };
     }
 
@@ -229,12 +243,12 @@ export class ProfileService {
       lastName: profileData.lastName,
       bio: profileData.bio,
       avatarUrl: profileData.avatarUrl,
-      coverImageUrl: profileData.coverImageUrl
+      coverImageUrl: profileData.coverImageUrl,
     };
 
     // Remove undefined values
     const updateData = Object.fromEntries(
-      Object.entries(allowedFields).filter(([_, value]) => value !== undefined)
+      Object.entries(allowedFields).filter(([_, value]) => value !== undefined),
     );
 
     const updatedUser = await this.prisma.user.update({
@@ -244,10 +258,10 @@ export class ProfileService {
         therapist: true,
         memberships: {
           include: {
-            community: true
-          }
-        }
-      }
+            community: true,
+          },
+        },
+      },
     });
 
     return {
@@ -261,8 +275,8 @@ export class ProfileService {
         coverImageUrl: updatedUser.coverImageUrl ?? undefined,
         role: updatedUser.role,
         createdAt: updatedUser.createdAt.toISOString(),
-        updatedAt: updatedUser.updatedAt.toISOString()
-      }
+        updatedAt: updatedUser.updatedAt.toISOString(),
+      },
     };
   }
 }

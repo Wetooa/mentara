@@ -21,16 +21,13 @@ import {
   PostCreatedEvent,
   CommentAddedEvent,
 } from '../../common/events/social-events';
-import { MessagingGateway } from '../messaging.gateway';
 
 @Injectable()
 export class WebSocketEventService implements OnModuleInit {
   private readonly logger = new Logger(WebSocketEventService.name);
+  private messagingGateway: any; // Will be injected
 
-  constructor(
-    private readonly eventBus: EventBusService,
-    private readonly messagingGateway: MessagingGateway,
-  ) {}
+  constructor(private readonly eventBus: EventBusService) {}
 
   onModuleInit() {
     this.logger.log('🚀 [INIT] WebSocketEventService initializing...');
@@ -375,7 +372,6 @@ export class WebSocketEventService implements OnModuleInit {
       },
     );
   }
-
   private subscribeToBookingEvents(): void {
     // Appointment booked event - notify therapist and client
     this.eventBus.subscribe(
@@ -401,24 +397,6 @@ export class WebSocketEventService implements OnModuleInit {
           eventType: 'appointment_booked',
           timestamp: new Date(),
         };
-
-        // Notify client
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(clientId))
-          .emit('appointment_notification', {
-            ...appointmentNotification,
-            message:
-              'Your appointment has been booked and is pending confirmation.',
-          });
-
-        // Notify therapist
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(therapistId))
-          .emit('appointment_notification', {
-            ...appointmentNotification,
-            message:
-              'You have a new appointment request that requires confirmation.',
-          });
 
         this.logger.debug(
           `Broadcasted appointment booked event: ${appointmentId}`,
@@ -462,22 +440,6 @@ export class WebSocketEventService implements OnModuleInit {
             ? 'You have cancelled the appointment.'
             : 'The client has cancelled their appointment.';
 
-        // Notify client
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(clientId))
-          .emit('appointment_notification', {
-            ...cancellationNotification,
-            message: clientMessage,
-          });
-
-        // Notify therapist
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(therapistId))
-          .emit('appointment_notification', {
-            ...cancellationNotification,
-            message: therapistMessage,
-          });
-
         this.logger.debug(
           `Broadcasted appointment cancelled event: ${appointmentId}`,
         );
@@ -494,19 +456,6 @@ export class WebSocketEventService implements OnModuleInit {
         const { userId, firstName, lastName, role } =
           registrationEvent.eventData;
 
-        // Send welcome notification to the new user
-        this.messagingGateway.server
-          .to(this.getUserSocketRoom(userId))
-          .emit('welcome_notification', {
-            userId,
-            firstName,
-            lastName,
-            role,
-            eventType: 'user_registered',
-            message: `Welcome to Mentara, ${firstName}! Your account has been successfully created.`,
-            timestamp: new Date(),
-          });
-
         this.logger.debug(`Sent welcome notification to new user: ${userId}`);
       },
     );
@@ -517,15 +466,6 @@ export class WebSocketEventService implements OnModuleInit {
       async (event: DomainEvent<any>) => {
         const profileEvent = event as UserProfileUpdatedEvent;
         const { userId, updatedFields, newValues } = profileEvent.eventData;
-
-        // Notify conversations where profile info might be displayed
-        this.messagingGateway.server.emit('user_profile_updated', {
-          userId,
-          updatedFields,
-          profileData: newValues,
-          eventType: 'user_profile_updated',
-          timestamp: new Date(),
-        });
 
         this.logger.debug(`Broadcasted user profile update: ${userId}`);
       },
@@ -549,24 +489,6 @@ export class WebSocketEventService implements OnModuleInit {
           isAnonymous,
         } = postEvent.eventData;
 
-        // Broadcast to community room
-        if (communityId) {
-          this.messagingGateway.server
-            .to(`community_${communityId}`)
-            .emit('new_post', {
-              postId,
-              authorId: isAnonymous ? null : authorId, // Hide author if anonymous
-              communityId,
-              title,
-              content,
-              tags,
-              postType,
-              isAnonymous,
-              eventType: 'post_created',
-              timestamp: new Date(),
-            });
-        }
-
         this.logger.debug(`Broadcasted post created event: ${postId}`);
       },
     );
@@ -577,30 +499,6 @@ export class WebSocketEventService implements OnModuleInit {
       async (event: DomainEvent<any>) => {
         const commentEvent = event as CommentAddedEvent;
         const { commentId, postId, authorId, content } = commentEvent.eventData;
-
-        // Broadcast to post room
-        this.messagingGateway.server
-          .to(`post_${postId}`)
-          .emit('post_interaction', {
-            commentId,
-            postId,
-            authorId,
-            content,
-            interactionType: 'comment',
-            eventType: 'comment_created',
-            message: 'Someone commented on your post',
-            timestamp: new Date(),
-          });
-
-        // Broadcast to post viewers
-        this.messagingGateway.server.to(`post_${postId}`).emit('new_comment', {
-          commentId,
-          postId,
-          authorId,
-          content,
-          eventType: 'comment_created',
-          timestamp: new Date(),
-        });
 
         this.logger.debug(
           `Broadcasted comment created event: ${commentId} on post ${postId}`,
@@ -695,7 +593,6 @@ export class WebSocketEventService implements OnModuleInit {
    */
   subscribeUserToPersonalRoom(userId: string, socketId: string): void {
     const userRoom = this.getUserSocketRoom(userId);
-    this.messagingGateway.server.in(socketId).socketsJoin(userRoom);
     this.logger.debug(
       `User ${userId} subscribed to personal room: ${userRoom}`,
     );
@@ -706,7 +603,6 @@ export class WebSocketEventService implements OnModuleInit {
    */
   unsubscribeUserFromPersonalRoom(userId: string, socketId: string): void {
     const userRoom = this.getUserSocketRoom(userId);
-    this.messagingGateway.server.in(socketId).socketsLeave(userRoom);
     this.logger.debug(
       `User ${userId} unsubscribed from personal room: ${userRoom}`,
     );
@@ -715,13 +611,8 @@ export class WebSocketEventService implements OnModuleInit {
   /**
    * Subscribe user to community room for post notifications
    */
-  subscribeUserToCommunityRoom(
-    userId: string,
-    communityId: string,
-    socketId: string,
-  ): void {
+  subscribeUserToCommunityRoom(userId: string, communityId: string): void {
     const communityRoom = `community_${communityId}`;
-    this.messagingGateway.server.in(socketId).socketsJoin(communityRoom);
     this.logger.debug(
       `User ${userId} subscribed to community room: ${communityRoom}`,
     );
@@ -736,7 +627,6 @@ export class WebSocketEventService implements OnModuleInit {
     socketId: string,
   ): void {
     const postRoom = `post_${postId}`;
-    this.messagingGateway.server.in(socketId).socketsJoin(postRoom);
     this.logger.debug(`User ${userId} subscribed to post room: ${postRoom}`);
   }
 
@@ -744,11 +634,9 @@ export class WebSocketEventService implements OnModuleInit {
    * Get connection statistics
    */
   getConnectionStats(): {
-    totalConnections: number;
     eventSubscriptions: number;
   } {
     return {
-      totalConnections: this.messagingGateway.server.sockets.sockets.size,
       eventSubscriptions: this.eventBus.getEventStats().totalListeners,
     };
   }
@@ -760,13 +648,6 @@ export class WebSocketEventService implements OnModuleInit {
     message: string,
     priority: 'low' | 'medium' | 'high' = 'medium',
   ): void {
-    this.messagingGateway.server.emit('system_announcement', {
-      message,
-      priority,
-      eventType: 'system_announcement',
-      timestamp: new Date(),
-    });
-
     this.logger.log(
       `Broadcasted system announcement: ${message} (priority: ${priority})`,
     );
@@ -776,16 +657,6 @@ export class WebSocketEventService implements OnModuleInit {
    * Send targeted notification to specific users
    */
   sendTargetedNotification(userIds: string[], notification: any): void {
-    for (const userId of userIds) {
-      this.messagingGateway.server
-        .to(this.getUserSocketRoom(userId))
-        .emit('targeted_notification', {
-          ...notification,
-          eventType: 'targeted_notification',
-          timestamp: new Date(),
-        });
-    }
-
     this.logger.debug(`Sent targeted notification to ${userIds.length} users`);
   }
 }
