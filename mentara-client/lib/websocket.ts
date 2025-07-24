@@ -90,9 +90,10 @@ class SimpleWebSocket {
         error: null,
       });
 
-      const socketUrl = this.config.url + this.config.namespace;
+      // Connect to base URL with namespace path - Socket.IO handles namespace routing internally
+      const namespacePath = this.config.namespace;
 
-      this.socket = io(socketUrl, {
+      this.socket = io(this.config.url + namespacePath, {
         auth: token ? { token } : {},
         transports: ['websocket', 'polling'],
         timeout: 15000,
