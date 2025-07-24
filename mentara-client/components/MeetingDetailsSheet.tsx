@@ -33,7 +33,10 @@ import {
   Save,
   Edit3,
   Play,
-  Phone as PhoneCall,
+  CheckCircle,
+  XCircle,
+  UserX,
+  ExternalLink,
 } from "lucide-react";
 import { useApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -122,6 +125,8 @@ export function MeetingDetailsSheet({
 
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
+      case "WAITING":
+        return "bg-orange-100 text-orange-800 border-orange-200";
       case "SCHEDULED":
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "CONFIRMED":
@@ -131,6 +136,8 @@ export function MeetingDetailsSheet({
       case "COMPLETED":
         return "bg-gray-100 text-gray-800 border-gray-200";
       case "CANCELLED":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "NO_SHOW":
         return "bg-red-100 text-red-800 border-red-200";
       default:
         return "bg-blue-100 text-blue-800 border-blue-200";
@@ -168,26 +175,54 @@ export function MeetingDetailsSheet({
     }
   };
 
-  const handleJoinVideo = async () => {
+  const handleCompleteMeeting = async () => {
     if (!meeting) return;
     
     try {
-      if (meeting.meetingUrl) {
-        window.open(meeting.meetingUrl, '_blank');
-      } else {
-        // Create video room if it doesn't exist
-        const videoRoom = await api.meetings.createVideoRoom(meeting.id);
-        if (videoRoom.roomUrl) {
-          window.open(videoRoom.roomUrl, '_blank');
-        }
-      }
+      await api.meetings.complete(meeting.id);
+      const updatedMeeting = { ...meeting, status: "COMPLETED" };
+      onMeetingUpdate?.(updatedMeeting);
+      toast.success("Meeting completed");
     } catch (error) {
-      toast.error("Failed to join video call");
+      toast.error("Failed to complete meeting");
     }
   };
 
-  const canStartMeeting = meeting.status === "CONFIRMED" || meeting.status === "SCHEDULED";
-  const canJoinVideo = meeting.status === "IN_PROGRESS" || meeting.meetingUrl;
+  const handleCancelMeeting = async () => {
+    if (!meeting) return;
+    
+    try {
+      await api.meetings.cancel(meeting.id);
+      const updatedMeeting = { ...meeting, status: "CANCELLED" };
+      onMeetingUpdate?.(updatedMeeting);
+      toast.success("Meeting cancelled");
+    } catch (error) {
+      toast.error("Failed to cancel meeting");
+    }
+  };
+
+  const handleMarkNoShow = async () => {
+    if (!meeting) return;
+    
+    try {
+      await api.meetings.markNoShow(meeting.id);
+      const updatedMeeting = { ...meeting, status: "NO_SHOW" };
+      onMeetingUpdate?.(updatedMeeting);
+      toast.success("Meeting marked as no-show");
+    } catch (error) {
+      toast.error("Failed to mark meeting as no-show");
+    }
+  };
+
+  const handleOpenMeetingUrl = () => {
+    if (meeting?.meetingUrl) {
+      window.open(meeting.meetingUrl, '_blank');
+    }
+  };
+
+  const canStartMeeting = meeting.status === "WAITING" || meeting.status === "SCHEDULED" || meeting.status === "CONFIRMED";
+  const canCompleteMeeting = meeting.status === "IN_PROGRESS";
+  const canCancelOrNoShow = meeting.status === "IN_PROGRESS" || meeting.status === "SCHEDULED" || meeting.status === "CONFIRMED";
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -218,16 +253,34 @@ export function MeetingDetailsSheet({
                 Start Meeting
               </Button>
             )}
-            {canJoinVideo && (
-              <Button onClick={handleJoinVideo} size="sm" variant="outline">
-                <Video className="h-4 w-4 mr-1" />
-                Join Video
+            
+            {canCompleteMeeting && (
+              <Button onClick={handleCompleteMeeting} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Complete Meeting
               </Button>
             )}
-            {meeting.client?.user && (
-              <Button size="sm" variant="outline">
-                <PhoneCall className="h-4 w-4 mr-1" />
-                Call Client
+            
+            {canCancelOrNoShow && (
+              <>
+                <Button onClick={handleCancelMeeting} size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50">
+                  <XCircle className="h-4 w-4 mr-1" />
+                  Cancel
+                </Button>
+                
+                {meeting.status === "IN_PROGRESS" && (
+                  <Button onClick={handleMarkNoShow} size="sm" variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-50">
+                    <UserX className="h-4 w-4 mr-1" />
+                    No Show
+                  </Button>
+                )}
+              </>
+            )}
+            
+            {meeting.meetingUrl && (
+              <Button onClick={handleOpenMeetingUrl} size="sm" variant="outline">
+                <ExternalLink className="h-4 w-4 mr-1" />
+                {meeting.meetingUrl.includes('http') ? 'Join Video' : 'View Location'}
               </Button>
             )}
           </div>
@@ -283,11 +336,29 @@ export function MeetingDetailsSheet({
                   )}
                 </div>
                 {meeting.meetingUrl && (
-                  <div className="flex items-center gap-3">
-                    <Video className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Meeting Type</p>
-                      <p className="text-sm text-muted-foreground">Video Session</p>
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-start gap-3">
+                      {meeting.meetingUrl.includes('http') ? (
+                        <Video className="h-5 w-5 text-blue-600 mt-0.5" />
+                      ) : (
+                        <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-blue-900 mb-1">
+                          {meeting.meetingUrl.includes('http') ? 'Video Meeting Link' : 'Meeting Location'}
+                        </p>
+                        <p className="text-sm text-blue-800 break-all">
+                          {meeting.meetingUrl}
+                        </p>
+                        {meeting.meetingUrl.includes('http') && (
+                          <button
+                            onClick={handleOpenMeetingUrl}
+                            className="text-xs text-blue-600 hover:text-blue-800 underline mt-1"
+                          >
+                            Click to join meeting
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

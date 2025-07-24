@@ -177,7 +177,7 @@ export default function UpcomingSessionsPage() {
           </div>
           
           <SessionsList
-            defaultStatus="SCHEDULED"
+            defaultStatus="SCHEDULED,CONFIRMED"
             showFilters={true}
             showStats={false}
             showJoinButtons={true}

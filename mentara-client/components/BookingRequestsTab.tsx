@@ -31,6 +31,8 @@ import {
   Inbox,
   CheckCircle,
   XCircle,
+  MapPin,
+  Video,
 } from "lucide-react";
 import { useBookingRequests } from "@/hooks/booking/useBooking";
 import { Meeting } from "@/lib/api/services/meetings";
@@ -51,6 +53,9 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
   
   const [denyReason, setDenyReason] = React.useState("");
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | null>(null);
+  const [acceptingRequestId, setAcceptingRequestId] = React.useState<string | null>(null);
+  const [meetingUrl, setMeetingUrl] = React.useState("");
+  const [showAcceptDialog, setShowAcceptDialog] = React.useState(false);
 
   const formatTime = (dateString: string) => {
     try {
@@ -82,9 +87,19 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
     }
   };
 
-  const handleAccept = async (meetingId: string) => {
+  const handleAccept = (request: any) => {
+    setAcceptingRequestId(request.id);
+    setShowAcceptDialog(true);
+  };
+
+  const handleConfirmAccept = async () => {
+    if (!acceptingRequestId || !meetingUrl.trim()) return;
+    
     try {
-      await acceptRequest(meetingId);
+      await acceptRequest(acceptingRequestId, meetingUrl.trim());
+      setShowAcceptDialog(false);
+      setAcceptingRequestId(null);
+      setMeetingUrl("");
     } catch (error) {
       console.error('Failed to accept booking request:', error);
     }
@@ -228,7 +243,7 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-2 min-w-[120px]">
                   <Button
-                    onClick={() => handleAccept(request.id)}
+                    onClick={() => handleAccept(request)}
                     disabled={isAccepting || isDenying}
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-white"
@@ -338,6 +353,95 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Accept Dialog with Meeting URL */}
+      <AlertDialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              Accept Booking Request
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Please provide the meeting location or URL for this session.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {acceptingRequestId && bookingRequests.find(r => r.id === acceptingRequestId) && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium">
+                    {formatDate(bookingRequests.find(r => r.id === acceptingRequestId)?.startTime || '')} at{' '}
+                    {formatTime(bookingRequests.find(r => r.id === acceptingRequestId)?.startTime || '')}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Meeting Type: {bookingRequests.find(r => r.id === acceptingRequestId)?.meetingType || 'video'}
+                </div>
+              </div>
+            )}
+            
+            <div>
+              <Label htmlFor="meetingUrl" className="flex items-center gap-2">
+                {acceptingRequestId && bookingRequests.find(r => r.id === acceptingRequestId)?.meetingType === 'in-person' ? (
+                  <>
+                    <MapPin className="h-4 w-4" />
+                    Meeting Address
+                  </>
+                ) : (
+                  <>
+                    <Video className="h-4 w-4" />
+                    Meeting URL/Link
+                  </>
+                )}
+              </Label>
+              <Textarea
+                id="meetingUrl"
+                placeholder={
+                  acceptingRequestId && bookingRequests.find(r => r.id === acceptingRequestId)?.meetingType === 'in-person'
+                    ? "Enter the meeting address (e.g., 123 Main St, Suite 200, City, State)"
+                    : "Enter the video meeting URL (e.g., https://zoom.us/j/123456789)"
+                }
+                value={meetingUrl}
+                onChange={(e) => setMeetingUrl(e.target.value)}
+                className="mt-2"
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowAcceptDialog(false);
+                setAcceptingRequestId(null);
+                setMeetingUrl("");
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmAccept}
+              disabled={!meetingUrl.trim() || isAccepting}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isAccepting ? (
+                <div className="flex items-center gap-1">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b border-white" />
+                  <span>Accepting...</span>
+                </div>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Accept Request
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

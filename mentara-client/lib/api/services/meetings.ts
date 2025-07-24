@@ -8,7 +8,7 @@ export interface Meeting {
   endTime?: string;
   dateTime: string; // Alias for startTime for consistency
   duration: number;
-  status: "SCHEDULED" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
+  status: "SCHEDULED" | "WAITING" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
   meetingType: string;
   type?: string; // Alias for meetingType for consistency
   meetingUrl?: string;
@@ -117,14 +117,7 @@ export function createMeetingsService(axios: AxiosInstance) {
       return data;
     },
 
-    /**
-     * Start a meeting
-     * @param meetingId - The meeting ID
-     */
-    async start(meetingId: string): Promise<Meeting> {
-      const { data } = await axios.post(`/meetings/${meetingId}/start`);
-      return data;
-    },
+
 
     /**
      * End a meeting
@@ -135,15 +128,7 @@ export function createMeetingsService(axios: AxiosInstance) {
       return data;
     },
 
-    /**
-     * Save meeting notes
-     * @param meetingId - The meeting ID
-     * @param notes - Meeting notes content
-     */
-    async saveNotes(meetingId: string, notes: string): Promise<Meeting> {
-      const { data } = await axios.put(`/meetings/${meetingId}/notes`, { notes });
-      return data;
-    },
+
 
     /**
      * Create a video room for a meeting
@@ -307,6 +292,72 @@ export function createMeetingsService(axios: AxiosInstance) {
       
       const { data } = await axios.get("/dashboard/therapist/analytics", { params });
       return data;
+    },
+
+    /**
+     * Accept a booking request (therapists only)
+     * @param meetingId - The meeting ID to accept
+     * @param meetingUrl - The URL or address for the meeting
+     */
+    async acceptMeetingRequest(meetingId: string, meetingUrl: string): Promise<Meeting> {
+      const { data } = await axios.post(`/booking/meetings/${meetingId}/accept`, { meetingUrl });
+      return data;
+    },
+
+    /**
+     * Start a meeting (therapists only)
+     * @param meetingId - The meeting ID to start
+     */
+    async startMeeting(meetingId: string): Promise<Meeting> {
+      const { data } = await axios.post(`/booking/meetings/${meetingId}/start`);
+      return data;
+    },
+
+    /**
+     * Complete a meeting (therapists only)
+     * @param meetingId - The meeting ID to complete
+     * @param notes - Optional session notes
+     */
+    async completeMeeting(meetingId: string, notes?: string): Promise<Meeting> {
+      const { data } = await axios.post(`/booking/meetings/${meetingId}/complete`, { notes });
+      return data;
+    },
+
+    /**
+     * Mark meeting as no-show (therapists only)
+     * @param meetingId - The meeting ID to mark as no-show
+     */
+    async markNoShow(meetingId: string): Promise<Meeting> {
+      const { data } = await axios.post(`/booking/meetings/${meetingId}/no-show`);
+      return data;
+    },
+
+    /**
+     * Save meeting notes (therapists only)
+     * @param meetingId - The meeting ID
+     * @param notes - Session notes content
+     */
+    async saveMeetingNotes(meetingId: string, notes: string): Promise<any> {
+      const { data } = await axios.put(`/booking/meetings/${meetingId}/notes`, { notes });
+      return data;
+    },
+
+    // Method aliases for MeetingDetailsSheet compatibility
+    async start(meetingId: string): Promise<Meeting> {
+      return this.startMeeting(meetingId);
+    },
+
+    async complete(meetingId: string, notes?: string): Promise<Meeting> {
+      return this.completeMeeting(meetingId, notes);
+    },
+
+    async cancel(meetingId: string): Promise<Meeting> {
+      const { data } = await axios.post(`/booking/meetings/${meetingId}/cancel`);
+      return data;
+    },
+
+    async saveNotes(meetingId: string, notes: string): Promise<any> {
+      return this.saveMeetingNotes(meetingId, notes);
     },
   };
 }
