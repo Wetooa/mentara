@@ -106,9 +106,34 @@ export function useNotifications(
       console.error('❌ [useNotifications] WebSocket error:', error);
 
       if (config.enableToasts) {
-        toast.error("Notification connection issue", {
-          description: "Using fallback mode. Some notifications may be delayed.",
-        });
+        // More user-friendly error messages based on error type
+        const isTransportError = typeof error === 'string' && error.includes('Transport error');
+        const isConnectionError = typeof error === 'string' && error.includes('Failed to connect');
+        
+        if (isTransportError) {
+          toast.error("Connection Issue", {
+            description: "Network connectivity problem. Retrying automatically...",
+            action: {
+              label: "Retry Now",
+              onClick: () => {
+                console.log('🔄 Manual retry requested by user');
+                window.location.reload();
+              },
+            },
+          });
+        } else if (isConnectionError) {
+          toast.error("Service Unavailable", {
+            description: "Notification service is temporarily unavailable.",
+            action: {
+              label: "Refresh",
+              onClick: () => window.location.reload(),
+            },
+          });
+        } else {
+          toast.error("Notification connection issue", {
+            description: "Using fallback mode. Some notifications may be delayed.",
+          });
+        }
       }
     }, [config.enableToasts]),
   });

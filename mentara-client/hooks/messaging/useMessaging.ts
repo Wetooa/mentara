@@ -266,7 +266,37 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       } catch (error) {
         if (!isMounted) return;
         console.error('💥 [FRONTEND] FORCE CONNECTION ERROR:', error);
-        toast.error('Connection error. Use the retry button if needed.');
+        
+        // Enhanced error handling with specific messages
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const isTransportError = errorMessage.includes('Transport') || errorMessage.includes('transport');
+        const isNetworkError = errorMessage.includes('Network') || errorMessage.includes('fetch');
+        
+        if (isTransportError) {
+          toast.error('Transport Error', {
+            description: 'Connection transport failed. Retrying with fallback method...',
+            action: {
+              label: "Manual Retry",
+              onClick: () => forceConnection(),
+            },
+          });
+        } else if (isNetworkError) {
+          toast.error('Network Error', {
+            description: 'Please check your internet connection.',
+            action: {
+              label: "Retry",
+              onClick: () => forceConnection(),
+            },
+          });
+        } else {
+          toast.error('Connection error', {
+            description: 'Use the retry button if needed.',
+            action: {
+              label: "Retry",
+              onClick: () => forceConnection(),
+            },
+          });
+        }
       }
     };
 

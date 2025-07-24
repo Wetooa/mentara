@@ -106,6 +106,8 @@ class SimpleWebSocket {
         forceNew: false,
         upgrade: true,
         rememberUpgrade: true,
+        // Enable modern Socket.IO v4+ features
+        tryAllTransports: true,
       });
 
       this.setupEventHandlers();
@@ -329,6 +331,13 @@ class SimpleWebSocket {
 
     this.socket.on('connect', () => {
       console.log('✅ WebSocket connected successfully');
+      
+      // Check for connection state recovery
+      const recovered = (this.socket as any).recovered;
+      if (recovered) {
+        console.log('🔄 Connection state recovered - no missed events');
+      }
+      
       this.updateConnectionState({
         isConnected: true,
         isConnecting: false,
@@ -339,8 +348,8 @@ class SimpleWebSocket {
       });
     });
 
-    this.socket.on('disconnect', (reason) => {
-      console.log('🔌 WebSocket disconnected:', reason);
+    this.socket.on('disconnect', (reason, details) => {
+      console.log('🔌 WebSocket disconnected:', reason, details);
       this.updateConnectionState({
         isConnected: false,
         isConnecting: false,
@@ -348,10 +357,11 @@ class SimpleWebSocket {
 
       // Handle specific disconnect reasons that might require reconnection
       if (reason === 'transport close' || reason === 'transport error') {
-        this.handleTransportError({ type: 'disconnect', reason });
+        this.handleTransportError({ type: 'disconnect', reason, details });
       }
     });
 
+    // Modern Socket.IO v4+ error handling - use 'connect_error' instead of 'error'
     this.socket.on('connect_error', (error) => {
       console.error('❌ WebSocket connection error:', error);
       
