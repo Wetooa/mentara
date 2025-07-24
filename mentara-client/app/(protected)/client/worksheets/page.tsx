@@ -27,19 +27,29 @@ export default function WorksheetsPage() {
         setIsLoading(true);
         setError(null);
 
-        // Convert activeFilter to status filter for API
-        let isCompleted: boolean | undefined;
-        if (activeFilter === "completed") {
-          isCompleted = true;
-        } else if (activeFilter === "pending") {
-          isCompleted = false;
+        // Map frontend filter to backend status parameter
+        let status: string | undefined;
+        switch (activeFilter) {
+          case "upcoming":
+            status = "upcoming"; // Backend handles upcoming = ASSIGNED + dueDate >= now
+            break;
+          case "past_due":
+            status = "OVERDUE"; // Backend handles overdue = ASSIGNED + dueDate < now
+            break;
+          case "completed":
+            status = "REVIEWED"; // Completed worksheets are marked as REVIEWED
+            break;
+          case "everything":
+          default:
+            status = undefined; // No status filter = get all worksheets
+            break;
         }
 
-        // Call the API to get worksheets
+        // Call the API to get worksheets with proper status filtering
         const worksheetsResponse = await api.worksheets.getAll({
           userId,
-          isCompleted,
-          limit: 100
+          status,
+          limit: 100,
         });
         
         // Transform worksheets to match Task interface
@@ -47,9 +57,11 @@ export default function WorksheetsPage() {
           ? worksheetsResponse.worksheets.map(worksheet => ({
               ...worksheet,
               date: worksheet.createdAt,
-              status: 'assigned' as const,
-              isCompleted: false,
-              therapistName: undefined,
+              status: mapWorksheetStatus(worksheet.status, worksheet.dueDate),
+              isCompleted: worksheet.status === 'REVIEWED',
+              therapistName: worksheet.therapist?.user 
+                ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}`
+                : undefined,
             }))
           : [];
         
@@ -64,6 +76,19 @@ export default function WorksheetsPage() {
 
     fetchWorksheets();
   }, [userId, activeFilter, api.worksheets]);
+
+  // Helper function to map backend status to frontend status display
+  const mapWorksheetStatus = (backendStatus: string, dueDate: string): 'assigned' | 'submitted' | 'completed' | 'overdue' => {
+    if (backendStatus === 'REVIEWED') return 'completed';
+    if (backendStatus === 'SUBMITTED') return 'submitted';
+    if (backendStatus === 'ASSIGNED') {
+      // Check if it's overdue
+      const due = new Date(dueDate);
+      const now = new Date();
+      return due < now ? 'overdue' : 'assigned';
+    }
+    return 'assigned'; // Default fallback
+  };
 
   // Filter tasks based on selected filters
   const getFilteredTasks = () => {
@@ -107,6 +132,9 @@ export default function WorksheetsPage() {
       ) : (
         <WorksheetsList tasks={getFilteredTasks()} />
       )}
+    </div>
+  );
+}
     </div>
   );
 }

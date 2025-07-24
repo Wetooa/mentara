@@ -31,8 +31,24 @@ export class WorksheetsService {
       where['therapistId'] = therapistId;
     }
 
+    // Handle status filtering with dynamic overdue calculation
     if (status) {
-      where['status'] = status;
+      if (status === 'OVERDUE' || status === 'overdue' || status === 'past_due') {
+        // Dynamic overdue: worksheets that are ASSIGNED but past due date
+        where['status'] = 'ASSIGNED';
+        where['dueDate'] = {
+          lt: new Date(), // Due date is in the past
+        };
+      } else if (status === 'upcoming') {
+        // Upcoming: worksheets that are ASSIGNED and not yet due
+        where['status'] = 'ASSIGNED';
+        where['dueDate'] = {
+          gte: new Date(), // Due date is in the future or today
+        };
+      } else {
+        // Static status filtering for other cases
+        where['status'] = status.toUpperCase();
+      }
     }
 
     // Get total count for pagination
