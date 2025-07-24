@@ -14,23 +14,6 @@ import { EventBusService } from '../common/events/event-bus.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { WebSocketEventService } from './services/websocket-event.service';
 
-interface ConnectedUser {
-  userId: string;
-  socketId: string;
-  connectedAt: Date;
-  rooms: Set<string>;
-}
-
-interface NotificationData {
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
-  data?: Record<string, any>;
-  actionUrl?: string;
-  actionText?: string;
-}
-
 import { WebSocketAuthMiddleware } from './services/websocket-auth.service';
 
 interface ConnectedUser {
@@ -55,6 +38,36 @@ interface NotificationData {
   data?: Record<string, any>;
   actionUrl?: string;
   actionText?: string;
+}
+
+interface VideoCallSession {
+  id: string;
+  callerId: string;
+  recipientId: string;
+  status: 'initiating' | 'ringing' | 'active' | 'ended';
+  startTime: Date;
+  endTime?: Date;
+}
+
+interface VideoCallOffer {
+  callId: string;
+  fromUserId: string;
+  toUserId: string;
+  signal: any;
+}
+
+interface VideoCallAnswer {
+  callId: string;
+  fromUserId: string;
+  toUserId: string;
+  signal: any;
+}
+
+interface VideoCallIceCandidate {
+  callId: string;
+  fromUserId: string;
+  toUserId: string;
+  candidate: any;
 }
 
 @Injectable()
@@ -86,6 +99,10 @@ export class MessagingGateway
   private connectedUsers = new Map<string, ConnectedUser>();
   private userToSocket = new Map<string, string>();
   private socketToUser = new Map<string, string>();
+  
+  // Video call state management
+  private activeCalls = new Map<string, VideoCallSession>();
+  private userCallStatus = new Map<string, 'idle' | 'calling' | 'in_call'>();
 
   constructor(
     private readonly authMiddleware: WebSocketAuthMiddleware,
@@ -170,6 +187,7 @@ export class MessagingGateway
     if (!userId) return;
 
     this.cleanupUserConnection(userId);
+    this.cleanupUserVideoCalls(userId);
     this.logger.log(`User ${userId} disconnected from messaging gateway`);
   }
 
@@ -534,5 +552,317 @@ export class MessagingGateway
       );
       return { success: false, error: 'Failed to acknowledge message' };
     }
+  }
+
+  // Video Call Event Handlers
+
+  @SubscribeMessage('initiate_video_call')
+  async handleInitiateVideoCall(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { recipientId: string },
+  ) {
+    const callerId = this.socketToUser.get(client.id);
+    if (!callerId) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const { recipientId } = data;
+    
+    // Check if recipient is connected
+    const recipientSocket = this.userToSocket.get(recipientId);
+    if (!recipientSocket) {
+      return { success: false, error: 'Recipient is not online' };
+    }
+
+    // Check if users are not already in a call
+    const callerStatus = this.userCallStatus.get(callerId) || 'idle';
+    const recipientStatus = this.userCallStatus.get(recipientId) || 'idle';
+    
+    if (callerStatus !== 'idle') {
+      return { success: false, error: 'You are already in a call' };
+    }
+    
+    if (recipientStatus !== 'idle') {
+      return { success: false, error: 'Recipient is already in a call' };
+    }
+
+    // Create call session
+    const callId = `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const callSession: VideoCallSession = {
+      id: callId,
+      callerId,
+      recipientId,
+      status: 'initiating',
+      startTime: new Date(),
+    };
+
+    this.activeCalls.set(callId, callSession);
+    this.userCallStatus.set(callerId, 'calling');
+    this.userCallStatus.set(recipientId, 'calling');
+
+    // Send incoming call notification to recipient
+    const recipientUserRoom = this.getUserRoom(recipientId);
+    const callerUser = this.connectedUsers.get(callerId)?.user;
+    
+    this.server.to(recipientUserRoom).emit('incoming_video_call', {
+      callId,
+      callerId,
+      callerName: callerUser ? `${callerUser.firstName} ${callerUser.lastName}` : 'Unknown User',
+      callerInfo: callerUser,
+      timestamp: new Date(),
+    });
+
+    // Update call status to ringing
+    callSession.status = 'ringing';
+    this.activeCalls.set(callId, callSession);
+
+    this.logger.log(`Video call initiated: ${callerId} -> ${recipientId} (Call ID: ${callId})`);
+
+    return {
+      success: true,
+      callId,
+      message: 'Call initiated',
+      timestamp: new Date(),
+    };
+  }
+
+  @SubscribeMessage('video_call_answer')
+  async handleVideoCallAnswer(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { callId: string; accept: boolean },
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return;
+
+    const { callId, accept } = data;
+    const callSession = this.activeCalls.get(callId);
+
+    if (!callSession || callSession.recipientId !== userId) {
+      client.emit('call_error', { error: 'Invalid call session' });
+      return;
+    }
+
+    if (accept) {
+      // Accept the call
+      callSession.status = 'active';
+      this.activeCalls.set(callId, callSession);
+      this.userCallStatus.set(callSession.callerId, 'in_call');
+      this.userCallStatus.set(callSession.recipientId, 'in_call');
+
+      // Notify caller that call was accepted
+      const callerSocket = this.userToSocket.get(callSession.callerId);
+      if (callerSocket) {
+        this.server.to(callerSocket).emit('video_call_accepted', {
+          callId,
+          timestamp: new Date(),
+        });
+      }
+
+      // Emit to both users to start WebRTC signaling
+      const recipientSocket = this.userToSocket.get(callSession.recipientId);
+      if (recipientSocket) {
+        this.server.to(recipientSocket).emit('start_webrtc_connection', {
+          callId,
+          isInitiator: false,
+          timestamp: new Date(),
+        });
+      }
+      
+      if (callerSocket) {
+        this.server.to(callerSocket).emit('start_webrtc_connection', {
+          callId,
+          isInitiator: true,
+          timestamp: new Date(),
+        });
+      }
+
+      this.logger.log(`Video call accepted: Call ID ${callId}`);
+    } else {
+      // Decline the call
+      this.endVideoCall(callId, 'declined');
+      
+      // Notify caller that call was declined
+      const callerSocket = this.userToSocket.get(callSession.callerId);
+      if (callerSocket) {
+        this.server.to(callerSocket).emit('video_call_declined', {
+          callId,
+          timestamp: new Date(),
+        });
+      }
+
+      this.logger.log(`Video call declined: Call ID ${callId}`);
+    }
+  }
+
+  @SubscribeMessage('video_call_decline')
+  async handleVideoCallDecline(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { callId: string },
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return;
+
+    const { callId } = data;
+    this.endVideoCall(callId, 'declined');
+    
+    this.logger.log(`Video call explicitly declined: Call ID ${callId}`);
+  }
+
+  @SubscribeMessage('video_call_offer')
+  async handleVideoCallOffer(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: VideoCallOffer,
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return;
+
+    const { callId, toUserId, signal } = data;
+    const callSession = this.activeCalls.get(callId);
+
+    if (!callSession || callSession.status !== 'active') {
+      client.emit('call_error', { error: 'Invalid call session for offer' });
+      return;
+    }
+
+    // Forward the offer to the recipient
+    const recipientSocket = this.userToSocket.get(toUserId);
+    if (recipientSocket) {
+      this.server.to(recipientSocket).emit('video_call_offer', {
+        callId,
+        fromUserId: userId,
+        signal,
+        timestamp: new Date(),
+      });
+    }
+
+    this.logger.debug(`Video call offer forwarded: ${userId} -> ${toUserId} (Call ID: ${callId})`);
+  }
+
+  @SubscribeMessage('video_call_answer_signal')
+  async handleVideoCallAnswerSignal(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: VideoCallAnswer,
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return;
+
+    const { callId, toUserId, signal } = data;
+    const callSession = this.activeCalls.get(callId);
+
+    if (!callSession || callSession.status !== 'active') {
+      client.emit('call_error', { error: 'Invalid call session for answer' });
+      return;
+    }
+
+    // Forward the answer to the caller
+    const callerSocket = this.userToSocket.get(toUserId);
+    if (callerSocket) {
+      this.server.to(callerSocket).emit('video_call_answer', {
+        callId,
+        fromUserId: userId,
+        signal,
+        timestamp: new Date(),
+      });
+    }
+
+    this.logger.debug(`Video call answer forwarded: ${userId} -> ${toUserId} (Call ID: ${callId})`);
+  }
+
+  @SubscribeMessage('video_call_ice_candidate')
+  async handleVideoCallIceCandidate(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: VideoCallIceCandidate,
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return;
+
+    const { callId, toUserId, candidate } = data;
+    const callSession = this.activeCalls.get(callId);
+
+    if (!callSession || callSession.status !== 'active') {
+      return; // Silently ignore ICE candidates for invalid calls
+    }
+
+    // Forward the ICE candidate to the other peer
+    const peerSocket = this.userToSocket.get(toUserId);
+    if (peerSocket) {
+      this.server.to(peerSocket).emit('video_call_ice_candidate', {
+        callId,
+        fromUserId: userId,
+        candidate,
+        timestamp: new Date(),
+      });
+    }
+
+    this.logger.debug(`ICE candidate forwarded: ${userId} -> ${toUserId} (Call ID: ${callId})`);
+  }
+
+  @SubscribeMessage('video_call_end')
+  async handleVideoCallEnd(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { callId: string },
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return;
+
+    const { callId } = data;
+    this.endVideoCall(callId, 'ended');
+    
+    this.logger.log(`Video call ended by user ${userId}: Call ID ${callId}`);
+  }
+
+  /**
+   * Helper method to end a video call and cleanup state
+   */
+  private endVideoCall(callId: string, reason: 'ended' | 'declined' | 'timeout' | 'error') {
+    const callSession = this.activeCalls.get(callId);
+    if (!callSession) return;
+
+    // Update call session
+    callSession.status = 'ended';
+    callSession.endTime = new Date();
+
+    // Reset user call status
+    this.userCallStatus.set(callSession.callerId, 'idle');
+    this.userCallStatus.set(callSession.recipientId, 'idle');
+
+    // Notify both users that the call has ended
+    const callerSocket = this.userToSocket.get(callSession.callerId);
+    const recipientSocket = this.userToSocket.get(callSession.recipientId);
+
+    const endEventData = {
+      callId,
+      reason,
+      timestamp: new Date(),
+    };
+
+    if (callerSocket) {
+      this.server.to(callerSocket).emit('video_call_ended', endEventData);
+    }
+    if (recipientSocket) {
+      this.server.to(recipientSocket).emit('video_call_ended', endEventData);
+    }
+
+    // Clean up call session after a short delay to allow for cleanup
+    setTimeout(() => {
+      this.activeCalls.delete(callId);
+    }, 5000);
+
+    this.logger.log(`Video call ${callId} ended: ${reason}`);
+  }
+
+  /**
+   * Clean up video call state when user disconnects
+   */
+  private cleanupUserVideoCalls(userId: string) {
+    // Find and end any active calls involving this user
+    for (const [callId, callSession] of this.activeCalls.entries()) {
+      if (callSession.callerId === userId || callSession.recipientId === userId) {
+        this.endVideoCall(callId, 'error');
+      }
+    }
+    
+    // Reset user call status
+    this.userCallStatus.delete(userId);
   }
 }
