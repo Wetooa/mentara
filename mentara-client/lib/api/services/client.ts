@@ -99,6 +99,15 @@ export function createClientService(client: AxiosInstance) {
       const response = await client.get("client/therapists");
       return response.data;
     },
+
+    /**
+     * Send a therapist connection request
+     * POST /client/therapist/request
+     */
+    async requestTherapist(therapistId: string): Promise<{ therapist: TherapistRecommendation }> {
+      const response = await client.post("client/therapist/request", { therapistId });
+      return response.data;
+    },
   };
 }
 

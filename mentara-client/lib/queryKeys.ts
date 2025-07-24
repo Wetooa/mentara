@@ -65,6 +65,9 @@ const createQueryKeys = () => {
     worksheets: {
       all: ['worksheets'] as const,
     },
+    client: {
+      all: ['client'] as const,
+    },
   };
 
   // Computed query keys - these can safely reference base keys
@@ -197,6 +200,12 @@ const createQueryKeys = () => {
       byId: (id: string) => [...base.worksheets.all, 'byId', id] as const,
       list: (params?: any) => [...base.worksheets.all, 'list', params] as const,
       stats: (params?: any) => [...base.worksheets.all, 'stats', params] as const,
+    },
+    client: {
+      ...base.client,
+      assignedTherapists: [...base.client.all, 'assigned-therapists'] as const,
+      profile: [...base.client.all, 'profile'] as const,
+      recommendations: [...base.client.all, 'recommendations'] as const,
     },
   };
 };
