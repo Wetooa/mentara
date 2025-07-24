@@ -213,7 +213,15 @@ export function useNotifications(
     isMarkingAllAsRead: markAllAsReadMutation.isPending,
     isDeleting: deleteNotificationMutation.isPending,
 
-    // Real-time WebSocket state
+    // Connection state (expected by NotificationCenter)
+    connectionState: {
+      isConnected: webSocketState.isConnected,
+      isConnecting: webSocketState.isConnecting,
+      error: webSocketState.error || null,
+    },
+    reconnectWebSocket: webSocketState.connect,
+
+    // Real-time WebSocket state (backward compatibility)
     realTime: {
       isConnected: webSocketState.isConnected,
       isConnecting: webSocketState.isConnecting,

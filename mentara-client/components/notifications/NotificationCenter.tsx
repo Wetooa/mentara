@@ -236,7 +236,7 @@ export function NotificationCenter({
           <div className="flex items-center gap-2">
             {/* Connection status indicators */}
             <div className="flex items-center gap-1">
-              {connectionState.isConnected ? (
+              {connectionState?.isConnected ? (
                 <Wifi className="h-4 w-4 text-green-500" title="Real-time connected" />
               ) : (
                 <WifiOff className="h-4 w-4 text-red-500" title="Real-time disconnected" />
@@ -266,7 +266,7 @@ export function NotificationCenter({
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh
                 </DropdownMenuItem>
-                {!connectionState.isConnected && (
+                {!connectionState?.isConnected && (
                   <DropdownMenuItem onClick={reconnectWebSocket}>
                     <Wifi className="h-4 w-4 mr-2" />
                     Reconnect
@@ -711,19 +711,19 @@ export function NotificationCenter({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {connectionState.isConnected ? (
+                        {connectionState?.isConnected ? (
                           <Wifi className="h-4 w-4 text-green-500" />
                         ) : (
                           <WifiOff className="h-4 w-4 text-red-500" />
                         )}
                         <span>Real-time Notifications</span>
                       </div>
-                      <Badge variant={connectionState.isConnected ? 'default' : 'destructive'}>
-                        {connectionState.isConnected ? 'Connected' : 'Disconnected'}
+                      <Badge variant={connectionState?.isConnected ? 'default' : 'destructive'}>
+                        {connectionState?.isConnected ? 'Connected' : 'Disconnected'}
                       </Badge>
                     </div>
 
-                    {connectionState.error && (
+                    {connectionState?.error && (
                       <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                         <p className="text-sm text-red-800">{connectionState.error}</p>
                         <Button 
