@@ -493,6 +493,14 @@ export function createCommunityService(axios: AxiosInstance) {
       return data;
     },
 
+    /**
+     * Report a post for inappropriate content
+     */
+    async reportPost(postId: string, reason: string, content?: string): Promise<{ success: boolean; reportId: string }> {
+      const { data } = await axios.post(`/posts/${postId}/report`, { reason, content });
+      return data;
+    },
+
     // Post Edit Methods
 
     /**
