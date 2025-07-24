@@ -336,7 +336,8 @@ export class WorksheetsService {
   async submitWorksheet(
     id: string,
     data: WorksheetSubmissionCreateInputDto,
-    clientId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _clientId: string,
   ) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
@@ -349,7 +350,7 @@ export class WorksheetsService {
     }
 
     // Create or update submission
-    let submission;
+    let submission: any;
     if (worksheet.submission) {
       // Update existing submission
       submission = await this.prisma.worksheetSubmission.update({
@@ -564,6 +565,90 @@ export class WorksheetsService {
       success: true,
       message: 'Worksheet turned back in for editing',
       data: await this.findById(id),
+    };
+  }
+
+  async removeSubmissionFile(
+    worksheetId: string,
+    filename: string,
+    clientId: string,
+  ) {
+    // Check if worksheet exists and belongs to the client
+    const worksheet = await this.prisma.worksheet.findUnique({
+      where: { id: worksheetId },
+      include: { submission: true },
+    });
+
+    if (!worksheet) {
+      throw new NotFoundException(`Worksheet with ID ${worksheetId} not found`);
+    }
+
+    // Verify client ownership
+    if (worksheet.clientId !== clientId) {
+      throw new NotFoundException(`Worksheet with ID ${worksheetId} not found`);
+    }
+
+    // Check if there's a submission
+    if (!worksheet.submission) {
+      throw new NotFoundException(
+        `No submission found for worksheet with ID ${worksheetId}`,
+      );
+    }
+
+    const submission = worksheet.submission;
+
+    // Find the file index by filename
+    const fileIndex = submission.fileNames.findIndex(
+      (name) => name === filename,
+    );
+
+    if (fileIndex === -1) {
+      throw new NotFoundException(`File "${filename}" not found in submission`);
+    }
+
+    // Get the file URL before removing it
+    const fileUrl = submission.fileUrls[fileIndex];
+
+    // Remove the file from all arrays at the same index
+    const updatedFileUrls = [...submission.fileUrls];
+    const updatedFileNames = [...submission.fileNames];
+    const updatedFileSizes = [...submission.fileSizes];
+
+    updatedFileUrls.splice(fileIndex, 1);
+    updatedFileNames.splice(fileIndex, 1);
+    updatedFileSizes.splice(fileIndex, 1);
+
+    // Update the submission in the database
+    await this.prisma.worksheetSubmission.update({
+      where: { worksheetId },
+      data: {
+        fileUrls: updatedFileUrls,
+        fileNames: updatedFileNames,
+        fileSizes: updatedFileSizes,
+      },
+    });
+
+    // Delete the file from Supabase Storage
+    try {
+      if (fileUrl) {
+        await this.supabaseStorageService.deleteFile(
+          fileUrl,
+          SupabaseStorageService.getSupportedBuckets().WORKSHEETS,
+        );
+      }
+    } catch (error) {
+      // Log error but don't fail the operation if storage deletion fails
+      console.error(`Failed to delete file from storage: ${error.message}`);
+    }
+
+    return {
+      success: true,
+      message: `File "${filename}" removed successfully`,
+      data: {
+        worksheetId,
+        filename,
+        remainingFiles: updatedFileNames.length,
+      },
     };
   }
 }

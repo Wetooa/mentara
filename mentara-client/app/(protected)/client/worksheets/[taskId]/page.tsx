@@ -201,20 +201,19 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
     document.body.removeChild(link);
   };
 
-  const handleDeleteAttachment = async (fileId: string) => {
+  const handleDeleteAttachment = async (filename: string) => {
     if (!task) return;
 
     try {
-      // Delete the file from the server
-      await api.worksheets.deleteSubmission(fileId);
+      // Delete the file from the server using worksheetId and filename
+      await api.worksheets.deleteSubmission(taskId, filename);
 
       // Refetch the data to update the UI
       queryClient.invalidateQueries({
         queryKey: queryKeys.worksheets.byId(taskId),
       });
 
-      const deletedFile = task.myWork?.find((work) => work.id === fileId);
-      toast.success(`Successfully deleted ${deletedFile?.filename || "file"}`);
+      toast.success(`Successfully deleted ${filename}`);
     } catch (err) {
       console.error("Error deleting file:", err);
       toast.error("Failed to delete file. Please try again.");
@@ -448,7 +447,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                         <button
                           className="text-gray-500 hover:text-red-600 p-2 rounded-md hover:bg-red-50 transition-colors"
                           onClick={() =>
-                            work.id && handleDeleteAttachment(work.id)
+                            work.filename && handleDeleteAttachment(work.filename)
                           }
                           title="Delete file"
                         >
