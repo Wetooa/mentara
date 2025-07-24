@@ -26,7 +26,8 @@ export interface Task {
     | "completed"
     | "assigned"
     | "in_progress"
-    | "overdue";
+    | "overdue"
+    | "reviewed";
   isCompleted: boolean;
   instructions?: string;
   materials?: TaskFile[];
@@ -69,6 +70,8 @@ export function transformWorksheetAssignmentToTask(
   let status: Task["status"] = "assigned";
   if (assignment.status === "SUBMITTED") {
     status = "completed";
+  } else if (assignment.status === "REVIEWED") {
+    status = "reviewed";
   } else if (assignment.status === "OVERDUE") {
     status = "past_due";
   } else if (new Date(assignment.dueDate) < new Date()) {
@@ -89,7 +92,8 @@ export function transformWorksheetAssignmentToTask(
       : "Unknown Patient",
     date: assignment.dueDate,
     status,
-    isCompleted: assignment.status === "SUBMITTED",
+    isCompleted:
+      assignment.status === "SUBMITTED" || assignment.status === "REVIEWED",
     instructions: assignment.instructions,
     materials,
     myWork,

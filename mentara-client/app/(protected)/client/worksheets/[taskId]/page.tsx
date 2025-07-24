@@ -39,6 +39,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
+  const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const api = useApi();
 
@@ -53,9 +54,13 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
     queryFn: () => api.worksheets.getById(taskId),
     enabled: !!taskId,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // Don't retry on 404 or auth errors
-      if (error?.response?.status === 404 || error?.response?.status === 401) {
+      const apiError = error as Error & { response?: { status?: number } };
+      if (
+        apiError?.response?.status === 404 ||
+        apiError?.response?.status === 401
+      ) {
         return false;
       }
       return failureCount < 2;
@@ -104,7 +109,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   // Turn in worksheet mutation
   const turnInMutation = useMutation({
     mutationFn: () => api.worksheets.turnIn(taskId),
-    onSuccess: (result) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.worksheets.byId(taskId),
       });
@@ -119,7 +124,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   // Unturn in worksheet mutation
   const unturnInMutation = useMutation({
     mutationFn: () => api.worksheets.unturnIn(taskId),
-    onSuccess: (result) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.worksheets.byId(taskId),
       });
@@ -133,7 +138,10 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
 
   // Determine if task is editable based on submission status
   const isTaskEditable =
-    task && !task.isCompleted && task.status !== "past_due";
+    task &&
+    !task.isCompleted &&
+    task.status !== "past_due" &&
+    task.status !== "reviewed";
 
   const handleBack = () => {
     router.back();
@@ -198,34 +206,34 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
     document.body.removeChild(link);
   };
 
-  const handleDeleteAttachment = async (fileId: string) => {
+  const handleDeleteAttachment = async (filename: string) => {
     if (!task) return;
 
+    // Add filename to deleting set
+    setDeletingFiles((prev) => new Set(prev).add(filename));
+
     try {
-      // Delete the file from the server
-      await api.worksheets.deleteSubmission(fileId);
+      // Delete the file from the server using worksheetId and filename
+      await api.worksheets.deleteSubmission(taskId, filename);
 
       // Refetch the data to update the UI
       queryClient.invalidateQueries({
         queryKey: queryKeys.worksheets.byId(taskId),
       });
 
-      const deletedFile = task.myWork?.find((work) => work.id === fileId);
-      toast.success(`Successfully deleted ${deletedFile?.filename || "file"}`);
+      toast.success(`Successfully deleted ${filename}`);
     } catch (err) {
       console.error("Error deleting file:", err);
       toast.error("Failed to delete file. Please try again.");
+    } finally {
+      // Remove filename from deleting set
+      setDeletingFiles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(filename);
+        return newSet;
+      });
     }
   };
-
-  const handleTurnIn = () => {
-    turnInMutation.mutate();
-  };
-
-  const handleUnturnIn = () => {
-    unturnInMutation.mutate();
-  };
-
   if (isLoading) {
     return (
       <div className="h-full bg-white p-6">
@@ -259,7 +267,8 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
         </div>
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <p className="text-secondary text-center">
-            {(error as any)?.response?.status === 404
+            {(error as Error & { response?: { status?: number } })?.response
+              ?.status === 404
               ? "Worksheet not found"
               : "Failed to load worksheet details. Please try again."}
           </p>
@@ -391,10 +400,16 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-medium text-secondary">My work</h2>
-              {task.status === "completed" && (
+              {worksheetData?.status === WorksheetStatus.SUBMITTED && (
                 <span className="text-sm text-green-500 flex items-center">
                   <CheckCircle className="h-4 w-4 mr-1" />
                   Submitted
+                </span>
+              )}
+              {worksheetData?.status === WorksheetStatus.REVIEWED && (
+                <span className="text-sm text-blue-500 flex items-center">
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Reviewed
                 </span>
               )}
               {task.status === "past_due" && (
@@ -428,151 +443,262 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                 ))}
 
                 {/* Show existing files */}
-                {task.myWork?.map((work) => (
-                  <div
-                    key={work.id}
-                    className="flex items-center justify-between p-3 rounded-md bg-gray-100"
-                  >
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 mr-3 text-primary" />
-                      <div className="flex flex-col">
-                        <span className="text-secondary">{work.filename}</span>
+                {task.myWork?.map((work) => {
+                  const isDeleting = Boolean(
+                    work.filename && deletingFiles.has(work.filename)
+                  );
+
+                  return (
+                    <div
+                      key={work.id}
+                      className={`flex items-center justify-between p-3 rounded-md transition-colors ${
+                        isDeleting
+                          ? "bg-red-50 border border-red-200 opacity-70"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <FileText
+                          className={`h-5 w-5 mr-3 ${
+                            isDeleting ? "text-red-500" : "text-primary"
+                          }`}
+                        />
+                        <div className="flex flex-col">
+                          <span
+                            className={`${
+                              isDeleting ? "text-red-700" : "text-secondary"
+                            }`}
+                          >
+                            {work.filename}
+                          </span>
+                          {isDeleting && (
+                            <span className="text-xs text-red-600">
+                              Deleting...
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {/* Show spinner when deleting */}
+                        {isDeleting && (
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500"></div>
+                        )}
+
+                        {/* View button - disabled when deleting */}
+                        <button
+                          className={`p-2 rounded-md transition-colors ${
+                            isDeleting
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "text-gray-500 hover:text-primary hover:bg-gray-200"
+                          }`}
+                          onClick={() => !isDeleting && handleDownload(work)}
+                          disabled={isDeleting}
+                          title={
+                            isDeleting ? "File is being deleted" : "View file"
+                          }
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+
+                        {/* Delete button - only if task is editable */}
+                        {isTaskEditable && (
+                          <button
+                            className={`p-2 rounded-md transition-colors ${
+                              isDeleting
+                                ? "text-gray-400 cursor-not-allowed"
+                                : "text-gray-500 hover:text-red-600 hover:bg-red-50"
+                            }`}
+                            onClick={() =>
+                              !isDeleting &&
+                              work.filename &&
+                              handleDeleteAttachment(work.filename)
+                            }
+                            disabled={isDeleting}
+                            title={isDeleting ? "Deleting..." : "Delete file"}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {/* View button */}
-                      <button
-                        className="text-gray-500 hover:text-primary p-2 rounded-md hover:bg-gray-200 transition-colors"
-                        onClick={() => handleDownload(work)}
-                        title="View file"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
+                  );
+                })}
 
-                      {/* Delete button - only if task is editable */}
-                      {isTaskEditable && (
-                        <button
-                          className="text-gray-500 hover:text-red-600 p-2 rounded-md hover:bg-red-50 transition-colors"
-                          onClick={() =>
-                            work.id && handleDeleteAttachment(work.id)
-                          }
-                          title="Delete file"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
+                {/* Status message for files vs submission */}
+                {worksheetData?.status === WorksheetStatus.SUBMITTED && (
+                  <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-sm text-green-700">
+                      ✓ Files uploaded and worksheet turned in
+                    </p>
                   </div>
-                ))}
+                )}
+                {worksheetData?.status !== WorksheetStatus.SUBMITTED &&
+                  task.myWork &&
+                  task.myWork.length > 0 && (
+                    <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-sm text-blue-700">
+                        Files uploaded but worksheet not yet turned in
+                      </p>
+                    </div>
+                  )}
 
                 {/* Add More Attachments Button - only if task is not completed */}
-                {isTaskEditable && (
-                  <button
-                    onClick={handleAddAttachment}
-                    disabled={uploadFileMutation.isPending}
-                    className="flex items-center justify-center w-full py-3 border border-dashed border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {uploadFileMutation.isPending ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2"></div>
-                        <span className="text-primary">Processing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-5 w-5 text-primary mr-2" />
-                        <span className="text-primary">
-                          Add More Attachments
-                        </span>
-                      </>
-                    )}
-                  </button>
-                )}
+                {isTaskEditable &&
+                  worksheetData?.status !== WorksheetStatus.SUBMITTED && (
+                    <button
+                      onClick={handleAddAttachment}
+                      disabled={
+                        uploadFileMutation.isPending || deletingFiles.size > 0
+                      }
+                      className="flex items-center justify-center w-full py-3 border border-dashed border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploadFileMutation.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2"></div>
+                          <span className="text-primary">Processing...</span>
+                        </>
+                      ) : deletingFiles.size > 0 ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500 mr-2"></div>
+                          <span className="text-red-500">
+                            Deleting files...
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-5 w-5 text-primary mr-2" />
+                          <span className="text-primary">
+                            Add More Attachments
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  )}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-6 bg-gray-100 rounded-lg">
                 {isTaskEditable ? (
                   <>
-                    <p className="mb-4 text-gray-600">No work submitted yet</p>
-                    <button
-                      onClick={handleAddAttachment}
-                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition"
-                    >
-                      <UploadIcon className="h-4 w-4 mr-2 inline" />
-                      Add Work
-                    </button>
+                    <p className="mb-4 text-gray-600">
+                      {worksheetData?.status === WorksheetStatus.SUBMITTED
+                        ? "No files uploaded, but worksheet has been turned in"
+                        : "No files uploaded yet"}
+                    </p>
+                    {worksheetData?.status !== WorksheetStatus.SUBMITTED && (
+                      <button
+                        onClick={handleAddAttachment}
+                        disabled={deletingFiles.size > 0}
+                        className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deletingFiles.size > 0 ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                            Deleting files...
+                          </>
+                        ) : (
+                          <>
+                            <UploadIcon className="h-4 w-4 mr-2 inline" />
+                            Add Work
+                          </>
+                        )}
+                      </button>
+                    )}
                   </>
                 ) : (
                   <p className="text-gray-600">
-                    No work was submitted for this task
+                    {worksheetData?.status === WorksheetStatus.SUBMITTED
+                      ? "No files were uploaded, but worksheet was turned in"
+                      : "No work was submitted for this task"}
                   </p>
                 )}
               </div>
             )}
           </div>
 
-          {/* Submit/Unsubmit button - only show if task has attachments or uploading files */}
-          {((task.myWork && task.myWork.length > 0) ||
-            Array.from(uploadingFiles).length > 0) &&
-            task.status !== "past_due" && (
-              <div className="flex flex-col items-end">
-                {task.submittedAt && (
-                  <p className="text-sm text-gray-500 mb-2">
-                    Submitted on {formatDate(task.submittedAt)}
-                  </p>
-                )}
-                <div className="flex gap-3">
-                  {/* Turn In/Unturn In Button */}
-                  {worksheetData?.status === WorksheetStatus.SUBMITTED ? (
-                    <button
-                      onClick={handleUnturnIn}
-                      disabled={
-                        unturnInMutation.isPending ||
-                        Array.from(uploadingFiles).length > 0
-                      }
-                      className="flex items-center px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {unturnInMutation.isPending ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                          Unturning in...
-                        </>
-                      ) : (
-                        <>
-                          <RotateCcw className="mr-2 h-4 w-4" />
-                          Unturn In
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleTurnIn}
-                      disabled={
-                        turnInMutation.isPending ||
-                        Array.from(uploadingFiles).length > 0
-                      }
-                      className="flex items-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {turnInMutation.isPending ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Turning in...
-                        </>
-                      ) : Array.from(uploadingFiles).length > 0 ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Uploading files...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-4 w-4" />
-                          Turn In
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
+          {/* Turn in info for empty worksheets */}
+          {task.status !== "past_due" &&
+            worksheetData?.status !== WorksheetStatus.SUBMITTED &&
+            worksheetData?.status !== WorksheetStatus.REVIEWED &&
+            (!task.myWork || task.myWork.length === 0) &&
+            Array.from(uploadingFiles).length === 0 && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <p className="text-sm text-yellow-700">
+                  💡 You can turn in this worksheet even without uploading files
+                  if no work is required.
+                </p>
               </div>
             )}
+
+          {/* Submit/Unsubmit button - show if task is not past due */}
+          {task.status !== "past_due" && (
+            <div className="flex flex-col items-end">
+              <div className="flex gap-3">
+                {/* Turn In/Unturn In Button */}
+                {worksheetData?.status === WorksheetStatus.SUBMITTED ? (
+                  <button
+                    onClick={() => unturnInMutation.mutate()}
+                    disabled={
+                      unturnInMutation.isPending ||
+                      Array.from(uploadingFiles).length > 0 ||
+                      deletingFiles.size > 0
+                    }
+                    className="flex items-center px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {unturnInMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                        Unturning in...
+                      </>
+                    ) : deletingFiles.size > 0 ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-2"></div>
+                        Deleting files...
+                      </>
+                    ) : (
+                      <>
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        Unturn In
+                      </>
+                    )}
+                  </button>
+                ) : worksheetData?.status !== WorksheetStatus.REVIEWED ? (
+                  <button
+                    onClick={() => turnInMutation.mutate()}
+                    disabled={
+                      turnInMutation.isPending ||
+                      Array.from(uploadingFiles).length > 0 ||
+                      deletingFiles.size > 0
+                    }
+                    className="flex items-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {turnInMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Turning in...
+                      </>
+                    ) : Array.from(uploadingFiles).length > 0 ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Uploading files...
+                      </>
+                    ) : deletingFiles.size > 0 ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Deleting files...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        {task.myWork && task.myWork.length > 0
+                          ? "Turn In"
+                          : "Turn In (No Files)"}
+                      </>
+                    )}
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

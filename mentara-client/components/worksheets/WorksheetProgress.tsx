@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, AlertTriangle, Circle } from "lucide-react";
+import { CheckCircle, AlertTriangle, Circle } from "lucide-react";
 import { Task } from "./types";
 
 interface WorksheetProgressProps {
@@ -40,6 +40,13 @@ export default function WorksheetProgress({
           color: "text-gray-500",
           bgColor: "bg-gray-50",
         };
+      case "reviewed":
+        return {
+          icon: <CheckCircle className="h-5 w-5 text-purple-500" />,
+          label: "Reviewed",
+          color: "text-purple-500",
+          bgColor: "bg-purple-50",
+        };
       default:
         return {
           icon: <Circle className="h-5 w-5 text-gray-500" />,
@@ -76,29 +83,6 @@ export default function WorksheetProgress({
           {statusInfo.label}
         </span>
       </div>
-
-      {/* Submission Details */}
-      {task.submittedAt && (
-        <div className="p-3 bg-green-50 rounded-lg">
-          <div className="flex items-center">
-            <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-            <div>
-              <p className="text-sm font-medium text-green-800">
-                Submitted successfully
-              </p>
-              <p className="text-xs text-green-600 mt-1">
-                {new Date(task.submittedAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Feedback Section */}
       {task.feedback && (

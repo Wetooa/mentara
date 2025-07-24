@@ -147,11 +147,11 @@ export function createWorksheetService(client: AxiosInstance) {
     },
 
     /**
-     * Delete a worksheet submission
-     * DELETE /worksheets/submissions/:id
+     * Delete a worksheet submission file
+     * DELETE /worksheets/:worksheetId/files/:filename
      */
-    async deleteSubmission(id: string): Promise<{ success: boolean; message: string }> {
-      const response = await client.delete(`worksheets/submissions/${id}`);
+    async deleteSubmission(worksheetId: string, filename: string): Promise<{ success: boolean; message: string }> {
+      const response = await client.delete(`worksheets/${worksheetId}/files/${encodeURIComponent(filename)}`);
       return response.data;
     },
 

@@ -1,7 +1,9 @@
 import {
   Controller,
   Post,
+  Delete,
   UseInterceptors,
+  UseGuards,
   UploadedFile,
   Body,
   BadRequestException,
@@ -10,14 +12,19 @@ import {
   Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { SupabaseStorageService } from '../common/services/supabase-storage.service';
+import { WorksheetsService } from './worksheets.service';
 
 @Controller('worksheets')
+@UseGuards(JwtAuthGuard)
 export class WorksheetUploadsController {
   constructor(
     private prisma: PrismaService,
     private readonly supabaseStorageService: SupabaseStorageService,
+    private readonly worksheetsService: WorksheetsService,
   ) {}
 
   @Post(':worksheetId/upload')
@@ -146,6 +153,44 @@ export class WorksheetUploadsController {
 
       throw new HttpException(
         `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete(':worksheetId/files/:filename')
+  async deleteFile(
+    @Param('worksheetId') worksheetId: string,
+    @Param('filename') filename: string,
+    @CurrentUserId() userId: string,
+  ) {
+    if (!worksheetId) {
+      throw new BadRequestException('Worksheet ID is required');
+    }
+
+    if (!filename) {
+      throw new BadRequestException('Filename is required');
+    }
+
+    try {
+      // Use the worksheets service to remove the file
+      const result = await this.worksheetsService.removeSubmissionFile(
+        worksheetId,
+        filename,
+        userId,
+      );
+
+      return result;
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error.name === 'NotFoundException'
+      ) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

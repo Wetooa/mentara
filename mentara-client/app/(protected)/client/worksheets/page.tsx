@@ -3,10 +3,7 @@
 import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
-import {
-  Task,
-  transformWorksheetAssignmentToTask,
-} from "@/components/worksheets/types";
+import { Task } from "@/components/worksheets/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
 
@@ -39,7 +36,10 @@ export default function WorksheetsPage() {
             status = "OVERDUE"; // Backend handles overdue = ASSIGNED + dueDate < now
             break;
           case "completed":
-            status = "REVIEWED"; // Completed worksheets are marked as REVIEWED
+            status = "SUBMITTED"; // Completed worksheets are marked as SUBMITTED
+            break;
+          case "reviewed":
+            status = "REVIEWED"; // Reviewed worksheets are marked as REVIEWED
             break;
           case "everything":
           default:
@@ -62,7 +62,9 @@ export default function WorksheetsPage() {
               ...worksheet,
               date: worksheet.dueDate,
               status: mapWorksheetStatus(worksheet.status, worksheet.dueDate),
-              isCompleted: worksheet.status === "REVIEWED",
+              isCompleted:
+                worksheet.status === "REVIEWED" ||
+                worksheet.status === "SUBMITTED",
               therapistName: worksheet.therapist?.user
                 ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}`
                 : undefined,
@@ -85,9 +87,9 @@ export default function WorksheetsPage() {
   const mapWorksheetStatus = (
     backendStatus: string,
     dueDate: string
-  ): "assigned" | "submitted" | "completed" | "overdue" => {
-    if (backendStatus === "REVIEWED") return "completed";
-    if (backendStatus === "SUBMITTED") return "submitted";
+  ): "assigned" | "completed" | "reviewed" | "overdue" => {
+    if (backendStatus === "REVIEWED") return "reviewed";
+    if (backendStatus === "SUBMITTED") return "completed";
     if (backendStatus === "ASSIGNED") {
       // Check if it's overdue
       const due = new Date(dueDate);
@@ -117,6 +119,8 @@ export default function WorksheetsPage() {
             return task.status === "past_due";
           case "completed":
             return task.status === "completed";
+          case "reviewed":
+            return task.status === "reviewed";
           default:
             return true;
         }

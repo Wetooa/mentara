@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { useApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,10 @@ import {
   Edit,
   Upload,
   Eye,
-  MoreHorizontal
+  MoreHorizontal,
+  X,
+  Trash2,
+  Plus
 } from 'lucide-react';
 
 import { useMatchedClients } from '@/hooks/therapist/useMatchedClients';
@@ -37,12 +41,14 @@ import { Textarea } from '@/components/ui/textarea';
 
 export function WorksheetManagementPage() {
   const api = useApi();
+  const router = useRouter();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [viewWorksheet, setViewWorksheet] = useState<Worksheet | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingWorksheet, setEditingWorksheet] = useState<Worksheet | null>(null);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
 
   // Fetch therapist's worksheets
   const { data: worksheetData, isLoading: worksheetsLoading } = useQuery({
@@ -60,9 +66,22 @@ export function WorksheetManagementPage() {
 
   const worksheets = worksheetData?.worksheets || [];
 
-  // Filter worksheets for each tab
-  const completedWorksheets = worksheets.filter((w) => w.status === 'SUBMITTED');
-  const nonCompletedWorksheets = worksheets.filter((w) => w.status !== 'SUBMITTED');
+  // Enhanced filtering function
+  const filterWorksheets = (worksheets: Worksheet[]) => {
+    return worksheets.filter((worksheet) => {
+      // Search term filter - check both worksheet title and patient name
+      const matchesSearch = searchTerm === '' || 
+        worksheet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      return matchesSearch;
+    });
+  };
+
+  // Filter worksheets for each tab with enhanced search
+  const allFilteredWorksheets = filterWorksheets(worksheets);
+  const completedWorksheets = allFilteredWorksheets.filter((w) => w.status === 'SUBMITTED');
+  const nonCompletedWorksheets = allFilteredWorksheets.filter((w) => w.status !== 'SUBMITTED');
 
   // Fetch matched clients for quick assignment
   const { data: matchedClientsData, isLoading: clientsLoading } = useMatchedClients();
@@ -86,16 +105,33 @@ export function WorksheetManagementPage() {
 
   // Mutation for editing worksheet
   const editWorksheetMutation = useMutation({
-    mutationFn: async ({ worksheetId, updateData }: { 
+    mutationFn: async ({ worksheetId, updateData, filesToRemove, newFiles }: { 
       worksheetId: string; 
-      updateData: { title?: string; instructions?: string; dueDate?: string; status?: string; }
+      updateData: { title?: string; instructions?: string; dueDate?: string; status?: string; };
+      filesToRemove: string[];
+      newFiles: File[];
     }) => {
-      return api.therapists.worksheets.edit(worksheetId, updateData);
+      // First update the worksheet
+      const result = await api.therapists.worksheets.edit(worksheetId, updateData);
+      
+      // Remove files
+      for (const fileUrl of filesToRemove) {
+        await api.therapists.worksheets.removeReferenceFile(worksheetId, fileUrl);
+      }
+      
+      // Upload new files
+      for (const file of newFiles) {
+        await api.therapists.worksheets.uploadReferenceFile(worksheetId, file);
+      }
+      
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['therapist', 'worksheets'] });
       toast.success("Worksheet updated successfully!");
       setEditingWorksheet(null);
+      setFilesToRemove([]);
+      setNewFiles([]);
     },
     onError: (error) => {
       console.error("Error updating worksheet:", error);
@@ -118,9 +154,48 @@ export function WorksheetManagementPage() {
     },
   });
 
+  // Mutation for removing reference file
+  const removeReferenceMutation = useMutation({
+    mutationFn: async ({ worksheetId, fileUrl }: { worksheetId: string; fileUrl: string }) => {
+      return api.therapists.worksheets.removeReferenceFile(worksheetId, fileUrl);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['therapist', 'worksheets'] });
+      toast.success("Reference file removed successfully!");
+    },
+    onError: (error) => {
+      console.error("Error removing reference file:", error);
+      toast.error("Failed to remove reference file. Please try again.");
+    },
+  });
+
   // Handler functions
+  const handleViewWorksheet = (worksheetId: string) => {
+    router.push(`/therapist/worksheets/${worksheetId}`);
+  };
+
   const handleEditWorksheet = (worksheet: Worksheet) => {
     setEditingWorksheet(worksheet);
+    setFilesToRemove([]);
+    setNewFiles([]);
+  };
+
+  const handleFileUpload = (files: FileList | null) => {
+    if (files) {
+      setNewFiles(prev => [...prev, ...Array.from(files)]);
+    }
+  };
+
+  const handleRemoveNewFile = (index: number) => {
+    setNewFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveExistingFile = (fileUrl: string) => {
+    setFilesToRemove(prev => [...prev, fileUrl]);
+  };
+
+  const handleRestoreExistingFile = (fileUrl: string) => {
+    setFilesToRemove(prev => prev.filter(url => url !== fileUrl));
   };
 
   const handleUploadReference = (worksheetId: string) => {
@@ -185,75 +260,124 @@ export function WorksheetManagementPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {/* Enhanced Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <FileText className="h-6 w-6 text-blue-600" />
+          <h1 className="text-3xl font-bold flex items-center gap-3 text-gray-900">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <FileText className="h-7 w-7 text-blue-600" />
+            </div>
             Worksheet Management
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600 mt-2 text-lg">
             Create, assign, and track worksheets for your clients
           </p>
+          <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span>{completedWorksheets.length} completed</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span>{nonCompletedWorksheets.length} in progress</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <span>{allFilteredWorksheets.length} total</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <Tabs defaultValue="worksheets" className="space-y-6">
-        <div className="flex items-center gap-4 mb-4">
-          <Button onClick={() => setCreateModalOpen(true)} variant="default">
-            + Create Worksheet
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+          <Button 
+            onClick={() => setCreateModalOpen(true)} 
+            variant="default"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Create New Worksheet
           </Button>
-          <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            <TabsTrigger value="worksheets">My Worksheets</TabsTrigger>
-            <TabsTrigger value="assign">Client Submissions</TabsTrigger>
+          <div className="flex-1" />
+          <TabsList className="grid w-full sm:w-auto grid-cols-2 bg-gray-100 p-1 rounded-lg">
+            <TabsTrigger 
+              value="worksheets"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-6 py-2 rounded-md transition-all"
+            >
+              My Worksheets ({nonCompletedWorksheets.length})
+            </TabsTrigger>
+            <TabsTrigger 
+              value="assign"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-6 py-2 rounded-md transition-all"
+            >
+              Client Submissions ({completedWorksheets.length})
+            </TabsTrigger>
           </TabsList>
         </div>
         <CreateWorksheetModal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} />
 
         {/* Worksheets Tab */}
         <TabsContent value="worksheets" className="space-y-6">
-          {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search worksheets or clients..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          {/* Enhanced Search and Filters */}
+          <Card className="p-4 bg-gradient-to-r from-gray-50 to-white border-gray-200">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by worksheet title or patient name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={statusFilter === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatusFilter('all')}
+                  className="transition-all duration-200"
+                >
+                  All
+                </Button>
+                <Button
+                  variant={statusFilter === 'ASSIGNED' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatusFilter('ASSIGNED')}
+                  className="transition-all duration-200"
+                >
+                  <Clock className="h-3 w-3 mr-1" />
+                  Assigned
+                </Button>
+                <Button
+                  variant={statusFilter === 'OVERDUE' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatusFilter('OVERDUE')}
+                  className="transition-all duration-200"
+                >
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  Overdue
+                </Button>
+                <Button
+                  variant={statusFilter === 'REVIEWED' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatusFilter('REVIEWED')}
+                  className="transition-all duration-200"
+                >
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Reviewed
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant={statusFilter === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('all')}
-              >
-                All
-              </Button>
-              <Button
-                variant={statusFilter === 'ASSIGNED' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('ASSIGNED')}
-              >
-                Assigned
-              </Button>
-              <Button
-                variant={statusFilter === 'OVERDUE' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('OVERDUE')}
-              >
-                Overdue
-              </Button>
-              <Button
-                variant={statusFilter === 'REVIEWED' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('REVIEWED')}
-              >
-                Reviewed
-              </Button>
-            </div>
-          </div>
+          </Card>
 
           {/* Worksheets List */}
           <div className="space-y-4">
@@ -269,71 +393,81 @@ export function WorksheetManagementPage() {
               </Card>
             ) : (
               nonCompletedWorksheets.map((worksheet: Worksheet) => (
-                <Card key={worksheet.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
+                <Card key={worksheet.id} className="group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-l-4 border-l-blue-500 bg-white">
+                  <CardContent className="p-6">
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">{worksheet.title}</h3>
-                          <Badge variant="outline" className={getStatusColor(worksheet.status)}>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-700 transition-colors">
+                            {worksheet.title}
+                          </h3>
+                          <Badge variant="outline" className={`${getStatusColor(worksheet.status)} font-medium`}>
                             {getStatusIcon(worksheet.status)}
-                            {worksheet.status.replace('_', ' ')}
+                            <span className="ml-1">{worksheet.status.replace('_', ' ')}</span>
                           </Badge>
                         </div>
                         
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            <Avatar className="h-6 w-6">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full">
+                            <Avatar className="h-5 w-5">
                               <AvatarImage src={worksheet.client.user.avatarUrl} />
-                              <AvatarFallback className="text-xs">
+                              <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
                                 {worksheet.client.user.firstName[0]}{worksheet.client.user.lastName[0]}
                               </AvatarFallback>
                             </Avatar>
-                            <span>{worksheet.client.user.firstName} {worksheet.client.user.lastName}</span>
+                            <span className="font-medium">
+                              {worksheet.client.user.firstName} {worksheet.client.user.lastName}
+                            </span>
                           </div>
                           
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 text-gray-500">
                             <Calendar className="h-4 w-4" />
                             <span>Created {format(new Date(worksheet.createdAt), 'MMM d, yyyy')}</span>
                           </div>
                           
                           {worksheet.dueDate && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 text-gray-500">
                               <Clock className="h-4 w-4" />
                               <span>Due {format(new Date(worksheet.dueDate), 'MMM d, yyyy')}</span>
                             </div>
                           )}
                         </div>
                         
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {worksheet.instructions || ""}
-                        </p>
+                        {worksheet.instructions && (
+                          <p className="text-sm text-gray-600 line-clamp-2 bg-gray-50 p-3 rounded-lg border-l-2 border-l-gray-300">
+                            {worksheet.instructions}
+                          </p>
+                        )}
                       </div>
                       
-                      <div className="flex gap-2 ml-4">
-                        <Button variant="outline" size="sm" onClick={() => setViewWorksheet(worksheet)}>
+                      <div className="flex gap-2 ml-6">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleViewWorksheet(worksheet.id)}
+                          className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 shadow-sm"
+                        >
                           <Eye className="h-4 w-4 mr-2" />
-                          View
+                          View Details
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="hover:bg-gray-50 transition-colors">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditWorksheet(worksheet)}>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => handleEditWorksheet(worksheet)} className="cursor-pointer">
                               <Edit className="h-4 w-4 mr-2" />
                               Edit Worksheet
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleUploadReference(worksheet.id)}>
+                            <DropdownMenuItem onClick={() => handleUploadReference(worksheet.id)} className="cursor-pointer">
                               <Upload className="h-4 w-4 mr-2" />
                               Upload Reference File
                             </DropdownMenuItem>
                             {worksheet.status === 'SUBMITTED' && (
-                              <DropdownMenuItem onClick={() => handleMarkAsReviewed(worksheet.id)}>
-                                <Eye className="h-4 w-4 mr-2" />
+                              <DropdownMenuItem onClick={() => handleMarkAsReviewed(worksheet.id)} className="cursor-pointer">
+                                <CheckCircle className="h-4 w-4 mr-2" />
                                 Mark as Reviewed
                               </DropdownMenuItem>
                             )}
@@ -348,14 +482,17 @@ export function WorksheetManagementPage() {
           </div>
         </TabsContent>
 
-        {/* Quick Assign Tab */}
+        {/* Client Submissions Tab */}
         <TabsContent value="assign" className="space-y-6">
-          {/* Completed Worksheets Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Completed Worksheets</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Worksheets that have been completed by your clients
+          {/* Enhanced Completed Worksheets Section */}
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-green-800">
+                <CheckCircle className="h-5 w-5" />
+                Completed Worksheets
+              </CardTitle>
+              <p className="text-sm text-green-700">
+                Worksheets that have been completed by your clients and are ready for review
               </p>
             </CardHeader>
             <CardContent>
@@ -370,54 +507,81 @@ export function WorksheetManagementPage() {
               ) : (
                 <div className="space-y-4">
                   {completedWorksheets.map((worksheet: Worksheet) => (
-                    <Card key={worksheet.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
+                    <Card key={worksheet.id} className="group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-l-4 border-l-green-500 bg-white">
+                      <CardContent className="p-6">
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-semibold">{worksheet.title}</h3>
-                              <Badge variant="outline" className={getStatusColor(worksheet.status)}>
+                          <div className="flex-1 space-y-3">
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-semibold text-lg text-gray-900 group-hover:text-green-700 transition-colors">
+                                {worksheet.title}
+                              </h3>
+                              <Badge variant="outline" className={`${getStatusColor(worksheet.status)} font-medium`}>
                                 {getStatusIcon(worksheet.status)}
-                                {worksheet.status.replace('_', ' ')}
+                                <span className="ml-1">{worksheet.status.replace('_', ' ')}</span>
                               </Badge>
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4" />
-                                <Avatar className="h-6 w-6">
+                            
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                              <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+                                <Avatar className="h-5 w-5">
                                   <AvatarImage src={worksheet.client.user.avatarUrl} />
-                                  <AvatarFallback className="text-xs">
+                                  <AvatarFallback className="text-xs bg-green-100 text-green-700">
                                     {worksheet.client.user.firstName[0]}{worksheet.client.user.lastName[0]}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span>{worksheet.client.user.firstName} {worksheet.client.user.lastName}</span>
+                                <span className="font-medium text-green-800">
+                                  {worksheet.client.user.firstName} {worksheet.client.user.lastName}
+                                </span>
                               </div>
-                              <div className="flex items-center gap-2">
+                              
+                              <div className="flex items-center gap-1.5 text-gray-500">
                                 <Calendar className="h-4 w-4" />
                                 <span>Created {format(new Date(worksheet.createdAt), 'MMM d, yyyy')}</span>
                               </div>
+                              
                               {worksheet.dueDate && (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5 text-gray-500">
                                   <Clock className="h-4 w-4" />
                                   <span>Due {format(new Date(worksheet.dueDate), 'MMM d, yyyy')}</span>
                                 </div>
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {worksheet.instructions || ""}
-                            </p>
+                            
+                            {worksheet.instructions && (
+                              <p className="text-sm text-gray-600 line-clamp-2 bg-green-50 p-3 rounded-lg border-l-2 border-l-green-300">
+                                {worksheet.instructions}
+                              </p>
+                            )}
                           </div>
-                          <div className="flex flex-col gap-2 ml-4 items-end">
-                            <Button variant="outline" size="sm" onClick={() => setViewWorksheet(worksheet)}>
-                              View
+                          
+                          <div className="flex flex-col gap-2 ml-6 items-end">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleViewWorksheet(worksheet.id)}
+                              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 shadow-sm"
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
                             </Button>
                             <Button
-                              variant="secondary"
+                              variant="default"
                               size="sm"
                               disabled={markAsReviewedMutation.isPending}
                               onClick={() => handleMarkAsReviewed(worksheet.id)}
+                              className="bg-green-600 hover:bg-green-700 text-white shadow-sm transition-all duration-200"
                             >
-                              {markAsReviewedMutation.isPending ? 'Marking...' : 'Mark as Reviewed'}
+                              {markAsReviewedMutation.isPending ? (
+                                <div className="flex items-center">
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
+                                  Marking...
+                                </div>
+                              ) : (
+                                <>
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Mark as Reviewed
+                                </>
+                              )}
                             </Button>
                           </div>
                         </div>
@@ -446,14 +610,18 @@ export function WorksheetManagementPage() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
+                  const dueDateValue = formData.get('dueDate') as string;
+                  
                   const updateData = {
                     title: formData.get('title') as string,
                     instructions: formData.get('instructions') as string,
-                    dueDate: formData.get('dueDate') as string,
+                    dueDate: dueDateValue ? new Date(dueDateValue).toISOString() : undefined,
                   };
                   editWorksheetMutation.mutate({
                     worksheetId: editingWorksheet.id,
                     updateData,
+                    filesToRemove,
+                    newFiles,
                   });
                 }}
                 className="space-y-4"
@@ -485,6 +653,132 @@ export function WorksheetManagementPage() {
                     defaultValue={editingWorksheet.dueDate ? new Date(editingWorksheet.dueDate).toISOString().slice(0, 16) : ''}
                   />
                 </div>
+
+                {/* File Management Section */}
+                <div className="space-y-4 border-t pt-4">
+                  <Label className="text-base font-medium">Reference Files</Label>
+                  
+                  {/* Existing Files */}
+                  {editingWorksheet.materialUrls && editingWorksheet.materialUrls.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-sm text-gray-600">Current Files</Label>
+                      <div className="space-y-2">
+                        {editingWorksheet.materialUrls.map((url, index) => {
+                          const fileName = editingWorksheet.materialNames?.[index] || `File ${index + 1}`;
+                          const isMarkedForRemoval = filesToRemove.includes(url);
+                          
+                          return (
+                            <div
+                              key={url}
+                              className={`flex items-center justify-between p-3 border rounded-lg transition-all ${
+                                isMarkedForRemoval 
+                                  ? 'bg-red-50 border-red-200 opacity-60' 
+                                  : 'bg-gray-50 border-gray-200'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-gray-500" />
+                                <span className={`text-sm ${isMarkedForRemoval ? 'line-through text-gray-500' : 'text-gray-700'}`}>
+                                  {fileName}
+                                </span>
+                                {isMarkedForRemoval && (
+                                  <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
+                                    Will be removed
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex gap-1">
+                                {!isMarkedForRemoval ? (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleRemoveExistingFile(url)}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleRestoreExistingFile(url)}
+                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                  >
+                                    Restore
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* New Files */}
+                  {newFiles.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-sm text-gray-600">New Files to Upload</Label>
+                      <div className="space-y-2">
+                        {newFiles.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                          >
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm text-blue-700">{file.name}</span>
+                              <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                New
+                              </span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRemoveNewFile(index)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* File Upload */}
+                  <div>
+                    <Label className="text-sm text-gray-600">Add Files</Label>
+                    <div className="mt-2">
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg"
+                        onChange={(e) => handleFileUpload(e.target.files)}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <Label
+                        htmlFor="file-upload"
+                        className="flex items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      >
+                        <div className="text-center">
+                          <Plus className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                          <span className="text-sm text-gray-600">
+                            Click to upload files or drag and drop
+                          </span>
+                          <span className="text-xs text-gray-500 block mt-1">
+                            PDF, DOC, DOCX, TXT, JPG, PNG (Max 10MB each)
+                          </span>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex justify-end gap-2">
                   <Button
                     type="button"
@@ -506,75 +800,7 @@ export function WorksheetManagementPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Worksheet View Modal */}
-      <Dialog open={!!viewWorksheet} onOpenChange={open => !open && setViewWorksheet(null)}>
-        <DialogContent>
-          {viewWorksheet && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-2xl font-bold mb-2">
-                  <FileText className="h-6 w-6 text-blue-500" />
-                  {viewWorksheet.title}
-                </DialogTitle>
-                <DialogDescription>
-                  <div className="flex flex-col gap-3 mt-2">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-gray-500" />
-                      <span className="font-medium">{viewWorksheet.client.user.firstName} {viewWorksheet.client.user.lastName}</span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge className="capitalize" variant="outline">{viewWorksheet.status.toLowerCase()}</Badge>
-                      <Calendar className="h-4 w-4 text-gray-500 ml-2" />
-                      <span className="text-xs">Created {format(new Date(viewWorksheet.createdAt), 'MMM d, yyyy')}</span>
-                      {viewWorksheet.dueDate && (
-                        <>
-                          <Clock className="h-4 w-4 text-gray-500 ml-2" />
-                          <span className="text-xs">Due {format(new Date(viewWorksheet.dueDate), 'MMM d, yyyy')}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-8 mt-8">
-                {/* Instructions */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3 text-lg font-semibold">
-                    <FileText className="h-5 w-5 text-blue-400" />
-                    Instructions
-                  </div>
-                  <div className="rounded-md bg-gray-50 p-4 text-sm text-gray-700 min-h-[60px] border whitespace-pre-line">
-                    {viewWorksheet.instructions || <span className="italic text-gray-400">No instructions provided.</span>}
-                  </div>
-                </div>
-                {/* Reference Materials */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3 text-lg font-semibold">
-                    <FileText className="h-5 w-5 text-green-400" />
-                    Reference Materials
-                  </div>
-                  <div className="rounded-md bg-gray-50 p-4 min-h-[60px] border">
-                    {viewWorksheet.materialUrls && viewWorksheet.materialUrls.length > 0 ? (
-                      <ul className="list-disc pl-5 space-y-3">
-                        {viewWorksheet.materialUrls.map((url, idx) => (
-                          <li key={url} className="flex items-center gap-2">
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium flex items-center gap-1">
-                              <FileText className="h-4 w-4 text-blue-400" />
-                              {viewWorksheet.materialNames[idx] || `Material ${idx + 1}`}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="italic text-gray-400">No reference materials attached.</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 }

@@ -11,7 +11,7 @@ export interface Patient {
   treatmentPlan: string;
   currentSession: number;
   totalSessions: number;
-  status: 'active' | 'inactive' | 'completed' | 'pending';
+  status: "active" | "inactive" | "completed" | "pending";
   assignedAt?: string;
   lastSession?: string;
   nextSession?: string;
@@ -26,9 +26,9 @@ export interface SessionInfo {
   number: number;
   date: string;
   duration?: number;
-  status: 'scheduled' | 'completed' | 'cancelled' | 'no_show';
+  status: "scheduled" | "completed" | "cancelled" | "no_show";
   notes: string;
-  meetingType?: 'video' | 'audio' | 'chat';
+  meetingType?: "video" | "audio" | "chat";
   meetingUrl?: string;
 }
 
@@ -38,7 +38,7 @@ export interface WorksheetInfo {
   title: string;
   assignedDate: string;
   dueDate?: string;
-  status: 'pending' | 'completed' | 'overdue';
+  status: "pending" | "completed" | "overdue" | "reviewed";
   instructions?: string;
   progress: number; // 0-100 percentage
 }
@@ -49,7 +49,7 @@ export interface SessionNote {
   sessionId: string;
   patientId: string;
   therapistId: string;
-  noteType: 'session' | 'treatment' | 'clinical' | 'progress';
+  noteType: "session" | "treatment" | "clinical" | "progress";
   title: string;
   content: string;
   isTemplate: boolean;
@@ -65,9 +65,9 @@ export interface TreatmentGoal {
   title: string;
   description: string;
   targetDate: string;
-  status: 'active' | 'completed' | 'cancelled' | 'on_hold';
+  status: "active" | "completed" | "cancelled" | "on_hold";
   progress: number; // 0-100 percentage
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   category: string;
   createdAt: string;
   updatedAt: string;
@@ -82,12 +82,12 @@ export interface ProgressMetric {
   unit: string;
   recordedDate: string;
   notes?: string;
-  source: 'self_report' | 'assessment' | 'observation';
+  source: "self_report" | "assessment" | "observation";
 }
 
 // Patient filtering and search options
 export interface PatientFilters {
-  status?: 'active' | 'inactive' | 'completed' | 'all';
+  status?: "active" | "inactive" | "completed" | "all";
   diagnosis?: string;
   treatmentPlan?: string;
   progressRange?: {
