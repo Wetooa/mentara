@@ -59,6 +59,9 @@ async function bootstrap() {
   // Configure Socket.io adapter for WebSocket support
   app.useWebSocketAdapter(new IoAdapter(app));
 
+  // Enable graceful shutdown hooks for WebSocket connections
+  app.enableShutdownHooks();
+
   // Enable security headers with helmet
   app.use(
     helmet({

@@ -6,6 +6,8 @@ import {
 } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { useAllTherapists } from "@/hooks/therapist/useAllTherapists";
+
 import type {
   TherapistSearchParams,
   TherapistRecommendationResponse,
@@ -97,55 +99,6 @@ export function useTherapistCards(params: TherapistSearchParams = {}) {
     totalCount: data?.totalCount || 0,
     userConditions: data?.userConditions || [],
     matchCriteria: data?.matchCriteria,
-    isLoading,
-    error,
-    refetch,
-  };
-}
-
-/**
- * Hook for fetching all therapists (when no filters applied)
- */
-export function useAllTherapists(params: TherapistSearchParams = {}) {
-  const api = useApi();
-
-  const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ["therapists", "all", params],
-    queryFn: () => {
-      return api.therapists.getTherapistList(params);
-    },
-    select: (response) => {
-      // Handle both new therapist list API and old recommendation API responses
-      if (response?.therapists && Array.isArray(response.therapists)) {
-        // New therapist list API response
-        return {
-          therapists: response.therapists,
-          totalCount: response.totalCount || response.therapists.length,
-          currentPage: response.currentPage || 1,
-          totalPages: response.totalPages || 1,
-          hasNextPage: response.hasNextPage || false,
-          hasPreviousPage: response.hasPreviousPage || false,
-        };
-      }
-      // Fallback for old format
-      return response?.data || { therapists: [], totalCount: 0 };
-    },
-    enabled: true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  const therapistCards: TherapistCardData[] =
-    data?.therapists?.map(transformTherapistForCard) || [];
-
-  return {
-    therapists: therapistCards,
-    totalCount: data?.totalCount || 0,
-    userConditions: data?.userConditions || [],
-    matchCriteria: data?.matchCriteria,
-    currentPage: data?.currentPage || 1,
-    totalPages: data?.totalPages || 1,
-    hasNextPage: data?.hasNextPage || false,
-    hasPreviousPage: data?.hasPreviousPage || false,
     isLoading,
     error,
     refetch,

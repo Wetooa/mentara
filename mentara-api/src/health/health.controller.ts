@@ -47,6 +47,18 @@ export class HealthController {
     return this.healthService.getSystemMetrics();
   }
 
+  @Public()
+  @Get('websocket')
+  async getWebSocketHealth() {
+    const wsHealth = await this.healthService.getWebSocketHealth();
+    
+    if (wsHealth.status === 'unhealthy') {
+      throw new HttpException(wsHealth, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+    
+    return wsHealth;
+  }
+
   @Get('admin')
   async getAdminHealth() {
     return this.healthService.getAdminHealthDashboard();

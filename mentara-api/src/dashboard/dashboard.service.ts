@@ -94,9 +94,10 @@ export class DashboardService {
         const therapistId = assignment.therapist.userId;
         try {
           // Check if conversation already exists
-          const existingConversations = await this.messagingService.getUserConversations(userId, 1, 100);
-          const hasConversationWithTherapist = existingConversations.some(conv => 
-            conv.participants?.some(p => p.userId === therapistId)
+          const existingConversations =
+            await this.messagingService.getUserConversations(userId, 1, 100);
+          const hasConversationWithTherapist = existingConversations.some(
+            (conv) => conv.participants?.some((p) => p.userId === therapistId),
           );
 
           if (!hasConversationWithTherapist) {
@@ -106,11 +107,16 @@ export class DashboardService {
               type: 'direct',
               title: `Therapy Session with ${assignment.therapist.user.firstName} ${assignment.therapist.user.lastName}`,
             });
-            console.log(`✅ Auto-created missing conversation between client ${userId} and therapist ${therapistId}`);
+            console.log(
+              `✅ Auto-created missing conversation between client ${userId} and therapist ${therapistId}`,
+            );
           }
         } catch (error) {
           // Log but don't fail dashboard load if conversation creation fails
-          console.warn(`⚠️ Failed to ensure conversation exists between client ${userId} and therapist ${therapistId}:`, error);
+          console.warn(
+            `⚠️ Failed to ensure conversation exists between client ${userId} and therapist ${therapistId}:`,
+            error,
+          );
         }
       }
 
@@ -141,7 +147,53 @@ export class DashboardService {
   }
 
   async getTherapistDashboardData(userId: string) {
+    console.log(
+      `🔍 [DashboardService] Getting therapist dashboard data for userId: ${userId}`,
+    );
+
     try {
+      // First, verify the user exists and check their role
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+        },
+      });
+
+      if (!user) {
+        console.error(`❌ [DashboardService] User not found: ${userId}`);
+        throw new NotFoundException(`User not found: ${userId}`);
+      }
+
+      console.log(
+        `📋 [DashboardService] User found: ${user.email} (${user.firstName} ${user.lastName}), role: ${user.role}, active: ${user.isActive}`,
+      );
+
+      if (user.role !== 'therapist') {
+        console.error(
+          `❌ [DashboardService] User ${user.email} has role '${user.role}', expected 'therapist'`,
+        );
+        throw new NotFoundException(
+          `User ${user.email} does not have therapist role. Current role: ${user.role}`,
+        );
+      }
+
+      if (!user.isActive) {
+        console.error(`❌ [DashboardService] User ${user.email} is not active`);
+        throw new NotFoundException(`User ${user.email} is not active`);
+      }
+
+      // Now attempt to find the therapist record
+      console.log(
+        `🔍 [DashboardService] Looking for Therapist record for userId: ${userId}`,
+      );
+
       const therapist = await this.prisma.therapist.findUnique({
         where: { userId },
         include: {
@@ -177,7 +229,35 @@ export class DashboardService {
       });
 
       if (!therapist) {
-        throw new NotFoundException('Therapist not found');
+        console.error(
+          `❌ [DashboardService] Therapist record not found for user: ${user.email} (${userId})`,
+        );
+        console.error(
+          `❌ [DashboardService] User has role 'therapist' but missing Therapist table record`,
+        );
+
+        // Additional diagnostic information
+        const allTherapistRecords = await this.prisma.therapist.count();
+        console.log(
+          `📊 [DashboardService] Total Therapist records in database: ${allTherapistRecords}`,
+        );
+
+        throw new NotFoundException(
+          `Therapist record not found for user ${user.email} (${userId}). ` +
+            `User has role 'therapist' but is missing corresponding Therapist table record. ` +
+            `This indicates a data consistency issue that needs to be resolved.`,
+        );
+      }
+
+      console.log(
+        `✅ [DashboardService] Therapist record found: ${therapist.user.email}, status: ${therapist.status}`,
+      );
+
+      // Validate therapist status
+      if (therapist.status !== 'APPROVED') {
+        console.warn(
+          `⚠️ [DashboardService] Therapist ${therapist.user.email} has status: ${therapist.status}`,
+        );
       }
 
       const completedMeetingsCount = await this.prisma.meeting.count({
@@ -185,12 +265,85 @@ export class DashboardService {
       });
 
       const totalClientsCount = await this.prisma.clientTherapist.count({
-        where: { therapistId: userId },
+        where: { therapistId: userId, status: 'active' },
       });
 
       const pendingWorksheetsCount = await this.prisma.worksheet.count({
         where: { therapistId: userId, status: { in: ['ASSIGNED', 'OVERDUE'] } },
       });
+
+      // Calculate additional stats needed by frontend components
+      const today = new Date();
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+      // Rescheduled meetings (meetings that were updated today with status changes)
+      const rescheduledCount = await this.prisma.meeting.count({
+        where: {
+          therapistId: userId,
+          updatedAt: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+          // Meetings that were rescheduled would have been updated recently
+          NOT: {
+            startTime: {
+              gte: startOfDay,
+              lte: endOfDay,
+            },
+          },
+        },
+      });
+
+      // Cancelled meetings today
+      const cancelledCount = await this.prisma.meeting.count({
+        where: {
+          therapistId: userId,
+          status: 'CANCELLED',
+          updatedAt: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      });
+
+      // Today's income from completed meetings
+      const todayCompletedMeetings = await this.prisma.meeting.findMany({
+        where: {
+          therapistId: userId,
+          status: 'COMPLETED',
+          endTime: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+        include: {
+          payments: {
+            where: {
+              status: 'COMPLETED',
+            },
+          },
+        },
+      });
+
+      // Calculate income from completed meetings today
+      let todayIncome = 0;
+      for (const meeting of todayCompletedMeetings) {
+        const meetingIncome = meeting.payments.reduce((sum, payment) => {
+          return (
+            sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+          );
+        }, 0);
+        todayIncome += meetingIncome;
+      }
+
+      // If no payments recorded, estimate from therapist hourly rate
+      if (todayIncome === 0 && todayCompletedMeetings.length > 0) {
+        const therapistRate = parseFloat(
+          therapist.hourlyRate?.toString() || '0',
+        );
+        todayIncome = todayCompletedMeetings.length * therapistRate;
+      }
 
       // Get recent completed meetings (replacing session logs)
       const recentSessions = await this.prisma.meeting.findMany({
@@ -211,29 +364,71 @@ export class DashboardService {
         },
       });
 
-      return {
+      console.log(
+        `📊 [DashboardService] Dashboard stats for ${therapist.user.email}: clients=${totalClientsCount}, completed_meetings=${completedMeetingsCount}, pending_worksheets=${pendingWorksheetsCount}`,
+      );
+
+      const dashboardData = {
         therapist: {
           ...therapist,
           // Map database fields to frontend-expected fields
+          name: `${therapist.user.firstName} ${therapist.user.lastName}`,
           specialties: therapist.areasOfExpertise || [],
         },
         stats: {
+          // Map backend data to frontend-expected field names
+          activePatients: totalClientsCount,
+          rescheduled: rescheduledCount,
+          cancelled: cancelledCount,
+          income: Math.round(todayIncome), // Round to nearest peso
+          // Keep additional stats for backward compatibility
           totalClients: totalClientsCount,
           completedMeetings: completedMeetingsCount,
           upcomingMeetings: therapist.meetings.length,
           pendingWorksheets: pendingWorksheetsCount,
+          patientStats: {
+            total: totalClientsCount,
+            percentage:
+              totalClientsCount > 0
+                ? Math.round((completedMeetingsCount / totalClientsCount) * 100)
+                : 0,
+            months: Math.floor(
+              (Date.now() - therapist.createdAt.getTime()) /
+                (1000 * 60 * 60 * 24 * 30),
+            ),
+            chartData: [], // Will be populated with actual chart data if needed
+          },
         },
-        upcomingMeetings: therapist.meetings,
+        upcomingAppointments: therapist.meetings.map((meeting) => ({
+          id: meeting.id,
+          patientName: `${meeting.client.user.firstName} ${meeting.client.user.lastName}`,
+          time: meeting.startTime,
+          duration: meeting.duration,
+          type: meeting.meetingType,
+          status: meeting.status,
+          clientId: meeting.clientId,
+        })),
         assignedClients: therapist.assignedClients.map((ct) => ct.client),
         pendingWorksheets: therapist.worksheets,
         recentSessions,
       };
+
+      console.log(
+        `✅ [DashboardService] Successfully retrieved dashboard data for ${therapist.user.email}`,
+      );
+      return dashboardData;
     } catch (error) {
       if (error instanceof NotFoundException) {
+        // Re-throw NotFoundException with our enhanced error messages
         throw error;
       }
+
+      console.error(
+        `❌ [DashboardService] Unexpected error getting therapist dashboard data for userId ${userId}:`,
+        error,
+      );
       throw new InternalServerErrorException(
-        `Failed to get therapist dashboard data: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to get therapist dashboard data for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

@@ -1,5 +1,6 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
 import { EventBusService } from '../../common/events/event-bus.service';
+import { MessagingGateway } from '../messaging.gateway';
 import { DomainEvent } from '../../common/events/interfaces/domain-event.interface';
 import {
   MessageSentEvent,
@@ -26,15 +27,25 @@ import {
 export class WebSocketEventService implements OnModuleInit {
   private readonly logger = new Logger(WebSocketEventService.name);
 
-  constructor(private readonly eventBus: EventBusService) {}
+  constructor(
+    private readonly eventBus: EventBusService,
+    @Inject(forwardRef(() => MessagingGateway))
+    private readonly messagingGateway: MessagingGateway,
+  ) {}
 
   onModuleInit() {
+    this.logger.log('🚀 [INIT] WebSocketEventService initializing...');
+    this.logger.log('🔍 [INIT] Dependencies check:');
+    this.logger.log(`   - EventBus exists: ${!!this.eventBus}`);
+    this.logger.log(`   - MessagingGateway exists: ${!!this.messagingGateway}`);
+    
     this.subscribeToEvents();
-    this.logger.log('WebSocket event handlers initialized successfully');
+    this.logger.log('✅ [INIT] WebSocket event handlers initialized successfully');
   }
 
   private subscribeToEvents(): void {
     // Subscribe to messaging events
+    this.subscribeToMessagingEvents();
 
     // Subscribe to booking events
     this.subscribeToBookingEvents();
@@ -48,6 +59,323 @@ export class WebSocketEventService implements OnModuleInit {
     this.logger.log('Subscribed to all WebSocket event handlers');
   }
 
+  private subscribeToMessagingEvents(): void {
+    this.logger.log('🔧 [EVENT SUBSCRIPTION] Subscribing to messaging events...');
+    
+    // Message sent event - broadcast to conversation participants
+    this.logger.log('📡 [EVENT SUBSCRIPTION] Registering MessageSentEvent handler...');
+    this.eventBus.subscribe(
+      'MessageSentEvent',
+      async (event: DomainEvent<any>) => {
+        this.logger.log('🚨 [EVENT RECEIVED] MessageSentEvent received in WebSocketEventService!');
+        this.logger.debug('📨 [EVENT DATA]', event.eventData);
+        try {
+          const messageEvent = event as MessageSentEvent;
+          const {
+            conversationId,
+            messageId,
+            senderId,
+            content,
+            messageType,
+            sentAt,
+            recipientIds,
+          } = messageEvent.eventData;
+
+          this.logger.debug('MessageSentEvent received:', {
+            conversationId,
+            messageId,
+            recipientCount: recipientIds?.length || 0,
+          });
+
+          // Broadcast message to conversation participants via WebSocket
+          // Frontend expects MessageEventData format with 'message' property
+          this.logger.log(`🚀 [WEBSOCKET] About to call MessagingGateway.broadcastMessage for conversation ${conversationId}`);
+          this.logger.debug(`🚀 [WEBSOCKET] Gateway exists: ${!!this.messagingGateway}`);
+          
+          this.messagingGateway.broadcastMessage(conversationId, {
+            message: {
+              id: messageId,
+              conversationId,
+              senderId,
+              content,
+              messageType,
+              sentAt,
+              createdAt: sentAt,
+              updatedAt: sentAt,
+              isRead: false,
+              isEdited: false,
+              isDeleted: false,
+              replyToId: messageEvent.eventData.replyToMessageId || null,
+              attachmentUrls: messageEvent.eventData.fileAttachments || [],
+              attachmentNames: [],
+              attachmentSizes: [],
+              editedAt: null,
+              sender: null, // Will be populated by client
+              replyTo: null,
+              reactions: [],
+              readReceipts: [],
+            },
+            eventType: 'message_sent',
+          });
+          
+          this.logger.log(`✅ [WEBSOCKET] MessagingGateway.broadcastMessage completed for conversation ${conversationId}`);
+
+          // Send delivery confirmations with safe iteration
+          const safeRecipientIds = this.ensureArray(recipientIds, 'recipientIds');
+          for (const recipientId of safeRecipientIds) {
+            if (recipientId && typeof recipientId === 'string') {
+              try {
+                // Check if server is available before sending delivery confirmations
+                if (this.messagingGateway.server?.sockets) {
+                  this.messagingGateway.server
+                    .to(this.getUserSocketRoom(recipientId))
+                    .emit('message_delivered', {
+                      messageId,
+                      conversationId,
+                      deliveredAt: new Date(),
+                      eventType: 'message_delivered',
+                    });
+                } else {
+                  this.logger.warn(`WebSocket server not ready for delivery confirmation to ${recipientId}`);
+                }
+              } catch (error) {
+                this.logger.error(`Error sending delivery confirmation to ${recipientId}:`, error);
+              }
+            } else {
+              this.logger.warn(`Invalid recipientId in MessageSentEvent: ${recipientId}`, {
+                messageId,
+                conversationId,
+                recipientId,
+                type: typeof recipientId,
+              });
+            }
+          }
+
+          this.logger.debug(`Broadcasted message sent event: ${messageId} to ${safeRecipientIds.length} recipients`);
+        } catch (error) {
+          this.logger.error('Error handling MessageSentEvent:', {
+            error: error.message,
+            stack: error.stack,
+            eventData: event.eventData,
+          });
+        }
+      },
+    );
+
+    // Message read event - broadcast read receipt
+    this.eventBus.subscribe(
+      'MessageReadEvent',
+      async (event: DomainEvent<any>) => {
+        try {
+          const readEvent = event as MessageReadEvent;
+          const { messageId, conversationId, readBy } = readEvent.eventData;
+
+          this.messagingGateway.broadcastReadReceipt(
+            conversationId,
+            messageId,
+            readBy,
+          );
+
+          this.logger.debug(
+            `Broadcasted message read event: ${messageId} by ${readBy}`,
+          );
+        } catch (error) {
+          this.logger.error('Error handling MessageReadEvent:', {
+            error: error.message,
+            eventData: event.eventData,
+          });
+        }
+      },
+    );
+
+    // Conversation created event - notify participants
+    this.eventBus.subscribe(
+      'ConversationCreatedEvent',
+      async (event: DomainEvent<any>) => {
+        try {
+          const conversationEvent = event as ConversationCreatedEvent;
+          const {
+            conversationId,
+            createdBy,
+            participantIds,
+            conversationType,
+            title,
+          } = conversationEvent.eventData;
+
+          // Enhanced debugging for the problematic participantIds
+          this.logger.debug('ConversationCreatedEvent received:', {
+            conversationId,
+            createdBy,
+            participantIds,
+            participantIdsType: typeof participantIds,
+            isArray: Array.isArray(participantIds),
+            participantIdsLength: participantIds?.length,
+            fullEventData: event.eventData,
+          });
+
+          // Ensure participantIds is always an array with safe iteration
+          const safeParticipantIds = this.ensureArray(participantIds, 'participantIds');
+
+          if (safeParticipantIds.length === 0) {
+            this.logger.warn('ConversationCreatedEvent has no valid participants:', {
+              conversationId,
+              originalParticipantIds: participantIds,
+              eventData: event.eventData,
+            });
+            return;
+          }
+
+          // Notify all participants about new conversation
+          for (const participantId of safeParticipantIds) {
+            if (participantId && typeof participantId === 'string') {
+              try {
+                if (this.messagingGateway.server?.sockets) {
+                  this.messagingGateway.server
+                    .to(this.getUserSocketRoom(participantId))
+                    .emit('conversation_created', {
+                      conversationId,
+                      createdBy,
+                      conversationType,
+                      title,
+                      participantIds: safeParticipantIds, // Send normalized array
+                      eventType: 'conversation_created',
+                      timestamp: new Date(),
+                    });
+                } else {
+                  this.logger.warn(`WebSocket server not ready for conversation notification to ${participantId}`);
+                }
+              } catch (error) {
+                this.logger.error(`Error notifying participant ${participantId} of conversation creation:`, error);
+              }
+            } else {
+              this.logger.warn(`Invalid participantId in ConversationCreatedEvent: ${participantId}`, {
+                conversationId,
+                participantId,
+                type: typeof participantId,
+                originalParticipantIds: participantIds,
+              });
+            }
+          }
+
+          this.logger.debug(
+            `Broadcasted conversation created event: ${conversationId} to ${safeParticipantIds.length} participants`,
+          );
+        } catch (error) {
+          this.logger.error('Error handling ConversationCreatedEvent:', {
+            error: error.message,
+            stack: error.stack,
+            eventData: event.eventData,
+          });
+        }
+      },
+    );
+
+    // Participant joined event - notify conversation
+    this.eventBus.subscribe(
+      'ParticipantJoinedEvent',
+      async (event: DomainEvent<any>) => {
+        try {
+          const joinEvent = event as ParticipantJoinedEvent;
+          const { conversationId, participantId, addedBy, joinedAt, role } =
+            joinEvent.eventData;
+
+          if (this.messagingGateway.server?.sockets) {
+            this.messagingGateway.server
+              .to(conversationId)
+              .emit('participant_joined', {
+                conversationId,
+                participantId,
+                addedBy,
+                joinedAt,
+                role,
+                eventType: 'participant_joined',
+              });
+          } else {
+            this.logger.warn('WebSocket server not ready for participant joined event');
+          }
+
+          this.logger.debug(
+            `Broadcasted participant joined event: ${participantId} to ${conversationId}`,
+          );
+        } catch (error) {
+          this.logger.error('Error handling ParticipantJoinedEvent:', {
+            error: error.message,
+            eventData: event.eventData,
+          });
+        }
+      },
+    );
+
+    // Participant left event - notify conversation
+    this.eventBus.subscribe(
+      'ParticipantLeftEvent',
+      async (event: DomainEvent<any>) => {
+        try {
+          const leftEvent = event as ParticipantLeftEvent;
+          const { conversationId, participantId, leftAt, leftReason } =
+            leftEvent.eventData;
+
+          if (this.messagingGateway.server?.sockets) {
+            this.messagingGateway.server
+              .to(conversationId)
+              .emit('participant_left', {
+                conversationId,
+                participantId,
+                leftAt,
+                leftReason,
+                eventType: 'participant_left',
+              });
+          } else {
+            this.logger.warn('WebSocket server not ready for participant left event');
+          }
+
+          this.logger.debug(
+            `Broadcasted participant left event: ${participantId} from ${conversationId}`,
+          );
+        } catch (error) {
+          this.logger.error('Error handling ParticipantLeftEvent:', {
+            error: error.message,
+            eventData: event.eventData,
+          });
+        }
+      },
+    );
+
+    // Typing indicator event - relay to conversation
+    this.eventBus.subscribe(
+      'TypingIndicatorEvent',
+      async (event: DomainEvent<any>) => {
+        try {
+          const typingEvent = event as TypingIndicatorEvent;
+          const { conversationId, userId, isTyping, timestamp } =
+            typingEvent.eventData;
+
+          if (this.messagingGateway.server?.sockets) {
+            this.messagingGateway.server
+              .to(conversationId)
+              .emit('typing_indicator', {
+                conversationId,
+                userId,
+                isTyping,
+                timestamp,
+                eventType: 'typing_indicator',
+              });
+          } else {
+            this.logger.warn('WebSocket server not ready for typing indicator event');
+          }
+
+          this.logger.debug(
+            `Relayed typing indicator: ${userId} in ${conversationId} - ${isTyping}`,
+          );
+        } catch (error) {
+          this.logger.error('Error handling TypingIndicatorEvent:', {
+            error: error.message,
+            eventData: event.eventData,
+          });
+        }
+      },
+    );
+  }
   private subscribeToBookingEvents(): void {
     // Appointment booked event - notify therapist and client
     this.eventBus.subscribe(
@@ -188,6 +516,80 @@ export class WebSocketEventService implements OnModuleInit {
    */
   private getUserSocketRoom(userId: string): string {
     return `user_${userId}`;
+  }
+
+  /**
+   * Safely ensure a value is an array for iteration
+   * Prevents "not iterable" errors by normalizing input to array format
+   */
+  private ensureArray(value: any, fieldName: string = 'value'): string[] {
+    try {
+      // Handle null or undefined
+      if (value == null) {
+        this.logger.warn(`${fieldName} is null/undefined, returning empty array`);
+        return [];
+      }
+
+      // Already an array - validate it's an array of strings
+      if (Array.isArray(value)) {
+        const validItems = value.filter(item => 
+          item != null && typeof item === 'string' && item.trim().length > 0
+        );
+        
+        if (validItems.length !== value.length) {
+          this.logger.warn(`${fieldName} array contains invalid items:`, {
+            original: value,
+            filtered: validItems,
+            removed: value.length - validItems.length,
+          });
+        }
+        
+        return validItems;
+      }
+
+      // Single string value - convert to array
+      if (typeof value === 'string' && value.trim().length > 0) {
+        this.logger.warn(`${fieldName} is a single string, converting to array:`, value);
+        return [value.trim()];
+      }
+
+      // Object - try to extract meaningful values
+      if (typeof value === 'object') {
+        this.logger.warn(`${fieldName} is an object, attempting to extract values:`, value);
+        
+        // Try common object patterns
+        if (value.participantIds && Array.isArray(value.participantIds)) {
+          return this.ensureArray(value.participantIds, `${fieldName}.participantIds`);
+        }
+        
+        if (value.ids && Array.isArray(value.ids)) {
+          return this.ensureArray(value.ids, `${fieldName}.ids`);
+        }
+        
+        // Try Object.values if it looks like a map
+        const objectValues = Object.values(value);
+        if (objectValues.length > 0 && objectValues.every(v => typeof v === 'string')) {
+          this.logger.warn(`${fieldName} object converted using Object.values:`, objectValues);
+          return objectValues as string[];
+        }
+      }
+
+      // Fallback for unexpected types
+      this.logger.error(`${fieldName} has unexpected type, returning empty array:`, {
+        value,
+        type: typeof value,
+        constructor: value?.constructor?.name,
+      });
+      
+      return [];
+    } catch (error) {
+      this.logger.error(`Error in ensureArray for ${fieldName}:`, {
+        error: error.message,
+        value,
+        type: typeof value,
+      });
+      return [];
+    }
   }
 
   /**

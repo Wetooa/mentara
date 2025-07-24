@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCommunityNavigation } from "@/store/community";
 import { toast } from "sonner";
 
 import { MentaraApiError } from "@/lib/api/errorHandler";
@@ -14,8 +15,17 @@ export function useCommunityPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  const [selectedCommunityId, setSelectedCommunityId] = useState<string>();
-  const [selectedRoomId, setSelectedRoomId] = useState<string>();
+  // Use global state instead of local state
+  const {
+    selectedCommunityId,
+    selectedRoomId,
+    selectedCommunity,
+    selectedRoom,
+    setCommunity,
+    setRoom,
+  } = useCommunityNavigation();
+  
+  // Keep local UI state
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
@@ -27,14 +37,22 @@ export function useCommunityPage() {
   const [editPostTitle, setEditPostTitle] = useState("");
   const [editPostContent, setEditPostContent] = useState("");
 
-  // Get selected community and room info
-  const { data: selectedCommunity } = useQuery({
+  // Get selected community data if not already cached in store
+  const { data: communityData } = useQuery({
     queryKey: ['communities', 'withStructure', selectedCommunityId!],
     queryFn: () => selectedCommunityId ? api.communities.getCommunityWithStructure(selectedCommunityId) : null,
-    enabled: !!selectedCommunityId,
+    enabled: !!selectedCommunityId && !selectedCommunity,
+    onSuccess: (data) => {
+      // Update the store with fetched community data
+      if (data && selectedCommunityId) {
+        setCommunity(selectedCommunityId, data);
+      }
+    },
   });
 
-  const selectedRoom = selectedCommunity?.roomGroups
+  // Use community data from store or fallback to fresh query data
+  const activeCommunity = selectedCommunity || communityData;
+  const activeRoom = selectedRoom || activeCommunity?.roomGroups
     .flatMap(group => group.rooms)
     .find(room => room.id === selectedRoomId);
 
@@ -137,12 +155,11 @@ export function useCommunityPage() {
   });
 
   const handleCommunitySelect = (communityId: string) => {
-    setSelectedCommunityId(communityId);
+    setCommunity(communityId);
   };
 
   const handleRoomSelect = (roomId: string, communityId: string) => {
-    setSelectedRoomId(roomId);
-    setSelectedCommunityId(communityId);
+    setRoom(roomId, communityId);
   };
 
   const handleCreatePost = () => {
@@ -231,17 +248,17 @@ export function useCommunityPage() {
   const getRoomBreadcrumb = () => {
     // TODO: CONFUSING - This function returns null when no room is selected, but components using it
     // may not handle null properly. Consider returning empty object or default values instead
-    if (!selectedCommunity || !selectedRoom) return null;
+    if (!activeCommunity || !activeRoom) return null;
 
-    const roomGroup = selectedCommunity.roomGroups.find(group => 
+    const roomGroup = activeCommunity.roomGroups.find(group => 
       group.rooms.some(room => room.id === selectedRoomId)
     );
 
     return {
-      communityName: selectedCommunity.name,
+      communityName: activeCommunity.name,
       roomGroupName: roomGroup?.name, // Could be undefined if room not found in any group
-      roomName: selectedRoom.name,
-      roomPostingRole: selectedRoom.postingRole,
+      roomName: activeRoom.name,
+      roomPostingRole: activeRoom.postingRole,
     };
   };
 
@@ -250,7 +267,7 @@ export function useCommunityPage() {
   };
 
   const isPostingAllowed = () => {
-    if (!selectedRoom || !user?.role) return false;
+    if (!activeRoom || !user?.role) return false;
     
     // Define role hierarchy for posting permissions
     const roleHierarchy = {
@@ -263,7 +280,7 @@ export function useCommunityPage() {
     const userRoleLevel = roleHierarchy[user.role as keyof typeof roleHierarchy];
     
     // Check what role is required to post in this room
-    switch (selectedRoom.postingRole) {
+    switch (activeRoom.postingRole) {
       case 'member':
         // Any authenticated user can post (all roles >= client)
         return userRoleLevel >= 0;
@@ -287,11 +304,11 @@ export function useCommunityPage() {
   };
 
   return {
-    // State
+    // State (using active data that combines store and fresh queries)
     selectedCommunityId,
     selectedRoomId,
-    selectedCommunity,
-    selectedRoom,
+    selectedCommunity: activeCommunity,
+    selectedRoom: activeRoom,
     isCreatePostOpen,
     newPostTitle,
     newPostContent,

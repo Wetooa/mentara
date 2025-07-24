@@ -34,14 +34,14 @@ export async function seedMessaging(
         data: [
           {
             conversationId: conversation.id,
-            userId: client.user.id,
+            userId: client.client.userId,
             joinedAt: relationship.assignedAt,
             role: 'MEMBER',
             lastReadAt: faker.date.recent({ days: 7 }),
           },
           {
             conversationId: conversation.id,
-            userId: therapist.user.id,
+            userId: therapist.therapist.userId,
             joinedAt: relationship.assignedAt,
             role: 'MEMBER',
             lastReadAt: faker.date.recent({ days: 7 }),

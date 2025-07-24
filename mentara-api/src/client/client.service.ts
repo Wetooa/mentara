@@ -155,6 +155,7 @@ export class ClientService {
     const assignment = await this.prisma.clientTherapist.findFirst({
       where: {
         clientId: userId,
+        status: 'active',
       },
       include: {
         therapist: {
@@ -185,6 +186,45 @@ export class ClientService {
     };
   }
 
+  async getAssignedTherapists(
+    userId: string,
+  ): Promise<TherapistRecommendation[]> {
+    const assignments = await this.prisma.clientTherapist.findMany({
+      where: {
+        clientId: userId,
+        status: 'active',
+      },
+      include: {
+        therapist: {
+          include: { user: true },
+        },
+      },
+      orderBy: { assignedAt: 'desc' },
+    });
+
+    if (!assignments || assignments.length === 0) {
+      return [];
+    }
+
+    // Transform the Prisma results to match TherapistRecommendation type
+    return assignments.map(assignment => {
+      const therapist = assignment.therapist;
+      return {
+        id: therapist.userId,
+        firstName: therapist.user.firstName,
+        lastName: therapist.user.lastName,
+        title: 'Therapist',
+        specialties: therapist.areasOfExpertise,
+        hourlyRate: Number(therapist.hourlyRate),
+        experience: therapist.yearsOfExperience || 0,
+        province: therapist.province,
+        isActive: therapist.status === 'APPROVED',
+        bio: therapist.user.bio || undefined,
+        profileImage: undefined,
+      };
+    });
+  }
+
   async assignTherapist(
     userId: string,
     therapistId: string,
@@ -206,20 +246,32 @@ export class ClientService {
       throw new NotFoundException('Therapist not found');
     }
 
-    // Delete any existing assignments
-    await this.prisma.clientTherapist.deleteMany({
+    // Check if this assignment already exists
+    const existingAssignment = await this.prisma.clientTherapist.findUnique({
       where: {
-        clientId: userId,
+        clientId_therapistId: {
+          clientId: userId,
+          therapistId: therapistId,
+        },
       },
     });
 
-    // Create new assignment
-    await this.prisma.clientTherapist.create({
-      data: {
-        clientId: userId,
-        therapistId: therapistId,
-      },
-    });
+    // If assignment already exists, update status to active
+    if (existingAssignment) {
+      await this.prisma.clientTherapist.update({
+        where: { id: existingAssignment.id },
+        data: { status: 'active' },
+      });
+    } else {
+      // Create new assignment
+      await this.prisma.clientTherapist.create({
+        data: {
+          clientId: userId,
+          therapistId: therapistId,
+          status: 'active',
+        },
+      });
+    }
 
     // Automatically create conversation between client and therapist
     try {
@@ -263,10 +315,14 @@ export class ClientService {
       throw new NotFoundException('Client not found');
     }
 
-    // Delete any existing assignments
-    await this.prisma.clientTherapist.deleteMany({
+    // Set all existing assignments to inactive instead of deleting
+    await this.prisma.clientTherapist.updateMany({
       where: {
         clientId: userId,
+        status: 'active',
+      },
+      data: {
+        status: 'inactive',
       },
     });
   }

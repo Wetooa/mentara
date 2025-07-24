@@ -2,7 +2,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -55,7 +54,9 @@ export class MeetingsService {
    * Get meeting details with access validation
    */
   async getMeetingById(meetingId: string, userId: string) {
-    this.logger.debug(`getMeetingById called with meetingId: ${meetingId}, userId: ${userId}`);
+    this.logger.debug(
+      `getMeetingById called with meetingId: ${meetingId}, userId: ${userId}`,
+    );
     const meeting = await this.prisma.meeting.findFirst({
       where: {
         id: meetingId,
@@ -86,6 +87,11 @@ export class MeetingsService {
             },
           },
         },
+        meetingNotes: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        },
       },
     });
 
@@ -93,13 +99,75 @@ export class MeetingsService {
       throw new NotFoundException('Meeting not found or access denied');
     }
 
-    return meeting;
+    return this.transformSingleMeeting(meeting);
+  }
+
+  /**
+   * Transform a single meeting to match frontend interface expectations
+   */
+  private transformSingleMeeting(meeting: any) {
+    // Get the latest meeting notes
+    const latestNotes = meeting.meetingNotes?.[0];
+    let notes = null;
+    let feedback = null;
+
+    // Parse notes if they exist
+    if (latestNotes?.notes) {
+      try {
+        const parsedNotes = JSON.parse(latestNotes.notes);
+        notes = parsedNotes.sessionNotes || parsedNotes.notes || latestNotes.notes;
+        feedback = parsedNotes.feedback || parsedNotes.clientProgress;
+      } catch {
+        // If parsing fails, use raw notes
+        notes = latestNotes.notes;
+      }
+    }
+
+    // Compute therapist name
+    const therapistName = meeting.therapist?.user ? 
+      `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`.trim() : 
+      undefined;
+
+    return {
+      id: meeting.id,
+      title: meeting.title,
+      description: meeting.description,
+      startTime: meeting.startTime,
+      endTime: meeting.endTime,
+      dateTime: meeting.startTime, // Alias for startTime
+      duration: meeting.duration,
+      status: meeting.status,
+      meetingType: meeting.meetingType,
+      type: meeting.meetingType, // Alias for meetingType
+      meetingUrl: meeting.meetingUrl,
+      clientId: meeting.clientId,
+      therapistId: meeting.therapistId,
+      notes,
+      feedback,
+      client: meeting.client ? {
+        userId: meeting.client.userId,
+        user: meeting.client.user
+      } : null,
+      therapist: meeting.therapist ? {
+        userId: meeting.therapist.userId,
+        name: therapistName,
+        specialization: meeting.therapist.specialization,
+        experience: meeting.therapist.experience,
+        user: meeting.therapist.user
+      } : null,
+      createdAt: meeting.createdAt,
+      updatedAt: meeting.updatedAt,
+    };
   }
 
   /**
    * Get user's upcoming meetings
    */
   async getUpcomingMeetings(userId: string, limit = 10) {
+    this.logger.debug(
+      `getUpcomingMeetings called for userId: ${userId}, limit: ${limit}`,
+    );
+
     // First validate that user exists
     const userExists = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -110,19 +178,25 @@ export class MeetingsService {
     });
 
     if (!userExists) {
-      this.logger.warn(`User not found: ${userId}`);
+      this.logger.warn(`getUpcomingMeetings: User not found: ${userId}`);
       throw new NotFoundException('User not found');
     }
 
     // If user exists but is not a client or therapist, return empty meetings
     // This follows REST API best practices: return 200 with empty array rather than 404
     if (!userExists.client && !userExists.therapist) {
-      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      this.logger.log(
+        `getUpcomingMeetings: User ${userId} is not a client or therapist, returning empty meetings`,
+      );
       return {
         meetings: [],
         total: 0,
       };
     }
+
+    this.logger.debug(
+      `getUpcomingMeetings: User ${userId} is valid client/therapist, fetching meetings`,
+    );
 
     const meetings = await this.prisma.meeting.findMany({
       where: {
@@ -158,7 +232,9 @@ export class MeetingsService {
       take: limit,
     });
 
-    this.logger.log(`Found ${meetings.length} upcoming meetings for user ${userId}`);
+    this.logger.log(
+      `Found ${meetings.length} upcoming meetings for user ${userId}`,
+    );
 
     return {
       meetings,
@@ -572,7 +648,11 @@ export class MeetingsService {
     });
 
     // Save session summary if provided
-    if (endCallDto.duration || endCallDto.reason || endCallDto.participantFeedback) {
+    if (
+      endCallDto.duration ||
+      endCallDto.reason ||
+      endCallDto.participantFeedback
+    ) {
       await this.prisma.meetingNotes.create({
         data: {
           id: `notes_${meetingId}_${Date.now()}`,
@@ -583,7 +663,8 @@ export class MeetingsService {
             endReason: endCallDto.reason,
             audioQuality: endCallDto.participantFeedback?.audioQuality,
             videoQuality: endCallDto.participantFeedback?.videoQuality,
-            overallExperience: endCallDto.participantFeedback?.overallExperience,
+            overallExperience:
+              endCallDto.participantFeedback?.overallExperience,
             issues: endCallDto.participantFeedback?.issues,
             platform: 'video',
             endTime: new Date().toISOString(),
@@ -670,7 +751,7 @@ export class MeetingsService {
     sessionData: SaveMeetingSessionDto,
   ) {
     // Validate meeting access
-    const meeting = await this.getMeetingById(meetingId, userId);
+    await this.getMeetingById(meetingId, userId);
 
     const session = await this.prisma.meetingNotes.create({
       data: {
@@ -678,8 +759,12 @@ export class MeetingsService {
         meetingId,
         notes: JSON.stringify({
           sessionType: 'REGULAR_THERAPY',
-          startTime: sessionData.sessionData?.startedAt ? new Date(sessionData.sessionData.startedAt).toISOString() : new Date().toISOString(),
-          endTime: sessionData.sessionData?.endedAt ? new Date(sessionData.sessionData.endedAt).toISOString() : new Date().toISOString(),
+          startTime: sessionData.sessionData?.startedAt
+            ? new Date(sessionData.sessionData.startedAt).toISOString()
+            : new Date().toISOString(),
+          endTime: sessionData.sessionData?.endedAt
+            ? new Date(sessionData.sessionData.endedAt).toISOString()
+            : new Date().toISOString(),
           duration: sessionData.sessionData?.duration || sessionData.duration,
           status: 'COMPLETED',
           platform: 'video',
@@ -716,10 +801,12 @@ export class MeetingsService {
 
     // If user exists but is not a client or therapist, return empty meetings
     if (!userExists.client && !userExists.therapist) {
-      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      this.logger.log(
+        `User ${userId} is not a client or therapist, returning empty meetings`,
+      );
       return [];
     }
-    
+
     const meetings = await this.prisma.meeting.findMany({
       where: {
         OR: [{ clientId: userId }, { therapistId: userId }],
@@ -737,6 +824,10 @@ export class MeetingsService {
    * Get user's cancelled meetings
    */
   async getCancelledMeetings(userId: string, limit = 10) {
+    this.logger.debug(
+      `getCancelledMeetings called for userId: ${userId}, limit: ${limit}`,
+    );
+
     // First validate that user exists
     const userExists = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -747,16 +838,22 @@ export class MeetingsService {
     });
 
     if (!userExists) {
-      this.logger.warn(`User not found: ${userId}`);
+      this.logger.warn(`getCancelledMeetings: User not found: ${userId}`);
       throw new NotFoundException('User not found');
     }
 
     // If user exists but is not a client or therapist, return empty meetings
     if (!userExists.client && !userExists.therapist) {
-      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      this.logger.log(
+        `getCancelledMeetings: User ${userId} is not a client or therapist, returning empty meetings`,
+      );
       return [];
     }
-    
+
+    this.logger.debug(
+      `getCancelledMeetings: User ${userId} is valid client/therapist, fetching meetings`,
+    );
+
     const meetings = await this.prisma.meeting.findMany({
       where: {
         OR: [{ clientId: userId }, { therapistId: userId }],
@@ -790,10 +887,12 @@ export class MeetingsService {
 
     // If user exists but is not a client or therapist, return empty meetings
     if (!userExists.client && !userExists.therapist) {
-      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      this.logger.log(
+        `User ${userId} is not a client or therapist, returning empty meetings`,
+      );
       return [];
     }
-    
+
     const meetings = await this.prisma.meeting.findMany({
       where: {
         OR: [{ clientId: userId }, { therapistId: userId }],
@@ -810,14 +909,17 @@ export class MeetingsService {
   /**
    * Get all meetings with filtering options
    */
-  async getAllMeetings(userId: string, queryOptions: {
-    status?: string;
-    type?: string;
-    limit?: number;
-    offset?: number;
-    dateFrom?: string;
-    dateTo?: string;
-  }) {
+  async getAllMeetings(
+    userId: string,
+    queryOptions: {
+      status?: string;
+      type?: string;
+      limit?: number;
+      offset?: number;
+      dateFrom?: string;
+      dateTo?: string;
+    },
+  ) {
     // First validate that user exists
     const userExists = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -834,10 +936,12 @@ export class MeetingsService {
 
     // If user exists but is not a client or therapist, return empty meetings
     if (!userExists.client && !userExists.therapist) {
-      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      this.logger.log(
+        `User ${userId} is not a client or therapist, returning empty meetings`,
+      );
       return [];
     }
-    
+
     const whereClause: any = {
       OR: [{ clientId: userId }, { therapistId: userId }],
     };
@@ -868,8 +972,6 @@ export class MeetingsService {
 
     return this.transformMeetings(meetings);
   }
-
-
 
   /**
    * Helper method to get consistent meeting include options
@@ -905,7 +1007,7 @@ export class MeetingsService {
    * Helper method to transform meetings data
    */
   private transformMeetings(meetings: any[]) {
-    return meetings.map(meeting => ({
+    return meetings.map((meeting) => ({
       id: meeting.id,
       title: meeting.title,
       description: meeting.description,

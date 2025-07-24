@@ -147,6 +147,30 @@ export class ClientController {
     }
   }
 
+  @Get('therapists')
+  @ApiOperation({
+    summary: 'Retrieve all assigned therapists',
+    description: 'Retrieve all active assigned therapists for the client',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getAssignedTherapists(
+    @CurrentUserId() id: string,
+  ): Promise<{ therapists: TherapistRecommendation[] }> {
+    try {
+      const therapists = await this.clientService.getAssignedTherapists(id);
+      return { therapists };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to fetch assigned therapists: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Post('therapist')
   @ApiOperation({
     summary: 'Create assign therapist',

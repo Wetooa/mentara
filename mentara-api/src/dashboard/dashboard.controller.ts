@@ -2,6 +2,7 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RoleBasedAccessGuard } from '../auth/guards/role-based-access.guard';
+import { TherapistDashboardAccessGuard } from '../auth/guards/therapist-dashboard-access.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import {
   ClientOnly,
@@ -22,7 +23,7 @@ export class DashboardController {
   }
 
   @Get('therapist')
-  @TherapistOnly()
+  @UseGuards(JwtAuthGuard, TherapistDashboardAccessGuard)
   getTherapistDashboard(@CurrentUserId() userId: string) {
     return this.dashboardService.getTherapistDashboardData(userId);
   }

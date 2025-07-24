@@ -53,12 +53,14 @@ export function TherapistSelectionSummary({
       )
     : 0;
 
-  const totalHourlyRate = selectedTherapistData.reduce(
+  // Filter out therapists with no hourly rate and calculate average
+  const therapistsWithRates = selectedTherapistData.filter(t => t.hourlyRate && t.hourlyRate > 0);
+  const totalHourlyRate = therapistsWithRates.reduce(
     (sum, t) => sum + (t.hourlyRate || 0), 
     0
   );
-  const averageHourlyRate = selectedTherapistData.length > 0
-    ? Math.round(totalHourlyRate / selectedTherapistData.length)
+  const averageHourlyRate = therapistsWithRates.length > 0
+    ? Math.round(totalHourlyRate / therapistsWithRates.length)
     : 0;
 
   return (
@@ -84,7 +86,7 @@ export function TherapistSelectionSummary({
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
-              ₱{averageHourlyRate}
+              {averageHourlyRate > 0 ? `₱${averageHourlyRate}` : 'N/A'}
             </div>
             <p className="text-sm text-muted-foreground">Average Rate/Hour</p>
           </div>
@@ -125,7 +127,7 @@ export function TherapistSelectionSummary({
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span>{therapist.providerType}</span>
-                    <span>₱{therapist.hourlyRate}/hr</span>
+                    <span>{therapist.hourlyRate ? `₱${therapist.hourlyRate}/hr` : 'Rate not set'}</span>
                     {therapist.reviews?.length > 0 && (
                       <div className="flex items-center gap-1">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />

@@ -1,8 +1,8 @@
-import { 
-  Calendar, 
-  CheckCircle, 
-  Clock, 
-  XCircle, 
+import {
+  Calendar,
+  CheckCircle,
+  Clock,
+  XCircle,
   Play
 } from "lucide-react";
 import { StatCard, type StatItem } from "@/components/ui/stat-card";
@@ -14,12 +14,12 @@ interface SessionStatsProps {
 }
 
 export function SessionStats({ showTrends = false, variant = 'default' }: SessionStatsProps) {
-  const { 
-    data: stats, 
-    isLoading, 
-    error, 
-    refetch, 
-    isRefetching 
+  const {
+    data: stats,
+    isLoading,
+    error,
+    refetch,
+    isRefetching
   } = useSessionStats();
 
   if (!stats && !isLoading && !error) {

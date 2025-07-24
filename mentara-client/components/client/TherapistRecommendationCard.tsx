@@ -79,9 +79,9 @@ export function TherapistRecommendationCard({
   };
 
   const getMatchBadgeColor = (score: number) => {
-    if (score >= 80) return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg';
-    if (score >= 60) return 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-lg';
-    return 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg';
+    if (score >= 80) return 'bg-green-600 text-white';
+    if (score >= 60) return 'bg-blue-600 text-white';
+    return 'bg-gray-600 text-white';
   };
 
   const handleCardClick = () => {
@@ -96,51 +96,43 @@ export function TherapistRecommendationCard({
 
   return (
     <Card 
-      className={`transition-all duration-300 cursor-pointer group relative overflow-hidden ${
+      className={`transition-all duration-200 cursor-pointer group relative overflow-hidden ${
         isSelected 
-          ? 'ring-2 ring-blue-400 shadow-2xl bg-gradient-to-br from-blue-50/80 via-white to-purple-50/30 scale-[1.02]' 
-          : 'hover:shadow-xl hover:scale-[1.01] hover:bg-gradient-to-br hover:from-gray-50/80 hover:via-white hover:to-blue-50/20'
-      } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+          ? 'ring-2 ring-primary shadow-lg bg-blue-50/50' 
+          : 'hover:shadow-md hover:bg-gray-50/50'
+      } ${disabled ? 'opacity-60 cursor-not-allowed' : ''} border border-gray-200 bg-white`}
       onClick={handleCardClick}
     >
       <CardHeader className="pb-4">
         <div className="flex items-start gap-4">
-          {/* Enhanced Rank Badge */}
+          {/* Professional Rank Badge */}
           <div className="flex flex-col items-center gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-sm opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-              <div className="relative bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                #{rank}
-              </div>
+            <div className="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold">
+              #{rank}
             </div>
-            <div className="relative">
-              <Checkbox
-                checked={isSelected}
-                onCheckedChange={onSelect}
-                disabled={disabled}
-                onClick={(e) => e.stopPropagation()}
-                className="scale-110 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-purple-500 border-2"
-              />
-            </div>
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={onSelect}
+              disabled={disabled}
+              onClick={(e) => e.stopPropagation()}
+              className="data-[state=checked]:bg-primary border-2"
+            />
           </div>
           
           {/* Therapist Info */}
           <div className="flex-1">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start gap-4">
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-sm opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
-                  <div className="relative p-1 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full">
-                    <Avatar className="h-16 w-16 border-2 border-white">
-                      <AvatarImage src={therapist.user?.avatarUrl} />
-                      <AvatarFallback className="text-lg bg-gradient-to-br from-blue-100 to-purple-100 text-blue-700 font-bold">
-                        {therapist.user?.firstName?.[0]}{therapist.user?.lastName?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+                <div className="relative">
+                  <Avatar className="h-16 w-16 border-2 border-gray-200">
+                    <AvatarImage src={therapist.user?.avatarUrl} />
+                    <AvatarFallback className="text-lg bg-blue-100 text-blue-700 font-bold">
+                      {therapist.user?.firstName?.[0]}{therapist.user?.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
                   {/* Online indicator */}
                   {therapist.isOnline && (
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-lg animate-pulse"></div>
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></div>
                   )}
                 </div>
                 
@@ -173,35 +165,33 @@ export function TherapistRecommendationCard({
                 </div>
               </div>
               
-              {/* Enhanced Match Score */}
+              {/* Professional Match Score */}
               <div className="text-right">
-                <div className="relative">
-                  <Badge className={`${getMatchBadgeColor(matchScore)} px-3 py-1 font-bold text-sm transform group-hover:scale-105 transition-transform duration-300`}>
-                    {matchScore}% Match
-                  </Badge>
-                </div>
+                <Badge className={`${getMatchBadgeColor(matchScore)} px-3 py-1 font-bold text-sm`}>
+                  {matchScore}% Match
+                </Badge>
                 <p className="text-xs font-medium text-gray-600 mt-2">
                   {getMatchLevel(matchScore)}
                 </p>
               </div>
             </div>
             
-            {/* Enhanced Quick Stats */}
+            {/* Professional Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg border border-gray-100 shadow-sm">
-                <MapPin className="h-4 w-4 text-blue-600" />
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                <MapPin className="h-4 w-4 text-gray-600" />
                 <span className="text-sm font-medium text-gray-700">{therapist.province || 'Remote'}</span>
               </div>
-              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg border border-gray-100 shadow-sm">
-                <Clock className="h-4 w-4 text-purple-600" />
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                <Clock className="h-4 w-4 text-gray-600" />
                 <span className="text-sm font-medium text-gray-700">{yearsSinceStart} years exp.</span>
               </div>
-              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg border border-gray-100 shadow-sm">
-                <CreditCard className="h-4 w-4 text-green-600" />
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                <CreditCard className="h-4 w-4 text-gray-600" />
                 <span className="text-sm font-medium text-gray-700">₱{therapist.hourlyRate || 'N/A'}/hour</span>
               </div>
-              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg border border-gray-100 shadow-sm">
-                <Calendar className="h-4 w-4 text-amber-600" />
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                <Calendar className="h-4 w-4 text-gray-600" />
                 <span className="text-sm font-medium text-gray-700">{normalizeSessionDuration(therapist.sessionDuration)} min sessions</span>
               </div>
             </div>
@@ -239,72 +229,52 @@ export function TherapistRecommendationCard({
           </div>
         )}
 
-        {/* Enhanced Match Explanation */}
+        {/* Professional Match Explanation */}
         {showMatchExplanation && therapist.matchExplanation && (
-          <div className="bg-gradient-to-br from-blue-50/80 via-white to-purple-50/50 border border-blue-200/60 rounded-xl p-5 shadow-sm backdrop-blur-sm">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
             <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-blue-800">
-              <div className="p-1 bg-blue-100 rounded-full">
-                <Info className="h-3 w-3 text-blue-600" />
-              </div>
+              <Info className="h-4 w-4 text-blue-600" />
               Why this match?
             </h4>
             <div className="space-y-2 text-sm">
               {therapist.matchExplanation.reasons?.map((reason, index) => (
-                <div key={index} className="flex items-start gap-3 p-2 bg-white/60 rounded-lg border border-blue-100/50">
+                <div key={index} className="flex items-start gap-3 p-2 bg-white rounded-lg border border-blue-100">
                   <CheckCircle className="h-4 w-4 mt-0.5 text-blue-600 flex-shrink-0" />
                   <span className="text-blue-800 font-medium">{reason}</span>
                 </div>
               ))}
             </div>
             
-            {/* Enhanced Match Score Breakdown */}
-            <div className="mt-4 pt-4 border-t border-blue-200/60">
+            {/* Professional Match Score Breakdown */}
+            <div className="mt-4 pt-4 border-t border-blue-200">
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-white/70 rounded-lg border border-blue-100">
+                <div className="text-center p-3 bg-white rounded-lg border border-blue-100">
                   <div className="font-bold text-blue-800 text-xs mb-2">Compatibility</div>
-                  <div className="relative mb-2">
-                    <Progress 
-                      value={therapist.matchExplanation.compatibility || 0} 
-                      className="h-2 bg-gray-200" 
-                    />
-                    <div 
-                      className="absolute top-0 left-0 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
-                      style={{ width: `${therapist.matchExplanation.compatibility || 0}%` }}
-                    />
-                  </div>
+                  <Progress 
+                    value={therapist.matchExplanation.compatibility || 0} 
+                    className="h-2 bg-gray-200 mb-2" 
+                  />
                   <span className="text-blue-600 font-bold text-xs">
                     {therapist.matchExplanation.compatibility || 0}%
                   </span>
                 </div>
-                <div className="text-center p-3 bg-white/70 rounded-lg border border-blue-100">
+                <div className="text-center p-3 bg-white rounded-lg border border-blue-100">
                   <div className="font-bold text-blue-800 text-xs mb-2">Availability</div>
-                  <div className="relative mb-2">
-                    <Progress 
-                      value={therapist.matchExplanation.availability || 0} 
-                      className="h-2 bg-gray-200" 
-                    />
-                    <div 
-                      className="absolute top-0 left-0 h-2 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full transition-all duration-500"
-                      style={{ width: `${therapist.matchExplanation.availability || 0}%` }}
-                    />
-                  </div>
-                  <span className="text-emerald-600 font-bold text-xs">
+                  <Progress 
+                    value={therapist.matchExplanation.availability || 0} 
+                    className="h-2 bg-gray-200 mb-2" 
+                  />
+                  <span className="text-blue-600 font-bold text-xs">
                     {therapist.matchExplanation.availability || 0}%
                   </span>
                 </div>
-                <div className="text-center p-3 bg-white/70 rounded-lg border border-blue-100">
+                <div className="text-center p-3 bg-white rounded-lg border border-blue-100">
                   <div className="font-bold text-blue-800 text-xs mb-2">Experience</div>
-                  <div className="relative mb-2">
-                    <Progress 
-                      value={therapist.matchExplanation.experience || 0} 
-                      className="h-2 bg-gray-200" 
-                    />
-                    <div 
-                      className="absolute top-0 left-0 h-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
-                      style={{ width: `${therapist.matchExplanation.experience || 0}%` }}
-                    />
-                  </div>
-                  <span className="text-amber-600 font-bold text-xs">
+                  <Progress 
+                    value={therapist.matchExplanation.experience || 0} 
+                    className="h-2 bg-gray-200 mb-2" 
+                  />
+                  <span className="text-blue-600 font-bold text-xs">
                     {therapist.matchExplanation.experience || 0}%
                   </span>
                 </div>
@@ -313,15 +283,15 @@ export function TherapistRecommendationCard({
           </div>
         )}
 
-        {/* Enhanced Action Area */}
+        {/* Professional Action Area */}
         <div className="pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2 px-2 py-1 bg-gray-100/70 rounded-lg">
-                      <Users className="h-4 w-4 text-blue-600" />
+                    <div className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-lg">
+                      <Users className="h-4 w-4 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">{therapist.activeClients || 0}</span>
                     </div>
                   </TooltipTrigger>
@@ -334,8 +304,8 @@ export function TherapistRecommendationCard({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2 px-2 py-1 bg-gray-100/70 rounded-lg">
-                      <MessageCircle className="h-4 w-4 text-purple-600" />
+                    <div className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-lg">
+                      <MessageCircle className="h-4 w-4 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">{therapist.responseTime || 'N/A'}</span>
                     </div>
                   </TooltipTrigger>
@@ -348,7 +318,7 @@ export function TherapistRecommendationCard({
             
             <div className="flex items-center gap-3">
               {isSelected && (
-                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg px-3 py-1">
+                <Badge className="bg-green-600 text-white px-3 py-1">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Selected
                 </Badge>
@@ -361,7 +331,7 @@ export function TherapistRecommendationCard({
                   e.stopPropagation();
                   // TODO: Navigate to therapist profile
                 }}
-                className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors duration-200 font-medium"
+                className="hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 font-medium"
               >
                 View Profile
               </Button>

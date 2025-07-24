@@ -5,7 +5,7 @@ import TherapistCard from "@/components/therapist/listing/TherapistCard";
 import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
 import BookingModal from "@/components/booking/BookingModal";
 import { useFavorites } from "@/hooks/user/useFavorites";
-import { useFilteredTherapists } from "@/hooks/therapist/useTherapists";
+import { useAllTherapists } from "@/hooks/therapist/useAllTherapists";
 import { Heart, Star } from "lucide-react";
 import { TherapistCardData } from "@/types/therapist";
 import { toast } from "sonner";
@@ -17,7 +17,7 @@ export default function FavoritesSection() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   // Get all therapists to filter favorites from
-  const { therapists, isLoading } = useFilteredTherapists("", "All", { limit: 100 });
+  const { therapists, isLoading } = useAllTherapists({ pageSize: 100 });
 
   // Filter therapists to only show favorites
   const favoriteTherapists = therapists.filter(therapist => 

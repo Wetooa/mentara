@@ -117,8 +117,8 @@ export async function seedWorksheets(
         // Create worksheet
         const worksheet = await prisma.worksheet.create({
           data: {
-            clientId: client.user.id,
-            therapistId: therapist.user.id,
+            clientId: client.client.userId,
+            therapistId: therapist.therapist.userId,
             title: template.title,
             instructions: template.description, // Use description as detailed instructions
             dueDate,

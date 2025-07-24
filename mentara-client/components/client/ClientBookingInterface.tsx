@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import {
   Select,
   SelectContent,
@@ -34,199 +35,82 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
-import { useApi } from "@/lib/api";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { BookingCalendar } from "@/components/booking/BookingCalendar";
-
-interface TherapistProfile {
-  id: string;
-  name: string;
-  title: string;
-  specialties: string[];
-  hourlyRate: number;
-  rating: number;
-  avatarUrl?: string;
-  bio?: string;
-}
-
-interface TimeSlot {
-  time: string;
-  startTime: string;
-  endTime: string;
-  availableDurations: Array<{
-    id: string;
-    name: string;
-    duration: number;
-  }>;
-}
-
-interface BookingStep {
-  step: number;
-  title: string;
-  description: string;
-}
+import { useClientBooking } from "@/hooks/booking";
+import { TimezoneUtils } from "@/lib/utils/timezone";
+import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
 
 interface ClientBookingInterfaceProps {
   therapistId: string;
+  selectedSlot: TimeSlot;
+  selectedDate: Date;
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-const BOOKING_STEPS: BookingStep[] = [
-  {
-    step: 1,
-    title: "Select Date & Time",
-    description: "Choose when you'd like to meet with your therapist",
-  },
-  {
-    step: 2,
-    title: "Session Details",
-    description: "Add session information and preferences",
-  },
-  {
-    step: 3,
-    title: "Payment & Confirmation",
-    description: "Review and confirm your booking",
-  },
-];
-
 export function ClientBookingInterface({
   therapistId,
+  selectedSlot,
+  selectedDate,
   isOpen,
   onClose,
   onSuccess,
 }: ClientBookingInterfaceProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState<{
-    id: string;
-    name: string;
-    duration: number;
-  } | null>(null);
-  const [sessionTitle, setSessionTitle] = useState("");
-  const [sessionDescription, setSessionDescription] = useState("");
-  const [paymentMethodId, setPaymentMethodId] = useState("");
-
-  const api = useApi();
-  const queryClient = useQueryClient();
-
-  // Get therapist profile
+  // Use the comprehensive booking hook that handles all business logic
   const {
-    data: therapist,
-    isLoading: therapistLoading,
-    error: therapistError,
-  } = useQuery({
-    queryKey: ["therapist-profile", therapistId],
-    queryFn: () => api.therapists.getTherapistProfile(therapistId),
-    enabled: isOpen && !!therapistId,
-  });
-
-  // Get payment methods
-  const {
-    data: paymentMethods = [],
-    isLoading: paymentMethodsLoading,
-  } = useQuery({
-    queryKey: ["payment-methods"],
-    queryFn: () => api.booking.payment.getPaymentMethods(),
-    enabled: currentStep === 3,
-  });
-
-  // Get durations
-  const {
-    data: durations = [],
-    isLoading: durationsLoading,
-  } = useQuery({
-    queryKey: ["meeting-durations"],
-    queryFn: () => api.booking.durations.getAll(),
+    // Form state
+    currentStep,
+    selectedTimeSlot,
+    selectedDuration,
+    setSelectedDuration,
+    sessionTitle,
+    setSessionTitle,
+    sessionDescription,
+    setSessionDescription,
+    paymentMethodId,
+    setPaymentMethodId,
+    
+    // Data
+    therapist,
+    paymentMethods,
+    
+    // Loading states
+    therapistLoading,
+    paymentMethodsLoading,
+    isBooking,
+    
+    // Error states
+    therapistError,
+    bookingError,
+    
+    // Actions
+    handleNextStep,
+    handlePrevStep,
+    handleConfirmBooking,
+    
+    // Validation
+    isStep1Complete,
+    isStep2Complete,
+    isStep3Complete,
+    
+    // Constants
+    BOOKING_STEPS,
+  } = useClientBooking({
+    therapistId,
+    selectedSlot,
+    selectedDate,
     enabled: isOpen,
+    onSuccess,
+    onClose,
   });
-
-  // Create booking mutation
-  const createBookingMutation = useMutation({
-    mutationFn: async () => {
-      if (!selectedTimeSlot || !selectedDuration || !paymentMethodId) {
-        throw new Error("Missing required booking information");
-      }
-
-      // Create the meeting first
-      const meeting = await api.booking.meetings.create({
-        therapistId,
-        startTime: selectedTimeSlot.startTime,
-        duration: selectedDuration.duration,
-        title: sessionTitle || `Session with ${therapist?.name}`,
-        description: sessionDescription,
-        meetingType: "video",
-      });
-
-      // Process payment for the session
-      const payment = await api.booking.payment.processSessionPayment({
-        meetingId: meeting.id,
-        paymentMethodId,
-        amount: therapist?.hourlyRate * (selectedDuration.duration / 60) || 0,
-        currency: "USD",
-      });
-
-      return { meeting, payment };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["available-slots"] });
-      toast.success("Session booked successfully!");
-      onSuccess?.();
-      onClose();
-      resetForm();
-    },
-    onError: (error: any) => {
-      toast.error(error?.message || "Failed to book session. Please try again.");
-    },
-  });
-
-  const resetForm = () => {
-    setCurrentStep(1);
-    setSelectedDate(undefined);
-    setSelectedTimeSlot(null);
-    setSelectedDuration(null);
-    setSessionTitle("");
-    setSessionDescription("");
-    setPaymentMethodId("");
-  };
-
-  const handleSlotSelect = (date: string, timeSlot: TimeSlot) => {
-    setSelectedTimeSlot(timeSlot);
-    // Auto-select first duration if only one available
-    if (timeSlot.availableDurations.length === 1) {
-      setSelectedDuration(timeSlot.availableDurations[0]);
-    }
-    setCurrentStep(2);
-  };
-
-  const handleNextStep = () => {
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleConfirmBooking = () => {
-    createBookingMutation.mutate();
-  };
-
-  const isStep1Complete = selectedTimeSlot && selectedDuration;
-  const isStep2Complete = sessionTitle.trim() && isStep1Complete;
-  const isStep3Complete = paymentMethodId && isStep2Complete;
 
   if (therapistLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-7xl lg:max-w-[95vw] xl:max-w-[90vw] max-h-[95vh] overflow-y-auto">
+          <VisuallyHidden.Root asChild>
+            <DialogTitle>Loading Booking Interface</DialogTitle>
+          </VisuallyHidden.Root>
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-64 w-full" />
@@ -241,6 +125,9 @@ export function ClientBookingInterface({
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-md">
+          <VisuallyHidden.Root asChild>
+            <DialogTitle>Booking Error</DialogTitle>
+          </VisuallyHidden.Root>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -257,7 +144,7 @@ export function ClientBookingInterface({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-7xl lg:max-w-[95vw] xl:max-w-[90vw] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
@@ -302,7 +189,7 @@ export function ClientBookingInterface({
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Therapist Info Sidebar */}
           <div className="lg:col-span-1">
             <Card>
@@ -370,7 +257,7 @@ export function ClientBookingInterface({
                   <div>
                     <div className="text-sm text-muted-foreground">Date & Time</div>
                     <div className="font-medium">
-                      {selectedDate?.toLocaleDateString()} at {selectedTimeSlot.time}
+                      {selectedDate ? TimezoneUtils.format(selectedDate, 'MMM d, yyyy') : ''} at {selectedTimeSlot.time}
                     </div>
                   </div>
                   <div>
@@ -387,7 +274,7 @@ export function ClientBookingInterface({
                   <div className="border-t pt-3">
                     <div className="text-sm text-muted-foreground">Total Cost</div>
                     <div className="text-lg font-bold text-green-600">
-                      ${((therapist.hourlyRate * selectedDuration.duration) / 60).toFixed(2)}
+                      ${((therapist.hourlyRate || 0) * selectedDuration.duration / 60).toFixed(2)}
                     </div>
                   </div>
                 </CardContent>
@@ -397,24 +284,46 @@ export function ClientBookingInterface({
 
           {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* Step 1: Date & Time Selection */}
+            {/* Step 1: Session Details */}
             {currentStep === 1 && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Select Date & Time
-                  </h3>
+                  <h3 className="text-lg font-semibold mb-2">Session Details</h3>
                   <p className="text-muted-foreground mb-4">
-                    Choose a convenient time slot for your therapy session
+                    Confirm your selected time and session preferences
                   </p>
                 </div>
 
-                <BookingCalendar
-                  therapistId={therapistId}
-                  onSlotSelect={handleSlotSelect}
-                  selectedDate={selectedDate}
-                  onDateSelect={setSelectedDate}
-                />
+                {/* Selected Time Confirmation */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5" />
+                      Selected Appointment Time
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold text-lg">
+                            {TimezoneUtils.format(selectedDate, 'EEEE, MMMM do, yyyy')}
+                          </div>
+                          <div className="text-blue-600 font-medium">
+                            {selectedTimeSlot?.time}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-muted-foreground">Session Type</div>
+                          <div className="flex items-center gap-1 font-medium">
+                            <Video className="h-4 w-4" />
+                            Video Call
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Duration Selection */}
                 {selectedTimeSlot && selectedTimeSlot.availableDurations.length > 1 && (
@@ -440,7 +349,7 @@ export function ClientBookingInterface({
                                 {duration.duration} minutes
                               </div>
                               <div className="text-sm font-medium text-green-600">
-                                ${((therapist.hourlyRate * duration.duration) / 60).toFixed(2)}
+                                ${((therapist.hourlyRate || 0) * duration.duration / 60).toFixed(2)}
                               </div>
                             </CardContent>
                           </Card>
@@ -449,16 +358,39 @@ export function ClientBookingInterface({
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Session Type Confirmation */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Session Preferences</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Video className="h-5 w-5 text-blue-500" />
+                          <div>
+                            <div className="font-medium">Video Session</div>
+                            <div className="text-sm text-muted-foreground">
+                              High-quality video call with your therapist
+                            </div>
+                          </div>
+                        </div>
+                        <Badge variant="default">Selected</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
-            {/* Step 2: Session Details */}
+            {/* Step 2: Session Notes */}
             {currentStep === 2 && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Session Details</h3>
+                  <h3 className="text-lg font-semibold mb-2">Session Notes</h3>
                   <p className="text-muted-foreground mb-4">
-                    Add information about what you'd like to discuss
+                    Add notes about what you&apos;d like to discuss in your session
                   </p>
                 </div>
 
@@ -532,7 +464,7 @@ export function ClientBookingInterface({
                           <SelectValue placeholder="Select payment method" />
                         </SelectTrigger>
                         <SelectContent>
-                          {paymentMethods.map((method: any) => (
+                          {paymentMethods.map((method: { id: string; cardBrand: string; cardLast4: string; isDefault?: boolean }) => (
                             <SelectItem key={method.id} value={method.id}>
                               <div className="flex items-center gap-2">
                                 <CreditCard className="h-4 w-4" />
@@ -559,10 +491,10 @@ export function ClientBookingInterface({
                     <CardTitle>Booking Review</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">Therapist:</span>
-                        <div className="font-medium">{therapist.name}</div>
+                        <div className="font-medium">{therapist?.name}</div>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Session:</span>
@@ -571,7 +503,7 @@ export function ClientBookingInterface({
                       <div>
                         <span className="text-muted-foreground">Date & Time:</span>
                         <div className="font-medium">
-                          {selectedDate?.toLocaleDateString()} at {selectedTimeSlot?.time}
+                          {selectedDate ? TimezoneUtils.format(selectedDate, 'MMM d, yyyy') : ''} at {selectedTimeSlot?.time}
                         </div>
                       </div>
                       <div>
@@ -584,7 +516,7 @@ export function ClientBookingInterface({
                       <div className="flex items-center justify-between text-lg font-semibold">
                         <span>Total Amount:</span>
                         <span className="text-green-600">
-                          ${selectedDuration ? ((therapist.hourlyRate * selectedDuration.duration) / 60).toFixed(2) : '0.00'}
+                          ${selectedDuration ? (((therapist.hourlyRate || 0) * selectedDuration.duration) / 60).toFixed(2) : '0.00'}
                         </span>
                       </div>
                     </div>
@@ -596,12 +528,12 @@ export function ClientBookingInterface({
         </div>
 
         {/* Error Display */}
-        {createBookingMutation.error && (
+        {bookingError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {createBookingMutation.error instanceof Error
-                ? createBookingMutation.error.message
+              {bookingError instanceof Error
+                ? bookingError.message
                 : "Failed to book session. Please try again."}
             </AlertDescription>
           </Alert>
@@ -640,10 +572,10 @@ export function ClientBookingInterface({
             {currentStep === 3 && (
               <Button
                 onClick={handleConfirmBooking}
-                disabled={!isStep3Complete || createBookingMutation.isPending}
+                disabled={!isStep3Complete || isBooking}
                 className="bg-green-600 hover:bg-green-700"
               >
-                {createBookingMutation.isPending ? (
+                {isBooking ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Booking...

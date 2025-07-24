@@ -3,7 +3,10 @@
 import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
-import { Task } from "@/components/worksheets/types";
+import {
+  Task,
+  transformWorksheetAssignmentToTask,
+} from "@/components/worksheets/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
 
@@ -103,6 +106,22 @@ export default function WorksheetsPage() {
     if (!Array.isArray(tasks)) return [];
 
     let filtered = [...tasks];
+
+    // Apply status filter based on activeFilter
+    if (activeFilter !== "everything") {
+      filtered = filtered.filter((task) => {
+        switch (activeFilter) {
+          case "upcoming":
+            return task.status === "upcoming";
+          case "past_due":
+            return task.status === "past_due";
+          case "completed":
+            return task.status === "completed";
+          default:
+            return true;
+        }
+      });
+    }
 
     // Apply therapist filter if selected
     if (therapistFilter) {

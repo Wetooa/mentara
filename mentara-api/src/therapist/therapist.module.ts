@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TherapistRecommendationController } from './therapist-recommendation.controller';
+import { TherapistsController } from './therapists.controller';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 
 import { TherapistManagementService } from './therapist-management.service';
@@ -7,6 +8,7 @@ import { TherapistManagementService } from './therapist-management.service';
 import { TherapistProfileController } from './controllers/therapist-profile.controller';
 import { TherapistClientController } from './controllers/therapist-client.controller';
 import { TherapistWorksheetController } from './controllers/therapist-worksheet.controller';
+import { TherapistMatchController } from './therapist-match.controller';
 import { TherapistListController } from './controllers/therapist-list.controller';
 import { TherapistListService } from './services/therapist-list.service';
 import { WorksheetsService } from '../worksheets/worksheets.service';
@@ -25,9 +27,11 @@ import { CommunitiesModule } from '../communities/communities.module';
   imports: [PreAssessmentModule, EmailModule, MessagingModule, CommunitiesModule],
   controllers: [
     TherapistRecommendationController,
+    TherapistsController,
     TherapistProfileController,
     TherapistClientController,
     TherapistWorksheetController,
+    TherapistMatchController,
     TherapistListController,
   ],
   providers: [

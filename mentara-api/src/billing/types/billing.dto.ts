@@ -17,10 +17,10 @@ export interface UpdatePaymentMethodDto {
 }
 
 export interface ProcessSessionPaymentDto {
-  sessionId: string;
+  meetingId: string; // Changed from sessionId to match frontend
   paymentMethodId: string;
   amount: number;
   currency?: string;
   description?: string;
-  therapistId: string; // Required by billing service
+  // therapistId removed - will be derived from meeting
 }

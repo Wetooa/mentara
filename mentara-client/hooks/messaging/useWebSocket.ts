@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSocketConnection } from '@/hooks/useSocketConnection';
+import { useAuth } from '@/contexts/AuthContext';
+import { getAuthToken } from '@/lib/constants/auth';
+import { 
+  connectWebSocket, 
+  disconnectWebSocket, 
+  emitEvent, 
+  onEvent, 
+  onStateChange, 
+  getConnectionState,
+  type ConnectionState 
+} from '@/lib/websocket';
 import type { Message } from '@/components/messages/types';
 
 interface TypingData {
@@ -16,70 +26,90 @@ interface UserStatusData {
   timestamp: string;
 }
 
+/**
+ * Simplified WebSocket hook for messaging
+ * Uses the new simple WebSocket client instead of complex useSocketConnection
+ */
 export function useMessagingWebSocket() {
-  // Use centralized socket connection
-  const {
-    connectionState,
-    isConnected,
-    error: connectionError,
-    subscribeToEvent,
-    emit,
-    reconnect
-  } = useSocketConnection({
-    subscriberId: 'messaging-websocket',
-    enableRealtime: true,
-  });
-
-  const [error, setError] = useState<string | null>(connectionError);
+  const { isAuthenticated } = useAuth();
+  const [connectionState, setConnectionState] = useState<ConnectionState>(getConnectionState());
+  const [error, setError] = useState<string | null>(null);
 
   const connect = useCallback(async () => {
-    if (isConnected) return;
+    const token = getAuthToken();
+    if (connectionState.isConnected || !token) return;
 
     try {
       setError(null);
-      await reconnect();
+      await connectWebSocket(token);
     } catch (err) {
       setError('Failed to connect to messaging service');
     }
-  }, [isConnected, reconnect]);
+  }, [connectionState.isConnected]);
 
   const disconnect = useCallback(() => {
-    // Socket manager handles disconnection automatically
-    // when no more subscribers are active
+    disconnectWebSocket();
   }, []);
 
   const joinConversation = useCallback((conversationId: string) => {
-    emit('join_conversation', { conversationId });
-  }, [emit]);
+    console.log('🚪 [WEBSOCKET DEBUG] Joining conversation room:', conversationId);
+    console.log('🚪 [WEBSOCKET DEBUG] Connection state:', connectionState);
+    emitEvent('join_conversation', { conversationId });
+    
+    // Listen for join confirmation
+    const unsubscribe = onEvent('conversation_joined', (data) => {
+      console.log('✅ [WEBSOCKET DEBUG] Successfully joined conversation room:', data);
+      unsubscribe();
+    });
+  }, [connectionState]);
 
   const leaveConversation = useCallback((conversationId: string) => {
-    emit('leave_conversation', { conversationId });
-  }, [emit]);
+    emitEvent('leave_conversation', { conversationId });
+  }, []);
 
   const sendTypingIndicator = useCallback((conversationId: string, isTyping: boolean = true) => {
-    emit('typing_indicator', { conversationId, isTyping });
-  }, [emit]);
+    emitEvent('typing_indicator', { conversationId, isTyping });
+  }, []);
 
   const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
-    return subscribeToEvent('new_message', callback);
-  }, [subscribeToEvent]);
+    return onEvent('new_message', (data: { message: Message }) => {
+      console.log('🔍 [WEBSOCKET DEBUG] Raw new_message event received:', data);
+      console.log('🔍 [WEBSOCKET DEBUG] Message data:', data.message);
+      callback(data.message);
+    });
+  }, []);
 
   const subscribeToTyping = useCallback((callback: (data: TypingData) => void) => {
-    return subscribeToEvent('typing_indicator', callback);
-  }, [subscribeToEvent]);
+    return onEvent('typing_indicator', callback);
+  }, []);
 
   const subscribeToUserStatus = useCallback((callback: (data: UserStatusData) => void) => {
-    return subscribeToEvent('user_status_changed', callback);
-  }, [subscribeToEvent]);
+    return onEvent('user_status_changed', callback);
+  }, []);
 
-  // Sync error state with connection error
+  // Monitor connection state
   useEffect(() => {
-    setError(connectionError);
-  }, [connectionError]);
+    const unsubscribe = onStateChange(setConnectionState);
+    return unsubscribe;
+  }, []);
+
+  // Auto-connect when authenticated and not connected
+  useEffect(() => {
+    console.log('🔐 [WEBSOCKET DEBUG] Auth state changed:', { 
+      isAuthenticated, 
+      isConnected: connectionState.isConnected,
+      isConnecting: connectionState.isConnecting 
+    });
+    
+    if (isAuthenticated && !connectionState.isConnected && !connectionState.isConnecting) {
+      console.log('🚀 [WEBSOCKET DEBUG] Attempting to connect...');
+      connect();
+    }
+  }, [isAuthenticated, connectionState.isConnected, connectionState.isConnecting, connect]);
 
   return {
-    isConnected,
-    error,
+    isConnected: connectionState.isConnected,
+    error: error || connectionState.error,
     connect,
     disconnect,
     joinConversation,

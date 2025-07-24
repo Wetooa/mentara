@@ -24,8 +24,8 @@ export async function seedClientTherapistRelationships(
     const therapist = faker.helpers.arrayElement(therapists);
     const relationship = await prisma.clientTherapist.create({
       data: {
-        clientId: client.user.id,
-        therapistId: therapist.user.id,
+        clientId: client.client.userId,
+        therapistId: therapist.therapist.userId,
         assignedAt: faker.date.past({ years: 1 }),
       },
     });
@@ -62,8 +62,8 @@ export async function seedMeetings(
 
       const meeting = await prisma.meeting.create({
         data: {
-          clientId: client.user.id,
-          therapistId: therapist.user.id,
+          clientId: client.client.userId,
+          therapistId: therapist.therapist.userId,
           startTime,
           duration: faker.helpers.arrayElement([45, 60, 90]),
           status: faker.helpers.arrayElement([

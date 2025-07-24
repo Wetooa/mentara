@@ -56,8 +56,11 @@ export function useTherapist() {
     },
     onSuccess: (data, therapistId) => {
       toast.success("Therapist assigned successfully!");
-      // Invalidate and refetch the assigned therapist
+      // Invalidate both single and multiple therapist queries
       queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapists'] });
+      // Also invalidate booking-related queries
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
     },
     onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to assign therapist";
@@ -72,8 +75,11 @@ export function useTherapist() {
     },
     onSuccess: () => {
       toast.success("Therapist removed successfully!");
-      // Invalidate the assigned therapist query
+      // Invalidate both single and multiple therapist queries
       queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapists'] });
+      // Also invalidate booking-related queries
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
     },
     onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to remove therapist";
@@ -141,7 +147,10 @@ export function useAssignedTherapists() {
 
   return useQuery({
     queryKey: ['client', 'assignedTherapists'],
-    queryFn: () => api.client.getAssignedTherapists(),
+    queryFn: async () => {
+      const response = await api.client.getAssignedTherapists();
+      return response.therapists;
+    },
     staleTime: 1000 * 60 * 10, // Cache for 10 minutes
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry on 404 (no therapists assigned)
@@ -151,9 +160,44 @@ export function useAssignedTherapists() {
   });
 }
 
+/**
+ * Hook for getting therapist profile by ID
+ */
+export function useTherapistProfile(therapistId: string, enabled: boolean = true) {
+  const api = useApi();
+
+  return useQuery({
+    queryKey: ['therapist-profile', therapistId],
+    queryFn: async () => {
+      try {
+        console.log('Fetching therapist profile for ID:', therapistId);
+        const result = await api.therapists.getTherapistProfile(therapistId);
+        console.log('Therapist profile result:', result);
+        return result;
+      } catch (error) {
+        console.error('Failed to fetch therapist profile:', error);
+        // Re-throw to let React Query handle it
+        throw error;
+      }
+    },
+    enabled: enabled && !!therapistId,
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    retry: (failureCount, error: MentaraApiError) => {
+      console.log('Retry attempt', failureCount, 'for therapist profile error:', error);
+      // Don't retry on 404 (therapist not found) or 401 (unauthorized)
+      if (error?.response?.status === 404 || error?.response?.status === 401) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+}
+
 // Export namespace for better organization
 export const TherapistHooks = {
   useAssignedTherapist,
   useAssignedTherapists,
   useTherapistAssignment,
+  useTherapistProfile,
 };

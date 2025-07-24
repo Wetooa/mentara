@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { TimezoneUtils } from "@/lib/utils/timezone";
 
 
 export interface TimeSlot {
@@ -26,10 +27,35 @@ export function useAvailableSlots(therapistId: string, date: string) {
     refetch,
   } = useQuery({
     queryKey: ['booking', 'slots', therapistId, date],
-    queryFn: () => api.booking.availability.getSlots(therapistId, date),
+    queryFn: async () => {
+      try {
+        return await api.booking.availability.getSlots(therapistId, date);
+      } catch (error: unknown) {
+        // Add more context to error messages
+        const err = error as { response?: { status: number; data?: { message?: string } }; message?: string };
+        if (err.response?.status === 400 && err.response?.data?.message?.includes('advance')) {
+          throw new Error('Bookings must be made at least 30 minutes in advance');
+        } else if (err.response?.status === 404) {
+          throw new Error('Therapist availability not found');
+        } else if (err.response?.status === 401) {
+          throw new Error('Authentication required');
+        } else {
+          throw new Error(err.response?.data?.message || err.message || 'Failed to load available slots');
+        }
+      }
+    },
     enabled: !!(therapistId && date),
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
+    retry: (failureCount, error: Error) => {
+      // Don't retry on authentication or validation errors
+      if (error.message?.includes('Authentication') || error.message?.includes('advance')) {
+        return false;
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   // Helper functions
@@ -46,7 +72,7 @@ export function useAvailableSlots(therapistId: string, date: string) {
 
   const getTimeSlots = () => {
     return slots?.map(slot => ({
-      time: new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: TimezoneUtils.format(new Date(slot.startTime), 'h:mm a'),
       startTime: slot.startTime,
       endTime: slot.endTime || slot.startTime, // Use endTime if available, otherwise use startTime
       availableDurations: slot.availableDurations,
@@ -74,16 +100,8 @@ export function useAvailableSlots(therapistId: string, date: string) {
 /**
  * Hook for getting available slots for multiple dates
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useMultiDateSlots(therapistId: string, dates: string[]) {
-  const api = useApi();
-
-  const queries = dates.map(date => ({
-    queryKey: ['booking', 'slots', therapistId, date],
-    queryFn: () => api.booking.availability.getSlots(therapistId, date),
-    enabled: !!(therapistId && date),
-    staleTime: 1000 * 60 * 5,
-  }));
-
   // This would need useQueries from React Query
   // For now, let's return a simpler implementation
   return {

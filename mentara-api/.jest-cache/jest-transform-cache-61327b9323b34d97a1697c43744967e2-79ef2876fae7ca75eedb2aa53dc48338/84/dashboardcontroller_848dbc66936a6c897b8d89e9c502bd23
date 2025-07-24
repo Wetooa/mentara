@@ -1,0 +1,80 @@
+7900b1134267537605d374fd0fb138bd
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DashboardController = void 0;
+const common_1 = require("@nestjs/common");
+const dashboard_service_1 = require("./dashboard.service");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const role_based_access_guard_1 = require("../auth/guards/role-based-access.guard");
+const therapist_dashboard_access_guard_1 = require("../auth/guards/therapist-dashboard-access.guard");
+const current_user_id_decorator_1 = require("../auth/decorators/current-user-id.decorator");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
+let DashboardController = class DashboardController {
+    dashboardService;
+    constructor(dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+    getClientDashboard(userId) {
+        return this.dashboardService.getClientDashboardData(userId);
+    }
+    getTherapistDashboard(userId) {
+        return this.dashboardService.getTherapistDashboardData(userId);
+    }
+    getAdminDashboard() {
+        return this.dashboardService.getAdminDashboardData();
+    }
+    getModeratorDashboard(userId) {
+        return this.dashboardService.getModeratorDashboardData(userId);
+    }
+};
+exports.DashboardController = DashboardController;
+__decorate([
+    (0, common_1.Get)('client'),
+    (0, roles_decorator_1.ClientOnly)(),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], DashboardController.prototype, "getClientDashboard", null);
+__decorate([
+    (0, common_1.Get)('therapist'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, therapist_dashboard_access_guard_1.TherapistDashboardAccessGuard),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], DashboardController.prototype, "getTherapistDashboard", null);
+__decorate([
+    (0, common_1.Get)('admin'),
+    (0, roles_decorator_1.AdminOnly)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], DashboardController.prototype, "getAdminDashboard", null);
+__decorate([
+    (0, common_1.Get)('moderator'),
+    (0, roles_decorator_1.ModeratorOnly)(),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], DashboardController.prototype, "getModeratorDashboard", null);
+exports.DashboardController = DashboardController = __decorate([
+    (0, common_1.Controller)('dashboard'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, role_based_access_guard_1.RoleBasedAccessGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof dashboard_service_1.DashboardService !== "undefined" && dashboard_service_1.DashboardService) === "function" ? _a : Object])
+], DashboardController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2Rhc2hib2FyZC9kYXNoYm9hcmQuY29udHJvbGxlci50cyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsMkNBQTREO0FBQzVELDJEQUF1RDtBQUN2RCxrRUFBNkQ7QUFDN0Qsb0ZBQThFO0FBQzlFLHNHQUFnRztBQUNoRyw0RkFBNkU7QUFDN0Usd0VBSzRDO0FBSXJDLElBQU0sbUJBQW1CLEdBQXpCLE1BQU0sbUJBQW1CO0lBQ0Q7SUFBN0IsWUFBNkIsZ0JBQWtDO1FBQWxDLHFCQUFnQixHQUFoQixnQkFBZ0IsQ0FBa0I7SUFBRyxDQUFDO0lBSW5FLGtCQUFrQixDQUFrQixNQUFjO1FBQ2hELE9BQU8sSUFBSSxDQUFDLGdCQUFnQixDQUFDLHNCQUFzQixDQUFDLE1BQU0sQ0FBQyxDQUFDO0lBQzlELENBQUM7SUFJRCxxQkFBcUIsQ0FBa0IsTUFBYztRQUNuRCxPQUFPLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyx5QkFBeUIsQ0FBQyxNQUFNLENBQUMsQ0FBQztJQUNqRSxDQUFDO0lBSUQsaUJBQWlCO1FBQ2YsT0FBTyxJQUFJLENBQUMsZ0JBQWdCLENBQUMscUJBQXFCLEVBQUUsQ0FBQztJQUN2RCxDQUFDO0lBSUQscUJBQXFCLENBQWtCLE1BQWM7UUFDbkQsT0FBTyxJQUFJLENBQUMsZ0JBQWdCLENBQUMseUJBQXlCLENBQUMsTUFBTSxDQUFDLENBQUM7SUFDakUsQ0FBQztDQUNGLENBQUE7QUExQlksa0RBQW1CO0FBSzlCO0lBRkMsSUFBQSxZQUFHLEVBQUMsUUFBUSxDQUFDO0lBQ2IsSUFBQSw0QkFBVSxHQUFFO0lBQ08sV0FBQSxJQUFBLHlDQUFhLEdBQUUsQ0FBQTs7Ozs2REFFbEM7QUFJRDtJQUZDLElBQUEsWUFBRyxFQUFDLFdBQVcsQ0FBQztJQUNoQixJQUFBLGtCQUFTLEVBQUMsNkJBQVksRUFBRSxnRUFBNkIsQ0FBQztJQUNoQyxXQUFBLElBQUEseUNBQWEsR0FBRSxDQUFBOzs7O2dFQUVyQztBQUlEO0lBRkMsSUFBQSxZQUFHLEVBQUMsT0FBTyxDQUFDO0lBQ1osSUFBQSwyQkFBUyxHQUFFOzs7OzREQUdYO0FBSUQ7SUFGQyxJQUFBLFlBQUcsRUFBQyxXQUFXLENBQUM7SUFDaEIsSUFBQSwrQkFBYSxHQUFFO0lBQ08sV0FBQSxJQUFBLHlDQUFhLEdBQUUsQ0FBQTs7OztnRUFFckM7OEJBekJVLG1CQUFtQjtJQUYvQixJQUFBLG1CQUFVLEVBQUMsV0FBVyxDQUFDO0lBQ3ZCLElBQUEsa0JBQVMsRUFBQyw2QkFBWSxFQUFFLDhDQUFvQixDQUFDO3lEQUVHLG9DQUFnQixvQkFBaEIsb0NBQWdCO0dBRHBELG1CQUFtQixDQTBCL0IiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2Rhc2hib2FyZC9kYXNoYm9hcmQuY29udHJvbGxlci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBDb250cm9sbGVyLCBHZXQsIFVzZUd1YXJkcyB9IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IERhc2hib2FyZFNlcnZpY2UgfSBmcm9tICcuL2Rhc2hib2FyZC5zZXJ2aWNlJztcbmltcG9ydCB7IEp3dEF1dGhHdWFyZCB9IGZyb20gJy4uL2F1dGgvZ3VhcmRzL2p3dC1hdXRoLmd1YXJkJztcbmltcG9ydCB7IFJvbGVCYXNlZEFjY2Vzc0d1YXJkIH0gZnJvbSAnLi4vYXV0aC9ndWFyZHMvcm9sZS1iYXNlZC1hY2Nlc3MuZ3VhcmQnO1xuaW1wb3J0IHsgVGhlcmFwaXN0RGFzaGJvYXJkQWNjZXNzR3VhcmQgfSBmcm9tICcuLi9hdXRoL2d1YXJkcy90aGVyYXBpc3QtZGFzaGJvYXJkLWFjY2Vzcy5ndWFyZCc7XG5pbXBvcnQgeyBDdXJyZW50VXNlcklkIH0gZnJvbSAnLi4vYXV0aC9kZWNvcmF0b3JzL2N1cnJlbnQtdXNlci1pZC5kZWNvcmF0b3InO1xuaW1wb3J0IHtcbiAgQ2xpZW50T25seSxcbiAgVGhlcmFwaXN0T25seSxcbiAgQWRtaW5Pbmx5LFxuICBNb2RlcmF0b3JPbmx5LFxufSBmcm9tICcuLi9hdXRoL2RlY29yYXRvcnMvcm9sZXMuZGVjb3JhdG9yJztcblxuQENvbnRyb2xsZXIoJ2Rhc2hib2FyZCcpXG5AVXNlR3VhcmRzKEp3dEF1dGhHdWFyZCwgUm9sZUJhc2VkQWNjZXNzR3VhcmQpXG5leHBvcnQgY2xhc3MgRGFzaGJvYXJkQ29udHJvbGxlciB7XG4gIGNvbnN0cnVjdG9yKHByaXZhdGUgcmVhZG9ubHkgZGFzaGJvYXJkU2VydmljZTogRGFzaGJvYXJkU2VydmljZSkge31cblxuICBAR2V0KCdjbGllbnQnKVxuICBAQ2xpZW50T25seSgpXG4gIGdldENsaWVudERhc2hib2FyZChAQ3VycmVudFVzZXJJZCgpIHVzZXJJZDogc3RyaW5nKSB7XG4gICAgcmV0dXJuIHRoaXMuZGFzaGJvYXJkU2VydmljZS5nZXRDbGllbnREYXNoYm9hcmREYXRhKHVzZXJJZCk7XG4gIH1cblxuICBAR2V0KCd0aGVyYXBpc3QnKVxuICBAVXNlR3VhcmRzKEp3dEF1dGhHdWFyZCwgVGhlcmFwaXN0RGFzaGJvYXJkQWNjZXNzR3VhcmQpXG4gIGdldFRoZXJhcGlzdERhc2hib2FyZChAQ3VycmVudFVzZXJJZCgpIHVzZXJJZDogc3RyaW5nKSB7XG4gICAgcmV0dXJuIHRoaXMuZGFzaGJvYXJkU2VydmljZS5nZXRUaGVyYXBpc3REYXNoYm9hcmREYXRhKHVzZXJJZCk7XG4gIH1cblxuICBAR2V0KCdhZG1pbicpXG4gIEBBZG1pbk9ubHkoKVxuICBnZXRBZG1pbkRhc2hib2FyZCgpIHtcbiAgICByZXR1cm4gdGhpcy5kYXNoYm9hcmRTZXJ2aWNlLmdldEFkbWluRGFzaGJvYXJkRGF0YSgpO1xuICB9XG5cbiAgQEdldCgnbW9kZXJhdG9yJylcbiAgQE1vZGVyYXRvck9ubHkoKVxuICBnZXRNb2RlcmF0b3JEYXNoYm9hcmQoQEN1cnJlbnRVc2VySWQoKSB1c2VySWQ6IHN0cmluZykge1xuICAgIHJldHVybiB0aGlzLmRhc2hib2FyZFNlcnZpY2UuZ2V0TW9kZXJhdG9yRGFzaGJvYXJkRGF0YSh1c2VySWQpO1xuICB9XG59XG4iXSwidmVyc2lvbiI6M30=

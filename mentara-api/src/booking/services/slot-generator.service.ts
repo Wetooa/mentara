@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
+import { ACTIVE_MEETING_STATUSES_ARRAY } from '../constants/meeting-status.constants';
 
 export interface TimeSlot {
   startTime: string;
@@ -21,7 +22,7 @@ export class SlotGeneratorService {
   private readonly defaultConfig: SlotGenerationConfig = {
     slotInterval: 30,
     maxAdvanceBooking: 90,
-    minAdvanceBooking: 2,
+    minAdvanceBooking: 0.5,
   };
 
   constructor(private readonly prisma: PrismaService) {}
@@ -85,6 +86,8 @@ export class SlotGeneratorService {
 
   private validateBookingDate(date: Date, config: SlotGenerationConfig): void {
     const now = new Date();
+    
+    // Calculate min and max dates using UTC
     const maxDate = new Date(
       now.getTime() + config.maxAdvanceBooking * 24 * 60 * 60 * 1000,
     );
@@ -92,6 +95,7 @@ export class SlotGeneratorService {
       now.getTime() + config.minAdvanceBooking * 60 * 60 * 1000,
     );
 
+    // Compare target date with UTC times
     if (date < minDate) {
       throw new BadRequestException(
         `Bookings must be made at least ${config.minAdvanceBooking} hours in advance`,
@@ -129,7 +133,7 @@ export class SlotGeneratorService {
       where: {
         therapistId,
         startTime: { gte: startOfDay, lte: endOfDay },
-        status: { in: ['SCHEDULED', 'CONFIRMED'] },
+        status: { in: ACTIVE_MEETING_STATUSES_ARRAY },
       },
       orderBy: { startTime: 'asc' },
     });

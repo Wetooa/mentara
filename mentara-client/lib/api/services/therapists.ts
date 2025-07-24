@@ -9,11 +9,21 @@ import type {
 
 /**
  * Therapist API service for recommendations, matching, and management
+ * Backend has global /api prefix, so endpoints here should not include /api
  */
 export function createTherapistService(axios: AxiosInstance) {
   return {
     /**
-     * Get personalized therapist recommendations for welcome page
+     * Get ALL approved therapists (no personalization, simple listing)
+     * Best for: Main therapist page, browse all functionality
+     */
+    async getAllTherapists(params?: TherapistSearchParams) {
+      const { data } = await axios.get("/therapists", { params });
+      return data;
+    },
+
+    /**
+     * Get personalized recommendations for welcome page
      */
     async getPersonalizedRecommendations(
       params?: WelcomeRecommendationQuery
@@ -23,7 +33,8 @@ export function createTherapistService(axios: AxiosInstance) {
     },
 
     /**
-     * Get standard therapist recommendations with filters
+     * Get personalized therapist recommendations (algorithmic matching)
+     * Best for: Recommendation sections, "For You" listings
      */
     async getRecommendations(
       params?: TherapistRecommendationQuery
@@ -32,6 +43,39 @@ export function createTherapistService(axios: AxiosInstance) {
         params,
       });
       console.log("Therapist recommendations data:", data);
+      return data;
+    },
+
+    /**
+     * Get welcome-specific recommendations with communities
+     * Best for: Welcome page flow, first-time user experience
+     */
+    async getWelcomeRecommendations(params?: WelcomeRecommendationQuery): Promise<TherapistRecommendationResponse> {
+      const { data } = await axios.get("/therapist-recommendations/welcome", { params });
+      return data;
+    },
+
+    /**
+     * Get detailed therapist profile by ID
+     */
+    async getTherapistProfile(therapistId: string) {
+      const { data } = await axios.get(`/therapists/${therapistId}`);
+      return data;
+    },
+
+    /**
+     * Get compatibility analysis between client and therapist
+     */
+    async getCompatibilityAnalysis(therapistId: string) {
+      const { data } = await axios.get(`/therapist-recommendations/compatibility/${therapistId}`);
+      return data;
+    },
+
+    /**
+     * Get therapist reviews
+     */
+    async getTherapistReviews(therapistId: string) {
+      const { data } = await axios.get(`/therapists/${therapistId}/reviews`);
       return data;
     },
 
@@ -56,16 +100,6 @@ export function createTherapistService(axios: AxiosInstance) {
     },
 
     /**
-     * Get compatibility analysis between client and therapist
-     */
-    async getCompatibilityAnalysis(therapistId: string) {
-      const { data } = await axios.get(
-        `/therapist-recommendations/compatibility/${therapistId}`
-      );
-      return data;
-    },
-
-    /**
      * Get list of therapists with filters
      */
     async getTherapistList(params?: TherapistSearchParams) {
@@ -77,16 +111,8 @@ export function createTherapistService(axios: AxiosInstance) {
     /**
      * Get detailed therapist profile
      */
-    async getTherapistProfile(therapistId: string) {
+    async getProfile(therapistId: string) {
       const { data } = await axios.get(`/therapists/${therapistId}`);
-      return data;
-    },
-
-    /**
-     * Get therapist reviews
-     */
-    async getTherapistReviews(therapistId: string) {
-      const { data } = await axios.get(`/therapists/${therapistId}/reviews`);
       return data;
     },
 

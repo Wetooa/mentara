@@ -64,9 +64,10 @@ import { JwtService } from '@nestjs/jwt';
       },
     ]),
     EventEmitterModule.forRoot({
-      // Set this to `true` to use wildcards
-      wildcard: true,
-      // The delimiter used to segment namespaces
+      // FIXED: Disabled wildcards to prevent event routing chaos
+      // Was causing MessageSentEvent to trigger ALL event handlers
+      wildcard: false,
+      // The delimiter used to segment namespaces (not needed without wildcards)
       delimiter: '.',
       // Disable throwing uncaught exceptions
       ignoreErrors: false,

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, User, Users, FileText, MessageCircle, PenTool, Building } from 'lucide-react';
+import { Search, User, Users, FileText, MessageCircle, MessageSquare, PenTool, Building } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,6 +24,7 @@ export interface OmniSearchResultsData {
   users?: any[];
   therapists?: any[];
   posts?: any[];
+  comments?: any[];
   communities?: any[];
   worksheets?: any[];
   messages?: any[];
@@ -41,6 +42,7 @@ const ENTITY_ICONS = {
   users: User,
   therapists: Users,
   posts: FileText,
+  comments: MessageSquare,
   communities: Building,
   worksheets: PenTool,
   messages: MessageCircle,
@@ -50,6 +52,7 @@ const ENTITY_COLORS = {
   users: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   therapists: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   posts: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  comments: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
   communities: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   worksheets: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
   messages: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
@@ -87,7 +90,18 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
         subtitle: item.content ? item.content.slice(0, 150) + '...' : '',
         description: `By ${item.user.firstName} ${item.user.lastName} • ${item._count.hearts} hearts`,
         avatarUrl: item.user.avatarUrl,
-        url: `/post/${item.id}`,
+        url: `/community/posts/${item.id}`, // Will be prefixed with role by parent component
+      };
+    
+    case 'comments':
+      return {
+        id: item.id,
+        type: 'comments',
+        title: item.content.slice(0, 100) + (item.content.length > 100 ? '...' : ''),
+        subtitle: `On post: ${item.post?.title || 'Untitled Post'}`,
+        description: `By ${item.user.firstName} ${item.user.lastName} • ${item._count?.hearts || 0} hearts • ${new Date(item.createdAt).toLocaleDateString()}`,
+        avatarUrl: item.user.avatarUrl,
+        url: `/community/posts/${item.post?.id}#comment-${item.id}`, // Will be prefixed with role by parent component
       };
     
     case 'communities':

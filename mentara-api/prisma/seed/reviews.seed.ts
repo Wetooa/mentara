@@ -32,8 +32,8 @@ export async function seedReviews(
       // Get meetings for this relationship to optionally link review to specific meeting
       const relationshipMeetings = meetings.filter(
         meeting => 
-          meeting.clientId === client.user.id && 
-          meeting.therapistId === therapist.user.id &&
+          meeting.clientId === client.client.userId && 
+          meeting.therapistId === therapist.therapist.userId &&
           meeting.status === 'COMPLETED'
       );
 
@@ -54,8 +54,8 @@ export async function seedReviews(
       // Create the review
       const review = await prisma.review.create({
         data: {
-          clientId: client.user.id,
-          therapistId: therapist.user.id,
+          clientId: client.client.userId,
+          therapistId: therapist.therapist.userId,
           meetingId: linkedMeeting?.id || null,
           rating,
           title,
@@ -93,8 +93,8 @@ export async function seedReviews(
       
       await prisma.review.create({
         data: {
-          clientId: client.user.id,
-          therapistId: therapist.user.id,
+          clientId: client.client.userId,
+          therapistId: therapist.therapist.userId,
           rating,
           title: generateModerationReviewTitle(status),
           content: generateModerationReviewContent(status),

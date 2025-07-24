@@ -377,6 +377,8 @@ export class MessagingService {
     attachmentNames: string[] = [],
     attachmentSizes: number[] = [],
   ) {
+    this.logger.debug(`Sending message from ${userId} to conversation ${conversationId}`);
+    
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
 
@@ -412,6 +414,7 @@ export class MessagingService {
     // Note: Message encryption functionality removed to match Prisma schema
     // Messages are stored as plaintext as the schema doesn't support encryption fields
 
+    this.logger.debug('Saving message to database...');
     const message = await this.prisma.message.create({
       data: {
         conversationId,
@@ -472,6 +475,8 @@ export class MessagingService {
         },
       },
     });
+    
+    this.logger.debug(`Message ${message.id} saved successfully to conversation ${message.conversationId}`);
 
     // Update conversation lastMessageAt
     await this.prisma.conversation.update({
@@ -487,29 +492,32 @@ export class MessagingService {
         .map((p) => p.userId)
         .filter((id) => id !== userId) || [];
 
+    this.logger.debug(`Broadcasting message to ${recipientIds.length} recipients`);
+
     // Publish message sent event
-    await this.eventBus.emit(
-      new MessageSentEvent({
-        messageId: message.id,
-        conversationId,
-        senderId: userId,
-        content: eventContent, // Content transmitted as-is
-        messageType: message.messageType.toLowerCase() as
-          | 'text'
-          | 'image'
-          | 'file'
-          | 'audio'
-          | 'video'
-          | 'system',
-        sentAt: message.createdAt,
-        recipientIds,
-        replyToMessageId: message.replyToId || undefined,
-        fileAttachments:
-          message.attachmentUrls.length > 0
-            ? message.attachmentUrls
-            : undefined,
-      }),
-    );
+    const messageEvent = new MessageSentEvent({
+      messageId: message.id,
+      conversationId,
+      senderId: userId,
+      content: eventContent, // Content transmitted as-is
+      messageType: message.messageType.toLowerCase() as
+        | 'text'
+        | 'image'
+        | 'file'
+        | 'audio'
+        | 'video'
+        | 'system',
+      sentAt: message.createdAt,
+      recipientIds,
+      replyToMessageId: message.replyToId || undefined,
+      fileAttachments:
+        message.attachmentUrls.length > 0
+          ? message.attachmentUrls
+          : undefined,
+    });
+    
+    await this.eventBus.emit(messageEvent);
+    this.logger.debug(`MessageSentEvent emitted for message ${message.id}`);
 
     // Return message as-is (no encryption)
     return message;
