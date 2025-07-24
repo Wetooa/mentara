@@ -85,7 +85,7 @@ export default function RecommendedSection() {
               <span className="text-sm font-medium animate-pulse">Finding perfect matches...</span>
             </div>
           </div>
-          <div className="h-8 w-16 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"></div>
+          <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
         </div>
 
         {/* Enhanced skeleton carousel */}
@@ -97,18 +97,18 @@ export default function RecommendedSection() {
                 className="relative flex-none w-[300px] h-full overflow-hidden"
                 data-testid="recommendation-skeleton"
               >
-                <Card className="relative overflow-hidden h-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+                <Card className="relative overflow-hidden h-full flex flex-col bg-gray-100">
                   {/* Animated shimmer overlay */}
                   <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
 
                   {/* Background image placeholder */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 animate-pulse"></div>
+                  <div className="absolute inset-0 bg-blue-100 animate-pulse"></div>
 
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
                   {/* Plus button placeholder */}
-                  <div className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-r from-blue-200 to-blue-300 rounded-full animate-pulse"></div>
+                  <div className="absolute top-2 right-2 w-8 h-8 bg-blue-200 rounded-full animate-pulse"></div>
 
                   {/* Content */}
                   <CardContent className="p-4 relative z-20 flex flex-col items-center justify-end h-full text-white mt-auto">
@@ -120,7 +120,7 @@ export default function RecommendedSection() {
                       </div>
                     </div>
 
-                    <div className="bg-black/40 backdrop-blur-sm rounded-lg p-3 w-full">
+                    <div className="bg-black/60 rounded-lg p-3 w-full">
                       <div className="h-5 bg-white/30 rounded w-3/4 mb-2 animate-pulse"></div>
                       <div className="space-y-1 mb-2">
                         <div className="h-3 bg-white/20 rounded animate-pulse"></div>
@@ -172,7 +172,7 @@ export default function RecommendedSection() {
                 Recommendations Unavailable
               </h3>
               <p className="text-red-700 text-sm mb-4">
-                We're having trouble loading personalized recommendations right now.
+                We&apos;re having trouble loading personalized recommendations right now.
               </p>
 
               {/* Retry options */}
@@ -328,7 +328,7 @@ export default function RecommendedSection() {
                     </div>
                   </div>
 
-                  <div className="bg-amber-900/90 rounded-lg p-3 w-full">
+                  <div className="bg-black/80 rounded-lg p-3 w-full">
                     <h3 className="font-semibold mb-1" data-testid="therapist-name">
                       {therapist.name}
                     </h3>
