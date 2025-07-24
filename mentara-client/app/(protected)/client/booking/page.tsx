@@ -12,6 +12,8 @@ import {
   Video,
   User,
   AlertCircle,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
 import BookingCalendar from "@/components/booking/BookingCalendar";
 import { ClientBookingInterface } from "@/components/client/ClientBookingInterface";
@@ -236,6 +238,39 @@ export default function BookingPage() {
                               </div>
                               <div>{meeting.duration} minutes</div>
                             </div>
+                            
+                            {/* Meeting URL Display */}
+                            {meeting.meetingUrl && (
+                              <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                                <div className="flex items-start gap-2">
+                                  {meeting.meetingUrl.includes('http') ? (
+                                    <Video className="h-3 w-3 text-blue-600 mt-0.5" />
+                                  ) : (
+                                    <MapPin className="h-3 w-3 text-blue-600 mt-0.5" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-blue-900">
+                                      {meeting.meetingUrl.includes('http') ? 'Video Meeting' : 'Location'}
+                                    </p>
+                                    <p className="text-xs text-blue-800 break-all">
+                                      {meeting.meetingUrl}
+                                    </p>
+                                    {meeting.meetingUrl.includes('http') && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.open(meeting.meetingUrl, '_blank');
+                                        }}
+                                        className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 flex items-center gap-1"
+                                      >
+                                        <ExternalLink className="h-2 w-2" />
+                                        Join Meeting
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             {getStatusBadge(meeting.status as unknown as MeetingStatus)}

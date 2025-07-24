@@ -9,6 +9,7 @@
  */
 export const ACTIVE_MEETING_STATUSES = [
   'SCHEDULED',
+  'WAITING',
   'CONFIRMED', 
   'IN_PROGRESS'
 ] as const;
@@ -23,6 +24,7 @@ export const ACTIVE_MEETING_STATUSES_ARRAY = [...ACTIVE_MEETING_STATUSES];
  */
 export const ALL_MEETING_STATUSES = [
   'SCHEDULED',
+  'WAITING',
   'CONFIRMED',
   'IN_PROGRESS',
   'COMPLETED',

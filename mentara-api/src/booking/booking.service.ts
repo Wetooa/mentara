@@ -42,7 +42,7 @@ export class BookingService {
   // Meeting Management
   async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
     const { startTime, therapistId, duration } = createMeetingDto;
-    
+
     const startTimeDate = new Date(startTime || createMeetingDto.dateTime);
     const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
 
@@ -106,7 +106,7 @@ export class BookingService {
             ...createMeetingDto,
             startTime: startTimeDate,
             endTime: endTimeDate,
-            status: 'SCHEDULED',
+            status: 'WAITING',
             clientId,
           },
           include: {
@@ -137,14 +137,17 @@ export class BookingService {
 
         // Create automatic mock payment for the meeting
         const sessionPrice = 100; // Mock session price - should come from therapist rates or duration
-        await this.billingService.createAutomaticMockPayment({
-          clientId: meeting.clientId,
-          therapistId: meeting.therapistId,
-          meetingId: meeting.id,
-          amount: sessionPrice,
-          currency: 'USD',
-          description: `Payment for therapy session: ${meeting.title || 'Therapy Session'}`,
-        }, tx);
+        await this.billingService.createAutomaticMockPayment(
+          {
+            clientId: meeting.clientId,
+            therapistId: meeting.therapistId,
+            meetingId: meeting.id,
+            amount: sessionPrice,
+            currency: 'USD',
+            description: `Payment for therapy session: ${meeting.title || 'Therapy Session'}`,
+          },
+          tx,
+        );
 
         // Publish appointment booked event
         await this.eventBus.emit(
@@ -674,5 +677,317 @@ export class BookingService {
     );
 
     return true;
+  }
+
+  // Meeting Status Transition Methods
+  async acceptMeetingRequest(meetingId: string, meetingUrl: string, userId: string, role: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (meeting.status !== 'WAITING') {
+        throw new BadRequestException('Only meetings with WAITING status can be accepted');
+      }
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can accept booking requests');
+      }
+
+      const updatedMeeting = await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { 
+          status: 'SCHEDULED',
+          meetingUrl: meetingUrl,
+        },
+        include: {
+          client: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Meeting ${meetingId} accepted by therapist ${userId}`);
+
+      return {
+        ...updatedMeeting,
+        dateTime: updatedMeeting.startTime,
+        therapistName: updatedMeeting.therapist?.user
+          ? `${updatedMeeting.therapist.user.firstName} ${updatedMeeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async startMeeting(meetingId: string, userId: string, role: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (!['WAITING', 'SCHEDULED', 'CONFIRMED'].includes(meeting.status)) {
+        throw new BadRequestException('Meeting cannot be started from current status');
+      }
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can start meetings');
+      }
+
+      const updatedMeeting = await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { status: 'IN_PROGRESS' },
+        include: {
+          client: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Meeting ${meetingId} started by therapist ${userId}`);
+
+      return {
+        ...updatedMeeting,
+        dateTime: updatedMeeting.startTime,
+        therapistName: updatedMeeting.therapist?.user
+          ? `${updatedMeeting.therapist.user.firstName} ${updatedMeeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async completeMeeting(meetingId: string, userId: string, role: string, notes?: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (meeting.status !== 'IN_PROGRESS') {
+        throw new BadRequestException('Only meetings in progress can be completed');
+      }
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can complete meetings');
+      }
+
+      // Save notes if provided
+      if (notes) {
+        // Check if notes already exist for this meeting
+        const existingNotes = await this.prisma.meetingNotes.findFirst({
+          where: { meetingId },
+        });
+        
+        if (existingNotes) {
+          // Update existing notes
+          await this.prisma.meetingNotes.update({
+            where: { id: existingNotes.id },
+            data: { notes },
+          });
+        } else {
+          // Create new notes
+          await this.prisma.meetingNotes.create({
+            data: {
+              id: `${meetingId}-notes`,
+              meetingId,
+              notes,
+            },
+          });
+        }
+      }
+
+      const updatedMeeting = await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { status: 'COMPLETED' },
+        include: {
+          client: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          meetingNotes: true,
+        },
+      });
+
+      // Publish completion event
+      await this.eventBus.emit(
+        new AppointmentCompletedEvent({
+          appointmentId: updatedMeeting.id,
+          clientId: updatedMeeting.clientId,
+          therapistId: updatedMeeting.therapistId,
+          completedAt: new Date(),
+          duration: updatedMeeting.duration,
+          sessionNotes: notes || '',
+          attendanceStatus: 'ATTENDED',
+        }),
+      );
+
+      this.logger.log(`Meeting ${meetingId} completed by therapist ${userId}`);
+
+      return {
+        ...updatedMeeting,
+        dateTime: updatedMeeting.startTime,
+        therapistName: updatedMeeting.therapist?.user
+          ? `${updatedMeeting.therapist.user.firstName} ${updatedMeeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async markNoShow(meetingId: string, userId: string, role: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (!['IN_PROGRESS', 'SCHEDULED', 'CONFIRMED'].includes(meeting.status)) {
+        throw new BadRequestException('Meeting cannot be marked as no-show from current status');
+      }
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can mark meetings as no-show');
+      }
+
+      const updatedMeeting = await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { status: 'NO_SHOW' },
+        include: {
+          client: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Meeting ${meetingId} marked as no-show by therapist ${userId}`);
+
+      return {
+        ...updatedMeeting,
+        dateTime: updatedMeeting.startTime,
+        therapistName: updatedMeeting.therapist?.user
+          ? `${updatedMeeting.therapist.user.firstName} ${updatedMeeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async saveMeetingNotes(meetingId: string, notes: string, userId: string, role: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can save meeting notes');
+      }
+
+      // Check if notes already exist for this meeting
+      const existingNotes = await this.prisma.meetingNotes.findFirst({
+        where: { meetingId },
+      });
+      
+      let meetingNotes;
+      if (existingNotes) {
+        // Update existing notes
+        meetingNotes = await this.prisma.meetingNotes.update({
+          where: { id: existingNotes.id },
+          data: { notes },
+        });
+      } else {
+        // Create new notes
+        meetingNotes = await this.prisma.meetingNotes.create({
+          data: {
+            id: `${meetingId}-notes`,
+            meetingId,
+            notes,
+          },
+        });
+      }
+
+      this.logger.log(`Meeting notes saved for meeting ${meetingId} by therapist ${userId}`);
+
+      return meetingNotes;
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   }
 }

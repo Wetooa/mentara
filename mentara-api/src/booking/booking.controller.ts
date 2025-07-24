@@ -102,6 +102,59 @@ export class BookingController {
     return this.bookingService.cancelMeeting(params.id, userId, role);
   }
 
+  @Post('meetings/:id/accept')
+  async acceptMeetingRequest(
+    @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
+    params: BookingMeetingParamsDto,
+    @Body() body: { meetingUrl: string },
+    @CurrentUserId() userId: string,
+    @CurrentUserRole() role: string,
+  ) {
+    return this.bookingService.acceptMeetingRequest(params.id, body.meetingUrl, userId, role);
+  }
+
+  @Post('meetings/:id/start')
+  async startMeeting(
+    @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
+    params: BookingMeetingParamsDto,
+    @CurrentUserId() userId: string,
+    @CurrentUserRole() role: string,
+  ) {
+    return this.bookingService.startMeeting(params.id, userId, role);
+  }
+
+  @Post('meetings/:id/complete')
+  async completeMeeting(
+    @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
+    params: BookingMeetingParamsDto,
+    @Body() body: { notes?: string },
+    @CurrentUserId() userId: string,
+    @CurrentUserRole() role: string,
+  ) {
+    return this.bookingService.completeMeeting(params.id, userId, role, body.notes);
+  }
+
+  @Post('meetings/:id/no-show')
+  async markNoShow(
+    @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
+    params: BookingMeetingParamsDto,
+    @CurrentUserId() userId: string,
+    @CurrentUserRole() role: string,
+  ) {
+    return this.bookingService.markNoShow(params.id, userId, role);
+  }
+
+  @Put('meetings/:id/notes')
+  async saveMeetingNotes(
+    @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
+    params: BookingMeetingParamsDto,
+    @Body() body: { notes: string },
+    @CurrentUserId() userId: string,
+    @CurrentUserRole() role: string,
+  ) {
+    return this.bookingService.saveMeetingNotes(params.id, body.notes, userId, role);
+  }
+
   // Availability endpoints (therapist only)
   @Post('availability')
   async createAvailability(

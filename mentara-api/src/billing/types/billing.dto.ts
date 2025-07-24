@@ -1,13 +1,46 @@
 export interface CreatePaymentMethodDto {
-  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET';
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA';
+  nickname?: string;
+  
+  // Card-specific fields
+  cardholderName?: string;
   cardNumber?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  cardType?: string;
+  
+  // Bank account fields
+  bankName?: string;
+  accountHolderName?: string;
+  accountType?: string;
+  routingNumber?: string;
+  accountNumber?: string;
+  
+  // Digital wallet fields
+  walletProvider?: string;
+  walletEmail?: string;
+  walletAccountName?: string;
+  
+  // GCash fields
+  gcashNumber?: string;
+  gcashName?: string;
+  gcashEmail?: string;
+  
+  // Maya fields
+  mayaNumber?: string;
+  mayaName?: string;
+  mayaEmail?: string;
+  
+  // Address
+  billingAddress?: any;
+  
+  // Default setting
+  isDefault?: boolean;
+  
+  // Legacy fields for backwards compatibility
   expiryDate?: string;
   cvv?: string;
-  cardholderName?: string;
-  accountNumber?: string;
-  routingNumber?: string;
   accountName?: string;
-  isDefault?: boolean;
 }
 
 export interface UpdatePaymentMethodDto {

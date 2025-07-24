@@ -22,7 +22,8 @@ import {
   AlertCircle,
   RefreshCw,
   FileText,
-  MapPin
+  MapPin,
+  ExternalLink
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -319,13 +320,48 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                  <Video className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <div className="font-medium">Type</div>
-                    <div className="text-sm text-muted-foreground">{session.type || 'Online Session'}</div>
+                    <div className="text-sm text-muted-foreground">{session.meetingType || 'Video Session'}</div>
                   </div>
                 </div>
               </div>
+
+              {/* Meeting URL Display */}
+              {session.meetingUrl && (
+                <div className="col-span-2">
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-start gap-2">
+                      {session.meetingUrl.includes('http') ? (
+                        <Video className="h-4 w-4 text-blue-600 mt-0.5" />
+                      ) : (
+                        <MapPin className="h-4 w-4 text-blue-600 mt-0.5" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-blue-900 mb-1">
+                          {session.meetingUrl.includes('http') ? 'Video Meeting Link' : 'Meeting Location'}
+                        </p>
+                        <p className="text-sm text-blue-800 break-all">
+                          {session.meetingUrl}
+                        </p>
+                        {session.meetingUrl.includes('http') && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(session.meetingUrl, '_blank');
+                            }}
+                            className="text-sm text-blue-600 hover:text-blue-800 underline mt-1 flex items-center gap-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Join Meeting
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {session.notes && (
                 <>

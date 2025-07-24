@@ -108,7 +108,8 @@ export default function TherapistSchedulePage() {
   const getTabBadgeCount = (tab: string) => {
     switch (tab) {
       case "requests":
-        return bookingRequests?.length || 0;
+        const waitingMeetings = meetingsArray.filter(meeting => meeting.status === "WAITING");
+        return waitingMeetings.length;
       case "overview":
         const todayMeetings = meetingsArray.filter((meeting) => {
           try {
