@@ -610,10 +610,12 @@ export function WorksheetManagementPage() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
+                  const dueDateValue = formData.get('dueDate') as string;
+                  
                   const updateData = {
                     title: formData.get('title') as string,
                     instructions: formData.get('instructions') as string,
-                    dueDate: formData.get('dueDate') as string,
+                    dueDate: dueDateValue ? new Date(dueDateValue).toISOString() : undefined,
                   };
                   editWorksheetMutation.mutate({
                     worksheetId: editingWorksheet.id,

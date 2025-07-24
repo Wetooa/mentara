@@ -15,12 +15,12 @@ import { useApi } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -350,209 +350,265 @@ export default function TherapistTaskDetailPage({
         worksheetTitle={task.title}
       />
 
-      {/* Edit Worksheet Dialog */}
-      <Dialog open={!!editingWorksheet} onOpenChange={open => !open && setEditingWorksheet(null)}>
-        <DialogContent className="max-w-2xl">
+      {/* Edit Worksheet Sheet */}
+      <Sheet open={!!editingWorksheet} onOpenChange={open => !open && setEditingWorksheet(null)}>
+        <SheetContent side="right" className="w-full max-w-2xl sm:max-w-xl p-0 gap-0 overflow-hidden flex flex-col">
           {editingWorksheet && (
             <>
-              <DialogHeader>
-                <DialogTitle>Edit Worksheet</DialogTitle>
-                <DialogDescription>
-                  Update the worksheet details and content.
-                </DialogDescription>
-              </DialogHeader>
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const updateData = {
-                    title: formData.get('title') as string,
-                    instructions: formData.get('instructions') as string,
-                    dueDate: formData.get('dueDate') as string,
-                  };
-                  editWorksheetMutation.mutate({
-                    worksheetId: editingWorksheet.id,
-                    updateData,
-                    filesToRemove,
-                    newFiles,
-                  });
-                }}
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    defaultValue={editingWorksheet.title}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="instructions">Instructions</Label>
-                  <Textarea
-                    id="instructions"
-                    name="instructions"
-                    defaultValue={editingWorksheet.instructions || ''}
-                    rows={4}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="dueDate">Due Date</Label>
-                  <Input
-                    id="dueDate"
-                    name="dueDate"
-                    type="datetime-local"
-                    defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toISOString().slice(0, 16) : ''}
-                  />
-                </div>
-
-                {/* File Management Section */}
-                <div className="space-y-4 border-t pt-4">
-                  <Label className="text-base font-medium">Reference Files</Label>
-                  
-                  {/* Existing Files */}
-                  {editingWorksheet.materials && editingWorksheet.materials.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="text-sm text-gray-600">Current Files</Label>
-                      <div className="space-y-2">
-                        {editingWorksheet.materials.map((material, index) => {
-                          const fileName = material.filename;
-                          const fileUrl = material.url || `file-${index}`;
-                          const isMarkedForRemoval = filesToRemove.includes(fileUrl);
-                          
-                          return (
-                            <div
-                              key={fileUrl}
-                              className={`flex items-center justify-between p-3 border rounded-lg transition-all ${
-                                isMarkedForRemoval 
-                                  ? 'bg-red-50 border-red-200 opacity-60' 
-                                  : 'bg-gray-50 border-gray-200'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-gray-500" />
-                                <span className={`text-sm ${isMarkedForRemoval ? 'line-through text-gray-500' : 'text-gray-700'}`}>
-                                  {fileName}
-                                </span>
-                                {isMarkedForRemoval && (
-                                  <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
-                                    Will be removed
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex gap-1">
-                                {!isMarkedForRemoval ? (
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleRemoveExistingFile(fileUrl)}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleRestoreExistingFile(fileUrl)}
-                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                  >
-                                    Restore
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
+              <SheetHeader className="px-6 py-5 border-b bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/80 backdrop-blur-sm">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <SheetTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900">
+                      <div className="p-2 rounded-lg bg-blue-100/80 shadow-sm">
+                        <Edit className="h-5 w-5 text-blue-600" />
                       </div>
-                    </div>
-                  )}
+                      Edit Worksheet
+                    </SheetTitle>
+                  </div>
+                  <SheetDescription className="text-sm text-gray-600 font-medium">
+                    Update the worksheet details, instructions, and reference materials for your client.
+                  </SheetDescription>
+                </div>
+              </SheetHeader>
+              
+              <div className="flex-1 min-h-0 bg-gradient-to-b from-gray-50/30 to-white">
+                <div className="h-full overflow-y-auto">
+                  <div className="p-6 space-y-6">
+                    <form 
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
+                        const dueDateValue = formData.get('dueDate') as string;
+                        
+                        const updateData = {
+                          title: formData.get('title') as string,
+                          instructions: formData.get('instructions') as string,
+                          dueDate: dueDateValue ? new Date(dueDateValue).toISOString() : undefined,
+                        };
+                        editWorksheetMutation.mutate({
+                          worksheetId: editingWorksheet.id,
+                          updateData,
+                          filesToRemove,
+                          newFiles,
+                        });
+                      }}
+                      className="space-y-6"
+                    >
+                      {/* Basic Information Section */}
+                      <div className="bg-white rounded-xl border border-gray-200/60 shadow-sm p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 rounded-lg bg-blue-50">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                              Worksheet Title
+                            </Label>
+                            <Input
+                              id="title"
+                              name="title"
+                              defaultValue={editingWorksheet.title}
+                              placeholder="Enter worksheet title..."
+                              className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                              required
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="instructions" className="text-sm font-medium text-gray-700">
+                              Instructions
+                            </Label>
+                            <Textarea
+                              id="instructions"
+                              name="instructions"
+                              defaultValue={editingWorksheet.instructions || ''}
+                              placeholder="Provide detailed instructions for your client..."
+                              rows={4}
+                              className="border-gray-300 focus:border-blue-500 focus:ring-blue-500/20 resize-none"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="dueDate" className="text-sm font-medium text-gray-700">
+                              Due Date & Time
+                            </Label>
+                            <Input
+                              id="dueDate"
+                              name="dueDate"
+                              type="datetime-local"
+                              defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toISOString().slice(0, 16) : ''}
+                              className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                  {/* New Files */}
-                  {newFiles.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="text-sm text-gray-600">New Files to Upload</Label>
-                      <div className="space-y-2">
-                        {newFiles.map((file, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                      {/* File Management Section */}
+                      <div className="bg-white rounded-xl border border-gray-200/60 shadow-sm p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 rounded-lg bg-purple-50">
+                            <FileText className="h-4 w-4 text-purple-600" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900">Reference Files</h3>
+                        </div>
+                        
+                        {/* Existing Files */}
+                        {editingWorksheet.materials && editingWorksheet.materials.length > 0 && (
+                          <div className="space-y-3 mb-6">
+                            <Label className="text-sm font-medium text-gray-700">Current Files</Label>
+                            <div className="space-y-2">
+                              {editingWorksheet.materials.map((material, index) => {
+                                const fileName = material.filename;
+                                const fileUrl = material.url || `file-${index}`;
+                                const isMarkedForRemoval = filesToRemove.includes(fileUrl);
+                                
+                                return (
+                                  <div
+                                    key={fileUrl}
+                                    className={`flex items-center justify-between p-4 border rounded-lg transition-all duration-200 ${
+                                      isMarkedForRemoval 
+                                        ? 'bg-red-50 border-red-200 opacity-60' 
+                                        : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <FileText className="h-4 w-4 text-gray-500" />
+                                      <span className={`text-sm font-medium ${isMarkedForRemoval ? 'line-through text-gray-500' : 'text-gray-700'}`}>
+                                        {fileName}
+                                      </span>
+                                      {isMarkedForRemoval && (
+                                        <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded-full font-medium">
+                                          Will be removed
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                      {!isMarkedForRemoval ? (
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleRemoveExistingFile(fileUrl)}
+                                          className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                      ) : (
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleRestoreExistingFile(fileUrl)}
+                                          className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                                        >
+                                          Restore
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* New Files */}
+                        {newFiles.length > 0 && (
+                          <div className="space-y-3 mb-6">
+                            <Label className="text-sm font-medium text-gray-700">New Files to Upload</Label>
+                            <div className="space-y-2">
+                              {newFiles.map((file, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <FileText className="h-4 w-4 text-blue-500" />
+                                    <span className="text-sm font-medium text-blue-700">{file.name}</span>
+                                    <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full font-medium">
+                                      New
+                                    </span>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleRemoveNewFile(index)}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* File Upload */}
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700 mb-2 block">Add Files</Label>
+                          <input
+                            type="file"
+                            multiple
+                            accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg"
+                            onChange={(e) => handleFileUpload(e.target.files)}
+                            className="hidden"
+                            id="file-upload-edit"
+                          />
+                          <Label
+                            htmlFor="file-upload-edit"
+                            className="flex items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-200 group"
                           >
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4 text-blue-500" />
-                              <span className="text-sm text-blue-700">{file.name}</span>
-                              <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                                New
+                            <div className="text-center">
+                              <Plus className="h-8 w-8 text-gray-400 mx-auto mb-3 group-hover:text-blue-500 transition-colors" />
+                              <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600 transition-colors">
+                                Click to upload files or drag and drop
+                              </span>
+                              <span className="text-xs text-gray-500 block mt-2">
+                                PDF, DOC, DOCX, TXT, JPG, PNG (Max 10MB each)
                               </span>
                             </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleRemoveNewFile(index)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* File Upload */}
-                  <div>
-                    <Label className="text-sm text-gray-600">Add Files</Label>
-                    <div className="mt-2">
-                      <input
-                        type="file"
-                        multiple
-                        accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg"
-                        onChange={(e) => handleFileUpload(e.target.files)}
-                        className="hidden"
-                        id="file-upload-edit"
-                      />
-                      <Label
-                        htmlFor="file-upload-edit"
-                        className="flex items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
-                      >
-                        <div className="text-center">
-                          <Plus className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-                          <span className="text-sm text-gray-600">
-                            Click to upload files or drag and drop
-                          </span>
-                          <span className="text-xs text-gray-500 block mt-1">
-                            PDF, DOC, DOCX, TXT, JPG, PNG (Max 10MB each)
-                          </span>
+                          </Label>
                         </div>
-                      </Label>
-                    </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex justify-end gap-3 pt-4 border-t bg-gray-50/50 -mx-6 px-6 py-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setEditingWorksheet(null)}
+                          className="px-6"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={editWorksheetMutation.isPending}
+                          className="px-6 bg-blue-600 hover:bg-blue-700"
+                        >
+                          {editWorksheetMutation.isPending ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                              Updating...
+                            </>
+                          ) : (
+                            'Update Worksheet'
+                          )}
+                        </Button>
+                      </div>
+                    </form>
                   </div>
                 </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setEditingWorksheet(null)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={editWorksheetMutation.isPending}
-                  >
-                    {editWorksheetMutation.isPending ? 'Updating...' : 'Update Worksheet'}
-                  </Button>
-                </div>
-              </form>
+              </div>
             </>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
