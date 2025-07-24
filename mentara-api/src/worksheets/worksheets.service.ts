@@ -6,9 +6,14 @@ import type {
   WorksheetUpdateInputDto,
 } from './types';
 
+import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
+
 @Injectable()
 export class WorksheetsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly supabaseStorageService: SupabaseStorageService,
+  ) {}
 
   async findAll(
     userId?: string,
@@ -136,6 +141,43 @@ export class WorksheetsService {
     therapistId: string,
     files: Express.Multer.File[] = [],
   ) {
+    let materialUrls: string[] = [];
+    let materialNames: string[] = [];
+
+    // If files are provided, upload them first
+    if (files && files.length > 0) {
+      const allowedMimeTypes = [
+        'application/pdf', // PDF files
+        'application/msword', // DOC files
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX files
+        'text/plain', // Text files
+        'image/jpeg', // JPEG images
+        'image/png', // PNG images
+      ];
+
+      for (const file of files) {
+        // Validate file
+        const validation = this.supabaseStorageService.validateFile(
+          file,
+          10 * 1024 * 1024, // 10MB limit for worksheet materials
+          allowedMimeTypes,
+        );
+
+        if (!validation.isValid) {
+          throw new BadRequestException(`File validation failed for ${file.originalname}: ${validation.error}`);
+        }
+
+        // Upload file to Supabase Storage
+        const uploadResult = await this.supabaseStorageService.uploadFile(
+          file,
+          SupabaseStorageService.getSupportedBuckets().WORKSHEETS,
+        );
+
+        materialUrls.push(uploadResult.url);
+        materialNames.push(file.originalname);
+      }
+    }
+
     // Create the worksheet
     const worksheet = await this.prisma.worksheet.create({
       data: {
@@ -145,9 +187,8 @@ export class WorksheetsService {
         status: (data as any).status || 'ASSIGNED',
         clientId: userId,
         therapistId,
-        // Material files can be uploaded separately
-        materialUrls: [],
-        materialNames: [],
+        materialUrls,
+        materialNames,
       },
     });
 
