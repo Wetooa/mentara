@@ -281,24 +281,24 @@ export default function PatientsLayout({
           </div>
         )}
 
-        {/* Horizontal Tabs */}
-        <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+        {/* Vertical Tabs */}
+        <div className="space-y-2">
           <button
             onClick={() => setActiveTab("patients")}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+            className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${
               activeTab === "patients"
                 ? "bg-primary text-white"
-                : "bg-white text-gray-700 hover:bg-gray-50"
+                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
             }`}
           >
             My Patients ({filteredPatients?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab("requests")}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors border-l border-gray-200 ${
+            className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${
               activeTab === "requests"
                 ? "bg-primary text-white"
-                : "bg-white text-gray-700 hover:bg-gray-50"
+                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
             }`}
           >
             Requests ({filteredRequests?.length || 0})
