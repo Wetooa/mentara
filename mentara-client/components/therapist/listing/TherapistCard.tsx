@@ -10,27 +10,14 @@ import { useTherapistReviewStats } from "@/hooks/reviews/useReviews";
 
 interface TherapistCardProps {
   therapist: TherapistCardData;
-  onRequest?: (therapistId: string) => void;
-  onMessage?: (therapistId: string) => void;
 }
 
-export default function TherapistCard({
-  therapist,
-  onRequest,
-  onMessage
-}: TherapistCardProps) {
+export default function TherapistCard({ therapist }: TherapistCardProps) {
   const router = useRouter();
   const nextAvailableTime = therapist.availableTimes?.[0];
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const isTherapistFavorited = isFavorite(therapist.id);
 
   // Fetch review stats for this therapist
   const { data: reviewStats } = useTherapistReviewStats(therapist.id);
-
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toggleFavorite(therapist.id);
-  };
 
   const handleViewProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -45,28 +32,19 @@ export default function TherapistCard({
           <div className="flex items-center mb-4 justify-between">
             <div className="flex items-center">
               <div
-                className={`w-2.5 h-2.5 rounded-full mr-2 ${therapist.isActive ? "bg-green-500" : "bg-gray-400"
-                  }`}
+                className={`w-2.5 h-2.5 rounded-full mr-2 ${
+                  therapist.isActive ? "bg-green-500" : "bg-gray-400"
+                }`}
               ></div>
-              <span className={`text-xs font-medium ${therapist.isActive ? "text-green-700" : "text-gray-500"
-                }`}>
+              <span
+                className={`text-xs font-medium ${
+                  therapist.isActive ? "text-green-700" : "text-gray-500"
+                }`}
+              >
                 {therapist.isActive ? "Available Now" : "Currently Offline"}
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleToggleFavorite}
-                className="p-1.5 h-8 w-8 rounded-full hover:bg-gray-50 transition-colors duration-200"
-              >
-                <Heart
-                  className={`h-4 w-4 transition-colors duration-200 ${isTherapistFavorited
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-400 hover:text-red-400"
-                    }`}
-                />
-              </Button>
               <div className="bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
                 <span className="text-sm font-semibold text-gray-900">
                   {therapist.sessionPrice}
@@ -116,10 +94,13 @@ export default function TherapistCard({
                   {specialty}
                 </Badge>
               )) || (
-                  <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                    General Therapy
-                  </Badge>
-                )}
+                <Badge
+                  variant="outline"
+                  className="text-xs bg-gray-50 text-gray-700 border-gray-200"
+                >
+                  General Therapy
+                </Badge>
+              )}
             </div>
 
             {/* Professional Available Time */}
@@ -127,7 +108,9 @@ export default function TherapistCard({
               <div className="flex items-center text-sm mb-3 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
                 <Calendar size={14} className="text-green-600 mr-3" />
                 <div>
-                  <div className="font-medium text-green-800">Next Available</div>
+                  <div className="font-medium text-green-800">
+                    Next Available
+                  </div>
                   <div className="text-xs text-green-600">
                     {nextAvailableTime.day}, {nextAvailableTime.time}
                   </div>
@@ -138,7 +121,8 @@ export default function TherapistCard({
             {/* Professional Bio Section */}
             <div className="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-100">
               <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
-                {therapist.bio || "Experienced therapist dedicated to helping you achieve your mental health goals."}
+                {therapist.bio ||
+                  "Experienced therapist dedicated to helping you achieve your mental health goals."}
               </p>
             </div>
 
@@ -152,30 +136,6 @@ export default function TherapistCard({
                 <User size={16} />
                 View Profile
               </Button>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 font-medium"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRequest?.(therapist.id);
-                  }}
-                >
-                  <UserPlus size={16} />
-                  Send Request
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 font-medium"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMessage?.(therapist.id);
-                  }}
-                >
-                  <MessageSquare size={16} />
-                  Send Message
-                </Button>
-              </div>
             </div>
           </div>
         </div>
