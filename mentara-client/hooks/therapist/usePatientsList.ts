@@ -27,6 +27,74 @@ export function usePatientsList() {
   });
 }
 
+export function usePatientsRequests() {
+  const api = useApi();
+  
+  return useQuery({
+    queryKey: ['clients', 'requests'],
+    queryFn: () => api.therapists.patients.getRequests(),
+    select: (response) => response.data || [],
+    staleTime: 1000 * 60 * 2, // Patient requests might change more frequently
+    retry: (failureCount, error: MentaraApiError) => {
+      // Don't retry if not authorized to access patient data
+      if (error?.status === 403 || error?.status === 401) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+}
+
+export function useAcceptPatientRequest() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (patientId: string) => api.therapists.patients.acceptRequest(patientId),
+    onSuccess: () => {
+      // Invalidate both lists to refresh data
+      queryClient.invalidateQueries({ queryKey: ['clients', 'requests'] });
+      queryClient.invalidateQueries({ queryKey: ['clients', 'assigned'] });
+    },
+    onError: (error: MentaraApiError) => {
+      console.error('Failed to accept patient request:', error);
+    },
+  });
+}
+
+export function useDenyPatientRequest() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (patientId: string) => api.therapists.patients.denyRequest(patientId),
+    onSuccess: () => {
+      // Invalidate requests list to refresh data
+      queryClient.invalidateQueries({ queryKey: ['clients', 'requests'] });
+    },
+    onError: (error: MentaraApiError) => {
+      console.error('Failed to deny patient request:', error);
+    },
+  });
+}
+
+export function useRemovePatient() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (patientId: string) => api.therapists.patients.removePatient(patientId),
+    onSuccess: () => {
+      // Invalidate both lists to refresh data
+      queryClient.invalidateQueries({ queryKey: ['clients', 'assigned'] });
+      queryClient.invalidateQueries({ queryKey: ['clients', 'requests'] });
+    },
+    onError: (error: MentaraApiError) => {
+      console.error('Failed to remove patient:', error);
+    },
+  });
+}
+
 /**
  * Hook for fetching specific patient details
  */

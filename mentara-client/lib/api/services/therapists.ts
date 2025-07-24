@@ -211,6 +211,38 @@ export function createTherapistService(axios: AxiosInstance) {
         );
         return data;
       },
+
+      /**
+       * Get list of pending patient requests for the authenticated therapist
+       */
+      async getRequests() {
+        const { data } = await axios.get("/therapist/clients/requests");
+        return data;
+      },
+
+      /**
+       * Accept a patient connection request
+       */
+      async acceptRequest(patientId: string) {
+        const { data } = await axios.post(`/therapist/clients/${patientId}/accept`);
+        return data;
+      },
+
+      /**
+       * Deny a patient connection request
+       */
+      async denyRequest(patientId: string) {
+        const { data } = await axios.post(`/therapist/clients/${patientId}/deny`);
+        return data;
+      },
+
+      /**
+       * Remove a patient from therapist's active patients list
+       */
+      async removePatient(patientId: string) {
+        const { data } = await axios.delete(`/therapist/clients/${patientId}`);
+        return data;
+      },
     },
 
     /**
