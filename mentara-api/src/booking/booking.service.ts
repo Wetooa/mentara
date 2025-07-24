@@ -42,11 +42,12 @@ export class BookingService {
   // Meeting Management
   async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
     const { startTime, therapistId, duration } = createMeetingDto;
+    
     const startTimeDate = new Date(startTime || createMeetingDto.dateTime);
     const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
 
     // Use database transaction to prevent race conditions
-    return this.prisma.$transaction(
+    const result = await this.prisma.$transaction(
       async (tx) => {
         // First, acquire locks on both therapist and client schedules
         // This prevents concurrent bookings from interfering
@@ -179,6 +180,8 @@ export class BookingService {
         maxWait: 5000, // Max wait time for transaction lock
       },
     );
+
+    return result;
   }
 
   async getMeetings(

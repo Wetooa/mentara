@@ -1,20 +1,11 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
-
-Meeting API Axios Errors
-
-🔍 [SOCKET] Full error object: "{\n  \"description\": {\n    \"isTrusted\": true\n  },\n  \"type\": \"TransportError\"\n}"
-
-lib/socket.ts (261:15) @ getSocket/<
-
-  259 |         data: error.data || 'No data',
-  260 |       });
-> 261 |       console.error('🔍 [SOCKET] Full error object:', JSON.stringify(error, null, 2));
-      |               ^
-  262 |     });
-  263 |
-  264 |     socket.on('reconnect', (attemptNumber) => {
-
+Video Call Feature In Messenger
+- implement webrtc for a video call feature in the messenger part
+- you dont have to save the data here for now, so dont make tables
+- just make sure that two people are able to call each other and see each other
+- i would like simplicity here, currently when clicking on it, it redirects the user to a different page. this is fine. 
+- when the user calls, the other one should recieve an pop up on the upper right corner of the screen with a button to accept or reject the call
 
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.

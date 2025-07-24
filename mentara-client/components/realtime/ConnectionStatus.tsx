@@ -317,10 +317,10 @@ export function useGlobalConnectionStatus() {
   // Import socket functions dynamically to avoid SSR issues
   const initializeSocket = React.useCallback(async () => {
     try {
-      const { getSocket, connectSocket, isSocketConnected } = await import('@/lib/websocket');
+      const { getMessagingSocket, connectMessagingSocket, isMessagingConnected } = await import('@/lib/websocket');
       
       // Check if already connected
-      if (isSocketConnected()) {
+      if (isMessagingConnected()) {
         setConnectionState("connected");
         setLastHeartbeat(Date.now());
         return;
@@ -337,7 +337,7 @@ export function useGlobalConnectionStatus() {
       setIsConnecting(true);
       setConnectionState("connecting");
       
-      const socket = getSocket();
+      const socket = getMessagingSocket(token);
       socketRef.current = socket;
 
       // Set up connection event listeners
@@ -403,7 +403,7 @@ export function useGlobalConnectionStatus() {
 
       // Connect the socket with authentication token
       console.log('🔄 Initiating WebSocket connection with authentication...');
-      await connectSocket(undefined, token);
+      await connectMessagingSocket(token);
       
     } catch (error) {
       console.error('💥 Failed to initialize WebSocket connection:', error);
@@ -429,8 +429,8 @@ export function useGlobalConnectionStatus() {
         return;
       }
 
-      const { connectSocket } = await import('@/lib/websocket');
-      await connectSocket(undefined, token);
+      const { connectMessagingSocket } = await import('@/lib/websocket');
+      await connectMessagingSocket(token);
     } catch (error) {
       console.error('❌ WebSocket reconnection failed:', error);
       setConnectionState("error");

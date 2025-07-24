@@ -222,16 +222,44 @@ export class BillingService {
    */
   async processSessionPayment(data: {
     clientId: string;
-    therapistId: string;
     meetingId?: string;
+    sessionId?: string; // Support both for backwards compatibility
+    therapistId?: string; // Optional - will be derived from meeting if not provided
     amount: number;
     currency?: string;
     paymentMethodId: string;
     description?: string;
   }) {
+    // Handle both meetingId and sessionId (backwards compatibility)
+    const meetingId = data.meetingId || data.sessionId;
+    
+    if (!meetingId) {
+      throw new BadRequestException('Meeting ID is required');
+    }
+
     this.logger.log(
-      `Processing session payment: ${data.amount} ${data.currency || 'USD'} from client ${data.clientId} to therapist ${data.therapistId}`
+      `Processing session payment: ${data.amount} ${data.currency || 'USD'} from client ${data.clientId} for meeting ${meetingId}`
     );
+
+    // Get therapistId from meeting if not provided
+    let therapistId = data.therapistId;
+    if (!therapistId) {
+      const meeting = await this.prisma.meeting.findUnique({
+        where: { id: meetingId },
+        select: { therapistId: true, clientId: true }
+      });
+
+      if (!meeting) {
+        throw new BadRequestException('Meeting not found');
+      }
+
+      // Verify the client owns this meeting
+      if (meeting.clientId !== data.clientId) {
+        throw new BadRequestException('Unauthorized: You can only pay for your own meetings');
+      }
+
+      therapistId = meeting.therapistId;
+    }
 
     // Validate payment method belongs to client
     const paymentMethod = await this.prisma.paymentMethod.findFirst({
@@ -245,20 +273,20 @@ export class BillingService {
       throw new BadRequestException('Invalid payment method');
     }
 
-    // Create payment record
+    // Create payment record with mock processing
     const paymentData: any = {
       amount: data.amount,
       currency: data.currency || 'USD',
-      status: PaymentStatus.PENDING,
+      status: PaymentStatus.COMPLETED, // Mock as completed immediately
       client: { connect: { userId: data.clientId } },
-      therapist: { connect: { userId: data.therapistId } },
+      therapist: { connect: { userId: therapistId } },
       paymentMethod: { connect: { id: data.paymentMethodId } },
       failureReason: null,
     };
 
-    // Only include meeting relation if meetingId is defined
-    if (data.meetingId) {
-      paymentData.meeting = { connect: { id: data.meetingId } };
+    // Include meeting relation if meetingId is provided
+    if (meetingId) {
+      paymentData.meeting = { connect: { id: meetingId } };
     }
 
     const payment = await this.prisma.payment.create({
@@ -279,14 +307,13 @@ export class BillingService {
           }
         },
         paymentMethod: true,
+        meeting: {
+          select: { id: true, title: true, startTime: true }
+        }
       },
     });
 
-    // Process payment asynchronously
-    this.processPaymentAsync(payment.id).catch((error) => {
-      this.logger.error(`Failed to process payment ${payment.id}:`, error);
-    });
-
+    this.logger.log(`Mock payment processed successfully: ${payment.id}`);
     return payment;
   }
 
