@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Search, Heart, Calendar } from "lucide-react";
 import MyTherapistSection from "./MyTherapistSection";
 import FindTherapistSection from "./FindTherapistSection";
-import MeetingsSection from "@/components/therapist/listing/MeetingsSection";
+import PendingRequestsSection from "@/components/client/therapist/PendingRequestsSection";
 import { TherapistListingErrorWrapper } from "@/components/common/TherapistListingErrorBoundary";
 
 export default function TherapistDashboard() {
@@ -112,25 +112,25 @@ export default function TherapistDashboard() {
               </div>
             </TherapistListingErrorWrapper>
 
-            {/* Enhanced Meetings Section for My Therapist tab */}
+            {/* Enhanced Pending Requests Section for My Therapist tab */}
             <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-6">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                     <Calendar className="h-5 w-5 text-white" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-white">
-                      Your Sessions
+                      Pending Requests
                     </h3>
-                    <p className="text-purple-100">
-                      Manage your upcoming appointments
+                    <p className="text-orange-100">
+                      Track your therapist connection requests
                     </p>
                   </div>
                 </div>
               </div>
               <div className="p-6">
-                <MeetingsSection />
+                <PendingRequestsSection />
               </div>
             </div>
           </TabsContent>

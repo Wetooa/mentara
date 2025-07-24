@@ -114,6 +114,18 @@ export function createClientService(client: AxiosInstance) {
     },
 
     /**
+     * Get pending therapist requests
+     * GET /client/therapist/requests
+     */
+    async getPendingTherapistRequests(): Promise<{
+      requests: TherapistRecommendation[];
+    }> {
+      const response = await client.get("client/therapist/requests");
+      console.log("Pending therapist requests response:", response.data);
+      return response.data;
+    },
+
+    /**
      * Send a therapist connection request
      * POST /client/therapist/request
      */
@@ -124,6 +136,18 @@ export function createClientService(client: AxiosInstance) {
         therapistId,
       });
       console.log("Therapist request response:", response.data);
+      return response.data;
+    },
+
+    /**
+     * Cancel a pending therapist connection request
+     * DELETE /client/therapist/request/:therapistId
+     */
+    async cancelTherapistRequest(
+      therapistId: string
+    ): Promise<{ success: boolean }> {
+      const response = await client.delete(`client/therapist/request/${therapistId}`);
+      console.log("Cancel therapist request response:", response.data);
       return response.data;
     },
   };
