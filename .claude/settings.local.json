@@ -177,6 +177,8 @@
       "Bash(timeout 10 npm run build:*)",
       "mcp__serena__insert_before_symbol",
       "Bash(timeout:*)"
+      "WebFetch(domain:socket.io)",
+      "mcp__serena__insert_before_symbol"
     ]
   },
   "enableAllProjectMcpServers": true,

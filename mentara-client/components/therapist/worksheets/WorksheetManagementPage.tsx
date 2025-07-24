@@ -11,23 +11,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   FileText, 
-  Plus, 
   Search, 
-  Filter,
   Calendar,
   Clock,
   CheckCircle,
   AlertCircle,
-  User
+  User,
+  Edit,
+  Upload,
+  Eye,
+  MoreHorizontal
 } from 'lucide-react';
-import { WorksheetAssignmentDialog } from './WorksheetAssignmentDialog';
+
 import { useMatchedClients } from '@/hooks/therapist/useMatchedClients';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Worksheet } from '@/types/api/worksheets';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 import CreateWorksheetModal from '@/components/worksheets/CreateWorksheetModal';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export function WorksheetManagementPage() {
   const api = useApi();
@@ -36,13 +42,14 @@ export function WorksheetManagementPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [viewWorksheet, setViewWorksheet] = useState<Worksheet | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editingWorksheet, setEditingWorksheet] = useState<Worksheet | null>(null);
 
   // Fetch therapist's worksheets
   const { data: worksheetData, isLoading: worksheetsLoading } = useQuery({
     queryKey: ['therapist', 'worksheets', statusFilter, user?.id],
     queryFn: async () => {
       if (!user?.id) return { worksheets: [], total: 0, hasMore: false };
-      const params: any = { therapistId: user.id };
+      const params: { therapistId: string; status?: string } = { therapistId: user.id };
       if (statusFilter !== 'all') {
         params.status = statusFilter;
       }
@@ -64,13 +71,75 @@ export function WorksheetManagementPage() {
 
   // Mutation for marking worksheet as reviewed
   const markAsReviewedMutation = useMutation({
-    mutationFn: async (worksheetId: string) => {
-      return api.worksheets.update(worksheetId, { status: 'REVIEWED' as any });
+    mutationFn: async ({ worksheetId, feedback }: { worksheetId: string; feedback?: string }) => {
+      return api.therapists.worksheets.markAsReviewed(worksheetId, feedback);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['therapist', 'worksheets'] });
+      toast.success("Worksheet marked as reviewed successfully!");
+    },
+    onError: (error) => {
+      console.error("Error marking worksheet as reviewed:", error);
+      toast.error("Failed to mark worksheet as reviewed. Please try again.");
     },
   });
+
+  // Mutation for editing worksheet
+  const editWorksheetMutation = useMutation({
+    mutationFn: async ({ worksheetId, updateData }: { 
+      worksheetId: string; 
+      updateData: { title?: string; instructions?: string; dueDate?: string; status?: string; }
+    }) => {
+      return api.therapists.worksheets.edit(worksheetId, updateData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['therapist', 'worksheets'] });
+      toast.success("Worksheet updated successfully!");
+      setEditingWorksheet(null);
+    },
+    onError: (error) => {
+      console.error("Error updating worksheet:", error);
+      toast.error("Failed to update worksheet. Please try again.");
+    },
+  });
+
+  // Mutation for uploading reference file
+  const uploadReferenceMutation = useMutation({
+    mutationFn: async ({ worksheetId, file }: { worksheetId: string; file: File }) => {
+      return api.therapists.worksheets.uploadReferenceFile(worksheetId, file);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['therapist', 'worksheets'] });
+      toast.success("Reference file uploaded successfully!");
+    },
+    onError: (error) => {
+      console.error("Error uploading reference file:", error);
+      toast.error("Failed to upload reference file. Please try again.");
+    },
+  });
+
+  // Handler functions
+  const handleEditWorksheet = (worksheet: Worksheet) => {
+    setEditingWorksheet(worksheet);
+  };
+
+  const handleUploadReference = (worksheetId: string) => {
+    // Create a hidden file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.txt,.jpg,.png';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        uploadReferenceMutation.mutate({ worksheetId, file });
+      }
+    };
+    input.click();
+  };
+
+  const handleMarkAsReviewed = (worksheetId: string, feedback?: string) => {
+    markAsReviewedMutation.mutate({ worksheetId, feedback });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -98,17 +167,7 @@ export function WorksheetManagementPage() {
     }
   };
 
-  const filteredWorksheets = worksheets.filter((worksheet: Worksheet) =>
-    worksheet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    `${worksheet.client?.user?.firstName || ''} ${worksheet.client?.user?.lastName || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
-  const activeClients = [
-    ...(matchedClientsData?.recentMatches || []),
-    ...(matchedClientsData?.pendingRequests || [])
-  ].filter((match, index, self) => 
-    index === self.findIndex(m => m.client.id === match.client.id)
-  );
 
   if (worksheetsLoading || clientsLoading) {
     return (
@@ -254,11 +313,32 @@ export function WorksheetManagementPage() {
                       
                       <div className="flex gap-2 ml-4">
                         <Button variant="outline" size="sm" onClick={() => setViewWorksheet(worksheet)}>
+                          <Eye className="h-4 w-4 mr-2" />
                           View
                         </Button>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditWorksheet(worksheet)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Worksheet
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUploadReference(worksheet.id)}>
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Reference File
+                            </DropdownMenuItem>
+                            {worksheet.status === 'SUBMITTED' && (
+                              <DropdownMenuItem onClick={() => handleMarkAsReviewed(worksheet.id)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Mark as Reviewed
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </CardContent>
@@ -334,10 +414,10 @@ export function WorksheetManagementPage() {
                             <Button
                               variant="secondary"
                               size="sm"
-                              disabled={markAsReviewedMutation.isPending && markAsReviewedMutation.variables === worksheet.id}
-                              onClick={() => markAsReviewedMutation.mutate(worksheet.id)}
+                              disabled={markAsReviewedMutation.isPending}
+                              onClick={() => handleMarkAsReviewed(worksheet.id)}
                             >
-                              {markAsReviewedMutation.isPending && markAsReviewedMutation.variables === worksheet.id ? 'Marking...' : 'Mark as Reviewed'}
+                              {markAsReviewedMutation.isPending ? 'Marking...' : 'Mark as Reviewed'}
                             </Button>
                           </div>
                         </div>
@@ -350,6 +430,81 @@ export function WorksheetManagementPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Worksheet Dialog */}
+      <Dialog open={!!editingWorksheet} onOpenChange={open => !open && setEditingWorksheet(null)}>
+        <DialogContent className="max-w-2xl">
+          {editingWorksheet && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Edit Worksheet</DialogTitle>
+                <DialogDescription>
+                  Update the worksheet details and content.
+                </DialogDescription>
+              </DialogHeader>
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const updateData = {
+                    title: formData.get('title') as string,
+                    instructions: formData.get('instructions') as string,
+                    dueDate: formData.get('dueDate') as string,
+                  };
+                  editWorksheetMutation.mutate({
+                    worksheetId: editingWorksheet.id,
+                    updateData,
+                  });
+                }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    name="title"
+                    defaultValue={editingWorksheet.title}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="instructions">Instructions</Label>
+                  <Textarea
+                    id="instructions"
+                    name="instructions"
+                    defaultValue={editingWorksheet.instructions || ''}
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dueDate">Due Date</Label>
+                  <Input
+                    id="dueDate"
+                    name="dueDate"
+                    type="datetime-local"
+                    defaultValue={editingWorksheet.dueDate ? new Date(editingWorksheet.dueDate).toISOString().slice(0, 16) : ''}
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditingWorksheet(null)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={editWorksheetMutation.isPending}
+                  >
+                    {editWorksheetMutation.isPending ? 'Updating...' : 'Update Worksheet'}
+                  </Button>
+                </div>
+              </form>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Worksheet View Modal */}
       <Dialog open={!!viewWorksheet} onOpenChange={open => !open && setViewWorksheet(null)}>

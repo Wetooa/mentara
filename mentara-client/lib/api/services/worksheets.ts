@@ -55,6 +55,50 @@ export function createWorksheetService(client: AxiosInstance) {
     },
 
     /**
+     * Create worksheet with files (convenience method)
+     * Handles FormData creation for worksheet + file uploads
+     */
+    async createWithFiles(
+      worksheetData: WorksheetCreateInputDto,
+      files: File[] = []
+    ): Promise<Worksheet> {
+      if (files.length === 0) {
+        // No files, use regular JSON submission
+        return this.create(worksheetData);
+      }
+
+      // Create FormData for multipart submission
+      const formData = new FormData();
+      
+      // Add worksheet fields
+      formData.append('title', worksheetData.title);
+      formData.append('instructions', worksheetData.instructions || '');
+      
+      if (worksheetData.dueDate) {
+        formData.append('dueDate', worksheetData.dueDate instanceof Date 
+          ? worksheetData.dueDate.toISOString() 
+          : worksheetData.dueDate);
+      }
+      
+      if (worksheetData.clientIds && worksheetData.clientIds.length > 0) {
+        worksheetData.clientIds.forEach(clientId => {
+          formData.append('clientIds[]', clientId);
+        });
+      }
+      
+      if (worksheetData.category) {
+        formData.append('category', worksheetData.category);
+      }
+
+      // Add files
+      files.forEach((file, index) => {
+        formData.append('files', file);
+      });
+
+      return this.create(formData);
+    },
+
+    /**
      * Update an existing worksheet
      * PUT /worksheets/:id
      */
@@ -185,6 +229,105 @@ export function createWorksheetService(client: AxiosInstance) {
     async getStats(params?: { userId?: string; therapistId?: string }): Promise<WorksheetStats> {
       const response = await client.get("worksheets/stats", { params });
       return response.data;
+    },
+
+    /**
+     * Turn in worksheet (create empty submission)
+     * POST /worksheets/:id/turn-in
+     */
+    async turnIn(id: string): Promise<{
+      success: boolean;
+      message: string;
+      data: Worksheet;
+    }> {
+      const response = await client.post(`worksheets/${id}/turn-in`);
+      return response.data;
+    },
+
+    /**
+     * Unturn in worksheet (delete submission) 
+     * POST /worksheets/:id/unturn-in
+     */
+    async unturnIn(id: string): Promise<{
+      success: boolean;
+      message: string;
+      data: Worksheet;
+    }> {
+      const response = await client.post(`worksheets/${id}/unturn-in`);
+      return response.data;
+    },
+
+    /**
+     * Upload submission file for worksheet
+     * Uses existing uploadFile method but with enhanced submission support
+     */
+    async uploadSubmissionFile(
+      file: File,
+      worksheetId: string
+    ): Promise<{
+      id: string;
+      filename: string;
+      url: string;
+      originalName: string;
+      size: number;
+      mimeType: string;
+      uploadedAt: string;
+    }> {
+      return this.uploadFile(file, worksheetId, "submission");
+    },
+
+    /**
+     * Upload multiple submission files
+     */
+    async uploadSubmissionFiles(
+      files: File[],
+      worksheetId: string
+    ): Promise<Array<{
+      id: string;
+      filename: string;
+      url: string;
+      originalName: string;
+      size: number;
+      mimeType: string;
+      uploadedAt: string;
+    }>> {
+      const uploadPromises = files.map(file => 
+        this.uploadSubmissionFile(file, worksheetId)
+      );
+      return Promise.all(uploadPromises);
+    },
+
+    /**
+     * Submit worksheet with files (combines turn-in with file uploads)
+     */
+    async submitWithFiles(worksheetId: string, files: File[] = []): Promise<{
+      success: boolean;
+      message: string;
+      data: Worksheet;
+      uploadedFiles?: Array<{
+        id: string;
+        filename: string;
+        url: string;
+        originalName: string;
+        size: number;
+        mimeType: string;
+        uploadedAt: string;
+      }>;
+    }> {
+      let uploadedFiles = [];
+      
+      // Upload files first if provided
+      if (files.length > 0) {
+        uploadedFiles = await this.uploadSubmissionFiles(files, worksheetId);
+      }
+
+      // Turn in the worksheet
+      const turnInResult = await this.turnIn(worksheetId);
+
+      return {
+        ...turnInResult,
+        uploadedFiles,
+      };
     },
   };
 }

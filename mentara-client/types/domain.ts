@@ -128,10 +128,10 @@ export enum OtpType {
 
 // Worksheet status
 export enum WorksheetStatus {
-  ASSIGNED = 'assigned',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  OVERDUE = 'overdue',
+  ASSIGNED = 'ASSIGNED',
+  SUBMITTED = 'SUBMITTED',
+  REVIEWED = 'REVIEWED',
+  OVERDUE = 'OVERDUE',
 }
 
 // Base user interface

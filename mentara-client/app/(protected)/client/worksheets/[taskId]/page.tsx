@@ -1,23 +1,28 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
-  MoreHorizontal,
   CheckCircle,
   FileText,
-  Download,
   Plus,
   Trash2,
   Upload as UploadIcon,
+  Send,
+  RotateCcw,
+  Eye,
 } from "lucide-react";
-import { Task, TaskFile, transformWorksheetAssignmentToTask } from "@/components/worksheets/types";
+import {
+  TaskFile,
+  transformWorksheetAssignmentToTask,
+} from "@/components/worksheets/types";
 import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
 import { toast } from "sonner";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { WorksheetStatus } from "@/types/api/worksheets";
 import { use } from "react";
 
 interface TaskDetailPageProps {
@@ -26,16 +31,15 @@ interface TaskDetailPageProps {
 
 export default function TaskDetailPage({ params }: TaskDetailPageProps) {
   const { taskId } = use(params);
-  
+
   return <TaskDetailPageClient taskId={taskId} />;
 }
 
 function TaskDetailPageClient({ taskId }: { taskId: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [showFileOptions, setShowFileOptions] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const api = useApi();
 
   // Use React Query to fetch worksheet data
@@ -43,7 +47,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
     data: worksheetData,
     isLoading,
     error,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: queryKeys.worksheets.byId(taskId),
     queryFn: () => api.worksheets.getById(taskId),
@@ -55,38 +59,81 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
         return false;
       }
       return failureCount < 2;
-    }
+    },
   });
 
   // Transform the worksheet data to Task format
-  const task = worksheetData ? transformWorksheetAssignmentToTask(worksheetData) : undefined;
+  const task = worksheetData
+    ? transformWorksheetAssignmentToTask(worksheetData)
+    : undefined;
 
   // File upload mutation with optimistic updates
   const uploadFileMutation = useMutation({
-    mutationFn: (file: File) => api.worksheets.uploadFile(file, taskId, "submission"),
+    mutationFn: async (file: File) => {
+      const fileName = file.name;
+      setUploadingFiles((prev) => new Set(prev).add(fileName));
+      return api.worksheets.uploadFile(file, taskId, "submission");
+    },
     onSuccess: (uploadedFile) => {
+      // Remove from uploading state
+      setUploadingFiles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(uploadedFile.filename || "");
+        return newSet;
+      });
+
       // Invalidate and refetch worksheet data
-      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.byId(taskId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.worksheets.byId(taskId),
+      });
       toast.success(`Successfully uploaded ${uploadedFile.filename}`);
     },
-    onError: (error) => {
+    onError: (error, file) => {
+      // Remove from uploading state
+      setUploadingFiles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(file.name);
+        return newSet;
+      });
+
       console.error("Error uploading file:", error);
       toast.error("Failed to upload file. Please try again.");
-    }
+    },
+  });
+
+  // Turn in worksheet mutation
+  const turnInMutation = useMutation({
+    mutationFn: () => api.worksheets.turnIn(taskId),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.worksheets.byId(taskId),
+      });
+      toast.success("Worksheet turned in successfully!");
+    },
+    onError: (error) => {
+      console.error("Error turning in worksheet:", error);
+      toast.error("Failed to turn in worksheet. Please try again.");
+    },
+  });
+
+  // Unturn in worksheet mutation
+  const unturnInMutation = useMutation({
+    mutationFn: () => api.worksheets.unturnIn(taskId),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.worksheets.byId(taskId),
+      });
+      toast.success("Worksheet turned back in for editing!");
+    },
+    onError: (error) => {
+      console.error("Error unturning in worksheet:", error);
+      toast.error("Failed to unturn in worksheet. Please try again.");
+    },
   });
 
   // Determine if task is editable based on submission status
-  const isTaskEditable = task && !task.isCompleted && task.status !== "past_due";
-
-  useEffect(() => {
-    // Close dropdown when clicking outside
-    const handleClickOutside = () => {
-      setShowFileOptions(null);
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+  const isTaskEditable =
+    task && !task.isCompleted && task.status !== "past_due";
 
   const handleBack = () => {
     router.back();
@@ -144,8 +191,8 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
 
     // Create an anchor element and trigger download
     const link = document.createElement("a");
-    link.href = file.url || '';
-    link.download = file.filename || 'download';
+    link.href = file.url || "";
+    link.download = file.filename || "download";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -156,68 +203,27 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
 
     try {
       // Delete the file from the server
-      // TODO: Implement deleteSubmission method
-      // await api.worksheets.deleteSubmission(fileId);
+      await api.worksheets.deleteSubmission(fileId);
 
-      // Update the local state
-      const deletedFile = task.myWork?.find((work) => work.id === fileId);
-      setTask({
-        ...task,
-        myWork: task.myWork?.filter((work) => work.id !== fileId) || [],
+      // Refetch the data to update the UI
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.worksheets.byId(taskId),
       });
-      
+
+      const deletedFile = task.myWork?.find((work) => work.id === fileId);
       toast.success(`Successfully deleted ${deletedFile?.filename || "file"}`);
     } catch (err) {
       console.error("Error deleting file:", err);
       toast.error("Failed to delete file. Please try again.");
     }
-
-    // Close dropdown
-    setShowFileOptions(null);
   };
 
-  const toggleFileOptions = (fileId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowFileOptions((prevId) => (prevId === fileId ? null : fileId));
+  const handleTurnIn = () => {
+    turnInMutation.mutate();
   };
 
-  const handleSubmitWork = async () => {
-    if (!task) return;
-
-    // Start submitting process
-    setSubmitting(true);
-
-    try {
-      if (task.isCompleted) {
-        // Unsubmit work - update assignment status
-        // Note: This would need to be an assignment update API method
-        // For now, we'll update local state since the API method may not exist yet
-        setTask({
-          ...task,
-          status: 'assigned',
-          isCompleted: false,
-          submittedAt: undefined,
-        });
-      } else {
-        // Submit work - update assignment status  
-        // Note: This would need to be an assignment update API method
-        // For now, we'll update local state since the API method may not exist yet
-        setTask({
-          ...task,
-          status: 'completed',
-          isCompleted: true,
-          submittedAt: new Date().toISOString(),
-        });
-        toast.success(
-          task.isCompleted ? "Worksheet unsubmitted successfully" : "Worksheet submitted successfully"
-        );
-      }
-    } catch (err) {
-      console.error("Error submitting worksheet:", err);
-      toast.error("Failed to submit worksheet. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+  const handleUnturnIn = () => {
+    unturnInMutation.mutate();
   };
 
   if (isLoading) {
@@ -253,8 +259,8 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
         </div>
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <p className="text-secondary text-center">
-            {(error as any)?.response?.status === 404 
-              ? "Worksheet not found" 
+            {(error as any)?.response?.status === 404
+              ? "Worksheet not found"
               : "Failed to load worksheet details. Please try again."}
           </p>
           <button
@@ -364,40 +370,13 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                       </span>
                     </div>
                     <div className="flex items-center">
-                      {/* Download button is always available */}
+                      {/* View button */}
                       <button
-                        className="text-gray-500 hover:text-primary p-1 mr-1"
+                        className="text-gray-500 hover:text-primary p-2 rounded-md hover:bg-gray-200 transition-colors"
                         onClick={() => handleDownload(material)}
-                        title="Download"
+                        title="View file"
                       >
-                        <Download className="h-5 w-5" />
-                      </button>
-                      <button
-                        className="text-gray-500 hover:text-secondary p-1 relative"
-                        onClick={(e) => material.id && toggleFileOptions(material.id, e)}
-                        title="More options"
-                      >
-                        <MoreHorizontal className="h-5 w-5" />
-
-                        {/* Dropdown menu for file */}
-                        {showFileOptions === material.id && (
-                          <div
-                            className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <ul className="py-1">
-                              <li>
-                                <button
-                                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                  onClick={() => handleDownload(material)}
-                                >
-                                  <Download className="h-4 w-4 mr-2" />
-                                  Download
-                                </button>
-                              </li>
-                            </ul>
-                          </div>
-                        )}
+                        <Eye className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -423,93 +402,64 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
               )}
             </div>
 
-            {task.myWork && task.myWork.length > 0 ? (
+            {/* Show uploading files first */}
+            {Array.from(uploadingFiles).length > 0 ||
+            (task.myWork && task.myWork.length > 0) ? (
               <div className="space-y-2">
-                {task.myWork.map((work) => (
+                {/* Show uploading files */}
+                {Array.from(uploadingFiles).map((fileName) => (
                   <div
-                    key={work.id}
-                    className={`flex items-center justify-between p-3 rounded-md ${
-                      work.uploading
-                        ? "bg-blue-50 border border-blue-200"
-                        : "bg-gray-100"
-                    }`}
+                    key={`uploading-${fileName}`}
+                    className="flex items-center justify-between p-3 rounded-md bg-blue-50 border border-blue-200"
                   >
                     <div className="flex items-center">
-                      <FileText className={`h-5 w-5 mr-3 ${
-                        work.uploading ? "text-blue-500" : "text-primary"
-                      }`} />
+                      <FileText className="h-5 w-5 mr-3 text-blue-500" />
                       <div className="flex flex-col">
-                        <span className={`text-secondary ${
-                          work.uploading ? "text-blue-700" : ""
-                        }`}>
-                          {work.filename}
+                        <span className="text-blue-700">{fileName}</span>
+                        <span className="text-xs text-blue-600">
+                          Uploading...
                         </span>
-                        {work.uploading && (
-                          <span className="text-xs text-blue-600">
-                            Uploading...
-                          </span>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center">
-                      {work.uploading ? (
-                        // Show spinner for uploading files
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-                      ) : (
-                        <>
-                          {/* Download button is always available */}
-                          <button
-                            className="text-gray-500 hover:text-primary p-1 mr-1"
-                            onClick={() => handleDownload(work)}
-                            title="Download"
-                          >
-                            <Download className="h-5 w-5" />
-                          </button>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                    </div>
+                  </div>
+                ))}
 
-                          {/* More options button with dropdown */}
-                          <button
-                            className="text-gray-500 hover:text-secondary p-1 relative"
-                            onClick={(e) => work.id && toggleFileOptions(work.id, e)}
-                            title="More options"
-                          >
-                            <MoreHorizontal className="h-5 w-5" />
+                {/* Show existing files */}
+                {task.myWork?.map((work) => (
+                  <div
+                    key={work.id}
+                    className="flex items-center justify-between p-3 rounded-md bg-gray-100"
+                  >
+                    <div className="flex items-center">
+                      <FileText className="h-5 w-5 mr-3 text-primary" />
+                      <div className="flex flex-col">
+                        <span className="text-secondary">{work.filename}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {/* View button */}
+                      <button
+                        className="text-gray-500 hover:text-primary p-2 rounded-md hover:bg-gray-200 transition-colors"
+                        onClick={() => handleDownload(work)}
+                        title="View file"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
 
-                            {/* Dropdown menu for file */}
-                            {showFileOptions === work.id && (
-                              <div
-                                className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <ul className="py-1">
-                                  <li>
-                                    <button
-                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                      onClick={() => handleDownload(work)}
-                                    >
-                                      <Download className="h-4 w-4 mr-2" />
-                                      Download
-                                    </button>
-                                  </li>
-
-                                  {/* Delete option only if task is not completed */}
-                                  {isTaskEditable && (
-                                    <li>
-                                      <button
-                                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                                        onClick={() =>
-                                          work.id && handleDeleteAttachment(work.id)
-                                        }
-                                      >
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete
-                                      </button>
-                                    </li>
-                                  )}
-                                </ul>
-                              </div>
-                            )}
-                          </button>
-                        </>
+                      {/* Delete button - only if task is editable */}
+                      {isTaskEditable && (
+                        <button
+                          className="text-gray-500 hover:text-red-600 p-2 rounded-md hover:bg-red-50 transition-colors"
+                          onClick={() =>
+                            work.id && handleDeleteAttachment(work.id)
+                          }
+                          title="Delete file"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       )}
                     </div>
                   </div>
@@ -519,10 +469,22 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                 {isTaskEditable && (
                   <button
                     onClick={handleAddAttachment}
-                    className="flex items-center justify-center w-full py-3 border border-dashed border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    disabled={uploadFileMutation.isPending}
+                    className="flex items-center justify-center w-full py-3 border border-dashed border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Plus className="h-5 w-5 text-primary mr-2" />
-                    <span className="text-primary">Add More Attachments</span>
+                    {uploadFileMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2"></div>
+                        <span className="text-primary">Processing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-5 w-5 text-primary mr-2" />
+                        <span className="text-primary">
+                          Add More Attachments
+                        </span>
+                      </>
+                    )}
                   </button>
                 )}
               </div>
@@ -548,53 +510,67 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
             )}
           </div>
 
-          {/* Submit/Unsubmit button - only show if task has attachments */}
-          {task.myWork &&
-            task.myWork.length > 0 &&
+          {/* Submit/Unsubmit button - only show if task has attachments or uploading files */}
+          {((task.myWork && task.myWork.length > 0) ||
+            Array.from(uploadingFiles).length > 0) &&
             task.status !== "past_due" && (
               <div className="flex flex-col items-end">
-                {task.submittedAt && !submitting && (
+                {task.submittedAt && (
                   <p className="text-sm text-gray-500 mb-2">
                     Submitted on {formatDate(task.submittedAt)}
                   </p>
                 )}
-                <button
-                  onClick={handleSubmitWork}
-                  disabled={submitting}
-                  className={`px-6 py-2 rounded-md transition ${
-                    task.isCompleted
-                      ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      : "bg-primary text-white hover:bg-primary/90"
-                  } ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
-                >
-                  {submitting ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      {task.isCompleted ? "Unsubmitting..." : "Submitting..."}
-                    </span>
+                <div className="flex gap-3">
+                  {/* Turn In/Unturn In Button */}
+                  {worksheetData?.status === WorksheetStatus.SUBMITTED ? (
+                    <button
+                      onClick={handleUnturnIn}
+                      disabled={
+                        unturnInMutation.isPending ||
+                        Array.from(uploadingFiles).length > 0
+                      }
+                      className="flex items-center px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {unturnInMutation.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                          Unturning in...
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          Unturn In
+                        </>
+                      )}
+                    </button>
                   ) : (
-                    <>{task.isCompleted ? "Unsubmit Work" : "Submit Work"}</>
+                    <button
+                      onClick={handleTurnIn}
+                      disabled={
+                        turnInMutation.isPending ||
+                        Array.from(uploadingFiles).length > 0
+                      }
+                      className="flex items-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {turnInMutation.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Turning in...
+                        </>
+                      ) : Array.from(uploadingFiles).length > 0 ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Uploading files...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" />
+                          Turn In
+                        </>
+                      )}
+                    </button>
                   )}
-                </button>
+                </div>
               </div>
             )}
         </div>

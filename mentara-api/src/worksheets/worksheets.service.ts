@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import type {
   WorksheetCreateInputDto,
@@ -6,9 +10,14 @@ import type {
   WorksheetUpdateInputDto,
 } from './types';
 
+import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
+
 @Injectable()
 export class WorksheetsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly supabaseStorageService: SupabaseStorageService,
+  ) {}
 
   async findAll(
     userId?: string,
@@ -26,8 +35,28 @@ export class WorksheetsService {
       where['therapistId'] = therapistId;
     }
 
+    // Handle status filtering with dynamic overdue calculation
     if (status) {
-      where['status'] = status;
+      if (
+        status === 'OVERDUE' ||
+        status === 'overdue' ||
+        status === 'past_due'
+      ) {
+        // Dynamic overdue: worksheets that are ASSIGNED but past due date
+        where['status'] = 'ASSIGNED';
+        where['dueDate'] = {
+          lt: new Date(), // Due date is in the past
+        };
+      } else if (status === 'upcoming') {
+        // Upcoming: worksheets that are ASSIGNED and not yet due
+        where['status'] = 'ASSIGNED';
+        where['dueDate'] = {
+          gte: new Date(), // Due date is in the future or today
+        };
+      } else {
+        // Static status filtering for other cases
+        where['status'] = status.toUpperCase();
+      }
     }
 
     // Get total count for pagination
@@ -136,6 +165,45 @@ export class WorksheetsService {
     therapistId: string,
     files: Express.Multer.File[] = [],
   ) {
+    let materialUrls: string[] = [];
+    let materialNames: string[] = [];
+
+    // If files are provided, upload them first
+    if (files && files.length > 0) {
+      const allowedMimeTypes = [
+        'application/pdf', // PDF files
+        'application/msword', // DOC files
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX files
+        'text/plain', // Text files
+        'image/jpeg', // JPEG images
+        'image/png', // PNG images
+      ];
+
+      for (const file of files) {
+        // Validate file
+        const validation = this.supabaseStorageService.validateFile(
+          file,
+          10 * 1024 * 1024, // 10MB limit for worksheet materials
+          allowedMimeTypes,
+        );
+
+        if (!validation.isValid) {
+          throw new BadRequestException(
+            `File validation failed for ${file.originalname}: ${validation.error}`,
+          );
+        }
+
+        // Upload file to Supabase Storage
+        const uploadResult = await this.supabaseStorageService.uploadFile(
+          file,
+          SupabaseStorageService.getSupportedBuckets().WORKSHEETS,
+        );
+
+        materialUrls.push(uploadResult.url);
+        materialNames.push(file.originalname);
+      }
+    }
+
     // Create the worksheet
     const worksheet = await this.prisma.worksheet.create({
       data: {
@@ -145,9 +213,8 @@ export class WorksheetsService {
         status: (data as any).status || 'ASSIGNED',
         clientId: userId,
         therapistId,
-        // Material files can be uploaded separately
-        materialUrls: [],
-        materialNames: [],
+        materialUrls,
+        materialNames,
       },
     });
 
@@ -163,6 +230,35 @@ export class WorksheetsService {
 
     if (!exists) {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // Update the worksheet
+    await this.prisma.worksheet.update({
+      where: { id },
+      data,
+    });
+
+    // Return the updated worksheet
+    return this.findById(id);
+  }
+
+  async updateByTherapist(
+    id: string,
+    therapistId: string,
+    data: WorksheetUpdateInputDto,
+  ) {
+    // Check if worksheet exists and belongs to the therapist
+    const worksheet = await this.prisma.worksheet.findUnique({
+      where: { id },
+    });
+
+    if (!worksheet) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // Verify therapist ownership
+    if (worksheet.therapistId !== therapistId) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`); // Use NotFoundException to avoid revealing ownership info
     }
 
     // Update the worksheet
@@ -307,7 +403,9 @@ export class WorksheetsService {
     }
 
     if (!worksheet.submission) {
-      throw new NotFoundException(`No submission found for worksheet with ID ${id}`);
+      throw new NotFoundException(
+        `No submission found for worksheet with ID ${id}`,
+      );
     }
 
     // Delete the submission
@@ -324,5 +422,148 @@ export class WorksheetsService {
     });
 
     return { success: true, message: 'Submission deleted successfully' };
+  }
+
+  async markAsReviewedByTherapist(
+    id: string,
+    therapistId: string,
+    feedback?: string,
+  ) {
+    // Check if worksheet exists and belongs to the therapist
+    const worksheet = await this.prisma.worksheet.findUnique({
+      where: { id },
+      include: { submission: true },
+    });
+
+    if (!worksheet) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // Verify therapist ownership
+    if (worksheet.therapistId !== therapistId) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // Mark worksheet as reviewed
+    await this.prisma.worksheet.update({
+      where: { id },
+      data: {
+        status: 'REVIEWED',
+      },
+    });
+
+    // Update submission with feedback if provided and submission exists
+    if (feedback && worksheet.submission) {
+      await this.prisma.worksheetSubmission.update({
+        where: { worksheetId: id },
+        data: {
+          feedback,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      message: 'Worksheet marked as reviewed successfully',
+      data: await this.findById(id),
+    };
+  }
+
+  async turnInWorksheet(id: string, clientId: string) {
+    // Check if worksheet exists and belongs to the client
+    const worksheet = await this.prisma.worksheet.findUnique({
+      where: { id },
+      include: { submission: true },
+    });
+
+    if (!worksheet) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // Verify client ownership
+    if (worksheet.clientId !== clientId) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // If submission already exists, just update the worksheet status
+    if (worksheet.submission) {
+      await this.prisma.worksheet.update({
+        where: { id },
+        data: {
+          status: 'SUBMITTED',
+        },
+      });
+
+      return {
+        success: true,
+        message: 'Worksheet turned in successfully',
+        data: await this.findById(id),
+      };
+    }
+
+    // Create new submission (empty submission to indicate "turned in")
+    await this.prisma.worksheetSubmission.create({
+      data: {
+        worksheetId: id,
+        fileUrls: [],
+        fileNames: [],
+        fileSizes: [],
+      },
+    });
+
+    // Update worksheet status to SUBMITTED
+    await this.prisma.worksheet.update({
+      where: { id },
+      data: {
+        status: 'SUBMITTED',
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Worksheet turned in successfully',
+      data: await this.findById(id),
+    };
+  }
+
+  async unturnInWorksheet(id: string, clientId: string) {
+    // Check if worksheet exists and belongs to the client
+    const worksheet = await this.prisma.worksheet.findUnique({
+      where: { id },
+      include: { submission: true },
+    });
+
+    if (!worksheet) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // Verify client ownership
+    if (worksheet.clientId !== clientId) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`);
+    }
+
+    // Check if there's a submission to delete
+    if (!worksheet.submission) {
+      throw new BadRequestException('Worksheet has not been turned in');
+    }
+
+    // Delete the submission
+    // await this.prisma.worksheetSubmission.delete({
+    //   where: { worksheetId: id },
+    // });
+
+    // Reset worksheet status back to ASSIGNED
+    await this.prisma.worksheet.update({
+      where: { id },
+      data: {
+        status: 'ASSIGNED',
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Worksheet turned back in for editing',
+      data: await this.findById(id),
+    };
   }
 }

@@ -13,6 +13,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RoleGuard } from '../../auth/guards/role.guard';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
@@ -20,6 +21,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { WorksheetsService } from '../../worksheets/worksheets.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../providers/prisma-client.provider';
+
 // import {
 //   WorksheetCreateInputDtoSchema,
 //   WorksheetUpdateInputDtoSchema,
@@ -28,7 +30,12 @@ import type {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
 } from '../types';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('therapist-worksheets')
 @ApiBearerAuth('JWT-auth')
@@ -85,7 +92,7 @@ export class TherapistWorksheetController {
       category: createWorksheetDto.category || 'therapy-assignment', // Default category
       clientIds: [createWorksheetDto.clientId], // Transform single clientId to array
     };
-    
+
     return this.worksheetsService.create(
       canonicalDto,
       createWorksheetDto.clientId,
@@ -104,7 +111,38 @@ export class TherapistWorksheetController {
     @Param('id') worksheetId: string,
     @Body() updateWorksheetDto: WorksheetUpdateInputDto,
   ) {
-    return this.worksheetsService.update(worksheetId, updateWorksheetDto);
+    return this.worksheetsService.updateByTherapist(
+      worksheetId,
+      therapistId,
+      updateWorksheetDto,
+    );
+  }
+
+  @Post('worksheets/:id/review')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Mark worksheet as reviewed',
+    description:
+      'Mark a worksheet as reviewed/completed, optionally adding feedback',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Worksheet marked as reviewed successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Worksheet not found or not owned by therapist',
+  })
+  async markWorksheetAsReviewed(
+    @CurrentUserId() therapistId: string,
+    @Param('id') worksheetId: string,
+    @Body() reviewDto: { feedback?: string },
+  ) {
+    return this.worksheetsService.markAsReviewedByTherapist(
+      worksheetId,
+      therapistId,
+      reviewDto.feedback,
+    );
   }
 
   // NEW MODULE 2 ENDPOINT
@@ -167,7 +205,10 @@ export class TherapistWorksheetController {
       throw new BadRequestException('Worksheet title is required');
     }
 
-    if (!createWorksheetDto.instructions || createWorksheetDto.instructions.trim() === '') {
+    if (
+      !createWorksheetDto.instructions ||
+      createWorksheetDto.instructions.trim() === ''
+    ) {
       throw new BadRequestException('Worksheet instructions are required');
     }
 

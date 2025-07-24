@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
-import { Task, transformWorksheetAssignmentToTask } from "@/components/worksheets/types";
+import {
+  Task,
+  transformWorksheetAssignmentToTask,
+} from "@/components/worksheets/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
-
 
 export default function WorksheetsPage() {
   const [activeFilter, setActiveFilter] = useState<string>("everything");
@@ -27,17 +29,46 @@ export default function WorksheetsPage() {
         setIsLoading(true);
         setError(null);
 
-        // Call the API to get all worksheets (no filtering on API level)
+        // Map frontend filter to backend status parameter
+        let status: string | undefined;
+        switch (activeFilter) {
+          case "upcoming":
+            status = "upcoming"; // Backend handles upcoming = ASSIGNED + dueDate >= now
+            break;
+          case "past_due":
+            status = "OVERDUE"; // Backend handles overdue = ASSIGNED + dueDate < now
+            break;
+          case "completed":
+            status = "REVIEWED"; // Completed worksheets are marked as REVIEWED
+            break;
+          case "everything":
+          default:
+            status = undefined; // No status filter = get all worksheets
+            break;
+        }
+
+        // Call the API to get worksheets with proper status filtering
         const worksheetsResponse = await api.worksheets.getAll({
           userId,
-          limit: 100
+          status,
+          limit: 100,
         });
-        
-        // Transform worksheets using the proper transformation function
-        const transformedTasks: Task[] = Array.isArray(worksheetsResponse.worksheets) 
-          ? worksheetsResponse.worksheets.map(worksheet => transformWorksheetAssignmentToTask(worksheet))
+
+        // Transform worksheets to match Task interface
+        const transformedTasks: Task[] = Array.isArray(
+          worksheetsResponse.worksheets
+        )
+          ? worksheetsResponse.worksheets.map((worksheet) => ({
+              ...worksheet,
+              date: worksheet.dueDate,
+              status: mapWorksheetStatus(worksheet.status, worksheet.dueDate),
+              isCompleted: worksheet.status === "REVIEWED",
+              therapistName: worksheet.therapist?.user
+                ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}`
+                : undefined,
+            }))
           : [];
-        
+
         setTasks(transformedTasks);
       } catch (err) {
         console.error("Error fetching worksheets:", err);
@@ -48,7 +79,23 @@ export default function WorksheetsPage() {
     }
 
     fetchWorksheets();
-  }, [userId, api.worksheets]);
+  }, [userId, activeFilter, api.worksheets]);
+
+  // Helper function to map backend status to frontend status display
+  const mapWorksheetStatus = (
+    backendStatus: string,
+    dueDate: string
+  ): "assigned" | "submitted" | "completed" | "overdue" => {
+    if (backendStatus === "REVIEWED") return "completed";
+    if (backendStatus === "SUBMITTED") return "submitted";
+    if (backendStatus === "ASSIGNED") {
+      // Check if it's overdue
+      const due = new Date(dueDate);
+      const now = new Date();
+      return due < now ? "overdue" : "assigned";
+    }
+    return "assigned"; // Default fallback
+  };
 
   // Filter tasks based on selected filters
   const getFilteredTasks = () => {
