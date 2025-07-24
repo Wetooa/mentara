@@ -1,13 +1,14 @@
-import BookingModal from "@/components/booking/BookingModal";
+
 import FilterBar from "@/components/therapist/filters/FilterBar";
 import TherapistCard from "@/components/therapist/listing/TherapistCard";
-import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Pagination from "@/components/ui/pagination";
 import { useAllTherapistsWithClientFilters } from "@/hooks/therapist/useAllTherapists";
 import { useFilters } from "@/hooks/utils/useFilters";
+import { useTherapistRequest } from "@/hooks/therapist/useTherapistRequest";
 import { TherapistCardData } from "@/types/therapist";
 import { AlertCircle, RefreshCw, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -91,9 +92,7 @@ function TherapistCardSkeleton() {
 export default function TherapistListing() {
   // All hooks must be called before any conditional returns
   const router = useRouter();
-  const [selectedTherapist, setSelectedTherapist] = useState<TherapistCardData | null>(null);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [componentError, setComponentError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -109,6 +108,9 @@ export default function TherapistListing() {
     updateFilters,
     resetFilters,
   } = useFilters();
+
+  // Therapist request functionality
+  const { requestTherapist, isLoading: isRequestLoading } = useTherapistRequest();
 
   // Use the new simple hook that fetches ALL therapists and filters client-side
   const {
@@ -157,73 +159,7 @@ export default function TherapistListing() {
 
 
 
-  const handleViewProfile = (therapist: TherapistCardData) => {
-    try {
-      // Validate therapist data before opening modal
-      if (!therapist?.id || !therapist?.name) {
-        toast.error("Invalid therapist data. Please try again.");
-        return;
-      }
-      setSelectedTherapist(therapist);
-      setIsProfileModalOpen(true);
-    } catch (error) {
-      console.error('Error viewing therapist profile:', error);
-      toast.error("Failed to open therapist profile. Please try again.");
-    }
-  };
 
-  const handleCloseProfileModal = () => {
-    setIsProfileModalOpen(false);
-    setSelectedTherapist(null);
-  };
-
-  const handleBooking = (therapistId: string) => {
-    try {
-      // Input validation
-      if (!therapistId || typeof therapistId !== 'string') {
-        toast.error("Invalid therapist selection. Please try again.");
-        return;
-      }
-
-      // Ensure therapists array exists and find therapist safely
-      if (!Array.isArray(therapists)) {
-        toast.error("Therapist data is not available. Please refresh the page.");
-        return;
-      }
-
-      const therapist = therapists.find(t => t?.id === therapistId);
-      if (!therapist) {
-        toast.error("Selected therapist not found. Please try again.");
-        return;
-      }
-
-      setSelectedTherapist(therapist);
-      setIsBookingModalOpen(true);
-      // Close profile modal if it's open
-      setIsProfileModalOpen(false);
-    } catch (error) {
-      console.error('Error initiating booking:', error);
-      toast.error("Failed to start booking process. Please try again.");
-    }
-  };
-
-  const handleCloseBookingModal = () => {
-    setIsBookingModalOpen(false);
-    setSelectedTherapist(null);
-  };
-
-  const handleBookingSuccess = () => {
-    try {
-      const therapistName = selectedTherapist?.name || 'the therapist';
-      toast.success("Session booked successfully!", {
-        description: `Your session with ${therapistName} has been scheduled.`,
-      });
-    } catch (error) {
-      console.error('Error displaying booking success:', error);
-      // Fallback success message
-      toast.success("Session booked successfully!");
-    }
-  };
 
   const handleMessage = (therapistId: string) => {
     try {
@@ -238,6 +174,26 @@ export default function TherapistListing() {
     } catch (error) {
       console.error('Error navigating to messages:', error);
       toast.error("Failed to open messages. Please try again.");
+    }
+  };
+
+  const handleRequest = (therapistId: string) => {
+    try {
+      // Input validation
+      if (!therapistId || typeof therapistId !== 'string') {
+        toast.error("Invalid therapist selection. Please try again.");
+        return;
+      }
+
+      if (isRequestLoading) {
+        toast.warning("Request already in progress. Please wait...");
+        return;
+      }
+
+      requestTherapist(therapistId);
+    } catch (error) {
+      console.error('Error sending therapist request:', error);
+      toast.error("Failed to send request. Please try again.");
     }
   };
 
@@ -463,8 +419,7 @@ export default function TherapistListing() {
                   <TherapistCard
                     key={therapist.id}
                     therapist={therapist}
-                    onViewProfile={handleViewProfile}
-                    onBooking={handleBooking}
+                    onRequest={handleRequest}
                     onMessage={handleMessage}
                   />
                 );
@@ -501,22 +456,7 @@ export default function TherapistListing() {
         </div>
       </div>
 
-      {/* Therapist Profile Modal */}
-      <TherapistProfileModal
-        therapist={selectedTherapist}
-        isOpen={isProfileModalOpen}
-        onClose={handleCloseProfileModal}
-        onBooking={handleBooking}
-        onMessage={handleMessage}
-      />
 
-      {/* Booking Modal */}
-      <BookingModal
-        therapist={selectedTherapist}
-        isOpen={isBookingModalOpen}
-        onClose={handleCloseBookingModal}
-        onSuccess={handleBookingSuccess}
-      />
     </>
   );
 }

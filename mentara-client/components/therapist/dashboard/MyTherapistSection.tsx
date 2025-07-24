@@ -5,38 +5,38 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageCircle, Calendar, User, Star, MapPin, Clock } from "lucide-react";
+import {
+  MessageCircle,
+  Calendar,
+  User,
+  Star,
+  Clock,
+  Users,
+  Search,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMyTherapists } from "@/hooks/therapist/useMyTherapists";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TherapistRecommendation } from "@/types/api/therapist";
 
-interface ActiveTherapistCardProps {
-  therapist: {
-    id: string;
-    name: string;
-    title: string;
-    bio: string;
-    rating: number;
-    reviewCount: number;
-    specialties: string[];
-    hourlyRate: number;
-    profileImage?: string;
-  };
+export interface ActiveTherapistCardProps {
+  therapist: TherapistRecommendation;
   onViewProfile: (therapistId: string) => void;
   onMessage: (therapistId: string) => void;
   onSchedule: (therapistId: string) => void;
 }
 
-function ActiveTherapistCard({ 
-  therapist, 
-  onViewProfile, 
-  onMessage, 
-  onSchedule 
+function ActiveTherapistCard({
+  therapist,
+  onViewProfile,
+  onMessage,
+  onSchedule,
 }: ActiveTherapistCardProps) {
-  const initials = therapist.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
+  console.log("Therapist:", therapist);
+  const initials = `${therapist.firstName} ${therapist.lastName}`
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
     .toUpperCase();
 
   return (
@@ -44,30 +44,38 @@ function ActiveTherapistCard({
       <CardHeader className="pb-4">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={therapist.profileImage} alt={therapist.name} />
+            <AvatarImage
+              src={therapist.profileImage}
+              alt={`${therapist.firstName} ${therapist.lastName}`}
+            />
             <AvatarFallback className="bg-blue-100 text-blue-600 text-lg font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
-          
+
           <div className="flex-1 space-y-2">
             <div className="flex items-start justify-between">
               <div>
                 <CardTitle className="text-xl font-semibold text-gray-900">
-                  {therapist.name}
+                  {`${therapist.firstName} ${therapist.lastName}`}
                 </CardTitle>
                 <p className="text-gray-600 font-medium">{therapist.title}</p>
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
+              <Badge
+                variant="secondary"
+                className="bg-green-100 text-green-700 hover:bg-green-100"
+              >
                 Active
               </Badge>
             </div>
-            
+
             {/* Rating */}
             <div className="flex items-center gap-2">
               <div className="flex items-center">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium ml-1">{therapist.rating}</span>
+                <span className="text-sm font-medium ml-1">
+                  {therapist.rating}
+                </span>
               </div>
               <span className="text-sm text-gray-500">
                 ({therapist.reviewCount} reviews)
@@ -145,16 +153,17 @@ function EmptyTherapistState() {
       <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
         <Users className="h-12 w-12 text-gray-400" />
       </div>
-      
+
       <h3 className="text-xl font-semibold text-gray-900 mb-2">
         No Active Therapists
       </h3>
-      
+
       <p className="text-gray-600 mb-6 max-w-md mx-auto">
-        You haven't connected with any therapists yet. Browse our qualified therapists 
-        and send connection requests to get started with your mental health journey.
+        You haven't connected with any therapists yet. Browse our qualified
+        therapists and send connection requests to get started with your mental
+        health journey.
       </p>
-      
+
       <Button className="bg-blue-600 hover:bg-blue-700">
         <Search className="h-4 w-4 mr-2" />
         Find a Therapist
@@ -254,7 +263,8 @@ export default function MyTherapistSection() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">My Therapists</h2>
         <p className="text-sm text-gray-600">
-          {therapists.length} active connection{therapists.length !== 1 ? 's' : ''}
+          {therapists.length} active connection
+          {therapists.length !== 1 ? "s" : ""}
         </p>
       </div>
 

@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PhoneCall, MessageSquare, Calendar, Heart } from "lucide-react";
+import { User, UserPlus, MessageSquare, Calendar, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { TherapistCardData } from "@/types/therapist";
 import { Badge } from "@/components/ui/badge";
 import { useFavorites } from "@/hooks/user/useFavorites";
@@ -9,17 +10,16 @@ import { useTherapistReviewStats } from "@/hooks/reviews/useReviews";
 
 interface TherapistCardProps {
   therapist: TherapistCardData;
-  onViewProfile?: (therapist: TherapistCardData) => void;
-  onBooking?: (therapistId: string) => void;
+  onRequest?: (therapistId: string) => void;
   onMessage?: (therapistId: string) => void;
 }
 
 export default function TherapistCard({
   therapist,
-  onViewProfile,
-  onBooking,
+  onRequest,
   onMessage
 }: TherapistCardProps) {
+  const router = useRouter();
   const nextAvailableTime = therapist.availableTimes?.[0];
   const { isFavorite, toggleFavorite } = useFavorites();
   const isTherapistFavorited = isFavorite(therapist.id);
@@ -32,13 +32,15 @@ export default function TherapistCard({
     toggleFavorite(therapist.id);
   };
 
+  const handleViewProfile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/client/profile/${therapist.id}`);
+  };
+
   return (
-    <Card className="w-full overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white transition-all duration-200 hover:border-primary/30 group cursor-pointer">
+    <Card className="w-full overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white transition-all duration-200 hover:border-primary/30 group">
       <CardContent className="p-0">
-        <div
-          className="p-6 flex flex-col h-full"
-          onClick={() => onViewProfile?.(therapist)}
-        >
+        <div className="p-6 flex flex-col h-full">
           {/* Professional Status and Price Section */}
           <div className="flex items-center mb-4 justify-between">
             <div className="flex items-center">
@@ -141,29 +143,39 @@ export default function TherapistCard({
             </div>
 
             {/* Professional Action Buttons */}
-            <div className="flex gap-3 mt-auto">
+            <div className="flex flex-col gap-2 mt-auto">
               <Button
                 variant="default"
-                className="flex-1 gap-2 bg-primary hover:bg-primary/90 text-white transition-colors duration-200 font-medium"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onBooking?.(therapist.id);
-                }}
+                className="w-full gap-2 bg-primary hover:bg-primary/90 text-white transition-colors duration-200 font-medium"
+                onClick={handleViewProfile}
               >
-                <PhoneCall size={16} />
-                Book Session
+                <User size={16} />
+                View Profile
               </Button>
-              <Button
-                variant="outline"
-                className="flex-1 gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 font-medium"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMessage?.(therapist.id);
-                }}
-              >
-                <MessageSquare size={16} />
-                Message
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRequest?.(therapist.id);
+                  }}
+                >
+                  <UserPlus size={16} />
+                  Send Request
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMessage?.(therapist.id);
+                  }}
+                >
+                  <MessageSquare size={16} />
+                  Send Message
+                </Button>
+              </div>
             </div>
           </div>
         </div>

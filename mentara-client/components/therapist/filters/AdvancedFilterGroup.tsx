@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { 
   TherapistFilters, 
   DEFAULT_FILTERS,
-  INSURANCE_OPTIONS,
   LANGUAGE_OPTIONS,
   EXPERIENCE_RANGE,
 } from "@/types/filters";
@@ -43,35 +42,6 @@ export default function AdvancedFilterGroup({
   return (
     <Card>
       <CardContent className="p-4 space-y-6">
-        {/* Insurance */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium text-gray-700">Insurance Accepted</Label>
-          <div className="flex flex-wrap gap-2">
-            {INSURANCE_OPTIONS.map((insurance) => (
-              <Badge
-                key={insurance.value}
-                variant={filters.insurance.includes(insurance.value) ? "default" : "outline"}
-                className="cursor-pointer hover:bg-primary/80 transition-colors"
-                onClick={() => 
-                  updateFilter('insurance', toggleArrayItem(filters.insurance, insurance.value))
-                }
-              >
-                {insurance.label}
-              </Badge>
-            ))}
-          </div>
-          {filters.insurance.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => updateFilter('insurance', [])}
-              className="text-xs h-6"
-            >
-              Clear all
-            </Button>
-          )}
-        </div>
-
         {/* Languages */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-gray-700">Languages Spoken</Label>

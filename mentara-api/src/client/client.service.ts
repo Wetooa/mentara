@@ -182,7 +182,7 @@ export class ClientService {
       province: therapist.province,
       isActive: therapist.status === 'APPROVED',
       bio: therapist.user.bio || undefined,
-      profileImage: undefined,
+      profileImage: therapist.user.avatarUrl || undefined,
     };
   }
 
@@ -207,7 +207,7 @@ export class ClientService {
     }
 
     // Transform the Prisma results to match TherapistRecommendation type
-    return assignments.map(assignment => {
+    return assignments.map((assignment) => {
       const therapist = assignment.therapist;
       return {
         id: therapist.userId,
@@ -220,7 +220,7 @@ export class ClientService {
         province: therapist.province,
         isActive: therapist.status === 'APPROVED',
         bio: therapist.user.bio || undefined,
-        profileImage: undefined,
+        profileImage: therapist.user.avatarUrl || undefined,
       };
     });
   }
@@ -347,7 +347,9 @@ export class ClientService {
         include: { user: true },
       });
       if (!therapist) {
-        this.logger.warn(`Therapist not found for request, therapistId: ${therapistId}`);
+        this.logger.warn(
+          `Therapist not found for request, therapistId: ${therapistId}`,
+        );
         throw new NotFoundException('Therapist not found');
       }
 
@@ -367,10 +369,14 @@ export class ClientService {
 
       if (existingRequest) {
         if (existingRequest.status === 'active') {
-          throw new BadRequestException('You are already connected to this therapist');
+          throw new BadRequestException(
+            'You are already connected to this therapist',
+          );
         }
         if (existingRequest.status === 'inactive') {
-          throw new BadRequestException('Request already sent to this therapist');
+          throw new BadRequestException(
+            'Request already sent to this therapist',
+          );
         }
       }
 
@@ -386,17 +392,22 @@ export class ClientService {
       // Return therapist information
       return {
         id: therapist.userId,
-        name: `${therapist.user.firstName} ${therapist.user.lastName}`.trim(),
-        title: therapist.professionalLicenseType || 'Licensed Therapist',
-        bio: therapist.user.bio || '',
-        rating: 4.5, // TODO: Calculate from reviews
-        reviewCount: 0, // TODO: Get actual review count
-        specialties: therapist.areasOfExpertise || [],
-        hourlyRate: Number(therapist.hourlyRate) || 0,
-        profileImage: therapist.user.avatarUrl,
+        firstName: therapist.user.firstName,
+        lastName: therapist.user.lastName,
+        title: 'Therapist',
+        specialties: therapist.areasOfExpertise,
+        hourlyRate: Number(therapist.hourlyRate),
+        experience: therapist.yearsOfExperience || 0,
+        province: therapist.province,
+        isActive: therapist.status === 'APPROVED',
+        bio: therapist.user.bio || undefined,
+        profileImage: undefined,
       };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
 
@@ -404,7 +415,9 @@ export class ClientService {
         this.logger.error(
           `Database error in requestTherapist: ${error.code} - ${error.message}`,
         );
-        throw new InternalServerErrorException('Failed to send therapist request');
+        throw new InternalServerErrorException(
+          'Failed to send therapist request',
+        );
       }
 
       this.logger.error(

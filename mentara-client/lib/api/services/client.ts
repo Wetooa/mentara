@@ -47,8 +47,12 @@ export function createClientService(client: AxiosInstance) {
      * Check if client needs therapist recommendations
      * GET /client/needs-therapist-recommendations
      */
-    async needsTherapistRecommendations(): Promise<{ needsTherapistRecommendations: boolean }> {
-      const response = await client.get("client/needs-therapist-recommendations");
+    async needsTherapistRecommendations(): Promise<{
+      needsTherapistRecommendations: boolean;
+    }> {
+      const response = await client.get(
+        "client/needs-therapist-recommendations"
+      );
       return response.data;
     },
 
@@ -57,7 +61,9 @@ export function createClientService(client: AxiosInstance) {
      * PUT /client/mark-therapist-recommendations-seen
      */
     async markTherapistRecommendationsSeen(): Promise<{ success: boolean }> {
-      const response = await client.put("client/mark-therapist-recommendations-seen");
+      const response = await client.put(
+        "client/mark-therapist-recommendations-seen"
+      );
       return response.data;
     },
 
@@ -68,7 +74,9 @@ export function createClientService(client: AxiosInstance) {
      * Get assigned therapist
      * GET /client/therapist
      */
-    async getAssignedTherapist(): Promise<{ therapist: TherapistRecommendation | null }> {
+    async getAssignedTherapist(): Promise<{
+      therapist: TherapistRecommendation | null;
+    }> {
       const response = await client.get("client/therapist");
       return response.data;
     },
@@ -77,7 +85,9 @@ export function createClientService(client: AxiosInstance) {
      * Assign a therapist to the client
      * POST /client/therapist
      */
-    async assignTherapist(therapistId: string): Promise<{ therapist: TherapistRecommendation }> {
+    async assignTherapist(
+      therapistId: string
+    ): Promise<{ therapist: TherapistRecommendation }> {
       const response = await client.post("client/therapist", { therapistId });
       return response.data;
     },
@@ -95,8 +105,11 @@ export function createClientService(client: AxiosInstance) {
      * Get all assigned therapists
      * GET /client/therapists
      */
-    async getAssignedTherapists(): Promise<{ therapists: TherapistRecommendation[] }> {
+    async getAssignedTherapists(): Promise<{
+      therapists: TherapistRecommendation[];
+    }> {
       const response = await client.get("client/therapists");
+      console.log("Assigned therapists response:", response.data);
       return response.data;
     },
 
@@ -104,8 +117,13 @@ export function createClientService(client: AxiosInstance) {
      * Send a therapist connection request
      * POST /client/therapist/request
      */
-    async requestTherapist(therapistId: string): Promise<{ therapist: TherapistRecommendation }> {
-      const response = await client.post("client/therapist/request", { therapistId });
+    async requestTherapist(
+      therapistId: string
+    ): Promise<{ therapist: TherapistRecommendation }> {
+      const response = await client.post("client/therapist/request", {
+        therapistId,
+      });
+      console.log("Therapist request response:", response.data);
       return response.data;
     },
   };
