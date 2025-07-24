@@ -16,24 +16,52 @@ export default function TherapistMessagesPage() {
 
   const handleCallInitiate = async (conversationId: string, type: 'audio' | 'video') => {
     try {
+      console.log('🚀 [TherapistMessages] Starting call initiation:', { conversationId, type, userId: user?.id });
       toast.info(`Initiating ${type} call...`);
       
-      // For instant calls from messaging, we need to create an immediate meeting
-      // and then navigate to it. The backend should handle creating a meeting
-      // that starts immediately for video/audio calls from conversations.
-      
       if (!user) {
+        console.error('❌ [TherapistMessages] No authenticated user');
         toast.error('Authentication required to start a call');
         return;
       }
 
-      // We'll use the conversation ID as a temporary meeting ID
-      // and let the meeting room handle the call setup
-      // The meeting room should be enhanced to handle instant calls
-      router.push(`/therapist/meeting/${conversationId}?type=${type}&instant=true&callType=${type}`);
+      console.log('📞 [TherapistMessages] Fetching conversation details...');
+      // Get conversation details to find the other participant
+      const conversation = await api.messaging.getConversation(conversationId);
+      console.log('✅ [TherapistMessages] Conversation fetched:', {
+        id: conversation.id,
+        participants: conversation.participants.map(p => ({ id: p.userId, name: `${p.user.firstName} ${p.user.lastName}` }))
+      });
+      
+      const otherParticipant = conversation.participants.find(p => p.userId !== user.id);
+      
+      if (!otherParticipant) {
+        console.error('❌ [TherapistMessages] No other participant found');
+        toast.error('Unable to find call recipient');
+        return;
+      }
+
+      console.log('🎯 [TherapistMessages] Found recipient:', {
+        userId: otherParticipant.userId,
+        name: `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
+      });
+
+      // Navigate to the new video call page with recipient ID
+      const callUrl = `/therapist/video-call?recipientId=${otherParticipant.userId}&type=${type}`;
+      console.log('🔗 [TherapistMessages] Navigating to:', callUrl);
+      router.push(callUrl);
       
     } catch (error) {
-      console.error('Failed to initiate call:', error);
+      console.error('❌ [TherapistMessages] Failed to initiate call:', error);
+      console.error('❌ [TherapistMessages] Error details:', {
+        conversationId,
+        type,
+        userId: user?.id,
+        error: error instanceof Error ? {
+          message: error.message,
+          stack: error.stack
+        } : error
+      });
       toast.error(`Failed to start ${type} call. Please try again.`);
     }
   };

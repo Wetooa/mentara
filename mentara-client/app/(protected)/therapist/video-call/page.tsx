@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,41 +34,112 @@ export default function TherapistVideoCallPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const initializationAttempted = useRef<string | false>(false);
 
   // Initialize call based on URL parameters
   useEffect(() => {
     const initializeCall = async () => {
+      // Prevent double execution (React Strict Mode or multiple renders)
+      const initKey = `${callId || 'no-call'}-${recipientId || 'no-recipient'}`;
+      if (initializationAttempted.current === initKey) {
+        console.log('🚫 [TherapistVideoCall] Initialization already attempted for:', initKey);
+        return;
+      }
+      initializationAttempted.current = initKey;
+
       try {
+        console.log('🚀 [TherapistVideoCall] Initializing call:', { 
+          callId, 
+          recipientId, 
+          userId: user?.id,
+          currentCallState: callState,
+          initKey 
+        });
         setIsLoading(true);
         setError(null);
 
         if (callId) {
-          // Joining an existing call (called party)
+          console.log('📞 [TherapistVideoCall] Handling existing call ID:', callId);
+          console.log('📞 [TherapistVideoCall] Current call state:', {
+            status: callState.status,
+            currentCallId: callState.currentCallId,
+            remotePeerId: callState.remotePeerId,
+            isInitiator: callState.isInitiator
+          });
+          
+          // Check if we're already in this call
           if (callState.currentCallId === callId) {
-            // Call already in progress
+            console.log('✅ [TherapistVideoCall] Already in call, stopping loading');
             setIsLoading(false);
-          } else {
-            // Accept the incoming call
-            acceptCall(callId);
+            return;
           }
+          
+          // Accept the incoming call if not already handled
+          console.log('📞 [TherapistVideoCall] Accepting call:', callId);
+          acceptCall(callId);
+          
+          // Wait a bit for WebSocket events to process
+          setTimeout(() => {
+            console.log('⏰ [TherapistVideoCall] Post-accept call state:', {
+              status: callState.status,
+              currentCallId: callState.currentCallId,
+              remotePeerId: callState.remotePeerId
+            });
+            setIsLoading(false);
+          }, 2000);
+          
         } else if (recipientId) {
+          console.log('📞 [TherapistVideoCall] Initiating new call to:', recipientId);
           // Initiating a new call
           const result = await initiateCall(recipientId);
+          console.log('🎯 [TherapistVideoCall] Call initiation result:', result);
           if (!result.success) {
+            console.error('❌ [TherapistVideoCall] Call initiation failed:', result.error);
             setError(result.error || 'Failed to initiate call');
+          } else {
+            console.log('✅ [TherapistVideoCall] Call initiated successfully');
           }
+          setIsLoading(false);
         } else {
+          console.error('❌ [TherapistVideoCall] Missing parameters');
           setError('No call ID or recipient ID provided');
+          setIsLoading(false);
         }
       } catch (err) {
+        console.error('❌ [TherapistVideoCall] Error in initializeCall:', err);
         setError('Failed to initialize video call');
-      } finally {
         setIsLoading(false);
       }
     };
 
     initializeCall();
-  }, [callId, recipientId, acceptCall, initiateCall, callState.currentCallId]);
+  }, [callId, recipientId]); // Only depend on URL parameters
+
+  // Monitor call state changes
+  useEffect(() => {
+    console.log('🔄 [TherapistVideoCall] Call state changed:', {
+      status: callState.status,
+      currentCallId: callState.currentCallId,
+      remotePeerId: callState.remotePeerId,
+      isInitiator: callState.isInitiator,
+      error: callState.error,
+      urlCallId: callId,
+      isLoading
+    });
+
+    // If we have matching call IDs and we're in an active state, stop loading
+    if (callId && callState.currentCallId === callId && callState.status !== 'idle') {
+      console.log('✅ [TherapistVideoCall] Call states synchronized, stopping loading');
+      setIsLoading(false);
+    }
+
+    // If we have an error in call state, show it
+    if (callState.error && !error) {
+      console.error('❌ [TherapistVideoCall] Call state error:', callState.error);
+      setError(callState.error);
+      setIsLoading(false);
+    }
+  }, [callState, callId, error, isLoading]);
 
   // Track session start time
   useEffect(() => {
@@ -278,7 +349,7 @@ export default function TherapistVideoCallPage() {
     );
   }
 
-  // Default fallback
+  // Default fallback - show debug info in development
   return (
     <div className="h-screen w-full bg-gray-900 flex items-center justify-center">
       <Card className="w-96 bg-gray-800 border-gray-700">
@@ -292,14 +363,40 @@ export default function TherapistVideoCallPage() {
           <p className="text-gray-400 mb-4">
             There is no active therapy session.
           </p>
-          <Button
-            onClick={handleBack}
-            variant="outline"
-            className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Patients
-          </Button>
+          
+          {/* Debug information in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mb-4 p-3 bg-gray-700 rounded text-xs">
+              <div className="text-green-400 font-semibold mb-2">Debug Info:</div>
+              <div className="text-gray-300 space-y-1">
+                <div>URL Call ID: {callId || 'none'}</div>
+                <div>URL Recipient ID: {recipientId || 'none'}</div>
+                <div>Call Status: {callState.status}</div>
+                <div>State Call ID: {callState.currentCallId || 'none'}</div>
+                <div>Remote Peer: {callState.remotePeerId || 'none'}</div>
+                <div>Is Initiator: {callState.isInitiator ? 'yes' : 'no'}</div>
+                <div>Loading: {isLoading ? 'yes' : 'no'}</div>
+                <div>Error: {error || callState.error || 'none'}</div>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex space-x-3">
+            <Button
+              onClick={handleBack}
+              variant="outline"
+              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-800"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Patients
+            </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              className="flex-1"
+            >
+              Retry
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

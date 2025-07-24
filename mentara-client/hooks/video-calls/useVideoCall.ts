@@ -8,6 +8,7 @@ import {
   connectWebSocket, 
   disconnectWebSocket, 
   emitEvent, 
+  emitEventWithResponse,
   onEvent, 
   getConnectionState 
 } from '@/lib/websocket';
@@ -117,11 +118,24 @@ export function useVideoCall(): UseVideoCallReturn {
 
     // Handle call accepted
     const handleCallAccepted = (data: { callId: string; timestamp: string }) => {
+      console.log('✅ [useVideoCall] handleCallAccepted called:', {
+        receivedCallId: data.callId,
+        currentCallId: callState.currentCallId,
+        match: data.callId === callState.currentCallId,
+        currentStatus: callState.status
+      });
+      
       if (data.callId === callState.currentCallId) {
+        console.log('✅ [useVideoCall] Call was accepted - updating status to calling');
         setCallState(prev => ({
           ...prev,
           status: 'calling',
         }));
+      } else {
+        console.warn('⚠️ [useVideoCall] Call ID mismatch in handleCallAccepted', {
+          received: data.callId,
+          current: callState.currentCallId
+        });
       }
     };
 
@@ -134,13 +148,27 @@ export function useVideoCall(): UseVideoCallReturn {
 
     // Handle WebRTC connection start
     const handleStartWebRTC = (data: StartWebRTCConnectionData) => {
+      console.log('🚀 [useVideoCall] handleStartWebRTC called:', {
+        receivedCallId: data.callId,
+        currentCallId: callState.currentCallId,
+        isInitiator: data.isInitiator,
+        match: data.callId === callState.currentCallId,
+        currentStatus: callState.status
+      });
+      
       if (data.callId === callState.currentCallId) {
+        console.log('✅ [useVideoCall] Starting WebRTC connection');
         setCallState(prev => ({
           ...prev,
           status: 'in_call',
           isInitiator: data.isInitiator,
         }));
         initializePeerConnection(data.isInitiator);
+      } else {
+        console.warn('⚠️ [useVideoCall] Call ID mismatch in handleStartWebRTC', {
+          received: data.callId,
+          current: callState.currentCallId
+        });
       }
     };
 
@@ -312,13 +340,17 @@ export function useVideoCall(): UseVideoCallReturn {
     }
   }, [callState.currentCallId, callState.remotePeerId, user?.id, resetCallState]);
 
+  // Create a ref to track current call state to avoid dependency issues
+  const callStateRef = useRef(callState);
+  callStateRef.current = callState;
+
   // Initiate call
   const initiateCall = useCallback(async (recipientId: string) => {
     if (!isAuthenticated || !user) {
       return { success: false, error: 'Not authenticated' };
     }
 
-    if (callState.status !== 'idle') {
+    if (callStateRef.current.status !== 'idle') {
       return { success: false, error: 'Already in a call' };
     }
 
@@ -329,7 +361,7 @@ export function useVideoCall(): UseVideoCallReturn {
         remotePeerId: recipientId,
       }));
 
-      const response = await emitEvent('initiate_video_call', { recipientId });
+      const response = await emitEventWithResponse('initiate_video_call', { recipientId });
       
       if (response.success) {
         setCallState(prev => ({
@@ -343,37 +375,78 @@ export function useVideoCall(): UseVideoCallReturn {
         return { success: false, error: response.error || 'Failed to initiate call' };
       }
     } catch (error) {
+      console.error('❌ [useVideoCall] initiateCall failed:', error);
+      console.error('❌ [useVideoCall] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        recipientId,
+        userAuthenticated: isAuthenticated,
+        userId: user?.id,
+        callState: callStateRef.current,
+        wsConnected: getConnectionState(),
+      });
       resetCallState();
-      return { success: false, error: 'Network error' };
+      const errorMessage = error instanceof Error ? error.message : 'Network error';
+      return { success: false, error: `Call initiation failed: ${errorMessage}` };
     }
-  }, [isAuthenticated, user, callState.status, resetCallState]);
+  }, [isAuthenticated, user, resetCallState]);
 
   // Accept call
   const acceptCall = useCallback((callId: string) => {
-    if (callState.currentCallId === callId) {
+    console.log('📞 [useVideoCall] acceptCall called:', {
+      providedCallId: callId,
+      currentCallId: callStateRef.current.currentCallId,
+      currentStatus: callStateRef.current.status,
+      remotePeerId: callStateRef.current.remotePeerId,
+      match: callStateRef.current.currentCallId === callId
+    });
+    
+    if (callStateRef.current.currentCallId === callId) {
+      console.log('✅ [useVideoCall] Accepting call - emitting video_call_answer');
       emitEvent('video_call_answer', { callId, accept: true });
+    } else {
+      console.warn('⚠️ [useVideoCall] Call ID mismatch - cannot accept', {
+        provided: callId,
+        current: callStateRef.current.currentCallId
+      });
+      
+      // If we don't have a current call but received a callId, set it up
+      if (!callStateRef.current.currentCallId && callId) {
+        console.log('🔧 [useVideoCall] Setting up call state for acceptance');
+        setCallState(prev => ({
+          ...prev,
+          currentCallId: callId,
+          status: 'receiving',
+        }));
+        
+        // Accept after state is set
+        setTimeout(() => {
+          console.log('✅ [useVideoCall] Accepting call after state setup');
+          emitEvent('video_call_answer', { callId, accept: true });
+        }, 100);
+      }
     }
-  }, [callState.currentCallId]);
+  }, []);
 
   // Decline call
   const declineCall = useCallback((callId: string) => {
-    if (callState.currentCallId === callId) {
+    if (callStateRef.current.currentCallId === callId) {
       emitEvent('video_call_answer', { callId, accept: false });
       resetCallState();
     }
-  }, [callState.currentCallId, resetCallState]);
+  }, [resetCallState]);
 
   // End call
   const endCall = useCallback(() => {
-    if (callState.currentCallId) {
-      emitEvent('video_call_end', { callId: callState.currentCallId });
+    if (callStateRef.current.currentCallId) {
+      emitEvent('video_call_end', { callId: callStateRef.current.currentCallId });
       resetCallState();
       if (peerRef.current) {
         peerRef.current.destroy();
         peerRef.current = null;
       }
     }
-  }, [callState.currentCallId, resetCallState]);
+  }, [resetCallState]);
 
   // Toggle video
   const toggleVideo = useCallback(() => {

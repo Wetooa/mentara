@@ -657,6 +657,32 @@ export const emitEvent = (event: string, data?: any) => {
     socket.emit(event, data);
   }
 };
+
+// Enhanced version that returns a promise with response
+export const emitEventWithResponse = (event: string, data?: any, timeout = 10000): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const socket = getMessagingSocket();
+    
+    if (!socket?.connected) {
+      console.error('❌ [WebSocket] Socket not connected for event:', event);
+      reject(new Error('WebSocket not connected'));
+      return;
+    }
+
+    console.log('🚀 [WebSocket] Emitting event:', event, 'with data:', data);
+
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Timeout waiting for response to ${event}`));
+    }, timeout);
+
+    // Use acknowledgment callback to get response
+    socket.emit(event, data, (response: any) => {
+      clearTimeout(timeoutId);
+      console.log('✅ [WebSocket] Received response for:', event, response);
+      resolve(response);
+    });
+  });
+};
 export const onEvent = (event: string, callback: (...args: any[]) => void) => {
   const socketInstance = getSocketInstance('/messaging');
   return socketInstance.on(event, callback);

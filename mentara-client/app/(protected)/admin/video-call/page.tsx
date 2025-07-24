@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,10 +33,19 @@ export default function AdminVideoCallPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const initializationAttempted = useRef<string | false>(false);
 
   // Initialize call based on URL parameters
   useEffect(() => {
     const initializeCall = async () => {
+      // Prevent double execution (React Strict Mode or multiple renders)
+      const initKey = `${callId || 'no-call'}-${recipientId || 'no-recipient'}`;
+      if (initializationAttempted.current === initKey) {
+        console.log('🚫 [AdminVideoCall] Initialization already attempted for:', initKey);
+        return;
+      }
+      initializationAttempted.current = initKey;
+
       try {
         setIsLoading(true);
         setError(null);
@@ -67,7 +76,7 @@ export default function AdminVideoCallPage() {
     };
 
     initializeCall();
-  }, [callId, recipientId, acceptCall, initiateCall, callState.currentCallId]);
+  }, [callId, recipientId]); // Only depend on URL parameters
 
   // Handle call end - redirect back to admin dashboard
   const handleEndCall = () => {

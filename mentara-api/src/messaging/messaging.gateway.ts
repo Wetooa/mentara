@@ -566,6 +566,12 @@ export class MessagingGateway
       return { success: false, error: 'User not authenticated' };
     }
 
+    // Check if server is properly initialized
+    if (!this.server || !this.server.sockets) {
+      this.logger.error('❌ [VIDEO CALL] Socket.IO server not properly initialized');
+      return { success: false, error: 'Server not ready' };
+    }
+
     const { recipientId } = data;
     
     // Check if recipient is connected
@@ -604,6 +610,28 @@ export class MessagingGateway
     const recipientUserRoom = this.getUserRoom(recipientId);
     const callerUser = this.connectedUsers.get(callerId)?.user;
     
+    this.logger.log(`📞 [VIDEO CALL] Sending incoming call notification:`);
+    this.logger.log(`   - Recipient ID: ${recipientId}`);
+    this.logger.log(`   - Recipient Room: ${recipientUserRoom}`);
+    this.logger.log(`   - Caller: ${callerUser ? `${callerUser.firstName} ${callerUser.lastName}` : 'Unknown User'}`);
+    this.logger.log(`   - Call ID: ${callId}`);
+    this.logger.log(`   - Connected Users Count: ${this.connectedUsers.size}`);
+    this.logger.log(`   - User-to-Socket Map Size: ${this.userToSocket.size}`);
+    this.logger.log(`   - Socket-to-User Map Size: ${this.socketToUser.size}`);
+    
+    // Double-check recipient is still connected (we already checked above, but being extra safe)
+    if (!this.userToSocket.get(recipientId)) {
+      this.logger.warn(`⚠️ [VIDEO CALL] Recipient ${recipientId} disconnected before call notification could be sent`);
+      return {
+        success: false,
+        error: 'Recipient went offline',
+        recipientId,
+        recipientRoom: recipientUserRoom,
+      };
+    }
+    
+    this.logger.log(`   - Recipient is connected, sending notification...`);
+    
     this.server.to(recipientUserRoom).emit('incoming_video_call', {
       callId,
       callerId,
@@ -611,6 +639,8 @@ export class MessagingGateway
       callerInfo: callerUser,
       timestamp: new Date(),
     });
+    
+    this.logger.log(`✅ [VIDEO CALL] Incoming call notification sent to ${recipientUserRoom}`);
 
     // Update call status to ringing
     callSession.status = 'ringing';

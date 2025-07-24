@@ -79,6 +79,14 @@ export function useCallNotifications(): UseCallNotificationsReturn {
 
   // Handle incoming video call
   const handleIncomingCall = useCallback((data: IncomingVideoCallData) => {
+    console.log('📞 [useCallNotifications] Received incoming video call:', data);
+    console.log('📞 [useCallNotifications] Call details:', {
+      callId: data.callId,
+      callerId: data.callerId,
+      callerName: data.callerName,
+      timestamp: data.timestamp
+    });
+    
     setIncomingCall(data);
     setShowIncomingCallNotification(true);
     
@@ -88,6 +96,7 @@ export function useCallNotifications(): UseCallNotificationsReturn {
     // Auto-dismiss after 30 seconds
     clearNotificationTimeout();
     timeoutRef.current = setTimeout(() => {
+      console.log('⏰ [useCallNotifications] Auto-declining call after timeout:', data.callId);
       // Auto-decline the call after timeout
       emitEvent('video_call_decline', { callId: data.callId });
       setIncomingCall(null);
@@ -131,15 +140,23 @@ export function useCallNotifications(): UseCallNotificationsReturn {
     const cleanupFunctions: (() => void)[] = [];
 
     if (isAuthenticated) {
+      console.log('🔌 [useCallNotifications] Setting up WebSocket event listeners...');
+      console.log('🔌 [useCallNotifications] WebSocket connection state:', getConnectionState());
+      
       cleanupFunctions.push(
         onEvent('incoming_video_call', handleIncomingCall),
         onEvent('video_call_declined', handleCallDeclined),
         onEvent('video_call_accepted', handleCallAccepted),
         onEvent('video_call_ended', handleCallEnded)
       );
+      
+      console.log('✅ [useCallNotifications] Event listeners registered');
+    } else {
+      console.log('❌ [useCallNotifications] Not authenticated - skipping event listeners');
     }
 
     return () => {
+      console.log('🧹 [useCallNotifications] Cleaning up event listeners');
       cleanupFunctions.forEach(cleanup => cleanup());
       clearNotificationTimeout();
       stopRingtone();

@@ -143,6 +143,36 @@ export class MessagingController {
     }
   }
 
+  @Get('conversations/:conversationId')
+  async getConversationById(
+    @CurrentUserId() userId: string,
+    @Param('conversationId') conversationId: string,
+  ) {
+    console.log('🔍 [MESSAGING CONTROLLER] getConversationById endpoint called');
+    console.log('👤 [USER ID]', userId);
+    console.log('💬 [CONVERSATION ID]', conversationId);
+    
+    try {
+      const result = await this.messagingService.getConversationById(
+        userId,
+        conversationId,
+      );
+      
+      console.log('✅ [CONTROLLER RESPONSE] Returning conversation details');
+      console.log('📝 [RESPONSE SUMMARY]:', {
+        id: result.id,
+        type: result.type,
+        title: result.title,
+        participantCount: result.participants?.length || 0,
+      });
+      
+      return result;
+    } catch (error) {
+      console.error('❌ [CONTROLLER ERROR] getConversationById failed:', error);
+      throw error;
+    }
+  }
+
   @Get('conversations/:conversationId/messages')
   async getConversationMessages(
     @CurrentUserId() userId: string,

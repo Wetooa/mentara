@@ -13,6 +13,7 @@ import {
   Video
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCallNotifications } from '@/hooks/video-calls/useCallNotifications';
 import type { IncomingCallNotificationProps } from '@/types/api/video-calls';
 
 export function IncomingCallNotification({
@@ -197,6 +198,41 @@ export function IncomingCallNotification({
         <div className="absolute inset-0 rounded-lg bg-blue-400 animate-ping opacity-10 animation-delay-75"></div>
       </div>
     </div>
+  );
+}
+
+// Standalone component that uses the hook - this is what should be used in layouts
+export function IncomingCallNotificationContainer() {
+  console.log('🔔 [IncomingCallNotificationContainer] Component rendered');
+  
+  const {
+    incomingCall,
+    showIncomingCallNotification,
+    acceptIncomingCall,
+    declineIncomingCall,
+  } = useCallNotifications();
+
+  console.log('🔔 [IncomingCallNotificationContainer] State:', {
+    hasIncomingCall: !!incomingCall,
+    showNotification: showIncomingCallNotification,
+    callId: incomingCall?.callId,
+    callerName: incomingCall?.callerName
+  });
+
+  if (!showIncomingCallNotification || !incomingCall) {
+    console.log('🔔 [IncomingCallNotificationContainer] Not showing notification');
+    return null;
+  }
+
+  console.log('🔔 [IncomingCallNotificationContainer] Rendering notification');
+
+  return (
+    <IncomingCallNotification
+      incomingCall={incomingCall}
+      onAccept={acceptIncomingCall}
+      onDecline={declineIncomingCall}
+      onTimeout={declineIncomingCall}
+    />
   );
 }
 

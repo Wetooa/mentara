@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,41 +32,120 @@ export default function ClientVideoCallPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const initializationAttempted = useRef<string | false>(false);
 
   // Initialize call based on URL parameters
   useEffect(() => {
     const initializeCall = async () => {
+      // Prevent double execution (React Strict Mode or multiple renders)
+      const initKey = `${callId || 'no-call'}-${recipientId || 'no-recipient'}`;
+      if (initializationAttempted.current === initKey) {
+        console.log('🚫 [ClientVideoCall] Initialization already attempted for:', initKey);
+        return;
+      }
+      initializationAttempted.current = initKey;
+
+      console.log('🎬 [ClientVideoCall] Initializing call with:', {
+        callId,
+        recipientId,
+        currentCallState: callState,
+        userRole: user?.role,
+        userId: user?.id
+      });
+
       try {
         setIsLoading(true);
         setError(null);
 
         if (callId) {
-          // Joining an existing call (called party)
+          console.log('📞 [ClientVideoCall] Handling existing call ID:', callId);
+          console.log('📞 [ClientVideoCall] Current call state:', {
+            status: callState.status,
+            currentCallId: callState.currentCallId,
+            remotePeerId: callState.remotePeerId,
+            isInitiator: callState.isInitiator
+          });
+          
+          // Check if we're already in this call
           if (callState.currentCallId === callId) {
-            // Call already in progress
+            console.log('✅ [ClientVideoCall] Already in call, stopping loading');
             setIsLoading(false);
-          } else {
-            // Accept the incoming call
-            acceptCall(callId);
+            return;
           }
+          
+          // Accept the incoming call if not already handled
+          console.log('📞 [ClientVideoCall] Accepting call:', callId);
+          acceptCall(callId);
+          
+          // Wait a bit for WebSocket events to process
+          setTimeout(() => {
+            console.log('⏰ [ClientVideoCall] Post-accept call state:', {
+              status: callState.status,
+              currentCallId: callState.currentCallId,
+              remotePeerId: callState.remotePeerId
+            });
+            setIsLoading(false);
+          }, 2000);
+          
         } else if (recipientId) {
+          console.log('📞 [ClientVideoCall] Initiating new call to:', recipientId);
           // Initiating a new call
           const result = await initiateCall(recipientId);
           if (!result.success) {
+            console.error('❌ [ClientVideoCall] Failed to initiate call:', result.error);
             setError(result.error || 'Failed to initiate call');
+          } else {
+            console.log('✅ [ClientVideoCall] Call initiated successfully');
           }
+          setIsLoading(false);
         } else {
+          console.error('❌ [ClientVideoCall] No call ID or recipient ID provided');
           setError('No call ID or recipient ID provided');
+          setIsLoading(false);
         }
       } catch (err) {
+        console.error('❌ [ClientVideoCall] Failed to initialize video call:', err);
         setError('Failed to initialize video call');
-      } finally {
         setIsLoading(false);
       }
     };
 
     initializeCall();
-  }, [callId, recipientId, acceptCall, initiateCall, callState.currentCallId]);
+  }, [callId, recipientId]); // Only depend on URL parameters
+
+  // Monitor call state changes
+  useEffect(() => {
+    console.log('🔄 [ClientVideoCall] Call state changed:', {
+      status: callState.status,
+      currentCallId: callState.currentCallId,
+      remotePeerId: callState.remotePeerId,
+      isInitiator: callState.isInitiator,
+      error: callState.error,
+      urlCallId: callId,
+      isLoading
+    });
+
+    // If we have a callId from URL but the call state shows we're in a different call or idle
+    if (callId && callState.currentCallId && callState.currentCallId !== callId) {
+      console.warn('⚠️ [ClientVideoCall] Call ID mismatch - URL vs State:', {
+        urlCallId: callId,
+        stateCallId: callState.currentCallId
+      });
+    }
+
+    // If we have matching call IDs and we're in an active state, stop loading
+    if (callId && callState.currentCallId === callId && callState.status !== 'idle') {
+      console.log('✅ [ClientVideoCall] Call states synchronized, stopping loading');
+      setIsLoading(false);
+    }
+
+    // If we have an error in call state, show it
+    if (callState.error && !error) {
+      console.error('❌ [ClientVideoCall] Call state error:', callState.error);
+      setError(callState.error);
+      setIsLoading(false);
+    }
+  }, [callState, callId, error, isLoading]);
 
   // Handle call end - redirect back to previous page
   const handleEndCall = () => {
@@ -221,7 +300,7 @@ export default function ClientVideoCallPage() {
     );
   }
 
-  // Default fallback
+  // Default fallback - show debug info in development
   return (
     <div className="h-screen w-full bg-gray-900 flex items-center justify-center">
       <Card className="w-96 bg-gray-800 border-gray-700">
@@ -235,14 +314,40 @@ export default function ClientVideoCallPage() {
           <p className="text-gray-400 mb-4">
             There is no active video call session.
           </p>
-          <Button
-            onClick={handleBack}
-            variant="outline"
-            className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Go Back
-          </Button>
+          
+          {/* Debug information in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mb-4 p-3 bg-gray-700 rounded text-xs">
+              <div className="text-green-400 font-semibold mb-2">Debug Info:</div>
+              <div className="text-gray-300 space-y-1">
+                <div>URL Call ID: {callId || 'none'}</div>
+                <div>URL Recipient ID: {recipientId || 'none'}</div>
+                <div>Call Status: {callState.status}</div>
+                <div>State Call ID: {callState.currentCallId || 'none'}</div>
+                <div>Remote Peer: {callState.remotePeerId || 'none'}</div>
+                <div>Is Initiator: {callState.isInitiator ? 'yes' : 'no'}</div>
+                <div>Loading: {isLoading ? 'yes' : 'no'}</div>
+                <div>Error: {error || callState.error || 'none'}</div>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex space-x-3">
+            <Button
+              onClick={handleBack}
+              variant="outline"
+              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-800"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Go Back
+            </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              className="flex-1"
+            >
+              Retry
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

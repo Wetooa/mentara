@@ -16,11 +16,13 @@ const Picker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 interface MessageChatAreaProps {
   contactId: string;
   enableRealtime?: boolean;
+  onCallInitiate?: (contactId: string, type: 'audio' | 'video') => void;
 }
 
 export function MessageChatArea({
   contactId,
   enableRealtime = true,
+  onCallInitiate,
 }: MessageChatAreaProps) {
   const { accessToken } = useAuth();
   const api = useApi();
@@ -197,7 +199,7 @@ export function MessageChatArea({
             <div className="text-red-500 text-sm">Failed to load contact information</div>
           </div>
         ) : (
-          <ChatHeader contact={contact} />
+          <ChatHeader contact={contact} onCallInitiate={onCallInitiate} />
         )}
       </div>
 
