@@ -144,8 +144,8 @@ export default function PatientsLayout({
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-medium truncate">{patientName}</h4>
-            <p className="text-xs text-gray-500">{patient.user?.email}</p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-500 truncate">{patient.user?.email}</p>
+            <p className="text-xs text-gray-400 truncate">
               Active since {new Date(patient.assignedAt).toLocaleDateString()}
             </p>
           </div>
@@ -198,8 +198,8 @@ export default function PatientsLayout({
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-medium truncate">{patientName}</h4>
-            <p className="text-xs text-gray-500">{request.user?.email}</p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-500 truncate">{request.user?.email}</p>
+            <p className="text-xs text-gray-400 truncate">
               Requested {new Date(request.requestedAt).toLocaleDateString()}
             </p>
           </div>
