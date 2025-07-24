@@ -3,7 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -110,23 +110,23 @@ function ActiveTherapistCard({
               <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
                 <Star className="h-4 w-4 fill-yellow-300 text-yellow-300 mr-1" />
                 <span className="text-white font-semibold text-sm">
-                  {therapist.rating || '4.8'}
+                  4.8
                 </span>
               </div>
               <span className="text-blue-100 text-sm">
-                ({therapist.reviewCount || '127'} reviews)
+                (127 reviews)
               </span>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <CardContent className="p-6 space-y-5">
         {/* Professional Bio */}
         {therapist.bio && (
           <div className="bg-gray-50/80 rounded-lg p-4 border-l-4 border-l-teal-400">
             <p className="text-gray-700 text-sm leading-relaxed line-clamp-3 italic">
-              "{therapist.bio}"
+              &ldquo;{therapist.bio}&rdquo;
             </p>
           </div>
         )}
@@ -168,7 +168,7 @@ function ActiveTherapistCard({
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">Experience</p>
-              <p className="text-sm font-semibold text-gray-800">{therapist.experience || '8+'} years</p>
+              <p className="text-sm font-semibold text-gray-800">{therapist.experience || 8}+ years</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -266,7 +266,7 @@ function EmptyTherapistState() {
       </h3>
 
       <p className="text-gray-600 mb-8 max-w-lg mx-auto text-lg">
-        You haven't connected with any therapists yet. Our platform makes it easy to 
+        You haven&apos;t connected with any therapists yet. Our platform makes it easy to 
         find qualified mental health professionals who match your needs and preferences.
       </p>
 
@@ -436,7 +436,7 @@ export default function MyTherapistSection() {
           Connection Issue
         </h3>
         <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          We're having trouble loading your therapist connections. This might be a temporary issue.
+          We&apos;re having trouble loading your therapist connections. This might be a temporary issue.
         </p>
         <Button 
           variant="outline" 
