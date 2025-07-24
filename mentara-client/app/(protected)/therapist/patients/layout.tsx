@@ -219,3 +219,121 @@ export default function PatientsLayout({
             <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
               {meetingsData?.meetings?.length || 0}
             </span>
+          </div>
+          <div className="appointment-calendar-container">
+            <AppointmentCalendar
+              meetings={meetingsData?.meetings || []}
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              showMeetingDetails={false}
+              className="scale-75 origin-top-left w-[133%] -ml-2"
+            />
+          </div>
+        </div>
+
+        {/* Patients section with tabs */}
+        <div className="p-3 flex-1 overflow-hidden flex flex-col">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-medium">Patients</h3>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={refreshData}
+              className="p-1.5"
+              disabled={loadingPatients || loadingRequests}
+            >
+              <RefreshCw className={`h-4 w-4 ${(loadingPatients || loadingRequests) ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+
+          {/* Search */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search patients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm"
+            />
+          </div>
+
+          {/* Error notifications */}
+          {(patientsError || requestsError) && (
+            <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+              <div className="flex items-center">
+                <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
+                <p className="text-xs text-yellow-800">Failed to load some data</p>
+              </div>
+            </div>
+          )}
+
+          {/* Tabs */}
+          <Tabs defaultValue="patients" className="flex-1 overflow-hidden flex flex-col">
+            <TabsList className="grid w-full grid-cols-2 mb-3">
+              <TabsTrigger value="patients" className="text-xs">
+                My Patients ({filteredPatients?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="requests" className="text-xs">
+                Requests ({filteredRequests?.length || 0})
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="patients" className="flex-1 overflow-y-auto mt-0">
+              {loadingPatients ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 text-gray-400 animate-spin mb-2" />
+                </div>
+              ) : filteredPatients?.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Users className="h-12 w-12 text-gray-300 mb-3" />
+                  <p className="text-sm text-gray-500 mb-1">No active patients</p>
+                  <p className="text-xs text-gray-400">Accepted patient requests will appear here</p>
+                </div>
+              ) : (
+                filteredPatients?.map((patient: any) => (
+                  <MyPatientCard key={patient.userId} patient={patient} />
+                ))
+              )}
+            </TabsContent>
+            
+            <TabsContent value="requests" className="flex-1 overflow-y-auto mt-0">
+              {loadingRequests ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 text-gray-400 animate-spin mb-2" />
+                </div>
+              ) : filteredRequests?.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Clock className="h-12 w-12 text-gray-300 mb-3" />
+                  <p className="text-sm text-gray-500 mb-1">No pending requests</p>
+                  <p className="text-xs text-gray-400">Patient connection requests will appear here</p>
+                </div>
+              ) : (
+                filteredRequests?.map((request: any) => (
+                  <PatientRequestCard key={request.userId} request={request} />
+                ))
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+
+      {/* Main content area */}
+      <div className="flex-1 overflow-auto">
+        {isPatientSelected ? (
+          children
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full bg-gray-50 text-center p-6">
+            <div className="rounded-full bg-primary/10 p-6 mb-4">
+              <Users size={48} className="text-primary" />
+            </div>
+            <h2 className="text-xl font-medium mb-2">Select a Patient</h2>
+            <p className="text-gray-600 max-w-md">
+              Choose a patient from the sidebar to view their profile, treatment plan, and session history.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
