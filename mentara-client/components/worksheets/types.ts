@@ -59,10 +59,12 @@ export function transformWorksheetAssignmentToTask(
   let status: Task['status'] = 'assigned';
   if (assignment.status === 'SUBMITTED') {
     status = 'completed';
+  } else if (assignment.status === 'OVERDUE') {
+    status = 'past_due';
   } else if (new Date(assignment.dueDate) < new Date()) {
     status = 'past_due';
   } else {
-    status = 'assigned';
+    status = 'upcoming';
   }
   
   return {
