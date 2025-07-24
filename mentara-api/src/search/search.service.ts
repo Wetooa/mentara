@@ -38,7 +38,9 @@ export class SearchService {
             },
           },
           {
-            bio: { contains: query, mode: 'insensitive' },
+            user: {
+              bio: { contains: query, mode: 'insensitive' },
+            },
           },
           {
             expertise: { hasSome: [query] },
@@ -70,6 +72,7 @@ export class SearchService {
               firstName: true,
               lastName: true,
               avatarUrl: true,
+              bio: true,
             },
           },
         },
