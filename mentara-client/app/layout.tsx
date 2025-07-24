@@ -4,7 +4,6 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import { LoadingBarProvider } from "@/components/providers/LoadingBarProvider";
 import { generatePageMetadata, SITE_CONFIG, generateHomepageStructuredData } from "@/lib/metadata";
 
@@ -125,29 +124,27 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
-            <WebSocketProvider namespace="/messaging" autoConnect={true}>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="light"
-                forcedTheme="light"
-                storageKey="mentara-theme"
-                disableTransitionOnChange
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              forcedTheme="light"
+              storageKey="mentara-theme"
+              disableTransitionOnChange
+            >
+              <LoadingBarProvider
+                showLoadingBar={true}
+                loadingBarProps={{
+                  height: 4,
+                  color: 'green',
+                  position: 'top',
+                  showPercentage: false,
+                  minimumDuration: 300,
+                }}
               >
-                <LoadingBarProvider
-                  showLoadingBar={true}
-                  loadingBarProps={{
-                    height: 4,
-                    color: 'green',
-                    position: 'top',
-                    showPercentage: false,
-                    minimumDuration: 300,
-                  }}
-                >
-                  {children}
-                </LoadingBarProvider>
-                <Toaster />
-              </ThemeProvider>
-            </WebSocketProvider>
+                {children}
+              </LoadingBarProvider>
+              <Toaster />
+            </ThemeProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

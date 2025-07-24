@@ -14,7 +14,52 @@ import type {
   MessagingConversation, 
   SendMessageDto 
 } from '@/lib/api/services/messaging';
-import { useWebSocket } from '@/contexts/WebSocketContext';
+import { useMessagingWebSocket } from '@/hooks/messaging/useWebSocket';
+import { onEvent } from '@/lib/websocket';
+
+// Type definitions for WebSocket events
+interface UseMessagingOptions {
+  conversationId?: string;
+  enableRealtime?: boolean;
+  enableTypingIndicators?: boolean;
+}
+
+interface TypingUser {
+  userId: string;
+  conversationId: string;
+  isTyping: boolean;
+}
+
+interface TypingData {
+  conversationId: string;
+  userId: string;
+  isTyping: boolean;
+}
+
+interface UserStatusData {
+  userId: string;
+  status: "online" | "offline";
+  timestamp: string;
+}
+
+interface MessageUpdatedEventData {
+  messageId: string;
+  content?: string;
+  isDeleted?: boolean;
+}
+
+interface MessageReadEventData {
+  messageId: string;
+  userId: string;
+  readAt: string;
+}
+
+interface MessageReactionEventData {
+  messageId: string;
+  userId: string;
+  emoji: string;
+  action: 'add' | 'remove';
+}
 
 export function useMessaging(options: UseMessagingOptions = {}) {
   const { 
@@ -29,17 +74,18 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   const { 
     isConnected, 
     connectionState, 
-    emit, 
-    on, 
-    reconnect 
-  } = useWebSocket();
+    joinConversation: joinConversationWS,
+    leaveConversation: leaveConversationWS,
+    sendTypingIndicator: sendTypingIndicatorWS,
+    subscribeToMessages,
+    subscribeToTyping,
+    subscribeToUserStatus
+  } = useMessagingWebSocket();
   
   // Local state for real-time features
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   
-  // Refs for cleanup
-  const eventUnsubscribers = useRef<(() => void)[]>([]);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Query keys for React Query
@@ -183,111 +229,79 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     if (!enableRealtime || !conversationId || !isConnected) return;
 
     console.log('🚪 Joining conversation room:', conversationId);
-    emit('join_conversation', { conversationId });
+    joinConversationWS(conversationId);
 
     return () => {
       console.log('🚪 Leaving conversation room:', conversationId);
-      emit('leave_conversation', { conversationId });
+      leaveConversationWS(conversationId);
     };
-  }, [conversationId, isConnected, enableRealtime, emit]);
+  }, [conversationId, isConnected, enableRealtime, joinConversationWS, leaveConversationWS]);
 
-  // Setup event listeners
+  // Setup event listeners using subscription functions
   useEffect(() => {
     if (!enableRealtime) return;
 
-    const eventHandlers = [
-      // New message received
-      on('new_message', (data: MessageEventData) => {
-        try {
-          console.log('📨 New message received:', data);
-          
-          if (!data || !data.message) {
-            console.warn('⚠️ Invalid new_message data received:', data);
-            return;
-          }
-          
-          const { message } = data;
-          
-          // Add to current conversation messages (avoid duplicates)
-          if (message.conversationId === conversationId) {
-            queryClient.setQueryData<MessagingMessage[]>(
-              queryKeys.messages(message.conversationId),
-              old => {
-                if (!old) return [message];
-                // Check if message already exists to prevent duplicates
-                const messageExists = old.some(existingMsg => existingMsg.id === message.id);
-                if (messageExists) {
-                  console.log('📝 Message already exists, skipping:', message.id);
-                  return old;
-                }
-                return [...old, message];
+    const unsubscribers: (() => void)[] = [];
+
+    // Subscribe to new messages using the specific subscription function
+    const unsubscribeMessages = subscribeToMessages((message: MessagingMessage) => {
+      try {
+        console.log('📨 New message received:', message);
+        
+        // Add to current conversation messages (avoid duplicates)
+        if (message.conversationId === conversationId) {
+          queryClient.setQueryData<MessagingMessage[]>(
+            queryKeys.messages(message.conversationId),
+            old => {
+              if (!old) return [message];
+              // Check if message already exists to prevent duplicates
+              const messageExists = old.some(existingMsg => existingMsg.id === message.id);
+              if (messageExists) {
+                console.log('📝 Message already exists, skipping:', message.id);
+                return old;
               }
+              return [...old, message];
+            }
+          );
+        }
+
+        // Update conversations list
+        queryClient.setQueryData<MessagingConversation[]>(
+          queryKeys.conversations,
+          old => {
+            if (!old) return old;
+            return old.map(conv => 
+              conv.id === message.conversationId 
+                ? { ...conv, lastMessage: message }
+                : conv
             );
           }
+        );
 
-          // Update conversations list
-          queryClient.setQueryData<MessagingConversation[]>(
-            queryKeys.conversations,
-            old => {
-              if (!old) return old;
-              return old.map(conv => 
-                conv.id === message.conversationId 
-                  ? { ...conv, lastMessage: message }
-                  : conv
-              );
-            }
-          );
-
-          // Show toast for messages from others (not in current conversation)
-          if (message.senderId !== user?.id && message.conversationId !== conversationId) {
-            toast('New message', {
-              description: message.content.length > 50 
-                ? message.content.substring(0, 50) + '...' 
-                : message.content,
-            });
-          }
-        } catch (error) {
-          console.error('💥 Error handling new_message event:', error, data);
-          toast.error('Error processing new message');
+        // Show toast for messages from others (not in current conversation)
+        if (message.senderId !== user?.id && message.conversationId !== conversationId) {
+          toast('New message', {
+            description: message.content.length > 50 
+              ? message.content.substring(0, 50) + '...' 
+              : message.content,
+          });
         }
-      }),
+      } catch (error) {
+        console.error('💥 Error handling new message:', error, message);
+        toast.error('Error processing new message');
+      }
+    });
+    unsubscribers.push(unsubscribeMessages);
 
-      // Message updated
-      on('message_updated', (data: MessageUpdatedEventData) => {
-        try {
-          if (!conversationId) return;
-          
-          if (!data || !data.messageId) {
-            console.warn('⚠️ Invalid message_updated data received:', data);
-            return;
-          }
-          
-          queryClient.setQueryData<MessagingMessage[]>(
-            queryKeys.messages(conversationId),
-            old => {
-              if (!old) return old;
-              return old.map(msg => 
-                msg.id === data.messageId
-                  ? {
-                      ...msg,
-                      content: data.content ?? msg.content,
-                      isDeleted: data.isDeleted ?? msg.isDeleted,
-                      isEdited: true,
-                      updatedAt: new Date().toISOString(),
-                    }
-                  : msg
-              );
-            }
-          );
-        } catch (error) {
-          console.error('💥 Error handling message_updated event:', error, data);
-          toast.error('Error updating message');
-        }
-      }),
-
-      // Message read
-      on('message_read', (data: MessageReadEventData) => {
+    // Subscribe to additional events using onEvent
+    const unsubscribeMessageUpdated = onEvent('message_updated', (data: MessageUpdatedEventData) => {
+      try {
         if (!conversationId) return;
+        
+        if (!data || !data.messageId) {
+          console.warn('⚠️ Invalid message_updated data received:', data);
+          return;
+        }
         
         queryClient.setQueryData<MessagingMessage[]>(
           queryKeys.messages(conversationId),
@@ -297,61 +311,90 @@ export function useMessaging(options: UseMessagingOptions = {}) {
               msg.id === data.messageId
                 ? {
                     ...msg,
-                    readReceipts: [
-                      ...(msg.readReceipts || []).filter(r => r.userId !== data.userId),
-                      {
-                        id: `${data.messageId}-${data.userId}`,
-                        messageId: data.messageId,
-                        userId: data.userId,
-                        readAt: data.readAt,
-                      },
-                    ],
+                    content: data.content ?? msg.content,
+                    isDeleted: data.isDeleted ?? msg.isDeleted,
+                    isEdited: true,
+                    updatedAt: new Date().toISOString(),
                   }
                 : msg
             );
           }
         );
-      }),
+      } catch (error) {
+        console.error('💥 Error handling message_updated event:', error, data);
+        toast.error('Error updating message');
+      }
+    });
+    unsubscribers.push(unsubscribeMessageUpdated);
 
-      // Message reaction
-      on('message_reaction', (data: MessageReactionEventData) => {
-        if (!conversationId) return;
-        
-        queryClient.setQueryData<MessagingMessage[]>(
-          queryKeys.messages(conversationId),
-          old => {
-            if (!old) return old;
-            return old.map(msg => {
-              if (msg.id !== data.messageId) return msg;
-
-              const reactions = msg.reactions || [];
-              if (data.action === 'add') {
-                return {
+    const unsubscribeMessageRead = onEvent('message_read', (data: MessageReadEventData) => {
+      if (!conversationId) return;
+      
+      queryClient.setQueryData<MessagingMessage[]>(
+        queryKeys.messages(conversationId),
+        old => {
+          if (!old) return old;
+          return old.map(msg => 
+            msg.id === data.messageId
+              ? {
                   ...msg,
-                  reactions: [
-                    ...reactions.filter(r => !(r.userId === data.userId && r.emoji === data.emoji)),
+                  readReceipts: [
+                    ...(msg.readReceipts || []).filter(r => r.userId !== data.userId),
                     {
-                      id: `${data.messageId}-${data.userId}-${data.emoji}`,
+                      id: `${data.messageId}-${data.userId}`,
                       messageId: data.messageId,
                       userId: data.userId,
-                      emoji: data.emoji,
-                      createdAt: new Date().toISOString(),
+                      readAt: data.readAt,
                     },
                   ],
-                };
-              } else {
-                return {
-                  ...msg,
-                  reactions: reactions.filter(r => !(r.userId === data.userId && r.emoji === data.emoji)),
-                };
-              }
-            });
-          }
-        );
-      }),
+                }
+              : msg
+          );
+        }
+      );
+    });
+    unsubscribers.push(unsubscribeMessageRead);
 
-      // Typing indicators
-      enableTypingIndicators ? on('user_typing', (data: TypingEventData) => {
+    const unsubscribeMessageReaction = onEvent('message_reaction', (data: MessageReactionEventData) => {
+      if (!conversationId) return;
+      
+      queryClient.setQueryData<MessagingMessage[]>(
+        queryKeys.messages(conversationId),
+        old => {
+          if (!old) return old;
+          return old.map(msg => {
+            if (msg.id !== data.messageId) return msg;
+
+            const reactions = msg.reactions || [];
+            if (data.action === 'add') {
+              return {
+                ...msg,
+                reactions: [
+                  ...reactions.filter(r => !(r.userId === data.userId && r.emoji === data.emoji)),
+                  {
+                    id: `${data.messageId}-${data.userId}-${data.emoji}`,
+                    messageId: data.messageId,
+                    userId: data.userId,
+                    emoji: data.emoji,
+                    createdAt: new Date().toISOString(),
+                  },
+                ],
+              };
+            } else {
+              return {
+                ...msg,
+                reactions: reactions.filter(r => !(r.userId === data.userId && r.emoji === data.emoji)),
+              };
+            }
+          });
+        }
+      );
+    });
+    unsubscribers.push(unsubscribeMessageReaction);
+
+    // Subscribe to typing indicators using the specific subscription function
+    if (enableTypingIndicators) {
+      const unsubscribeTyping = subscribeToTyping((data: TypingData) => {
         try {
           if (data.userId === user?.id) return; // Don't show own typing
           
@@ -375,30 +418,29 @@ export function useMessaging(options: UseMessagingOptions = {}) {
         } catch (error) {
           console.error('💥 Error handling typing_indicator event:', error, data);
         }
-      }) : () => {},
+      });
+      unsubscribers.push(unsubscribeTyping);
+    }
 
-      // User status changes
-      on('user_status_changed', (data: { userId: string; status: 'online' | 'offline' }) => {
-        setOnlineUsers(prev => {
-          const newSet = new Set(prev);
-          if (data.status === 'online') {
-            newSet.add(data.userId);
-          } else {
-            newSet.delete(data.userId);
-          }
-          return newSet;
-        });
-      }),
-    ];
-
-    // Store unsubscribers for cleanup
-    eventUnsubscribers.current = eventHandlers;
+    // Subscribe to user status changes using the specific subscription function
+    const unsubscribeUserStatus = subscribeToUserStatus((data: UserStatusData) => {
+      setOnlineUsers(prev => {
+        const newSet = new Set(prev);
+        if (data.status === 'online') {
+          newSet.add(data.userId);
+        } else {
+          newSet.delete(data.userId);
+        }
+        return newSet;
+      });
+    });
+    unsubscribers.push(unsubscribeUserStatus);
 
     return () => {
-      eventUnsubscribers.current.forEach(unsubscribe => unsubscribe());
-      eventUnsubscribers.current = [];
+      unsubscribers.forEach(unsubscribe => unsubscribe());
     };
-  }, [enableRealtime, enableTypingIndicators, conversationId, user?.id, queryClient, on]);
+  }, [enableRealtime, enableTypingIndicators, conversationId, user?.id, queryClient, 
+      subscribeToMessages, subscribeToTyping, subscribeToUserStatus]);
 
   // ============ PUBLIC API ============
 
@@ -428,9 +470,8 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   const sendTypingIndicator = useCallback((isTyping: boolean) => {
     if (!conversationId || !enableTypingIndicators || !isConnected) return;
 
-    const eventData = { conversationId, isTyping };
-    console.log('⌨️ Sending typing indicator:', eventData);
-    emit(isTyping ? 'typing_start' : 'typing_stop', eventData);
+    console.log('⌨️ Sending typing indicator:', { conversationId, isTyping });
+    sendTypingIndicatorWS(conversationId, isTyping);
 
     // Auto-stop typing after 3 seconds
     if (isTyping) {
@@ -444,7 +485,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
-  }, [conversationId, enableTypingIndicators, isConnected, emit]);
+  }, [conversationId, enableTypingIndicators, isConnected, sendTypingIndicatorWS]);
 
   const uploadFile = useCallback(async (file: File) => {
     try {
@@ -496,7 +537,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       api.messaging.removeReaction(messageId, emoji),
     sendTypingIndicator,
     uploadFile,
-    reconnectWebSocket: reconnect, // Use the centralized reconnect from context
+    // Note: Reconnection is handled automatically by lib/websocket.ts
 
     // Utilities
     refetchConversations,
