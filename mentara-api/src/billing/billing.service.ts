@@ -24,6 +24,7 @@ import {
  * - Educational payment flows
  * - Realistic payment failures and retries
  */
+
 @Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
@@ -41,9 +42,46 @@ export class BillingService {
   async createPaymentMethod(data: {
     userId: string;
     type: PaymentMethodType;
+    nickname?: string;
+    
+    // Card-specific fields
+    cardholderName?: string;
+    cardNumber?: string;
+    expiryMonth?: number;
+    expiryYear?: number;
+    cardType?: string;
+    
+    // Bank account fields
+    bankName?: string;
+    accountHolderName?: string;
+    accountType?: string;
+    routingNumber?: string;
+    accountNumber?: string;
+    
+    // Digital wallet fields
+    walletProvider?: string;
+    walletEmail?: string;
+    walletAccountName?: string;
+    
+    // GCash fields
+    gcashNumber?: string;
+    gcashName?: string;
+    gcashEmail?: string;
+    
+    // Maya fields
+    mayaNumber?: string;
+    mayaName?: string;
+    mayaEmail?: string;
+    
+    // Address
+    billingAddress?: any;
+    
+    // Default setting
+    isDefault?: boolean;
+    
+    // Legacy fields
     cardLast4?: string;
     cardBrand?: string;
-    isDefault?: boolean;
   }) {
     this.logger.log(`Creating payment method for user ${data.userId}`);
 
@@ -55,13 +93,54 @@ export class BillingService {
       });
     }
 
+    // Extract last 4 digits from card number if provided
+    const cardLast4 = data.cardLast4 || (data.cardNumber ? data.cardNumber.slice(-4) : undefined);
+    
+    // Determine card brand from card type or existing brand
+    const cardBrand = data.cardBrand || data.cardType;
+
     const paymentMethod = await this.prisma.paymentMethod.create({
       data: {
         userId: data.userId,
         type: data.type,
-        cardLast4: data.cardLast4,
-        cardBrand: data.cardBrand,
+        nickname: data.nickname,
         isDefault: data.isDefault || false,
+        
+        // Card-specific fields
+        cardLast4,
+        cardBrand,
+        cardholderName: data.cardholderName,
+        cardNumber: data.cardNumber, // Note: In production, this should be encrypted/tokenized
+        expiryMonth: data.expiryMonth,
+        expiryYear: data.expiryYear,
+        cardType: data.cardType,
+        
+        // Bank account fields
+        bankName: data.bankName,
+        accountHolderName: data.accountHolderName,
+        accountType: data.accountType,
+        routingNumber: data.routingNumber,
+        accountLast4: data.accountNumber ? data.accountNumber.slice(-4) : undefined,
+        
+        // Digital wallet fields
+        walletProvider: data.walletProvider,
+        walletEmail: data.walletEmail,
+        walletAccountName: data.walletAccountName,
+        
+        // GCash fields
+        gcashNumber: data.gcashNumber,
+        gcashName: data.gcashName,
+        gcashEmail: data.gcashEmail,
+        isVerified: data.gcashNumber ? false : undefined, // Default unverified for new GCash
+        
+        // Maya fields
+        mayaNumber: data.mayaNumber,
+        mayaName: data.mayaName,
+        mayaEmail: data.mayaEmail,
+        mayaVerified: data.mayaNumber ? false : undefined, // Default unverified for new Maya
+        
+        // Address
+        billingAddress: data.billingAddress,
       },
     });
 
@@ -69,6 +148,7 @@ export class BillingService {
       userId: data.userId,
       paymentMethodId: paymentMethod.id,
       type: data.type,
+      nickname: data.nickname,
     });
 
     return paymentMethod;
@@ -161,46 +241,35 @@ export class BillingService {
     return { success: true };
   }
 
-  // ===== PAYMENT PROCESSING =====
-
   /**
-   * Process a payment for a therapy session
+   * Create automatic mock payment for booking (used when payment is mocked/automatic)
+   * This creates a COMPLETED payment record without requiring payment method validation
    */
-  async processSessionPayment(data: {
+  async createAutomaticMockPayment(data: {
     clientId: string;
     therapistId: string;
-    meetingId?: string;
+    meetingId: string;
     amount: number;
     currency?: string;
-    paymentMethodId: string;
     description?: string;
-  }) {
+  }, tx?: any) {
     this.logger.log(
-      `Processing session payment: ${data.amount} ${data.currency || 'USD'} from client ${data.clientId} to therapist ${data.therapistId}`
+      `Creating automatic mock payment: ${data.amount} ${data.currency || 'USD'} for meeting ${data.meetingId}`
     );
 
-    // Validate payment method belongs to client
-    const paymentMethod = await this.prisma.paymentMethod.findFirst({
-      where: {
-        id: data.paymentMethodId,
-        userId: data.clientId,
-      },
-    });
+    const prismaClient = tx || this.prisma;
 
-    if (!paymentMethod) {
-      throw new BadRequestException('Invalid payment method');
-    }
-
-    // Create payment record
-    const payment = await this.prisma.payment.create({
+    // Create completed payment record (mock payment is always successful)
+    const payment = await prismaClient.payment.create({
       data: {
         amount: data.amount,
         currency: data.currency || 'USD',
-        status: PaymentStatus.PENDING,
-        clientId: data.clientId,
-        therapistId: data.therapistId,
-        meetingId: data.meetingId,
-        paymentMethodId: data.paymentMethodId,
+        status: 'COMPLETED', // Mock payment is always successful
+        client: { connect: { userId: data.clientId } },
+        therapist: { connect: { userId: data.therapistId } },
+        meeting: { connect: { id: data.meetingId } },
+        // No payment method needed for mock - omit paymentMethodId when null
+        processedAt: new Date(),
         failureReason: null,
       },
       include: {
@@ -218,15 +287,112 @@ export class BillingService {
             }
           }
         },
-        paymentMethod: true,
       },
     });
 
-    // Process payment asynchronously
-    this.processPaymentAsync(payment.id).catch((error) => {
-      this.logger.error(`Failed to process payment ${payment.id}:`, error);
+    this.logger.log(`Mock payment created successfully: ${payment.id}`);
+    return payment;
+  }
+
+  // ===== PAYMENT PROCESSING =====
+
+  /**
+   * Process a payment for a therapy session
+   */
+  async processSessionPayment(data: {
+    clientId: string;
+    meetingId?: string;
+    sessionId?: string; // Support both for backwards compatibility
+    therapistId?: string; // Optional - will be derived from meeting if not provided
+    amount: number;
+    currency?: string;
+    paymentMethodId: string;
+    description?: string;
+  }) {
+    // Handle both meetingId and sessionId (backwards compatibility)
+    const meetingId = data.meetingId || data.sessionId;
+    
+    if (!meetingId) {
+      throw new BadRequestException('Meeting ID is required');
+    }
+
+    this.logger.log(
+      `Processing session payment: ${data.amount} ${data.currency || 'USD'} from client ${data.clientId} for meeting ${meetingId}`
+    );
+
+    // Get therapistId from meeting if not provided
+    let therapistId = data.therapistId;
+    if (!therapistId) {
+      const meeting = await this.prisma.meeting.findUnique({
+        where: { id: meetingId },
+        select: { therapistId: true, clientId: true }
+      });
+
+      if (!meeting) {
+        throw new BadRequestException('Meeting not found');
+      }
+
+      // Verify the client owns this meeting
+      if (meeting.clientId !== data.clientId) {
+        throw new BadRequestException('Unauthorized: You can only pay for your own meetings');
+      }
+
+      therapistId = meeting.therapistId;
+    }
+
+    // Validate payment method belongs to client
+    const paymentMethod = await this.prisma.paymentMethod.findFirst({
+      where: {
+        id: data.paymentMethodId,
+        userId: data.clientId,
+      },
     });
 
+    if (!paymentMethod) {
+      throw new BadRequestException('Invalid payment method');
+    }
+
+    // Create payment record with mock processing
+    const paymentData: any = {
+      amount: data.amount,
+      currency: data.currency || 'USD',
+      status: PaymentStatus.COMPLETED, // Mock as completed immediately
+      client: { connect: { userId: data.clientId } },
+      therapist: { connect: { userId: therapistId } },
+      paymentMethod: { connect: { id: data.paymentMethodId } },
+      failureReason: null,
+    };
+
+    // Include meeting relation if meetingId is provided
+    if (meetingId) {
+      paymentData.meeting = { connect: { id: meetingId } };
+    }
+
+    const payment = await this.prisma.payment.create({
+      data: paymentData,
+      include: {
+        client: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        therapist: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        paymentMethod: true,
+        meeting: {
+          select: { id: true, title: true, startTime: true }
+        }
+      },
+    });
+
+    this.logger.log(`Mock payment processed successfully: ${payment.id}`);
     return payment;
   }
 

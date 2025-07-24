@@ -51,12 +51,39 @@ export interface TherapistDashboardResponseDto {
 
 // Billing types
 export interface CreatePaymentMethodDto {
-  type: 'card' | 'bank_account';
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA';
+  nickname?: string;
+  
+  // Card fields
   cardNumber?: string;
   expiryDate?: string;
   cvv?: string;
   cardholderName?: string;
+  
+  // Bank account fields
   accountNumber?: string;
+  bankName?: string;
+  accountHolderName?: string;
+  accountType?: string;
+  routingNumber?: string;
+  
+  // Digital wallet fields
+  walletProvider?: string;
+  walletEmail?: string;
+  walletAccountName?: string;
+  
+  // GCash fields
+  gcashNumber?: string;
+  gcashName?: string;
+  gcashEmail?: string;
+  
+  // Maya fields
+  mayaNumber?: string;
+  mayaName?: string;
+  mayaEmail?: string;
+  
+  // Address
+  billingAddress?: any;
   routingNumber?: string;
   accountName?: string;
   isDefault?: boolean;
@@ -128,10 +155,10 @@ export enum OtpType {
 
 // Worksheet status
 export enum WorksheetStatus {
-  ASSIGNED = 'assigned',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  OVERDUE = 'overdue',
+  ASSIGNED = 'ASSIGNED',
+  SUBMITTED = 'SUBMITTED',
+  REVIEWED = 'REVIEWED',
+  OVERDUE = 'OVERDUE',
 }
 
 // Base user interface

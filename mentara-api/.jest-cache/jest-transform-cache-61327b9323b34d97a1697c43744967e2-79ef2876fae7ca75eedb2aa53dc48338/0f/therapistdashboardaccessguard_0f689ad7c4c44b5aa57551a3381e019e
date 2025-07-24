@@ -1,0 +1,115 @@
+9c2b94447067d7c6766b1ee659daacef
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TherapistDashboardAccessGuard = void 0;
+const common_1 = require("@nestjs/common");
+const prisma_client_provider_1 = require("src/providers/prisma-client.provider");
+/**
+ * Specialized guard for therapist dashboard access that validates:
+ * 1. User is authenticated
+ * 2. User has role 'therapist'
+ * 3. User has corresponding Therapist record in database
+ * 4. User account is active
+ * 5. Therapist status is appropriate for dashboard access
+ */
+let TherapistDashboardAccessGuard = class TherapistDashboardAccessGuard {
+    prisma;
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
+    async canActivate(context) {
+        const request = context.switchToHttp().getRequest();
+        const user = request.user;
+        const userRole = request.userRole || user?.role;
+        const userId = request.userId || user?.userId || user?.id;
+        console.log(`🔐 [TherapistDashboardGuard] Validating access for userId: ${userId}, role: ${userRole}`);
+        // 1. Check if user is authenticated
+        if (!userId) {
+            console.error(`❌ [TherapistDashboardGuard] No userId found in request`);
+            throw new common_1.UnauthorizedException('Authentication required');
+        }
+        // 2. Verify user exists and get fresh data
+        const userRecord = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+                isActive: true,
+                createdAt: true,
+            },
+        });
+        if (!userRecord) {
+            console.error(`❌ [TherapistDashboardGuard] User not found: ${userId}`);
+            throw new common_1.NotFoundException(`User not found: ${userId}`);
+        }
+        console.log(`👤 [TherapistDashboardGuard] User found: ${userRecord.email}, role: ${userRecord.role}, active: ${userRecord.isActive}`);
+        // 3. Check if user has therapist role
+        if (userRecord.role !== 'therapist') {
+            console.error(`❌ [TherapistDashboardGuard] User ${userRecord.email} has role '${userRecord.role}', expected 'therapist'`);
+            throw new common_1.ForbiddenException(`Access denied. User role '${userRecord.role}' is not authorized for therapist dashboard. Required role: 'therapist'`);
+        }
+        // 4. Check if user account is active
+        if (!userRecord.isActive) {
+            console.error(`❌ [TherapistDashboardGuard] User ${userRecord.email} account is not active`);
+            throw new common_1.ForbiddenException('Access denied. Account is not active.');
+        }
+        // 5. Verify Therapist record exists
+        const therapistRecord = await this.prisma.therapist.findUnique({
+            where: { userId: userRecord.id },
+            select: {
+                userId: true,
+                status: true,
+                createdAt: true,
+                providerType: true,
+                yearsOfExperience: true,
+            },
+        });
+        if (!therapistRecord) {
+            console.error(`❌ [TherapistDashboardGuard] Therapist record not found for user: ${userRecord.email} (${userId})`);
+            console.error(`❌ [TherapistDashboardGuard] User has role 'therapist' but missing Therapist table record - data inconsistency!`);
+            // This is a critical data consistency issue that should be escalated
+            throw new common_1.ForbiddenException(`Access denied. Therapist profile not found for user ${userRecord.email}. ` +
+                `This indicates a data consistency issue. Please contact support.`);
+        }
+        console.log(`👩‍⚕️ [TherapistDashboardGuard] Therapist record found: status=${therapistRecord.status}, provider=${therapistRecord.providerType}`);
+        // 6. Check therapist status (warn but don't block for non-APPROVED status)
+        if (therapistRecord.status !== 'APPROVED') {
+            console.warn(`⚠️ [TherapistDashboardGuard] Therapist ${userRecord.email} has status: ${therapistRecord.status} (not APPROVED)`);
+            // For PENDING/REJECTED status, we might want to show a different dashboard or message
+            // but we'll allow access and let the dashboard service handle the specific display logic
+            if (therapistRecord.status === 'REJECTED') {
+                console.warn(`⚠️ [TherapistDashboardGuard] Allowing access but therapist application was rejected`);
+            }
+        }
+        // 7. All validations passed
+        console.log(`✅ [TherapistDashboardGuard] Access granted for therapist: ${userRecord.email}`);
+        // Store validated therapist info in request for downstream use
+        request.validatedTherapist = {
+            userId: userRecord.id,
+            email: userRecord.email,
+            name: `${userRecord.firstName} ${userRecord.lastName}`,
+            status: therapistRecord.status,
+            providerType: therapistRecord.providerType,
+        };
+        return true;
+    }
+};
+exports.TherapistDashboardAccessGuard = TherapistDashboardAccessGuard;
+exports.TherapistDashboardAccessGuard = TherapistDashboardAccessGuard = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof prisma_client_provider_1.PrismaService !== "undefined" && prisma_client_provider_1.PrismaService) === "function" ? _a : Object])
+], TherapistDashboardAccessGuard);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvZ3VhcmRzL3RoZXJhcGlzdC1kYXNoYm9hcmQtYWNjZXNzLmd1YXJkLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7QUFBQSwyQ0FPd0I7QUFDeEIsaUZBQXFFO0FBRXJFOzs7Ozs7O0dBT0c7QUFFSSxJQUFNLDZCQUE2QixHQUFuQyxNQUFNLDZCQUE2QjtJQUNwQjtJQUFwQixZQUFvQixNQUFxQjtRQUFyQixXQUFNLEdBQU4sTUFBTSxDQUFlO0lBQUcsQ0FBQztJQUU3QyxLQUFLLENBQUMsV0FBVyxDQUFDLE9BQXlCO1FBQ3pDLE1BQU0sT0FBTyxHQUFHLE9BQU8sQ0FBQyxZQUFZLEVBQUUsQ0FBQyxVQUFVLEVBQUUsQ0FBQztRQUNwRCxNQUFNLElBQUksR0FBRyxPQUFPLENBQUMsSUFBSSxDQUFDO1FBQzFCLE1BQU0sUUFBUSxHQUFHLE9BQU8sQ0FBQyxRQUFRLElBQUksSUFBSSxFQUFFLElBQUksQ0FBQztRQUNoRCxNQUFNLE1BQU0sR0FBRyxPQUFPLENBQUMsTUFBTSxJQUFJLElBQUksRUFBRSxNQUFNLElBQUksSUFBSSxFQUFFLEVBQUUsQ0FBQztRQUUxRCxPQUFPLENBQUMsR0FBRyxDQUFDLDhEQUE4RCxNQUFNLFdBQVcsUUFBUSxFQUFFLENBQUMsQ0FBQztRQUV2RyxvQ0FBb0M7UUFDcEMsSUFBSSxDQUFDLE1BQU0sRUFBRSxDQUFDO1lBQ1osT0FBTyxDQUFDLEtBQUssQ0FBQyx3REFBd0QsQ0FBQyxDQUFDO1lBQ3hFLE1BQU0sSUFBSSw4QkFBcUIsQ0FBQyx5QkFBeUIsQ0FBQyxDQUFDO1FBQzdELENBQUM7UUFFRCwyQ0FBMkM7UUFDM0MsTUFBTSxVQUFVLEdBQUcsTUFBTSxJQUFJLENBQUMsTUFBTSxDQUFDLElBQUksQ0FBQyxVQUFVLENBQUM7WUFDbkQsS0FBSyxFQUFFLEVBQUUsRUFBRSxFQUFFLE1BQU0sRUFBRTtZQUNyQixNQUFNLEVBQUU7Z0JB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LENBQUMsa0JBQWtCLEdBQUc7WUFDM0IsTUFBTSxFQUFFLFVBQVUsQ0FBQyxFQUFFO1lBQ3JCLEtBQUssRUFBRSxVQUFVLENBQUMsS0FBSztZQUN2QixJQUFJLEVBQUUsR0FBRyxVQUFVLENBQUMsU0FBUyxJQUFJLFVBQVUsQ0FBQyxRQUFRLEVBQUU7WUFDdEQsTUFBTSxFQUFFLGVBQWUsQ0FBQyxNQUFNO1lBQzlCLFlBQVksRUFBRSxlQUFlLENBQUMsWUFBWTtTQUMzQyxDQUFDO1FBRUYsT0FBTyxJQUFJLENBQUM7SUFDZCxDQUFDO0NBQ0YsQ0FBQTtBQXRHWSxzRUFBNkI7d0NBQTdCLDZCQUE2QjtJQUR6QyxJQUFBLG1CQUFVLEdBQUU7eURBRWlCLHNDQUFhLG9CQUFiLHNDQUFhO0dBRDlCLDZCQUE2QixDQXNHekMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvZ3VhcmRzL3RoZXJhcGlzdC1kYXNoYm9hcmQtYWNjZXNzLmd1YXJkLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7XG4gIEluamVjdGFibGUsXG4gIENhbkFjdGl2YXRlLFxuICBFeGVjdXRpb25Db250ZXh0LFxuICBGb3JiaWRkZW5FeGNlcHRpb24sXG4gIE5vdEZvdW5kRXhjZXB0aW9uLFxuICBVbmF1dGhvcml6ZWRFeGNlcHRpb24sXG59IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IFByaXNtYVNlcnZpY2UgfSBmcm9tICdzcmMvcHJvdmlkZXJzL3ByaXNtYS1jbGllbnQucHJvdmlkZXInO1xuXG4vKipcbiAqIFNwZWNpYWxpemVkIGd1YXJkIGZvciB0aGVyYXBpc3QgZGFzaGJvYXJkIGFjY2VzcyB0aGF0IHZhbGlkYXRlczpcbiAqIDEuIFVzZXIgaXMgYXV0aGVudGljYXRlZFxuICogMi4gVXNlciBoYXMgcm9sZSAndGhlcmFwaXN0J1xuICogMy4gVXNlciBoYXMgY29ycmVzcG9uZGluZyBUaGVyYXBpc3QgcmVjb3JkIGluIGRhdGFiYXNlXG4gKiA0LiBVc2VyIGFjY291bnQgaXMgYWN0aXZlXG4gKiA1LiBUaGVyYXBpc3Qgc3RhdHVzIGlzIGFwcHJvcHJpYXRlIGZvciBkYXNoYm9hcmQgYWNjZXNzXG4gKi9cbkBJbmplY3RhYmxlKClcbmV4cG9ydCBjbGFzcyBUaGVyYXBpc3REYXNoYm9hcmRBY2Nlc3NHdWFyZCBpbXBsZW1lbnRzIENhbkFjdGl2YXRlIHtcbiAgY29uc3RydWN0b3IocHJpdmF0ZSBwcmlzbWE6IFByaXNtYVNlcnZpY2UpIHt9XG5cbiAgYXN5bmMgY2FuQWN0aXZhdGUoY29udGV4dDogRXhlY3V0aW9uQ29udGV4dCk6IFByb21pc2U8Ym9vbGVhbj4ge1xuICAgIGNvbnN0IHJlcXVlc3QgPSBjb250ZXh0LnN3aXRjaFRvSHR0cCgpLmdldFJlcXVlc3QoKTtcbiAgICBjb25zdCB1c2VyID0gcmVxdWVzdC51c2VyO1xuICAgIGNvbnN0IHVzZXJSb2xlID0gcmVxdWVzdC51c2VyUm9sZSB8fCB1c2VyPy5yb2xlO1xuICAgIGNvbnN0IHVzZXJJZCA9IHJlcXVlc3QudXNlcklkIHx8IHVzZXI/LnVzZXJJZCB8fCB1c2VyPy5pZDtcblxuICAgIGNvbnNvbGUubG9nKGDwn5SQIFtUaGVyYXBpc3REYXNoYm9hcmRHdWFyZF0gVmFsaWRhdGluZyBhY2Nlc3MgZm9yIHVzZXJJZDogJHt1c2VySWR9LCByb2xlOiAke3VzZXJSb2xlfWApO1xuXG4gICAgLy8gMS4gQ2hlY2sgaWYgdXNlciBpcyBhdXRoZW50aWNhdGVkXG4gICAgaWYgKCF1c2VySWQpIHtcbiAgICAgIGNvbnNvbGUuZXJyb3IoYOKdjCBbVGhlcmFwaXN0RGFzaGJvYXJkR3VhcmRdIE5vIHVzZXJJZCBmb3VuZCBpbiByZXF1ZXN0YCk7XG4gICAgICB0aHJvdyBuZXcgVW5hdXRob3JpemVkRXhjZXB0aW9uKCdBdXRoZW50aWNhdGlvbiByZXF1aXJlZCcpO1xuICAgIH1cblxuICAgIC8vIDIuIFZlcmlmeSB1c2VyIGV4aXN0cyBhbmQgZ2V0IGZyZXNoIGRhdGFcbiAgICBjb25zdCB1c2VyUmVjb3JkID0gYXdhaXQgdGhpcy5wcmlzbWEudXNlci5maW5kVW5pcXVlKHtcbiAgICAgIHdoZXJlOiB7IGlkOiB1c2VySWQgfSxcbiAgICAgIHNlbGVjdDoge1xuICAgICAgICBpZDogdHJ1ZSxcbiAgICAgICAgZW1haWw6IHRydWUsXG4gICAgICAgIGZpcnN0TmFtZTogdHJ1ZSxcbiAgICAgICAgbGFzdE5hbWU6IHRydWUsXG4gICAgICAgIHJvbGU6IHRydWUsXG4gICAgICAgIGlzQWN0aXZlOiB0cnVlLFxuICAgICAgICBjcmVhdGVkQXQ6IHRydWUsXG4gICAgICB9LFxuICAgIH0pO1xuXG4gICAgaWYgKCF1c2VyUmVjb3JkKSB7XG4gICAgICBjb25zb2xlLmVycm9yKGDinYwgW1RoZXJhcGlzdERhc2hib2FyZEd1YXJkXSBVc2VyIG5vdCBmb3VuZDogJHt1c2VySWR9YCk7XG4gICAgICB0aHJvdyBuZXcgTm90Rm91bmRFeGNlcHRpb24oYFVzZXIgbm90IGZvdW5kOiAke3VzZXJJZH1gKTtcbiAgICB9XG5cbiAgICBjb25zb2xlLmxvZyhg8J+RpCBbVGhlcmFwaXN0RGFzaGJvYXJkR3VhcmRdIFVzZXIgZm91bmQ6ICR7dXNlclJlY29yZC5lbWFpbH0sIHJvbGU6ICR7dXNlclJlY29yZC5yb2xlfSwgYWN0aXZlOiAke3VzZXJSZWNvcmQuaXNBY3RpdmV9YCk7XG5cbiAgICAvLyAzLiBDaGVjayBpZiB1c2VyIGhhcyB0aGVyYXBpc3Qgcm9sZVxuICAgIGlmICh1c2VyUmVjb3JkLnJvbGUgIT09ICd0aGVyYXBpc3QnKSB7XG4gICAgICBjb25zb2xlLmVycm9yKGDinYwgW1RoZXJhcGlzdERhc2hib2FyZEd1YXJkXSBVc2VyICR7dXNlclJlY29yZC5lbWFpbH0gaGFzIHJvbGUgJyR7dXNlclJlY29yZC5yb2xlfScsIGV4cGVjdGVkICd0aGVyYXBpc3QnYCk7XG4gICAgICB0aHJvdyBuZXcgRm9yYmlkZGVuRXhjZXB0aW9uKFxuICAgICAgICBgQWNjZXNzIGRlbmllZC4gVXNlciByb2xlICcke3VzZXJSZWNvcmQucm9sZX0nIGlzIG5vdCBhdXRob3JpemVkIGZvciB0aGVyYXBpc3QgZGFzaGJvYXJkLiBSZXF1aXJlZCByb2xlOiAndGhlcmFwaXN0J2BcbiAgICAgICk7XG4gICAgfVxuXG4gICAgLy8gNC4gQ2hlY2sgaWYgdXNlciBhY2NvdW50IGlzIGFjdGl2ZVxuICAgIGlmICghdXNlclJlY29yZC5pc0FjdGl2ZSkge1xuICAgICAgY29uc29sZS5lcnJvcihg4p2MIFtUaGVyYXBpc3REYXNoYm9hcmRHdWFyZF0gVXNlciAke3VzZXJSZWNvcmQuZW1haWx9IGFjY291bnQgaXMgbm90IGFjdGl2ZWApO1xuICAgICAgdGhyb3cgbmV3IEZvcmJpZGRlbkV4Y2VwdGlvbignQWNjZXNzIGRlbmllZC4gQWNjb3VudCBpcyBub3QgYWN0aXZlLicpO1xuICAgIH1cblxuICAgIC8vIDUuIFZlcmlmeSBUaGVyYXBpc3QgcmVjb3JkIGV4aXN0c1xuICAgIGNvbnN0IHRoZXJhcGlzdFJlY29yZCA9IGF3YWl0IHRoaXMucHJpc21hLnRoZXJhcGlzdC5maW5kVW5pcXVlKHtcbiAgICAgIHdoZXJlOiB7IHVzZXJJZDogdXNlclJlY29yZC5pZCB9LFxuICAgICAgc2VsZWN0OiB7XG4gICAgICAgIHVzZXJJZDogdHJ1ZSxcbiAgICAgICAgc3RhdHVzOiB0cnVlLFxuICAgICAgICBjcmVhdGVkQXQ6IHRydWUsXG4gICAgICAgIHByb3ZpZGVyVHlwZTogdHJ1ZSxcbiAgICAgICAgeWVhcnNPZkV4cGVyaWVuY2U6IHRydWUsXG4gICAgICB9LFxuICAgIH0pO1xuXG4gICAgaWYgKCF0aGVyYXBpc3RSZWNvcmQpIHtcbiAgICAgIGNvbnNvbGUuZXJyb3IoYOKdjCBbVGhlcmFwaXN0RGFzaGJvYXJkR3VhcmRdIFRoZXJhcGlzdCByZWNvcmQgbm90IGZvdW5kIGZvciB1c2VyOiAke3VzZXJSZWNvcmQuZW1haWx9ICgke3VzZXJJZH0pYCk7XG4gICAgICBjb25zb2xlLmVycm9yKGDinYwgW1RoZXJhcGlzdERhc2hib2FyZEd1YXJkXSBVc2VyIGhhcyByb2xlICd0aGVyYXBpc3QnIGJ1dCBtaXNzaW5nIFRoZXJhcGlzdCB0YWJsZSByZWNvcmQgLSBkYXRhIGluY29uc2lzdGVuY3khYCk7XG4gICAgICBcbiAgICAgIC8vIFRoaXMgaXMgYSBjcml0aWNhbCBkYXRhIGNvbnNpc3RlbmN5IGlzc3VlIHRoYXQgc2hvdWxkIGJlIGVzY2FsYXRlZFxuICAgICAgdGhyb3cgbmV3IEZvcmJpZGRlbkV4Y2VwdGlvbihcbiAgICAgICAgYEFjY2VzcyBkZW5pZWQuIFRoZXJhcGlzdCBwcm9maWxlIG5vdCBmb3VuZCBmb3IgdXNlciAke3VzZXJSZWNvcmQuZW1haWx9LiBgICtcbiAgICAgICAgYFRoaXMgaW5kaWNhdGVzIGEgZGF0YSBjb25zaXN0ZW5jeSBpc3N1ZS4gUGxlYXNlIGNvbnRhY3Qgc3VwcG9ydC5gXG4gICAgICApO1xuICAgIH1cblxuICAgIGNvbnNvbGUubG9nKGDwn5Gp4oCN4pqV77iPIFtUaGVyYXBpc3REYXNoYm9hcmRHdWFyZF0gVGhlcmFwaXN0IHJlY29yZCBmb3VuZDogc3RhdHVzPSR7dGhlcmFwaXN0UmVjb3JkLnN0YXR1c30sIHByb3ZpZGVyPSR7dGhlcmFwaXN0UmVjb3JkLnByb3ZpZGVyVHlwZX1gKTtcblxuICAgIC8vIDYuIENoZWNrIHRoZXJhcGlzdCBzdGF0dXMgKHdhcm4gYnV0IGRvbid0IGJsb2NrIGZvciBub24tQVBQUk9WRUQgc3RhdHVzKVxuICAgIGlmICh0aGVyYXBpc3RSZWNvcmQuc3RhdHVzICE9PSAnQVBQUk9WRUQnKSB7XG4gICAgICBjb25zb2xlLndhcm4oYOKaoO+4jyBbVGhlcmFwaXN0RGFzaGJvYXJkR3VhcmRdIFRoZXJhcGlzdCAke3VzZXJSZWNvcmQuZW1haWx9IGhhcyBzdGF0dXM6ICR7dGhlcmFwaXN0UmVjb3JkLnN0YXR1c30gKG5vdCBBUFBST1ZFRClgKTtcbiAgICAgIFxuICAgICAgLy8gRm9yIFBFTkRJTkcvUkVKRUNURUQgc3RhdHVzLCB3ZSBtaWdodCB3YW50IHRvIHNob3cgYSBkaWZmZXJlbnQgZGFzaGJvYXJkIG9yIG1lc3NhZ2VcbiAgICAgIC8vIGJ1dCB3ZSdsbCBhbGxvdyBhY2Nlc3MgYW5kIGxldCB0aGUgZGFzaGJvYXJkIHNlcnZpY2UgaGFuZGxlIHRoZSBzcGVjaWZpYyBkaXNwbGF5IGxvZ2ljXG4gICAgICBpZiAodGhlcmFwaXN0UmVjb3JkLnN0YXR1cyA9PT0gJ1JFSkVDVEVEJykge1xuICAgICAgICBjb25zb2xlLndhcm4oYOKaoO+4jyBbVGhlcmFwaXN0RGFzaGJvYXJkR3VhcmRdIEFsbG93aW5nIGFjY2VzcyBidXQgdGhlcmFwaXN0IGFwcGxpY2F0aW9uIHdhcyByZWplY3RlZGApO1xuICAgICAgfVxuICAgIH1cblxuICAgIC8vIDcuIEFsbCB2YWxpZGF0aW9ucyBwYXNzZWRcbiAgICBjb25zb2xlLmxvZyhg4pyFIFtUaGVyYXBpc3REYXNoYm9hcmRHdWFyZF0gQWNjZXNzIGdyYW50ZWQgZm9yIHRoZXJhcGlzdDogJHt1c2VyUmVjb3JkLmVtYWlsfWApO1xuICAgIFxuICAgIC8vIFN0b3JlIHZhbGlkYXRlZCB0aGVyYXBpc3QgaW5mbyBpbiByZXF1ZXN0IGZvciBkb3duc3RyZWFtIHVzZVxuICAgIHJlcXVlc3QudmFsaWRhdGVkVGhlcmFwaXN0ID0ge1xuICAgICAgdXNlcklkOiB1c2VyUmVjb3JkLmlkLFxuICAgICAgZW1haWw6IHVzZXJSZWNvcmQuZW1haWwsXG4gICAgICBuYW1lOiBgJHt1c2VyUmVjb3JkLmZpcnN0TmFtZX0gJHt1c2VyUmVjb3JkLmxhc3ROYW1lfWAsXG4gICAgICBzdGF0dXM6IHRoZXJhcGlzdFJlY29yZC5zdGF0dXMsXG4gICAgICBwcm92aWRlclR5cGU6IHRoZXJhcGlzdFJlY29yZC5wcm92aWRlclR5cGUsXG4gICAgfTtcblxuICAgIHJldHVybiB0cnVlO1xuICB9XG59Il0sInZlcnNpb24iOjN9

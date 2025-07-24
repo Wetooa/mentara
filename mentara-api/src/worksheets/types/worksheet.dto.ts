@@ -6,11 +6,11 @@
 // Worksheet creation DTO
 export interface WorksheetCreateInputDto {
   title: string;
-  description: string;
-  content: string;
-  type: 'assignment' | 'exercise' | 'reflection' | 'assessment' | 'homework' | 'journal';
-  difficulty: 'easy' | 'medium' | 'hard';
-  category: string;
+  description?: string;
+  content?: string;
+  type?: 'assignment' | 'exercise' | 'reflection' | 'assessment' | 'homework' | 'journal';
+  difficulty?: 'easy' | 'medium' | 'hard';
+  category?: string;
   tags?: string[];
   estimatedDuration?: number; // in minutes
   instructions?: string;
@@ -18,7 +18,7 @@ export interface WorksheetCreateInputDto {
   isTemplate?: boolean;
   templateCategory?: string;
   clientIds?: string[]; // For assignment to specific clients
-  dueDate?: string; // ISO string
+  dueDate: string; // ISO string - required and must be in future
   reminderEnabled?: boolean;
   reminderTime?: string; // ISO string
   maxAttempts?: number;
@@ -46,7 +46,7 @@ export interface WorksheetUpdateInputDto {
   attachments?: string[];
   isTemplate?: boolean;
   templateCategory?: string;
-  dueDate?: string;
+  dueDate?: string; // ISO string - if provided, must be in future
   reminderEnabled?: boolean;
   reminderTime?: string;
   maxAttempts?: number;

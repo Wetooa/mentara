@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MeetingStatus } from '@prisma/client';
+import { ACTIVE_MEETING_STATUSES_ARRAY } from './constants/meeting-status.constants';
 import type {
   MeetingCreateDto,
   MeetingUpdateDto,
@@ -41,164 +42,171 @@ export class BookingService {
   // Meeting Management
   async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
     const { startTime, therapistId, duration } = createMeetingDto;
+
     const startTimeDate = new Date(startTime || createMeetingDto.dateTime);
     const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
 
     // Use database transaction to prevent race conditions
-    return this.prisma.$transaction(async (tx) => {
-      // First, acquire locks on both therapist and client schedules
-      // This prevents concurrent bookings from interfering
-      const [therapistLock, clientLock] = await Promise.all([
-        tx.user.findUnique({
-          where: { id: therapistId },
-          select: { id: true }
-        }),
-        tx.user.findUnique({
-          where: { id: clientId },
-          select: { id: true }
-        })
-      ]);
+    const result = await this.prisma.$transaction(
+      async (tx) => {
+        // First, acquire locks on both therapist and client schedules
+        // This prevents concurrent bookings from interfering
+        const [therapistLock, clientLock] = await Promise.all([
+          tx.user.findUnique({
+            where: { id: therapistId },
+            select: { id: true },
+          }),
+          tx.user.findUnique({
+            where: { id: clientId },
+            select: { id: true },
+          }),
+        ]);
 
-      if (!therapistLock || !clientLock) {
-        throw new BadRequestException('Therapist or client not found');
-      }
+        if (!therapistLock || !clientLock) {
+          throw new BadRequestException('Therapist or client not found');
+        }
 
-      // Check for conflicts within transaction (atomic operation)
-      const conflictingMeetings = await tx.meeting.findMany({
-        where: {
-          OR: [
-            {
-              therapistId,
-              startTime: { lt: endTimeDate },
-              endTime: { gt: startTimeDate },
-              status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
-            },
-            {
-              clientId,
-              startTime: { lt: endTimeDate },
-              endTime: { gt: startTimeDate },
-              status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
-            },
-          ],
-        },
-      });
+        // Check for conflicts within transaction (atomic operation)
+        const conflictingMeetings = await tx.meeting.findMany({
+          where: {
+            OR: [
+              {
+                therapistId,
+                startTime: { lt: endTimeDate },
+                endTime: { gt: startTimeDate },
+                status: { in: ACTIVE_MEETING_STATUSES_ARRAY },
+              },
+              {
+                clientId,
+                startTime: { lt: endTimeDate },
+                endTime: { gt: startTimeDate },
+                status: { in: ACTIVE_MEETING_STATUSES_ARRAY },
+              },
+            ],
+          },
+        });
 
-      if (conflictingMeetings.length > 0) {
-        throw new BadRequestException(
-          `Schedule conflict detected: ${conflictingMeetings.length} conflicting meetings found`
-        );
-      }
+        if (conflictingMeetings.length > 0) {
+          throw new BadRequestException(
+            `Schedule conflict detected: ${conflictingMeetings.length} conflicting meetings found`,
+          );
+        }
 
-      // Validate therapist availability within transaction
-      // Get therapist's timezone preference
-      const therapist = await tx.therapist.findUnique({
-        where: { userId: therapistId },
-        select: { timezone: true },
-      });
-      
-      const therapistTimezone = therapist?.timezone || 'UTC';
-      
-      // Convert to therapist's timezone for availability check
-      const therapistLocalTime = new Date(startTimeDate.toLocaleString('en-US', { timeZone: therapistTimezone }));
-      const therapistLocalEndTime = new Date(endTimeDate.toLocaleString('en-US', { timeZone: therapistTimezone }));
-      
-      const dayOfWeek = therapistLocalTime.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
-      const timeOnly = therapistLocalTime.toTimeString().slice(0, 5); // HH:MM format
-      const endTimeOnly = therapistLocalEndTime.toTimeString().slice(0, 5);
-
-      const availability = await tx.therapistAvailability.findFirst({
-        where: {
+        // Validate therapist availability using the validator service
+        await this.availabilityValidator.validateTherapistAvailabilityWithTransaction(
           therapistId,
-          dayOfWeek,
-          startTime: { lte: timeOnly },
-          endTime: { gte: endTimeOnly },
-          isAvailable: true,
-        },
-      });
-
-      if (!availability) {
-        throw new BadRequestException(
-          `Therapist is not available at the requested time (${timeOnly}-${endTimeOnly} ${dayOfWeek} in ${therapistTimezone})`
+          startTimeDate,
+          duration,
+          tx, // Pass transaction client
         );
-      }
 
-      // Create the meeting within the transaction
-      const meeting = await tx.meeting.create({
-        data: {
-          ...createMeetingDto,
-          startTime: startTimeDate,
-          endTime: endTimeDate,
-          status: 'SCHEDULED',
-          clientId,
-        },
-        include: {
-          client: {
-            select: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+        // Create the meeting within the transaction
+        const meeting = await tx.meeting.create({
+          data: {
+            ...createMeetingDto,
+            startTime: startTimeDate,
+            endTime: endTimeDate,
+            status: 'WAITING',
+            clientId,
+          },
+          include: {
+            client: {
+              select: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+            therapist: {
+              select: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
                 },
               },
             },
           },
-          therapist: {
-            select: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true,
-                },
-              },
-            },
+        });
+
+        // Create automatic mock payment for the meeting
+        const sessionPrice = 100; // Mock session price - should come from therapist rates or duration
+        await this.billingService.createAutomaticMockPayment(
+          {
+            clientId: meeting.clientId,
+            therapistId: meeting.therapistId,
+            meetingId: meeting.id,
+            amount: sessionPrice,
+            currency: 'USD',
+            description: `Payment for therapy session: ${meeting.title || 'Therapy Session'}`,
           },
-        },
-      });
+          tx,
+        );
 
-      // NOTE: Payment processing now handled separately when client pays for session
-      // The meeting is created first, then payment is processed via billing controller
-      // This allows for better payment flow and error handling
+        // Publish appointment booked event
+        await this.eventBus.emit(
+          new AppointmentBookedEvent({
+            appointmentId: meeting.id,
+            clientId: meeting.clientId,
+            therapistId: meeting.therapistId,
+            startTime: meeting.startTime,
+            meetingType: meeting.meetingType as
+              | 'video'
+              | 'audio'
+              | 'in_person'
+              | 'chat',
+            duration: meeting.duration,
+            title: meeting.title || 'Therapy Session',
+            description: meeting.description || undefined,
+            isInitialConsultation: false,
+          }),
+        );
 
-      // Publish appointment booked event
-      await this.eventBus.emit(
-        new AppointmentBookedEvent({
-          appointmentId: meeting.id,
-          clientId: meeting.clientId,
-          therapistId: meeting.therapistId,
-          startTime: meeting.startTime,
-          meetingType: meeting.meetingType as
-            | 'video'
-            | 'audio'
-            | 'in_person'
-            | 'chat',
-          duration: meeting.duration,
-          title: meeting.title || 'Therapy Session',
-          description: meeting.description || undefined,
-          isInitialConsultation: false,
-        }),
-      );
+        // Transform the response to match frontend expectations
+        return {
+          ...meeting,
+          dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
+          therapistName: meeting.therapist?.user
+            ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
+            : 'Unknown Therapist',
+        };
+      },
+      {
+        isolationLevel: 'Serializable', // Highest isolation level to prevent race conditions
+        timeout: 10000, // 10 second timeout
+        maxWait: 5000, // Max wait time for transaction lock
+      },
+    );
 
-      // Transform the response to match frontend expectations
-      return {
-        ...meeting,
-        dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-        therapistName: meeting.therapist?.user 
-          ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
-          : 'Unknown Therapist',
-      };
-    }, {
-      isolationLevel: 'Serializable', // Highest isolation level to prevent race conditions
-      timeout: 10000, // 10 second timeout
-      maxWait: 5000, // Max wait time for transaction lock
-    });
+    return result;
   }
 
-  async getMeetings(userId: string, role: string) {
+  async getMeetings(
+    userId: string,
+    role: string,
+    queryOptions?: {
+      status?: string;
+      limit?: number;
+      offset?: number;
+    },
+  ) {
     try {
-      const where =
+      const where: any =
         role === 'therapist' ? { therapistId: userId } : { clientId: userId };
+
+      // Handle status filtering
+      if (queryOptions?.status) {
+        const statusValues = queryOptions.status
+          .split(',')
+          .map((s) => s.trim().toUpperCase());
+        where.status = { in: statusValues };
+      }
 
       const meetings = await this.prisma.meeting.findMany({
         where,
@@ -227,13 +235,15 @@ export class BookingService {
           },
         },
         orderBy: { startTime: 'desc' },
+        take: queryOptions?.limit,
+        skip: queryOptions?.offset,
       });
 
       // Transform the response to match frontend expectations
-      return meetings.map(meeting => ({
+      return meetings.map((meeting) => ({
         ...meeting,
         dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-        therapistName: meeting.therapist?.user 
+        therapistName: meeting.therapist?.user
           ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
           : 'Unknown Therapist',
       }));
@@ -290,7 +300,7 @@ export class BookingService {
       return {
         ...meeting,
         dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-        therapistName: meeting.therapist?.user 
+        therapistName: meeting.therapist?.user
           ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
           : 'Unknown Therapist',
       };
@@ -476,20 +486,26 @@ export class BookingService {
       // Handle payment refund for cancelled sessions
       try {
         // Find payment record associated with this meeting using the updated API
-        const payments = await this.billingService.getUserPayments(userId, { 
-          limit: 100 
+        const payments = await this.billingService.getUserPayments(userId, {
+          limit: 100,
         });
-        const meetingPayment = payments.find(p => p.meetingId === meeting.id);
-        
-        if (meetingPayment && cancellationNotice >= 24) { // 24-hour cancellation policy
+        const meetingPayment = payments.find((p) => p.meetingId === meeting.id);
+
+        if (meetingPayment && cancellationNotice >= 24) {
+          // 24-hour cancellation policy
           // NOTE: Refund logic would need to be implemented in billing service
           // For now, we'll emit an event that a refund is needed
-          this.logger.log(`Refund needed for cancelled session ${meeting.id} - ${cancellationNotice}h notice`);
+          this.logger.log(
+            `Refund needed for cancelled session ${meeting.id} - ${cancellationNotice}h notice`,
+          );
           // TODO: Implement refund processing in billing service
         }
       } catch (refundError) {
         // Log refund error but don't fail the cancellation
-        console.error('Failed to process refund for cancelled meeting:', refundError);
+        console.error(
+          'Failed to process refund for cancelled meeting:',
+          refundError,
+        );
       }
 
       // Publish cancellation event
@@ -661,5 +677,317 @@ export class BookingService {
     );
 
     return true;
+  }
+
+  // Meeting Status Transition Methods
+  async acceptMeetingRequest(meetingId: string, meetingUrl: string, userId: string, role: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (meeting.status !== 'WAITING') {
+        throw new BadRequestException('Only meetings with WAITING status can be accepted');
+      }
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can accept booking requests');
+      }
+
+      const updatedMeeting = await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { 
+          status: 'SCHEDULED',
+          meetingUrl: meetingUrl,
+        },
+        include: {
+          client: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Meeting ${meetingId} accepted by therapist ${userId}`);
+
+      return {
+        ...updatedMeeting,
+        dateTime: updatedMeeting.startTime,
+        therapistName: updatedMeeting.therapist?.user
+          ? `${updatedMeeting.therapist.user.firstName} ${updatedMeeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async startMeeting(meetingId: string, userId: string, role: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (!['WAITING', 'SCHEDULED', 'CONFIRMED'].includes(meeting.status)) {
+        throw new BadRequestException('Meeting cannot be started from current status');
+      }
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can start meetings');
+      }
+
+      const updatedMeeting = await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { status: 'IN_PROGRESS' },
+        include: {
+          client: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Meeting ${meetingId} started by therapist ${userId}`);
+
+      return {
+        ...updatedMeeting,
+        dateTime: updatedMeeting.startTime,
+        therapistName: updatedMeeting.therapist?.user
+          ? `${updatedMeeting.therapist.user.firstName} ${updatedMeeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async completeMeeting(meetingId: string, userId: string, role: string, notes?: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (meeting.status !== 'IN_PROGRESS') {
+        throw new BadRequestException('Only meetings in progress can be completed');
+      }
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can complete meetings');
+      }
+
+      // Save notes if provided
+      if (notes) {
+        // Check if notes already exist for this meeting
+        const existingNotes = await this.prisma.meetingNotes.findFirst({
+          where: { meetingId },
+        });
+        
+        if (existingNotes) {
+          // Update existing notes
+          await this.prisma.meetingNotes.update({
+            where: { id: existingNotes.id },
+            data: { notes },
+          });
+        } else {
+          // Create new notes
+          await this.prisma.meetingNotes.create({
+            data: {
+              id: `${meetingId}-notes`,
+              meetingId,
+              notes,
+            },
+          });
+        }
+      }
+
+      const updatedMeeting = await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { status: 'COMPLETED' },
+        include: {
+          client: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          meetingNotes: true,
+        },
+      });
+
+      // Publish completion event
+      await this.eventBus.emit(
+        new AppointmentCompletedEvent({
+          appointmentId: updatedMeeting.id,
+          clientId: updatedMeeting.clientId,
+          therapistId: updatedMeeting.therapistId,
+          completedAt: new Date(),
+          duration: updatedMeeting.duration,
+          sessionNotes: notes || '',
+          attendanceStatus: 'ATTENDED',
+        }),
+      );
+
+      this.logger.log(`Meeting ${meetingId} completed by therapist ${userId}`);
+
+      return {
+        ...updatedMeeting,
+        dateTime: updatedMeeting.startTime,
+        therapistName: updatedMeeting.therapist?.user
+          ? `${updatedMeeting.therapist.user.firstName} ${updatedMeeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async markNoShow(meetingId: string, userId: string, role: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (!['IN_PROGRESS', 'SCHEDULED', 'CONFIRMED'].includes(meeting.status)) {
+        throw new BadRequestException('Meeting cannot be marked as no-show from current status');
+      }
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can mark meetings as no-show');
+      }
+
+      const updatedMeeting = await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { status: 'NO_SHOW' },
+        include: {
+          client: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Meeting ${meetingId} marked as no-show by therapist ${userId}`);
+
+      return {
+        ...updatedMeeting,
+        dateTime: updatedMeeting.startTime,
+        therapistName: updatedMeeting.therapist?.user
+          ? `${updatedMeeting.therapist.user.firstName} ${updatedMeeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async saveMeetingNotes(meetingId: string, notes: string, userId: string, role: string) {
+    try {
+      const meeting = await this.getMeeting(meetingId, userId, role);
+
+      if (role !== 'therapist') {
+        throw new ForbiddenException('Only therapists can save meeting notes');
+      }
+
+      // Check if notes already exist for this meeting
+      const existingNotes = await this.prisma.meetingNotes.findFirst({
+        where: { meetingId },
+      });
+      
+      let meetingNotes;
+      if (existingNotes) {
+        // Update existing notes
+        meetingNotes = await this.prisma.meetingNotes.update({
+          where: { id: existingNotes.id },
+          data: { notes },
+        });
+      } else {
+        // Create new notes
+        meetingNotes = await this.prisma.meetingNotes.create({
+          data: {
+            id: `${meetingId}-notes`,
+            meetingId,
+            notes,
+          },
+        });
+      }
+
+      this.logger.log(`Meeting notes saved for meeting ${meetingId} by therapist ${userId}`);
+
+      return meetingNotes;
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   }
 }

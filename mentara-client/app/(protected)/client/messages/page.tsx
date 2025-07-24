@@ -18,19 +18,22 @@ export default function ClientMessagesPage() {
     try {
       toast.info(`Initiating ${type} call...`);
       
-      // For instant calls from messaging, we need to create an immediate meeting
-      // and then navigate to it. The backend should handle creating a meeting
-      // that starts immediately for video/audio calls from conversations.
-      
       if (!user) {
         toast.error('Authentication required to start a call');
         return;
       }
 
-      // We'll use the conversation ID as a temporary meeting ID
-      // and let the meeting room handle the call setup
-      // The meeting room should be enhanced to handle instant calls
-      router.push(`/client/meeting/${conversationId}?type=${type}&instant=true&callType=${type}`);
+      // Get conversation details to find the other participant
+      const conversation = await api.messaging.getConversation(conversationId);
+      const otherParticipant = conversation.participants.find(p => p.userId !== user.id);
+      
+      if (!otherParticipant) {
+        toast.error('Unable to find call recipient');
+        return;
+      }
+
+      // Navigate to the new video call page with recipient ID
+      router.push(`/client/video-call?recipientId=${otherParticipant.userId}&type=${type}`);
       
     } catch (error) {
       console.error('Failed to initiate call:', error);

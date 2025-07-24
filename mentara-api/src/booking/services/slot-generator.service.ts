@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
+import { ACTIVE_MEETING_STATUSES_ARRAY } from '../constants/meeting-status.constants';
 
 export interface TimeSlot {
   startTime: string;
@@ -21,7 +22,7 @@ export class SlotGeneratorService {
   private readonly defaultConfig: SlotGenerationConfig = {
     slotInterval: 30,
     maxAdvanceBooking: 90,
-    minAdvanceBooking: 2,
+    minAdvanceBooking: 0.5,
   };
 
   constructor(private readonly prisma: PrismaService) {}
@@ -38,24 +39,35 @@ export class SlotGeneratorService {
   /**
    * Generate available time slots for a therapist on a specific date
    */
+  /**
+   * Generate available time slots for a therapist on a specific date
+   */
   async generateAvailableSlots(
     therapistId: string,
     date: string,
     config: Partial<SlotGenerationConfig> = {},
   ): Promise<TimeSlot[]> {
+    console.log(`[SlotGenerator] Generating slots for therapist ${therapistId} on ${date}`);
+    
     const finalConfig = { ...this.defaultConfig, ...config };
     const targetDate = new Date(date);
     const dayOfWeek = targetDate.getDay();
+    
+    console.log(`[SlotGenerator] Target date: ${targetDate.toISOString()}, dayOfWeek: ${dayOfWeek} (${this.getDayName(dayOfWeek)})`);
 
     // Validate date is within booking window
     this.validateBookingDate(targetDate, finalConfig);
 
-    // Get therapist availability for this day
+    // Get therapist availability for this day - convert JS day number to string
     const availability = await this.getTherapistAvailability(
       therapistId,
-      dayOfWeek,
+      dayOfWeek.toString(), // Fixed: ensure consistent string conversion
     );
+    
+    console.log(`[SlotGenerator] Found ${availability.length} availability records:`, availability);
+    
     if (availability.length === 0) {
+      console.log(`[SlotGenerator] No availability found for therapist ${therapistId} on ${this.getDayName(dayOfWeek)}`);
       return [];
     }
 
@@ -64,27 +76,41 @@ export class SlotGeneratorService {
       therapistId,
       targetDate,
     );
+    
+    console.log(`[SlotGenerator] Found ${existingBookings.length} existing bookings:`, existingBookings.map(b => ({
+      id: b.id,
+      startTime: b.startTime,
+      duration: b.duration,
+      status: b.status
+    })));
 
     // Generate slots for each availability window
     const allSlots: TimeSlot[] = [];
     for (const avail of availability) {
+      console.log(`[SlotGenerator] Processing availability window: ${avail.startTime} - ${avail.endTime}`);
       const slots = this.generateSlotsForAvailabilityWindow(
         targetDate,
         avail,
         existingBookings,
         finalConfig,
       );
+      console.log(`[SlotGenerator] Generated ${slots.length} slots for this window`);
       allSlots.push(...slots);
     }
 
-    return allSlots.sort(
+    const sortedSlots = allSlots.sort(
       (a, b) =>
         new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
     );
+    
+    console.log(`[SlotGenerator] Final result: ${sortedSlots.length} total slots`);
+    return sortedSlots;
   }
 
   private validateBookingDate(date: Date, config: SlotGenerationConfig): void {
     const now = new Date();
+    
+    // Calculate min and max dates using UTC
     const maxDate = new Date(
       now.getTime() + config.maxAdvanceBooking * 24 * 60 * 60 * 1000,
     );
@@ -92,6 +118,7 @@ export class SlotGeneratorService {
       now.getTime() + config.minAdvanceBooking * 60 * 60 * 1000,
     );
 
+    // Compare target date with UTC times
     if (date < minDate) {
       throw new BadRequestException(
         `Bookings must be made at least ${config.minAdvanceBooking} hours in advance`,
@@ -107,12 +134,12 @@ export class SlotGeneratorService {
 
   private async getTherapistAvailability(
     therapistId: string,
-    dayOfWeek: number,
+    dayOfWeek: string, // Changed: accept string directly to match database schema
   ) {
     return this.prisma.therapistAvailability.findMany({
       where: {
         therapistId,
-        dayOfWeek: dayOfWeek.toString(),
+        dayOfWeek: dayOfWeek, // Use directly since it's already a string
         isAvailable: true,
       },
       orderBy: { startTime: 'asc' },
@@ -129,7 +156,7 @@ export class SlotGeneratorService {
       where: {
         therapistId,
         startTime: { gte: startOfDay, lte: endOfDay },
-        status: { in: ['SCHEDULED', 'CONFIRMED'] },
+        status: { in: ACTIVE_MEETING_STATUSES_ARRAY },
       },
       orderBy: { startTime: 'asc' },
     });
@@ -246,6 +273,9 @@ export class SlotGeneratorService {
   /**
    * Check if a specific time slot is available
    */
+  /**
+   * Check if a specific time slot is available
+   */
   async isSlotAvailable(
     therapistId: string,
     startTime: Date,
@@ -254,11 +284,11 @@ export class SlotGeneratorService {
     const endTime = new Date(startTime.getTime() + duration * 60000);
     const dayOfWeek = startTime.getDay();
 
-    // Check therapist availability
+    // Check therapist availability - convert JS day number to string
     const availability = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek: dayOfWeek.toString(),
+        dayOfWeek: dayOfWeek.toString(), // Fixed: consistent string conversion
         isAvailable: true,
       },
     });
@@ -282,5 +312,10 @@ export class SlotGeneratorService {
     );
 
     return !this.hasConflictWithBookings(startTime, endTime, existingBookings);
+  }
+
+  private getDayName(dayOfWeek: number): string {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dayOfWeek] || 'Unknown';
   }
 }

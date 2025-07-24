@@ -1,5 +1,14 @@
 'use client';
 
+/**
+ * @deprecated UserSearchBar is deprecated. Use LayoutOmniSearchBar for layout search
+ * or OmniSearchBar for comprehensive search functionality instead.
+ * 
+ * UserSearchBar provides limited user-only search capabilities and is being phased out
+ * in favor of omnisearch components that support multiple entity types with better
+ * performance and user experience.
+ */
+
 import React, { useState, useCallback, useRef } from 'react';
 import { Search, X, User, UserCircle, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';

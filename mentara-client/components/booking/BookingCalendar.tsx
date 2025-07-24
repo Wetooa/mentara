@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
 import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
+import { TimezoneUtils } from "@/lib/utils/timezone";
 
 interface BookingCalendarProps {
   therapistId: string;
@@ -32,10 +33,10 @@ export function BookingCalendar({
   onDateSelect,
   className,
 }: BookingCalendarProps) {
-  const [calendarDate, setCalendarDate] = useState<Date>(selectedDate || new Date());
+  const [calendarDate, setCalendarDate] = useState<Date>(selectedDate || TimezoneUtils.getCurrent());
   
-  // Format date for API
-  const dateString = calendarDate ? calendarDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+  // Format date for API using Manila timezone
+  const dateString = calendarDate ? TimezoneUtils.format(calendarDate, 'yyyy-MM-dd') : TimezoneUtils.format(TimezoneUtils.getCurrent(), 'yyyy-MM-dd');
   
   const {
     timeSlots,
@@ -43,6 +44,7 @@ export function BookingCalendar({
     error,
     hasSlots,
     getAvailableDurationsForSlot,
+    refetch, // Add refetch function
   } = useAvailableSlots(therapistId, dateString);
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -60,9 +62,8 @@ export function BookingCalendar({
 
   // Check if date has available slots (for calendar day highlighting)
   const isDayAvailable = (date: Date) => {
-    // For now, allow all future dates
-    // In a real implementation, you might want to check availability for each day
-    return date >= new Date();
+    // Check if date is in the future (Manila time) and can be booked
+    return !TimezoneUtils.isPast(date) && TimezoneUtils.canBook(date);
   };
 
   return (
@@ -75,25 +76,48 @@ export function BookingCalendar({
             Select Date
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Calendar
-            mode="single"
-            selected={calendarDate}
-            onSelect={handleDateSelect}
-            disabled={(date) => {
-              // Disable past dates
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              return date < today;
-            }}
-            modifiers={{
-              available: isDayAvailable,
-            }}
-            modifiersClassNames={{
-              available: "bg-green-100 text-green-900",
-            }}
-            className="rounded-md border"
-          />
+        <CardContent className="p-0">
+          <div className="w-full">
+            <Calendar
+              mode="single"
+              selected={calendarDate}
+              onSelect={handleDateSelect}
+              disabled={(date) => {
+                // Disable past dates and dates that can't be booked (Manila timezone)
+                return TimezoneUtils.isPast(date) || !TimezoneUtils.canBook(date, 0.5);
+              }}
+              modifiers={{
+                available: isDayAvailable,
+              }}
+              modifiersClassNames={{
+                available: "bg-green-100 text-green-900",
+              }}
+              className="w-full rounded-none border-0"
+              classNames={{
+                months: "flex w-full flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                month: "space-y-4 w-full flex flex-col",
+                caption: "flex justify-center pt-1 relative items-center",
+                caption_label: "text-sm font-medium",
+                caption_dropdowns: "flex justify-center gap-1",
+                nav: "space-x-1 flex items-center",
+                nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                table: "w-full border-collapse space-y-1",
+                head_row: "flex w-full",
+                head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] flex-1 text-center",
+                row: "flex w-full mt-2",
+                cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 flex-1",
+                day: "h-9 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                day_today: "bg-accent text-accent-foreground",
+                day_outside: "text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+                day_disabled: "text-muted-foreground opacity-50",
+                day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                day_hidden: "invisible",
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -104,7 +128,7 @@ export function BookingCalendar({
             <Clock className="h-5 w-5" />
             Available Time Slots
             <Badge variant="secondary" className="ml-auto">
-              {calendarDate.toLocaleDateString()}
+              {TimezoneUtils.formatForDisplay(calendarDate)}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -122,8 +146,25 @@ export function BookingCalendar({
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Failed to load available slots. Please try again.
+              <AlertDescription className="space-y-2">
+                <div>
+                  {error.message?.includes('advance') 
+                    ? 'Cannot book appointments for this date. Please select a time at least 30 minutes in advance.'
+                    : error.message?.includes('404') || error.message?.includes('not found')
+                    ? 'Therapist availability not found. Please try selecting a different date.'
+                    : error.message?.includes('401') || error.message?.includes('unauthorized')
+                    ? 'Please sign in again to view available slots.'
+                    : 'Failed to load available slots. Please check your connection and try again.'
+                  }
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => refetch()}
+                  className="mt-2"
+                >
+                  Retry
+                </Button>
               </AlertDescription>
             </Alert>
           )}
@@ -198,11 +239,11 @@ export function BookingCalendar({
           onClick={() => {
             const prevDay = new Date(calendarDate);
             prevDay.setDate(prevDay.getDate() - 1);
-            if (prevDay >= new Date()) {
+            if (!TimezoneUtils.isPast(prevDay) && TimezoneUtils.canBook(prevDay)) {
               handleDateSelect(prevDay);
             }
           }}
-          disabled={calendarDate <= new Date()}
+          disabled={TimezoneUtils.isPast(calendarDate) || !TimezoneUtils.canBook(calendarDate)}
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
           Previous Day

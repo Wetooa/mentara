@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo } from 'react';
-import { useRealtimeMessaging } from './useRealtimeMessaging';
+import { useMessaging } from './useMessaging';
 import { groupMessagesByDate, formatDateLabel } from '@/lib/utils/messageUtils';
 import type { Message, Conversation } from '@/components/messages/types';
 
 /**
- * Simplified messaging hook that wraps useRealtimeMessaging 
+ * Simplified messaging hook that wraps useMessaging 
  * for easy use in message components like MessageChatArea
+ * Now uses the new simplified useMessaging hook
  */
 export function useSimpleMessaging(params: {
   conversationId?: string;
@@ -34,7 +35,7 @@ export function useSimpleMessaging(params: {
     isSendingMessage,
     isMarkingAsRead,
     isAddingReaction,
-  } = useRealtimeMessaging(params);
+  } = useMessaging(params);
 
   // Convert backend messages to frontend Message format
   const convertedMessages: Message[] = useMemo(() => {

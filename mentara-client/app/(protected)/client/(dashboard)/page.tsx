@@ -6,17 +6,14 @@ import {
   useDashboardData,
   useRecentCommunications,
 } from "@/hooks/dashboard/useClientDashboard";
-import { useNotifications } from "@/hooks/notifications/useNotifications";
-import {
-  transformDashboardData,
-} from "@/lib/transformers/dashboardTransformer";
+import { transformDashboardData } from "@/lib/transformers/dashboardTransformer";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
 import UpcomingSessionsCalendar from "@/components/dashboard/UpcomingSessionsCalendar";
 import WorksheetStatus from "@/components/dashboard/WorksheetStatus";
 import ProgressTracking from "@/components/dashboard/ProgressTracking";
-import NotificationsCenter from "@/components/dashboard/NotificationsCenter";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import AssignedTherapist from "@/components/dashboard/AssignedTherapist";
 import RecentCommunications from "@/components/dashboard/RecentCommunications";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,9 +32,6 @@ export default function DashboardPage() {
     refetch: refetchDashboard,
   } = useDashboardData();
 
-  const { data: notificationsData, isLoading: isNotificationsLoading } =
-    useNotifications({ limit: 10, isRead: false });
-
   const { data: communicationsData, isLoading: isCommunicationsLoading } =
     useRecentCommunications();
 
@@ -48,41 +42,41 @@ export default function DashboardPage() {
     }
 
     // DEBUG: Log raw API data to trace dateString.split error
-    console.log('🔍 Dashboard API Data:', {
+    console.log("🔍 Dashboard API Data:", {
       dashboardApiData: JSON.stringify(dashboardApiData, null, 2),
-      notificationsData: JSON.stringify(notificationsData, null, 2),
       communicationsData: JSON.stringify(communicationsData, null, 2),
     });
 
     try {
       const transformedData = transformDashboardData(
         dashboardApiData,
-        Array.isArray(notificationsData) ? notificationsData : [],
         Array.isArray(communicationsData) ? communicationsData : []
       );
-      
-      console.log('✅ Dashboard data transformed successfully:', transformedData);
+
+      console.log(
+        "✅ Dashboard data transformed successfully:",
+        transformedData
+      );
       return transformedData;
     } catch (error) {
-      console.error('❌ Error transforming dashboard data:', error);
-      console.error('❌ Error stack:', error.stack);
+      console.error("❌ Error transforming dashboard data:", error);
+      console.error("❌ Error stack:", error.stack);
       throw error; // Re-throw to trigger error boundary
     }
-  }, [dashboardApiData, notificationsData, communicationsData]);
+  }, [dashboardApiData, communicationsData]);
 
-  const isLoading =
-    isDashboardLoading || isNotificationsLoading || isCommunicationsLoading;
+  const isLoading = isDashboardLoading || isCommunicationsLoading;
 
   const handleMessageTherapist = () => {
-    router.push('/client/messages');
+    router.push("/client/messages");
   };
 
   const handleScheduleSession = () => {
-    router.push('/client/booking');
+    router.push("/client/booking");
   };
 
   const handleViewAllMessages = () => {
-    router.push('/client/messages');
+    router.push("/client/messages");
   };
 
   const handleContactSelect = (contactId: string) => {
@@ -90,7 +84,7 @@ export default function DashboardPage() {
   };
 
   const handleBookSession = () => {
-    router.push('/client/booking');
+    router.push("/client/booking");
   };
 
   const handleRetry = () => {
@@ -99,23 +93,23 @@ export default function DashboardPage() {
 
   // Navigation handlers for clickable dashboard cards
   const handleUpcomingSessionsClick = () => {
-    router.push('/client/sessions/upcoming');
+    router.push("/client/sessions/upcoming");
   };
 
   const handlePendingWorksheetsClick = () => {
-    router.push('/client/worksheets');
+    router.push("/client/worksheets");
   };
 
   const handleCompletedSessionsClick = () => {
-    router.push('/client/sessions/completed');
+    router.push("/client/sessions/completed");
   };
 
   const handleCompletedWorksheetsClick = () => {
-    router.push('/client/worksheets?filter=completed');
+    router.push("/client/worksheets?filter=completed");
   };
 
   const handleTherapistsClick = () => {
-    router.push('/client/therapist');
+    router.push("/client/therapist");
   };
 
   // Show error state
@@ -188,7 +182,7 @@ export default function DashboardPage() {
       />
 
       {/* Stats Overview */}
-      <StatsOverview 
+      <StatsOverview
         stats={dashboardData.stats}
         onUpcomingSessionsClick={handleUpcomingSessionsClick}
         onPendingWorksheetsClick={handlePendingWorksheetsClick}
@@ -202,8 +196,8 @@ export default function DashboardPage() {
         {/* Primary Column - Full-Width Sessions Calendar */}
         <div className="lg:col-span-2 space-y-4 lg:space-y-6">
           {/* Sessions Calendar - Full Width Modern Design */}
-          <UpcomingSessionsCalendar className="h-full" />
-          
+          {/* <UpcomingSessionsCalendar className="h-full" /> */}
+
           {/* Secondary Content - Sessions and Worksheets */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
@@ -225,7 +219,11 @@ export default function DashboardPage() {
             onContactSelect={handleContactSelect}
           />
           <ProgressTracking progress={dashboardData.progress} />
-          <NotificationsCenter notifications={dashboardData.notifications} />
+          {/* <NotificationCenter  */}
+          {/*   className="h-96"  */}
+          {/*   showSettings={false}  */}
+          {/*   maxHeight="384px"  */}
+          {/* /> */}
         </div>
       </div>
     </div>

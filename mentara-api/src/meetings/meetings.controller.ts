@@ -10,11 +10,11 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { MeetingsService } from './meetings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 // TODO: Add validation schemas when needed
 import type {
   CreateVideoRoomDto,
@@ -30,6 +30,47 @@ import type {
 @UseGuards(JwtAuthGuard)
 export class MeetingsController {
   constructor(private readonly meetingsService: MeetingsService) {}
+
+  // Specific routes must come before parameterized routes
+  @Get('upcoming')
+  async getUpcomingMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.meetingsService.getUpcomingMeetings(userId, limit);
+  }
+
+  @Get('completed')
+  async getCompletedMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.meetingsService.getCompletedMeetings(userId, limit);
+  }
+
+  @Get('cancelled')
+  async getCancelledMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.meetingsService.getCancelledMeetings(userId, limit);
+  }
+
+  @Get('in-progress')
+  async getInProgressMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.meetingsService.getInProgressMeetings(userId, limit);
+  }
+
+  @Get('booking-requests')
+  async getBookingRequests(
+    @CurrentUserId() userId: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.meetingsService.getBookingRequests(userId, limit);
+  }
 
   @Get(':id')
   async getMeeting(
@@ -52,6 +93,25 @@ export class MeetingsController {
       userId,
       updateStatusDto,
     );
+  }
+
+  @Put(':id/accept')
+  @HttpCode(HttpStatus.OK)
+  async acceptBookingRequest(
+    @Param('id') meetingId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.meetingsService.acceptBookingRequest(meetingId, userId);
+  }
+
+  @Put(':id/deny')
+  @HttpCode(HttpStatus.OK)
+  async denyBookingRequest(
+    @Param('id') meetingId: string,
+    @CurrentUserId() userId: string,
+    @Body() body?: { reason?: string },
+  ) {
+    return this.meetingsService.denyBookingRequest(meetingId, userId, body?.reason);
   }
 
   // ===== VIDEO CALL INTEGRATION ENDPOINTS =====
@@ -123,53 +183,21 @@ export class MeetingsController {
     );
   }
 
-  @Get('upcoming')
-  async getUpcomingMeetings(
-    @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
-  ) {
-    return this.meetingsService.getUpcomingMeetings(userId, limit);
-  }
-
-  @Get('completed')
-  async getCompletedMeetings(
-    @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
-  ) {
-    return this.meetingsService.getCompletedMeetings(userId, limit);
-  }
-
-  @Get('cancelled')
-  async getCancelledMeetings(
-    @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
-  ) {
-    return this.meetingsService.getCancelledMeetings(userId, limit);
-  }
-
-  @Get('in-progress')
-  async getInProgressMeetings(
-    @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
-  ) {
-    return this.meetingsService.getInProgressMeetings(userId, limit);
-  }
-
   @Get()
   async getAllMeetings(
     @CurrentUserId() userId: string,
     @Query('status') status?: string,
     @Query('type') type?: string,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
     const queryOptions = {
       status,
       type,
-      limit: limit ? Number(limit) : undefined,
-      offset: offset ? Number(offset) : undefined,
+      limit,
+      offset,
       dateFrom,
       dateTo,
     };

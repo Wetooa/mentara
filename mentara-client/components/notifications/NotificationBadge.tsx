@@ -34,7 +34,7 @@ export function NotificationBadge({
 
   const sizeClasses = {
     sm: "h-4 w-4",
-    md: "h-5 w-5", 
+    md: "h-5 w-5",
     lg: "h-6 w-6",
   };
 
@@ -47,12 +47,12 @@ export function NotificationBadge({
   const Component = onClick ? Button : "div";
   const componentProps = onClick
     ? {
-        variant: "ghost" as const,
-        size: "sm" as const,
-        onClick,
-        disabled,
-        "aria-label": `Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`,
-      }
+      variant: "ghost" as const,
+      size: "sm" as const,
+      onClick,
+      disabled,
+      "aria-label": `Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`,
+    }
     : {};
 
   if (variant === "counter") {
@@ -232,8 +232,8 @@ export function NotificationStatusIndicator({
         isConnected
           ? "Real-time notifications active"
           : isReconnecting
-          ? "Connecting to notifications..."
-          : `Notifications offline${error ? `: ${error}` : ""}`
+            ? "Connecting to notifications..."
+            : `Notifications offline${error ? `: ${error}` : ""}`
       }
     />
   );

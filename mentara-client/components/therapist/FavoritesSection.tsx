@@ -2,61 +2,60 @@
 
 import React, { useState } from "react";
 import TherapistCard from "@/components/therapist/listing/TherapistCard";
-import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
-import BookingModal from "@/components/booking/BookingModal";
+
 import { useFavorites } from "@/hooks/user/useFavorites";
-import { useFilteredTherapists } from "@/hooks/therapist/useTherapists";
+import { useAllTherapists } from "@/hooks/therapist/useAllTherapists";
+import { useTherapistRequest } from "@/hooks/therapist/useTherapistRequest";
 import { Heart, Star } from "lucide-react";
 import { TherapistCardData } from "@/types/therapist";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function FavoritesSection() {
+  const router = useRouter();
   const { favorites, isLoaded } = useFavorites();
-  const [selectedTherapist, setSelectedTherapist] = useState<TherapistCardData | null>(null);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const { requestTherapist, isLoading: isRequestLoading } = useTherapistRequest();
 
   // Get all therapists to filter favorites from
-  const { therapists, isLoading } = useFilteredTherapists("", "All", { limit: 100 });
+  const { therapists, isLoading } = useAllTherapists({ pageSize: 100 });
 
   // Filter therapists to only show favorites
   const favoriteTherapists = therapists.filter(therapist => 
     favorites.includes(therapist.id)
   );
 
-  const handleViewProfile = (therapist: TherapistCardData) => {
-    setSelectedTherapist(therapist);
-    setIsProfileModalOpen(true);
-  };
+  const handleRequest = (therapistId: string) => {
+    try {
+      if (!therapistId || typeof therapistId !== 'string') {
+        toast.error("Invalid therapist selection. Please try again.");
+        return;
+      }
 
-  const handleCloseProfileModal = () => {
-    setIsProfileModalOpen(false);
-    setSelectedTherapist(null);
-  };
+      if (isRequestLoading) {
+        toast.warning("Request already in progress. Please wait...");
+        return;
+      }
 
-  const handleBooking = (therapistId: string) => {
-    const therapist = therapists.find(t => t.id === therapistId);
-    if (therapist) {
-      setSelectedTherapist(therapist);
-      setIsBookingModalOpen(true);
-      setIsProfileModalOpen(false);
+      requestTherapist(therapistId);
+    } catch (error) {
+      console.error('Error sending therapist request:', error);
+      toast.error("Failed to send request. Please try again.");
     }
   };
 
-  const handleCloseBookingModal = () => {
-    setIsBookingModalOpen(false);
-    setSelectedTherapist(null);
-  };
-
-  const handleBookingSuccess = () => {
-    toast.success("Session booked successfully!", {
-      description: `Your session with ${selectedTherapist?.name} has been scheduled.`,
-    });
-  };
-
   const handleMessage = (therapistId: string) => {
-    console.log("Messaging therapist:", therapistId);
-    toast.info("Messaging feature coming soon!");
+    try {
+      if (!therapistId || typeof therapistId !== 'string') {
+        toast.error("Invalid therapist selection. Please try again.");
+        return;
+      }
+
+      router.push(`/client/messages?contact=${encodeURIComponent(therapistId)}`);
+      toast.success("Opening messages...");
+    } catch (error) {
+      console.error('Error navigating to messages:', error);
+      toast.error("Failed to open messages. Please try again.");
+    }
   };
 
   if (!isLoaded || isLoading) {
@@ -129,8 +128,7 @@ export default function FavoritesSection() {
               </div>
               <TherapistCard
                 therapist={therapist}
-                onViewProfile={handleViewProfile}
-                onBooking={handleBooking}
+                onRequest={handleRequest}
                 onMessage={handleMessage}
               />
             </div>
@@ -138,22 +136,7 @@ export default function FavoritesSection() {
         </div>
       </div>
 
-      {/* Therapist Profile Modal */}
-      <TherapistProfileModal
-        therapist={selectedTherapist}
-        isOpen={isProfileModalOpen}
-        onClose={handleCloseProfileModal}
-        onBooking={handleBooking}
-        onMessage={handleMessage}
-      />
 
-      {/* Booking Modal */}
-      <BookingModal
-        therapist={selectedTherapist}
-        isOpen={isBookingModalOpen}
-        onClose={handleCloseBookingModal}
-        onSuccess={handleBookingSuccess}
-      />
     </>
   );
 }

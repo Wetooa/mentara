@@ -9,7 +9,7 @@ import type { Meeting, MeetingsQueryOptions } from '@/lib/api/services/meetings'
  */
 export function useSessions(options: MeetingsQueryOptions = {}) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: queryKeys.sessions.list(options),
     queryFn: () => api.meetings.getAllMeetings(options),
@@ -29,7 +29,7 @@ export function useSessions(options: MeetingsQueryOptions = {}) {
  */
 export function useUpcomingSessions(limit = 10) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: queryKeys.sessions.upcoming(limit),
     queryFn: () => api.meetings.getUpcomingMeetings(limit),
@@ -49,7 +49,7 @@ export function useUpcomingSessions(limit = 10) {
  */
 export function useCompletedSessions(limit = 10) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['sessions', 'completed', limit],
     queryFn: () => api.meetings.getCompletedMeetings(limit),
@@ -68,7 +68,7 @@ export function useCompletedSessions(limit = 10) {
  */
 export function useCancelledSessions(limit = 10) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['sessions', 'cancelled', limit],
     queryFn: () => api.meetings.getCancelledMeetings(limit),
@@ -87,7 +87,7 @@ export function useCancelledSessions(limit = 10) {
  */
 export function useInProgressSessions(limit = 10) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['sessions', 'in-progress', limit],
     queryFn: () => api.meetings.getInProgressMeetings(limit),
@@ -107,7 +107,7 @@ export function useInProgressSessions(limit = 10) {
  */
 export function useSessionsByStatus(status: Meeting["status"], limit = 10) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['sessions', 'by-status', status, limit],
     queryFn: () => api.meetings.getMeetingsByStatus(status, limit),
@@ -127,7 +127,7 @@ export function useSessionsByStatus(status: Meeting["status"], limit = 10) {
  */
 export function useSessionsInDateRange(dateFrom: string, dateTo: string, limit = 20) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['sessions', 'date-range', dateFrom, dateTo, limit],
     queryFn: () => api.meetings.getMeetingsInDateRange(dateFrom, dateTo, limit),
@@ -147,7 +147,7 @@ export function useSessionsInDateRange(dateFrom: string, dateTo: string, limit =
  */
 export function useSessionById(sessionId: string) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['sessions', 'by-id', sessionId],
     queryFn: () => api.meetings.getMeetingById(sessionId),
@@ -168,21 +168,21 @@ export function useSessionById(sessionId: string) {
  */
 export function useSessionStats() {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['sessions', 'stats'],
     queryFn: async () => {
       // Fetch different session counts in parallel
       const [upcoming, completed, cancelled, inProgress] = await Promise.all([
-        api.meetings.getUpcomingMeetings(1).then(meetings => meetings.length),
-        api.meetings.getCompletedMeetings(100).then(meetings => meetings.length), 
+        api.meetings.getUpcomingMeetings(1).then(meetings => meetings.meetings.length),
+        api.meetings.getCompletedMeetings(100).then(meetings => meetings.length),
         api.meetings.getCancelledMeetings(100).then(meetings => meetings.length),
         api.meetings.getInProgressMeetings(1).then(meetings => meetings.length),
       ]);
-      
+
       return {
         upcoming,
-        completed, 
+        completed,
         cancelled,
         inProgress,
         total: upcoming + completed + cancelled + inProgress,
@@ -204,7 +204,7 @@ export function useSessionStats() {
 export function usePrefetchSessions() {
   const queryClient = useQueryClient();
   const api = useApi();
-  
+
   return {
     prefetchUpcoming: (limit = 10) => {
       queryClient.prefetchQuery({
@@ -222,7 +222,7 @@ export function usePrefetchSessions() {
     },
     prefetchCancelled: (limit = 10) => {
       queryClient.prefetchQuery({
-        queryKey: ['sessions', 'cancelled', limit], 
+        queryKey: ['sessions', 'cancelled', limit],
         queryFn: () => api.meetings.getCancelledMeetings(limit),
         staleTime: 1000 * 60 * 5,
       });
@@ -242,7 +242,7 @@ export function usePrefetchSessions() {
  */
 export function useInvalidateSessions() {
   const queryClient = useQueryClient();
-  
+
   return {
     invalidateAll: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] });

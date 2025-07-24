@@ -46,7 +46,7 @@ export function useAdminDashboard() {
   
   return useQuery({
     queryKey: ['admin', 'dashboard'],
-    queryFn: () => api.admin.getDashboard(),
+    queryFn: () => api.dashboard.getAdminDashboard(),
     staleTime: 1000 * 60 * 2, // 2 minutes (dashboard data changes frequently)
   });
 }
@@ -415,13 +415,14 @@ export function useAdminPlatformOverview() {
 
 /**
  * Hook for fetching matching performance analytics (admin functionality)
+ * TODO: Create backend endpoint for matching performance analytics
  */
 export function useAdminMatchingPerformance(startDate?: string, endDate?: string) {
   const api = useApi();
   
   return useQuery({
     queryKey: ['admin', 'analytics', 'matchingPerformance', startDate, endDate],
-    queryFn: () => api.admin.analytics.getMatchingPerformance(startDate, endDate),
+    queryFn: () => Promise.resolve({}), // TODO: Replace with api.admin.analytics.getMatchingPerformance(startDate, endDate) when endpoint is created
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }

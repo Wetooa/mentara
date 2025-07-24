@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, Clock, CheckCircle, Filter } from "lucide-react";
+import { Calendar, Clock, CheckCircle, Filter, Eye } from "lucide-react";
 
 interface WorksheetsSidebarProps {
   activeFilter: string;
@@ -30,6 +30,11 @@ export default function WorksheetsSidebar({
       id: "completed",
       name: "Completed",
       icon: <CheckCircle className="h-4 w-4" />,
+    },
+    {
+      id: "reviewed",
+      name: "Reviewed",
+      icon: <Eye className="h-4 w-4" />,
     },
   ];
 

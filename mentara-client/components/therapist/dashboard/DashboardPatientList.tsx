@@ -58,13 +58,13 @@ export default function DashboardPatientList({
 
   if (appointments.length === 0) {
     return (
-      <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+      <Card className="border-gray-200 shadow-lg bg-white">
         <CardContent className="p-12 text-center">
-          <div className="rounded-xl bg-muted/50 p-4 w-fit mx-auto mb-4">
-            <Clock className="h-8 w-8 text-muted-foreground" />
+          <div className="rounded-xl bg-gray-50 p-4 w-fit mx-auto mb-4">
+            <Clock className="h-8 w-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">No appointments today</h3>
-          <p className="text-muted-foreground">
+          <h3 className="text-lg font-semibold mb-2 text-gray-900">No appointments today</h3>
+          <p className="text-gray-600">
             Your schedule is clear. Enjoy your free time!
           </p>
         </CardContent>
@@ -87,9 +87,9 @@ export default function DashboardPatientList({
           onMouseEnter={() => setHoveredAppointment(appointment.id)}
           onMouseLeave={() => setHoveredAppointment(null)}
         >
-          <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/50 backdrop-blur-sm group">
+          <Card className="relative overflow-hidden border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-white group">
             {/* Accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500" />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600" />
             
             <CardContent className="p-6">
               {/* Patient Info */}
@@ -99,7 +99,7 @@ export default function DashboardPatientList({
                     src={appointment.patientAvatar || "/avatar-placeholder.png"} 
                     alt={appointment.patientName} 
                   />
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                  <AvatarFallback className="bg-amber-100 text-amber-800 font-semibold">
                     {getInitials(appointment.patientName)}
                   </AvatarFallback>
                 </Avatar>
@@ -164,7 +164,7 @@ export default function DashboardPatientList({
               </div>
 
               {/* Subtle gradient overlay on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </CardContent>
           </Card>
         </motion.div>

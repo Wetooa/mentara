@@ -85,7 +85,6 @@ export function useFilters(options: UseFiltersOptions = {}) {
         filters.priceRange.max !== defaultFilters.priceRange.max) count++;
     if (filters.location && filters.location !== defaultFilters.location) count++;
     if (Object.values(filters.availability).some(Boolean)) count++;
-    if (filters.insurance.length > 0) count++;
     if (filters.languages.length > 0) count++;
     if (filters.experienceLevel.min !== defaultFilters.experienceLevel.min || 
         filters.experienceLevel.max !== defaultFilters.experienceLevel.max) count++;
@@ -116,9 +115,6 @@ export function useFilters(options: UseFiltersOptions = {}) {
       params.availability = filters.availability;
     }
 
-    if (filters.insurance.length > 0) {
-      params.insurance = filters.insurance;
-    }
 
     if (filters.languages.length > 0) {
       params.languages = filters.languages;
@@ -162,9 +158,6 @@ export function useFilters(options: UseFiltersOptions = {}) {
       summary.push(`${availabilityCount} time slots`);
     }
 
-    if (filters.insurance.length > 0) {
-      summary.push(`${filters.insurance.length} insurance plans`);
-    }
 
     if (filters.languages.length > 0) {
       summary.push(`${filters.languages.length} languages`);

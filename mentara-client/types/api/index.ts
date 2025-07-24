@@ -78,6 +78,9 @@ export * from './filters';
 // Meeting types
 export * from './meetings';
 
+// Video call types
+export * from './video-calls';
+
 // Keep existing service types for backward compatibility
 export * from '../booking';
 export * from '../review';

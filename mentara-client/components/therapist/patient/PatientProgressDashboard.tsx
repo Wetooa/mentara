@@ -63,10 +63,18 @@ const generateProgressMetrics = (patient: Patient): ProgressMetric[] => [
   },
   {
     label: "Worksheet Completion",
-    value: patient.worksheets?.filter(w => w.status === "completed").length || 0,
+    value:
+      patient.worksheets?.filter(
+        (w) => w.status === "completed" || w.status === "reviewed"
+      ).length || 0,
     total: patient.worksheets?.length || 0,
-    percentage: patient.worksheets?.length ? 
-      (patient.worksheets.filter(w => w.status === "completed").length / patient.worksheets.length) * 100 : 0,
+    percentage: patient.worksheets?.length
+      ? (patient.worksheets.filter(
+          (w) => w.status === "completed" || w.status === "reviewed"
+        ).length /
+          patient.worksheets.length) *
+        100
+      : 0,
     trend: "stable",
     trendValue: 0,
   },
@@ -127,21 +135,31 @@ const generateMilestones = (): Milestone[] => [
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
-    case "therapy": return MessageSquare;
-    case "behavioral": return Activity;
-    case "medication": return Target;
-    case "lifestyle": return Calendar;
-    default: return CheckCircle;
+    case "therapy":
+      return MessageSquare;
+    case "behavioral":
+      return Activity;
+    case "medication":
+      return Target;
+    case "lifestyle":
+      return Calendar;
+    default:
+      return CheckCircle;
   }
 };
 
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case "therapy": return "bg-blue-100 text-blue-800";
-    case "behavioral": return "bg-green-100 text-green-800";
-    case "medication": return "bg-purple-100 text-purple-800";
-    case "lifestyle": return "bg-orange-100 text-orange-800";
-    default: return "bg-gray-100 text-gray-800";
+    case "therapy":
+      return "bg-blue-100 text-blue-800";
+    case "behavioral":
+      return "bg-green-100 text-green-800";
+    case "medication":
+      return "bg-purple-100 text-purple-800";
+    case "lifestyle":
+      return "bg-orange-100 text-orange-800";
+    default:
+      return "bg-gray-100 text-gray-800";
   }
 };
 
@@ -150,8 +168,8 @@ export default function PatientProgressDashboard({
 }: PatientProgressDashboardProps) {
   const progressMetrics = generateProgressMetrics(patient);
   const milestones = generateMilestones();
-  const completedMilestones = milestones.filter(m => m.completed);
-  const upcomingMilestones = milestones.filter(m => !m.completed);
+  const completedMilestones = milestones.filter((m) => m.completed);
+  const upcomingMilestones = milestones.filter((m) => !m.completed);
 
   return (
     <div className="space-y-6">
@@ -173,18 +191,27 @@ export default function PatientProgressDashboard({
                   ) : (
                     <div className="h-3 w-3 rounded-full bg-gray-400" />
                   )}
-                  <span className={`text-xs ${
-                    metric.trend === "up" ? "text-green-500" : 
-                    metric.trend === "down" ? "text-red-500" : "text-gray-500"
-                  }`}>
-                    {metric.trendValue > 0 ? `+${metric.trendValue}%` : 
-                     metric.trendValue < 0 ? `${metric.trendValue}%` : "--"}
+                  <span
+                    className={`text-xs ${
+                      metric.trend === "up"
+                        ? "text-green-500"
+                        : metric.trend === "down"
+                          ? "text-red-500"
+                          : "text-gray-500"
+                    }`}
+                  >
+                    {metric.trendValue > 0
+                      ? `+${metric.trendValue}%`
+                      : metric.trendValue < 0
+                        ? `${metric.trendValue}%`
+                        : "--"}
                   </span>
                 </div>
               </div>
               <div className="mt-2">
                 <div className="text-2xl font-bold">
-                  {metric.value}{metric.total > 0 && `/${metric.total}`}
+                  {metric.value}
+                  {metric.total > 0 && `/${metric.total}`}
                 </div>
                 <Progress value={metric.percentage} className="mt-2" />
                 <div className="text-xs text-muted-foreground mt-1">
@@ -215,9 +242,16 @@ export default function PatientProgressDashboard({
                   { week: "Week 2", progress: 35, sessions: 2 },
                   { week: "Week 3", progress: 50, sessions: 3 },
                   { week: "Week 4", progress: 65, sessions: 2 },
-                  { week: "Week 5", progress: patient.progress, sessions: patient.currentSession - 9 },
+                  {
+                    week: "Week 5",
+                    progress: patient.progress,
+                    sessions: patient.currentSession - 9,
+                  },
                 ].map((week, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm font-medium">{week.week}</span>
                     <div className="flex items-center space-x-2">
                       <Progress value={week.progress} className="w-24" />
@@ -277,13 +311,19 @@ export default function PatientProgressDashboard({
                 },
               ].map((activity, index) => (
                 <div key={index} className="flex items-start space-x-3">
-                  <div className={`p-2 rounded-full bg-gray-100 ${activity.color}`}>
+                  <div
+                    className={`p-2 rounded-full bg-gray-100 ${activity.color}`}
+                  >
                     <activity.icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{activity.title}</p>
-                    <p className="text-xs text-muted-foreground">{activity.description}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.date}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {activity.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {activity.date}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -312,19 +352,27 @@ export default function PatientProgressDashboard({
                 {completedMilestones.map((milestone) => {
                   const IconComponent = getCategoryIcon(milestone.category);
                   return (
-                    <div key={milestone.id} className="border rounded-lg p-3 bg-green-50">
+                    <div
+                      key={milestone.id}
+                      className="border rounded-lg p-3 bg-green-50"
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-3">
                           <div className="p-1 rounded bg-green-100">
                             <IconComponent className="h-3 w-3 text-green-600" />
                           </div>
                           <div className="flex-1">
-                            <h5 className="text-sm font-medium">{milestone.title}</h5>
+                            <h5 className="text-sm font-medium">
+                              {milestone.title}
+                            </h5>
                             <p className="text-xs text-muted-foreground mt-1">
                               {milestone.description}
                             </p>
                             <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="secondary" className={getCategoryColor(milestone.category)}>
+                              <Badge
+                                variant="secondary"
+                                className={getCategoryColor(milestone.category)}
+                              >
                                 {milestone.category}
                               </Badge>
                               <span className="text-xs text-green-600">
@@ -352,36 +400,54 @@ export default function PatientProgressDashboard({
                   const IconComponent = getCategoryIcon(milestone.category);
                   const isOverdue = new Date(milestone.targetDate) < new Date();
                   return (
-                    <div key={milestone.id} className={`border rounded-lg p-3 ${
-                      isOverdue ? "bg-red-50 border-red-200" : "bg-gray-50"
-                    }`}>
+                    <div
+                      key={milestone.id}
+                      className={`border rounded-lg p-3 ${
+                        isOverdue ? "bg-red-50 border-red-200" : "bg-gray-50"
+                      }`}
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-3">
-                          <div className={`p-1 rounded ${
-                            isOverdue ? "bg-red-100" : "bg-gray-100"
-                          }`}>
-                            <IconComponent className={`h-3 w-3 ${
-                              isOverdue ? "text-red-600" : "text-gray-600"
-                            }`} />
+                          <div
+                            className={`p-1 rounded ${
+                              isOverdue ? "bg-red-100" : "bg-gray-100"
+                            }`}
+                          >
+                            <IconComponent
+                              className={`h-3 w-3 ${
+                                isOverdue ? "text-red-600" : "text-gray-600"
+                              }`}
+                            />
                           </div>
                           <div className="flex-1">
-                            <h5 className="text-sm font-medium">{milestone.title}</h5>
+                            <h5 className="text-sm font-medium">
+                              {milestone.title}
+                            </h5>
                             <p className="text-xs text-muted-foreground mt-1">
                               {milestone.description}
                             </p>
                             <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="secondary" className={getCategoryColor(milestone.category)}>
+                              <Badge
+                                variant="secondary"
+                                className={getCategoryColor(milestone.category)}
+                              >
                                 {milestone.category}
                               </Badge>
-                              <span className={`text-xs ${
-                                isOverdue ? "text-red-600" : "text-muted-foreground"
-                              }`}>
+                              <span
+                                className={`text-xs ${
+                                  isOverdue
+                                    ? "text-red-600"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
                                 Target: {milestone.targetDate}
                               </span>
                             </div>
                           </div>
                         </div>
-                        {isOverdue && <AlertTriangle className="h-4 w-4 text-red-600" />}
+                        {isOverdue && (
+                          <AlertTriangle className="h-4 w-4 text-red-600" />
+                        )}
                       </div>
                     </div>
                   );
@@ -424,10 +490,14 @@ export default function PatientProgressDashboard({
                 <div key={index} className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">{goal.title}</span>
-                    <span className="text-xs text-muted-foreground">{goal.progress}%</span>
+                    <span className="text-xs text-muted-foreground">
+                      {goal.progress}%
+                    </span>
                   </div>
                   <Progress value={goal.progress} />
-                  <p className="text-xs text-muted-foreground">{goal.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {goal.description}
+                  </p>
                 </div>
               ))}
             </div>
@@ -454,7 +524,8 @@ export default function PatientProgressDashboard({
                 {
                   type: "worksheet",
                   title: "Add journaling exercises",
-                  description: "Daily mood tracking might help identify patterns",
+                  description:
+                    "Daily mood tracking might help identify patterns",
                   priority: "medium",
                 },
                 {
@@ -464,22 +535,37 @@ export default function PatientProgressDashboard({
                   priority: "medium",
                 },
               ].map((rec, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 border rounded-lg">
-                  <div className={`p-1 rounded ${
-                    rec.priority === "high" ? "bg-red-100" : "bg-blue-100"
-                  }`}>
-                    <TrendingUp className={`h-3 w-3 ${
-                      rec.priority === "high" ? "text-red-600" : "text-blue-600"
-                    }`} />
+                <div
+                  key={index}
+                  className="flex items-start space-x-3 p-3 border rounded-lg"
+                >
+                  <div
+                    className={`p-1 rounded ${
+                      rec.priority === "high" ? "bg-red-100" : "bg-blue-100"
+                    }`}
+                  >
+                    <TrendingUp
+                      className={`h-3 w-3 ${
+                        rec.priority === "high"
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h5 className="text-sm font-medium">{rec.title}</h5>
-                      <Badge variant={rec.priority === "high" ? "destructive" : "secondary"}>
+                      <Badge
+                        variant={
+                          rec.priority === "high" ? "destructive" : "secondary"
+                        }
+                      >
                         {rec.priority}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{rec.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {rec.description}
+                    </p>
                   </div>
                 </div>
               ))}

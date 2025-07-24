@@ -106,16 +106,6 @@ export default function FilterBar({
       });
     }
     
-    // Insurance
-    if (filters.insurance.length > 0) {
-      activeFilters.push({
-        type: 'insurance',
-        label: filters.insurance.length === 1 
-          ? filters.insurance[0] 
-          : `${filters.insurance.length} insurance plans`,
-        value: filters.insurance
-      });
-    }
     
     // Languages
     if (filters.languages.length > 0) {
@@ -137,7 +127,7 @@ export default function FilterBar({
   }, [activeFiltersData.length, onFiltersChange]);
 
   const handleFilterRemove = (filterType: string, value?: any) => {
-    let newFilters = { ...filters };
+    const newFilters = { ...filters };
     
     switch (filterType) {
       case 'specialty':
@@ -157,9 +147,6 @@ export default function FilterBar({
         break;
       case 'availability':
         newFilters.availability = { ...DEFAULT_FILTERS.availability };
-        break;
-      case 'insurance':
-        newFilters.insurance = [];
         break;
       case 'languages':
         newFilters.languages = [];

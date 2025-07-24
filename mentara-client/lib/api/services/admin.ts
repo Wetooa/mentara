@@ -49,6 +49,20 @@ export function createAdminService(axios: AxiosInstance) {
 
   return {
     /**
+     * Check admin permissions
+     * Endpoint: GET /admin/check
+     * @throws MentaraApiError on request failure
+     */
+    async checkAdmin() {
+      try {
+        const { data } = await axios.get("/admin/check");
+        return data;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+
+    /**
      * Get pending therapist applications with filters
      * Endpoint: GET /admin/therapists/pending
      * @throws MentaraApiError on request failure
@@ -179,6 +193,415 @@ export function createAdminService(axios: AxiosInstance) {
       } catch (error) {
         handleApiError(error);
       }
+    },
+
+    // User Management Methods
+    users: {
+      /**
+       * Get all users with filtering and pagination
+       * Endpoint: GET /admin/users
+       * @throws MentaraApiError on request failure
+       */
+      async getList(params?: {
+        role?: string;
+        page?: number;
+        limit?: number;
+        search?: string;
+        status?: string;
+        sortBy?: string;
+        sortOrder?: 'asc' | 'desc';
+      }) {
+        try {
+          const { data } = await axios.get("/admin/users", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get specific user by ID
+       * Endpoint: GET /admin/users/:id
+       * @throws MentaraApiError on request failure
+       */
+      async getById(userId: string) {
+        try {
+          const { data } = await axios.get(`/admin/users/${userId}`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Suspend user
+       * Endpoint: PUT /admin/users/:id/suspend
+       * @throws MentaraApiError on request failure
+       */
+      async suspend(userId: string, suspensionData: { reason: string; duration?: number }) {
+        try {
+          const { data } = await axios.put(`/admin/users/${userId}/suspend`, suspensionData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Unsuspend user
+       * Endpoint: PUT /admin/users/:id/unsuspend
+       * @throws MentaraApiError on request failure
+       */
+      async unsuspend(userId: string) {
+        try {
+          const { data } = await axios.put(`/admin/users/${userId}/unsuspend`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Delete user
+       * Endpoint: DELETE /admin/users/:id
+       * @throws MentaraApiError on request failure
+       */
+      async delete(userId: string) {
+        try {
+          const { data } = await axios.delete(`/admin/users/${userId}`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Send verification email to user
+       * Endpoint: POST /admin/users/:id/send-verification
+       * @throws MentaraApiError on request failure
+       */
+      async sendVerificationEmail(userId: string) {
+        try {
+          const { data } = await axios.post(`/admin/users/${userId}/send-verification`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update user role
+       * Endpoint: PUT /admin/users/:id/role
+       * @throws MentaraApiError on request failure
+       */
+      async updateRole(userId: string, roleData: { role: string }) {
+        try {
+          const { data } = await axios.put(`/admin/users/${userId}/role`, roleData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Create new user
+       * Endpoint: POST /admin/users
+       * @throws MentaraApiError on request failure
+       */
+      async create(userData: any) {
+        try {
+          const { data } = await axios.post('/admin/users', userData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update user
+       * Endpoint: PUT /admin/users/:id
+       * @throws MentaraApiError on request failure
+       */
+      async update(userId: string, userData: any) {
+        try {
+          const { data } = await axios.put(`/admin/users/${userId}`, userData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+    },
+
+    // Analytics Methods
+    analytics: {
+      /**
+       * Get system statistics
+       * Endpoint: GET /admin/analytics/system-stats
+       * @throws MentaraApiError on request failure
+       */
+      async getSystemStats() {
+        try {
+          const { data } = await axios.get("/admin/analytics/system-stats");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get user growth analytics
+       * Endpoint: GET /admin/analytics/user-growth
+       * @throws MentaraApiError on request failure
+       */
+      async getUserGrowth(params?: { startDate?: string; endDate?: string }) {
+        try {
+          const { data } = await axios.get("/admin/analytics/user-growth", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get engagement analytics
+       * Endpoint: GET /admin/analytics/engagement
+       * @throws MentaraApiError on request failure
+       */
+      async getEngagement(params?: { startDate?: string; endDate?: string }) {
+        try {
+          const { data } = await axios.get("/admin/analytics/engagement", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get platform overview analytics
+       * Endpoint: GET /admin/analytics/platform-overview
+       * @throws MentaraApiError on request failure
+       */
+      async getPlatformOverview() {
+        try {
+          const { data } = await axios.get("/admin/analytics/platform-overview");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get user statistics
+       * Endpoint: GET /admin/analytics/user-stats
+       * @throws MentaraApiError on request failure
+       */
+      async getUserStats() {
+        try {
+          const { data } = await axios.get("/admin/analytics/user-stats");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+    },
+
+    // Therapist Applications Methods
+    therapistApplications: {
+      /**
+       * Get therapist applications list
+       * Endpoint: GET /admin/therapist-applications
+       * @throws MentaraApiError on request failure
+       */
+      async getList(params?: any) {
+        try {
+          const { data } = await axios.get("/admin/therapist-applications", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get therapist application by ID
+       * Endpoint: GET /admin/therapist-applications/:id
+       * @throws MentaraApiError on request failure
+       */
+      async getById(applicationId: string) {
+        try {
+          const { data } = await axios.get(`/admin/therapist-applications/${applicationId}`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update therapist application status
+       * Endpoint: PUT /admin/therapist-applications/:id/status
+       * @throws MentaraApiError on request failure
+       */
+      async updateStatus(applicationId: string, statusData: any) {
+        try {
+          const { data } = await axios.put(`/admin/therapist-applications/${applicationId}/status`, statusData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+    },
+
+    // Moderation Methods
+    moderation: {
+      /**
+       * Get moderation reports
+       * Endpoint: GET /admin/moderation/reports
+       * @throws MentaraApiError on request failure
+       */
+      async getReports(params?: any) {
+        try {
+          const { data } = await axios.get("/admin/moderation/reports", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update moderation report
+       * Endpoint: PUT /admin/moderation/reports/:id
+       * @throws MentaraApiError on request failure
+       */
+      async updateReport(reportId: string, reportData: any) {
+        try {
+          const { data } = await axios.put(`/admin/moderation/reports/${reportId}`, reportData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get flagged content
+       * Endpoint: GET /admin/moderation/flagged-content
+       * @throws MentaraApiError on request failure
+       */
+      async getFlaggedContent(params?: any) {
+        try {
+          const { data } = await axios.get("/admin/moderation/flagged-content", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Moderate content
+       * Endpoint: POST /admin/moderation/moderate
+       * @throws MentaraApiError on request failure
+       */
+      async moderateContent(contentType: string, contentId: string, action: string, reason?: string) {
+        try {
+          const { data } = await axios.post("/admin/moderation/moderate", {
+            contentType,
+            contentId,
+            action,
+            reason,
+          });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+    },
+
+    // Configuration Methods
+    config: {
+      /**
+       * Get system configuration
+       * Endpoint: GET /admin/config
+       * @throws MentaraApiError on request failure
+       */
+      async get() {
+        try {
+          const { data } = await axios.get("/admin/config");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update system configuration
+       * Endpoint: PUT /admin/config
+       * @throws MentaraApiError on request failure
+       */
+      async update(configData: any) {
+        try {
+          const { data } = await axios.put("/admin/config", configData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get feature flags
+       * Endpoint: GET /admin/config/feature-flags
+       * @throws MentaraApiError on request failure
+       */
+      async getFeatureFlags() {
+        try {
+          const { data } = await axios.get("/admin/config/feature-flags");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update feature flag
+       * Endpoint: PUT /admin/config/feature-flags/:flagName
+       * @throws MentaraApiError on request failure
+       */
+      async updateFeatureFlag(flagName: string, flagData: any) {
+        try {
+          const { data } = await axios.put(`/admin/config/feature-flags/${flagName}`, flagData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+    },
+
+    // Profile Methods
+    profile: {
+      /**
+       * Get admin profile
+       * Endpoint: GET /admin/profile
+       * @throws MentaraApiError on request failure
+       */
+      async get() {
+        try {
+          const { data } = await axios.get("/admin/profile");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update admin profile
+       * Endpoint: PUT /admin/profile
+       * @throws MentaraApiError on request failure
+       */
+      async update(profileData: any) {
+        try {
+          const { data } = await axios.put("/admin/profile", profileData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
     },
   };
 }

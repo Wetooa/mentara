@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import CommunitySidebar from "@/components/community/Sidebar";
 import CommentSection from "@/components/community/CommentSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +31,7 @@ import {
   X,
   Edit3,
   Trash2,
-  MoreHorizontal
+  Eye
 } from "lucide-react";
 import {
   ResizableHandle,
@@ -37,8 +39,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useCommunityPage } from "@/hooks/community/useCommunityPage";
-import { useCommunityStats } from "@/hooks/community";
-import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/api/communities";
 
@@ -57,7 +57,6 @@ export default function UserCommunity() {
     heartPostMutation,
     // Edit post functionality
     isEditPostOpen,
-    editingPost,
     editPostTitle,
     editPostContent,
     editPostMutation,
@@ -86,10 +85,15 @@ export default function UserCommunity() {
     selectedFiles,
   } = useCommunityPage();
 
-  const { user } = useAuth();
+  const router = useRouter();
 
   // Mobile sidebar visibility state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Navigation function for viewing post details
+  const handleViewPost = (postId: string) => {
+    router.push(`/client/community/posts/${postId}`);
+  };
 
   // Enhanced community data with new hooks
   // const { stats: communityStats } = useCommunityStats();
@@ -427,7 +431,7 @@ export default function UserCommunity() {
             </div>
 
             {/* Posts Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto bg-community-warm/10 relative mentara-scrollbar">
+            <ScrollArea className="flex-1 min-h-0 bg-community-warm/10 relative">
               {/* Background decoration */}
               <div className="absolute inset-0 bg-community-gradient opacity-20" />
               <div className="relative max-w-4xl mx-auto p-4 lg:p-6">
@@ -686,6 +690,16 @@ export default function UserCommunity() {
                                     {commentCount === 1 ? 'comment' : 'comments'}
                                   </span>
                                 </div>
+
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewPost((post as unknown as {id?: string})?.id || '')}
+                                  className="flex items-center gap-2 bg-white/60 hover:bg-community-calm/10 text-community-calm-foreground hover:text-community-accent border-2 border-community-calm/30 hover:border-community-accent/50 backdrop-blur-sm transition-all duration-200"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  <span className="font-medium">View Post</span>
+                                </Button>
                               </div>
                               
                               <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-community-soothing/20 border border-community-soothing/30">
@@ -704,7 +718,7 @@ export default function UserCommunity() {
                   </div>
                 )}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         )}
           </ResizablePanel>
@@ -768,13 +782,13 @@ export default function UserCommunity() {
                   {selectedRoom?.name}
                 </h1>
               </div>
-              <div className="flex-1 min-h-0 overflow-y-auto bg-community-warm/10 mentara-scrollbar">
+              <ScrollArea className="flex-1 min-h-0 bg-community-warm/10">
                 <div className="p-4">
                   <div className="text-center py-8">
                     <p className="text-community-soothing-foreground">Mobile room content loading...</p>
                   </div>
                 </div>
-              </div>
+              </ScrollArea>
             </div>
           )}
         </div>

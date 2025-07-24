@@ -58,13 +58,13 @@ interface AvailabilitySlot {
 }
 
 const DAYS_OF_WEEK = [
-  { value: "MONDAY", label: "Monday" },
-  { value: "TUESDAY", label: "Tuesday" },
-  { value: "WEDNESDAY", label: "Wednesday" },
-  { value: "THURSDAY", label: "Thursday" },
-  { value: "FRIDAY", label: "Friday" },
-  { value: "SATURDAY", label: "Saturday" },
-  { value: "SUNDAY", label: "Sunday" },
+  { value: "0", label: "Sunday" },
+  { value: "1", label: "Monday" },
+  { value: "2", label: "Tuesday" },
+  { value: "3", label: "Wednesday" },
+  { value: "4", label: "Thursday" },
+  { value: "5", label: "Friday" },
+  { value: "6", label: "Saturday" },
 ];
 
 const COMMON_TIMEZONES = [
@@ -100,22 +100,22 @@ export function TherapistAvailabilityCalendar() {
     setEditingSlot,
     formData,
     setFormData,
-    
+
     // Data
     availability = [],
     isLoading,
     error,
-    
+
     // Actions
     createAvailability,
     updateAvailability,
     deleteAvailability,
-    
+
     // Mutations loading states
     isCreating,
     isUpdating,
     isDeleting,
-    
+
     // Utilities
     resetForm,
     handleEditSlot,
@@ -123,7 +123,7 @@ export function TherapistAvailabilityCalendar() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.dayOfWeek || !formData.startTime || !formData.endTime) {
       toast.error("Please fill in all required fields");
       return;
@@ -169,13 +169,16 @@ export function TherapistAvailabilityCalendar() {
   };
 
   // Group availability by day of week
-  const availabilityByDay = availability.reduce((acc, slot) => {
-    if (!acc[slot.dayOfWeek]) {
-      acc[slot.dayOfWeek] = [];
-    }
-    acc[slot.dayOfWeek].push(slot);
-    return acc;
-  }, {} as Record<string, AvailabilitySlot[]>);
+  const availabilityByDay = availability.reduce(
+    (acc, slot) => {
+      if (!acc[slot.dayOfWeek]) {
+        acc[slot.dayOfWeek] = [];
+      }
+      acc[slot.dayOfWeek].push(slot);
+      return acc;
+    },
+    {} as Record<string, AvailabilitySlot[]>
+  );
 
   if (isLoading) {
     return (
@@ -258,7 +261,7 @@ export function TherapistAvailabilityCalendar() {
                         <SelectValue placeholder="Select day" />
                       </SelectTrigger>
                       <SelectContent>
-                        {DAYS_OF_WEEK.map((day) => (
+                        {DAYS_OF_WEEK.map((day, _) => (
                           <SelectItem key={day.value} value={day.value}>
                             {day.label}
                           </SelectItem>
@@ -266,7 +269,6 @@ export function TherapistAvailabilityCalendar() {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="startTime">Start Time *</Label>
@@ -310,7 +312,6 @@ export function TherapistAvailabilityCalendar() {
                       </Select>
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="timezone">Timezone</Label>
                     <Select
@@ -331,7 +332,6 @@ export function TherapistAvailabilityCalendar() {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="notes">Notes (Optional)</Label>
                     <Textarea
@@ -344,7 +344,6 @@ export function TherapistAvailabilityCalendar() {
                       rows={3}
                     />
                   </div>
-
                   <div className="flex justify-end gap-2 pt-4">
                     <Button
                       type="button"
@@ -353,12 +352,12 @@ export function TherapistAvailabilityCalendar() {
                     >
                       Cancel
                     </Button>
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       disabled={isCreating || isUpdating}
                       className="flex items-center gap-2"
                     >
-                      {(isCreating || isUpdating) ? (
+                      {isCreating || isUpdating ? (
                         <>
                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                           {editingSlot ? "Updating..." : "Creating..."}
@@ -382,7 +381,8 @@ export function TherapistAvailabilityCalendar() {
               <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No availability set</h3>
               <p className="text-muted-foreground mb-4">
-                Set your weekly availability to let clients book sessions with you.
+                Set your weekly availability to let clients book sessions with
+                you.
               </p>
               <Button onClick={() => setIsAddDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
@@ -425,7 +425,9 @@ export function TherapistAvailabilityCalendar() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge
-                                variant={slot.isAvailable ? "default" : "secondary"}
+                                variant={
+                                  slot.isAvailable ? "default" : "secondary"
+                                }
                                 className="text-xs"
                               >
                                 {slot.isAvailable ? "Available" : "Unavailable"}
@@ -450,14 +452,19 @@ export function TherapistAvailabilityCalendar() {
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Availability</AlertDialogTitle>
+                                    <AlertDialogTitle>
+                                      Delete Availability
+                                    </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to delete this availability slot?
-                                      This action cannot be undone.
+                                      Are you sure you want to delete this
+                                      availability slot? This action cannot be
+                                      undone.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
                                     <AlertDialogAction
                                       onClick={() => handleDelete(slot.id)}
                                       disabled={isDeleting}

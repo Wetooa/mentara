@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useApi } from '@/lib/api';
-import { createSocket } from '@/lib/socket';
+import { createSocket } from '@/lib/websocket';
 import { toast } from 'sonner';
 
 interface ParticipantInfo {

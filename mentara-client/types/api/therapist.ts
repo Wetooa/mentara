@@ -2,10 +2,10 @@
 
 export interface TherapistRecommendationQuery {
   specializations?: string[];
-  gender?: 'male' | 'female' | 'non-binary' | 'other';
-  ageRange?: 'young-adult' | 'adult' | 'senior';
+  gender?: "male" | "female" | "non-binary" | "other";
+  ageRange?: "young-adult" | "adult" | "senior";
   languages?: string[];
-  sessionType?: 'in-person' | 'video' | 'phone';
+  sessionType?: "in-person" | "video" | "phone";
   location?: string;
   maxDistance?: number;
   priceRange?: {
@@ -14,7 +14,7 @@ export interface TherapistRecommendationQuery {
   };
   availability?: {
     days: string[];
-    timeOfDay: 'morning' | 'afternoon' | 'evening';
+    timeOfDay: "morning" | "afternoon" | "evening";
   };
   experience?: {
     minYears?: number;
@@ -26,8 +26,8 @@ export interface WelcomeRecommendationQuery {
   preAssessmentId?: string;
   specializations?: string[];
   location?: string;
-  sessionType?: 'in-person' | 'video' | 'phone';
-  gender?: 'male' | 'female' | 'non-binary' | 'other';
+  sessionType?: "in-person" | "video" | "phone";
+  gender?: "male" | "female" | "non-binary" | "other";
 }
 
 export interface TherapistSearchParams {
@@ -35,8 +35,8 @@ export interface TherapistSearchParams {
   specializations?: string[];
   location?: string;
   radius?: number;
-  sortBy?: 'rating' | 'experience' | 'price' | 'distance';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "rating" | "experience" | "price" | "distance";
+  sortOrder?: "asc" | "desc";
   page?: number;
   limit?: number;
   filters?: TherapistRecommendationQuery;
@@ -46,43 +46,17 @@ export interface TherapistRecommendation {
   id: string;
   firstName: string;
   lastName: string;
-  avatarUrl: string;
   title: string;
-  bio: string;
-  specializations: string[];
-  experience: number; // years
-  rating: number;
-  reviewCount: number;
-  location: {
-    city: string;
-    state: string;
-    country: string;
-    isRemote: boolean;
-  };
-  pricing: {
-    sessionRate: number;
-    currency: string;
-    acceptsInsurance: boolean;
-    insuranceTypes?: string[];
-  };
-  availability: {
-    nextAvailable: string;
-    sessionTypes: ('in-person' | 'video' | 'phone')[];
-    languages: string[];
-  };
-  credentials: {
-    license: string;
-    education: string[];
-    certifications: string[];
-  };
-  matchScore?: number; // 0-100 for recommendation relevance
-  matchReasons?: string[]; // reasons for the recommendation
-  isAcceptingNewClients: boolean;
-  verificationStatus: {
-    isVerified: boolean;
-    backgroundCheckComplete: boolean;
-    documentsVerified: boolean;
-  };
+  specialties: string[];
+  hourlyRate: number;
+  experience: number;
+  province: string | null;
+  isActive: boolean;
+  bio?: string;
+  profileImage?: string | undefined;
+  // Optional fields for pending requests
+  requestedAt?: string;
+  requestId?: string;
 }
 
 export interface TherapistRecommendationResponse {

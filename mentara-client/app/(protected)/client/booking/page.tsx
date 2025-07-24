@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,11 +12,13 @@ import {
   Video,
   User,
   AlertCircle,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
 import BookingCalendar from "@/components/booking/BookingCalendar";
 import { ClientBookingInterface } from "@/components/client/ClientBookingInterface";
 import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
-import { useTherapist } from "@/hooks/therapist/useTherapist";
+import { useAssignedTherapists } from "@/hooks/therapist/useTherapist";
 import { MeetingStatus } from "@/types/booking";
 import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
 import { toast } from "sonner";
@@ -24,13 +26,15 @@ import { toast } from "sonner";
 export default function BookingPage() {
   const [selectedTherapistId, setSelectedTherapistId] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Get user's assigned therapists
-  const { therapist } = useTherapist();
-  const therapists = therapist ? [therapist] : [];
-  const therapistsLoading = false;
+  const { 
+    data: therapists = [], 
+    isLoading: therapistsLoading, 
+    error: therapistsError 
+  } = useAssignedTherapists();
 
   // Get user's meetings
   const { meetings, isLoading: meetingsLoading } = useMeetings({
@@ -40,6 +44,13 @@ export default function BookingPage() {
 
   // Get booking utilities
   const { cancelMeeting, isCancelling } = useBooking();
+
+  // Auto-select first therapist if there's only one
+  useEffect(() => {
+    if (!therapistsLoading && !selectedTherapistId && therapists.length === 1) {
+      setSelectedTherapistId(therapists[0].id);
+    }
+  }, [therapists, therapistsLoading, selectedTherapistId]);
 
   const handleSlotSelect = (date: string, timeSlot: TimeSlot) => {
     setSelectedDate(new Date(date));
@@ -101,6 +112,19 @@ export default function BookingPage() {
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
                 Select Therapist
+                {selectedTherapistId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedTherapistId("");
+                      setSelectedDate(undefined);
+                    }}
+                    className="ml-auto text-xs"
+                  >
+                    Clear
+                  </Button>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -110,6 +134,13 @@ export default function BookingPage() {
                     <Skeleton key={i} className="h-16 w-full" />
                   ))}
                 </div>
+              ) : therapistsError ? (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Failed to load assigned therapists. Please try refreshing the page.
+                  </AlertDescription>
+                </Alert>
               ) : therapists.length === 0 ? (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
@@ -118,27 +149,43 @@ export default function BookingPage() {
                   </AlertDescription>
                 </Alert>
               ) : (
-                therapists.map((therapist) => (
+                therapists.map((therapist, index) => (
                   <Card
-                    key={therapist.id}
+                    key={`therapist-${therapist.id}-${index}`}
                     className={`cursor-pointer transition-colors ${
                       selectedTherapistId === therapist.id
                         ? "ring-2 ring-blue-500 bg-blue-50"
                         : "hover:bg-gray-50"
                     }`}
-                    onClick={() => setSelectedTherapistId(therapist.id)}
+                    onClick={() => {
+                      setSelectedTherapistId(therapist.id);
+                      // Reset selected date when changing therapist to show fresh availability
+                      setSelectedDate(undefined);
+                    }}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                           <User className="h-5 w-5 text-blue-600" />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <div className="font-medium">{therapist.firstName} {therapist.lastName}</div>
                           <div className="text-sm text-muted-foreground">
                             {therapist.specialties?.join(", ") || "General Therapy"}
                           </div>
+                          {therapist.experience && (
+                            <div className="text-xs text-blue-600 mt-1">
+                              {therapist.experience}+ years experience
+                            </div>
+                          )}
                         </div>
+                        {selectedTherapistId === therapist.id && (
+                          <div className="text-blue-600">
+                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                              ✓
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -169,8 +216,8 @@ export default function BookingPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {(Array.isArray(meetings) ? meetings : meetings?.meetings || []).slice(0, 5).map((meeting) => (
-                    <Card key={meeting.id} className="border border-gray-200">
+                  {(Array.isArray(meetings) ? meetings : meetings?.meetings || []).slice(0, 5).map((meeting, index) => (
+                    <Card key={`meeting-${meeting.id}-${index}`} className="border border-gray-200">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -191,6 +238,39 @@ export default function BookingPage() {
                               </div>
                               <div>{meeting.duration} minutes</div>
                             </div>
+                            
+                            {/* Meeting URL Display */}
+                            {meeting.meetingUrl && (
+                              <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                                <div className="flex items-start gap-2">
+                                  {meeting.meetingUrl.includes('http') ? (
+                                    <Video className="h-3 w-3 text-blue-600 mt-0.5" />
+                                  ) : (
+                                    <MapPin className="h-3 w-3 text-blue-600 mt-0.5" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-blue-900">
+                                      {meeting.meetingUrl.includes('http') ? 'Video Meeting' : 'Location'}
+                                    </p>
+                                    <p className="text-xs text-blue-800 break-all">
+                                      {meeting.meetingUrl}
+                                    </p>
+                                    {meeting.meetingUrl.includes('http') && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.open(meeting.meetingUrl, '_blank');
+                                        }}
+                                        className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 flex items-center gap-1"
+                                      >
+                                        <ExternalLink className="h-2 w-2" />
+                                        Join Meeting
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             {getStatusBadge(meeting.status as unknown as MeetingStatus)}
@@ -241,15 +321,19 @@ export default function BookingPage() {
       </div>
 
       {/* Booking Interface */}
-      <ClientBookingInterface
-        therapistId={selectedTherapistId}
-        isOpen={showBookingModal}
-        onClose={() => {
-          setShowBookingModal(false);
-          setSelectedTimeSlot(null);
-        }}
-        onSuccess={handleBookingSuccess}
-      />
+      {selectedTimeSlot && selectedDate && (
+        <ClientBookingInterface
+          therapistId={selectedTherapistId}
+          selectedSlot={selectedTimeSlot}
+          selectedDate={selectedDate}
+          isOpen={showBookingModal}
+          onClose={() => {
+            setShowBookingModal(false);
+            setSelectedTimeSlot(null);
+          }}
+          onSuccess={handleBookingSuccess}
+        />
+      )}
     </div>
   );
 }

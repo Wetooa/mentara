@@ -368,6 +368,111 @@ export class MessagingService {
     }
   }
 
+  /**
+   * Get a specific conversation by ID with participant details
+   * Used for video call functionality to get recipient information
+   */
+  async getConversationById(userId: string, conversationId: string) {
+    console.log('🔍 [MESSAGING SERVICE] getConversationById called');
+    console.log('📊 [PARAMETERS]', { userId, conversationId });
+
+    try {
+      const conversation = await this.prisma.conversation.findFirst({
+        where: {
+          id: conversationId,
+          participants: {
+            some: {
+              userId,
+              isActive: true,
+            },
+          },
+          isActive: true,
+        },
+        include: {
+          participants: {
+            where: { isActive: true },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  avatarUrl: true,
+                  role: true,
+                },
+              },
+            },
+          },
+          messages: {
+            take: 1,
+            orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              content: true,
+              createdAt: true,
+              messageType: true,
+            },
+          },
+        },
+      });
+
+      if (!conversation) {
+        throw new NotFoundException('Conversation not found');
+      }
+
+      console.log('✅ [DATABASE SUCCESS] Conversation found:', {
+        id: conversation.id,
+        type: conversation.type,
+        participantCount: conversation.participants.length,
+      });
+
+      // Transform the data to match frontend expectations
+      const result = {
+        id: conversation.id,
+        type: conversation.type.toLowerCase(),
+        title: conversation.title,
+        description: null, // Not in schema, set to null
+        avatarUrl: null, // Not in schema, set to null
+        isArchived: false, // Not in schema, default to false
+        isMuted: false, // Not at conversation level, default to false
+        createdAt: conversation.createdAt.toISOString(),
+        updatedAt: conversation.updatedAt.toISOString(),
+        participants: conversation.participants.map(p => ({
+          id: p.id,
+          conversationId: p.conversationId,
+          userId: p.userId,
+          role: p.role.toLowerCase(),
+          joinedAt: p.joinedAt.toISOString(),
+          leftAt: null, // Not in schema, set to null
+          isMuted: p.isMuted,
+          user: {
+            id: p.user.id,
+            firstName: p.user.firstName,
+            lastName: p.user.lastName,
+            email: p.user.email,
+            avatarUrl: p.user.avatarUrl,
+            role: p.user.role.toLowerCase(),
+          },
+        })),
+        lastMessage: conversation.messages[0] ? {
+          id: conversation.messages[0].id,
+          content: conversation.messages[0].content,
+          createdAt: conversation.messages[0].createdAt.toISOString(),
+          messageType: conversation.messages[0].messageType.toLowerCase(),
+        } : undefined,
+      };
+
+      return result;
+    } catch (error) {
+      console.error('❌ [DATABASE ERROR] getConversationById failed:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to fetch conversation');
+    }
+  }
+
   // Message Management
   async sendMessage(
     userId: string,
@@ -377,6 +482,8 @@ export class MessagingService {
     attachmentNames: string[] = [],
     attachmentSizes: number[] = [],
   ) {
+    this.logger.debug(`Sending message from ${userId} to conversation ${conversationId}`);
+    
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
 
@@ -412,6 +519,7 @@ export class MessagingService {
     // Note: Message encryption functionality removed to match Prisma schema
     // Messages are stored as plaintext as the schema doesn't support encryption fields
 
+    this.logger.debug('Saving message to database...');
     const message = await this.prisma.message.create({
       data: {
         conversationId,
@@ -472,6 +580,8 @@ export class MessagingService {
         },
       },
     });
+    
+    this.logger.debug(`Message ${message.id} saved successfully to conversation ${message.conversationId}`);
 
     // Update conversation lastMessageAt
     await this.prisma.conversation.update({
@@ -487,29 +597,32 @@ export class MessagingService {
         .map((p) => p.userId)
         .filter((id) => id !== userId) || [];
 
+    this.logger.debug(`Broadcasting message to ${recipientIds.length} recipients`);
+
     // Publish message sent event
-    await this.eventBus.emit(
-      new MessageSentEvent({
-        messageId: message.id,
-        conversationId,
-        senderId: userId,
-        content: eventContent, // Content transmitted as-is
-        messageType: message.messageType.toLowerCase() as
-          | 'text'
-          | 'image'
-          | 'file'
-          | 'audio'
-          | 'video'
-          | 'system',
-        sentAt: message.createdAt,
-        recipientIds,
-        replyToMessageId: message.replyToId || undefined,
-        fileAttachments:
-          message.attachmentUrls.length > 0
-            ? message.attachmentUrls
-            : undefined,
-      }),
-    );
+    const messageEvent = new MessageSentEvent({
+      messageId: message.id,
+      conversationId,
+      senderId: userId,
+      content: eventContent, // Content transmitted as-is
+      messageType: message.messageType.toLowerCase() as
+        | 'text'
+        | 'image'
+        | 'file'
+        | 'audio'
+        | 'video'
+        | 'system',
+      sentAt: message.createdAt,
+      recipientIds,
+      replyToMessageId: message.replyToId || undefined,
+      fileAttachments:
+        message.attachmentUrls.length > 0
+          ? message.attachmentUrls
+          : undefined,
+    });
+    
+    await this.eventBus.emit(messageEvent);
+    this.logger.debug(`MessageSentEvent emitted for message ${message.id}`);
 
     // Return message as-is (no encryption)
     return message;

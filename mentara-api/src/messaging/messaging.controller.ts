@@ -143,6 +143,36 @@ export class MessagingController {
     }
   }
 
+  @Get('conversations/:conversationId')
+  async getConversationById(
+    @CurrentUserId() userId: string,
+    @Param('conversationId') conversationId: string,
+  ) {
+    console.log('🔍 [MESSAGING CONTROLLER] getConversationById endpoint called');
+    console.log('👤 [USER ID]', userId);
+    console.log('💬 [CONVERSATION ID]', conversationId);
+    
+    try {
+      const result = await this.messagingService.getConversationById(
+        userId,
+        conversationId,
+      );
+      
+      console.log('✅ [CONTROLLER RESPONSE] Returning conversation details');
+      console.log('📝 [RESPONSE SUMMARY]:', {
+        id: result.id,
+        type: result.type,
+        title: result.title,
+        participantCount: result.participants?.length || 0,
+      });
+      
+      return result;
+    } catch (error) {
+      console.error('❌ [CONTROLLER ERROR] getConversationById failed:', error);
+      throw error;
+    }
+  }
+
   @Get('conversations/:conversationId/messages')
   async getConversationMessages(
     @CurrentUserId() userId: string,
@@ -169,6 +199,16 @@ export class MessagingController {
     @Body() sendMessageDto: SendMessageDto,
     @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ) {
+    console.log('📤 [MESSAGE CONTROLLER] Send message request received');
+    console.log('👤 [SENDER]', userId);
+    console.log('💬 [CONVERSATION]', conversationId);
+    console.log('📝 [MESSAGE DATA]', {
+      content: sendMessageDto.content?.substring(0, 50) + (sendMessageDto.content?.length > 50 ? '...' : ''),
+      type: sendMessageDto.type,
+      hasReplyTo: !!sendMessageDto.replyToMessageId,
+      hasAttachments: files?.length > 0,
+    });
+    console.log('📎 [FILES]', files?.length || 0, 'files uploaded');
     // Validate and upload files if provided
     const fileResults: FileUploadResult[] = [];
     if (files && files.length > 0) {
@@ -190,14 +230,32 @@ export class MessagingController {
       fileResults.push(...uploadResults);
     }
 
-    return this.messagingService.sendMessage(
-      userId,
-      conversationId,
-      sendMessageDto,
-      fileResults.map((f) => f.url),
-      fileResults.map((f) => f.filename),
-      files.map((f) => f.size),
-    );
+    try {
+      console.log('🔄 [MESSAGE CONTROLLER] Calling messaging service...');
+      const result = await this.messagingService.sendMessage(
+        userId,
+        conversationId,
+        sendMessageDto,
+        fileResults.map((f) => f.url),
+        fileResults.map((f) => f.filename),
+        files.map((f) => f.size),
+      );
+      
+      console.log('✅ [MESSAGE CONTROLLER] Message sent successfully');
+      console.log('📨 [MESSAGE RESULT]', {
+        messageId: result.id,
+        conversationId: result.conversationId,
+        senderId: result.senderId,
+        content: result.content?.substring(0, 50) + (result.content?.length > 50 ? '...' : ''),
+        timestamp: result.createdAt,
+      });
+      console.log('🚀 [MESSAGE CONTROLLER] Message should now be broadcasting to participants...');
+      
+      return result;
+    } catch (error) {
+      console.error('❌ [MESSAGE CONTROLLER] Send message failed:', error);
+      throw error;
+    }
   }
 
   @Put('messages/:messageId')

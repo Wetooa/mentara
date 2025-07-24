@@ -355,3 +355,98 @@ export class WebSocketAuthService {
     };
   }
 }
+
+/**
+ * Simplified WebSocket Authentication Middleware
+ * Replaces complex WebSocketAuthService with a clean middleware pattern
+ * Following Socket.IO best practices for connection-time authentication
+ */
+@Injectable()
+export class WebSocketAuthMiddleware {
+  private readonly logger = new Logger(WebSocketAuthMiddleware.name);
+
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  /**
+   * Simple, reliable authentication middleware for Socket.IO connections
+   * Validates JWT at connection time using middleware pattern
+   */
+  createAuthMiddleware() {
+    return async (socket: Socket, next: (err?: Error) => void) => {
+      try {
+        const token = this.extractToken(socket);
+        
+        if (!token) {
+          this.logger.warn(`No token provided for socket ${socket.id}`);
+          return next(new Error('Authentication token required'));
+        }
+
+        // Verify JWT token
+        const payload = this.jwtService.verify(token);
+        if (!payload.sub || !payload.email) {
+          this.logger.warn(`Invalid token payload for socket ${socket.id}`);
+          return next(new Error('Invalid token payload'));
+        }
+
+        // Validate user exists and is active
+        const user = await this.prisma.user.findUnique({
+          where: {
+            id: payload.sub,
+            deactivatedAt: null,
+            isActive: true,
+          },
+          select: {
+            id: true,
+            role: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        });
+
+        if (!user) {
+          this.logger.warn(`User not found or inactive for socket ${socket.id}`);
+          return next(new Error('User not found or inactive'));
+        }
+
+        // Attach user info to socket for later use
+        (socket as any).userId = user.id;
+        (socket as any).user = user;
+
+        this.logger.log(`Socket ${socket.id} authenticated as user ${user.id}`);
+        next();
+      } catch (error) {
+        this.logger.error(`Auth middleware error for socket ${socket.id}:`, error.message);
+        next(new Error('Authentication failed'));
+      }
+    };
+  }
+
+  /**
+   * Extract token from socket handshake - simplified version
+   */
+  private extractToken(socket: Socket): string | null {
+    // 1. Authorization header (Bearer token)
+    const authHeader = socket.handshake.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      return authHeader.substring(7).trim();
+    }
+
+    // 2. Auth object in handshake
+    const authToken = socket.handshake.auth?.token;
+    if (authToken && typeof authToken === 'string') {
+      return authToken;
+    }
+
+    // 3. Query parameter
+    const queryToken = socket.handshake.query?.token;
+    if (queryToken && typeof queryToken === 'string') {
+      return queryToken;
+    }
+
+    return null;
+  }
+}

@@ -181,7 +181,6 @@ export interface TherapistSearchFilters {
   minPrice?: number;
   maxPrice?: number;
   location?: string;
-  insurance?: string[];
   availableFrom?: string;
   availableTo?: string;
 }

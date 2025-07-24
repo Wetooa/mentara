@@ -1,38 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
-  LayoutDashboard,
-  Users,
-  FileText,
-  AlertTriangle,
   Search,
-  Settings,
-  UserCheck,
   LogOut,
   Menu,
   X,
-  ChevronLeft,
-  ChevronRight,
-  BarChart3,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
 import Image from "next/image";
-import { UserDisplay } from "@/components/common/UserDisplay";
-import { useApi } from "@/lib/api";
 
 export default function AdminLayout({
   children,
@@ -41,78 +21,44 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const [adminProfile, setAdminProfile] = useState(null);
-  const { user, logout } = useAuth();
-  const api = useApi();
-
-  // Load sidebar state from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("admin-sidebar-expanded");
-    if (saved !== null) {
-      setIsSidebarExpanded(JSON.parse(saved));
-    }
-
-    async function fetchAdminProfile() {
-      try {
-        const profile = await api.auth.admin.getProfile();
-        setAdminProfile(profile);
-      } catch (error) {
-        console.error("Failed to fetch admin profile:", error);
-      }
-    }
-    fetchAdminProfile();
-  }, [api.auth.admin]);
-
-  console.log("Admin Profile:", adminProfile);
-
-  // Save sidebar state to localStorage
-  const toggleSidebar = () => {
-    const newState = !isSidebarExpanded;
-    setIsSidebarExpanded(newState);
-    localStorage.setItem("admin-sidebar-expanded", JSON.stringify(newState));
-  };
+  const { logout, user } = useAuth();
 
   const navItems = [
     {
-      title: "Dashboard",
-      href: "/admin",
-      icon: <LayoutDashboard className="h-5 w-5" />,
+      name: "Dashboard",
+      path: "/admin",
+      icon: "/icons/dashboard.svg",
+      id: "dashboard",
     },
     {
-      title: "User Management",
-      href: "/admin/users",
-      icon: <Users className="h-5 w-5" />,
+      name: "Users",
+      path: "/admin/users",
+      icon: "/icons/therapist.svg", // Using therapist icon for users management
+      id: "users",
     },
     {
-      title: "Therapist Applications",
-      href: "/admin/therapist-applications",
-      icon: <UserCheck className="h-5 w-5" />,
+      name: "Applications",
+      path: "/admin/therapist-applications",
+      icon: "/icons/sessions.svg", // Using sessions icon for applications
+      id: "applications",
     },
     {
-      title: "Analytics",
-      href: "/admin/analytics",
-      icon: <BarChart3 className="h-5 w-5" />,
+      name: "Analytics",
+      path: "/admin/analytics",
+      icon: "/icons/worksheets.svg", // Using worksheets icon for analytics
+      id: "analytics",
     },
     {
-      title: "Reports",
-      href: "/admin/reports",
-      icon: <AlertTriangle className="h-5 w-5" />,
+      name: "Reports",
+      path: "/admin/reports",
+      icon: "/icons/community.svg", // Using community icon for reports
+      id: "reports",
     },
     {
-      title: "Content Search",
-      href: "/admin/content/search",
-      icon: <Search className="h-5 w-5" />,
-    },
-    {
-      title: "Content Management",
-      href: "/admin/content",
-      icon: <FileText className="h-5 w-5" />,
-    },
-    {
-      title: "Audit Logs",
-      href: "/admin/audit-logs",
-      icon: <Settings className="h-5 w-5" />,
+      name: "Content",
+      path: "/admin/content",
+      icon: "/icons/messages.svg", // Using messages icon for content
+      id: "content",
     },
   ];
 
@@ -123,132 +69,74 @@ export default function AdminLayout({
   return (
     <div className="flex h-screen w-full bg-gray-50">
       {/* Desktop Sidebar Navigation */}
-      <nav
-        className={cn(
-          "hidden md:flex fixed left-0 top-0 z-10 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
-          isSidebarExpanded ? "w-64" : "w-[70px]"
-        )}
-      >
-        {/* Header with Logo and Toggle */}
-        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-          <Link
-            href="/admin"
-            className={cn(
-              "flex items-center transition-all duration-300",
-              isSidebarExpanded ? "" : "justify-center"
-            )}
-          >
-            <Image
-              src="/mentara-icon.png"
-              alt="Mentara Logo"
-              width={32}
-              height={32}
-              priority
-              className="flex-shrink-0"
-            />
-            {isSidebarExpanded && (
-              <span className="ml-3 text-lg font-semibold text-gray-900 transition-all duration-300">
-                Admin
-              </span>
-            )}
-          </Link>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className={cn(
-              "h-8 w-8 transition-all duration-300",
-              !isSidebarExpanded && "opacity-0 hover:opacity-100"
-            )}
-          >
-            {isSidebarExpanded ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-
-        {/* Navigation Items */}
-        <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
+      <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
+        <Link href="/admin" className="mb-8 px-2">
+          <Image
+            src="/icons/mentara/mentara-icon.png"
+            alt="Mentara Logo"
+            width={50}
+            height={50}
+            priority
+            className="hover:scale-110 transition-transform duration-300"
+          />
+        </Link>
+        <div className="flex flex-1 flex-col items-center gap-6">
           {navItems.map((item) => {
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
             return (
               <Link
-                key={item.href}
-                href={item.href}
+                key={item.id}
+                href={item.path}
                 className={cn(
-                  "relative group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 ease-in-out",
+                  "relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out",
                   isActive
-                    ? "bg-blue-50 text-blue-600 shadow-sm"
-                    : "text-gray-700 hover:bg-blue-50/50 hover:text-blue-600",
-                  !isSidebarExpanded && "justify-center px-2"
+                    ? "text-red-600"
+                    : "text-muted-foreground hover:text-red-600"
                 )}
-                title={!isSidebarExpanded ? item.title : undefined}
               >
-                {/* Left accent indicator */}
                 <div
                   className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-blue-600 rounded-r-full transition-all duration-300 ease-in-out",
+                    "absolute inset-0 transition-all duration-400 ease-in-out",
+                    isActive
+                      ? "bg-red-100 rounded-2xl scale-100"
+                      : "bg-transparent rounded-full scale-75 group-hover:bg-red-50 group-hover:rounded-2xl group-hover:scale-100"
+                  )}
+                />
+                <div
+                  className={cn(
+                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-red-600 rounded-r-full transition-all duration-300 ease-in-out",
                     isActive
                       ? "h-8 opacity-100"
                       : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
                   )}
                 />
-
-                {/* Discord-style bevel background */}
-                <div
-                  className={cn(
-                    "absolute inset-0 transition-all duration-400 ease-in-out",
-                    isActive
-                      ? "bg-blue-50 rounded-xl scale-100"
-                      : "bg-transparent rounded-full scale-75 group-hover:bg-blue-50/50 group-hover:rounded-xl group-hover:scale-100"
-                  )}
-                />
-
-                <div className="relative z-10 flex items-center gap-3">
-                  <div
+                <div className="relative z-10 flex flex-col items-center justify-center">
+                  <Image
+                    src={item.icon}
+                    alt={item.name}
+                    width={24}
+                    height={24}
                     className={cn(
                       "transition-all duration-300",
                       isActive
-                        ? "text-blue-600 scale-110"
-                        : "text-gray-500 group-hover:text-blue-600 group-hover:scale-110"
+                        ? "scale-110"
+                        : "group-hover:scale-110"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "mt-1 text-center text-[9px] font-medium transition-all duration-300",
+                      isActive
+                        ? "text-red-600 opacity-100"
+                        : "text-muted-foreground opacity-75 group-hover:text-red-600 group-hover:opacity-100"
                     )}
                   >
-                    {item.icon}
-                  </div>
-
-                  {isSidebarExpanded && (
-                    <span
-                      className={cn(
-                        "transition-all duration-300",
-                        isActive
-                          ? "text-blue-600"
-                          : "text-gray-700 group-hover:text-blue-600"
-                      )}
-                    >
-                      {item.title}
-                    </span>
-                  )}
+                    {item.name}
+                  </span>
                 </div>
               </Link>
             );
           })}
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-gray-200 p-4">
-          {isSidebarExpanded ? (
-            <p className="text-xs text-gray-500 text-center">
-              © 2025 Mentara Admin
-            </p>
-          ) : (
-            <div className="flex justify-center">
-              <div className="h-2 w-2 rounded-full bg-blue-300" />
-            </div>
-          )}
         </div>
       </nav>
 
@@ -263,7 +151,7 @@ export default function AdminLayout({
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center gap-3">
                 <Image
-                  src="/mentara-icon.png"
+                  src="/icons/mentara/mentara-icon.png"
                   alt="Mentara Logo"
                   width={32}
                   height={32}
@@ -285,39 +173,44 @@ export default function AdminLayout({
               <div className="space-y-2">
                 {navItems.map((item) => {
                   const isActive =
-                    pathname === item.href ||
-                    pathname.startsWith(`${item.href}/`);
+                    pathname === item.path ||
+                    pathname.startsWith(`${item.path}/`);
                   return (
                     <Link
-                      key={item.href}
-                      href={item.href}
+                      key={item.id}
+                      href={item.path}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={cn(
                         "relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300",
                         isActive
-                          ? "bg-blue-50 text-blue-600"
-                          : "text-gray-700 hover:bg-blue-50/50 hover:text-blue-600"
+                          ? "bg-red-50 text-red-600"
+                          : "text-gray-700 hover:bg-red-50/50 hover:text-red-600"
                       )}
                     >
                       <div
                         className={cn(
                           "transition-all duration-300",
                           isActive
-                            ? "text-blue-600 scale-110"
-                            : "text-gray-500 group-hover:text-blue-600 group-hover:scale-105"
+                            ? "text-red-600 scale-110"
+                            : "text-gray-500 group-hover:text-red-600 group-hover:scale-105"
                         )}
                       >
-                        {item.icon}
+                        <Image
+                          src={item.icon}
+                          alt={item.name}
+                          width={20}
+                          height={20}
+                        />
                       </div>
                       <span
                         className={cn(
                           "font-medium transition-all duration-300",
                           isActive
-                            ? "text-blue-600"
-                            : "text-gray-700 group-hover:text-blue-600"
+                            ? "text-red-600"
+                            : "text-gray-700 group-hover:text-red-600"
                         )}
                       >
-                        {item.title}
+                        {item.name}
                       </span>
                     </Link>
                   );
@@ -338,34 +231,18 @@ export default function AdminLayout({
         </div>
       )}
 
-      {/* Main Content Area - Responsive padding */}
-      <div
-        className={cn(
-          "flex flex-1 flex-col w-full h-screen transition-all duration-300",
-          "md:ml-0",
-          isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
-        )}
-      >
-        {/* Top Header - Responsive */}
-        <header
-          className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm"
-          style={{
-            width: isSidebarExpanded
-              ? "calc(100% - 256px)"
-              : "calc(100% - 70px)",
-            ...(window.innerWidth < 768 && { width: "100%" }),
-          }}
-        >
+      {/* Main Content Area - Fixed 70px padding */}
+      <div className="flex flex-1 flex-col w-full h-screen md:ml-[70px]">
+        {/* Top Header - Fixed width for 70px sidebar */}
+        <header className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm w-full md:w-[calc(100%-70px)]">
           {/* Mobile menu button and title */}
           <div className="flex items-center gap-3 md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="p-2 text-gray-700 hover:text-gray-900"
             >
               <Menu className="h-5 w-5" />
-            </Button>
+            </button>
             <span className="text-lg font-semibold text-gray-900">Admin</span>
           </div>
 
@@ -374,71 +251,56 @@ export default function AdminLayout({
             <h1 className="text-lg font-semibold text-gray-900">
               {navItems.find(
                 (item) =>
-                  pathname === item.href || pathname.startsWith(`${item.href}/`)
-              )?.title || "Dashboard"}
+                  pathname === item.path || pathname.startsWith(`${item.path}/`)
+              )?.name || "Dashboard"}
             </h1>
           </div>
 
           {/* Search Bar - Placeholder for future implementation */}
           <div className="relative mx-4 hidden flex-1 max-w-md md:block">
             <div className="relative">
-              <div className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-lg ring-1 ring-border/50 rounded-xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-blue-300 focus-within:shadow-xl transition-all duration-300 flex items-center text-gray-500">
+              <div className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-lg ring-1 ring-border/50 rounded-xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-red-300 focus-within:shadow-xl transition-all duration-300 flex items-center text-gray-500">
                 <Search className="h-4 w-4 mr-2" />
                 Search admin functions...
               </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-blue-500/5 rounded-xl pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-transparent to-red-500/5 rounded-xl pointer-events-none" />
             </div>
           </div>
 
           {/* Admin User Info and Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex">
-                <UserDisplay
-                  variant="name-only"
-                  showRole={true}
-                  textClassName="flex flex-col items-end text-gray-900"
-                  className="gap-1"
-                />
+              <div className="hidden sm:flex flex-col items-end">
+                <span className="text-sm font-medium text-gray-900">
+                  {user?.firstName && user?.lastName
+                    ? `${user.firstName} ${user.lastName}`
+                    : "Admin"}
+                </span>
+                <span className="text-xs text-gray-500 capitalize">
+                  {user?.role || "admin"}
+                </span>
               </div>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative group p-0">
-                    <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-blue-100 to-blue-200 ring-2 ring-border/50 group-hover:ring-blue-300 transition-all duration-300 shadow-sm group-hover:shadow-md">
-                      <Avatar className="h-full w-full">
-                        <AvatarImage
-                          src={user.avatarUrl}
-                          alt={user?.firstName}
-                          className="transition-transform duration-300 group-hover:scale-110"
-                        />
-                        <AvatarFallback className="bg-blue-100 text-blue-700">
-                          {user?.firstName.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    {/* Online status indicator */}
-                    <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/profile" className="cursor-pointer">
-                      Profile Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="text-red-600 cursor-pointer"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <button
+                className="relative group focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 rounded-full transition-all duration-300"
+                title="Admin Profile"
+              >
+                <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-red-100 to-red-200 ring-2 ring-border/50 group-hover:ring-red-300 transition-all duration-300 shadow-sm group-hover:shadow-md cursor-pointer">
+                  <Image
+                    src={user?.avatarUrl || "/avatar-placeholder.png"}
+                    alt="Admin Avatar"
+                    width={36}
+                    height={36}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+                    }}
+                  />
+                </div>
+                {/* Online status indicator */}
+                <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm" />
+              </button>
 
               <button
                 onClick={handleLogout}
@@ -452,9 +314,56 @@ export default function AdminLayout({
         </header>
 
         {/* Main Content - Responsive padding */}
-        <main className="flex-1 w-full h-full pt-16 overflow-y-auto bg-gray-50">
+        <main className="flex-1 w-full h-full pt-16 pb-16 md:pb-0 overflow-y-auto bg-gray-50">
           <div className="p-4 md:p-6">{children}</div>
         </main>
+
+        {/* Video Call Notifications - Fixed position in upper right */}
+        <IncomingCallNotificationContainer />
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 shadow-lg">
+          <div className="flex items-center justify-around py-2">
+            {navItems.slice(0, 5).map((item) => {
+              const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.path}
+                  className={cn(
+                    "relative group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0",
+                    isActive
+                      ? "text-red-600"
+                      : "text-gray-600 hover:text-red-600"
+                  )}
+                >
+                  <Image
+                    src={item.icon}
+                    alt={item.name}
+                    width={20}
+                    height={20}
+                    className={cn(
+                      "transition-all duration-300",
+                      isActive
+                        ? "scale-110"
+                        : "group-hover:scale-105"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300",
+                      isActive
+                        ? "text-red-600 font-medium"
+                        : "text-gray-600 group-hover:text-red-600"
+                    )}
+                  >
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Post,
+  Delete,
   Param,
   HttpCode,
   HttpStatus,
@@ -34,10 +36,17 @@ export class TherapistClientController {
 
   @Get('matched')
   @HttpCode(HttpStatus.OK)
-  async getMatchedClients(
-    @CurrentUserId() therapistId: string,
-  ): Promise<any> {
+  async getMatchedClients(@CurrentUserId() therapistId: string): Promise<any> {
     return this.therapistManagementService.getMatchedClients(therapistId);
+  }
+
+  @Get('requests')
+  @HttpCode(HttpStatus.OK)
+  async getPendingRequests(
+    @CurrentUserId() therapistId: string,
+  ): Promise<any[]> {
+    console.log('Fetching pending requests for therapist:', therapistId);
+    return this.therapistManagementService.getPendingRequests(therapistId);
   }
 
   @Get(':id')
@@ -47,5 +56,41 @@ export class TherapistClientController {
     @Param('id') clientId: string,
   ): Promise<any> {
     return this.therapistManagementService.getClientById(therapistId, clientId);
+  }
+
+  @Post(':clientId/accept')
+  @HttpCode(HttpStatus.OK)
+  async acceptPatientRequest(
+    @CurrentUserId() therapistId: string,
+    @Param('clientId') clientId: string,
+  ): Promise<{ success: boolean }> {
+    await this.therapistManagementService.acceptPatientRequest(
+      therapistId,
+      clientId,
+    );
+    return { success: true };
+  }
+
+  @Post(':clientId/deny')
+  @HttpCode(HttpStatus.OK)
+  async denyPatientRequest(
+    @CurrentUserId() therapistId: string,
+    @Param('clientId') clientId: string,
+  ): Promise<{ success: boolean }> {
+    await this.therapistManagementService.denyPatientRequest(
+      therapistId,
+      clientId,
+    );
+    return { success: true };
+  }
+
+  @Delete(':clientId')
+  @HttpCode(HttpStatus.OK)
+  async removePatient(
+    @CurrentUserId() therapistId: string,
+    @Param('clientId') clientId: string,
+  ): Promise<{ success: boolean }> {
+    await this.therapistManagementService.removePatient(therapistId, clientId);
+    return { success: true };
   }
 }

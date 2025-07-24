@@ -9,10 +9,12 @@ import { OmniSearchBar, type EntityType, type OmniSearchFilters } from '@/compon
 import { TabbedSearchResults } from '@/components/search/TabbedSearchResults';
 import { useOmniSearch, useTrendingSearches, useSearchSuggestions } from '@/components/search/hooks/useOmniSearch';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   
   // Get initial query from URL params
   const initialQuery = searchParams.get('q') || '';
@@ -20,7 +22,7 @@ export default function SearchPage() {
   
   const [query, setQuery] = useState(initialQuery);
   const [filters, setFilters] = useState<OmniSearchFilters>({
-    entityTypes: initialTypes.length > 0 ? initialTypes : ['users', 'therapists', 'posts', 'communities', 'worksheets', 'messages'],
+    entityTypes: initialTypes.length > 0 ? initialTypes : ['users', 'therapists', 'posts', 'comments', 'communities', 'worksheets', 'messages'],
     showFilters: false,
   });
 
@@ -53,7 +55,7 @@ export default function SearchPage() {
   const handleClear = () => {
     setQuery('');
     setFilters({
-      entityTypes: ['users', 'therapists', 'posts', 'communities', 'worksheets', 'messages'],
+      entityTypes: ['users', 'therapists', 'posts', 'comments', 'communities', 'worksheets', 'messages'],
       showFilters: false,
     });
   };
@@ -61,7 +63,15 @@ export default function SearchPage() {
   // Handle result click
   const handleResultClick = (result: { url?: string }) => {
     if (result.url) {
-      router.push(result.url);
+      const userRole = user?.role || 'client';
+      
+      // Add role prefix to relative URLs if not already present
+      if (result.url.startsWith('/') && !result.url.startsWith(`/${userRole}/`)) {
+        const roleBasedUrl = `/${userRole}${result.url}`;
+        router.push(roleBasedUrl);
+      } else {
+        router.push(result.url);
+      }
     }
   };
 

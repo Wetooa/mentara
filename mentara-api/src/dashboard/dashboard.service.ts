@@ -94,9 +94,10 @@ export class DashboardService {
         const therapistId = assignment.therapist.userId;
         try {
           // Check if conversation already exists
-          const existingConversations = await this.messagingService.getUserConversations(userId, 1, 100);
-          const hasConversationWithTherapist = existingConversations.some(conv => 
-            conv.participants?.some(p => p.userId === therapistId)
+          const existingConversations =
+            await this.messagingService.getUserConversations(userId, 1, 100);
+          const hasConversationWithTherapist = existingConversations.some(
+            (conv) => conv.participants?.some((p) => p.userId === therapistId),
           );
 
           if (!hasConversationWithTherapist) {
@@ -106,11 +107,16 @@ export class DashboardService {
               type: 'direct',
               title: `Therapy Session with ${assignment.therapist.user.firstName} ${assignment.therapist.user.lastName}`,
             });
-            console.log(`✅ Auto-created missing conversation between client ${userId} and therapist ${therapistId}`);
+            console.log(
+              `✅ Auto-created missing conversation between client ${userId} and therapist ${therapistId}`,
+            );
           }
         } catch (error) {
           // Log but don't fail dashboard load if conversation creation fails
-          console.warn(`⚠️ Failed to ensure conversation exists between client ${userId} and therapist ${therapistId}:`, error);
+          console.warn(
+            `⚠️ Failed to ensure conversation exists between client ${userId} and therapist ${therapistId}:`,
+            error,
+          );
         }
       }
 
@@ -141,7 +147,54 @@ export class DashboardService {
   }
 
   async getTherapistDashboardData(userId: string) {
+    console.log(
+      `🔍 [DashboardService] Getting therapist dashboard data for userId: ${userId}`,
+    );
+
     try {
+      // First, verify the user exists and check their role
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+          avatarUrl: true,
+        },
+      });
+
+      if (!user) {
+        console.error(`❌ [DashboardService] User not found: ${userId}`);
+        throw new NotFoundException(`User not found: ${userId}`);
+      }
+
+      console.log(
+        `📋 [DashboardService] User found: ${user.email} (${user.firstName} ${user.lastName}), role: ${user.role}, active: ${user.isActive}`,
+      );
+
+      if (user.role !== 'therapist') {
+        console.error(
+          `❌ [DashboardService] User ${user.email} has role '${user.role}', expected 'therapist'`,
+        );
+        throw new NotFoundException(
+          `User ${user.email} does not have therapist role. Current role: ${user.role}`,
+        );
+      }
+
+      if (!user.isActive) {
+        console.error(`❌ [DashboardService] User ${user.email} is not active`);
+        throw new NotFoundException(`User ${user.email} is not active`);
+      }
+
+      // Now attempt to find the therapist record
+      console.log(
+        `🔍 [DashboardService] Looking for Therapist record for userId: ${userId}`,
+      );
+
       const therapist = await this.prisma.therapist.findUnique({
         where: { userId },
         include: {
@@ -154,7 +207,10 @@ export class DashboardService {
             },
           },
           meetings: {
-            where: { status: { in: ['SCHEDULED', 'CONFIRMED'] } },
+            where: { 
+              status: { in: ['SCHEDULED', 'CONFIRMED'] },
+              startTime: { gte: new Date() }
+            },
             orderBy: { startTime: 'asc' },
             take: 10,
             include: {
@@ -173,67 +229,283 @@ export class DashboardService {
               },
             },
           },
+          reviews: {
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+          },
         },
       });
 
       if (!therapist) {
-        throw new NotFoundException('Therapist not found');
+        console.error(
+          `❌ [DashboardService] Therapist record not found for user: ${user.email} (${userId})`,
+        );
+        console.error(
+          `❌ [DashboardService] User has role 'therapist' but missing Therapist table record`,
+        );
+
+        // Additional diagnostic information
+        const allTherapistRecords = await this.prisma.therapist.count();
+        console.log(
+          `📊 [DashboardService] Total Therapist records in database: ${allTherapistRecords}`,
+        );
+
+        throw new NotFoundException(
+          `Therapist record not found for user ${user.email} (${userId}). ` +
+            `User has role 'therapist' but is missing corresponding Therapist table record. ` +
+            `This indicates a data consistency issue that needs to be resolved.`,
+        );
       }
+
+      console.log(
+        `✅ [DashboardService] Therapist record found: ${therapist.user.email}, status: ${therapist.status}`,
+      );
+
+      // Calculate stats
+      const totalClientsCount = await this.prisma.clientTherapist.count({
+        where: { therapistId: userId, status: 'active' },
+      });
 
       const completedMeetingsCount = await this.prisma.meeting.count({
         where: { therapistId: userId, status: 'COMPLETED' },
       });
 
-      const totalClientsCount = await this.prisma.clientTherapist.count({
-        where: { therapistId: userId },
+      const newClientRequestsCount = await this.prisma.clientTherapist.count({
+        where: { 
+          therapistId: userId, 
+          assignedAt: { 
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // last 7 days
+          } 
+        },
       });
 
-      const pendingWorksheetsCount = await this.prisma.worksheet.count({
-        where: { therapistId: userId, status: { in: ['ASSIGNED', 'OVERDUE'] } },
-      });
+      // Get today's and this week's schedule
+      const now = new Date();
+      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
 
-      // Get recent completed meetings (replacing session logs)
-      const recentSessions = await this.prisma.meeting.findMany({
+      const todayMeetings = await this.prisma.meeting.findMany({
         where: {
           therapistId: userId,
+          startTime: { gte: startOfDay, lte: endOfDay },
+          status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
+        },
+        include: {
+          client: { include: { user: true } },
+        },
+        orderBy: { startTime: 'asc' },
+      });
+
+      const thisWeekMeetings = await this.prisma.meeting.findMany({
+        where: {
+          therapistId: userId,
+          startTime: { gte: startOfWeek, lte: endOfWeek },
+          status: { in: ['SCHEDULED', 'CONFIRMED'] },
+        },
+        include: {
+          client: { include: { user: true } },
+        },
+        orderBy: { startTime: 'asc' },
+      });
+
+      // Calculate earnings
+      const thisMonth = new Date();
+      const startOfMonth = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+      const lastMonth = new Date(thisMonth.getFullYear(), thisMonth.getMonth() - 1, 1);
+      const startOfLastMonth = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
+      const endOfLastMonth = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 0);
+
+      const thisMonthPayments = await this.prisma.payment.findMany({
+        where: {
+          meeting: { therapistId: userId },
+          status: 'COMPLETED',
+          createdAt: { gte: startOfMonth },
+        },
+      });
+
+      const lastMonthPayments = await this.prisma.payment.findMany({
+        where: {
+          meeting: { therapistId: userId },
+          status: 'COMPLETED',
+          createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
+        },
+      });
+
+      const allPayments = await this.prisma.payment.findMany({
+        where: {
+          meeting: { therapistId: userId },
           status: 'COMPLETED',
         },
-        orderBy: { startTime: 'desc' },
-        take: 5,
-        include: {
-          client: {
-            include: { user: true },
+      });
+
+      const pendingPayments = await this.prisma.payment.findMany({
+        where: {
+          meeting: { therapistId: userId },
+          status: 'PENDING',
+        },
+      });
+
+      const thisMonthEarnings = thisMonthPayments.reduce((sum, payment) => 
+        sum + parseFloat(payment.amount?.toString() || '0'), 0);
+      const lastMonthEarnings = lastMonthPayments.reduce((sum, payment) => 
+        sum + parseFloat(payment.amount?.toString() || '0'), 0);
+      const totalEarnings = allPayments.reduce((sum, payment) => 
+        sum + parseFloat(payment.amount?.toString() || '0'), 0);
+      const pendingPayouts = pendingPayments.reduce((sum, payment) => 
+        sum + parseFloat(payment.amount?.toString() || '0'), 0);
+
+      const earningsPercentageChange = lastMonthEarnings > 0 
+        ? ((thisMonthEarnings - lastMonthEarnings) / lastMonthEarnings) * 100 
+        : 0;
+
+      // Calculate performance metrics
+      const averageRating = therapist.reviews.length > 0 
+        ? therapist.reviews.reduce((sum, review) => sum + review.rating, 0) / therapist.reviews.length 
+        : 0;
+      
+      const totalSessions = await this.prisma.meeting.count({
+        where: { therapistId: userId },
+      });
+      
+      const completedSessions = await this.prisma.meeting.count({
+        where: { therapistId: userId, status: 'COMPLETED' },
+      });
+      
+      const sessionCompletionRate = totalSessions > 0 
+        ? (completedSessions / totalSessions) * 100 
+        : 0;
+
+      // Response time calculation (average time to respond to messages)
+      const conversations = await this.prisma.conversation.findMany({
+        where: {
+          participants: {
+            some: { userId: userId },
           },
-          meetingNotes: {
+        },
+        include: {
+          messages: {
             orderBy: { createdAt: 'desc' },
-            take: 1,
+            take: 50,
           },
         },
       });
 
-      return {
+      let totalResponseTime = 0;
+      let responseCount = 0;
+      
+      for (const conversation of conversations) {
+        const messages = conversation.messages;
+        for (let i = 0; i < messages.length - 1; i++) {
+          if (messages[i].senderId === userId && messages[i + 1].senderId !== userId) {
+            const responseTime = messages[i].createdAt.getTime() - messages[i + 1].createdAt.getTime();
+            totalResponseTime += responseTime;
+            responseCount++;
+          }
+        }
+      }
+
+      const averageResponseTime = responseCount > 0 
+        ? totalResponseTime / responseCount / (1000 * 60 * 60) // Convert to hours
+        : 0;
+
+      // Get recent client data
+      const recentClients = await this.prisma.clientTherapist.findMany({
+        where: { therapistId: userId, status: 'active' },
+        include: {
+          client: {
+            include: { 
+              user: true,
+              meetings: {
+                where: { therapistId: userId },
+                orderBy: { startTime: 'desc' },
+                take: 1,
+              },
+            },
+          },
+        },
+        orderBy: { assignedAt: 'desc' },
+        take: 5,
+      });
+
+      console.log(
+        `📊 [DashboardService] Dashboard stats for ${therapist.user.email}: clients=${totalClientsCount}, completed_meetings=${completedMeetingsCount}`,
+      );
+
+      const dashboardData = {
         therapist: {
-          ...therapist,
-          // Map database fields to frontend-expected fields
-          specialties: therapist.areasOfExpertise || [],
+          id: therapist.user.id,
+          firstName: therapist.user.firstName,
+          lastName: therapist.user.lastName,
+          avatarUrl: therapist.user.avatarUrl || '',
+          approvalStatus: therapist.status,
+          joinDate: therapist.createdAt.toISOString(),
+          specializations: therapist.areasOfExpertise || [],
         },
-        stats: {
-          totalClients: totalClientsCount,
-          completedMeetings: completedMeetingsCount,
-          upcomingMeetings: therapist.meetings.length,
-          pendingWorksheets: pendingWorksheetsCount,
+        patients: {
+          active: totalClientsCount,
+          total: totalClientsCount,
+          newRequests: newClientRequestsCount,
+          recent: recentClients.map(ct => ({
+            id: ct.client.user.id,
+            firstName: ct.client.user.firstName,
+            lastName: ct.client.user.lastName,
+            avatarUrl: ct.client.user.avatarUrl || '',
+            lastSessionDate: ct.client.meetings[0]?.startTime?.toISOString() || null,
+            nextSessionDate: therapist.meetings.find(m => m.clientId === ct.client.userId)?.startTime?.toISOString() || null,
+            status: ct.status,
+          })),
         },
-        upcomingMeetings: therapist.meetings,
-        assignedClients: therapist.assignedClients.map((ct) => ct.client),
-        pendingWorksheets: therapist.worksheets,
-        recentSessions,
+        schedule: {
+          today: todayMeetings.map(meeting => ({
+            id: meeting.id,
+            patientName: `${meeting.client.user.firstName} ${meeting.client.user.lastName}`,
+            startTime: meeting.startTime.toISOString(),
+            endTime: meeting.endTime?.toISOString() || '',
+            type: meeting.meetingType,
+            status: meeting.status,
+          })),
+          thisWeek: thisWeekMeetings.map(meeting => ({
+            id: meeting.id,
+            patientName: `${meeting.client.user.firstName} ${meeting.client.user.lastName}`,
+            date: meeting.startTime.toISOString().split('T')[0],
+            startTime: meeting.startTime.toISOString(),
+            type: meeting.meetingType,
+          })),
+          upcomingCount: therapist.meetings.length,
+        },
+        earnings: {
+          thisMonth: Math.round(thisMonthEarnings),
+          lastMonth: Math.round(lastMonthEarnings),
+          percentageChange: Math.round(earningsPercentageChange * 100) / 100,
+          totalEarnings: Math.round(totalEarnings),
+          pendingPayouts: Math.round(pendingPayouts),
+        },
+        performance: {
+          averageRating: Math.round(averageRating * 100) / 100,
+          totalRatings: therapist.reviews.length,
+          sessionCompletionRate: Math.round(sessionCompletionRate * 100) / 100,
+          responseTime: Math.round(averageResponseTime * 100) / 100,
+        },
       };
+
+      console.log(
+        `✅ [DashboardService] Successfully retrieved dashboard data for ${therapist.user.email}`,
+      );
+      return dashboardData;
     } catch (error) {
       if (error instanceof NotFoundException) {
+        // Re-throw NotFoundException with our enhanced error messages
         throw error;
       }
+
+      console.error(
+        `❌ [DashboardService] Unexpected error getting therapist dashboard data for userId ${userId}:`,
+        error,
+      );
       throw new InternalServerErrorException(
-        `Failed to get therapist dashboard data: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to get therapist dashboard data for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -410,6 +682,256 @@ export class DashboardService {
       }
       throw new InternalServerErrorException(
         `Failed to get moderator dashboard data: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async getTherapistAnalytics(
+    therapistId: string,
+    dateRange?: { start: Date; end: Date },
+  ) {
+    try {
+      // Validate therapist exists
+      const therapist = await this.prisma.therapist.findUnique({
+        where: { userId: therapistId },
+        include: { user: true },
+      });
+
+      if (!therapist) {
+        throw new NotFoundException('Therapist not found');
+      }
+
+      // Define date range for queries
+      const startDate =
+        dateRange?.start || new Date(new Date().getFullYear(), 0, 1); // Start of current year
+      const endDate = dateRange?.end || new Date(); // Today
+
+      // Get meetings within date range
+      const meetings = await this.prisma.meeting.findMany({
+        where: {
+          therapistId,
+          startTime: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        include: {
+          payments: {
+            where: { status: 'COMPLETED' },
+            include: { paymentMethod: true },
+          },
+          client: {
+            include: { user: true },
+          },
+        },
+        orderBy: { startTime: 'desc' },
+      });
+
+      // Calculate revenue statistics
+      const totalRevenue = meetings.reduce((sum, meeting) => {
+        const meetingRevenue = meeting.payments.reduce((paySum, payment) => {
+          return (
+            paySum +
+            (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+          );
+        }, 0);
+        return sum + meetingRevenue;
+      }, 0);
+
+      // If no payment data, estimate from hourly rate
+      const estimatedRevenue =
+        meetings.length * parseFloat(therapist.hourlyRate?.toString() || '120');
+      const finalRevenue = totalRevenue > 0 ? totalRevenue : estimatedRevenue;
+
+      // Sessions by status
+      const sessionsByStatus = {
+        completed: meetings.filter((m) => m.status === 'COMPLETED').length,
+        scheduled: meetings.filter((m) => m.status === 'SCHEDULED').length,
+        confirmed: meetings.filter((m) => m.status === 'CONFIRMED').length,
+        cancelled: meetings.filter((m) => m.status === 'CANCELLED').length,
+        no_show: meetings.filter((m) => m.status === 'NO_SHOW').length,
+      };
+
+      // Monthly revenue breakdown
+      const monthlyRevenue = {};
+      meetings.forEach((meeting) => {
+        const month = meeting.startTime.toISOString().slice(0, 7); // YYYY-MM format
+        const meetingRevenue = meeting.payments.reduce((sum, payment) => {
+          return (
+            sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+          );
+        }, 0);
+
+        if (!monthlyRevenue[month]) {
+          monthlyRevenue[month] = 0;
+        }
+        monthlyRevenue[month] +=
+          meetingRevenue ||
+          parseFloat(therapist.hourlyRate?.toString() || '120');
+      });
+
+      // Top clients by session count
+      const clientSessions = {};
+      meetings.forEach((meeting) => {
+        const clientId = meeting.clientId;
+        const clientName = `${meeting.client.user.firstName} ${meeting.client.user.lastName}`;
+
+        if (!clientSessions[clientId]) {
+          clientSessions[clientId] = {
+            name: clientName,
+            sessions: 0,
+            revenue: 0,
+          };
+        }
+
+        clientSessions[clientId].sessions++;
+        const sessionRevenue =
+          meeting.payments.reduce((sum, payment) => {
+            return (
+              sum + (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+            );
+          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
+
+        clientSessions[clientId].revenue += sessionRevenue;
+      });
+
+      const topClients = Object.values(clientSessions)
+        .sort((a: any, b: any) => b.sessions - a.sessions)
+        .slice(0, 10);
+
+      // Session completion rate
+      const totalSessions = meetings.length;
+      const completedSessions = sessionsByStatus.completed;
+      const completionRate =
+        totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
+
+      // Average session duration
+      const completedMeetings = meetings.filter(
+        (m) => m.status === 'COMPLETED',
+      );
+      const averageDuration =
+        completedMeetings.length > 0
+          ? completedMeetings.reduce((sum, m) => sum + m.duration, 0) /
+            completedMeetings.length
+          : 0;
+
+      // Today's stats
+      const today = new Date();
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+      const todayMeetings = meetings.filter(
+        (m) => m.startTime >= startOfDay && m.startTime <= endOfDay,
+      );
+
+      const todayRevenue = todayMeetings.reduce((sum, meeting) => {
+        const meetingRevenue =
+          meeting.payments.reduce((paySum, payment) => {
+            return (
+              paySum +
+              (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+            );
+          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
+        return sum + meetingRevenue;
+      }, 0);
+
+      // This week's stats
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const weekMeetings = meetings.filter((m) => m.startTime >= startOfWeek);
+      const weekRevenue = weekMeetings.reduce((sum, meeting) => {
+        const meetingRevenue =
+          meeting.payments.reduce((paySum, payment) => {
+            return (
+              paySum +
+              (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+            );
+          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
+        return sum + meetingRevenue;
+      }, 0);
+
+      // This month's stats
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const monthMeetings = meetings.filter((m) => m.startTime >= startOfMonth);
+      const monthRevenue = monthMeetings.reduce((sum, meeting) => {
+        const meetingRevenue =
+          meeting.payments.reduce((paySum, payment) => {
+            return (
+              paySum +
+              (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+            );
+          }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120');
+        return sum + meetingRevenue;
+      }, 0);
+
+      return {
+        therapist: {
+          id: therapist.userId,
+          name: `${therapist.user.firstName} ${therapist.user.lastName}`,
+          email: therapist.user.email,
+          specialization: therapist.specialCertifications,
+          hourlyRate: parseFloat(therapist.hourlyRate?.toString() || '120'),
+        },
+        dateRange: {
+          start: startDate,
+          end: endDate,
+        },
+        overview: {
+          totalRevenue: Math.round(finalRevenue),
+          totalSessions: totalSessions,
+          completedSessions: completedSessions,
+          completionRate: Math.round(completionRate * 100) / 100,
+          averageDuration: Math.round(averageDuration),
+          activeClients: Object.keys(clientSessions).length,
+        },
+        timeBasedStats: {
+          today: {
+            sessions: todayMeetings.length,
+            revenue: Math.round(todayRevenue),
+          },
+          thisWeek: {
+            sessions: weekMeetings.length,
+            revenue: Math.round(weekRevenue),
+          },
+          thisMonth: {
+            sessions: monthMeetings.length,
+            revenue: Math.round(monthRevenue),
+          },
+        },
+        sessionsByStatus,
+        monthlyRevenue: Object.entries(monthlyRevenue).map(
+          ([month, revenue]) => ({
+            month,
+            revenue: Math.round(revenue as number),
+          }),
+        ),
+        topClients: topClients.map((client: any) => ({
+          ...client,
+          revenue: Math.round(client.revenue),
+        })),
+        recentSessions: meetings.slice(0, 10).map((meeting) => ({
+          id: meeting.id,
+          startTime: meeting.startTime,
+          duration: meeting.duration,
+          status: meeting.status,
+          clientName: `${meeting.client.user.firstName} ${meeting.client.user.lastName}`,
+          revenue:
+            meeting.payments.reduce((sum, payment) => {
+              return (
+                sum +
+                (payment.amount ? parseFloat(payment.amount.toString()) : 0)
+              );
+            }, 0) || parseFloat(therapist.hourlyRate?.toString() || '120'),
+        })),
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get therapist analytics: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

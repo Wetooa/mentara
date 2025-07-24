@@ -124,19 +124,14 @@ export function NotificationDropdown({
     unreadCount,
     isLoading,
     error,
-    connectionState,
-    isConnected,
-    isHealthy,
     markAsRead,
     markAllAsRead,
     deleteNotification,
     isMarkingAsRead,
     isMarkingAllAsRead,
     isDeleting,
-    reconnectWebSocket,
   } = useNotifications({ 
     limit: maxNotifications,
-    enableRealtime: true,
     enableToasts: false, // We'll handle toasts manually to avoid duplicates
   });
 
@@ -163,9 +158,10 @@ export function NotificationDropdown({
     deleteNotification(notificationId);
   };
 
-  const handleReconnect = () => {
-    reconnectWebSocket();
-    toast.info("Reconnecting to notification service...");
+  const handleRefresh = () => {
+    // Refresh notifications via HTTP instead of WebSocket reconnect
+    window.location.reload();
+    toast.info("Refreshing notifications...");
   };
 
   const displayNotifications = notifications.slice(0, maxNotifications);
@@ -201,12 +197,7 @@ export function NotificationDropdown({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <h3 className="font-semibold text-sm">Notifications</h3>
-              {showConnectionStatus && !isHealthy && (
-                <Badge variant="outline" className="text-xs shrink-0">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  {connectionState.isStale ? "Stale" : "Offline"}
-                </Badge>
-              )}
+              {/* Connection status removed - notifications use HTTP polling */}
             </div>
             <div className="flex items-center gap-1 shrink-0">
               {unreadCount > 0 && (
@@ -258,16 +249,7 @@ export function NotificationDropdown({
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   Failed to load notifications.
-                  {!isHealthy && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      onClick={handleReconnect}
-                      className="ml-2 p-0 h-auto"
-                    >
-                      Reconnect
-                    </Button>
-                  )}
+                  {/* Connection status removed - notifications use reliable HTTP polling */}
                 </AlertDescription>
               </Alert>
             </div>

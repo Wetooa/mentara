@@ -6,14 +6,25 @@ import type {
   TherapistRecommendation,
   WelcomeRecommendationQuery,
 } from "@/types/api/therapist";
+import { WorksheetDetailDTO } from "@/types";
 
 /**
  * Therapist API service for recommendations, matching, and management
+ * Backend has global /api prefix, so endpoints here should not include /api
  */
 export function createTherapistService(axios: AxiosInstance) {
   return {
     /**
-     * Get personalized therapist recommendations for welcome page
+     * Get ALL approved therapists (no personalization, simple listing)
+     * Best for: Main therapist page, browse all functionality
+     */
+    async getAllTherapists(params?: TherapistSearchParams) {
+      const { data } = await axios.get("/therapists", { params });
+      return data;
+    },
+
+    /**
+     * Get personalized recommendations for welcome page
      */
     async getPersonalizedRecommendations(
       params?: WelcomeRecommendationQuery
@@ -23,7 +34,8 @@ export function createTherapistService(axios: AxiosInstance) {
     },
 
     /**
-     * Get standard therapist recommendations with filters
+     * Get personalized therapist recommendations (algorithmic matching)
+     * Best for: Recommendation sections, "For You" listings
      */
     async getRecommendations(
       params?: TherapistRecommendationQuery
@@ -32,6 +44,45 @@ export function createTherapistService(axios: AxiosInstance) {
         params,
       });
       console.log("Therapist recommendations data:", data);
+      return data;
+    },
+
+    /**
+     * Get welcome-specific recommendations with communities
+     * Best for: Welcome page flow, first-time user experience
+     */
+    async getWelcomeRecommendations(
+      params?: WelcomeRecommendationQuery
+    ): Promise<TherapistRecommendationResponse> {
+      const { data } = await axios.get("/therapist-recommendations/welcome", {
+        params,
+      });
+      return data;
+    },
+
+    /**
+     * Get detailed therapist profile by ID
+     */
+    async getTherapistProfile(therapistId: string) {
+      const { data } = await axios.get(`/therapists/${therapistId}`);
+      return data;
+    },
+
+    /**
+     * Get compatibility analysis between client and therapist
+     */
+    async getCompatibilityAnalysis(therapistId: string) {
+      const { data } = await axios.get(
+        `/therapist-recommendations/compatibility/${therapistId}`
+      );
+      return data;
+    },
+
+    /**
+     * Get therapist reviews
+     */
+    async getTherapistReviews(therapistId: string) {
+      const { data } = await axios.get(`/therapists/${therapistId}/reviews`);
       return data;
     },
 
@@ -56,16 +107,6 @@ export function createTherapistService(axios: AxiosInstance) {
     },
 
     /**
-     * Get compatibility analysis between client and therapist
-     */
-    async getCompatibilityAnalysis(therapistId: string) {
-      const { data } = await axios.get(
-        `/therapist-recommendations/compatibility/${therapistId}`
-      );
-      return data;
-    },
-
-    /**
      * Get list of therapists with filters
      */
     async getTherapistList(params?: TherapistSearchParams) {
@@ -77,16 +118,8 @@ export function createTherapistService(axios: AxiosInstance) {
     /**
      * Get detailed therapist profile
      */
-    async getTherapistProfile(therapistId: string) {
+    async getProfile(therapistId: string) {
       const { data } = await axios.get(`/therapists/${therapistId}`);
-      return data;
-    },
-
-    /**
-     * Get therapist reviews
-     */
-    async getTherapistReviews(therapistId: string) {
-      const { data } = await axios.get(`/therapists/${therapistId}/reviews`);
       return data;
     },
 
@@ -121,6 +154,7 @@ export function createTherapistService(axios: AxiosInstance) {
        */
       async getList() {
         const { data } = await axios.get("/therapist/clients/assigned");
+        console.log("Assigned patients data:", data);
         return data;
       },
 
@@ -175,6 +209,130 @@ export function createTherapistService(axios: AxiosInstance) {
         const { data } = await axios.post(
           `/therapist/clients/${patientId}/worksheets`,
           worksheetData
+        );
+        return data;
+      },
+
+      /**
+       * Get list of pending patient requests for the authenticated therapist
+       */
+      async getRequests() {
+        const { data } = await axios.get("/therapist/clients/requests");
+        console.log("Pending patient requests data:", data);
+        return data;
+      },
+
+      /**
+       * Accept a patient connection request
+       */
+      async acceptRequest(patientId: string) {
+        const { data } = await axios.post(
+          `/therapist/clients/${patientId}/accept`
+        );
+        return data;
+      },
+
+      /**
+       * Deny a patient connection request
+       */
+      async denyRequest(patientId: string) {
+        const { data } = await axios.post(
+          `/therapist/clients/${patientId}/deny`
+        );
+        return data;
+      },
+
+      /**
+       * Remove a patient from therapist's active patients list
+       */
+      async removePatient(patientId: string) {
+        const { data } = await axios.delete(`/therapist/clients/${patientId}`);
+        return data;
+      },
+    },
+
+    /**
+     * Worksheets sub-service for therapists to manage worksheets
+     */
+    worksheets: {
+      /**
+       * Get list of worksheets for the authenticated therapist
+       */
+      async getList(params?: { status?: string; clientId?: string }) {
+        const { data } = await axios.get("/therapist/worksheets", { params });
+        return data;
+      },
+
+      /**
+       * Get worksheet details by ID
+       */
+      async getById(worksheetId: string): Promise<WorksheetDetailDTO> {
+        const { data } = await axios.get(
+          `/therapist/worksheets/${worksheetId}`
+        );
+        return data;
+      },
+
+      /**
+       * Edit/update worksheet content
+       */
+      async edit(
+        worksheetId: string,
+        updateData: {
+          title?: string;
+          instructions?: string;
+          dueDate?: string;
+          status?: string;
+        }
+      ) {
+        const { data } = await axios.put(
+          `/therapist/worksheets/${worksheetId}`,
+          updateData
+        );
+        return data;
+      },
+
+      /**
+       * Mark worksheet as reviewed/completed
+       */
+      async markAsReviewed(worksheetId: string, feedback?: string) {
+        const { data } = await axios.post(
+          `/therapist/worksheets/${worksheetId}/review`,
+          {
+            feedback,
+          }
+        );
+        return data;
+      },
+
+      /**
+       * Upload reference file for worksheet
+       */
+      async uploadReferenceFile(worksheetId: string, file: File) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const { data } = await axios.post(
+          `/therapist/worksheets/${worksheetId}/reference-file`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        return data;
+      },
+
+      /**
+       * Remove reference file from worksheet
+       */
+      async removeReferenceFile(worksheetId: string, fileUrl: string) {
+        const { data } = await axios.delete(
+          `/therapist/worksheets/${worksheetId}/reference-file`,
+          {
+            data: { fileUrl },
+          }
         );
         return data;
       },

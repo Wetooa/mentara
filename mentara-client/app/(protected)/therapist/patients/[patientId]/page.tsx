@@ -60,7 +60,7 @@ export default function PatientDetailPage(
             <button className="p-2 rounded-md bg-green-100 text-primary">
               <MessageSquare className="h-5 w-5" />
             </button>
-            <button 
+            <button
               className="p-2 rounded-md bg-green-100 text-primary hover:bg-green-200 transition-colors"
               onClick={() => setIsSchedulingModalOpen(true)}
               title="Schedule Session"
@@ -243,31 +243,28 @@ export default function PatientDetailPage(
         <div className="flex space-x-6">
           <button
             onClick={() => setActiveTab("notes")}
-            className={`py-2 ${
-              activeTab === "notes"
+            className={`py-2 ${activeTab === "notes"
                 ? "text-primary border-b-2 border-primary"
                 : "text-gray-500"
-            }`}
+              }`}
           >
             Session Notes
           </button>
           <button
             onClick={() => setActiveTab("worksheets")}
-            className={`py-2 ${
-              activeTab === "worksheets"
+            className={`py-2 ${activeTab === "worksheets"
                 ? "text-primary border-b-2 border-primary"
                 : "text-gray-500"
-            }`}
+              }`}
           >
             Worksheets
           </button>
           <button
             onClick={() => setActiveTab("progress")}
-            className={`py-2 ${
-              activeTab === "progress"
+            className={`py-2 ${activeTab === "progress"
                 ? "text-primary border-b-2 border-primary"
                 : "text-gray-500"
-            }`}
+              }`}
           >
             Progress
           </button>

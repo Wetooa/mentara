@@ -11,6 +11,7 @@
  * - useCommunityPage: Page-specific community data
  * - useCommunityRooms: Room management
  * - useCommunityAssignment: Assignment and matching logic
+ * - usePostDetail: Individual post management and interaction
  */
 
 export { useCommunityDashboard } from './useCommunityDashboard';
@@ -22,3 +23,4 @@ export { useCommunityOverview } from './useCommunityOverview';
 export { useCommunityPage } from './useCommunityPage';
 export { useCommunityRooms } from './useCommunityRooms';
 export { useCommunityAssignment } from './useCommunityAssignment';
+export { usePostDetail } from './usePostDetail';

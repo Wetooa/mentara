@@ -31,6 +31,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { UserDisplay } from "@/components/common/UserDisplay";
+import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
 
 
 export default function ModeratorLayout({
@@ -412,6 +413,9 @@ export default function ModeratorLayout({
         <main className="flex-1 w-full h-full pt-16 overflow-y-auto bg-gray-50">
           <div className="p-4 md:p-6">{children}</div>
         </main>
+
+        {/* Video Call Notifications - Fixed position in upper right */}
+        <IncomingCallNotificationContainer />
       </div>
     </div>
   );

@@ -154,12 +154,52 @@ export class AvailabilityValidatorService {
   /**
    * Check if therapist is available at the specified time
    */
+
+  /**
+   * Validate therapist availability with transaction support (simplified UTC-only version)
+   */
+  async validateTherapistAvailabilityWithTransaction(
+    therapistId: string,
+    startTime: Date,
+    duration: number,
+    prismaClient: any, // Accept transaction client or regular prisma
+  ): Promise<boolean> {
+    // Simple UTC-based validation (no timezone conversion)
+    // Convert to numeric day string to match database schema (0=Sunday, 1=Monday, etc.)
+    const dayOfWeek = startTime.getDay().toString();
+    const startTimeStr = this.formatTime(startTime);
+    const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+    const endTimeStr = this.formatTime(endTime);
+
+    const availability = await prismaClient.therapistAvailability.findFirst({
+      where: {
+        therapistId,
+        dayOfWeek,
+        startTime: { lte: startTimeStr },
+        endTime: { gte: endTimeStr },
+        isAvailable: true,
+      },
+    });
+
+    if (!availability) {
+      throw new BadRequestException(
+        `Therapist is not available at the requested time (${startTimeStr}-${endTimeStr} on day ${dayOfWeek} UTC)`,
+      );
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if therapist is available at the specified time
+   */
   async validateTherapistAvailability(
     therapistId: string,
     startTime: Date,
     duration: number,
   ): Promise<boolean> {
-    const dayOfWeek = startTime.getDay();
+    // Convert to numeric day string to match database schema (0=Sunday, 1=Monday, etc.)
+    const dayOfWeek = startTime.getDay().toString();
     const startTimeStr = this.formatTime(startTime);
     const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
     const endTimeStr = this.formatTime(endTime);
@@ -167,7 +207,7 @@ export class AvailabilityValidatorService {
     const availability = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek: dayOfWeek.toString(),
+        dayOfWeek,
         startTime: { lte: startTimeStr },
         endTime: { gte: endTimeStr },
         isAvailable: true,
@@ -333,11 +373,16 @@ export class AvailabilityValidatorService {
       );
     }
 
+    // Convert numeric day to day name string to match database schema
+    const dayOfWeekString = new Date(2024, 0, dayOfWeek) // Use dummy date with desired day
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toUpperCase();
+
     // Check for overlapping availability
     const overlapping = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek: dayOfWeek.toString(),
+        dayOfWeek: dayOfWeekString,
         OR: [
           {
             startTime: { lt: endTime },

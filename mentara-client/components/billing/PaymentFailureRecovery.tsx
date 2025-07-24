@@ -17,7 +17,7 @@ import {
 import { useApi } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { PaymentMethodForm } from "./PaymentMethodForm";
+// import { PaymentMethodForm } from "./PaymentMethodForm";
 
 // Use the actual Invoice type that matches our data structure
 type FailedPayment = {
@@ -270,14 +270,12 @@ export function PaymentFailureRecovery({
             <CardTitle>Add New Payment Method</CardTitle>
           </CardHeader>
           <CardContent>
-            <PaymentMethodForm
-              onSuccess={() => {
-                setShowAddPaymentMethod(false);
-                toast.success("Payment method added! You can now retry failed payments.");
-                queryClient.invalidateQueries({ queryKey: ["payment-methods"] });
-              }}
-              onCancel={() => setShowAddPaymentMethod(false)}
-            />
+            <div className="p-4 text-center text-muted-foreground">
+              Payment method form would go here (requires Stripe setup)
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setShowAddPaymentMethod(false)}>Close</Button>
+            </div>
           </CardContent>
         </Card>
       )}

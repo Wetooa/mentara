@@ -37,34 +37,6 @@ export default function TaskCard({ task }: TaskCardProps) {
         </div>
       </div>
 
-      {/* Progress indicator for list view */}
-      <div className="mt-3 flex items-center space-x-2">
-        <div className="flex-1 bg-gray-200 rounded-full h-1">
-          <div
-            className={`h-1 rounded-full transition-all duration-300 ${
-              task.isCompleted
-                ? "bg-green-500"
-                : task.myWork && task.myWork.length > 0
-                ? "bg-blue-500"
-                : "bg-gray-300"
-            }`}
-            style={{
-              width: task.isCompleted
-                ? "100%"
-                : task.myWork && task.myWork.length > 0
-                ? "60%"
-                : "20%",
-            }}
-          />
-        </div>
-        <span className="text-xs text-gray-500">
-          {task.isCompleted
-            ? "100%"
-            : task.myWork && task.myWork.length > 0
-            ? "60%"
-            : "20%"}
-        </span>
-      </div>
     </div>
   );
 }

@@ -38,7 +38,7 @@ import Image from "next/image";
 import { useApi } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useSubscriptionStatus } from "@/hooks/billing";
+// import { useSubscriptionStatus } from "@/hooks/billing"; // Removed - subscriptions are outdated
 
 interface SessionSchedulingModalProps {
   patient: Patient | null;
@@ -92,14 +92,13 @@ export function SessionSchedulingModal({
   const queryClient = useQueryClient();
   
   // Payment verification
-  const {
-    isActive,
-    isTrial,
-    isPastDue,
-    hasPaymentIssue,
-    needsPaymentMethod,
-    isLoading: subscriptionLoading
-  } = useSubscriptionStatus();
+  // Removed subscription status - subscriptions are outdated
+  const isActive = true; // Allow all therapists to schedule sessions
+  const isTrial = false;
+  const isPastDue = false;
+  const hasPaymentIssue = false;
+  const needsPaymentMethod = false;
+  const subscriptionLoading = false;
   
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("");

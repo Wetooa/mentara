@@ -8,7 +8,6 @@ import type {
  */
 export function transformDashboardData(
   backendData: ApiDashboardResponse,
-  notifications: unknown[] = [],
   recentCommunications: unknown[] = []
 ): UserDashboardData {
   console.log('🔍 Starting dashboard data transformation...');
@@ -27,7 +26,6 @@ export function transformDashboardData(
   console.log('🔍 Stats data:', stats);
   console.log('🔍 Upcoming meetings data:', upcomingMeetings);
   console.log('🔍 Pending worksheets data:', pendingWorksheets);
-  console.log('🔍 Notifications data:', notifications);
   console.log('🔍 Communications data:', recentCommunications);
 
   // Handle cases where client.user might be null or undefined
@@ -139,25 +137,6 @@ export function transformDashboardData(
           "Therapist",
       };
     }),
-    notifications: notifications.map((notification, index) => {
-      console.log(`🔍 Processing notification ${index}:`, notification);
-      console.log(`🔍 Notification dates:`, {
-        createdAt: notification.createdAt,
-        dateTime: notification.dateTime,
-        createdAtType: typeof notification.createdAt,
-        dateTimeType: typeof notification.dateTime
-      });
-      
-      return {
-        id: notification.id,
-        type: transformNotificationType(notification.type),
-        title: notification.title,
-        message: notification.message,
-        dateTime: safeDateTimeFormat(notification.createdAt || notification.dateTime),
-        read: notification.read || notification.isRead || false,
-        actionUrl: notification.actionUrl,
-      };
-    }),
     recentCommunications: recentCommunications.slice(0, 4).map((comm, index) => {
       console.log(`🔍 Processing communication ${index}:`, comm);
       console.log(`🔍 Communication time fields:`, {
@@ -235,30 +214,6 @@ function determineWorksheetStatus(
   return "pending";
 }
 
-/**
- * Transform backend notification type to frontend format
- */
-function transformNotificationType(
-  backendType: string
-): "session" | "worksheet" | "message" | "system" {
-  const typeMap: Record<
-    string,
-    "session" | "worksheet" | "message" | "system"
-  > = {
-    appointment: "session",
-    meeting: "session",
-    session: "session",
-    worksheet: "worksheet",
-    assignment: "worksheet",
-    message: "message",
-    chat: "message",
-    system: "system",
-    admin: "system",
-    notification: "system",
-  };
-
-  return typeMap[backendType.toLowerCase()] || "system";
-}
 
 /**
  * Safely format a date to YYYY-MM-DD format
@@ -329,7 +284,6 @@ export function createFallbackDashboardData(
     },
     upcomingSessions: [],
     worksheets: [],
-    notifications: [],
     recentCommunications: [],
   };
 }

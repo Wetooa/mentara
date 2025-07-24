@@ -1,74 +1,215 @@
 "use client";
 
-import React from "react";
 import DashboardGreeting from "@/components/therapist/dashboard/DashboardGreeting";
-import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
-import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
 import DashboardOverview from "@/components/therapist/dashboard/DashboardOverview";
+import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
+import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
+import { MatchedClientsSection } from "@/components/therapist/dashboard/MatchedClientsSection";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTherapistDashboard } from "@/hooks/therapist/useTherapistDashboard";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function TherapistDashboardPage() {
-  const { data, isLoading, error } = useTherapistDashboard();
-  
-  // Destructure from data object for backward compatibility
-  const therapist = data?.therapist;
-  const stats = data?.stats;
-  const upcomingAppointments = data?.upcomingAppointments || [];
+  const router = useRouter();
+  const { data, isLoading, error, refetch } = useTherapistDashboard();
 
-  if (isLoading) {
-    return <div className="p-6">Loading dashboard data...</div>;
+  // Destructure from updated backend response structure
+  const therapist = data?.therapist;
+  const patients = data?.patients;
+  const schedule = data?.schedule;
+  const earnings = data?.earnings;
+  const performance = data?.performance;
+
+  // Navigation handlers for clickable dashboard elements
+  const handlePatientsClick = () => {
+    router.push('/therapist/patients');
+  };
+
+  const handleScheduleClick = () => {
+    router.push('/therapist/schedule');
+  };
+
+  const handleMessagesClick = () => {
+    router.push('/therapist/messages');
+  };
+
+  const handleCommunityClick = () => {
+    router.push('/therapist/community');
+  };
+
+  const handleWorksheetsClick = () => {
+    router.push('/therapist/worksheets');
+  };
+
+  const handleRetry = () => {
+    refetch();
+  };
+
+  // Enhanced error state with retry functionality
+  if (error && !isLoading) {
+    return (
+      <div className="w-full h-full p-6 space-y-8">
+        <Alert className="max-w-md mx-auto border-amber-200 bg-amber-50">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="flex items-center justify-between text-amber-800">
+            <span>Failed to load dashboard data</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRetry}
+              className="ml-4 border-amber-300 text-amber-700 hover:bg-amber-100"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
-  if (error) {
+  // Enhanced loading state with skeleton components
+  if (isLoading || !data) {
     return (
-      <div className="p-6 text-red-500">
-        Error loading dashboard: {error.message}
+      <div className="w-full h-full p-6 space-y-8">
+        {/* Loading Header */}
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-64 bg-amber-100" />
+          <Skeleton className="h-4 w-96 bg-amber-50" />
+        </div>
+
+        {/* Loading Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 bg-amber-100" />
+          ))}
+        </div>
+
+        {/* Loading Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Skeleton className="h-64 bg-amber-100" />
+            <Skeleton className="h-64 bg-amber-100" />
+          </div>
+          <div className="space-y-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-48 bg-amber-100" />
+            ))}
+          </div>
+          <div className="space-y-6">
+            <Skeleton className="h-48 bg-amber-100" />
+            <Skeleton className="h-48 bg-amber-100" />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <DashboardGreeting name={therapist?.name || 'Therapist'} />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        <div className="lg:col-span-2">
-          <div className="mb-6">
-            <h2 className="text-lg font-medium mb-4">Today&apos;s agenda</h2>
-            <DashboardStats stats={stats || {
-              activePatients: 0,
-              rescheduled: 0,
-              cancelled: 0,
-              income: 0,
-              patientStats: {
-                total: 0,
-                percentage: 0,
-                months: 0,
-                chartData: [] as Array<{ month: string; value: number }>
-              }
-            }} />
-          </div>
-
-          <div>
-            <h2 className="text-lg font-medium mb-4">
-              Today&apos;s upcoming patients ({upcomingAppointments.length})
-            </h2>
-            <DashboardPatientList appointments={upcomingAppointments.map(apt => ({
-              ...apt,
-              patientAvatar: "/avatar-placeholder.png",
-              condition: "General consultation"
-            }))} />
-          </div>
+    <div className="w-full min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Enhanced Page Header */}
+        <div className="text-center md:text-left">
+          <DashboardGreeting name={therapist ? `${therapist.firstName} ${therapist.lastName}` : 'Therapist'} />
+          <p className="text-amber-700 mt-2 text-lg">Manage your client relationships and grow your practice</p>
         </div>
 
-        <div>
-          <h2 className="text-lg font-medium mb-4">Overview</h2>
-          <DashboardOverview patientStats={stats?.patientStats || {
-            total: 0,
-            percentage: 0,
-            months: 0,
-            chartData: []
-          }} />
+        {/* Matched Clients Section - Primary Focus */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-amber-900">Client Matches</h2>
+              <p className="text-amber-700">Your assigned clients and recent connections</p>
+            </div>
+          </div>
+          <MatchedClientsSection />
+        </section>
+
+        {/* Stats Overview */}
+        <section className="space-y-4">
+          <div>
+            <h2 className="text-2xl font-bold text-amber-900">Today's Overview</h2>
+            <p className="text-amber-700">Your schedule and practice metrics</p>
+          </div>
+          <DashboardStats
+            stats={{
+              activePatients: patients?.active || 0,
+              rescheduled: 0, // Not available in new structure
+              cancelled: 0, // Not available in new structure
+              income: earnings?.thisMonth || 0,
+              patientStats: {
+                total: patients?.total || 0,
+                percentage: 0, // Not available in new structure
+                months: 6, // Default to 6 months
+                chartData: [] as Array<{ month: string; value: number }>
+              }
+            }}
+            onPatientsClick={handlePatientsClick}
+            onScheduleClick={handleScheduleClick}
+            onMessagesClick={handleMessagesClick}
+            onWorksheetsClick={handleWorksheetsClick}
+          />
+        </section>
+
+        {/* Enhanced Main Dashboard Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+          {/* Primary Column - Sessions and Patients */}
+          <div className="xl:col-span-2 space-y-6">
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-amber-900">
+                    Today's Schedule
+                  </h3>
+                  <p className="text-amber-700 text-sm">
+                    {schedule?.today?.length || 0} appointment{(schedule?.today?.length || 0) !== 1 ? 's' : ''} scheduled
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleScheduleClick}
+                  className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                >
+                  View All
+                </Button>
+              </div>
+              <DashboardPatientList
+                appointments={(schedule?.today || []).map(appointment => ({
+                  id: appointment.id,
+                  patientId: appointment.id, // Using appointment id as patient id
+                  patientName: appointment.patientName,
+                  patientAvatar: "/avatar-placeholder.png",
+                  time: new Date(appointment.startTime).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  }),
+                  condition: appointment.type || "Session"
+                }))}
+              />
+            </section>
+          </div>
+
+          {/* Secondary Column - Analytics and Quick Actions */}
+          <div className="space-y-6">
+            <section>
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-amber-900">Practice Analytics</h3>
+                <p className="text-amber-700 text-sm">Your growth and engagement metrics</p>
+              </div>
+              <DashboardOverview
+                patientStats={{
+                  total: patients?.total || 0,
+                  percentage: 0, // Not available in new structure
+                  months: 6, // Default to 6 months
+                  chartData: [] // Not available in new structure, could be added later
+                }}
+              />
+            </section>
+          </div>
         </div>
       </div>
     </div>

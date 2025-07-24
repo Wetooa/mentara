@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Filter, FileText, Clock, CheckCircle, Plus } from "lucide-react";
+import { Filter, FileText, Clock, CheckCircle, Plus, Eye } from "lucide-react";
 import CreateWorksheetModal from "./CreateWorksheetModal";
 
 interface TherapistWorksheetsSidebarProps {
@@ -37,6 +37,11 @@ export default function WorksheetsSidebar({
       id: "completed",
       name: "Completed",
       icon: <CheckCircle className="h-4 w-4" />,
+    },
+    {
+      id: "reviewed",
+      name: "Reviewed",
+      icon: <Eye className="h-4 w-4" />,
     },
   ];
 

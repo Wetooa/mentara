@@ -1,4 +1,5 @@
-// Legacy user search components
+// Legacy user search components (DEPRECATED - use LayoutOmniSearchBar for layouts or OmniSearchBar for comprehensive search)
+/** @deprecated Use LayoutOmniSearchBar for layout search or OmniSearchBar for comprehensive search instead */
 export { UserSearchBar } from './UserSearchBar';
 export { UserSearchItem } from './UserSearchItem';
 export { UserSearchResults } from './UserSearchResults';
@@ -10,6 +11,7 @@ export type { RecentSearch } from './hooks/useRecentSearches';
 
 // New omnisearch components
 export { OmniSearchBar } from './OmniSearchBar';
+export { LayoutOmniSearchBar } from './LayoutOmniSearchBar';
 export { OmniSearchResults } from './OmniSearchResults';
 export { TabbedSearchResults } from './TabbedSearchResults';
 export { 
