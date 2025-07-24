@@ -240,7 +240,7 @@ export class HealthService {
       // For now, we'll do a basic connectivity check
       const response = await fetch('http://localhost:3001/socket.io/?EIO=4&transport=polling', {
         method: 'GET',
-        timeout: 5000,
+        signal: AbortSignal.timeout(5000),
       }).catch(() => null);
 
       const isHealthy = response !== null;
