@@ -133,7 +133,10 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
 
   // Determine if task is editable based on submission status
   const isTaskEditable =
-    task && !task.isCompleted && task.status !== "past_due";
+    task &&
+    !task.isCompleted &&
+    task.status !== "past_due" &&
+    task.status !== "reviewed";
 
   const handleBack = () => {
     router.back();
@@ -217,15 +220,6 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
       toast.error("Failed to delete file. Please try again.");
     }
   };
-
-  const handleTurnIn = () => {
-    turnInMutation.mutate();
-  };
-
-  const handleUnturnIn = () => {
-    unturnInMutation.mutate();
-  };
-
   if (isLoading) {
     return (
       <div className="h-full bg-white p-6">
@@ -524,7 +518,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                   {/* Turn In/Unturn In Button */}
                   {worksheetData?.status === WorksheetStatus.SUBMITTED ? (
                     <button
-                      onClick={handleUnturnIn}
+                      onClick={() => unturnInMutation.mutate()}
                       disabled={
                         unturnInMutation.isPending ||
                         Array.from(uploadingFiles).length > 0
@@ -543,9 +537,9 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                         </>
                       )}
                     </button>
-                  ) : (
+                  ) : worksheetData?.status !== WorksheetStatus.REVIEWED ? (
                     <button
-                      onClick={handleTurnIn}
+                      onClick={() => turnInMutation.mutate()}
                       disabled={
                         turnInMutation.isPending ||
                         Array.from(uploadingFiles).length > 0
@@ -569,7 +563,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                         </>
                       )}
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             )}

@@ -22,7 +22,7 @@ export interface Worksheet {
   id: string;
   title: string;
   instructions?: string;
-  dueDate: string; 
+  dueDate: string;
   status: WorksheetStatus;
   clientId: string;
   client: {
@@ -54,10 +54,10 @@ export interface Worksheet {
 }
 
 export enum WorksheetStatus {
-  ASSIGNED = 'ASSIGNED',
-  SUBMITTED = 'SUBMITTED', 
-  REVIEWED = 'REVIEWED',
-  OVERDUE = 'OVERDUE'
+  ASSIGNED = "ASSIGNED",
+  SUBMITTED = "SUBMITTED",
+  REVIEWED = "REVIEWED",
+  OVERDUE = "OVERDUE",
 }
 
 export interface WorksheetMaterial {
@@ -92,12 +92,13 @@ export interface WorksheetSubmission {
 export interface WorksheetListParams {
   userId?: string;
   therapistId?: string;
+  status?: string;
   isCompleted?: boolean;
   overdue?: boolean;
   limit?: number;
   offset?: number;
-  sortBy?: 'dueDate' | 'createdAt' | 'title';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "dueDate" | "createdAt" | "title";
+  sortOrder?: "asc" | "desc";
 }
 
 export interface WorksheetListResponse {

@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, AlertTriangle, Circle } from "lucide-react";
+import { CheckCircle, AlertTriangle, Circle } from "lucide-react";
 import { Task } from "./types";
 
 interface WorksheetProgressProps {
@@ -39,6 +39,13 @@ export default function WorksheetProgress({
           label: "Assigned",
           color: "text-gray-500",
           bgColor: "bg-gray-50",
+        };
+      case "reviewed":
+        return {
+          icon: <CheckCircle className="h-5 w-5 text-purple-500" />,
+          label: "Reviewed",
+          color: "text-purple-500",
+          bgColor: "bg-purple-50",
         };
       default:
         return {
