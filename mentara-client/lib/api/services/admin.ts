@@ -180,6 +180,73 @@ export function createAdminService(axios: AxiosInstance) {
         handleApiError(error);
       }
     },
+
+    // User Management Methods
+    users: {
+      /**
+       * Get all users with filtering and pagination
+       * Endpoint: GET /admin/users
+       * @throws MentaraApiError on request failure
+       */
+      async getList(params?: {
+        role?: string;
+        page?: number;
+        limit?: number;
+        search?: string;
+        status?: string;
+        sortBy?: string;
+        sortOrder?: 'asc' | 'desc';
+      }) {
+        try {
+          const { data } = await axios.get("/admin/users", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get specific user by ID
+       * Endpoint: GET /admin/users/:id
+       * @throws MentaraApiError on request failure
+       */
+      async getById(userId: string) {
+        try {
+          const { data } = await axios.get(`/admin/users/${userId}`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Suspend user
+       * Endpoint: PUT /admin/users/:id/suspend
+       * @throws MentaraApiError on request failure
+       */
+      async suspend(userId: string, suspensionData: { reason: string; duration?: number }) {
+        try {
+          const { data } = await axios.put(`/admin/users/${userId}/suspend`, suspensionData);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Unsuspend user
+       * Endpoint: PUT /admin/users/:id/unsuspend
+       * @throws MentaraApiError on request failure
+       */
+      async unsuspend(userId: string) {
+        try {
+          const { data } = await axios.put(`/admin/users/${userId}/unsuspend`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+    },
   };
 }
 
