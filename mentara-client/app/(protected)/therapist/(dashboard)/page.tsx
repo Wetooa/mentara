@@ -1,18 +1,16 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
 import DashboardGreeting from "@/components/therapist/dashboard/DashboardGreeting";
-import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
-import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
 import DashboardOverview from "@/components/therapist/dashboard/DashboardOverview";
+import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
+import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
 import { MatchedClientsSection } from "@/components/therapist/dashboard/MatchedClientsSection";
-import { DashboardCalendarWidget } from "@/components/therapist/dashboard/DashboardCalendarWidget";
-import { useTherapistDashboard } from "@/hooks/therapist/useTherapistDashboard";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTherapistDashboard } from "@/hooks/therapist/useTherapistDashboard";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function TherapistDashboardPage() {
   const router = useRouter();
@@ -168,8 +166,8 @@ export default function TherapistDashboardPage() {
                     {upcomingAppointments.length} appointment{upcomingAppointments.length !== 1 ? 's' : ''} scheduled
                   </p>
                 </div>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={handleScheduleClick}
                   className="border-amber-300 text-amber-700 hover:bg-amber-100"

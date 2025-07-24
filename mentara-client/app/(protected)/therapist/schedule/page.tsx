@@ -1,30 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+import { useState } from "react";
 // Alert components not used in this page
+import { TherapistAvailabilityCalendar } from "@/components/therapist/TherapistAvailabilityCalendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { useBookingRequests, useMeetings } from "@/hooks/booking/useBooking";
 import {
   Calendar,
-  BarChart3,
-  Inbox,
   Clock,
-  Settings,
-  Users,
-  TrendingUp,
+  Inbox,
+  Settings
 } from "lucide-react";
-import { GoogleCalendarView } from "@/components/calendar-02";
-import { MeetingDetailsSheet } from "@/components/MeetingDetailsSheet";
-import { BookingRequestsTab } from "@/components/BookingRequestsTab";
-import { TherapistAnalyticsDashboard } from "@/components/TherapistAnalyticsDashboard";
-import { UpcomingSessionsToday } from "@/components/UpcomingSessionsToday";
-import { TherapistAvailabilityCalendar } from "@/components/therapist/TherapistAvailabilityCalendar";
-import { useMeetings, useBookingRequests } from "@/hooks/booking/useBooking";
 import { toast } from "sonner";
 
 // Animation variants
@@ -103,7 +93,7 @@ export default function TherapistSchedulePage() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="container mx-auto p-6 space-y-6"
       variants={pageVariants}
       initial="hidden"
@@ -118,8 +108,8 @@ export default function TherapistSchedulePage() {
           </p>
         </div>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button 
-            onClick={() => setActiveTab("availability")} 
+          <Button
+            onClick={() => setActiveTab("availability")}
             className="bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-300"
           >
             <motion.div
@@ -229,7 +219,7 @@ export default function TherapistSchedulePage() {
                                     </div>
                                   </div>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-4 text-sm text-slate-600">
                                   <div className="flex items-center gap-1">
                                     <Clock className="h-3 w-3 text-blue-600" />
@@ -253,7 +243,7 @@ export default function TherapistSchedulePage() {
 
                               <div className="flex flex-col items-end gap-2">
                                 {getStatusBadge(meeting.status as unknown as MeetingStatus)}
-                                
+
                                 <div className="flex gap-1">
                                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                                     <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-300 hover:shadow-md transition-all duration-200">
@@ -266,8 +256,8 @@ export default function TherapistSchedulePage() {
                                     </Button>
                                   </motion.div>
                                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                                    <Button 
-                                      variant="outline" 
+                                    <Button
+                                      variant="outline"
                                       size="sm"
                                       onClick={() => handleCancelMeeting(meeting.id)}
                                       disabled={isCancelling}
@@ -279,7 +269,7 @@ export default function TherapistSchedulePage() {
                                 </div>
 
                                 {meeting.status === 'scheduled' && (
-                                  <Button 
+                                  <Button
                                     size="sm"
                                     onClick={() => handleUpdateMeetingStatus(meeting.id, MeetingStatus.CONFIRMED)}
                                     disabled={isUpdating}
@@ -290,7 +280,7 @@ export default function TherapistSchedulePage() {
                                 )}
 
                                 {meeting.status === 'confirmed' && (
-                                  <Button 
+                                  <Button
                                     size="sm"
                                     onClick={() => handleUpdateMeetingStatus(meeting.id, MeetingStatus.IN_PROGRESS)}
                                     disabled={isUpdating}
@@ -324,7 +314,7 @@ export default function TherapistSchedulePage() {
               </motion.div>
             )}
           </div>
-        </motion.div>
+        </TabsContent>
 
         {/* Availability Management Tab */}
         <TabsContent value="availability" className="space-y-6">
@@ -390,7 +380,7 @@ export default function TherapistSchedulePage() {
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-4">
                             <div className="text-sm text-slate-600 text-right">
                               <div className="font-medium">{new Date(meeting.startTime).toLocaleDateString()}</div>
@@ -412,7 +402,7 @@ export default function TherapistSchedulePage() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-    </motion.div>
+      </Tabs >
+    </motion.div >
   );
 }

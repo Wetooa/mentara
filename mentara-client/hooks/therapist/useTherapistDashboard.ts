@@ -14,32 +14,32 @@ type MeetingData = Meeting;
  */
 export function useTherapistDashboard() {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['therapists', 'dashboard'],
     queryFn: () => api.dashboard.getTherapistDashboard(),
     staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes (dashboard data changes frequently)
     retry: (failureCount, error: MentaraApiError) => {
       console.log(`🔄 [useTherapistDashboard] Retry attempt ${failureCount + 1} for error:`, error);
-      
+
       // Don't retry authentication errors
       if (error?.status === 401) {
         console.log(`❌ [useTherapistDashboard] Authentication error - no retry`);
         return false;
       }
-      
+
       // Don't retry authorization errors (user doesn't have therapist access)
       if (error?.status === 403) {
         console.log(`❌ [useTherapistDashboard] Authorization error - no retry`);
         return false;
       }
-      
+
       // Don't retry therapist data consistency errors (404 with specific message)
       if (error?.status === 404 && error?.message?.includes('Therapist record not found')) {
         console.log(`❌ [useTherapistDashboard] Data consistency error - no retry`);
         return false;
       }
-      
+
       // Don't retry client errors (400-499) except for temporary issues
       if (error?.status >= 400 && error?.status < 500) {
         // Retry rate limiting and temporary client errors
@@ -49,13 +49,13 @@ export function useTherapistDashboard() {
         console.log(`❌ [useTherapistDashboard] Client error ${error.status} - no retry`);
         return false;
       }
-      
+
       // Retry server errors (500+) and network errors
       if (error?.status >= 500 || error?.status === 0) {
         console.log(`🔄 [useTherapistDashboard] Server/network error - retry ${failureCount + 1}/3`);
         return failureCount < 3;
       }
-      
+
       // Default: retry up to 2 times for unknown errors
       return failureCount < 2;
     },
@@ -67,7 +67,7 @@ export function useTherapistDashboard() {
     },
     onError: (error: MentaraApiError) => {
       console.error(`❌ [useTherapistDashboard] Dashboard fetch failed:`, error);
-      
+
       // Enhanced error logging for debugging
       console.error(`❌ [useTherapistDashboard] Error details:`, {
         status: error.status,
@@ -75,7 +75,7 @@ export function useTherapistDashboard() {
         message: error.message,
         details: error.details,
       });
-      
+
       // Show user-friendly error messages based on error type
       if (error.status === 401) {
         toast.error('Please log in again to access your dashboard');
@@ -125,7 +125,7 @@ export function useTherapistDashboard() {
  */
 export function useTherapistStats() {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['therapists', 'dashboard', 'stats'],
     queryFn: () => api.dashboard.getTherapistMetrics(),
@@ -138,7 +138,7 @@ export function useTherapistStats() {
  */
 export function useTherapistUpcomingAppointments() {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['therapists', 'dashboard', 'appointments'],
     queryFn: () => api.meetings.getUpcomingMeetings(10),
@@ -150,13 +150,13 @@ export function useTherapistUpcomingAppointments() {
 /**
  * Hook for getting therapist meetings/sessions
  */
-export function useTherapistMeetings(params: { 
-  status?: string; 
-  limit?: number; 
-  offset?: number 
+export function useTherapistMeetings(params: {
+  status?: string;
+  limit?: number;
+  offset?: number
 } = {}) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['therapists', 'meetings', params],
     queryFn: () => api.booking.meetings.getAll(params),
@@ -169,7 +169,7 @@ export function useTherapistMeetings(params: {
  */
 export function useTherapistMeeting(meetingId: string | null) {
   const api = useApi();
-  
+
   return useQuery({
     queryKey: ['therapists', 'meetings', meetingId || ''],
     queryFn: () => api.meetings.getById(meetingId!),
@@ -184,34 +184,34 @@ export function useTherapistMeeting(meetingId: string | null) {
 export function useUpdateMeetingStatus() {
   const api = useApi();
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ 
-      meetingId, 
-      status 
-    }: { 
-      meetingId: string; 
-      status: 'scheduled' | 'started' | 'completed' | 'cancelled' 
+    mutationFn: ({
+      meetingId,
+      status
+    }: {
+      meetingId: string;
+      status: 'scheduled' | 'started' | 'completed' | 'cancelled'
     }) => api.meetings.updateMeetingStatus(meetingId, status),
     onMutate: async ({ meetingId, status }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ 
-        queryKey: ['therapists', 'meetings'] 
+      await queryClient.cancelQueries({
+        queryKey: ['therapists', 'meetings']
       });
-      
+
       // Optimistically update meeting status
       queryClient.setQueriesData(
         { queryKey: ['therapists', 'meetings'] },
         (oldData: MeetingData[] | undefined) => {
           if (Array.isArray(oldData)) {
-            return oldData.map(meeting => 
+            return oldData.map(meeting =>
               meeting.id === meetingId ? { ...meeting, status } : meeting
             );
           }
           return oldData;
         }
       );
-      
+
       // Also update specific meeting query
       queryClient.setQueryData(
         ['therapists', 'meetings', meetingId],
@@ -220,27 +220,27 @@ export function useUpdateMeetingStatus() {
     },
     onError: (error: MentaraApiError, { meetingId }) => {
       toast.error(error?.message || 'Failed to update meeting status');
-      
+
       // Invalidate queries to revert optimistic update
-      queryClient.invalidateQueries({ 
-        queryKey: ['therapists', 'meetings'] 
+      queryClient.invalidateQueries({
+        queryKey: ['therapists', 'meetings']
       });
     },
     onSuccess: (data, { status }) => {
-      const statusText = status === 'started' ? 'started' : 
-                        status === 'completed' ? 'completed' : 
-                        status === 'cancelled' ? 'cancelled' : 'updated';
+      const statusText = status === 'started' ? 'started' :
+        status === 'completed' ? 'completed' :
+          status === 'cancelled' ? 'cancelled' : 'updated';
       toast.success(`Meeting ${statusText} successfully!`);
-      
+
       // Invalidate dashboard data to refresh stats
-      queryClient.invalidateQueries({ 
-        queryKey: ['therapists', 'dashboard'] 
+      queryClient.invalidateQueries({
+        queryKey: ['therapists', 'dashboard']
       });
     },
     onSettled: () => {
       // Always refetch meetings
-      queryClient.invalidateQueries({ 
-        queryKey: ['therapists', 'meetings'] 
+      queryClient.invalidateQueries({
+        queryKey: ['therapists', 'meetings']
       });
     },
   });
@@ -252,28 +252,28 @@ export function useUpdateMeetingStatus() {
 export function useStartMeeting() {
   const api = useApi();
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (meetingId: string) => api.meetings.start(meetingId),
     onSuccess: (data, meetingId) => {
       toast.success('Meeting started successfully!');
-      
+
       // Update meeting status to 'started'
       queryClient.setQueriesData(
         { queryKey: ['therapists', 'meetings'] },
         (oldData: MeetingData[] | undefined) => {
           if (Array.isArray(oldData)) {
-            return oldData.map(meeting => 
+            return oldData.map(meeting =>
               meeting.id === meetingId ? { ...meeting, status: 'started' } : meeting
             );
           }
           return oldData;
         }
       );
-      
+
       // Invalidate dashboard
-      queryClient.invalidateQueries({ 
-        queryKey: ['therapists', 'dashboard'] 
+      queryClient.invalidateQueries({
+        queryKey: ['therapists', 'dashboard']
       });
     },
     onError: (error: MentaraApiError) => {
@@ -287,17 +287,17 @@ export function useStartMeeting() {
  */
 export function useRefreshDashboard() {
   const queryClient = useQueryClient();
-  
+
   return () => {
     // Invalidate all dashboard-related queries
-    queryClient.invalidateQueries({ 
-      queryKey: ['therapists', 'dashboard'] 
+    queryClient.invalidateQueries({
+      queryKey: ['therapists', 'dashboard']
     });
-    
-    queryClient.invalidateQueries({ 
-      queryKey: ['therapists', 'meetings'] 
+
+    queryClient.invalidateQueries({
+      queryKey: ['therapists', 'meetings']
     });
-    
+
     toast.success('Dashboard refreshed!');
   };
 }
@@ -308,7 +308,7 @@ export function useRefreshDashboard() {
 export function usePrefetchMeeting() {
   const queryClient = useQueryClient();
   const api = useApi();
-  
+
   return (meetingId: string) => {
     queryClient.prefetchQuery({
       queryKey: ['therapists', 'meetings', meetingId],
