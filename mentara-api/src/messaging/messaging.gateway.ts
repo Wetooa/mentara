@@ -224,26 +224,50 @@ export class MessagingGateway
    * Broadcast message to conversation participants
    */
   broadcastMessage(conversationId: string, messageData: any): void {
-    const room = this.getConversationRoom(conversationId);
-    this.logger.log(`🚀 [BROADCAST] Broadcasting message to conversation room: ${room}`);
-    this.logger.debug(`📨 [BROADCAST] Message data:`, {
-      messageId: messageData?.message?.id,
-      senderId: messageData?.message?.senderId,
-      content: messageData?.message?.content?.substring(0, 50),
-      eventType: 'new_message'
-    });
+    try {
+      const room = this.getConversationRoom(conversationId);
+      this.logger.log(`🚀 [BROADCAST] Broadcasting message to conversation room: ${room}`);
+      this.logger.debug(`📨 [BROADCAST] Message data:`, {
+        messageId: messageData?.message?.id,
+        senderId: messageData?.message?.senderId,
+        content: messageData?.message?.content?.substring(0, 50),
+        eventType: 'new_message'
+      });
 
-    // Get connected sockets in this room for debugging
-    const socketsInRoom = this.server.sockets.adapter.rooms.get(room);
-    this.logger.log(`👥 [BROADCAST] Sockets in room ${room}: ${socketsInRoom?.size || 0}`);
+      // Check if server and adapter are available before accessing rooms
+      if (!this.server) {
+        this.logger.error(`❌ [BROADCAST] WebSocket server not available`);
+        return;
+      }
 
-    this.server.to(room).emit('new_message', {
-      ...messageData,
-      eventType: 'new_message',
-      timestamp: new Date(),
-    });
-    
-    this.logger.log(`✅ [BROADCAST] Message broadcasted successfully to room: ${room}`);
+      if (!this.server.sockets) {
+        this.logger.error(`❌ [BROADCAST] WebSocket sockets not available`);
+        return;
+      }
+
+      // Get connected sockets in this room for debugging (with safe access)
+      const socketsInRoom = this.server.sockets.adapter?.rooms?.get(room);
+      this.logger.log(`👥 [BROADCAST] Sockets in room ${room}: ${socketsInRoom?.size || 0}`);
+
+      // Check if there are any sockets to broadcast to
+      if (!socketsInRoom || socketsInRoom.size === 0) {
+        this.logger.warn(`⚠️ [BROADCAST] No sockets connected to room ${room}`);
+      }
+
+      this.server.to(room).emit('new_message', {
+        ...messageData,
+        eventType: 'new_message',
+        timestamp: new Date(),
+      });
+      
+      this.logger.log(`✅ [BROADCAST] Message broadcasted successfully to room: ${room}`);
+    } catch (error) {
+      this.logger.error(`💥 [BROADCAST] Error broadcasting message:`, {
+        error: error.message,
+        conversationId,
+        messageData: messageData?.message?.id
+      });
+    }
   }
 
   /**
@@ -302,6 +326,11 @@ export class MessagingGateway
       return;
     }
 
+    if (!this.server) {
+      this.logger.error(`❌ [ROOM JOIN] WebSocket server not available`);
+      return;
+    }
+
     const conversationRoom = this.getConversationRoom(conversationId);
     this.server.in(socketId).socketsJoin(conversationRoom);
 
@@ -310,8 +339,8 @@ export class MessagingGateway
       connectedUser.rooms.add(conversationRoom);
     }
 
-    // Log room membership after joining
-    const socketsInRoom = this.server.sockets.adapter.rooms.get(conversationRoom);
+    // Log room membership after joining (with safe access)
+    const socketsInRoom = this.server.sockets?.adapter?.rooms?.get(conversationRoom);
     this.logger.log(
       `✅ [ROOM JOIN] User ${userId} (socket: ${socketId}) joined room: ${conversationRoom}. Total in room: ${socketsInRoom?.size || 0}`,
     );
