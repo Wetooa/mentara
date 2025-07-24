@@ -1,9 +1,15 @@
-import { X, Upload } from "lucide-react";
-import { useState, useEffect } from "react";
+import { X, Upload, FileText, Eye, Trash2, Plus } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useApi } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { WorksheetCreateInputDto } from "@/types/api/worksheets";
 import { useTherapistAuth } from "@/hooks/auth/therapist/useTherapistAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 interface CreateWorksheetModalProps {
   isOpen: boolean;
@@ -27,6 +33,7 @@ export default function CreateWorksheetModal({
   const [formError, setFormError] = useState<string | null>(null);
   const [materials, setMaterials] = useState<File[]>([]);
   const [materialErrors, setMaterialErrors] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch patients directly from API service
   useEffect(() => {
@@ -57,6 +64,9 @@ export default function CreateWorksheetModal({
       setInstructions("");
       setDueDate("");
       setSelectedPatient("");
+      setMaterials([]);
+      setMaterialErrors(null);
+      toast.success("Worksheet created successfully!");
       onClose();
     },
     onError: (err: any) => {
@@ -64,6 +74,83 @@ export default function CreateWorksheetModal({
       setFormError(err?.message || "Failed to create worksheet");
     },
   });
+
+  // File management functions
+  const handleAddFiles = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Validate files
+    const validFiles: File[] = [];
+    const invalidFiles: string[] = [];
+
+    files.forEach(file => {
+      const validation = validateFile(file);
+      if (validation.isValid) {
+        validFiles.push(file);
+      } else {
+        invalidFiles.push(`${file.name}: ${validation.error}`);
+      }
+    });
+
+    if (invalidFiles.length > 0) {
+      setMaterialErrors(invalidFiles.join(', '));
+    } else {
+      setMaterialErrors(null);
+    }
+
+    // Add valid files to existing materials (avoiding duplicates)
+    setMaterials(prev => {
+      const existingNames = prev.map(f => f.name);
+      const newFiles = validFiles.filter(f => !existingNames.includes(f.name));
+      return [...prev, ...newFiles];
+    });
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const validateFile = (file: File): { isValid: boolean; error?: string } => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/jpeg',
+      'image/jpg',
+      'image/png'
+    ];
+
+    if (file.size > maxSize) {
+      return { isValid: false, error: 'File size must be less than 5MB' };
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      return { isValid: false, error: 'Invalid file type. Only PDF, DOC, DOCX, JPG, PNG allowed' };
+    }
+
+    return { isValid: true };
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setMaterials(prev => prev.filter((_, i) => i !== index));
+    setMaterialErrors(null);
+  };
+
+  const handleViewFile = (file: File) => {
+    const url = URL.createObjectURL(file);
+    window.open(url, '_blank');
+    // Clean up the URL after a short delay
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,152 +187,179 @@ export default function CreateWorksheetModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[98vh] sm:max-h-[90vh] overflow-y-auto">
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          onChange={handleFileSelection}
+          className="hidden"
+        />
+
         <div className="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
             Create New Worksheet
           </h2>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 focus:outline-none p-1"
             disabled={submitting}
           >
-            <X className="h-4 w-4 sm:h-5 sm:w-5" />
-          </button>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="p-4 sm:p-6">
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-6">
-              {/* Worksheet Title */}
-              <div>
-                <label
-                  htmlFor="title"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Worksheet Title *
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#436B00] focus:border-transparent"
-                  placeholder="Enter worksheet title"
-                  required
-                  disabled={submitting}
-                />
-              </div>
-
-              {/* Patient Selection */}
-              <div>
-                <label
-                  htmlFor="patient"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Assign to Patient *
-                </label>
-                <select
-                  id="patient"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#436B00] focus:border-transparent"
-                  value={selectedPatient}
-                  onChange={e => {
-                    setSelectedPatient(e.target.value);
-                    console.log('Selected patient:', e.target.value);
-                  }}
-                  disabled={patientsLoading || submitting}
-                  required
-                >
-                  <option value="" disabled>{patientsLoading ? "Loading patients..." : "Select a patient"}</option>
-                  {patients && patients.length > 0 && patients.map((patient: any) => (
-                    <option key={patient.userId} value={String(patient.userId)}>
-                      {patient.user.firstName + " " + patient.user.lastName || `Unnamed Patient (${patient.id})`}
-                    </option>
-                  ))}
-                </select>
-                {patientsError && <div className="text-red-500 text-xs mt-1">{patientsError}</div>}
-              </div>
-
-              {/* Due Date */}
-              <div>
-                <label
-                  htmlFor="dueDate"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Due Date *
-                </label>
-                <input
-                  type="date"
-                  id="dueDate"
-                  value={dueDate}
-                  onChange={e => setDueDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#436B00] focus:border-transparent"
-                  required
-                  disabled={submitting}
-                />
-              </div>
-
-              {/* Instructions */}
-              <div>
-                <label
-                  htmlFor="instructions"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Instructions
-                </label>
-                <textarea
-                  id="instructions"
-                  rows={4}
-                  value={instructions}
-                  onChange={e => setInstructions(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#436B00] focus:border-transparent"
-                  placeholder="Provide instructions for the patient..."
-                  disabled={submitting}
-                ></textarea>
-              </div>
-
-              {/* Reference Materials */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Reference Materials
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={e => {
-                    const files = Array.from(e.target.files || []);
-                    setMaterials(files);
-                  }}
-                  disabled={submitting}
-                  className="mb-2"
-                />
-                {materials.length > 0 && (
-                  <ul className="text-xs text-gray-600 mb-2">
-                    {materials.map((file, i) => <li key={i}>{file.name}</li>)}
-                  </ul>
-                )}
-                {materialErrors && <div className="text-red-500 text-xs">{materialErrors}</div>}
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Worksheet Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Worksheet Title *</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Enter worksheet title"
+                required
+                disabled={submitting}
+              />
             </div>
 
-            {formError && <div className="text-red-500 text-sm mt-4">{formError}</div>}
+            {/* Patient Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="patient">Assign to Patient *</Label>
+              <select
+                id="patient"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                value={selectedPatient}
+                onChange={e => setSelectedPatient(e.target.value)}
+                disabled={patientsLoading || submitting}
+                required
+              >
+                <option value="" disabled>
+                  {patientsLoading ? "Loading patients..." : "Select a patient"}
+                </option>
+                {patients && patients.length > 0 && patients.map((patient: any) => (
+                  <option key={patient.userId} value={String(patient.userId)}>
+                    {patient.user.firstName + " " + patient.user.lastName || `Unnamed Patient (${patient.id})`}
+                  </option>
+                ))}
+              </select>
+              {patientsError && (
+                <p className="text-red-500 text-sm">{patientsError}</p>
+              )}
+            </div>
 
-            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-end gap-3 sm:gap-0 sm:space-x-3">
-              <button
+            {/* Due Date */}
+            <div className="space-y-2">
+              <Label htmlFor="dueDate">Due Date *</Label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
+                required
+                disabled={submitting}
+              />
+            </div>
+
+            {/* Instructions */}
+            <div className="space-y-2">
+              <Label htmlFor="instructions">Instructions</Label>
+              <Textarea
+                id="instructions"
+                rows={4}
+                value={instructions}
+                onChange={e => setInstructions(e.target.value)}
+                placeholder="Provide instructions for the patient..."
+                disabled={submitting}
+              />
+            </div>
+
+            {/* Reference Materials */}
+            <div className="space-y-3">
+              <Label>Reference Materials</Label>
+              
+              {/* Add Files Button */}
+              <Button
                 type="button"
+                variant="outline"
+                onClick={handleAddFiles}
+                disabled={submitting}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Reference Files
+              </Button>
+
+              {/* File List */}
+              {materials.length > 0 && (
+                <div className="space-y-2">
+                  {materials.map((file, index) => (
+                    <Card key={index}>
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <FileText className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <p className="text-sm font-medium">{file.name}</p>
+                              <p className="text-xs text-gray-500">
+                                {(file.size / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewFile(file)}
+                              disabled={submitting}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveFile(index)}
+                              disabled={submitting}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {materialErrors && (
+                <p className="text-red-500 text-sm">{materialErrors}</p>
+              )}
+            </div>
+
+            {formError && (
+              <p className="text-red-500 text-sm">{formError}</p>
+            )}
+
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-0 sm:space-x-3">
+              <Button
+                type="button"
+                variant="outline"
                 onClick={onClose}
-                className="order-2 sm:order-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#436B00] focus:ring-offset-2"
                 disabled={submitting}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="order-1 sm:order-2 px-4 py-2 bg-[#436B00] text-white rounded-md hover:bg-[#129316] focus:outline-none focus:ring-2 focus:ring-[#436B00] focus:ring-offset-2"
                 disabled={submitting}
               >
                 {submitting ? "Creating..." : "Create Worksheet"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
