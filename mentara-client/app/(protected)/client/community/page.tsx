@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import CommunitySidebar from "@/components/community/Sidebar";
 import CommentSection from "@/components/community/CommentSection";
@@ -29,7 +30,8 @@ import {
   X,
   Edit3,
   Trash2,
-  MoreHorizontal
+  MoreHorizontal,
+  Eye
 } from "lucide-react";
 import {
   ResizableHandle,
@@ -87,9 +89,15 @@ export default function UserCommunity() {
   } = useCommunityPage();
 
   const { user } = useAuth();
+  const router = useRouter();
 
   // Mobile sidebar visibility state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Navigation function for viewing post details
+  const handleViewPost = (postId: string) => {
+    router.push(`/client/community/posts/${postId}`);
+  };
 
   // Enhanced community data with new hooks
   // const { stats: communityStats } = useCommunityStats();
@@ -686,6 +694,16 @@ export default function UserCommunity() {
                                     {commentCount === 1 ? 'comment' : 'comments'}
                                   </span>
                                 </div>
+
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewPost((post as unknown as {id?: string})?.id || '')}
+                                  className="flex items-center gap-2 bg-white/60 hover:bg-community-calm/10 text-community-calm-foreground hover:text-community-accent border-2 border-community-calm/30 hover:border-community-accent/50 backdrop-blur-sm transition-all duration-200"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  <span className="font-medium">View Post</span>
+                                </Button>
                               </div>
                               
                               <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-community-soothing/20 border border-community-soothing/30">

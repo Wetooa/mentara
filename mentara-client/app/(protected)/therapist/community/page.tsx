@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import CommunitySidebar from "@/components/community/Sidebar";
 import CommentSection from "@/components/community/CommentSection";
@@ -32,7 +33,8 @@ import {
   AlertCircle,
   Activity,
   Stethoscope,
-  UserCheck
+  UserCheck,
+  Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/api/communities";
@@ -90,9 +92,15 @@ export default function TherapistCommunity() {
 
   // Enhanced community stats for therapists
   const { stats: communityStats } = useCommunityStats();
+  const router = useRouter();
 
   // Mobile sidebar visibility state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Navigation function for viewing post details
+  const handleViewPost = (postId: string) => {
+    router.push(`/therapist/community/posts/${postId}`);
+  };
 
   const breadcrumb = getRoomBreadcrumb();
 
@@ -400,6 +408,16 @@ export default function TherapistCommunity() {
                               <MessageCircle className="h-4 w-4" />
                               <span>{post._count.comments}</span>
                             </div>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewPost(post.id)}
+                              className="flex items-center gap-2 text-neutral-600 hover:text-blue-600"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span>View Post</span>
+                            </Button>
                           </div>
                           
                           <CommentSection postId={post.id} />

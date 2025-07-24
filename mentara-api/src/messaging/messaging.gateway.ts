@@ -74,6 +74,34 @@ export class MessagingGateway
     this.logger.log('✅ WebSocket server initialized successfully');
     this.logger.log(`🔌 WebSocket namespace: /messaging`);
     this.logger.log(`🌐 Server ready for connections`);
+    
+    // Check server components
+    this.logger.log(`🔍 Server components check:`);
+    this.logger.log(`   - Server exists: ${!!this.server}`);
+    this.logger.log(`   - Sockets exists: ${!!this.server?.sockets}`);
+    this.logger.log(`   - Adapter exists: ${!!this.server?.sockets?.adapter}`);
+    this.logger.log(`   - Rooms exists: ${!!this.server?.sockets?.adapter?.rooms}`);
+    
+    // Add server event listeners for debugging
+    if (this.server) {
+      this.server.on('connection', (socket) => {
+        this.logger.debug(`🔗 Socket connected: ${socket.id}`);
+      });
+      
+      this.server.on('disconnect', (socket) => {
+        this.logger.debug(`🔌 Socket disconnected: ${socket.id}`);
+      });
+    }
+  }
+
+  // Helper method to check server readiness
+  private isServerReady(): boolean {
+    return !!(this.server && this.server.sockets);
+  }
+
+  // Helper method to check adapter readiness
+  private isAdapterReady(): boolean {
+    return !!(this.server && this.server.sockets && this.server.sockets.adapter && this.server.sockets.adapter.rooms);
   }
 
   async handleConnection(client: AuthenticatedSocket) {
@@ -378,15 +406,39 @@ export class MessagingGateway
       this.logger.error('WebSocket server not initialized - cannot broadcast message');
       return;
     }
+
+    // Check if server sockets are available
+    if (!this.server.sockets) {
+      this.logger.error('WebSocket server sockets not available - cannot broadcast message');
+      return;
+    }
     
-    // Check how many sockets are in the conversation room
-    const conversationRoom = this.server.sockets.adapter.rooms.get(conversationId);
-    const socketsInRoom = conversationRoom ? conversationRoom.size : 0;
-    this.logger.debug(`Broadcasting to ${socketsInRoom} sockets in conversation ${conversationId}`);
-    
-    // Emit to the conversation room
-    this.server.to(conversationId).emit('new_message', message);
-    this.logger.debug(`Message broadcasted to conversation ${conversationId}`);
+    try {
+      // Safe check for adapter and rooms (defensive programming)
+      let socketsInRoom = 0;
+      if (this.server.sockets.adapter && this.server.sockets.adapter.rooms) {
+        const conversationRoom = this.server.sockets.adapter.rooms.get(conversationId);
+        socketsInRoom = conversationRoom ? conversationRoom.size : 0;
+        this.logger.debug(`Broadcasting to ${socketsInRoom} sockets in conversation ${conversationId}`);
+      } else {
+        this.logger.warn('WebSocket adapter or rooms not ready, broadcasting anyway');
+      }
+      
+      // Emit to the conversation room - this should work even if adapter.rooms is not ready
+      this.server.to(conversationId).emit('new_message', message);
+      this.logger.debug(`Message broadcasted to conversation ${conversationId}`);
+      
+    } catch (error) {
+      this.logger.error(`Error broadcasting message to conversation ${conversationId}:`, error);
+      
+      // Fallback: try broadcasting to all connected sockets if room-based broadcasting fails
+      try {
+        this.logger.warn('Attempting fallback broadcast to all sockets');
+        this.server.emit('new_message', { ...message, conversationId });
+      } catch (fallbackError) {
+        this.logger.error('Fallback broadcast also failed:', fallbackError);
+      }
+    }
   }
 
   // Broadcast message update (edit/delete)
@@ -395,10 +447,19 @@ export class MessagingGateway
     messageId: string,
     update: any,
   ) {
-    this.server.to(conversationId).emit('message_updated', {
-      messageId,
-      ...update,
-    });
+    if (!this.server?.sockets) {
+      this.logger.error('WebSocket server not available for message update broadcast');
+      return;
+    }
+    
+    try {
+      this.server.to(conversationId).emit('message_updated', {
+        messageId,
+        ...update,
+      });
+    } catch (error) {
+      this.logger.error(`Error broadcasting message update:`, error);
+    }
   }
 
   // Broadcast read receipt
@@ -407,19 +468,37 @@ export class MessagingGateway
     messageId: string,
     userId: string,
   ) {
-    this.server.to(conversationId).emit('message_read', {
-      messageId,
-      userId,
-      readAt: new Date(),
-    });
+    if (!this.server?.sockets) {
+      this.logger.error('WebSocket server not available for read receipt broadcast');
+      return;
+    }
+    
+    try {
+      this.server.to(conversationId).emit('message_read', {
+        messageId,
+        userId,
+        readAt: new Date(),
+      });
+    } catch (error) {
+      this.logger.error(`Error broadcasting read receipt:`, error);
+    }
   }
 
   // Broadcast message reaction
   broadcastReaction(conversationId: string, messageId: string, reaction: any) {
-    this.server.to(conversationId).emit('message_reaction', {
-      messageId,
-      reaction,
-    });
+    if (!this.server?.sockets) {
+      this.logger.error('WebSocket server not available for reaction broadcast');
+      return;
+    }
+    
+    try {
+      this.server.to(conversationId).emit('message_reaction', {
+        messageId,
+        reaction,
+      });
+    } catch (error) {
+      this.logger.error(`Error broadcasting reaction:`, error);
+    }
   }
 
   // Private helper methods
@@ -491,28 +570,41 @@ export class MessagingGateway
     userId: string,
     status: 'online' | 'offline',
   ) {
-    // Get all conversations this user participates in
-    const conversations = await this.prisma.conversation.findMany({
-      where: {
-        participants: {
-          some: {
-            userId,
-            isActive: true,
+    if (!this.server?.sockets) {
+      this.logger.error('WebSocket server not available for user status broadcast');
+      return;
+    }
+
+    try {
+      // Get all conversations this user participates in
+      const conversations = await this.prisma.conversation.findMany({
+        where: {
+          participants: {
+            some: {
+              userId,
+              isActive: true,
+            },
           },
         },
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    // Broadcast status to all conversation rooms
-    for (const conversation of conversations) {
-      this.server.to(conversation.id).emit('user_status_changed', {
-        userId,
-        status,
-        timestamp: new Date(),
+        select: {
+          id: true,
+        },
       });
+
+      // Broadcast status to all conversation rooms
+      for (const conversation of conversations) {
+        try {
+          this.server.to(conversation.id).emit('user_status_changed', {
+            userId,
+            status,
+            timestamp: new Date(),
+          });
+        } catch (error) {
+          this.logger.error(`Error broadcasting user status to conversation ${conversation.id}:`, error);
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Error broadcasting user status for user ${userId}:`, error);
     }
   }
 
