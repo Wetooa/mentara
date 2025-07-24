@@ -4,7 +4,23 @@
  * This file contains configurations for pre-generated communities,
  * particularly illness-specific communities that are created during
  * database seeding and application setup.
+ * 
+ * IMPORTANT: This file now uses centralized community definitions to ensure
+ * perfect alignment between questionnaires, AI recommendations, and database seeding.
  */
+
+import { 
+  CANONICAL_COMMUNITIES, 
+  getAllCanonicalCommunities, 
+  getCommunityBySlug as getCanonicalCommunityBySlug,
+  GENERAL_COMMUNITIES,
+  CommunityDefinition
+} from '../common/constants/communities';
+import { 
+  CANONICAL_QUESTIONNAIRE_IDS,
+  CanonicalQuestionnaireId,
+  QUESTIONNAIRE_DISPLAY_NAMES
+} from '../common/constants/disorders';
 
 export interface CommunityConfig {
   name: string;
@@ -17,107 +33,15 @@ export interface CommunityConfig {
  * Predefined illness communities that are automatically created
  * during database seeding. These communities provide focused
  * support spaces for users with specific mental health conditions.
+ * 
+ * NOTE: Now sourced from centralized canonical definitions
  */
-export const ILLNESS_COMMUNITIES: CommunityConfig[] = [
-  {
-    name: 'Stress Support Community',
-    description:
-      'A supportive community for people dealing with stress, pressure, and life challenges. Share coping strategies and find understanding.',
-    slug: 'stress-support',
-    illness: 'Stress',
-  },
-  {
-    name: 'Anxiety Warriors',
-    description:
-      'A safe space for individuals with anxiety disorders. Connect with others who understand the challenges of living with anxiety.',
-    slug: 'anxiety-warriors',
-    illness: 'Anxiety',
-  },
-  {
-    name: 'Depression Support Network',
-    description:
-      'A compassionate community for those dealing with depression. Find hope, support, and understanding from people who care.',
-    slug: 'depression-support',
-    illness: 'Depression',
-  },
-  {
-    name: 'Sleep & Insomnia Support',
-    description:
-      'A community for people struggling with sleep issues and insomnia. Share tips and find solutions for better sleep.',
-    slug: 'insomnia-support',
-    illness: 'Insomnia',
-  },
-  {
-    name: 'Panic Disorder Support',
-    description:
-      'A supportive community for individuals with panic disorder. Learn coping strategies and find understanding.',
-    slug: 'panic-disorder-support',
-    illness: 'Panic Disorder',
-  },
-  {
-    name: 'Bipolar Support Circle',
-    description:
-      'A community for individuals with bipolar disorder and their loved ones. Share experiences and find support.',
-    slug: 'bipolar-support',
-    illness: 'Bipolar Disorder',
-  },
-  {
-    name: 'OCD Support Community',
-    description:
-      'A safe space for individuals with obsessive-compulsive disorder. Connect with others who understand OCD challenges.',
-    slug: 'ocd-support',
-    illness: 'OCD',
-  },
-  {
-    name: 'PTSD Support Network',
-    description:
-      'A compassionate community for individuals with post-traumatic stress disorder. Find healing and support.',
-    slug: 'ptsd-support',
-    illness: 'PTSD',
-  },
-  {
-    name: 'Social Anxiety Support',
-    description:
-      'A community for people with social anxiety. Build confidence and find understanding from others who share similar experiences.',
-    slug: 'social-anxiety-support',
-    illness: 'Social Anxiety',
-  },
-  {
-    name: 'Phobia Support Group',
-    description:
-      'A supportive community for individuals dealing with specific phobias. Face fears together and find coping strategies.',
-    slug: 'phobia-support',
-    illness: 'Phobia',
-  },
-  {
-    name: 'Burnout Recovery',
-    description:
-      'A community for people experiencing burnout and work-related stress. Find balance and recovery strategies.',
-    slug: 'burnout-recovery',
-    illness: 'Burnout',
-  },
-  {
-    name: 'Eating Disorder Recovery',
-    description:
-      'A supportive community for individuals with eating disorders. Find healing, understanding, and recovery support.',
-    slug: 'eating-disorder-recovery',
-    illness: 'Eating Disorder',
-  },
-  {
-    name: 'ADHD Support Community',
-    description:
-      'A community for individuals with ADHD/ADD. Share strategies, experiences, and find understanding.',
-    slug: 'adhd-support',
-    illness: 'ADHD',
-  },
-  {
-    name: 'Substance Recovery Support',
-    description:
-      'A supportive community for individuals dealing with substance or alcohol use issues. Find recovery and healing.',
-    slug: 'substance-recovery-support',
-    illness: 'Substance Use',
-  },
-];
+export const ILLNESS_COMMUNITIES: CommunityConfig[] = getAllCanonicalCommunities().map(community => ({
+  name: community.name,
+  description: community.description,
+  slug: community.slug,
+  illness: QUESTIONNAIRE_DISPLAY_NAMES[community.id]
+}));
 
 // Keep legacy export for backward compatibility
 export const COMMUNITIES = ILLNESS_COMMUNITIES;
@@ -128,7 +52,16 @@ export const COMMUNITIES = ILLNESS_COMMUNITIES;
  * @returns The community configuration or undefined if not found
  */
 export function getCommunityBySlug(slug: string): CommunityConfig | undefined {
-  return ILLNESS_COMMUNITIES.find((community) => community.slug === slug);
+  const canonicalCommunity = getCanonicalCommunityBySlug(slug);
+  if (canonicalCommunity) {
+    return {
+      name: canonicalCommunity.name,
+      description: canonicalCommunity.description,
+      slug: canonicalCommunity.slug,
+      illness: QUESTIONNAIRE_DISPLAY_NAMES[canonicalCommunity.id]
+    };
+  }
+  return undefined;
 }
 
 /**
@@ -165,8 +98,28 @@ export function getAllIllnessTypes(): string[] {
 /**
  * Mapping between AI disorder predictions and community slugs
  * Used for automatic community recommendations based on assessment results
+ * 
+ * UPDATED: Now uses canonical questionnaire IDs instead of Has_* format
  */
 export const AI_DISORDER_TO_COMMUNITY_MAPPING: Record<string, string[]> = {
+  // Primary mappings based on canonical questionnaire IDs
+  depression: ['depression-support'],
+  anxiety: ['anxiety-warriors'],
+  'social-phobia': ['social-anxiety-support', 'anxiety-warriors'],
+  ptsd: ['ptsd-support'],
+  'panic-disorder': ['panic-disorder-support', 'anxiety-warriors'],
+  'mood-disorder': ['bipolar-support'],
+  'obsessional-compulsive': ['ocd-support'],
+  insomnia: ['insomnia-support'],
+  stress: ['stress-support', 'burnout-recovery'],
+  burnout: ['burnout-recovery', 'stress-support'],
+  'binge-eating': ['eating-disorder-recovery'],
+  adhd: ['adhd-support'],
+  alcohol: ['alcohol-recovery-support'],
+  'drug-abuse': ['substance-recovery-support'],
+  phobia: ['phobia-support'],
+  
+  // Legacy mappings for backward compatibility (to be phased out)
   Has_Depression: ['depression-support'],
   Has_Anxiety: ['anxiety-warriors'],
   Has_Social_Anxiety: ['social-anxiety-support', 'anxiety-warriors'],
@@ -179,7 +132,7 @@ export const AI_DISORDER_TO_COMMUNITY_MAPPING: Record<string, string[]> = {
   Has_Burnout: ['burnout-recovery', 'stress-support'],
   Has_Binge_Eating: ['eating-disorder-recovery'],
   Has_ADHD: ['adhd-support'],
-  Has_Alcohol_Problem: ['substance-recovery-support'],
+  Has_Alcohol_Problem: ['alcohol-recovery-support'],
   Has_Drug_Problem: ['substance-recovery-support'],
   Has_Phobia: ['phobia-support'],
   Has_Agoraphobia: ['phobia-support', 'social-anxiety-support'],

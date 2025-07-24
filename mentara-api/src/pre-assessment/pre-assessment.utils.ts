@@ -10,7 +10,7 @@ export interface QuestionnaireScores {
   [questionnaireName: string]: QuestionnaireScore;
 }
 
-interface SeverityLevel {
+export interface SeverityLevel {
   range: [number, number];
   label: string;
 }
@@ -356,12 +356,12 @@ export function processPreAssessmentAnswers(flatAnswers: number[]): {
   severityLevels: Record<string, string>;
 } {
   const calculatedScores = calculateAllScoresFromFlatArray(flatAnswers);
-  
+
   const scores = Object.fromEntries(
     Object.entries(calculatedScores).map(([key, value]) => [key, value.score]),
   );
-  
+
   const severityLevels = generateSeverityLevels(calculatedScores);
-  
+
   return { scores, severityLevels };
 }

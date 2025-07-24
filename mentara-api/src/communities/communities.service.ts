@@ -519,20 +519,67 @@ export class CommunitiesService {
   }
 
   async getRecommendedCommunities(userId: string): Promise<CommunityWithRoomGroupsResponse[]> {
-    // For now, return communities the user is not yet a member of
-    // This can be enhanced with actual recommendation logic later
+    // Get user's current communities to exclude
     const userCommunityIds = await this.prisma.membership.findMany({
       where: { userId },
       select: { communityId: true },
     });
-
     const excludeIds = userCommunityIds.map(m => m.communityId);
 
+    // Get user's preassessment data if available
+    const user = await this.prisma.client.findUnique({
+      where: { userId },
+      include: {
+        preAssessment: {
+          select: {
+            severityLevels: true,
+            aiEstimate: true,
+            scores: true,
+          },
+        },
+      },
+    });
+
+    // If user has processed preassessment data, use it for personalized recommendations
+    if (user?.preAssessment?.severityLevels) {
+      try {
+        const severityLevels = user.preAssessment.severityLevels as Record<string, string>;
+        
+        // Map severity levels to community slugs for targeted recommendations
+        const recommendedSlugs = this.mapSeverityLevelsToCommunities(severityLevels);
+        
+        if (recommendedSlugs.length > 0) {
+          // Get personalized community recommendations based on assessment
+          const personalizedCommunities = await this.prisma.community.findMany({
+            where: {
+              slug: { in: recommendedSlugs },
+              id: { notIn: excludeIds },
+            },
+            include: {
+              roomGroups: {
+                include: {
+                  rooms: true,
+                },
+                orderBy: { order: 'asc' },
+              },
+            },
+            take: 5,
+          });
+
+          if (personalizedCommunities.length > 0) {
+            return personalizedCommunities;
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to process preassessment data for user ${userId}:`, error);
+        // Fall through to basic recommendations
+      }
+    }
+
+    // Fallback to recent communities for users without preassessment or when processing fails
     return await this.prisma.community.findMany({
       where: {
-        id: {
-          notIn: excludeIds,
-        },
+        id: { notIn: excludeIds },
       },
       include: {
         roomGroups: {
@@ -545,6 +592,43 @@ export class CommunitiesService {
       take: 5,
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  /**
+   * Map severity levels from stored preassessment to community slugs
+   */
+  private mapSeverityLevelsToCommunities(severityLevels: Record<string, string>): string[] {
+    const communityMap: Record<string, string> = {
+      'PHQ-9': 'depression-support',
+      'GAD-7': 'anxiety-warriors', 
+      'ASRS': 'adhd-support',
+      'AUDIT': 'alcohol-recovery-support',
+      'BES': 'eating-disorder-recovery',
+      'DAST-10': 'substance-recovery-support',
+      'ISI': 'insomnia-support',
+      'MBI': 'burnout-recovery',
+      'MDQ': 'bipolar-support',
+      'OCI-R': 'ocd-support',
+      'PCL-5': 'ptsd-support',
+      'PDSS': 'panic-disorder-support',
+      'PSS': 'stress-support',
+      'SPIN': 'social-anxiety-support',
+      'Phobia': 'phobia-support'
+    };
+
+    const recommendedSlugs: string[] = [];
+
+    // Recommend communities for conditions that are mild or above
+    Object.entries(severityLevels).forEach(([questionnaire, severity]) => {
+      if (severity && severity !== 'subclinical' && severity !== 'minimal') {
+        const communitySlug = communityMap[questionnaire];
+        if (communitySlug) {
+          recommendedSlugs.push(communitySlug);
+        }
+      }
+    });
+
+    return recommendedSlugs;
   }
 
   async getRecentActivity(userId: string) {

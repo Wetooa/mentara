@@ -10,6 +10,9 @@ import {
   HttpStatus,
   HttpCode,
   ParseUUIDPipe,
+  BadRequestException,
+  InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -46,6 +49,8 @@ import type {
 @UseGuards(JwtAuthGuard, RoleBasedAccessGuard)
 @ApiBearerAuth()
 export class CommunityRecommendationController {
+  private readonly logger = new Logger(CommunityRecommendationController.name);
+
   constructor(
     private readonly communityRecommendationService: CommunityRecommendationService,
   ) {}
@@ -436,18 +441,94 @@ export class CommunityRecommendationController {
     @Body() dto: { communitySlugs: string[] },
   ) {
     try {
+      // Input validation
+      if (!dto.communitySlugs || !Array.isArray(dto.communitySlugs)) {
+        this.logger.warn(`Invalid communitySlugs provided by user ${user.id}:`, dto);
+        throw new BadRequestException('Invalid community slugs provided - must be an array');
+      }
+
+      if (dto.communitySlugs.length === 0) {
+        this.logger.warn(`Empty communitySlugs array provided by user ${user.id}`);
+        throw new BadRequestException('At least one community slug must be provided');
+      }
+
+      if (dto.communitySlugs.length > 10) {
+        this.logger.warn(`Too many community slugs provided by user ${user.id}: ${dto.communitySlugs.length}`);
+        throw new BadRequestException('Cannot join more than 10 communities at once');
+      }
+
+      // Validate slug format (basic validation)
+      const invalidSlugs = dto.communitySlugs.filter(slug => 
+        !slug || typeof slug !== 'string' || slug.trim().length === 0
+      );
+      if (invalidSlugs.length > 0) {
+        this.logger.warn(`Invalid slug format provided by user ${user.id}:`, invalidSlugs);
+        throw new BadRequestException('All community slugs must be valid non-empty strings');
+      }
+
+      this.logger.log(`User ${user.id} attempting to join ${dto.communitySlugs.length} communities: [${dto.communitySlugs.join(', ')}]`);
+
       const joinResults = await this.communityRecommendationService.joinRecommendedCommunities(
         user.id,
         dto.communitySlugs,
       );
 
+      // Enhanced response messaging
+      let message = '';
+      const successCount = joinResults.successfulJoins.length;
+      const failureCount = joinResults.failedJoins.length;
+
+      if (successCount === dto.communitySlugs.length) {
+        message = `Successfully joined all ${successCount} communities`;
+      } else if (successCount > 0) {
+        message = `Successfully joined ${successCount} of ${dto.communitySlugs.length} communities`;
+      } else {
+        message = 'Failed to join any communities';
+      }
+
+      // Log the outcome
+      if (failureCount > 0) {
+        this.logger.warn(
+          `Partial success for user ${user.id}: ${successCount} succeeded, ${failureCount} failed`,
+          { failures: joinResults.failedJoins }
+        );
+      } else {
+        this.logger.log(`Complete success for user ${user.id}: joined ${successCount} communities`);
+      }
+
       return {
         success: true,
         data: joinResults,
-        message: `Successfully joined ${joinResults.successfulJoins.length} communities`,
+        message,
+        details: {
+          totalAttempted: dto.communitySlugs.length,
+          successful: successCount,
+          failed: failureCount,
+        }
       };
+
     } catch (error) {
-      throw error;
+      // Enhanced error logging and handling
+      if (error instanceof BadRequestException) {
+        // Re-throw validation errors as-is
+        throw error;
+      }
+
+      // Log unexpected errors with context
+      this.logger.error(
+        `Unexpected error in joinRecommendedCommunities for user ${user.id}:`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          userId: user.id,
+          communitySlugs: dto.communitySlugs,
+        }
+      );
+
+      // Return a user-friendly error
+      throw new InternalServerErrorException(
+        'An unexpected error occurred while joining communities. Please try again.'
+      );
     }
   }
 }
