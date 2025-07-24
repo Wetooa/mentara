@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { SessionsList, SessionStats } from "@/components/sessions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Calendar, ArrowLeft, TrendingUp } from "lucide-react";
+import { CheckCircle, Calendar, ArrowLeft, TrendingUp, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Meeting } from "@/lib/api/services/meetings";
+import { PaymentMethodsSheet } from "@/components/billing";
+import { useState } from "react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -33,6 +35,7 @@ const itemVariants = {
 
 export default function CompletedSessionsPage() {
   const router = useRouter();
+  const [paymentMethodsOpen, setPaymentMethodsOpen] = useState(false);
 
   const handleSessionClick = (session: Meeting) => {
     router.push(`/client/sessions/${session.id}`);
@@ -44,6 +47,10 @@ export default function CompletedSessionsPage() {
 
   const handleScheduleNewSession = () => {
     router.push('/client/booking');
+  };
+
+  const handleManagePaymentMethods = () => {
+    setPaymentMethodsOpen(true);
   };
 
   return (
@@ -99,7 +106,7 @@ export default function CompletedSessionsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600 mb-1">✨</div>
                 <div className="text-sm font-medium">Sessions Completed</div>
@@ -115,6 +122,17 @@ export default function CompletedSessionsPage() {
                 <div className="text-sm font-medium">Goals Achieved</div>
                 <div className="text-xs text-muted-foreground">Celebrating milestones</div>
               </div>
+              <Button
+                variant="outline"
+                className="h-auto p-4 justify-start"
+                onClick={handleManagePaymentMethods}
+              >
+                <CreditCard className="h-5 w-5 mr-3 text-blue-600" />
+                <div className="text-left">
+                  <div className="font-medium">Payment Methods</div>
+                  <div className="text-xs text-muted-foreground">Manage payments</div>
+                </div>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -149,6 +167,12 @@ export default function CompletedSessionsPage() {
           />
         </div>
       </motion.div>
+
+      {/* Payment Methods Sheet */}
+      <PaymentMethodsSheet
+        open={paymentMethodsOpen}
+        onOpenChange={setPaymentMethodsOpen}
+      />
     </motion.div>
   );
 }
