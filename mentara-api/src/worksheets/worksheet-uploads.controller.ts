@@ -12,18 +12,18 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { SupabaseStorageService } from '../common/services/supabase-storage.service';
 
-@Controller('worksheets/upload')
+@Controller('worksheets')
 export class WorksheetUploadsController {
   constructor(
     private prisma: PrismaService,
     private readonly supabaseStorageService: SupabaseStorageService,
   ) {}
 
-  @Post()
+  @Post(':worksheetId/upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body('worksheetId') worksheetId: string,
+    @Param('worksheetId') worksheetId: string,
     @Body('type') type: 'material' | 'submission',
   ) {
     if (!file) {
