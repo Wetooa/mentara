@@ -377,6 +377,15 @@ export class MessagingService {
     attachmentNames: string[] = [],
     attachmentSizes: number[] = [],
   ) {
+    console.log('🔄 [MESSAGING SERVICE] sendMessage called');
+    console.log('👤 [SENDER]', userId);
+    console.log('💬 [CONVERSATION]', conversationId);
+    console.log('📝 [MESSAGE]', {
+      content: sendMessageDto.content?.substring(0, 50) + (sendMessageDto.content?.length > 50 ? '...' : ''),
+      type: sendMessageDto.messageType,
+      hasReplyTo: !!sendMessageDto.replyToId,
+    });
+    
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
 
@@ -412,6 +421,7 @@ export class MessagingService {
     // Note: Message encryption functionality removed to match Prisma schema
     // Messages are stored as plaintext as the schema doesn't support encryption fields
 
+    console.log('💾 [MESSAGING SERVICE] Saving message to database...');
     const message = await this.prisma.message.create({
       data: {
         conversationId,
@@ -472,6 +482,15 @@ export class MessagingService {
         },
       },
     });
+    
+    console.log('✅ [MESSAGING SERVICE] Message saved to database successfully');
+    console.log('📨 [MESSAGE SAVED]', {
+      id: message.id,
+      content: message.content?.substring(0, 50) + (message.content?.length > 50 ? '...' : ''),
+      conversationId: message.conversationId,
+      senderId: message.senderId,
+      createdAt: message.createdAt,
+    });
 
     // Update conversation lastMessageAt
     await this.prisma.conversation.update({
@@ -487,29 +506,44 @@ export class MessagingService {
         .map((p) => p.userId)
         .filter((id) => id !== userId) || [];
 
+    console.log('👥 [MESSAGING SERVICE] Identified message recipients');
+    console.log('👥 [CONVERSATION PARTICIPANTS]', conversation?.participants?.map(p => ({ userId: p.userId, isActive: p.isActive })));
+    console.log('📨 [RECIPIENT IDS]', recipientIds);
+    console.log('📤 [EVENT] Emitting MessageSentEvent to event bus...');
+
     // Publish message sent event
-    await this.eventBus.emit(
-      new MessageSentEvent({
-        messageId: message.id,
-        conversationId,
-        senderId: userId,
-        content: eventContent, // Content transmitted as-is
-        messageType: message.messageType.toLowerCase() as
-          | 'text'
-          | 'image'
-          | 'file'
-          | 'audio'
-          | 'video'
-          | 'system',
-        sentAt: message.createdAt,
-        recipientIds,
-        replyToMessageId: message.replyToId || undefined,
-        fileAttachments:
-          message.attachmentUrls.length > 0
-            ? message.attachmentUrls
-            : undefined,
-      }),
-    );
+    const messageEvent = new MessageSentEvent({
+      messageId: message.id,
+      conversationId,
+      senderId: userId,
+      content: eventContent, // Content transmitted as-is
+      messageType: message.messageType.toLowerCase() as
+        | 'text'
+        | 'image'
+        | 'file'
+        | 'audio'
+        | 'video'
+        | 'system',
+      sentAt: message.createdAt,
+      recipientIds,
+      replyToMessageId: message.replyToId || undefined,
+      fileAttachments:
+        message.attachmentUrls.length > 0
+          ? message.attachmentUrls
+          : undefined,
+    });
+    
+    console.log('🚀 [EVENT DETAILS]', {
+      eventType: messageEvent.eventType,
+      messageId: messageEvent.messageId,
+      conversationId: messageEvent.conversationId,
+      senderId: messageEvent.senderId,
+      recipientCount: messageEvent.recipientIds?.length || 0,
+      recipientIds: messageEvent.recipientIds,
+    });
+    
+    await this.eventBus.emit(messageEvent);
+    console.log('✅ [MESSAGING SERVICE] MessageSentEvent emitted to event bus successfully');
 
     // Return message as-is (no encryption)
     return message;

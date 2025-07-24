@@ -228,14 +228,22 @@ export function useMessaging(options: UseMessagingOptions = {}) {
 
     const setupConnection = async () => {
       try {
+        console.log('🔌 [FRONTEND] Setting up WebSocket connection for messaging...');
+        console.log('👤 [USER]', user?.id, user?.email);
+        console.log('💬 [CONVERSATION]', conversationId || 'none specified');
+        
         await connectWebSocket(accessToken);
+        console.log('✅ [FRONTEND] WebSocket connected successfully');
         
         // Join conversation if specified
         if (conversationId) {
+          console.log('🚪 [FRONTEND] Joining conversation room:', conversationId);
           emitEvent('join_conversation', { conversationId });
+        } else {
+          console.log('ℹ️ [FRONTEND] No specific conversation to join');
         }
       } catch (error) {
-        console.error('Failed to connect WebSocket:', error);
+        console.error('❌ [FRONTEND] Failed to connect WebSocket:', error);
       }
     };
 
@@ -261,6 +269,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     const eventHandlers = [
       // New message received
       onEvent('new_message', (data: MessageEventData) => {
+        console.log('📨 [FRONTEND] new_message event received:', data);
         const { message } = data;
         
         // Add to current conversation messages

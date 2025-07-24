@@ -363,10 +363,22 @@ export class MessagingGateway
 
   // Broadcast new message to conversation participants
   broadcastMessage(conversationId: string, message: any) {
+    console.log('🚨 [GATEWAY] broadcastMessage CALLED');
+    console.log('🚨 [GATEWAY] conversationId:', conversationId);
+    console.log('🚨 [GATEWAY] message object:', message);
+    
+    // Check how many sockets are in the conversation room
+    const conversationRoom = this.server.sockets.adapter.rooms.get(conversationId);
+    const socketsInRoom = conversationRoom ? conversationRoom.size : 0;
+    console.log('🚨 [GATEWAY] socketsInRoom:', socketsInRoom);
+    
+    // Just emit to the room
+    console.log('🚨 [GATEWAY] Emitting new_message to room:', conversationId);
     this.server.to(conversationId).emit('new_message', message);
+    console.log('🚨 [GATEWAY] Emit completed');
 
-    // Send push notification to offline users (implement as needed)
-    this.sendPushNotifications(conversationId, message);
+    // Don't call push notifications to avoid the error for now
+    // this.sendPushNotifications(conversationId, message);
   }
 
   // Broadcast message update (edit/delete)
@@ -423,7 +435,12 @@ export class MessagingGateway
     userId: string,
   ) {
     try {
+      console.log('🏠 [ROOM MANAGEMENT] joinUserConversations called');
+      console.log('👤 [USER]', userId);
+      console.log('🔌 [SOCKET]', client.id);
+      
       // Get all active conversations for the user
+      console.log('🔍 [DATABASE] Querying user conversations...');
       const conversations = await this.prisma.conversation.findMany({
         where: {
           participants: {
@@ -439,21 +456,44 @@ export class MessagingGateway
         },
       });
 
+      console.log('📋 [CONVERSATIONS FOUND]', {
+        count: conversations.length,
+        conversationIds: conversations.map(c => c.id),
+      });
+
       // Join all conversation rooms
       for (const conversation of conversations) {
-        void client.join(conversation.id);
+        console.log(`🚪 [JOINING] Socket ${client.id} joining conversation room: ${conversation.id}`);
+        
+        // Join the room
+        await client.join(conversation.id);
+        
+        // Verify the join was successful
+        const isInRoom = client.rooms.has(conversation.id);
+        console.log(`✅ [ROOM JOIN] Socket ${client.id} ${isInRoom ? 'successfully joined' : 'FAILED to join'} room ${conversation.id}`);
 
         // Add to tracking
         if (!this.conversationParticipants.has(conversation.id)) {
           this.conversationParticipants.set(conversation.id, new Set());
         }
         this.conversationParticipants.get(conversation.id)!.add(userId);
+        
+        console.log(`👥 [TRACKING] Added user ${userId} to conversation ${conversation.id} tracking`);
       }
+
+      // Log final room state for this socket
+      console.log('🏠 [FINAL ROOM STATE]', {
+        socketId: client.id,
+        userId,
+        roomsJoined: Array.from(client.rooms),
+        conversationsJoined: conversations.length,
+      });
 
       this.logger.log(
         `User ${userId} joined ${conversations.length} conversation rooms`,
       );
     } catch (error) {
+      console.error('❌ [ROOM MANAGEMENT] Error joining user conversations:', error);
       this.logger.error('Error joining user conversations:', error);
     }
   }
@@ -508,11 +548,14 @@ export class MessagingGateway
         return;
       }
 
+      // Extract message data from event structure first
+      const messageData = message.message || message; // Handle both structures
+      
       // Filter participants who should receive push notifications
       const eligibleParticipants = conversation.participants.filter(
         (participant) => {
           // Don't send to message sender
-          if (participant.userId === message.senderId) {
+          if (participant.userId === messageData.senderId) {
             return false;
           }
 
@@ -537,18 +580,20 @@ export class MessagingGateway
       }
 
       // Prepare notification payload
+      const messageContent = messageData.content || '';
+      
       const notificationPayload = {
         title: 'New Message',
         body:
-          message.content.length > 50
-            ? `${message.content.substring(0, 50)}...`
-            : message.content,
+          messageContent.length > 50
+            ? `${messageContent.substring(0, 50)}...`
+            : messageContent,
         icon: '/icon-192x192.png',
         badge: '/badge-72x72.png',
         data: {
           conversationId: conversationId,
-          messageId: message.id,
-          senderId: message.senderId,
+          messageId: messageData.id,
+          senderId: messageData.senderId,
           url: `/user/messages?conversation=${conversationId}`,
         },
       };
@@ -558,7 +603,7 @@ export class MessagingGateway
         try {
           // Log notification attempt (alternative to push notifications)
           this.logger.log(
-            `Would send push notification to user ${participant.userId} for message ${message.id} (no DeviceToken model available)`,
+            `Would send push notification to user ${participant.userId} for message ${messageData.id} (no DeviceToken model available)`,
           );
           
           // Here you could implement WebSocket-based real-time notifications
@@ -605,7 +650,18 @@ export class MessagingGateway
     userId: string,
   ) {
     const userRoom = `user:${userId}`;
+    
+    console.log('👤 [PERSONAL ROOM] Subscribing user to personal room');
+    console.log('🔌 [SOCKET]', client.id);
+    console.log('👤 [USER]', userId);
+    console.log('🏠 [ROOM]', userRoom);
+    
     await client.join(userRoom);
+    
+    // Verify the join was successful
+    const isInPersonalRoom = client.rooms.has(userRoom);
+    console.log(`✅ [PERSONAL ROOM] Socket ${client.id} ${isInPersonalRoom ? 'successfully joined' : 'FAILED to join'} personal room ${userRoom}`);
+    
     this.logger.debug(
       `User ${userId} subscribed to personal room: ${userRoom}`,
     );
