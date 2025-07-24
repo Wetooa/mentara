@@ -175,153 +175,27 @@ export const DEFAULT_PASSWORD = 'password123';
 /**
  * Mental health communities based on assessment disorders
  * These align with the questionnaire mapping from the client
+ * 
+ * UPDATED: Now uses centralized canonical community definitions
  */
-export const MENTAL_HEALTH_COMMUNITIES = [
-  {
-    name: 'General Support',
-    slug: 'general-support',
-    description: 'A welcoming community for general mental health support and discussion.',
-    imageUrl: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=400',
-  },
-  {
-    name: 'Anxiety Support',
-    slug: 'anxiety-support', 
-    description: 'A supportive community for individuals managing anxiety disorders.',
-    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda450fbb2?w=400',
-  },
-  {
-    name: 'Depression Support',
-    slug: 'depression-support',
-    description: 'A supportive community for individuals working through depression.',
-    imageUrl: 'https://images.unsplash.com/photo-1517949908114-71669a64d885?w=400',
-  },
-  {
-    name: 'Stress Management',
-    slug: 'stress-management',
-    description: 'Community focused on healthy stress management and coping strategies.',
-    imageUrl: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=400',
-  },
-  {
-    name: 'Sleep & Insomnia Support',
-    slug: 'sleep-insomnia-support',
-    description: 'Support for those struggling with sleep disorders and insomnia.',
-    imageUrl: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400',
-  },
-  {
-    name: 'PTSD & Trauma Recovery',
-    slug: 'ptsd-trauma-recovery',
-    description: 'A safe space for trauma survivors and PTSD recovery.',
-    imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400',
-  },
-  {
-    name: 'Bipolar Support',
-    slug: 'bipolar-support',
-    description: 'Community for individuals managing bipolar disorder.',
-    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400',
-  },
-  {
-    name: 'OCD Support',
-    slug: 'ocd-support',
-    description: 'Support community for obsessive-compulsive disorder.',
-    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400',
-  },
-  {
-    name: 'Social Anxiety',
-    slug: 'social-anxiety',
-    description: 'Community for those working through social anxiety challenges.',
-    imageUrl: 'https://images.unsplash.com/photo-1517960413843-0aee8e2b3285?w=400',
-  },
-  {
-    name: 'Panic Disorder Support',
-    slug: 'panic-disorder-support',
-    description: 'Support for individuals experiencing panic attacks and panic disorder.',
-    imageUrl: 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400',
-  },
-  {
-    name: 'ADHD Support',
-    slug: 'adhd-support',
-    description: 'Community for individuals with ADHD and attention challenges.',
-    imageUrl: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?w=400',
-  },
-  {
-    name: 'Eating Disorder Recovery',
-    slug: 'eating-disorder-recovery',
-    description: 'Supportive community for eating disorder recovery.',
-    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda450fbb2?w=400',
-  },
-  {
-    name: 'Substance Recovery',
-    slug: 'substance-recovery',
-    description: 'Support community for substance use recovery.',
-    imageUrl: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400',
-  },
-  {
-    name: 'Phobia Support',
-    slug: 'phobia-support',
-    description: 'Community for individuals working through specific phobias.',
-    imageUrl: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400',
-  },
-  {
-    name: 'Burnout Recovery',
-    slug: 'burnout-recovery',
-    description: 'Support for those recovering from professional and personal burnout.',
-    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400',
-  },
-];
+import { getAllCanonicalCommunities, GENERAL_COMMUNITIES as CANONICAL_GENERAL_COMMUNITIES } from '../../src/common/constants/communities';
+
+export const MENTAL_HEALTH_COMMUNITIES = getAllCanonicalCommunities().map(community => ({
+  name: community.name,
+  slug: community.slug,
+  description: community.description,
+  imageUrl: community.imageUrl,
+}));
 
 /**
  * General support communities not tied to specific conditions
  */
-export const GENERAL_COMMUNITIES = [
-  {
-    name: 'Mindfulness & Meditation',
-    slug: 'mindfulness-meditation',
-    description: 'Share mindfulness practices and meditation techniques.',
-    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda450fbb2?w=400',
-  },
-  {
-    name: 'Family & Relationships',
-    slug: 'family-relationships',
-    description: 'Support for navigating family dynamics and relationship challenges.',
-    imageUrl: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400',
-  },
-  {
-    name: 'Young Adults (18-25)',
-    slug: 'young-adults',
-    description: 'Mental health support specifically for young adults.',
-    imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
-  },
-  {
-    name: 'Parents & Caregivers',
-    slug: 'parents-caregivers',
-    description: 'Support for parents and caregivers managing their mental health.',
-    imageUrl: 'https://images.unsplash.com/photo-1491013516836-7db643ee125a?w=400',
-  },
-  {
-    name: 'Workplace Mental Health',
-    slug: 'workplace-mental-health',
-    description: 'Discussing mental health challenges in professional settings.',
-    imageUrl: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400',
-  },
-  {
-    name: 'LGBTQ+ Support',
-    slug: 'lgbtq-support',
-    description: 'Mental health support for LGBTQ+ individuals.',
-    imageUrl: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400',
-  },
-  {
-    name: 'Seniors (65+)',
-    slug: 'seniors-support',
-    description: 'Mental health support tailored for senior adults.',
-    imageUrl: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400',
-  },
-  {
-    name: 'Creative Expression',
-    slug: 'creative-expression',
-    description: 'Using art, music, and creativity for mental health.',
-    imageUrl: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400',
-  },
-];
+export const GENERAL_COMMUNITIES = CANONICAL_GENERAL_COMMUNITIES.map(community => ({
+  name: community.name,
+  slug: community.slug,
+  description: community.description,
+  imageUrl: community.imageUrl,
+}));
 
 /**
  * Worksheet templates for therapy assignments

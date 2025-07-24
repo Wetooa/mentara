@@ -3,8 +3,7 @@ import { PrismaService } from '../../providers/prisma-client.provider';
 import { CommunityMatchingService } from './community-matching.service';
 import { 
   getCommunityRecommendationsWithScores,
-  getCommunityBySlug,
-  ILLNESS_COMMUNITIES 
+  getCommunityBySlug
 } from '../../config/community-configs';
 import { AiServiceClient } from '../../pre-assessment/services/ai-service.client';
 
@@ -341,63 +340,126 @@ export class CommunityRecommendationService {
     const successfulJoins: Array<{ communityId: string; communityName: string; slug: string }> = [];
     const failedJoins: Array<{ slug: string; reason: string }> = [];
 
+    this.logger.log(`Starting community join process for user ${userId} with ${communitySlugs.length} communities: [${communitySlugs.join(', ')}]`);
+
     for (const slug of communitySlugs) {
       try {
-        // Find the community by slug
-        const community = await this.prisma.community.findUnique({
-          where: { slug },
-          select: { id: true, name: true, slug: true }
-        });
+        // Use transaction to ensure data consistency
+        const result = await this.prisma.$transaction(async (tx) => {
+          // Find and validate the community exists with enhanced logging
+          const community = await tx.community.findUnique({
+            where: { slug },
+            select: { id: true, name: true, slug: true }
+          });
 
-        if (!community) {
-          failedJoins.push({ slug, reason: 'Community not found' });
-          continue;
-        }
+          if (!community) {
+            this.logger.warn(`Community not found for slug: ${slug}`);
+            throw new Error('Community not found');
+          }
 
-        // Check if user is already a member
-        const existingMembership = await this.prisma.membership.findUnique({
-          where: {
-            userId_communityId: {
-              userId,
-              communityId: community.id
+          this.logger.debug(`Found community: ${community.name} (${community.id}) for slug: ${slug}`);
+
+          // Verify community ID exists (additional safety check)
+          const communityExists = await tx.community.findUnique({
+            where: { id: community.id },
+            select: { id: true }
+          });
+
+          if (!communityExists) {
+            this.logger.error(`Critical: Community ID ${community.id} found by slug but doesn't exist by ID - data integrity issue`);
+            throw new Error('Community data integrity issue');
+          }
+
+          // Check if user is already a member
+          const existingMembership = await tx.membership.findUnique({
+            where: {
+              userId_communityId: {
+                userId,
+                communityId: community.id
+              }
             }
+          });
+
+          if (existingMembership) {
+            this.logger.debug(`User ${userId} is already a member of community ${community.name} (${slug})`);
+            throw new Error('Already a member');
           }
-        });
 
-        if (existingMembership) {
-          failedJoins.push({ slug, reason: 'Already a member' });
-          continue;
-        }
+          // Verify user exists before creating membership
+          const userExists = await tx.user.findUnique({
+            where: { id: userId },
+            select: { id: true }
+          });
 
-        // Create membership
-        await this.prisma.membership.create({
-          data: {
-            userId,
+          if (!userExists) {
+            this.logger.error(`User ${userId} not found when trying to join community ${slug}`);
+            throw new Error('User not found');
+          }
+
+          // Create membership with enhanced validation
+          this.logger.debug(`Creating membership for user ${userId} in community ${community.id} (${slug})`);
+          
+          const membership = await tx.membership.create({
+            data: {
+              userId,
+              communityId: community.id,
+              joinedAt: new Date()
+            },
+            select: {
+              id: true,
+              userId: true,
+              communityId: true,
+              joinedAt: true
+            }
+          });
+
+          this.logger.debug(`Successfully created membership: ${membership.id} for user ${userId} in community ${community.id}`);
+
+          return {
             communityId: community.id,
-            joinedAt: new Date()
-          }
+            communityName: community.name,
+            slug: community.slug
+          };
         });
 
-        successfulJoins.push({
-          communityId: community.id,
-          communityName: community.name,
-          slug: community.slug
-        });
-
-        this.logger.log(`User ${userId} successfully joined community ${community.name} (${slug})`);
+        successfulJoins.push(result);
+        this.logger.log(`✅ User ${userId} successfully joined community ${result.communityName} (${slug})`);
 
       } catch (error) {
-        this.logger.error(`Error joining community ${slug} for user ${userId}:`, error);
-        failedJoins.push({ 
-          slug, 
-          reason: error instanceof Error ? error.message : 'Unknown error' 
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`❌ Error joining community ${slug} for user ${userId}:`, {
+          error: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined,
+          userId,
+          slug
         });
+
+        // Provide more specific error reasons
+        let reason = errorMessage;
+        if (errorMessage.includes('Community not found')) {
+          reason = 'Community not found';
+        } else if (errorMessage.includes('Already a member')) {
+          reason = 'Already a member';
+        } else if (errorMessage.includes('User not found')) {
+          reason = 'User account not found';
+        } else if (errorMessage.includes('data integrity')) {
+          reason = 'Community data issue - please contact support';
+        } else if (errorMessage.includes('foreign key constraint')) {
+          reason = 'Database consistency error - please try again';
+        } else {
+          reason = 'Failed to join community - please try again';
+        }
+
+        failedJoins.push({ slug, reason });
       }
     }
 
-    this.logger.log(
-      `Community join results for user ${userId}: ${successfulJoins.length} successful, ${failedJoins.length} failed`
-    );
+    const summary = `Community join results for user ${userId}: ${successfulJoins.length} successful, ${failedJoins.length} failed`;
+    this.logger.log(summary);
+
+    if (failedJoins.length > 0) {
+      this.logger.warn(`Failed joins details:`, failedJoins);
+    }
 
     return { successfulJoins, failedJoins };
   }
