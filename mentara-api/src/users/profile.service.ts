@@ -21,6 +21,7 @@ export interface PublicProfileResponse {
     areasOfExpertise?: string[];
     languages?: string[];
   };
+  connectionStatus?: 'connected' | 'pending' | null; // Connection status to this user/therapist
   mutualCommunities: Array<{
     id: string;
     name: string;
@@ -192,6 +193,24 @@ export class ProfileService {
     );
     const limitedActivity = recentActivity.slice(0, 20);
 
+    // Check connection status if current user is a client and profile user is a therapist
+    let connectionStatus: 'connected' | 'pending' | null = null;
+    if (user.role === 'therapist' && currentUserId !== profileUserId) {
+      // Check if there's a ClientTherapist relationship
+      const clientTherapistConnection = await this.prisma.clientTherapist.findUnique({
+        where: {
+          clientId_therapistId: {
+            clientId: currentUserId,
+            therapistId: profileUserId,
+          },
+        },
+      });
+
+      if (clientTherapistConnection) {
+        connectionStatus = clientTherapistConnection.status === 'active' ? 'connected' : 'pending';
+      }
+    }
+
     // Calculate stats
     const stats = {
       postsCount: user.posts.length,
@@ -213,6 +232,7 @@ export class ProfileService {
         role: user.role,
         createdAt: user.createdAt.toISOString(),
       },
+      connectionStatus,
       mutualCommunities,
       recentActivity: limitedActivity,
       stats,
