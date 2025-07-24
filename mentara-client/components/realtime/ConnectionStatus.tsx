@@ -16,6 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 interface ConnectionStatusProps {
   isConnected: boolean;
@@ -303,13 +304,71 @@ export function useGlobalConnectionStatus() {
   const socketRef = React.useRef<any>(null);
   const heartbeatIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  // Debug function to help troubleshoot authentication issues
+  const debugAuthFlow = React.useCallback(() => {
+    console.group('🔍 [ConnectionStatus] Authentication Debug Information');
+    
+    try {
+      const token = getAuthToken();
+      console.log('Token present:', !!token);
+      
+      if (token) {
+        // Basic JWT structure validation
+        const parts = token.split('.');
+        console.log('Token parts count:', parts.length);
+        console.log('Token preview:', token.substring(0, 20) + '...');
+        
+        try {
+          // Decode JWT payload (without verification)
+          const payload = JSON.parse(atob(parts[1]));
+          console.log('Token payload:', {
+            sub: payload.sub ? 'present' : 'missing',
+            email: payload.email ? 'present' : 'missing',
+            iat: payload.iat ? new Date(payload.iat * 1000).toISOString() : 'missing',
+            exp: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'missing',
+            isExpired: payload.exp ? Date.now() / 1000 > payload.exp : 'unknown',
+          });
+        } catch (decodeError) {
+          console.error('Failed to decode token payload:', decodeError);
+        }
+      }
+      
+      // Check environment configuration
+      console.log('WebSocket URL:', process.env.NEXT_PUBLIC_WS_URL || 'not set (using default)');
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL || 'not set (using default)');
+      console.log('Current connection state:', connectionState);
+      console.log('Is connecting:', isConnecting);
+      console.log('Last error:', lastError);
+      console.log('Retry attempts:', reconnectAttempts);
+      
+    } catch (error) {
+      console.error('Error during auth debug:', error);
+    }
+    
+    console.groupEnd();
+  }, [getAuthToken, connectionState, isConnecting, lastError, reconnectAttempts]);
+
   // Helper function to get token from localStorage (client-side only)
   const getAuthToken = React.useCallback(() => {
     if (typeof window === 'undefined') return null;
     try {
-      return localStorage.getItem('token');
+      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+      // Additional validation: ensure token is non-empty and properly formatted
+      if (!token || token.trim().length === 0) {
+        console.warn('🔑 [ConnectionStatus] No authentication token found in localStorage');
+        return null;
+      }
+      
+      // Basic JWT format validation (should have 3 parts separated by dots)
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.warn('🔑 [ConnectionStatus] Invalid token format found in localStorage');
+        return null;
+      }
+      
+      return token.trim();
     } catch (error) {
-      console.warn('Failed to retrieve auth token from localStorage:', error);
+      console.warn('🔑 [ConnectionStatus] Failed to retrieve auth token from localStorage:', error);
       return null;
     }
   }, []);
@@ -326,13 +385,17 @@ export function useGlobalConnectionStatus() {
         return;
       }
 
-      // Get authentication token
+      // Get authentication token with enhanced validation
       const token = getAuthToken();
       if (!token) {
+        console.error('🔑 [ConnectionStatus] Failed to initialize WebSocket - no valid authentication token');
+        debugAuthFlow(); // Debug authentication issues
         setConnectionState("error");
-        setLastError('Authentication token not found. Please sign in again.');
+        setLastError('Authentication token not found or invalid. Please sign in again.');
         return;
       }
+      
+      console.log('🔑 [ConnectionStatus] Authentication token retrieved successfully for WebSocket connection');
 
       setIsConnecting(true);
       setConnectionState("connecting");
@@ -342,7 +405,7 @@ export function useGlobalConnectionStatus() {
 
       // Set up connection event listeners
       socket.on('connect', () => {
-        console.log('✅ WebSocket connected successfully');
+        console.log('✅ [ConnectionStatus] WebSocket connected successfully');
         setConnectionState("connected");
         setIsConnecting(false);
         setLastError(null);
@@ -351,46 +414,89 @@ export function useGlobalConnectionStatus() {
       });
 
       socket.on('disconnect', (reason) => {
-        console.log('🔌 WebSocket disconnected:', reason);
+        console.log('🔌 [ConnectionStatus] WebSocket disconnected:', reason);
         setConnectionState("disconnected");
         setIsConnecting(false);
+        
+        // Handle different disconnect reasons with appropriate error messages
         if (reason === 'io server disconnect') {
-          setLastError('Server disconnected');
+          setLastError('Server disconnected unexpectedly');
         } else if (reason === 'io client disconnect') {
           // Client-initiated disconnect, not an error
           setLastError(null);
+          console.log('🔌 [ConnectionStatus] Client-initiated disconnect');
+        } else if (reason === 'transport close' || reason === 'transport error') {
+          setLastError('Connection lost due to network issues');
+        } else if (reason === 'ping timeout') {
+          setLastError('Connection timeout - poor network connectivity');
         } else {
-          setLastError(`Disconnected: ${reason}`);
+          setLastError(`Connection lost: ${reason}`);
         }
       });
 
       socket.on('connect_error', (error) => {
-        console.error('❌ WebSocket connection error:', error);
+        console.error('❌ [ConnectionStatus] WebSocket connection error:', error);
         setConnectionState("error");
         setIsConnecting(false);
         
-        // Provide more specific error messages
+        // Enhanced error categorization and user-friendly messages
         let errorMessage = 'Connection failed';
-        if (error.message?.includes('unauthorized') || error.message?.includes('authentication')) {
+        let shouldRetry = true;
+        
+        if (error.message?.includes('unauthorized') || error.message?.includes('authentication') || error.message?.includes('auth')) {
           errorMessage = 'Authentication failed. Please sign in again.';
+          shouldRetry = false; // Don't auto-retry auth errors
         } else if (error.message?.includes('timeout')) {
           errorMessage = 'Connection timeout. Please check your network.';
+        } else if (error.message?.includes('Network Error') || error.message?.includes('ECONNREFUSED')) {
+          errorMessage = 'Unable to reach server. Please check your internet connection.';
+        } else if (error.message?.includes('CORS')) {
+          errorMessage = 'Cross-origin request blocked. Please contact support.';
+          shouldRetry = false;
         } else if (error.message) {
-          errorMessage = error.message;
+          errorMessage = `Connection error: ${error.message}`;
         }
         
         setLastError(errorMessage);
-        setReconnectAttempts(prev => prev + 1);
+        
+        // Only increment retry count for retryable errors
+        if (shouldRetry) {
+          setReconnectAttempts(prev => prev + 1);
+        }
       });
 
       socket.on('auth_error', (data) => {
-        console.error('🔒 WebSocket authentication error:', data);
+        console.error('🔒 [ConnectionStatus] WebSocket authentication error:', data);
         setConnectionState("error");
         setIsConnecting(false);
-        setLastError(data.message || 'Authentication failed');
+        
+        // Enhanced auth error handling with specific messages
+        let authErrorMessage = 'Authentication failed';
+        if (data.code === 'AUTH_FAILED') {
+          authErrorMessage = 'Invalid authentication token. Please sign in again.';
+        } else if (data.code === 'USER_NOT_FOUND') {
+          authErrorMessage = 'User account not found or inactive. Please contact support.';
+        } else if (data.code === 'TOKEN_EXPIRED') {
+          authErrorMessage = 'Session expired. Please sign in again.';
+        } else if (data.message) {
+          authErrorMessage = data.message;
+        }
+        
+        setLastError(authErrorMessage);
+        
+        // Log detailed auth error for debugging
+        console.error('🔍 [ConnectionStatus] Auth error details:', {
+          code: data.code,
+          message: data.message,
+          timestamp: data.timestamp,
+          debug: data.debug,
+        });
+        
+        // Run debug analysis for auth failures
+        debugAuthFlow();
       });
 
-      // Set up heartbeat monitoring
+      // Enhanced heartbeat monitoring with connection health checks
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
       }
@@ -398,6 +504,10 @@ export function useGlobalConnectionStatus() {
       heartbeatIntervalRef.current = setInterval(() => {
         if (socket.connected) {
           setLastHeartbeat(Date.now());
+          console.log('💓 [ConnectionStatus] Heartbeat - connection healthy');
+        } else {
+          console.warn('💔 [ConnectionStatus] Heartbeat - socket disconnected');
+          setConnectionState("disconnected");
         }
       }, 30000); // Update heartbeat every 30 seconds
 
@@ -416,37 +526,59 @@ export function useGlobalConnectionStatus() {
   const reconnect = React.useCallback(async () => {
     if (isConnecting) return;
     
-    console.log('🔄 Attempting to reconnect WebSocket...');
+    console.log('🔄 [ConnectionStatus] Attempting to reconnect WebSocket...');
     setIsConnecting(true);
     setLastError(null);
     
     try {
       const token = getAuthToken();
       if (!token) {
+        console.error('🔑 [ConnectionStatus] Failed to reconnect WebSocket - no valid authentication token');
         setConnectionState("error");
         setIsConnecting(false);
-        setLastError('Authentication token not found. Please sign in again.');
+        setLastError('Authentication token not found or invalid. Please sign in again.');
         return;
       }
+      
+      console.log('🔑 [ConnectionStatus] Authentication token validated for WebSocket reconnection');
 
-      const { connectMessagingSocket } = await import('@/lib/websocket');
-      await connectMessagingSocket(token);
+      // Try manual recovery first (handles transport errors)
+      const { recoverMessagingConnection, connectMessagingSocket } = await import('@/lib/websocket');
+      
+      const recoverySuccess = await recoverMessagingConnection();
+      if (!recoverySuccess) {
+        // Fallback to regular connection
+        console.log('🔄 [ConnectionStatus] Manual recovery failed, attempting regular connection...');
+        await connectMessagingSocket(token);
+      } else {
+        console.log('✅ [ConnectionStatus] Manual recovery successful');
+      }
     } catch (error) {
-      console.error('❌ WebSocket reconnection failed:', error);
+      console.error('❌ [ConnectionStatus] WebSocket reconnection failed:', error);
       setConnectionState("error");
       setIsConnecting(false);
       
       let errorMessage = 'Reconnection failed';
+      let shouldIncrementRetries = true;
+      
       if (error instanceof Error) {
-        if (error.message?.includes('unauthorized') || error.message?.includes('authentication')) {
+        if (error.message?.includes('unauthorized') || error.message?.includes('authentication') || error.message?.includes('auth')) {
           errorMessage = 'Authentication failed. Please sign in again.';
+          shouldIncrementRetries = false; // Don't retry auth errors
+        } else if (error.message?.includes('timeout')) {
+          errorMessage = 'Reconnection timeout. Please check your network.';
+        } else if (error.message?.includes('ECONNREFUSED')) {
+          errorMessage = 'Server unavailable. Please try again later.';
         } else if (error.message) {
-          errorMessage = error.message;
+          errorMessage = `Reconnection error: ${error.message}`;
         }
       }
       
       setLastError(errorMessage);
-      setReconnectAttempts(prev => prev + 1);
+      
+      if (shouldIncrementRetries) {
+        setReconnectAttempts(prev => prev + 1);
+      }
     }
   }, [isConnecting, getAuthToken]);
 
@@ -477,5 +609,6 @@ export function useGlobalConnectionStatus() {
     maxReconnectAttempts: 5,
     lastHeartbeat,
     reconnect,
+    debugAuthFlow, // Debug function for troubleshooting
   };
 }

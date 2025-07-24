@@ -92,7 +92,6 @@ export class SearchService {
         OR: [
           { title: { contains: query, mode: 'insensitive' } },
           { content: { contains: query, mode: 'insensitive' } },
-          { tags: { hasSome: [query] } },
         ],
       };
 

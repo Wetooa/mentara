@@ -345,7 +345,6 @@ describe('SearchService', () => {
           OR: [
             { title: { contains: 'anxiety', mode: 'insensitive' } },
             { content: { contains: 'anxiety', mode: 'insensitive' } },
-            { tags: { hasSome: ['anxiety'] } },
           ],
         },
         include: {
@@ -443,19 +442,6 @@ describe('SearchService', () => {
       );
     });
 
-    it('should search in post tags', async () => {
-      await service.searchPosts('mental-health');
-
-      expect(prismaService.post.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            OR: expect.arrayContaining([
-              { tags: { hasSome: ['mental-health'] } },
-            ]),
-          }),
-        }),
-      );
-    });
 
     it('should handle Unicode characters', async () => {
       const unicodeQuery = 'salúd mental';
