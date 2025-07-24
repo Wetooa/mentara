@@ -51,7 +51,7 @@ export function useRealTimeWorksheets({
     });
   }, [realTimeEvents, userId]);
 
-  const updateWorksheetStatus = useCallback((worksheetId: string, status: "draft" | "assigned" | "in_progress" | "completed" | "reviewed") => {
+  const updateWorksheetStatus = useCallback((worksheetId: string, status: "assigned" | "submitted" | "reviewed" | "overdue") => {
     realTimeEvents.sendMessage("update_worksheet_status", {
       worksheetId,
       status,

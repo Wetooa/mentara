@@ -114,4 +114,20 @@ export class WorksheetsController {
   deleteSubmission(@CurrentUserId() userId: string, @Param('id') id: string) {
     return this.worksheetsService.deleteSubmission(id);
   }
+
+  @Post(':id/turn-in')
+  turnInWorksheet(
+    @CurrentUserId() userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.worksheetsService.turnInWorksheet(id, userId);
+  }
+
+  @Post(':id/unturn-in')
+  unturnInWorksheet(
+    @CurrentUserId() userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.worksheetsService.unturnInWorksheet(id, userId);
+  }
 }
