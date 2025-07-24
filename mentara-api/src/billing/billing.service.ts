@@ -42,9 +42,46 @@ export class BillingService {
   async createPaymentMethod(data: {
     userId: string;
     type: PaymentMethodType;
+    nickname?: string;
+    
+    // Card-specific fields
+    cardholderName?: string;
+    cardNumber?: string;
+    expiryMonth?: number;
+    expiryYear?: number;
+    cardType?: string;
+    
+    // Bank account fields
+    bankName?: string;
+    accountHolderName?: string;
+    accountType?: string;
+    routingNumber?: string;
+    accountNumber?: string;
+    
+    // Digital wallet fields
+    walletProvider?: string;
+    walletEmail?: string;
+    walletAccountName?: string;
+    
+    // GCash fields
+    gcashNumber?: string;
+    gcashName?: string;
+    gcashEmail?: string;
+    
+    // Maya fields
+    mayaNumber?: string;
+    mayaName?: string;
+    mayaEmail?: string;
+    
+    // Address
+    billingAddress?: any;
+    
+    // Default setting
+    isDefault?: boolean;
+    
+    // Legacy fields
     cardLast4?: string;
     cardBrand?: string;
-    isDefault?: boolean;
   }) {
     this.logger.log(`Creating payment method for user ${data.userId}`);
 
@@ -56,13 +93,54 @@ export class BillingService {
       });
     }
 
+    // Extract last 4 digits from card number if provided
+    const cardLast4 = data.cardLast4 || (data.cardNumber ? data.cardNumber.slice(-4) : undefined);
+    
+    // Determine card brand from card type or existing brand
+    const cardBrand = data.cardBrand || data.cardType;
+
     const paymentMethod = await this.prisma.paymentMethod.create({
       data: {
         userId: data.userId,
         type: data.type,
-        cardLast4: data.cardLast4,
-        cardBrand: data.cardBrand,
+        nickname: data.nickname,
         isDefault: data.isDefault || false,
+        
+        // Card-specific fields
+        cardLast4,
+        cardBrand,
+        cardholderName: data.cardholderName,
+        cardNumber: data.cardNumber, // Note: In production, this should be encrypted/tokenized
+        expiryMonth: data.expiryMonth,
+        expiryYear: data.expiryYear,
+        cardType: data.cardType,
+        
+        // Bank account fields
+        bankName: data.bankName,
+        accountHolderName: data.accountHolderName,
+        accountType: data.accountType,
+        routingNumber: data.routingNumber,
+        accountLast4: data.accountNumber ? data.accountNumber.slice(-4) : undefined,
+        
+        // Digital wallet fields
+        walletProvider: data.walletProvider,
+        walletEmail: data.walletEmail,
+        walletAccountName: data.walletAccountName,
+        
+        // GCash fields
+        gcashNumber: data.gcashNumber,
+        gcashName: data.gcashName,
+        gcashEmail: data.gcashEmail,
+        isVerified: data.gcashNumber ? false : undefined, // Default unverified for new GCash
+        
+        // Maya fields
+        mayaNumber: data.mayaNumber,
+        mayaName: data.mayaName,
+        mayaEmail: data.mayaEmail,
+        mayaVerified: data.mayaNumber ? false : undefined, // Default unverified for new Maya
+        
+        // Address
+        billingAddress: data.billingAddress,
       },
     });
 
@@ -70,6 +148,7 @@ export class BillingService {
       userId: data.userId,
       paymentMethodId: paymentMethod.id,
       type: data.type,
+      nickname: data.nickname,
     });
 
     return paymentMethod;

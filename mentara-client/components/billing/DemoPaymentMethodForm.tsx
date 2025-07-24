@@ -127,16 +127,23 @@ export function DemoPaymentMethodForm({ onSuccess, onCancel, embedded = false }:
     setIsSubmitting(true);
     
     try {
-      // Simulate API call for demo purposes
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Transform form data to match backend API expectations
+      const apiData = {
+        ...data,
+        isDefault: data.setAsDefault, // Transform setAsDefault to isDefault
+      };
       
-      // In real implementation, this would call the API
-      // await createPaymentMethodMutation.mutateAsync(data);
+      // Remove the frontend-specific field
+      delete (apiData as any).setAsDefault;
+      
+      // Make real API call to create payment method
+      await createPaymentMethodMutation.mutateAsync(apiData);
       
       toast.success('Payment method added successfully!');
       onSuccess?.();
     } catch (error) {
       toast.error('Failed to add payment method. Please try again.');
+      console.error('Payment method creation error:', error);
     } finally {
       setIsSubmitting(false);
     }
