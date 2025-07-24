@@ -47,12 +47,27 @@ export function useCalendarMeetings(params: {
       : meetingsQuery.data.meetings || []
     
     return meetings.map((meeting: any): CalendarMeeting => {
-      // Extract meeting data with fallbacks
-      const startTime = meeting.startTime || meeting.date || meeting.scheduledAt
-      const endTime = meeting.endTime || meeting.endDate || 
-        (startTime && meeting.duration 
-          ? new Date(new Date(startTime).getTime() + (meeting.duration * 60000)).toISOString()
-          : startTime)
+      // Extract meeting data with proper validation and fallbacks
+      const rawStartTime = meeting.startTime || meeting.date || meeting.scheduledAt
+      const startTime = rawStartTime ? new Date(rawStartTime).toISOString() : new Date().toISOString()
+      
+      let endTime: string
+      if (meeting.endTime) {
+        endTime = new Date(meeting.endTime).toISOString()
+      } else if (meeting.endDate) {
+        endTime = new Date(meeting.endDate).toISOString()
+      } else if (rawStartTime && meeting.duration) {
+        const startDate = new Date(rawStartTime)
+        if (!isNaN(startDate.getTime())) {
+          endTime = new Date(startDate.getTime() + (meeting.duration * 60000)).toISOString()
+        } else {
+          endTime = startTime
+        }
+      } else {
+        // Default to 1 hour after start time
+        const startDate = new Date(startTime)
+        endTime = new Date(startDate.getTime() + (60 * 60000)).toISOString()
+      }
       
       // Handle different data structures from different endpoints
       const therapistName = meeting.therapist?.name || 
@@ -90,24 +105,44 @@ export function useCalendarMeetings(params: {
                     dashboardData.meetings || 
                     dashboardData.appointments || []
     
-    return meetings.map((meeting: any): CalendarMeeting => ({
-      id: meeting.id,
-      title: meeting.title || 'Therapy Session',
-      startTime: meeting.startTime || meeting.scheduledAt || meeting.date,
-      endTime: meeting.endTime || meeting.endDate ||
-        (meeting.startTime && meeting.duration
-          ? new Date(new Date(meeting.startTime).getTime() + (meeting.duration * 60000)).toISOString()
-          : meeting.startTime),
-      status: meeting.status?.toUpperCase() || 'SCHEDULED',
-      therapistId: meeting.therapistId,
-      therapistName: meeting.therapistName || user?.firstName + ' ' + user?.lastName,
-      clientId: meeting.clientId || meeting.userId,
-      clientName: meeting.clientName || 
-                 meeting.client?.firstName + ' ' + meeting.client?.lastName ||
-                 meeting.user?.firstName + ' ' + meeting.user?.lastName,
-      meetingUrl: meeting.meetingUrl || meeting.roomUrl,
-      notes: meeting.notes || meeting.description,
-    }))
+    return meetings.map((meeting: any): CalendarMeeting => {
+      const rawStartTime = meeting.startTime || meeting.scheduledAt || meeting.date
+      const startTime = rawStartTime ? new Date(rawStartTime).toISOString() : new Date().toISOString()
+      
+      let endTime: string
+      if (meeting.endTime) {
+        endTime = new Date(meeting.endTime).toISOString()
+      } else if (meeting.endDate) {
+        endTime = new Date(meeting.endDate).toISOString()
+      } else if (rawStartTime && meeting.duration) {
+        const startDate = new Date(rawStartTime)
+        if (!isNaN(startDate.getTime())) {
+          endTime = new Date(startDate.getTime() + (meeting.duration * 60000)).toISOString()
+        } else {
+          endTime = startTime
+        }
+      } else {
+        // Default to 1 hour after start time
+        const startDate = new Date(startTime)
+        endTime = new Date(startDate.getTime() + (60 * 60000)).toISOString()
+      }
+      
+      return {
+        id: meeting.id,
+        title: meeting.title || 'Therapy Session',
+        startTime,
+        endTime,
+        status: meeting.status?.toUpperCase() || 'SCHEDULED',
+        therapistId: meeting.therapistId,
+        therapistName: meeting.therapistName || user?.firstName + ' ' + user?.lastName,
+        clientId: meeting.clientId || meeting.userId,
+        clientName: meeting.clientName || 
+                   meeting.client?.firstName + ' ' + meeting.client?.lastName ||
+                   meeting.user?.firstName + ' ' + meeting.user?.lastName,
+        meetingUrl: meeting.meetingUrl || meeting.roomUrl,
+        notes: meeting.notes || meeting.description,
+      }
+    })
   }, [dashboardQuery.data, isTherapist, user])
   
   // Combine and deduplicate meetings

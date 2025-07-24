@@ -18,8 +18,7 @@
     "test:cov": "node --max-old-space-size=2048 node_modules/.bin/jest --coverage",
     "test:debug": "node --inspect-brk --max-old-space-size=2048 -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "node --max-old-space-size=2048 node_modules/.bin/jest --config ./test/jest-e2e.json",
-    "db:seed": "node --max-old-space-size=1024 node_modules/.bin/ts-node prisma/seed/index-simple.ts",
-    "db:seed:full": "node --max-old-space-size=1024 node_modules/.bin/ts-node prisma/seed/index.ts",
+    "db:seed": "node --max-old-space-size=1024 node_modules/.bin/ts-node prisma/seed/scripts/cli.ts from-phase 1",
     "seed:from-phase": "node --max-old-space-size=1024 node_modules/.bin/ts-node prisma/seed/scripts/cli.ts from-phase",
     "seed:phase": "node --max-old-space-size=1024 node_modules/.bin/ts-node prisma/seed/scripts/cli.ts phase",
     "seed:progress": "node --max-old-space-size=1024 node_modules/.bin/ts-node prisma/seed/scripts/cli.ts progress",
@@ -30,7 +29,10 @@
     "db:reset": "prisma migrate reset --force && npm run db:seed",
     "assign-therapist": "node --max-old-space-size=1024 node_modules/.bin/ts-node scripts/assign-therapist.ts",
     "assign-random-therapists": "node --max-old-space-size=1024 node_modules/.bin/ts-node scripts/assign-therapist.ts random",
-    "validate-endpoints": "node --max-old-space-size=1024 node_modules/.bin/ts-node scripts/validate-api-endpoints.ts"
+    "validate-endpoints": "node --max-old-space-size=1024 node_modules/.bin/ts-node scripts/validate-api-endpoints.ts",
+    "kill-port": "npx kill-port 3001",
+    "check-port": "lsof -i tcp:3001 || echo 'Port 3001 is available'",
+    "dev:clean": "npm run kill-port && npm run start:dev"
   },
   "dependencies": {
     "@emailjs/nodejs": "^5.0.2",

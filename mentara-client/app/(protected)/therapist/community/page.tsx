@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import CommunitySidebar from "@/components/community/Sidebar";
 import CommentSection from "@/components/community/CommentSection";
@@ -13,6 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { 
   Heart, 
   MessageCircle, 
@@ -85,18 +91,50 @@ export default function TherapistCommunity() {
   // Enhanced community stats for therapists
   const { stats: communityStats } = useCommunityStats();
 
+  // Mobile sidebar visibility state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const breadcrumb = getRoomBreadcrumb();
 
   return (
-    <main className="w-full flex h-full">
-      <CommunitySidebar
-        selectedCommunityId={selectedCommunityId}
-        selectedRoomId={selectedRoomId}
-        onCommunitySelect={handleCommunitySelect}
-        onRoomSelect={handleRoomSelect}
-      />
-
-      <div className="flex-1 flex flex-col h-full">
+    <main className="w-full h-full">
+      {/* Mobile overlay for sidebar */}
+      <div className="lg:hidden">
+        {(selectedCommunityId || isSidebarOpen) && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="fixed inset-0 bg-black/50" onClick={() => {
+              handleCommunitySelect('');
+              setIsSidebarOpen(false);
+            }} />
+            <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
+              <CommunitySidebar
+                selectedCommunityId={selectedCommunityId}
+                selectedRoomId={selectedRoomId}
+                onCommunitySelect={(communityId) => {
+                  handleCommunitySelect(communityId);
+                  setIsSidebarOpen(false);
+                }}
+                onRoomSelect={handleRoomSelect}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Desktop resizable layout */}
+      <div className="hidden lg:block h-full">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={35} className="min-w-[240px]">
+            <CommunitySidebar
+              selectedCommunityId={selectedCommunityId}
+              selectedRoomId={selectedRoomId}
+              onCommunitySelect={handleCommunitySelect}
+              onRoomSelect={handleRoomSelect}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle className="w-1.5 bg-amber-100/60 hover:bg-amber-200/80 transition-colors duration-200" />
+          <ResizablePanel defaultSize={80}>
+            {/* Desktop Main Content Area */}
         {/* Main Content Area */}
         {!selectedRoomId ? (
           // Welcome/No Room Selected State - Enhanced for Therapists
@@ -374,6 +412,74 @@ export default function TherapistCommunity() {
             </div>
           </div>
         )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+      
+      {/* Mobile layout */}
+      <div className="lg:hidden flex flex-col h-full">
+        {/* Mobile header */}
+        <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 p-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (selectedCommunityId) {
+                  // Show sidebar to change community selection
+                  handleCommunitySelect(selectedCommunityId);
+                } else {
+                  // Show sidebar for initial community selection
+                  setIsSidebarOpen(true);
+                }
+              }}
+              className="border-amber-300 text-amber-600"
+            >
+              <Hash className="h-4 w-4 mr-1" />
+              {selectedCommunityId ? 'Communities' : 'Select Community'}
+            </Button>
+            {selectedRoom && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>/</span>
+                <span className="font-medium text-amber-700">{selectedRoom.name}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Mobile Main Content */}
+        <div className="flex-1 flex flex-col h-full">
+          {!selectedRoomId ? (
+            // Mobile Welcome State
+            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+              <div className="text-center max-w-md p-4">
+                <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <Stethoscope className="h-8 w-8 text-green-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-neutral-800 mb-2">Therapist Community Hub</h2>
+                <p className="text-neutral-600 mb-6">
+                  Tap Communities above to connect with fellow therapists and clients.
+                </p>
+              </div>
+            </div>
+          ) : (
+            // Mobile Room Content (simplified)
+            <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 p-4 shadow-sm">
+                <h1 className="text-xl font-bold text-neutral-800 truncate">
+                  {selectedRoom?.name}
+                </h1>
+              </div>
+              <div className="flex-1 min-h-0 overflow-y-auto bg-neutral-50">
+                <div className="p-4">
+                  <div className="text-center py-8">
+                    <p className="text-neutral-600">Mobile room content loading...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );

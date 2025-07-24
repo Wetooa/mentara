@@ -163,7 +163,13 @@
       "mcp__serena__find_referencing_symbols",
       "mcp__serena__find_referencing_symbols",
       "WebFetch(domain:stackoverflow.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(timeout 10s npm run start:dev)",
+      "Bash(true)",
+      "Bash(git check-ignore:*)",
+      "Bash(timeout 10 npm run dev:*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:socket.io)"
     ]
   },
   "enableAllProjectMcpServers": true,

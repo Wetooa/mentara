@@ -1,0 +1,22 @@
+e3d87619e7a5445e90e4d9bc1cc25e58
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EmailModule = void 0;
+const common_1 = require("@nestjs/common");
+const email_service_1 = require("./email.service");
+let EmailModule = class EmailModule {
+};
+exports.EmailModule = EmailModule;
+exports.EmailModule = EmailModule = __decorate([
+    (0, common_1.Module)({
+        providers: [email_service_1.EmailService],
+        exports: [email_service_1.EmailService], // Export for use in other modules
+    })
+], EmailModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2VtYWlsL2VtYWlsLm1vZHVsZS50cyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7QUFBQSwyQ0FBd0M7QUFDeEMsbURBQStDO0FBTXhDLElBQU0sV0FBVyxHQUFqQixNQUFNLFdBQVc7Q0FBRyxDQUFBO0FBQWQsa0NBQVc7c0JBQVgsV0FBVztJQUp2QixJQUFBLGVBQU0sRUFBQztRQUNOLFNBQVMsRUFBRSxDQUFDLDRCQUFZLENBQUM7UUFDekIsT0FBTyxFQUFFLENBQUMsNEJBQVksQ0FBQyxFQUFFLGtDQUFrQztLQUM1RCxDQUFDO0dBQ1csV0FBVyxDQUFHIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9lbWFpbC9lbWFpbC5tb2R1bGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTW9kdWxlIH0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgRW1haWxTZXJ2aWNlIH0gZnJvbSAnLi9lbWFpbC5zZXJ2aWNlJztcblxuQE1vZHVsZSh7XG4gIHByb3ZpZGVyczogW0VtYWlsU2VydmljZV0sXG4gIGV4cG9ydHM6IFtFbWFpbFNlcnZpY2VdLCAvLyBFeHBvcnQgZm9yIHVzZSBpbiBvdGhlciBtb2R1bGVzXG59KVxuZXhwb3J0IGNsYXNzIEVtYWlsTW9kdWxlIHt9XG4iXSwidmVyc2lvbiI6M30=

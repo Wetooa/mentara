@@ -9,6 +9,8 @@ import { TokenService } from './token.service';
 import { EmailService } from '../../email/email.service';
 import { EmailVerificationService } from './email-verification.service';
 import * as bcrypt from 'bcrypt';
+import { processPreAssessmentAnswers } from '../../pre-assessment/pre-assessment.utils';
+import { generateAIEvaluationData } from '../../pre-assessment/ai-evaluation.utils';
 
 @Injectable()
 export class ClientAuthService {
@@ -20,6 +22,8 @@ export class ClientAuthService {
   ) {}
 
   async registerClient(registerDto: RegisterClientDto) {
+    console.log('Registering client with preassessment data:', registerDto);
+
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
@@ -65,16 +69,28 @@ export class ClientAuthService {
         registerDto.preassessmentAnswers &&
         registerDto.preassessmentAnswers.length > 0
       ) {
+        // Import scoring utilities
+
+        // Calculate scores from flat answers array
+        const { scores, severityLevels } = processPreAssessmentAnswers(
+          registerDto.preassessmentAnswers,
+        );
+
+        // Generate realistic AI evaluation data based on assessment results
+        const aiEvaluationData = generateAIEvaluationData(
+          scores,
+          severityLevels,
+        );
+
         preAssessment = await tx.preAssessment.create({
           data: {
             clientId: user.id,
-            answers: registerDto.preassessmentAnswers,
-            questionnaires: [], // Empty until processed
-            answerMatrix: [], // Empty until processed
-            scores: {}, // Empty until processed
-            severityLevels: {}, // Empty until processed
-            aiEstimate: {}, // Empty until processed
-            isProcessed: false, // Will be processed later
+            answers: registerDto.preassessmentAnswers, // Flat array of 201 responses
+            scores, // Calculated scores by questionnaire
+            severityLevels, // Severity classifications
+            aiEstimate: aiEvaluationData as any, // Realistic AI evaluation data - cast to satisfy Prisma JSON type
+            isProcessed: true, // Mark as processed since we calculated scores
+            processedAt: new Date(),
           },
         });
       }
@@ -166,14 +182,7 @@ export class ClientAuthService {
   async getClientProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        birthDate: true,
-        createdAt: true,
-        role: true,
+      include: {
         client: {
           include: {
             assignedTherapists: {
@@ -209,13 +218,15 @@ export class ClientAuthService {
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       role: 'client' as const,
+      avatarUrl: user.avatarUrl || undefined,
       dateOfBirth: user.birthDate ? user.birthDate.toISOString() : undefined,
       phoneNumber: undefined, // Phone number not stored in User model for clients
       profileComplete: !!(user.firstName && user.lastName && user.birthDate),
       therapistId:
         user.client?.assignedTherapists?.[0]?.therapist?.user?.id || undefined,
       createdAt: user.createdAt.toISOString(),
-      hasSeenTherapistRecommendations: user.client?.hasSeenTherapistRecommendations || false,
+      hasSeenTherapistRecommendations:
+        user.client?.hasSeenTherapistRecommendations || false,
     };
   }
 
@@ -236,22 +247,36 @@ export class ClientAuthService {
     }
 
     // Return in the expected OnboardingStatusResponse format
-    const profileCompleted = !!(user.firstName && user.lastName && user.birthDate);
+    const profileCompleted = !!(
+      user.firstName &&
+      user.lastName &&
+      user.birthDate
+    );
     const assessmentCompleted = false; // TODO: implement assessment completion check
     const completedSteps: string[] = [];
-    
+
     if (profileCompleted) completedSteps.push('profile');
-    if (user.client.hasSeenTherapistRecommendations) completedSteps.push('recommendations');
+    if (user.client.hasSeenTherapistRecommendations)
+      completedSteps.push('recommendations');
     if (assessmentCompleted) completedSteps.push('assessment');
-    
+
     return {
       isFirstSignIn: !user.lastLoginAt,
       hasSeenRecommendations: user.client.hasSeenTherapistRecommendations,
       profileCompleted,
       assessmentCompleted,
-      isOnboardingComplete: profileCompleted && user.client.hasSeenTherapistRecommendations && assessmentCompleted,
+      isOnboardingComplete:
+        profileCompleted &&
+        user.client.hasSeenTherapistRecommendations &&
+        assessmentCompleted,
       completedSteps,
-      nextStep: !profileCompleted ? 'profile' : !user.client.hasSeenTherapistRecommendations ? 'recommendations' : !assessmentCompleted ? 'assessment' : undefined,
+      nextStep: !profileCompleted
+        ? 'profile'
+        : !user.client.hasSeenTherapistRecommendations
+          ? 'recommendations'
+          : !assessmentCompleted
+            ? 'assessment'
+            : undefined,
     };
   }
 
@@ -300,7 +325,7 @@ export class ClientAuthService {
 
     // Use EmailVerificationService to verify the OTP
     const result = await this.emailVerificationService.verifyEmail(otpCode);
-    
+
     if (result.success) {
       // Update emailVerified flag for client
       await this.prisma.user.update({

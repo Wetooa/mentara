@@ -6,6 +6,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, ChevronDown, ChevronRight, RefreshCw, AlertCircle } from "lucide-react";
 import { usePatientsList } from "@/hooks/therapist/usePatientsList";
+import AppointmentCalendar from "@/components/calendar-02";
+import { useQuery } from "@tanstack/react-query";
+import { useApi } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function PatientsLayout({
   children,
@@ -14,9 +19,18 @@ export default function PatientsLayout({
 }) {
   const pathname = usePathname();
   const [filterOpen, setFilterOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const api = useApi();
   
   // Use modern hook and implement filtering locally
   const { data: rawPatients, isLoading, error, refetch } = usePatientsList();
+  
+  // Fetch meetings/appointments for calendar
+  const { data: meetingsData } = useQuery({
+    queryKey: ['meetings', 'upcoming'],
+    queryFn: () => api.meetings.getUpcomingMeetings(50), // Get up to 50 upcoming meetings
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
   
   // Local state for search and filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,46 +106,21 @@ export default function PatientsLayout({
         {/* Calendar section */}
         <div className="p-2 md:p-3 border-b border-gray-200">
           <div className="flex justify-between items-center mb-2 md:mb-3">
-            <h3 className="font-medium text-sm md:text-base">Appointments</h3>
-            <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-              6
+            <h3 className="font-medium text-sm md:text-base text-amber-800">Appointments</h3>
+            <span className="text-xs text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+              {meetingsData?.meetings?.length || 0}
             </span>
           </div>
 
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs bg-gray-100 rounded px-2 py-1">
-              May 2023
-            </span>
-          </div>
-
-          {/* Calendar header */}
-          <div className="grid grid-cols-7 text-center text-[10px] md:text-xs text-gray-500 mb-1">
-            <div>SUN</div>
-            <div>MON</div>
-            <div>TUE</div>
-            <div>WED</div>
-            <div>THU</div>
-            <div>FRI</div>
-            <div>SAT</div>
-          </div>
-
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-0.5 md:gap-1 text-center text-xs md:text-sm">
-            {/* Days numbers with some dates highlighted */}
-            {Array.from({ length: 31 }, (_, i) => {
-              const day = i + 1;
-              const isActive = [1, 8, 15, 22, 29].includes(day);
-              return (
-                <div
-                  key={day}
-                  className={`
-                  h-6 w-6 md:h-8 md:w-8 flex items-center justify-center rounded-full mx-auto text-xs md:text-sm
-                  ${isActive ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100"}`}
-                >
-                  {day}
-                </div>
-              );
-            })}
+          {/* Appointment Calendar */}
+          <div className="appointment-calendar-container">
+            <AppointmentCalendar
+              meetings={meetingsData?.meetings || []}
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              showMeetingDetails={false}
+              className="scale-75 origin-top-left w-[133%] -ml-2"
+            />
           </div>
         </div>
 

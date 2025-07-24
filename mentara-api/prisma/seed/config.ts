@@ -6,21 +6,18 @@
 export const TEST_ACCOUNTS = {
   CLIENTS: [
     {
-      id: 'fake_client_test_1',
       email: 'test.client.basic@mentaratest.dev',
       firstName: 'Sarah',
       lastName: 'Johnson',
       role: 'client' as const,
     },
     {
-      id: 'fake_client_test_2',
       email: 'test.client.complete@mentaratest.dev',
       firstName: 'Marcus',
       lastName: 'Rodriguez',
       role: 'client' as const,
     },
     {
-      id: 'fake_client_test_3',
       email: 'test.client.inactive@mentaratest.dev',
       firstName: 'Jennifer',
       lastName: 'Chen',
@@ -28,14 +25,12 @@ export const TEST_ACCOUNTS = {
       isActive: false,
     },
     {
-      id: 'fake_client_test_4',
       email: 'test.client.premium@mentaratest.dev',
       firstName: 'David',
       lastName: 'Kim',
       role: 'client' as const,
     },
     {
-      id: 'fake_client_test_5',
       email: 'test.client.longterm@mentaratest.dev',
       firstName: 'Maria',
       lastName: 'Gonzalez',
@@ -44,35 +39,30 @@ export const TEST_ACCOUNTS = {
   ],
   THERAPISTS: [
     {
-      id: 'fake_therapist_test_1',
       email: 'test.therapist.approved@mentaratest.dev',
       firstName: 'Dr. Michael',
       lastName: 'Thompson',
       role: 'therapist' as const,
     },
     {
-      id: 'fake_therapist_test_2',
       email: 'test.therapist.pending@mentaratest.dev',
       firstName: 'Dr. Lisa',
       lastName: 'Park',
       role: 'therapist' as const,
     },
     {
-      id: 'fake_therapist_test_3',
       email: 'test.therapist.specialist@mentaratest.dev',
       firstName: 'Dr. Amanda',
       lastName: 'Williams',
       role: 'therapist' as const,
     },
     {
-      id: 'fake_therapist_test_4',
       email: 'test.therapist.trauma@mentaratest.dev',
       firstName: 'Dr. James',
       lastName: "O'Connor",
       role: 'therapist' as const,
     },
     {
-      id: 'fake_therapist_test_5',
       email: 'test.therapist.anxiety@mentaratest.dev',
       firstName: 'Dr. Emily',
       lastName: 'Zhang',
@@ -81,35 +71,30 @@ export const TEST_ACCOUNTS = {
   ],
   ADMINS: [
     {
-      id: 'fake_admin_test_1',
       email: 'test.admin.super@mentaratest.dev',
       firstName: 'Robert',
       lastName: 'Anderson',
       role: 'admin' as const,
     },
     {
-      id: 'fake_admin_test_2',
       email: 'test.admin.user.manager@mentaratest.dev',
       firstName: 'Linda',
       lastName: 'Martinez',
       role: 'admin' as const,
     },
     {
-      id: 'fake_admin_test_3',
       email: 'test.admin.content.manager@mentaratest.dev',
       firstName: 'William',
       lastName: 'Johnson',
       role: 'admin' as const,
     },
     {
-      id: 'fake_admin_test_4',
       email: 'test.admin.billing@mentaratest.dev',
       firstName: 'Nancy',
       lastName: 'Wilson',
       role: 'admin' as const,
     },
     {
-      id: 'fake_admin_test_5',
       email: 'test.admin.technical@mentaratest.dev',
       firstName: 'Kevin',
       lastName: 'Lee',
@@ -118,35 +103,30 @@ export const TEST_ACCOUNTS = {
   ],
   MODERATORS: [
     {
-      id: 'fake_moderator_test_1',
       email: 'test.moderator.primary@mentaratest.dev',
       firstName: 'Alex',
       lastName: 'Morgan',
       role: 'moderator' as const,
     },
     {
-      id: 'fake_moderator_test_2',
       email: 'test.moderator.community@mentaratest.dev',
       firstName: 'Taylor',
       lastName: 'Davis',
       role: 'moderator' as const,
     },
     {
-      id: 'fake_moderator_test_3',
       email: 'test.moderator.content@mentaratest.dev',
       firstName: 'Jordan',
       lastName: 'Smith',
       role: 'moderator' as const,
     },
     {
-      id: 'fake_moderator_test_4',
       email: 'test.moderator.support@mentaratest.dev',
       firstName: 'Casey',
       lastName: 'Brown',
       role: 'moderator' as const,
     },
     {
-      id: 'fake_moderator_test_5',
       email: 'test.moderator.night@mentaratest.dev',
       firstName: 'Avery',
       lastName: 'White',
@@ -155,121 +135,63 @@ export const TEST_ACCOUNTS = {
   ],
 };
 
-// Configuration constants - COMPREHENSIVE DEV SEEDING
+// Configuration constants - DEVELOPMENT SEEDING (BALANCED)
 export const SEED_CONFIG = {
   USERS: {
-    CLIENTS: 5, // 5 clients for comprehensive testing
-    THERAPISTS: 5, // 5 therapists for comprehensive testing
-    ADMINS: 5, // 5 admins for comprehensive testing
-    MODERATORS: 5, // 5 moderators for comprehensive testing
+    CLIENTS: 5, // Balanced for development - enough to test features
+    THERAPISTS: 5, // Balanced for development - enough to test features  
+    ADMINS: 5, // Balanced for development - enough to test features
+    MODERATORS: 5, // Balanced for development - enough to test features
   },
   COMMUNITIES: {
     ADDITIONAL: 0, // No additional communities - only questionnaire-based ones
-    POSTS_PER_COMMUNITY: 3, // Create some posts for demo
-    COMMENTS_PER_POST: 3, // Create some comments for demo
+    POSTS_PER_COMMUNITY: 1, // Minimal content - just enough to see community activity
+    COMMENTS_PER_POST: 2, // Minimal engagement - enough to test comment functionality
   },
   RELATIONSHIPS: {
-    CLIENT_THERAPIST_RATIO: 0.8, // 80% of clients get assigned to therapists
-    MEETINGS_PER_RELATIONSHIP: 1, // Reduced from 3 for testing
+    CLIENT_THERAPIST_RATIO: 0.6, // 60% of clients get therapists (3 out of 5) - realistic
+    MEETINGS_PER_RELATIONSHIP: 6, // Increased to 6 meetings per relationship - more session history
   },
   ASSESSMENTS: {
-    COMPLETION_RATE: 0.8, // 80% of clients complete pre-assessments
+    COMPLETION_RATE: 0.8, // 80% completion rate - good for testing
   },
   MESSAGING: {
     CONVERSATIONS_PER_RELATIONSHIP: 1, // Direct therapy conversations
-    MESSAGES_PER_CONVERSATION: 3, // Reduced from 15 for testing
-    GROUP_CONVERSATIONS: 1, // Reduced from 3 for testing
-    SUPPORT_CONVERSATIONS: 1, // Reduced from 2 for testing
+    MESSAGES_PER_CONVERSATION: 15, // Increased to 15 messages - more realistic conversations
+    GROUP_CONVERSATIONS: 2, // Reduced to 2 group conversations - enough for testing
+    SUPPORT_CONVERSATIONS: 1, // Single support conversation - adequate for testing
   },
   WORKSHEETS: {
-    TEMPLATES: 3, // Reduced from 10 for testing
-    SUBMISSIONS_PER_RELATIONSHIP: 1, // Reduced from 3 for testing
-    COMPLETION_RATE: 0.75, // 75% completion rate for assigned worksheets
+    TEMPLATES: 4, // Reduced to 4 templates - good variety without overwhelm
+    SUBMISSIONS_PER_RELATIONSHIP: 4, // Increased to 4 submissions per relationship - more worksheet data
+    COMPLETION_RATE: 0.75, // 75% completion rate - realistic for testing
   },
   REVIEWS: {
-    REVIEW_RATE: 0.6, // 60% of completed relationships get reviews
+    REVIEW_RATE: 0.6, // 60% of relationships get reviews - good for testing
     AVERAGE_RATING: 4.2, // Average therapist rating
     DETAILED_REVIEW_RATE: 0.8, // 80% of reviews include written feedback
   },
   SESSIONS: {
-    SESSIONS_PER_RELATIONSHIP: 1, // Further reduced for testing
-    ACTIVITIES_PER_SESSION: 1, // Further reduced for testing
-    PROGRESS_TRACKING_RATE: 0.5, // Reduced to 50% for testing
+    SESSIONS_PER_RELATIONSHIP: 5, // Increased to 5 sessions per relationship - better session tracking
+    ACTIVITIES_PER_SESSION: 4, // Increased to 4 activities per session - more detailed sessions
+    PROGRESS_TRACKING_RATE: 0.7, // 70% tracking rate - good for testing
   },
   NOTIFICATIONS: {
-    DEVICES_PER_USER: 1.0, // Reduced from 1.3 for testing
-    NOTIFICATIONS_PER_USER: 1, // Ultra-minimal for testing
+    DEVICES_PER_USER: 1.0, // 1 device per user - keeps it simple
+    NOTIFICATIONS_PER_USER: 12, // Increased to 12 notifications per user - richer notification testing
     READ_RATE: 0.7, // 70% of notifications are read
   },
   THERAPIST_REQUESTS: {
-    REQUEST_RATE: 0.4, // 40% of clients make additional therapist requests
+    REQUEST_RATE: 0.4, // 40% of clients make therapist requests
     PENDING_RATE: 0.2, // 20% of requests are still pending
     PRIORITY_DISTRIBUTION: { high: 0.1, medium: 0.6, low: 0.3 },
   },
   AUDIT_LOGS: {
-    COUNT: 5, // Ultra-minimal for testing
-    SUCCESS_RATE: 0.95, // 95% of actions are successful
+    COUNT: 50, // Increased to 50 audit logs - more audit trail data
+    SUCCESS_RATE: 0.9, // 90% of actions are successful
     ADMIN_ACTION_RATE: 0.3, // 30% of logs are admin actions
   },
 };
-// Configuration constants - SIMPLE DEV SEEDING (reduced counts)
-export const SIMPLE_SEED_CONFIG = {
-  USERS: {
-    CLIENTS: 3, // Minimal clients for development
-    THERAPISTS: 3, // Minimal therapists for development  
-    ADMINS: 1, // Single admin for development
-    MODERATORS: 2, // Minimal moderators for development
-  },
-  COMMUNITIES: {
-    ADDITIONAL: 0, // No additional communities
-    POSTS_PER_COMMUNITY: 1, // Single post per community for testing
-    COMMENTS_PER_POST: 1, // Single comment per post for testing
-  },
-  RELATIONSHIPS: {
-    CLIENT_THERAPIST_RATIO: 0.5, // 50% of clients get assigned to therapists
-    MEETINGS_PER_RELATIONSHIP: 1, // Single meeting per relationship
-  },
-  ASSESSMENTS: {
-    COMPLETION_RATE: 0.5, // 50% of clients complete pre-assessments
-  },
-  MESSAGING: {
-    CONVERSATIONS_PER_RELATIONSHIP: 1, // Single conversation
-    MESSAGES_PER_CONVERSATION: 1, // Single message for testing
-    GROUP_CONVERSATIONS: 0, // No group conversations
-    SUPPORT_CONVERSATIONS: 0, // No support conversations
-  },
-  WORKSHEETS: {
-    TEMPLATES: 2, // Minimal worksheet templates
-    SUBMISSIONS_PER_RELATIONSHIP: 1, // Single submission
-    COMPLETION_RATE: 0.5, // 50% completion rate
-  },
-  REVIEWS: {
-    REVIEW_RATE: 0.3, // 30% of relationships get reviews
-    AVERAGE_RATING: 4.0, // Simple average rating
-    DETAILED_REVIEW_RATE: 0.5, // 50% of reviews include written feedback
-  },
-  SESSIONS: {
-    SESSIONS_PER_RELATIONSHIP: 1, // Single session per relationship
-    ACTIVITIES_PER_SESSION: 1, // Single activity per session
-    PROGRESS_TRACKING_RATE: 0.3, // Minimal progress tracking
-  },
-  NOTIFICATIONS: {
-    DEVICES_PER_USER: 1.0, // Single device per user
-    NOTIFICATIONS_PER_USER: 1, // Single notification per user
-    READ_RATE: 0.5, // 50% of notifications are read
-  },
-  THERAPIST_REQUESTS: {
-    REQUEST_RATE: 0.2, // 20% of clients make therapist requests
-    PENDING_RATE: 0.1, // 10% of requests are still pending
-    PRIORITY_DISTRIBUTION: { high: 0.1, medium: 0.5, low: 0.4 },
-  },
-  AUDIT_LOGS: {
-    COUNT: 2, // Minimal audit logs
-    SUCCESS_RATE: 0.9, // 90% of actions are successful
-    ADMIN_ACTION_RATE: 0.2, // 20% of logs are admin actions
-  },
-};
-
 // Illness communities configuration - Based on questionnaire disorders
 // These match the exact disorders from @mentara-commons/src/constants/questionnaire/questionnaire-mapping.ts
 export const ILLNESS_COMMUNITIES = [

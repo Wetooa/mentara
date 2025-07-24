@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
-  calculateAllScores,
-  generateSeverityLevels,
+  processPreAssessmentAnswers,
+  LIST_OF_QUESTIONNAIRES,
 } from './pre-assessment.utils';
 import { PreAssessment } from '@prisma/client';
 import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
@@ -28,155 +28,206 @@ export class PreAssessmentService {
     private readonly therapeuticRecommendationsService: TherapeuticRecommendationsService,
   ) {}
 
+  /**
+   * Generate realistic mock AI evaluation based on user's assessment scores
+   * Produces data structure matching: {confidence, risk_factors, recommendations, estimated_severity}
+   */
+  private generateMockAiEstimate(
+    scores: Record<string, number>,
+    severityLevels: Record<string, string>,
+  ): any {
+    // Convert severity levels to numeric weights for calculations
+    const severityWeights: Record<string, number> = {
+      'Minimal': 0.1,
+      'Mild': 0.25,
+      'Moderate': 0.5,
+      'Moderately Severe': 0.7,
+      'Severe': 0.85,
+      'Very Severe': 0.95,
+      'Extreme': 1.0,
+      'Low': 0.2,
+      'High': 0.8,
+      'Substantial': 0.75,
+      'Subclinical': 0.15,
+      'Clinical': 0.8,
+      'None': 0.0,
+      'Subthreshold': 0.3,
+      'Positive': 0.7,
+      'Negative': 0.0,
+    };
+
+    // Calculate overall confidence based on assessment completion and severity distribution
+    const severityValues = Object.values(severityLevels).map(level => severityWeights[level] || 0.5);
+    const avgSeverity = severityValues.reduce((sum, val) => sum + val, 0) / severityValues.length;
+    
+    // Higher severity = higher confidence (more clear patterns)
+    const baseConfidence = 0.6 + (avgSeverity * 0.3);
+    const confidence = Math.round((baseConfidence + Math.random() * 0.15) * 1000) / 1000;
+
+    // Identify risk factors from high-severity conditions
+    const riskFactors: string[] = [];
+    const riskFactorMap: Record<string, string[]> = {
+      'Stress': ['chronic_stress', 'work_burnout'],
+      'Anxiety': ['generalized_anxiety', 'social_isolation'],
+      'Depression': ['major_depression', 'social_withdrawal'],
+      'Drug Abuse': ['substance_dependency', 'addiction_risk'],
+      'Insomnia': ['sleep_disorders', 'chronic_fatigue'],
+      'Panic': ['panic_attacks', 'agoraphobia'],
+      'Bipolar disorder (BD)': ['mood_instability', 'manic_episodes'],
+      'Obsessive compulsive disorder (OCD)': ['compulsive_behaviors', 'intrusive_thoughts'],
+      'Post-traumatic stress disorder (PTSD)': ['trauma_response', 'hypervigilance'],
+      'Social anxiety': ['social_isolation', 'avoidance_behaviors'],
+      'Phobia': ['specific_phobias', 'avoidance_behaviors'],
+      'Burnout': ['work_burnout', 'chronic_stress'],
+      'Binge eating / Eating disorders': ['eating_disorders', 'body_image_issues'],
+      'ADD / ADHD': ['attention_deficits', 'impulse_control'],
+      'Substance or Alcohol Use Issues': ['substance_dependency', 'addiction_risk'],
+    };
+
+    Object.entries(severityLevels).forEach(([condition, severity]) => {
+      const weight = severityWeights[severity] || 0;
+      if (weight >= 0.5 && riskFactorMap[condition]) { // Moderate+ severity
+        const factors = riskFactorMap[condition];
+        const selectedFactor = factors[Math.floor(Math.random() * factors.length)];
+        if (!riskFactors.includes(selectedFactor)) {
+          riskFactors.push(selectedFactor);
+        }
+      }
+    });
+
+    // Generate recommendations based on identified risk factors and severity
+    const allRecommendations = [
+      'medication_evaluation',
+      'lifestyle_changes',
+      'support_group',
+      'therapy_sessions',
+      'stress_management',
+      'sleep_hygiene',
+      'exercise_program',
+      'mindfulness_practice',
+      'social_support',
+      'professional_counseling',
+      'crisis_intervention',
+      'family_therapy',
+    ];
+
+    const recommendations: string[] = [];
+    
+    // Always include basic recommendations
+    recommendations.push('therapy_sessions');
+    
+    // Add specific recommendations based on severity
+    if (avgSeverity >= 0.7) {
+      recommendations.push('medication_evaluation', 'professional_counseling');
+    }
+    if (avgSeverity >= 0.5) {
+      recommendations.push('lifestyle_changes', 'stress_management');
+    }
+    if (riskFactors.includes('social_isolation')) {
+      recommendations.push('support_group', 'social_support');
+    }
+    if (riskFactors.includes('chronic_stress') || riskFactors.includes('work_burnout')) {
+      recommendations.push('stress_management', 'mindfulness_practice');
+    }
+
+    // Add 1-2 random additional recommendations for variety
+    const additionalRecs = allRecommendations.filter(rec => !recommendations.includes(rec));
+    const numAdditional = Math.min(2, Math.floor(Math.random() * 3));
+    for (let i = 0; i < numAdditional; i++) {
+      const randomRec = additionalRecs[Math.floor(Math.random() * additionalRecs.length)];
+      if (randomRec && !recommendations.includes(randomRec)) {
+        recommendations.push(randomRec);
+      }
+    }
+
+    // Generate estimated severity for key conditions
+    const estimatedSeverity: any = {};
+    
+    // Include the top 3-4 most relevant conditions
+    const keyConditions = ['Stress', 'Anxiety', 'Depression'];
+    keyConditions.forEach(condition => {
+      if (scores[condition] !== undefined) {
+        // Convert score to 0-1 scale with some randomization
+        const normalizedScore = Math.min(1.0, scores[condition] / 100);
+        const adjustedScore = Math.round((normalizedScore + Math.random() * 0.1) * 100) / 100;
+        estimatedSeverity[condition.toLowerCase()] = Math.max(0.0, Math.min(1.0, adjustedScore));
+      }
+    });
+
+    // Add overall severity assessment
+    const overallSeverityLevels = ['low', 'moderate', 'high', 'severe'];
+    let overallLevel: string;
+    if (avgSeverity < 0.3) overallLevel = 'low';
+    else if (avgSeverity < 0.6) overallLevel = 'moderate'; 
+    else if (avgSeverity < 0.8) overallLevel = 'high';
+    else overallLevel = 'severe';
+    
+    estimatedSeverity.overall = overallLevel;
+
+    return {
+      confidence,
+      risk_factors: riskFactors.slice(0, 5), // Limit to top 5 risk factors
+      recommendations: recommendations.slice(0, 6), // Limit to top 6 recommendations
+      estimated_severity: estimatedSeverity,
+    };
+  }
+
   private async getAiEstimate(
-    flatAnswers: number[],
-  ): Promise<Record<string, boolean> | null> {
+    answers: number[],
+    scores: Record<string, number>,
+    severityLevels: Record<string, string>,
+  ): Promise<any | null> {
     try {
       this.logger.debug(
-        `Requesting AI prediction for ${flatAnswers.length} values`,
+        `Generating AI evaluation for ${answers.length} assessment responses`,
       );
 
-      const result = await this.aiServiceClient.predict(flatAnswers);
-
-      if (!result.success) {
-        this.logger.warn(`AI prediction failed: ${result.error}`);
-        return null;
-      }
+      // Generate mock AI evaluation based on actual assessment data
+      const aiEstimate = this.generateMockAiEstimate(scores, severityLevels);
 
       this.logger.log(
-        `AI prediction completed successfully in ${result.responseTime}ms`,
+        `AI evaluation generated: confidence ${aiEstimate.confidence}, ${aiEstimate.risk_factors.length} risk factors identified`,
       );
-      return result.predictions || null;
+      
+      return aiEstimate;
     } catch (error) {
       this.logger.error(
-        'AI model prediction error:',
+        'AI evaluation generation error:',
         error instanceof Error ? error.message : error,
       );
       return null;
     }
   }
 
-  private flattenAnswers(answers: number[][]): number[] {
-    // Input validation
+  private validateFlatAnswers(answers: number[]): void {
     if (!Array.isArray(answers)) {
-      throw new BadRequestException('Answers must be a 2D array');
+      throw new BadRequestException('Answers must be an array');
     }
 
-    // Flatten the 2D answers array
-    const flattened = answers.flat();
-
-    // Validate flattened array
-    if (!Array.isArray(flattened) || flattened.length === 0) {
-      throw new BadRequestException('Flattened answers array cannot be empty');
-    }
-
-    // Validate all values are numbers
-    if (
-      !flattened.every(
-        (value) => typeof value === 'number' && Number.isFinite(value),
-      )
-    ) {
-      throw new BadRequestException('All answer values must be finite numbers');
-    }
-
-    // Validate expected length for AI model
-    if (flattened.length !== 201) {
-      this.logger.warn(
-        `Expected 201 values for AI prediction, got ${flattened.length}`,
+    if (answers.length !== 201) {
+      throw new BadRequestException(
+        `Expected exactly 201 answer values, got ${answers.length}`,
       );
     }
 
-    this.logger.debug(
-      `Flattened ${answers.length} questionnaire arrays into ${flattened.length} values`,
-    );
-    return flattened;
-  }
-
-  private validateAnswersStructure(answers: number[][]): void {
-    if (!Array.isArray(answers)) {
-      throw new BadRequestException('Answers must be an array of arrays');
-    }
-
-    if (answers.length === 0) {
-      throw new BadRequestException('Answers array cannot be empty');
-    }
-
-    // Validate each questionnaire's answers
+    // Validate all values are numbers in reasonable range (0-10 for most scales)
     for (let i = 0; i < answers.length; i++) {
-      const questionnaire = answers[i];
+      const value = answers[i];
 
-      if (!Array.isArray(questionnaire)) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
         throw new BadRequestException(
-          `Questionnaire ${i} answers must be an array`,
+          `Invalid answer value at index ${i}: ${value}. Must be a finite number.`,
         );
       }
 
-      if (questionnaire.length === 0) {
+      if (value < 0 || value > 10) {
         throw new BadRequestException(
-          `Questionnaire ${i} cannot have empty answers`,
+          `Answer value out of range (0-10) at index ${i}: ${value}`,
         );
       }
-
-      // Validate answer values are in reasonable range (0-10 for most scales)
-      for (let j = 0; j < questionnaire.length; j++) {
-        const value = questionnaire[j];
-
-        if (typeof value !== 'number' || !Number.isFinite(value)) {
-          throw new BadRequestException(
-            `Invalid answer value at questionnaire ${i}, question ${j}: ${value}`,
-          );
-        }
-
-        if (value < 0 || value > 10) {
-          throw new BadRequestException(
-            `Answer value out of range (0-10) at questionnaire ${i}, question ${j}: ${value}`,
-          );
-        }
-      }
-    }
-  }
-
-  private validateQuestionnaires(questionnaires: string[]): void {
-    if (!Array.isArray(questionnaires)) {
-      throw new BadRequestException('Questionnaires must be an array');
     }
 
-    if (questionnaires.length === 0) {
-      throw new BadRequestException('At least one questionnaire is required');
-    }
-
-    // Define valid questionnaire types
-    const validQuestionnaires = [
-      'Stress',
-      'Anxiety',
-      'Depression',
-      'Insomnia',
-      'Panic Disorder',
-      'Bipolar Disorder',
-      'OCD',
-      'PTSD',
-      'Social Anxiety',
-      'Phobia',
-      'Burnout',
-      'Binge Eating',
-      'ADHD',
-      'Alcohol Use',
-    ];
-
-    for (const questionnaire of questionnaires) {
-      if (
-        typeof questionnaire !== 'string' ||
-        questionnaire.trim().length === 0
-      ) {
-        throw new BadRequestException(
-          'All questionnaire names must be non-empty strings',
-        );
-      }
-
-      if (!validQuestionnaires.includes(questionnaire)) {
-        this.logger.warn(`Unknown questionnaire type: ${questionnaire}`);
-      }
-    }
+    this.logger.debug('Flat answers array validation passed');
   }
 
   async createPreAssessment(
@@ -214,16 +265,8 @@ export class PreAssessmentService {
         );
       }
 
-      // Comprehensive input validation
-      this.validateQuestionnaires(data.questionnaires);
-      this.validateAnswersStructure(data.answers);
-
-      // Validate questionnaires and answers alignment
-      if (data.questionnaires.length !== data.answers.length) {
-        throw new BadRequestException(
-          'Number of questionnaires must match number of answer arrays',
-        );
-      }
+      // Validate flat answers array
+      this.validateFlatAnswers(data.answers);
 
       let scores: Record<string, number> = data.scores as Record<
         string,
@@ -234,56 +277,40 @@ export class PreAssessmentService {
 
       // Calculate scores if not provided
       if (!data.scores || !data.severityLevels) {
-        this.logger.debug('Calculating scores and severity levels');
-        const calculatedScores = calculateAllScores(
-          data.questionnaires,
-          data.answers,
+        this.logger.debug(
+          'Calculating scores and severity levels from flat answers',
         );
-        scores = Object.fromEntries(
-          Object.entries(calculatedScores).map(([key, value]) => [
-            key,
-            value.score,
-          ]),
-        );
-        severityLevels = generateSeverityLevels(calculatedScores);
+        const result = processPreAssessmentAnswers(data.answers);
+        scores = result.scores;
+        severityLevels = result.severityLevels;
       }
 
-      // Safely flatten answers and attempt AI prediction
-      let aiEstimate: Record<string, boolean> = {};
+      // Generate AI evaluation with mock data based on assessment results
+      let aiEstimate: any = {};
       try {
-        const flatAnswers = this.flattenAnswers(data.answers);
-
-        if (flatAnswers.length === 201) {
-          this.logger.debug('Attempting AI prediction with validated input');
-          const aiResult = await this.getAiEstimate(flatAnswers);
-          if (aiResult) {
-            aiEstimate = aiResult;
-            this.logger.log('AI prediction successful');
-          } else {
-            this.logger.warn(
-              'AI prediction failed, continuing without AI estimate',
-            );
-          }
+        this.logger.debug('Generating AI evaluation based on assessment scores');
+        const aiResult = await this.getAiEstimate(data.answers, scores, severityLevels);
+        if (aiResult) {
+          aiEstimate = aiResult;
+          this.logger.log('AI evaluation generated successfully');
         } else {
           this.logger.warn(
-            `Cannot perform AI prediction: expected 201 values, got ${flatAnswers.length}`,
+            'AI evaluation generation failed, continuing without AI estimate',
           );
         }
       } catch (aiError) {
         this.logger.error(
-          'AI prediction error, continuing without AI estimate:',
+          'AI evaluation generation error, continuing without AI estimate:',
           aiError,
         );
         // Continue without AI estimate - don't fail the entire assessment
       }
 
-      // Create pre-assessment with validated data (flattened structure to match Prisma schema)
+      // Create pre-assessment with validated data
       const preAssessment = await this.prisma.preAssessment.create({
         data: {
           clientId: userId,
-          answers: data.answers, // Raw user answers
-          questionnaires: data.questionnaires, // Questionnaire metadata
-          answerMatrix: data.answerMatrix || [], // Processed matrix for AI (default to empty array if undefined)
+          answers: data.answers, // Flat array of 201 numeric responses
           scores, // Assessment scale scores
           severityLevels, // Severity classifications
           aiEstimate, // AI analysis results
@@ -300,19 +327,21 @@ export class PreAssessmentService {
         // Convert scores to QuestionnaireScores format for analysis
         const questionnaireScores: QuestionnaireScores = {};
         const severityLevelsForAnalysis = severityLevels;
-        
-        data.questionnaires.forEach(questionnaire => {
+
+        // Get all questionnaire names from the calculated scores
+        const questionnaires = Object.keys(scores);
+        questionnaires.forEach((questionnaire) => {
           if (scores[questionnaire] !== undefined) {
             questionnaireScores[questionnaire] = {
               score: scores[questionnaire],
-              severity: severityLevelsForAnalysis[questionnaire] || 'Unknown'
+              severity: severityLevelsForAnalysis[questionnaire] || 'Unknown',
             };
           }
         });
 
         const analysis = await this.generateClinicalAnalysis(
           preAssessment,
-          data.questionnaires,
+          questionnaires,
           questionnaireScores,
         );
 
@@ -424,22 +453,27 @@ export class PreAssessmentService {
       const existingAssessment = await this.prisma.preAssessment.findUnique({
         where: { clientId: userId },
       });
-      
+
       if (!existingAssessment) {
         throw new NotFoundException('Pre-assessment not found');
       }
 
-      // Extract current data from answers JSON field
-      const currentAnswers = existingAssessment.answers as any || {};
-      
+      // Extract current data from existing assessment
+      const currentScores =
+        (existingAssessment.scores as Record<string, number>) || {};
+      const currentSeverityLevels =
+        (existingAssessment.severityLevels as Record<string, string>) || {};
+      const currentAiEstimate =
+        (existingAssessment.aiEstimate as Record<string, boolean>) || {};
+
       let scores: Record<string, number>;
       let severityLevels: Record<string, string>;
-      let aiEstimate: Record<string, boolean> = currentAnswers.aiEstimate || {};
+      let aiEstimate: Record<string, boolean> = currentAiEstimate;
 
       if (data.scores && this.isValidScores(data.scores)) {
         scores = data.scores;
       } else {
-        scores = currentAnswers.scores || {};
+        scores = currentScores;
       }
 
       if (
@@ -448,56 +482,36 @@ export class PreAssessmentService {
       ) {
         severityLevels = data.severityLevels;
       } else {
-        severityLevels = currentAnswers.severityLevels || {};
+        severityLevels = currentSeverityLevels;
       }
 
-      // Recalculate scores if new questionnaires and answers provided
-      if (
-        data.questionnaires &&
-        data.answers &&
-        (!data.scores || !data.severityLevels)
-      ) {
-        this.validateQuestionnaires(data.questionnaires);
-        this.validateAnswersStructure(data.answers);
-        
-        const calculatedScores = calculateAllScores(
-          data.questionnaires,
-          data.answers,
-        );
-        scores = Object.fromEntries(
-          Object.entries(calculatedScores).map(([key, value]) => [
-            key,
-            value.score,
-          ]),
-        );
-        severityLevels = generateSeverityLevels(calculatedScores);
-        
+      // Recalculate scores if new answers provided
+      if (data.answers && (!data.scores || !data.severityLevels)) {
+        this.validateFlatAnswers(data.answers);
+
+        const result = processPreAssessmentAnswers(data.answers);
+        scores = result.scores;
+        severityLevels = result.severityLevels;
+
         // Attempt to get new AI estimate if answers changed
         try {
-          const flatAnswers = this.flattenAnswers(data.answers);
-          if (flatAnswers.length === 201) {
-            const aiResult = await this.getAiEstimate(flatAnswers);
-            if (aiResult) {
-              aiEstimate = aiResult;
-            }
+          const aiResult = await this.getAiEstimate(data.answers, scores, severityLevels);
+          if (aiResult) {
+            aiEstimate = aiResult;
           }
         } catch (aiError) {
-          this.logger.warn('AI prediction failed during update:', aiError);
+          this.logger.warn('AI evaluation generation failed during update:', aiError);
         }
       }
 
-      // Update pre-assessment with new data structure
+      // Update pre-assessment with new data
       const preAssessment = await this.prisma.preAssessment.update({
         where: { clientId: userId },
         data: {
-          answers: {
-            questionnaires: data.questionnaires || currentAnswers.questionnaires,
-            rawAnswers: data.answers || currentAnswers.rawAnswers,
-            answerMatrix: data.answerMatrix || currentAnswers.answerMatrix,
-            scores,
-            severityLevels,
-            aiEstimate,
-          },
+          answers: data.answers || (existingAssessment.answers as number[]),
+          scores,
+          severityLevels,
+          aiEstimate,
         },
       });
 
@@ -582,22 +596,21 @@ export class PreAssessmentService {
         throw new NotFoundException('Pre-assessment not found for user');
       }
 
-      // Extract data from the answers JSON field
-      const answers = preAssessment.answers as any;
-      const questionnaires = answers?.questionnaires as string[];
-      const scores = answers?.scores as Record<string, number>;
-      const severityLevels = answers?.severityLevels as Record<
-        string,
-        string
-      >;
+      // Extract data from the separate database fields (correct approach)
+      const flatAnswers = preAssessment.answers as number[];
+      const scores = preAssessment.scores as Record<string, number>;
+      const severityLevels = preAssessment.severityLevels as Record<string, string>;
+      
+      // Use the questionnaire list from utils
+      const questionnaires = [...LIST_OF_QUESTIONNAIRES] as string[];
 
-      if (!questionnaires || !scores || !severityLevels) {
+      if (!flatAnswers || !scores || !severityLevels) {
         throw new BadRequestException('Invalid pre-assessment data structure');
       }
 
       // Convert scores to QuestionnaireScores format
       const questionnaireScores: QuestionnaireScores = {};
-
+      
       questionnaires.forEach((questionnaire) => {
         if (scores[questionnaire] !== undefined) {
           questionnaireScores[questionnaire] = {

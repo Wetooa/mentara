@@ -40,9 +40,19 @@ export class WebSocketAuthService {
     const clientIp = this.getClientIp(socket);
 
     try {
+      this.logger.log(`🔐 [WebSocketAuth] Authenticating socket ${socket.id} from IP ${clientIp}`);
+      
+      // Log handshake details for debugging
+      this.logger.debug(`🔍 [WebSocketAuth] Handshake details:`, {
+        headers: socket.handshake.headers,
+        auth: socket.handshake.auth,
+        query: socket.handshake.query,
+        url: socket.handshake.url,
+      });
+
       // Rate limiting check
       if (!this.checkRateLimit(clientIp)) {
-        this.logger.warn(`Rate limit exceeded for IP ${clientIp}`);
+        this.logger.warn(`⚠️ [WebSocketAuth] Rate limit exceeded for IP ${clientIp}`);
         this.recordConnectionAttempt(clientIp, false);
         return null;
       }
@@ -51,18 +61,36 @@ export class WebSocketAuthService {
       const token = this.extractToken(socket);
 
       if (!token) {
-        this.logger.warn(`Socket ${socket.id} connected without valid token`);
+        this.logger.warn(`❌ [WebSocketAuth] Socket ${socket.id} connected without valid token`);
+        this.logger.warn(`🔍 [WebSocketAuth] Token extraction failed - available sources:`, {
+          authHeader: socket.handshake.headers.authorization ? 'present' : 'missing',
+          authToken: socket.handshake.auth?.token ? 'present' : 'missing', 
+          queryToken: socket.handshake.query?.token ? 'present' : 'missing',
+          cookies: socket.handshake.headers.cookie ? 'present' : 'missing',
+        });
         this.recordConnectionAttempt(clientIp, false);
         return null;
       }
 
+      this.logger.log(`✅ [WebSocketAuth] Token extracted successfully for socket ${socket.id}`);
+      this.logger.debug(`🔑 [WebSocketAuth] Token preview: ${token.substring(0, 20)}...`);
+
       // Verify JWT token with additional security checks
-      const payload = this.jwtService.verify(token, {
-        algorithms: ['HS256'], // Restrict to specific algorithm
-      });
+      let payload;
+      try {
+        payload = this.jwtService.verify(token, {
+          algorithms: ['HS256'], // Restrict to specific algorithm
+        });
+        this.logger.log(`✅ [WebSocketAuth] JWT token verified successfully for socket ${socket.id}`);
+      } catch (jwtError) {
+        this.logger.warn(`❌ [WebSocketAuth] JWT verification failed for socket ${socket.id}:`, jwtError.message);
+        this.recordConnectionAttempt(clientIp, false);
+        return null;
+      }
 
       if (!payload.sub || !payload.email) {
-        this.logger.warn(`Socket ${socket.id} has invalid token payload`);
+        this.logger.warn(`❌ [WebSocketAuth] Socket ${socket.id} has invalid token payload - missing sub or email`);
+        this.logger.debug(`🔍 [WebSocketAuth] Payload:`, { sub: payload.sub, email: payload.email, iat: payload.iat, exp: payload.exp });
         this.recordConnectionAttempt(clientIp, false);
         return null;
       }
@@ -71,7 +99,7 @@ export class WebSocketAuthService {
       const tokenAge = Date.now() / 1000 - payload.iat;
       if (tokenAge > 24 * 60 * 60) {
         // 24 hours
-        this.logger.warn(`Socket ${socket.id} using stale token`);
+        this.logger.warn(`❌ [WebSocketAuth] Socket ${socket.id} using stale token (age: ${Math.round(tokenAge / 3600)} hours)`);
         this.recordConnectionAttempt(clientIp, false);
         return null;
       }
@@ -80,13 +108,14 @@ export class WebSocketAuthService {
       const existingConnections = this.getUserConnectionCount(payload.sub);
       if (existingConnections >= this.MAX_CONNECTIONS_PER_USER) {
         this.logger.warn(
-          `User ${payload.sub} exceeded connection limit (${existingConnections})`,
+          `❌ [WebSocketAuth] User ${payload.sub} exceeded connection limit (${existingConnections}/${this.MAX_CONNECTIONS_PER_USER})`,
         );
         this.recordConnectionAttempt(clientIp, false);
         return null;
       }
 
       // Validate user exists in database and is not deactivated
+      this.logger.debug(`🔍 [WebSocketAuth] Looking up user ${payload.sub} in database...`);
       const user = await this.prisma.user.findUnique({
         where: {
           id: payload.sub,
@@ -103,15 +132,17 @@ export class WebSocketAuthService {
       });
 
       if (!user) {
-        this.logger.warn(`Socket ${socket.id} user not found or deactivated`);
+        this.logger.warn(`❌ [WebSocketAuth] Socket ${socket.id} user ${payload.sub} not found or deactivated`);
         this.recordConnectionAttempt(clientIp, false);
         return null;
       }
 
+      this.logger.log(`✅ [WebSocketAuth] User ${payload.sub} found in database with role ${user.role}`);
+
       // Check if user account is locked
       if (user.lockoutUntil && user.lockoutUntil > new Date()) {
         this.logger.warn(
-          `Socket ${socket.id} user account is locked until ${user.lockoutUntil}`,
+          `❌ [WebSocketAuth] Socket ${socket.id} user account is locked until ${user.lockoutUntil}`,
         );
         this.recordConnectionAttempt(clientIp, false);
         return null;
@@ -132,12 +163,14 @@ export class WebSocketAuthService {
         `Socket ${socket.id} authenticated as user ${user.id} with role ${user.role} (${authenticatedUser.connectionCount} connections)`,
       );
 
+      this.logger.log(`🎉 [WebSocketAuth] Socket ${socket.id} authenticated successfully as user ${user.id} (${user.role})`);
       return authenticatedUser;
     } catch (error) {
       this.logger.error(
-        `Socket ${socket.id} authentication failed:`,
+        `💥 [WebSocketAuth] Socket ${socket.id} authentication failed:`,
         error instanceof Error ? error.message : error,
       );
+      this.logger.error(`🔍 [WebSocketAuth] Full error stack:`, error instanceof Error ? error.stack : error);
       this.recordConnectionAttempt(clientIp, false);
       return null;
     }

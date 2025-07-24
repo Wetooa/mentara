@@ -23,3 +23,14 @@ export interface TherapistRecommendation {
   bio?: string;
   profileImage?: string;
 }
+
+// Client profile DTO interface
+export interface ClientProfileDto {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}

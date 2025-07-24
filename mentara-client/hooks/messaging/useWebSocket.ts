@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { messagingWebSocket } from '@/lib/messaging-websocket';
+import { useSocketConnection } from '@/hooks/useSocketConnection';
 import type { Message } from '@/components/messages/types';
 
 interface TypingData {
@@ -17,83 +17,65 @@ interface UserStatusData {
 }
 
 export function useMessagingWebSocket() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Use centralized socket connection
+  const {
+    connectionState,
+    isConnected,
+    error: connectionError,
+    subscribeToEvent,
+    emit,
+    reconnect
+  } = useSocketConnection({
+    subscriberId: 'messaging-websocket',
+    enableRealtime: true,
+  });
+
+  const [error, setError] = useState<string | null>(connectionError);
 
   const connect = useCallback(async () => {
-    if (messagingWebSocket.isSocketConnected()) return;
+    if (isConnected) return;
 
     try {
       setError(null);
-      await messagingWebSocket.connect();
+      await reconnect();
     } catch (err) {
       setError('Failed to connect to messaging service');
-      setIsConnected(false);
     }
-  }, []);
+  }, [isConnected, reconnect]);
 
   const disconnect = useCallback(() => {
-    messagingWebSocket.disconnect();
-    setIsConnected(false);
+    // Socket manager handles disconnection automatically
+    // when no more subscribers are active
   }, []);
 
   const joinConversation = useCallback((conversationId: string) => {
-    messagingWebSocket.joinConversation(conversationId);
-  }, []);
+    emit('join_conversation', { conversationId });
+  }, [emit]);
 
   const leaveConversation = useCallback((conversationId: string) => {
-    messagingWebSocket.leaveConversation(conversationId);
-  }, []);
+    emit('leave_conversation', { conversationId });
+  }, [emit]);
 
   const sendTypingIndicator = useCallback((conversationId: string, isTyping: boolean = true) => {
-    messagingWebSocket.sendTypingIndicator(conversationId, isTyping);
-  }, []);
+    emit('typing_indicator', { conversationId, isTyping });
+  }, [emit]);
 
   const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
-    messagingWebSocket.on('new_message', callback);
-    return () => messagingWebSocket.off('new_message', callback);
-  }, []);
+    return subscribeToEvent('new_message', callback);
+  }, [subscribeToEvent]);
 
   const subscribeToTyping = useCallback((callback: (data: TypingData) => void) => {
-    messagingWebSocket.on('typing_indicator', callback);
-    return () => messagingWebSocket.off('typing_indicator', callback);
-  }, []);
+    return subscribeToEvent('typing_indicator', callback);
+  }, [subscribeToEvent]);
 
   const subscribeToUserStatus = useCallback((callback: (data: UserStatusData) => void) => {
-    messagingWebSocket.on('user_status_changed', callback);
-    return () => messagingWebSocket.off('user_status_changed', callback);
-  }, []);
+    return subscribeToEvent('user_status_changed', callback);
+  }, [subscribeToEvent]);
 
-  // Setup connection event listeners
+  // Sync error state with connection error
   useEffect(() => {
-    const handleConnected = () => {
-      setIsConnected(true);
-      setError(null);
-    };
-
-    const handleDisconnected = () => {
-      setIsConnected(false);
-    };
-
-    const handleError = (errorMessage: string) => {
-      setError(errorMessage);
-      setIsConnected(false);
-    };
-
-    messagingWebSocket.on('connected', handleConnected);
-    messagingWebSocket.on('disconnected', handleDisconnected);
-    messagingWebSocket.on('error', handleError);
-
-    // Auto-connect on mount
-    connect();
-
-    return () => {
-      messagingWebSocket.off('connected', handleConnected);
-      messagingWebSocket.off('disconnected', handleDisconnected);
-      messagingWebSocket.off('error', handleError);
-      disconnect();
-    };
-  }, [connect, disconnect]);
+    setError(connectionError);
+  }, [connectionError]);
 
   return {
     isConnected,
@@ -106,5 +88,6 @@ export function useMessagingWebSocket() {
     subscribeToMessages,
     subscribeToTyping,
     subscribeToUserStatus,
+    connectionState,
   };
 }

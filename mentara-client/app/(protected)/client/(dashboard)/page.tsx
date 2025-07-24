@@ -9,9 +9,7 @@ import {
 import { useNotifications } from "@/hooks/notifications/useNotifications";
 import {
   transformDashboardData,
-  createFallbackDashboardData,
 } from "@/lib/transformers/dashboardTransformer";
-import type { UserDashboardData } from "@/types/api/dashboard";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
@@ -76,29 +74,23 @@ export default function DashboardPage() {
     isDashboardLoading || isNotificationsLoading || isCommunicationsLoading;
 
   const handleMessageTherapist = () => {
-    // TODO: Navigate to messages page
-    // Navigation functionality to be implemented
+    router.push('/client/messages');
   };
 
   const handleScheduleSession = () => {
-    // TODO: Navigate to scheduling page
-    // Navigation functionality to be implemented
+    router.push('/client/booking');
   };
 
   const handleViewAllMessages = () => {
-    // TODO: Navigate to messages page
-    // Navigation functionality to be implemented
+    router.push('/client/messages');
   };
 
   const handleContactSelect = (contactId: string) => {
-    // TODO: Navigate to specific conversation
-    // Navigation functionality to be implemented
-    void contactId; // Acknowledge parameter
+    router.push(`/client/messages?contact=${contactId}`);
   };
 
   const handleBookSession = () => {
-    // TODO: Navigate to booking page
-    // Navigation functionality to be implemented
+    router.push('/client/booking');
   };
 
   const handleRetry = () => {
@@ -107,7 +99,7 @@ export default function DashboardPage() {
 
   // Navigation handlers for clickable dashboard cards
   const handleUpcomingSessionsClick = () => {
-    router.push('/client/booking');
+    router.push('/client/sessions/upcoming');
   };
 
   const handlePendingWorksheetsClick = () => {
@@ -115,8 +107,7 @@ export default function DashboardPage() {
   };
 
   const handleCompletedSessionsClick = () => {
-    // Could navigate to a sessions history page in the future
-    console.log('Navigate to completed sessions');
+    router.push('/client/sessions/completed');
   };
 
   const handleCompletedWorksheetsClick = () => {
@@ -206,19 +197,22 @@ export default function DashboardPage() {
         onTherapistsClick={handleTherapistsClick}
       />
 
-      {/* Main Dashboard Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      {/* Main Dashboard Content - Responsive layout with calendar prominence */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/* Primary Column - Full-Width Sessions Calendar */}
+        <div className="lg:col-span-2 space-y-4 lg:space-y-6">
+          {/* Sessions Calendar - Full Width Modern Design */}
+          <UpcomingSessionsCalendar className="h-full" />
+          
+          {/* Secondary Content - Sessions and Worksheets */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
-            <UpcomingSessionsCalendar />
+            <WorksheetStatus worksheets={dashboardData.worksheets} />
           </div>
-          <WorksheetStatus worksheets={dashboardData.worksheets} />
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
+        {/* Right Sidebar - Therapist, Communications, Progress, and Notifications */}
+        <div className="space-y-4 lg:space-y-6">
           <AssignedTherapist
             assignedTherapists={dashboardApiData?.assignedTherapists || []}
             isLoading={isDashboardLoading}

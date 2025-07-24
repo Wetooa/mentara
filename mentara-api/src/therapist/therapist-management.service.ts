@@ -65,6 +65,8 @@ export class TherapistManagementService {
       });
       return {
         ...therapist,
+        // Map database fields to frontend-expected fields
+        specialties: therapist.areasOfExpertise || [],
         treatmentSuccessRates:
           (therapist.treatmentSuccessRates as Record<string, any>) || {},
         hourlyRate: therapist.hourlyRate,
@@ -158,6 +160,8 @@ export class TherapistManagementService {
       });
       return {
         ...updatedTherapist,
+        // Map database fields to frontend-expected fields
+        specialties: updatedTherapist.areasOfExpertise || [],
         treatmentSuccessRates:
           (updatedTherapist.treatmentSuccessRates as Record<string, any>) || {},
         hourlyRate: updatedTherapist.hourlyRate,
@@ -252,6 +256,8 @@ export class TherapistManagementService {
       });
       return {
         ...therapist,
+        // Map database fields to frontend-expected fields
+        specialties: therapist.areasOfExpertise || [],
         treatmentSuccessRates:
           (therapist.treatmentSuccessRates as Record<string, any>) || {},
         hourlyRate: therapist.hourlyRate,
@@ -281,6 +287,8 @@ export class TherapistManagementService {
       });
       return {
         ...updatedTherapist,
+        // Map database fields to frontend-expected fields
+        specialties: updatedTherapist.areasOfExpertise || [],
         treatmentSuccessRates:
           (updatedTherapist.treatmentSuccessRates as Record<string, any>) || {},
         hourlyRate: updatedTherapist.hourlyRate,

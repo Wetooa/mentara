@@ -131,6 +131,51 @@ export class MeetingsController {
     return this.meetingsService.getUpcomingMeetings(userId, limit);
   }
 
+  @Get('completed')
+  async getCompletedMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.meetingsService.getCompletedMeetings(userId, limit);
+  }
+
+  @Get('cancelled')
+  async getCancelledMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.meetingsService.getCancelledMeetings(userId, limit);
+  }
+
+  @Get('in-progress')
+  async getInProgressMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.meetingsService.getInProgressMeetings(userId, limit);
+  }
+
+  @Get()
+  async getAllMeetings(
+    @CurrentUserId() userId: string,
+    @Query('status') status?: string,
+    @Query('type') type?: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+  ) {
+    const queryOptions = {
+      status,
+      type,
+      limit: limit ? Number(limit) : undefined,
+      offset: offset ? Number(offset) : undefined,
+      dateFrom,
+      dateTo,
+    };
+    return this.meetingsService.getAllMeetings(userId, queryOptions);
+  }
+
   @Post(':id/session')
   @HttpCode(HttpStatus.CREATED)
   async saveMeetingSession(

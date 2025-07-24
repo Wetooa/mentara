@@ -126,38 +126,6 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
     [debouncedSearch]
   );
 
-  const renderSuggestion = (suggestion: User) => (
-    <CommandItem
-      key={suggestion.id}
-      value={`${suggestion.firstName} ${suggestion.lastName} ${suggestion.email}`}
-      onSelect={() => handleSuggestionSelected(suggestion)}
-      className="flex items-center gap-3 p-3 cursor-pointer"
-      aria-label={`${suggestion.firstName} ${suggestion.lastName}, ${suggestion.role}, ${suggestion.email}`}
-    >
-      <Avatar className="w-8 h-8">
-        <AvatarImage src={suggestion.avatarUrl} alt={`${suggestion.firstName} ${suggestion.lastName}`} />
-        <AvatarFallback>
-          {suggestion.firstName.charAt(0)}
-          {suggestion.lastName.charAt(0)}
-        </AvatarFallback>
-      </Avatar>
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-medium text-sm truncate">
-            {suggestion.firstName} {suggestion.lastName}
-          </p>
-          <Badge variant="secondary" className={cn('text-xs', getRoleColor(suggestion.role))}>
-            <span className="flex items-center gap-1">
-              {getRoleIcon(suggestion.role)}
-              {suggestion.role}
-            </span>
-          </Badge>
-        </div>
-        <p className="text-xs text-muted-foreground truncate">{suggestion.email}</p>
-      </div>
-    </CommandItem>
-  );
 
 
 
@@ -284,7 +252,38 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
                   
                   {!isLoading && suggestions.length > 0 && (
                     <CommandGroup>
-                      {suggestions.map((suggestion) => renderSuggestion(suggestion))}
+                      {suggestions.map((suggestion) => (
+                        <CommandItem
+                          key={suggestion.id}
+                          value={`${suggestion.firstName} ${suggestion.lastName} ${suggestion.email}`}
+                          onSelect={() => handleSuggestionSelected(suggestion)}
+                          className="flex items-center gap-3 p-3 cursor-pointer"
+                          aria-label={`${suggestion.firstName} ${suggestion.lastName}, ${suggestion.role}, ${suggestion.email}`}
+                        >
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={suggestion.avatarUrl} alt={`${suggestion.firstName} ${suggestion.lastName}`} />
+                            <AvatarFallback>
+                              {suggestion.firstName.charAt(0)}
+                              {suggestion.lastName.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-sm truncate">
+                                {suggestion.firstName} {suggestion.lastName}
+                              </p>
+                              <Badge variant="secondary" className={cn('text-xs', getRoleColor(suggestion.role))}>
+                                <span className="flex items-center gap-1">
+                                  {getRoleIcon(suggestion.role)}
+                                  {suggestion.role}
+                                </span>
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">{suggestion.email}</p>
+                          </div>
+                        </CommandItem>
+                      ))}
                     </CommandGroup>
                   )}
                 </CommandList>

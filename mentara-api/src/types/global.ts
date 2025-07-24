@@ -16,7 +16,7 @@ export interface JwtPayload {
   exp?: number;
 }
 
-// Extended Express Request interface  
+// Extended Express Request interface
 declare global {
   namespace Express {
     interface Request {

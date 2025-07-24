@@ -10,6 +10,7 @@ import {
   Smile,
 } from "lucide-react";
 import { Message, Attachment } from "./types";
+import { formatFileSize } from "@/lib/utils/common";
 
 interface MessageBubbleProps {
   message: Message;
@@ -86,12 +87,6 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
     }
   };
 
-  // Function to format file size
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-  };
 
   // Function to render message status
   const renderMessageStatus = () => {

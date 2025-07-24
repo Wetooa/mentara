@@ -1,0 +1,80 @@
+daa3a948314043d92120af7213152e33
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TherapistClientController = void 0;
+const common_1 = require("@nestjs/common");
+const jwt_auth_guard_1 = require("../../auth/guards/jwt-auth.guard");
+const current_user_id_decorator_1 = require("../../auth/decorators/current-user-id.decorator");
+const therapist_management_service_1 = require("../therapist-management.service");
+// Using any type to avoid conflicts with service definitions
+let TherapistClientController = class TherapistClientController {
+    therapistManagementService;
+    constructor(therapistManagementService) {
+        this.therapistManagementService = therapistManagementService;
+    }
+    async getAssignedPatients(therapistId) {
+        return this.therapistManagementService.getAssignedPatients(therapistId);
+    }
+    async getAllClients(therapistId) {
+        return this.therapistManagementService.getAllClients(therapistId);
+    }
+    async getMatchedClients(therapistId) {
+        return this.therapistManagementService.getMatchedClients(therapistId);
+    }
+    async getClientById(therapistId, clientId) {
+        return this.therapistManagementService.getClientById(therapistId, clientId);
+    }
+};
+exports.TherapistClientController = TherapistClientController;
+__decorate([
+    (0, common_1.Get)('assigned'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], TherapistClientController.prototype, "getAssignedPatients", null);
+__decorate([
+    (0, common_1.Get)('all'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], TherapistClientController.prototype, "getAllClients", null);
+__decorate([
+    (0, common_1.Get)('matched'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], TherapistClientController.prototype, "getMatchedClients", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], TherapistClientController.prototype, "getClientById", null);
+exports.TherapistClientController = TherapistClientController = __decorate([
+    (0, common_1.Controller)('therapist/clients'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof therapist_management_service_1.TherapistManagementService !== "undefined" && therapist_management_service_1.TherapistManagementService) === "function" ? _a : Object])
+], TherapistClientController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL3RoZXJhcGlzdC9jb250cm9sbGVycy90aGVyYXBpc3QtY2xpZW50LmNvbnRyb2xsZXIudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLDJDQU93QjtBQUN4QixxRUFBZ0U7QUFDaEUsK0ZBQWdGO0FBQ2hGLGtGQUE2RTtBQUM3RSw2REFBNkQ7QUFJdEQsSUFBTSx5QkFBeUIsR0FBL0IsTUFBTSx5QkFBeUI7SUFFakI7SUFEbkIsWUFDbUIsMEJBQXNEO1FBQXRELCtCQUEwQixHQUExQiwwQkFBMEIsQ0FBNEI7SUFDdEUsQ0FBQztJQUlFLEFBQU4sS0FBSyxDQUFDLG1CQUFtQixDQUNOLFdBQW1CO1FBRXBDLE9BQU8sSUFBSSxDQUFDLDBCQUEwQixDQUFDLG1CQUFtQixDQUFDLFdBQVcsQ0FBQyxDQUFDO0lBQzFFLENBQUM7SUFJSyxBQUFOLEtBQUssQ0FBQyxhQUFhLENBQWtCLFdBQW1CO1FBQ3RELE9BQU8sSUFBSSxDQUFDLDBCQUEwQixDQUFDLGFBQWEsQ0FBQyxXQUFXLENBQUMsQ0FBQztJQUNwRSxDQUFDO0lBSUssQUFBTixLQUFLLENBQUMsaUJBQWlCLENBQ0osV0FBbUI7UUFFcEMsT0FBTyxJQUFJLENBQUMsMEJBQTBCLENBQUMsaUJBQWlCLENBQUMsV0FBVyxDQUFDLENBQUM7SUFDeEUsQ0FBQztJQUlLLEFBQU4sS0FBSyxDQUFDLGFBQWEsQ0FDQSxXQUFtQixFQUN2QixRQUFnQjtRQUU3QixPQUFPLElBQUksQ0FBQywwQkFBMEIsQ0FBQyxhQUFhLENBQUMsV0FBVyxFQUFFLFFBQVEsQ0FBQyxDQUFDO0lBQzlFLENBQUM7Q0FDRixDQUFBO0FBbkNZLDhEQUF5QjtBQU85QjtJQUZMLElBQUEsWUFBRyxFQUFDLFVBQVUsQ0FBQztJQUNmLElBQUEsaUJBQVEsRUFBQyxtQkFBVSxDQUFDLEVBQUUsQ0FBQztJQUVyQixXQUFBLElBQUEseUNBQWEsR0FBRSxDQUFBOzs7d0RBQ2YsT0FBTyxvQkFBUCxPQUFPO29FQUVUO0FBSUs7SUFGTCxJQUFBLFlBQUcsRUFBQyxLQUFLLENBQUM7SUFDVixJQUFBLGlCQUFRLEVBQUMsbUJBQVUsQ0FBQyxFQUFFLENBQUM7SUFDSCxXQUFBLElBQUEseUNBQWEsR0FBRSxDQUFBOzs7d0RBQXVCLE9BQU8sb0JBQVAsT0FBTzs4REFFakU7QUFJSztJQUZMLElBQUEsWUFBRyxFQUFDLFNBQVMsQ0FBQztJQUNkLElBQUEsaUJBQVEsRUFBQyxtQkFBVSxDQUFDLEVBQUUsQ0FBQztJQUVyQixXQUFBLElBQUEseUNBQWEsR0FBRSxDQUFBOzs7d0RBQ2YsT0FBTyxvQkFBUCxPQUFPO2tFQUVUO0FBSUs7SUFGTCxJQUFBLFlBQUcsRUFBQyxLQUFLLENBQUM7SUFDVixJQUFBLGlCQUFRLEVBQUMsbUJBQVUsQ0FBQyxFQUFFLENBQUM7SUFFckIsV0FBQSxJQUFBLHlDQUFhLEdBQUUsQ0FBQTtJQUNmLFdBQUEsSUFBQSxjQUFLLEVBQUMsSUFBSSxDQUFDLENBQUE7Ozt3REFDWCxPQUFPLG9CQUFQLE9BQU87OERBRVQ7b0NBbENVLHlCQUF5QjtJQUZyQyxJQUFBLG1CQUFVLEVBQUMsbUJBQW1CLENBQUM7SUFDL0IsSUFBQSxrQkFBUyxFQUFDLDZCQUFZLENBQUM7eURBR3lCLHlEQUEwQixvQkFBMUIseURBQTBCO0dBRjlELHlCQUF5QixDQW1DckMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL3RoZXJhcGlzdC9jb250cm9sbGVycy90aGVyYXBpc3QtY2xpZW50LmNvbnRyb2xsZXIudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHtcbiAgQ29udHJvbGxlcixcbiAgR2V0LFxuICBQYXJhbSxcbiAgSHR0cENvZGUsXG4gIEh0dHBTdGF0dXMsXG4gIFVzZUd1YXJkcyxcbn0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgSnd0QXV0aEd1YXJkIH0gZnJvbSAnLi4vLi4vYXV0aC9ndWFyZHMvand0LWF1dGguZ3VhcmQnO1xuaW1wb3J0IHsgQ3VycmVudFVzZXJJZCB9IGZyb20gJy4uLy4uL2F1dGgvZGVjb3JhdG9ycy9jdXJyZW50LXVzZXItaWQuZGVjb3JhdG9yJztcbmltcG9ydCB7IFRoZXJhcGlzdE1hbmFnZW1lbnRTZXJ2aWNlIH0gZnJvbSAnLi4vdGhlcmFwaXN0LW1hbmFnZW1lbnQuc2VydmljZSc7XG4vLyBVc2luZyBhbnkgdHlwZSB0byBhdm9pZCBjb25mbGljdHMgd2l0aCBzZXJ2aWNlIGRlZmluaXRpb25zXG5cbkBDb250cm9sbGVyKCd0aGVyYXBpc3QvY2xpZW50cycpXG5AVXNlR3VhcmRzKEp3dEF1dGhHdWFyZClcbmV4cG9ydCBjbGFzcyBUaGVyYXBpc3RDbGllbnRDb250cm9sbGVyIHtcbiAgY29uc3RydWN0b3IoXG4gICAgcHJpdmF0ZSByZWFkb25seSB0aGVyYXBpc3RNYW5hZ2VtZW50U2VydmljZTogVGhlcmFwaXN0TWFuYWdlbWVudFNlcnZpY2UsXG4gICkge31cblxuICBAR2V0KCdhc3NpZ25lZCcpXG4gIEBIdHRwQ29kZShIdHRwU3RhdHVzLk9LKVxuICBhc3luYyBnZXRBc3NpZ25lZFBhdGllbnRzKFxuICAgIEBDdXJyZW50VXNlcklkKCkgdGhlcmFwaXN0SWQ6IHN0cmluZyxcbiAgKTogUHJvbWlzZTxhbnlbXT4ge1xuICAgIHJldHVybiB0aGlzLnRoZXJhcGlzdE1hbmFnZW1lbnRTZXJ2aWNlLmdldEFzc2lnbmVkUGF0aWVudHModGhlcmFwaXN0SWQpO1xuICB9XG5cbiAgQEdldCgnYWxsJylcbiAgQEh0dHBDb2RlKEh0dHBTdGF0dXMuT0spXG4gIGFzeW5jIGdldEFsbENsaWVudHMoQEN1cnJlbnRVc2VySWQoKSB0aGVyYXBpc3RJZDogc3RyaW5nKTogUHJvbWlzZTxhbnlbXT4ge1xuICAgIHJldHVybiB0aGlzLnRoZXJhcGlzdE1hbmFnZW1lbnRTZXJ2aWNlLmdldEFsbENsaWVudHModGhlcmFwaXN0SWQpO1xuICB9XG5cbiAgQEdldCgnbWF0Y2hlZCcpXG4gIEBIdHRwQ29kZShIdHRwU3RhdHVzLk9LKVxuICBhc3luYyBnZXRNYXRjaGVkQ2xpZW50cyhcbiAgICBAQ3VycmVudFVzZXJJZCgpIHRoZXJhcGlzdElkOiBzdHJpbmcsXG4gICk6IFByb21pc2U8YW55PiB7XG4gICAgcmV0dXJuIHRoaXMudGhlcmFwaXN0TWFuYWdlbWVudFNlcnZpY2UuZ2V0TWF0Y2hlZENsaWVudHModGhlcmFwaXN0SWQpO1xuICB9XG5cbiAgQEdldCgnOmlkJylcbiAgQEh0dHBDb2RlKEh0dHBTdGF0dXMuT0spXG4gIGFzeW5jIGdldENsaWVudEJ5SWQoXG4gICAgQEN1cnJlbnRVc2VySWQoKSB0aGVyYXBpc3RJZDogc3RyaW5nLFxuICAgIEBQYXJhbSgnaWQnKSBjbGllbnRJZDogc3RyaW5nLFxuICApOiBQcm9taXNlPGFueT4ge1xuICAgIHJldHVybiB0aGlzLnRoZXJhcGlzdE1hbmFnZW1lbnRTZXJ2aWNlLmdldENsaWVudEJ5SWQodGhlcmFwaXN0SWQsIGNsaWVudElkKTtcbiAgfVxufVxuIl0sInZlcnNpb24iOjN9

@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useRef } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useState, useRef, use } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -18,21 +18,31 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUpdateProfileWithFiles } from '@/hooks/profile/useProfile';
-import { PublicProfileResponse, UpdateProfileRequest } from '@/lib/api/services/profile';
-import { Camera, Upload, X } from 'lucide-react';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUpdateProfileWithFiles } from "@/hooks/profile/useProfile";
+import {
+  PublicProfileResponse,
+  UpdateProfileRequest,
+} from "@/lib/api/services/profile";
+import { Camera, Upload, X } from "lucide-react";
+import { useAuth } from "@/hooks";
 
 // Form validation schema
 const profileEditSchema = z.object({
-  firstName: z.string().min(1, 'First name is required').max(50, 'First name too long'),
-  middleName: z.string().max(50, 'Middle name too long').optional(),
-  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name too long'),
-  bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
+  firstName: z
+    .string()
+    .min(1, "First name is required")
+    .max(50, "First name too long"),
+  middleName: z.string().max(50, "Middle name too long").optional(),
+  lastName: z
+    .string()
+    .min(1, "Last name is required")
+    .max(50, "Last name too long"),
+  bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
 });
 
 type ProfileEditFormData = z.infer<typeof profileEditSchema>;
@@ -43,24 +53,32 @@ interface ProfileEditModalProps {
   profile: PublicProfileResponse;
 }
 
-export function ProfileEditModal({ isOpen, onClose, profile }: ProfileEditModalProps) {
+export function ProfileEditModal({
+  isOpen,
+  onClose,
+  profile,
+}: ProfileEditModalProps) {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  
+
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
-  
-  const { mutate: updateProfile, isPending } = useUpdateProfileWithFiles();
+
+  const { user } = useAuth();
+
+  const { mutate: updateProfile, isPending } = useUpdateProfileWithFiles(
+    user?.id
+  );
 
   const form = useForm<ProfileEditFormData>({
     resolver: zodResolver(profileEditSchema),
     defaultValues: {
-      firstName: profile.user.firstName || '',
-      middleName: profile.user.middleName || '',
-      lastName: profile.user.lastName || '',
-      bio: profile.user.bio || '',
+      firstName: profile.user.firstName || "",
+      middleName: profile.user.middleName || "",
+      lastName: profile.user.lastName || "",
+      bio: profile.user.bio || "",
     },
   });
 
@@ -117,8 +135,8 @@ export function ProfileEditModal({ isOpen, onClose, profile }: ProfileEditModalP
   // Generate user initials for avatar fallback
   const initials = [profile.user.firstName, profile.user.lastName]
     .filter(Boolean)
-    .map(name => name!.charAt(0).toUpperCase())
-    .join('');
+    .map((name) => name!.charAt(0).toUpperCase())
+    .join("");
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -131,19 +149,21 @@ export function ProfileEditModal({ isOpen, onClose, profile }: ProfileEditModalP
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Cover Image */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Cover Image</label>
+              <label className="text-sm font-medium text-gray-700">
+                Cover Image
+              </label>
               <div className="relative">
                 <div className="h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg overflow-hidden">
                   {coverPreview ? (
-                    <img 
-                      src={coverPreview} 
-                      alt="Cover preview" 
+                    <img
+                      src={coverPreview}
+                      alt="Cover preview"
                       className="w-full h-full object-cover"
                     />
                   ) : profile.user.coverImageUrl ? (
-                    <img 
-                      src={profile.user.coverImageUrl} 
-                      alt="Current cover" 
+                    <img
+                      src={profile.user.coverImageUrl}
+                      alt="Current cover"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -172,13 +192,15 @@ export function ProfileEditModal({ isOpen, onClose, profile }: ProfileEditModalP
 
             {/* Avatar */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Profile Picture</label>
+              <label className="text-sm font-medium text-gray-700">
+                Profile Picture
+              </label>
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <Avatar className="w-20 h-20">
-                    <AvatarImage 
-                      src={avatarPreview || profile.user.avatarUrl} 
-                      alt="Profile picture" 
+                    <AvatarImage
+                      src={avatarPreview || profile.user.avatarUrl}
+                      alt="Profile picture"
                     />
                     <AvatarFallback className="text-lg font-semibold">
                       {initials}
@@ -255,7 +277,10 @@ export function ProfileEditModal({ isOpen, onClose, profile }: ProfileEditModalP
                 <FormItem>
                   <FormLabel>Middle Name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter middle name (optional)" />
+                    <Input
+                      {...field}
+                      placeholder="Enter middle name (optional)"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -294,7 +319,7 @@ export function ProfileEditModal({ isOpen, onClose, profile }: ProfileEditModalP
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? 'Saving...' : 'Save Changes'}
+                {isPending ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>

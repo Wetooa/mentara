@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { PrismaService } from '../providers/prisma-client.provider';
+import { CommunitiesService } from '../communities/communities.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -41,6 +42,7 @@ export class TherapistRecommendationController {
   constructor(
     private readonly therapistRecommendationService: TherapistRecommendationService,
     private readonly prisma: PrismaService,
+    private readonly communitiesService: CommunitiesService,
   ) {}
 
   @Get()
@@ -194,7 +196,7 @@ export class TherapistRecommendationController {
         };
       }
 
-      // Get personalized welcome recommendations
+      // Get personalized welcome recommendations - both therapists and communities
       const request: TherapistRecommendationRequest = {
         userId: user.id,
         limit: query.limit,
@@ -203,14 +205,47 @@ export class TherapistRecommendationController {
         maxHourlyRate: undefined, // No rate filter for initial welcome
       };
 
-      const recommendations =
-        await this.therapistRecommendationService.getRecommendedTherapists(
-          request,
-        );
+      const [therapistRecommendations, communityRecommendations] =
+        await Promise.all([
+          this.therapistRecommendationService.getRecommendedTherapists(
+            request,
+          ),
+          this.communitiesService.getRecommendedCommunities(user.id),
+        ]);
+
+      // Debug logging for community recommendations
+      console.log(`[DEBUG] Community recommendations for user ${user.id}:`, {
+        count: communityRecommendations?.length || 0,
+        communities: communityRecommendations?.map(c => ({ id: c.id, name: c.name })) || []
+      });
+
+      // Transform therapist data to match frontend expectations - flatten structure
+      const recommendations = (therapistRecommendations?.therapists || []).map((therapist, index) => ({
+        ...therapist,
+        id: therapist.userId, // Use userId as the primary ID
+        matchScore: therapist.matchScore || 0, // Add matchScore directly to therapist object
+        score: therapist.matchScore || 0, // Keep score for backward compatibility
+        rank: index + 1,
+      }));
+
+      // Transform community data for frontend
+      const communities = (communityRecommendations || []).map((community, index) => ({
+        id: community.id,
+        name: community.name,
+        slug: community.slug,
+        description: community.description,
+        imageUrl: community.imageUrl,
+        rank: index + 1,
+      }));
 
       // Enhance recommendations with welcome-specific data
       const enhancedRecommendations = {
-        ...recommendations,
+        recommendations, // Frontend expects this field
+        communities,     // Add communities data
+        totalCount: therapistRecommendations?.totalCount || 0,
+        averageMatchScore: recommendations.length > 0 
+          ? recommendations.reduce((sum, rec) => sum + rec.score, 0) / recommendations.length 
+          : 0,
         welcomeMessage: this.generateWelcomeMessage(
           user.firstName,
           isFirstTime,
@@ -231,11 +266,19 @@ export class TherapistRecommendationController {
           ],
         },
         matchingInsights: {
-          totalAvailableTherapists: recommendations.totalCount,
+          totalAvailableTherapists: therapistRecommendations?.totalCount || 0,
+          totalAvailableCommunities: communities.length,
           recommendationEngine: 'AI-powered compatibility matching',
           lastUpdated: new Date(),
         },
       };
+
+      // Debug logging for final response
+      console.log(`[DEBUG] Final welcome response:`, {
+        recommendationsCount: enhancedRecommendations.recommendations.length,
+        communitiesCount: enhancedRecommendations.communities.length,
+        hasWelcomeMessage: !!enhancedRecommendations.welcomeMessage
+      });
 
       return enhancedRecommendations;
     } catch (error) {

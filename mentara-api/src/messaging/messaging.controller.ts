@@ -40,6 +40,20 @@ export class MessagingController {
     private readonly supabaseStorageService: SupabaseStorageService,
   ) {}
 
+  // Health check endpoint for WebSocket connectivity
+  @Get('health')
+  @HttpCode(HttpStatus.OK)
+  async checkHealth(@CurrentUserId() userId: string) {
+    return {
+      success: true,
+      message: 'Messaging service is healthy',
+      timestamp: new Date().toISOString(),
+      userId,
+      environment: process.env.NODE_ENV || 'unknown',
+      frontendUrl: process.env.FRONTEND_URL || 'not_configured',
+    };
+  }
+
   // Conversation endpoints
   @Post('conversations')
   @HttpCode(HttpStatus.CREATED)
@@ -58,29 +72,73 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Query() params: ConversationListParams,
   ) {
-    console.log('🚀 [MESSAGING CONTROLLER] getUserConversations endpoint called');
+    console.log(
+      '🚀 [MESSAGING CONTROLLER] getUserConversations endpoint called',
+    );
     console.log('👤 [USER ID]', userId);
     console.log('📊 [QUERY PARAMS]', params);
-    
+
     try {
       const result = await this.messagingService.getUserConversations(
         userId,
         params.page || 1,
         params.limit || 20,
       );
+
+      console.log(
+        '✅ [CONTROLLER RESPONSE] Returning',
+        result.length,
+        'conversations',
+      );
+      console.log(
+        '📝 [RESPONSE SUMMARY]:',
+        result.map((conv) => ({
+          id: conv.id,
+          type: conv.type,
+          title: conv.title,
+          participantCount: conv.participants?.length || 0,
+          messageCount: conv.messages?.length || 0,
+        })),
+      );
+
+      return result;
+    } catch (error) {
+      console.error(
+        '❌ [CONTROLLER ERROR] getUserConversations failed:',
+        error,
+      );
+      throw error;
+    }
+  }
+
+  @Get('recent-communications')
+  async getRecentCommunications(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: string,
+  ) {
+    console.log('📞 [MESSAGING CONTROLLER] getRecentCommunications endpoint called');
+    console.log('👤 [USER ID]', userId);
+    console.log('📊 [LIMIT]', limit);
+    
+    try {
+      const limitNum = limit ? Number(limit) : 5;
+      const result = await this.messagingService.getRecentCommunications(
+        userId,
+        limitNum,
+      );
       
-      console.log('✅ [CONTROLLER RESPONSE] Returning', result.length, 'conversations');
-      console.log('📝 [RESPONSE SUMMARY]:', result.map(conv => ({
-        id: conv.id,
-        type: conv.type,
-        title: conv.title,
-        participantCount: conv.participants?.length || 0,
-        messageCount: conv.messages?.length || 0
+      console.log('✅ [CONTROLLER RESPONSE] Returning', result.length, 'recent communications');
+      console.log('📱 [RESPONSE SUMMARY]:', result.map(comm => ({
+        id: comm?.id,
+        name: comm?.name,
+        role: comm?.role,
+        hasLastMessage: !!comm?.lastMessage,
+        unreadCount: comm?.unreadCount
       })));
       
       return result;
     } catch (error) {
-      console.error('❌ [CONTROLLER ERROR] getUserConversations failed:', error);
+      console.error('❌ [CONTROLLER ERROR] getRecentCommunications failed:', error);
       throw error;
     }
   }

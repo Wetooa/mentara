@@ -155,11 +155,13 @@ export function TherapistProfileModal({
                       Specialties & Expertise
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                      {therapist.specialties.map((specialty, index) => (
+                      {therapist.specialties?.map((specialty, index) => (
                         <Badge key={index} variant="secondary" className="text-sm">
                           {specialty}
                         </Badge>
-                      ))}
+                      )) || (
+                        <span className="text-muted-foreground">No specialties listed</span>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

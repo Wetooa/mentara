@@ -64,8 +64,14 @@ interface MeetingControlData {
 @WebSocketGateway({
   namespace: '/meetings',
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'http://localhost:3000',  // Explicit fallback
+      'http://127.0.0.1:3000',  // Alternative localhost
+    ],
+    methods: ['GET', 'POST'],
     credentials: true,
+    allowedHeaders: ['authorization', 'content-type'],
   },
 })
 export class MeetingsGateway

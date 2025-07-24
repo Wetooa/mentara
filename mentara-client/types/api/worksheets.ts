@@ -15,34 +15,49 @@ export interface WorksheetUpdateInputDto {
   dueDate?: string;
   isCompleted?: boolean;
   feedback?: string;
+  status?: WorksheetStatus;
 }
 
 export interface Worksheet {
   id: string;
   title: string;
   instructions?: string;
-  dueDate: string;
-  isCompleted: boolean;
-  submittedAt?: string;
-  feedback?: string;
-  userId: string;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl: string;
+  dueDate: string; 
+  status: WorksheetStatus;
+  clientId: string;
+  client: {
+    userId: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl: string;
+    };
   };
   therapistId: string;
   therapist: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl: string;
+    userId: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl: string;
+    };
   };
-  materials: WorksheetMaterial[];
-  submissions: WorksheetSubmission[];
+  // Backend uses arrays for materials instead of objects
+  materialUrls: string[];
+  materialNames: string[];
+  // Backend returns singular submission, not plural submissions
+  submission: WorksheetSubmission | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export enum WorksheetStatus {
+  ASSIGNED = 'ASSIGNED',
+  SUBMITTED = 'SUBMITTED', 
+  REVIEWED = 'REVIEWED',
+  OVERDUE = 'OVERDUE'
 }
 
 export interface WorksheetMaterial {
@@ -66,11 +81,12 @@ export interface WorksheetSubmissionCreateInputDto {
 export interface WorksheetSubmission {
   id: string;
   worksheetId: string;
-  filename: string;
-  url: string;
-  fileSize: number;
-  fileType: string;
+  // Backend uses arrays for multiple file support
+  fileUrls: string[];
+  fileNames: string[];
+  fileSizes: number[];
   submittedAt: string;
+  feedback?: string;
 }
 
 export interface WorksheetListParams {

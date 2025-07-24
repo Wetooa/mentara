@@ -1,0 +1,95 @@
+24169f668d81ce99267da389eb12d648
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HealthController = void 0;
+const common_1 = require("@nestjs/common");
+const health_service_1 = require("./health.service");
+const public_decorator_1 = require("../auth/decorators/public.decorator");
+let HealthController = class HealthController {
+    healthService;
+    constructor(healthService) {
+        this.healthService = healthService;
+    }
+    async getHealth() {
+        return this.healthService.getBasicHealth();
+    }
+    async getDetailedHealth() {
+        const health = await this.healthService.getDetailedHealth();
+        if (health.status === 'error') {
+            throw new common_1.HttpException(health, common_1.HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        return health;
+    }
+    async getDatabaseHealth() {
+        const dbHealth = await this.healthService.getDatabaseHealth();
+        if (dbHealth.status === 'disconnected') {
+            throw new common_1.HttpException(dbHealth, common_1.HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        return dbHealth;
+    }
+    async getServicesHealth() {
+        return this.healthService.getServicesHealth();
+    }
+    async getSystemMetrics() {
+        return this.healthService.getSystemMetrics();
+    }
+    async getAdminHealth() {
+        return this.healthService.getAdminHealthDashboard();
+    }
+};
+exports.HealthController = HealthController;
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], HealthController.prototype, "getHealth", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], HealthController.prototype, "getDetailedHealth", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('database'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], HealthController.prototype, "getDatabaseHealth", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('services'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], HealthController.prototype, "getServicesHealth", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('system'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], HealthController.prototype, "getSystemMetrics", null);
+__decorate([
+    (0, common_1.Get)('admin'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], HealthController.prototype, "getAdminHealth", null);
+exports.HealthController = HealthController = __decorate([
+    (0, common_1.Controller)('health'),
+    __metadata("design:paramtypes", [typeof (_a = typeof health_service_1.HealthService !== "undefined" && health_service_1.HealthService) === "function" ? _a : Object])
+], HealthController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2hlYWx0aC9oZWFsdGguY29udHJvbGxlci50cyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7O0FBQUEsMkNBQTRFO0FBQzVFLHFEQUFpRDtBQUNqRCwwRUFBNkQ7QUFHdEQsSUFBTSxnQkFBZ0IsR0FBdEIsTUFBTSxnQkFBZ0I7SUFDRTtJQUE3QixZQUE2QixhQUE0QjtRQUE1QixrQkFBYSxHQUFiLGFBQWEsQ0FBZTtJQUFHLENBQUM7SUFJdkQsQUFBTixLQUFLLENBQUMsU0FBUztRQUNiLE9BQU8sSUFBSSxDQUFDLGFBQWEsQ0FBQyxjQUFjLEVBQUUsQ0FBQztJQUM3QyxDQUFDO0lBR0ssQUFBTixLQUFLLENBQUMsaUJBQWlCO1FBQ3JCLE1BQU0sTUFBTSxHQUFHLE1BQU0sSUFBSSxDQUFDLGFBQWEsQ0FBQyxpQkFBaUIsRUFBRSxDQUFDO1FBRTVELElBQUksTUFBTSxDQUFDLE1BQU0sS0FBSyxPQUFPLEVBQUUsQ0FBQztZQUM5QixNQUFNLElBQUksc0JBQWEsQ0FBQyxNQUFNLEVBQUUsbUJBQVUsQ0FBQyxtQkFBbUIsQ0FBQyxDQUFDO1FBQ2xFLENBQUM7UUFFRCxPQUFPLE1BQU0sQ0FBQztJQUNoQixDQUFDO0lBSUssQUFBTixLQUFLLENBQUMsaUJBQWlCO1FBQ3JCLE1BQU0sUUFBUSxHQUFHLE1BQU0sSUFBSSxDQUFDLGFBQWEsQ0FBQyxpQkFBaUIsRUFBRSxDQUFDO1FBRTlELElBQUksUUFBUSxDQUFDLE1BQU0sS0FBSyxjQUFjLEVBQUUsQ0FBQztZQUN2QyxNQUFNLElBQUksc0JBQWEsQ0FBQyxRQUFRLEVBQUUsbUJBQVUsQ0FBQyxtQkFBbUIsQ0FBQyxDQUFDO1FBQ3BFLENBQUM7UUFFRCxPQUFPLFFBQVEsQ0FBQztJQUNsQixDQUFDO0lBSUssQUFBTixLQUFLLENBQUMsaUJBQWlCO1FBQ3JCLE9BQU8sSUFBSSxDQUFDLGFBQWEsQ0FBQyxpQkFBaUIsRUFBRSxDQUFDO0lBQ2hELENBQUM7SUFJSyxBQUFOLEtBQUssQ0FBQyxnQkFBZ0I7UUFDcEIsT0FBTyxJQUFJLENBQUMsYUFBYSxDQUFDLGdCQUFnQixFQUFFLENBQUM7SUFDL0MsQ0FBQztJQUdLLEFBQU4sS0FBSyxDQUFDLGNBQWM7UUFDbEIsT0FBTyxJQUFJLENBQUMsYUFBYSxDQUFDLHVCQUF1QixFQUFFLENBQUM7SUFDdEQsQ0FBQztDQUNGLENBQUE7QUFoRFksNENBQWdCO0FBS3JCO0lBRkwsSUFBQSx5QkFBTSxHQUFFO0lBQ1IsSUFBQSxZQUFHLEdBQUU7Ozs7aURBR0w7QUFHSztJQURMLElBQUEseUJBQU0sR0FBRTs7Ozt5REFTUjtBQUlLO0lBRkwsSUFBQSx5QkFBTSxHQUFFO0lBQ1IsSUFBQSxZQUFHLEVBQUMsVUFBVSxDQUFDOzs7O3lEQVNmO0FBSUs7SUFGTCxJQUFBLHlCQUFNLEdBQUU7SUFDUixJQUFBLFlBQUcsRUFBQyxVQUFVLENBQUM7Ozs7eURBR2Y7QUFJSztJQUZMLElBQUEseUJBQU0sR0FBRTtJQUNSLElBQUEsWUFBRyxFQUFDLFFBQVEsQ0FBQzs7Ozt3REFHYjtBQUdLO0lBREwsSUFBQSxZQUFHLEVBQUMsT0FBTyxDQUFDOzs7O3NEQUdaOzJCQS9DVSxnQkFBZ0I7SUFENUIsSUFBQSxtQkFBVSxFQUFDLFFBQVEsQ0FBQzt5REFFeUIsOEJBQWEsb0JBQWIsOEJBQWE7R0FEOUMsZ0JBQWdCLENBZ0Q1QiIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWFwaS9zcmMvaGVhbHRoL2hlYWx0aC5jb250cm9sbGVyLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IENvbnRyb2xsZXIsIEdldCwgSHR0cFN0YXR1cywgSHR0cEV4Y2VwdGlvbiB9IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IEhlYWx0aFNlcnZpY2UgfSBmcm9tICcuL2hlYWx0aC5zZXJ2aWNlJztcbmltcG9ydCB7IFB1YmxpYyB9IGZyb20gJy4uL2F1dGgvZGVjb3JhdG9ycy9wdWJsaWMuZGVjb3JhdG9yJztcblxuQENvbnRyb2xsZXIoJ2hlYWx0aCcpXG5leHBvcnQgY2xhc3MgSGVhbHRoQ29udHJvbGxlciB7XG4gIGNvbnN0cnVjdG9yKHByaXZhdGUgcmVhZG9ubHkgaGVhbHRoU2VydmljZTogSGVhbHRoU2VydmljZSkge31cblxuICBAUHVibGljKClcbiAgQEdldCgpXG4gIGFzeW5jIGdldEhlYWx0aCgpIHtcbiAgICByZXR1cm4gdGhpcy5oZWFsdGhTZXJ2aWNlLmdldEJhc2ljSGVhbHRoKCk7XG4gIH1cblxuICBAUHVibGljKClcbiAgYXN5bmMgZ2V0RGV0YWlsZWRIZWFsdGgoKSB7XG4gICAgY29uc3QgaGVhbHRoID0gYXdhaXQgdGhpcy5oZWFsdGhTZXJ2aWNlLmdldERldGFpbGVkSGVhbHRoKCk7XG5cbiAgICBpZiAoaGVhbHRoLnN0YXR1cyA9PT0gJ2Vycm9yJykge1xuICAgICAgdGhyb3cgbmV3IEh0dHBFeGNlcHRpb24oaGVhbHRoLCBIdHRwU3RhdHVzLlNFUlZJQ0VfVU5BVkFJTEFCTEUpO1xuICAgIH1cblxuICAgIHJldHVybiBoZWFsdGg7XG4gIH1cblxuICBAUHVibGljKClcbiAgQEdldCgnZGF0YWJhc2UnKVxuICBhc3luYyBnZXREYXRhYmFzZUhlYWx0aCgpIHtcbiAgICBjb25zdCBkYkhlYWx0aCA9IGF3YWl0IHRoaXMuaGVhbHRoU2VydmljZS5nZXREYXRhYmFzZUhlYWx0aCgpO1xuXG4gICAgaWYgKGRiSGVhbHRoLnN0YXR1cyA9PT0gJ2Rpc2Nvbm5lY3RlZCcpIHtcbiAgICAgIHRocm93IG5ldyBIdHRwRXhjZXB0aW9uKGRiSGVhbHRoLCBIdHRwU3RhdHVzLlNFUlZJQ0VfVU5BVkFJTEFCTEUpO1xuICAgIH1cblxuICAgIHJldHVybiBkYkhlYWx0aDtcbiAgfVxuXG4gIEBQdWJsaWMoKVxuICBAR2V0KCdzZXJ2aWNlcycpXG4gIGFzeW5jIGdldFNlcnZpY2VzSGVhbHRoKCkge1xuICAgIHJldHVybiB0aGlzLmhlYWx0aFNlcnZpY2UuZ2V0U2VydmljZXNIZWFsdGgoKTtcbiAgfVxuXG4gIEBQdWJsaWMoKVxuICBAR2V0KCdzeXN0ZW0nKVxuICBhc3luYyBnZXRTeXN0ZW1NZXRyaWNzKCkge1xuICAgIHJldHVybiB0aGlzLmhlYWx0aFNlcnZpY2UuZ2V0U3lzdGVtTWV0cmljcygpO1xuICB9XG5cbiAgQEdldCgnYWRtaW4nKVxuICBhc3luYyBnZXRBZG1pbkhlYWx0aCgpIHtcbiAgICByZXR1cm4gdGhpcy5oZWFsdGhTZXJ2aWNlLmdldEFkbWluSGVhbHRoRGFzaGJvYXJkKCk7XG4gIH1cbn1cbiJdLCJ2ZXJzaW9uIjozfQ==

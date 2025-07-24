@@ -4,10 +4,14 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
+import { MessagingService } from '../messaging/messaging.service';
 
 @Injectable()
 export class DashboardService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messagingService: MessagingService,
+  ) {}
 
   async getClientDashboardData(userId: string) {
     try {
@@ -84,6 +88,31 @@ export class DashboardService {
           },
         },
       });
+
+      // Ensure conversations exist between client and assigned therapists
+      for (const assignment of client.assignedTherapists) {
+        const therapistId = assignment.therapist.userId;
+        try {
+          // Check if conversation already exists
+          const existingConversations = await this.messagingService.getUserConversations(userId, 1, 100);
+          const hasConversationWithTherapist = existingConversations.some(conv => 
+            conv.participants?.some(p => p.userId === therapistId)
+          );
+
+          if (!hasConversationWithTherapist) {
+            // Auto-create conversation if it doesn't exist
+            await this.messagingService.createConversation(userId, {
+              participantIds: [therapistId],
+              type: 'direct',
+              title: `Therapy Session with ${assignment.therapist.user.firstName} ${assignment.therapist.user.lastName}`,
+            });
+            console.log(`✅ Auto-created missing conversation between client ${userId} and therapist ${therapistId}`);
+          }
+        } catch (error) {
+          // Log but don't fail dashboard load if conversation creation fails
+          console.warn(`⚠️ Failed to ensure conversation exists between client ${userId} and therapist ${therapistId}:`, error);
+        }
+      }
 
       const responseData = {
         client,
@@ -183,7 +212,11 @@ export class DashboardService {
       });
 
       return {
-        therapist,
+        therapist: {
+          ...therapist,
+          // Map database fields to frontend-expected fields
+          specialties: therapist.areasOfExpertise || [],
+        },
         stats: {
           totalClients: totalClientsCount,
           completedMeetings: completedMeetingsCount,

@@ -50,7 +50,7 @@ export async function seedMessaging(
       });
 
       // Create conversation messages
-      const messageCount = faker.number.int({ min: 5, max: 25 });
+      const messageCount = SEED_CONFIG.MESSAGING.MESSAGES_PER_CONVERSATION;
       const conversationMessages = await createConversationMessages(
         prisma,
         conversation,
@@ -103,7 +103,7 @@ export async function seedMessaging(
       }
 
       // Create group messages
-      const groupMessageCount = faker.number.int({ min: 10, max: 30 });
+      const groupMessageCount = SEED_CONFIG.MESSAGING.MESSAGES_PER_CONVERSATION;
       const groupMessages = await createGroupMessages(
         prisma,
         conversation,

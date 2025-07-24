@@ -301,8 +301,7 @@ export default function PatientDetailPage(
         isOpen={isSchedulingModalOpen}
         onClose={() => setIsSchedulingModalOpen(false)}
         onSuccess={() => {
-          // Optionally refresh patient data or show success message
-          console.log('Session scheduled successfully');
+          // Session scheduled successfully - modal will show success feedback
         }}
       />
     </div>

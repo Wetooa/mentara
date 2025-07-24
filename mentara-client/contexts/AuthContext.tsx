@@ -9,11 +9,12 @@ import {
   useRef,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
-import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
+import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
+import { useCurrentUserProfile } from "@/hooks/auth/useCurrentUserProfile";
 
 // Types
 export type UserRole = "client" | "therapist" | "moderator" | "admin";
@@ -21,6 +22,10 @@ export type UserRole = "client" | "therapist" | "moderator" | "admin";
 export interface User {
   id: string;
   role: UserRole;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  hasSeenTherapistRecommendations?: boolean;
 }
 
 export interface AuthContextType {
@@ -29,6 +34,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   userRole: UserRole | null;
   logout: () => void;
+  refreshProfile: () => void;
 }
 
 // Create Auth Context
@@ -84,7 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { toast } = useToast();
   const api = useApi();
+  const queryClient = useQueryClient();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   // Ref to track if auth loading is already in progress to prevent infinite loops
   const authLoadingRef = useRef<boolean>(false);
@@ -103,11 +111,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Determine if we should check authentication based on route
   const shouldCheckAuth = !isPublicRoute(pathname);
 
-  // Check for token on mount and route changes
+  // Set client state on mount to prevent SSR issues
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-    setHasToken(!!token);
-  }, [pathname]);
+    setIsClient(true);
+  }, []);
+
+  // Check for token on mount and route changes (client-side only)
+  useEffect(() => {
+    if (isClient) {
+      setHasToken(hasAuthToken());
+    }
+  }, [pathname, isClient]);
 
   // Fetch user role using React Query (only when we have a token and need auth)
   const {
@@ -118,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery({
     queryKey: ["auth", "user-role"],
     queryFn: () => api.auth.getUserRole(),
-    enabled: shouldCheckAuth && hasToken === true,
+    enabled: isClient && shouldCheckAuth && hasToken === true,
     retry: (failureCount, error: any) => {
       // Don't retry on 401/403 errors (auth failures)
       if (error?.response?.status === 401 || error?.response?.status === 403) {
@@ -128,15 +142,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // const currentUserProfile = useCurrentUserProfile();
+
   const userRole = (authData as any)?.role as UserRole | null;
   const userId = (authData as any)?.userId || null;
 
-  // Create user object
+  // Fetch profile data if user is authenticated
+  const { data: profileData, refetch: refetchProfile } = useQuery({
+    queryKey: ["auth", "current-user-profile", userId, userRole],
+    queryFn: async () => {
+      if (!userRole) {
+        throw new Error("User role not available");
+      }
+
+      let profileResponse: any;
+
+      // Call the appropriate role-specific profile endpoint
+      switch (userRole) {
+        case "client":
+          profileResponse = await api.auth.client.getProfile();
+          break;
+        case "therapist":
+          profileResponse = await api.auth.therapist.getProfile();
+          break;
+        case "admin":
+          profileResponse = await api.auth.admin.getProfile();
+          break;
+        case "moderator":
+          profileResponse = await api.auth.moderator.getProfile();
+          break;
+        default:
+          throw new Error(`Unsupported user role: ${userRole}`);
+      }
+
+      // Normalize the profile data structure
+      return {
+        firstName:
+          profileResponse.user?.firstName || profileResponse.firstName || "",
+        lastName:
+          profileResponse.user?.lastName || profileResponse.lastName || "",
+        avatarUrl: profileResponse.user?.avatarUrl || profileResponse.avatarUrl,
+        hasSeenTherapistRecommendations:
+          profileResponse.hasSeenTherapistRecommendations,
+      };
+    },
+    enabled: isClient && !!userId && !!userRole && hasToken === true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: (failureCount, error: any) => {
+      // Don't retry on 401/403 errors (auth failures)
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+  });
+
+  console.log("Auth Data:", authData);
+  console.log("Profile Data:", profileData);
+
+  // Create user object with profile data when available
   const user: User | null =
     userRole && userId
       ? {
           id: userId,
           role: userRole,
+          firstName: profileData?.firstName,
+          lastName: profileData?.lastName,
+          avatarUrl: profileData?.avatarUrl,
+          hasSeenTherapistRecommendations:
+            profileData?.hasSeenTherapistRecommendations,
         }
       : null;
 
@@ -147,7 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sync global loading with React Query loading state
   useEffect(() => {
-    if (shouldCheckAuth && hasToken === true) {
+    if (isClient && shouldCheckAuth && hasToken === true) {
       if (isLoading) {
         // Prevent starting multiple loading operations
         if (!authLoadingRef.current) {
@@ -194,8 +268,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       }
-    } else if (!shouldCheckAuth && authLoadingRef.current) {
-      // Complete any auth loading for public routes
+    } else if ((!shouldCheckAuth || !isClient) && authLoadingRef.current) {
+      // Complete any auth loading for public routes or during SSR
       authLoadingRef.current = false;
 
       // Clear progress interval
@@ -215,6 +289,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
   }, [
+    isClient,
     isLoading,
     error,
     shouldCheckAuth,
@@ -227,15 +302,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    // Clear React Query cache to prevent stale authentication data
+    queryClient.clear();
+
+    if (isClient) {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
     setHasToken(false);
     router.push("/auth/sign-in");
   };
 
+  // Function to refresh profile data
+  const refreshProfile = () => {
+    refetchProfile();
+  };
+
   // Handle route protection and redirection
   useEffect(() => {
-    // Skip redirections during loading or if we don't know token status yet
-    if (isLoading || hasToken === null) return;
+    // Skip redirections during loading, SSR, or if we don't know token status yet
+    if (!isClient || isLoading || hasToken === null) return;
 
     const isPublic = isPublicRoute(pathname);
 
@@ -279,6 +364,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      // Client welcome redirect logic - ensure clients see welcome page if they haven't seen recommendations
+      if (
+        isAuthenticated &&
+        userRole === "client" &&
+        user?.hasSeenTherapistRecommendations === false
+      ) {
+        if (!pathname.startsWith("/client/welcome")) {
+          router.push("/client/welcome");
+          return;
+        }
+      }
+
       // Authenticated user on protected route
       if (isAuthenticated && isAnyRoleRoute(pathname)) {
         // Check if user has correct role for this route
@@ -298,9 +395,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Authenticated user with correct role or on general protected route - allow access
     }
   }, [
+    isClient,
     isLoading,
     isAuthenticated,
     userRole,
+    user,
     pathname,
     router,
     toast,
@@ -311,7 +410,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Show minimal loading state during authentication check
   // The global loading bar will handle the visual feedback
-  if ((isLoading || hasToken === null) && shouldCheckAuth) {
+  if ((isLoading || hasToken === null || !isClient) && shouldCheckAuth) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center justify-center gap-2">
@@ -329,6 +428,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated,
     userRole,
     logout,
+    refreshProfile,
   };
 
   return (

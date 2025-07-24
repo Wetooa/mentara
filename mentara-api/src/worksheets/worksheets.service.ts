@@ -14,7 +14,8 @@ export class WorksheetsService {
     userId?: string,
     therapistId?: string,
     status?: string,
-  ): Promise<any[]> {
+    limit?: number,
+  ): Promise<{ worksheets: any[]; total: number; hasMore: boolean }> {
     const where = {};
 
     if (userId) {
@@ -29,8 +30,15 @@ export class WorksheetsService {
       where['status'] = status;
     }
 
+    // Get total count for pagination
+    const total = await this.prisma.worksheet.count({ where });
+
+    // Apply limit if specified
+    const take = limit ? Number(limit) : undefined;
+
     const worksheets = await this.prisma.worksheet.findMany({
       where,
+      take,
       include: {
         client: {
           include: {
@@ -63,7 +71,13 @@ export class WorksheetsService {
       },
     });
 
-    return worksheets;
+    const hasMore = limit ? worksheets.length >= limit : false;
+
+    return {
+      worksheets,
+      total,
+      hasMore,
+    };
   }
 
   async findById(id: string) {
@@ -118,7 +132,7 @@ export class WorksheetsService {
 
   async create(
     data: WorksheetCreateInputDto,
-    clientId: string,
+    userId: string,
     therapistId: string,
     files: Express.Multer.File[] = [],
   ) {
@@ -129,7 +143,7 @@ export class WorksheetsService {
         instructions: data.instructions || '',
         dueDate: data.dueDate || new Date(),
         status: (data as any).status || 'ASSIGNED',
-        clientId,
+        clientId: userId,
         therapistId,
         // Material files can be uploaded separately
         materialUrls: [],

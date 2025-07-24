@@ -23,20 +23,8 @@ export function useLogin() {
       // Store only token in localStorage (secure)
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
 
-      // Handle immediate post-login redirect using backend data
-      if (response.user.role === "client") {
-        // Check if client has seen therapist recommendations (backend now returns this)
-        const hasSeenRecommendations = response.user.client?.hasSeenTherapistRecommendations;
-
-        if (hasSeenRecommendations === false) {
-          router.push("/client/welcome");
-        } else {
-          router.push("/client");
-        }
-      } else {
-        // For non-client roles, redirect to their dashboard
-        router.push(`/${response.user.role}`);
-      }
+      // Handle immediate post-login redirect - AuthProvider will handle welcome page logic
+      router.push(`/${response.user.role}`);
     } catch (error) {
       throw error;
     } finally {

@@ -124,7 +124,7 @@ export class ProgressTracker {
   }
 
   public getNextPhaseToRun(): number | null {
-    const totalPhases = 14; // Total number of phases
+    const totalPhases = 12; // Total number of phases
     
     for (let phase = 1; phase <= totalPhases; phase++) {
       if (!this.isPhaseCompleted(phase)) {
@@ -140,7 +140,7 @@ export class ProgressTracker {
   }
 
   public getCompletionPercentage(): number {
-    const totalPhases = 14;
+    const totalPhases = 12;
     return Math.round((this.progress.completedPhases.length / totalPhases) * 100);
   }
 
@@ -151,7 +151,7 @@ export class ProgressTracker {
 
     console.log('\n📊 Seeding Progress Status');
     console.log('========================');
-    console.log(`📈 Overall Progress: ${percentage}% (${progress.completedPhases.length}/14 phases)`);
+    console.log(`📈 Overall Progress: ${percentage}% (${progress.completedPhases.length}/12 phases)`);
     console.log(`🚀 Started: ${new Date(progress.startedAt).toLocaleString()}`);
     console.log(`⏰ Last Updated: ${new Date(progress.lastUpdatedAt).toLocaleString()}`);
     console.log(`🔧 Mode: ${progress.config}`);
@@ -203,12 +203,10 @@ export class ProgressTracker {
       6: 'Meetings, Notes & Payment Methods',
       7: 'Payment Transactions',
       8: 'Community Content (posts, comments, reactions)',
-      9: 'Therapist Availability',
-      10: 'Messaging System (conversations, messages)',
-      11: 'Worksheets & Therapy Materials',
-      12: 'Therapist Reviews & Ratings',
-      13: 'Notifications & Device Tokens',
-      14: 'Final Validation & Summary'
+      9: 'Messaging System (conversations, messages)',
+      10: 'Worksheets & Therapy Materials',
+      11: 'Therapist Reviews & Ratings',
+      12: 'Notifications & Device Tokens'
     };
     
     return descriptions[phaseNumber as keyof typeof descriptions] || `Phase ${phaseNumber}`;

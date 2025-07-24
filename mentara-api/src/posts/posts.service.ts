@@ -4,13 +4,18 @@ import {
   ForbiddenException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { Post, Prisma, User } from '@prisma/client';
 import type { PostUpdateInputDto } from './types';
+import { PostCreatedEvent } from '../common/events/social-events';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async findUserById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
@@ -168,7 +173,7 @@ export class PostsService {
     attachmentNames: string[] = [],
     attachmentSizes: number[] = [],
   ): Promise<Post> {
-    return this.prisma.post.create({
+    const post = await this.prisma.post.create({
       data: {
         ...data,
         attachmentUrls,
@@ -192,6 +197,25 @@ export class PostsService {
         },
       },
     });
+
+    // Emit PostCreatedEvent for notifications (only if post has a room/community)
+    if (post.roomId) {
+      await this.eventEmitter.emitAsync(
+        'PostCreatedEvent',
+        new PostCreatedEvent({
+          postId: post.id,
+          authorId: post.userId,
+          communityId: post.roomId,
+          title: post.title || '',
+          content: post.content || '',
+          tags: [], // Add tags if available in schema
+          postType: 'text', // Default to 'text' postType
+          isAnonymous: false, // Default to false since field doesn't exist in schema
+        }),
+      );
+    }
+
+    return post;
   }
 
   async update(

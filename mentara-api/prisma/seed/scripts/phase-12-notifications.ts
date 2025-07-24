@@ -3,6 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { PhaseResult } from './progress-tracker';
+import { seedNotifications } from '../notifications.seed';
 
 export async function runPhase12Notifications(
   prisma: PrismaClient,
@@ -26,12 +27,39 @@ export async function runPhase12Notifications(
       };
     }
 
-    console.log(`✅ Phase 12 completed: Notifications & device tokens ready (simplified)`);
+    // Get users from users data
+    const users = usersData.users || [];
+    if (users.length === 0) {
+      return {
+        success: false,
+        message: 'No users found in users data for notification creation',
+      };
+    }
+
+    // Extract data arrays from phase results
+    const relationships = relationshipsData?.relationships || [];
+    const meetings = meetingsData?.meetings || [];
+    const worksheets = worksheetsData?.worksheets || [];
+    const messages = messagingData?.messages || [];
+
+    // Create notifications using the existing seed function
+    const result = await seedNotifications(
+      prisma,
+      users,
+      relationships,
+      meetings,
+      worksheets,
+      messages,
+      config
+    );
+
+    const notifications = result.notifications || [];
+    console.log(`✅ Phase 12 completed: Created ${notifications.length} notifications`);
 
     return {
       success: true,
-      message: 'Notifications & device tokens phase completed',
-      data: { notifications: [] },
+      message: `Notifications phase completed - ${notifications.length} notifications created`,
+      data: { notifications, deviceTokens: [] },
     };
 
   } catch (error) {

@@ -1,5 +1,5 @@
 // Utility functions for pre-assessment scoring
-// Based on the frontend questionnaire structure
+// Based on the AI evaluation service 201-item questionnaire structure
 
 export interface QuestionnaireScore {
   score: number;
@@ -20,6 +20,66 @@ interface QuestionnaireConfig {
   reverseScoredQuestions?: number[];
   severityLevels: Record<string, SeverityLevel>;
 }
+
+// Fixed questionnaire index mapping based on AI evaluation service
+// Total: 201 items across 15 questionnaires
+interface QuestionnaireIndexRange {
+  startIndex: number;
+  endIndex: number;
+  itemCount: number;
+}
+
+export const LIST_OF_QUESTIONNAIRES = [
+  'Stress',
+  'Anxiety',
+  'Depression',
+  'Drug Abuse',
+  'Insomnia',
+  'Panic',
+  'Bipolar disorder (BD)',
+  'Obsessive compulsive disorder (OCD)',
+  'Post-traumatic stress disorder (PTSD)',
+  'Social anxiety',
+  'Phobia',
+  'Burnout',
+  'Binge eating / Eating disorders',
+  'ADD / ADHD',
+  'Substance or Alcohol Use Issues',
+] as const;
+
+const QUESTIONNAIRE_INDEX_MAPPING: Record<string, QuestionnaireIndexRange> = {
+  Depression: { startIndex: 0, endIndex: 14, itemCount: 15 }, // PHQ
+  'ADD / ADHD': { startIndex: 15, endIndex: 32, itemCount: 18 }, // ASRS
+  'Substance or Alcohol Use Issues': {
+    startIndex: 33,
+    endIndex: 42,
+    itemCount: 10,
+  }, // AUDIT
+  'Binge eating / Eating disorders': {
+    startIndex: 43,
+    endIndex: 58,
+    itemCount: 16,
+  }, // BES
+  'Drug Issues': { startIndex: 59, endIndex: 68, itemCount: 10 }, // DAST10
+  Anxiety: { startIndex: 69, endIndex: 75, itemCount: 7 }, // GAD7
+  Insomnia: { startIndex: 76, endIndex: 82, itemCount: 7 }, // ISI
+  Burnout: { startIndex: 83, endIndex: 104, itemCount: 22 }, // MBI
+  'Bipolar disorder (BD)': { startIndex: 105, endIndex: 119, itemCount: 15 }, // MDQ
+  'Obsessive compulsive disorder (OCD)': {
+    startIndex: 120,
+    endIndex: 137,
+    itemCount: 18,
+  }, // OCI_R
+  'Post-traumatic stress disorder (PTSD)': {
+    startIndex: 138,
+    endIndex: 157,
+    itemCount: 20,
+  }, // PCL5
+  Panic: { startIndex: 158, endIndex: 164, itemCount: 7 }, // PDSS
+  'Depression Secondary': { startIndex: 165, endIndex: 173, itemCount: 9 }, // PHQ9
+  Stress: { startIndex: 174, endIndex: 183, itemCount: 10 }, // PSS
+  'Social anxiety': { startIndex: 184, endIndex: 200, itemCount: 17 }, // SPIN
+};
 
 // Questionnaire scoring configurations
 const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
@@ -158,6 +218,28 @@ const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
       severe: { range: [20, 40], label: 'Severe alcohol use' },
     },
   },
+  'Drug Issues': {
+    scoreMapping: { 0: 0, 1: 1 }, // DAST10 is usually yes/no questions
+    severityLevels: {
+      none: { range: [0, 2], label: 'No drug problem' },
+      low: { range: [3, 5], label: 'Low level drug problem' },
+      moderate: { range: [6, 8], label: 'Moderate level drug problem' },
+      substantial: { range: [9, 10], label: 'Substantial drug problem' },
+    },
+  },
+  'Depression Secondary': {
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 }, // PHQ9 scoring
+    severityLevels: {
+      minimal: { range: [0, 4], label: 'Minimal Depression' },
+      mild: { range: [5, 9], label: 'Mild Depression' },
+      moderate: { range: [10, 14], label: 'Moderate Depression' },
+      moderatelySevere: {
+        range: [15, 19],
+        label: 'Moderately Severe Depression',
+      },
+      severe: { range: [20, 27], label: 'Severe Depression' },
+    },
+  },
 };
 
 export function calculateQuestionnaireScore(
@@ -201,6 +283,37 @@ export function calculateQuestionnaireScore(
   return { score, severity };
 }
 
+// New function to work with flat array of 201 responses
+export function calculateAllScoresFromFlatArray(
+  flatAnswers: number[],
+): QuestionnaireScores {
+  if (flatAnswers.length !== 201) {
+    throw new Error(`Expected 201 responses, got ${flatAnswers.length}`);
+  }
+
+  const scores: QuestionnaireScores = {};
+
+  // Calculate scores for each questionnaire using fixed index ranges
+  for (const [questionnaireName, indexRange] of Object.entries(
+    QUESTIONNAIRE_INDEX_MAPPING,
+  )) {
+    const questionnaireAnswers = flatAnswers.slice(
+      indexRange.startIndex,
+      indexRange.endIndex + 1,
+    );
+
+    if (questionnaireAnswers.length === indexRange.itemCount) {
+      scores[questionnaireName] = calculateQuestionnaireScore(
+        questionnaireName,
+        questionnaireAnswers,
+      );
+    }
+  }
+
+  return scores;
+}
+
+// Legacy function for backward compatibility - now deprecated
 export function calculateAllScores(
   questionnaires: string[],
   answers: number[][],
@@ -232,4 +345,23 @@ export function generateSeverityLevels(
   }
 
   return severityLevels;
+}
+
+/**
+ * Helper function to process flat answers and generate scores and severity levels
+ * This eliminates code duplication across services
+ */
+export function processPreAssessmentAnswers(flatAnswers: number[]): {
+  scores: Record<string, number>;
+  severityLevels: Record<string, string>;
+} {
+  const calculatedScores = calculateAllScoresFromFlatArray(flatAnswers);
+  
+  const scores = Object.fromEntries(
+    Object.entries(calculatedScores).map(([key, value]) => [key, value.score]),
+  );
+  
+  const severityLevels = generateSeverityLevels(calculatedScores);
+  
+  return { scores, severityLevels };
 }

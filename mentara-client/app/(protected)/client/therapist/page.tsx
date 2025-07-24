@@ -1,114 +1,104 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import TherapistListing from "@/components/therapist/listing/TherapistListing";
 import MeetingsSection from "@/components/therapist/listing/MeetingsSection";
 import RecommendedSection from "@/components/therapist/listing/RecommendedSection";
-import { AdvancedFilters } from "@/components/therapist/filters/AdvancedFilters";
+import FilterBar from "@/components/therapist/filters/FilterBar";
 import { TherapistListingErrorWrapper } from "@/components/common/TherapistListingErrorBoundary";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useFilters } from "@/hooks/utils/useFilters";
 
 export default function TherapistPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
-  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
-  
-  const {
-    filters,
-    updateFilters,
-    resetFilters,
-    hasActiveFilters,
-    activeFilterCount
-  } = useFilters();
+  const [hasActiveFilters, setHasActiveFilters] = useState(false);
+
+  const { filters, updateFilters, resetFilters } = useFilters();
 
   return (
-    <div className="w-full h-full p-6 space-y-8">
+    <div className="w-full h-full p-6 space-y-6 bg-gradient-to-br from-blue-50/30 via-white to-green-50/20 min-h-screen">
       {/* Page Header */}
-      <h1 className="text-2xl font-bold">My Therapists</h1>
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Find Your Therapist
+        </h1>
+        <p className="text-gray-600 leading-relaxed">
+          Connect with licensed mental health professionals who understand your
+          needs and can guide you toward wellness.
+        </p>
+      </div>
 
-      {/* Search and Filter */}
-      <div className="space-y-4">
-        <div className="flex gap-2 items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search therapists by name or specialty..."
-              className="pl-10 pr-4"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Select
-            value={selectedFilter}
-            onValueChange={(value) => setSelectedFilter(value)}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue>{selectedFilter}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All</SelectItem>
-              <SelectItem value="CBT">CBT</SelectItem>
-              <SelectItem value="DBT">DBT</SelectItem>
-              <SelectItem value="EMDR">EMDR</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant={hasActiveFilters ? "default" : "outline"}
-            onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
-            className="gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="bg-white text-blue-600 text-xs px-1.5 py-0.5 rounded-full font-medium">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-        </div>
-
-        {/* Advanced Filters */}
-        <AdvancedFilters
-          filters={filters}
-          onChange={updateFilters}
-          onReset={resetFilters}
-          isExpanded={isFiltersExpanded}
-          onExpandedChange={setIsFiltersExpanded}
+      {/* Search Bar */}
+      <div className="relative max-w-2xl">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-500 h-5 w-5" />
+        <Input
+          type="text"
+          placeholder="Search by therapist name, specialty, or approach..."
+          className="pl-12 pr-4 h-12 text-base border-blue-200 focus:border-blue-400 focus:ring-blue-400 shadow-sm"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      {/* Therapist Listings with Error Boundary */}
-      <TherapistListingErrorWrapper
-        onError={(error, errorInfo) => {
-          // Log error to monitoring service
-          console.error('Therapist listing error:', { error, errorInfo, searchQuery, selectedFilter, filters });
-          // Could integrate with error tracking service here
-        }}
-      >
-        <TherapistListing 
-          searchQuery={searchQuery} 
-          filter={selectedFilter} 
-          advancedFilters={filters}
-        />
-      </TherapistListingErrorWrapper>
+      {/* Filter Section */}
+      <FilterBar
+        filters={filters}
+        onChange={updateFilters}
+        onFiltersChange={setHasActiveFilters}
+        className="max-w-full"
+      />
 
-      {/* Meetings and Recommended Sections placed side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[500px]">
-        <div className="w-full lg:col-span-1">
-          <MeetingsSection />
+      {/* Main Content Area */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Primary Therapist Listings */}
+        <div className="lg:col-span-3 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Available Therapists
+            </h2>
+            {hasActiveFilters && (
+              <span className="text-sm text-blue-600 font-medium">
+                Filtered results
+              </span>
+            )}
+          </div>
+
+          <TherapistListingErrorWrapper
+            onError={(error, errorInfo) => {
+              console.error("Therapist listing error:", {
+                error,
+                errorInfo,
+                searchQuery,
+                selectedFilter,
+                filters,
+              });
+            }}
+          >
+            <TherapistListing
+              searchQuery={searchQuery}
+              filter={selectedFilter}
+              advancedFilters={filters}
+            />
+          </TherapistListingErrorWrapper>
         </div>
-        <div className="w-full lg:col-span-2 h-full">
+
+        {/* Sidebar with Additional Sections */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
+            <div className="space-y-2">
+              <button className="w-full text-left px-3 py-2 text-sm text-blue-700 hover:bg-blue-50 rounded-md transition-colors">
+                Schedule Consultation
+              </button>
+              <button className="w-full text-left px-3 py-2 text-sm text-green-700 hover:bg-green-50 rounded-md transition-colors">
+                Emergency Resources
+              </button>
+            </div>
+          </div>
+
+          <MeetingsSection />
           <RecommendedSection />
         </div>
       </div>

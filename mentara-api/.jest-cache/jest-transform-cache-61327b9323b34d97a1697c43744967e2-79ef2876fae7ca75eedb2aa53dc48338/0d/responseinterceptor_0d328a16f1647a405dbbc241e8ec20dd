@@ -1,0 +1,34 @@
+35092569850be86a95621a73b5bd7f34
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ResponseInterceptor = void 0;
+const common_1 = require("@nestjs/common");
+const operators_1 = require("rxjs/operators");
+const api_response_dto_1 = require("../dto/api-response.dto");
+let ResponseInterceptor = class ResponseInterceptor {
+    intercept(context, next) {
+        return next.handle().pipe((0, operators_1.map)((data) => {
+            // If the controller already returns an ApiResponseDto, pass it through
+            if (data instanceof api_response_dto_1.ApiResponseDto) {
+                return data;
+            }
+            // If the data has success property, it's already formatted
+            if (data && typeof data === 'object' && 'success' in data) {
+                return data;
+            }
+            // Otherwise, wrap the data in our standard response format
+            return api_response_dto_1.ApiResponseDto.success(data);
+        }));
+    }
+};
+exports.ResponseInterceptor = ResponseInterceptor;
+exports.ResponseInterceptor = ResponseInterceptor = __decorate([
+    (0, common_1.Injectable)()
+], ResponseInterceptor);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2NvbW1vbi9pbnRlcmNlcHRvcnMvcmVzcG9uc2UuaW50ZXJjZXB0b3IudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUEsMkNBS3dCO0FBRXhCLDhDQUFxQztBQUNyQyw4REFBc0U7QUFHL0QsSUFBTSxtQkFBbUIsR0FBekIsTUFBTSxtQkFBbUI7SUFHOUIsU0FBUyxDQUNQLE9BQXlCLEVBQ3pCLElBQWlCO1FBRWpCLE9BQU8sSUFBSSxDQUFDLE1BQU0sRUFBRSxDQUFDLElBQUksQ0FDdkIsSUFBQSxlQUFHLEVBQUMsQ0FBQyxJQUFJLEVBQUUsRUFBRTtZQUNYLHVFQUF1RTtZQUN2RSxJQUFJLElBQUksWUFBWSxpQ0FBYyxFQUFFLENBQUM7Z0JBQ25DLE9BQU8sSUFBSSxDQUFDO1lBQ2QsQ0FBQztZQUVELDJEQUEyRDtZQUMzRCxJQUFJLElBQUksSUFBSSxPQUFPLElBQUksS0FBSyxRQUFRLElBQUksU0FBUyxJQUFJLElBQUksRUFBRSxDQUFDO2dCQUMxRCxPQUFPLElBQXNCLENBQUM7WUFDaEMsQ0FBQztZQUVELDJEQUEyRDtZQUMzRCxPQUFPLGlDQUFjLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxDQUFDO1FBQ3RDLENBQUMsQ0FBQyxDQUNILENBQUM7SUFDSixDQUFDO0NBQ0YsQ0FBQTtBQXhCWSxrREFBbUI7OEJBQW5CLG1CQUFtQjtJQUQvQixJQUFBLG1CQUFVLEdBQUU7R0FDQSxtQkFBbUIsQ0F3Qi9CIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9jb21tb24vaW50ZXJjZXB0b3JzL3Jlc3BvbnNlLmludGVyY2VwdG9yLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7XG4gIEluamVjdGFibGUsXG4gIE5lc3RJbnRlcmNlcHRvcixcbiAgRXhlY3V0aW9uQ29udGV4dCxcbiAgQ2FsbEhhbmRsZXIsXG59IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IE9ic2VydmFibGUgfSBmcm9tICdyeGpzJztcbmltcG9ydCB7IG1hcCB9IGZyb20gJ3J4anMvb3BlcmF0b3JzJztcbmltcG9ydCB7IEFwaVJlc3BvbnNlLCBBcGlSZXNwb25zZUR0byB9IGZyb20gJy4uL2R0by9hcGktcmVzcG9uc2UuZHRvJztcblxuQEluamVjdGFibGUoKVxuZXhwb3J0IGNsYXNzIFJlc3BvbnNlSW50ZXJjZXB0b3I8VD5cbiAgaW1wbGVtZW50cyBOZXN0SW50ZXJjZXB0b3I8VCwgQXBpUmVzcG9uc2U8VD4+XG57XG4gIGludGVyY2VwdChcbiAgICBjb250ZXh0OiBFeGVjdXRpb25Db250ZXh0LFxuICAgIG5leHQ6IENhbGxIYW5kbGVyLFxuICApOiBPYnNlcnZhYmxlPEFwaVJlc3BvbnNlPFQ+PiB7XG4gICAgcmV0dXJuIG5leHQuaGFuZGxlKCkucGlwZShcbiAgICAgIG1hcCgoZGF0YSkgPT4ge1xuICAgICAgICAvLyBJZiB0aGUgY29udHJvbGxlciBhbHJlYWR5IHJldHVybnMgYW4gQXBpUmVzcG9uc2VEdG8sIHBhc3MgaXQgdGhyb3VnaFxuICAgICAgICBpZiAoZGF0YSBpbnN0YW5jZW9mIEFwaVJlc3BvbnNlRHRvKSB7XG4gICAgICAgICAgcmV0dXJuIGRhdGE7XG4gICAgICAgIH1cblxuICAgICAgICAvLyBJZiB0aGUgZGF0YSBoYXMgc3VjY2VzcyBwcm9wZXJ0eSwgaXQncyBhbHJlYWR5IGZvcm1hdHRlZFxuICAgICAgICBpZiAoZGF0YSAmJiB0eXBlb2YgZGF0YSA9PT0gJ29iamVjdCcgJiYgJ3N1Y2Nlc3MnIGluIGRhdGEpIHtcbiAgICAgICAgICByZXR1cm4gZGF0YSBhcyBBcGlSZXNwb25zZTxUPjtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIE90aGVyd2lzZSwgd3JhcCB0aGUgZGF0YSBpbiBvdXIgc3RhbmRhcmQgcmVzcG9uc2UgZm9ybWF0XG4gICAgICAgIHJldHVybiBBcGlSZXNwb25zZUR0by5zdWNjZXNzKGRhdGEpO1xuICAgICAgfSksXG4gICAgKTtcbiAgfVxufVxuIl0sInZlcnNpb24iOjN9

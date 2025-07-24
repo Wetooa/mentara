@@ -12,7 +12,11 @@ import {
   NotificationType,
   NotificationPriority,
 } from '@prisma/client';
-import { MessagingGateway } from '../messaging/messaging.gateway';
+import { MessageSentEvent } from '../common/events/messaging-events';
+import {
+  PostCreatedEvent,
+  CommentAddedEvent,
+} from '../common/events/social-events';
 
 interface WebSocketServer {
   to(room: string): {
@@ -45,16 +49,15 @@ export class NotificationsService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly messagingGateway: MessagingGateway,
   ) {}
 
   onModuleInit() {
     // Configure WebSocket server for real-time notifications
     // Use a slight delay to ensure MessagingGateway is fully initialized
     setTimeout(() => {
-      this.setWebSocketServer(this.messagingGateway.server);
+      // this.setWebSocketServer(this.messagingGateway.server);
     }, 1000);
-    
+
     this.logger.log(
       'NotificationsService initialized with real-time capabilities',
     );
@@ -246,7 +249,7 @@ export class NotificationsService implements OnModuleInit {
     // Return updated default settings since notificationSettings model doesn't exist
     // This provides a consistent interface while using in-memory defaults
     const currentSettings = await this.getNotificationSettings(userId);
-    
+
     return {
       ...currentSettings,
       ...data,
@@ -592,6 +595,268 @@ export class NotificationsService implements OnModuleInit {
         `Error handling recommendations refreshed event:`,
         error,
       );
+    }
+  }
+
+  // ===== MESSAGING EVENT LISTENERS =====
+
+  /**
+   * Handle message sent events to create MESSAGE_RECEIVED notifications
+   */
+  @OnEvent('MessageSentEvent')
+  async handleMessageSent(event: MessageSentEvent) {
+    try {
+      const { senderId, conversationId, content, recipientIds } =
+        event.eventData;
+
+      // Get sender details
+      const sender = await this.prisma.user.findUnique({
+        where: { id: senderId },
+        select: { firstName: true, lastName: true },
+      });
+
+      if (!sender) {
+        this.logger.warn(
+          `Sender not found for message notification: ${senderId}`,
+        );
+        return;
+      }
+
+      const senderName = `${sender.firstName} ${sender.lastName}`;
+
+      // Create notifications for each recipient
+      for (const recipientId of recipientIds) {
+        await this.create(
+          {
+            userId: recipientId,
+            title: 'New Message',
+            message: `You have a new message from ${senderName}.`,
+            type: NotificationType.MESSAGE_RECEIVED,
+            priority: NotificationPriority.NORMAL,
+            actionUrl: `/messages/${conversationId}`,
+            data: {
+              senderId,
+              conversationId,
+              messagePreview:
+                content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+              senderName,
+            },
+          },
+          {
+            realTime: true,
+            email: false,
+            push: true,
+          },
+        );
+      }
+
+      this.logger.log(
+        `Message notifications sent to ${recipientIds.length} recipients for conversation ${conversationId}`,
+      );
+    } catch (error) {
+      this.logger.error(`Error handling message sent event:`, error);
+    }
+  }
+
+  /**
+   * Handle post created events to create COMMUNITY_POST notifications for community members
+   */
+  @OnEvent('PostCreatedEvent')
+  async handlePostCreated(event: PostCreatedEvent) {
+    try {
+      const { postId, authorId, communityId, title, content, isAnonymous } =
+        event.eventData;
+
+      // Skip notifications for anonymous posts or posts without community
+      if (isAnonymous || !communityId) {
+        return;
+      }
+
+      // Get post author details
+      const author = await this.prisma.user.findUnique({
+        where: { id: authorId },
+        select: { firstName: true, lastName: true },
+      });
+
+      // Get community details and members
+      const community = await this.prisma.community.findUnique({
+        where: { id: communityId },
+        select: {
+          name: true,
+          memberships: {
+            where: {
+              userId: { not: authorId }, // Don't notify the author
+            },
+            select: { userId: true },
+          },
+        },
+      });
+
+      if (!author || !community) {
+        this.logger.warn(
+          `Author or community not found for post notification: ${postId}`,
+        );
+        return;
+      }
+
+      const authorName = `${author.firstName} ${author.lastName}`;
+
+      // Create notifications for community members
+      const notifications = community.memberships
+        .filter((member) => member.userId !== null)
+        .map((member) => ({
+          userId: member.userId!,
+          title: `New Post in ${community.name}`,
+          message: `${authorName} posted: "${title || content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
+          type: NotificationType.COMMUNITY_POST,
+          priority: NotificationPriority.LOW,
+          actionUrl: `/communities/posts/${postId}`,
+          data: {
+            postId,
+            authorId,
+            authorName,
+            communityId,
+            communityName: community.name,
+            postTitle: title,
+          },
+        }));
+
+      await this.createBatch(notifications, {
+        realTime: true,
+        email: false,
+        push: false,
+      });
+
+      this.logger.log(
+        `Post notification sent to ${notifications.length} community members for post ${postId}`,
+      );
+    } catch (error) {
+      this.logger.error(`Error handling post created event:`, error);
+    }
+  }
+
+  /**
+   * Handle comment added events to create COMMUNITY_REPLY notifications for post author and parent comment author
+   */
+  @OnEvent('CommentAddedEvent')
+  async handleCommentAdded(event: CommentAddedEvent) {
+    try {
+      const { commentId, postId, authorId, content, parentCommentId } =
+        event.eventData;
+
+      // Validate required event data
+      if (!authorId) {
+        this.logger.error(
+          `Missing authorId in CommentAddedEvent for comment ${commentId}`,
+          {
+            commentId,
+            postId,
+            eventData: event.eventData,
+          },
+        );
+        return;
+      }
+
+      if (!commentId || !postId || !content) {
+        this.logger.error(`Missing required data in CommentAddedEvent`, {
+          commentId,
+          postId,
+          authorId,
+          hasContent: !!content,
+          eventData: event.eventData,
+        });
+        return;
+      }
+
+      // Get comment author details
+      const author = await this.prisma.user.findUnique({
+        where: { id: authorId },
+        select: { firstName: true, lastName: true },
+      });
+
+      // Get post details and author
+      const post = await this.prisma.post.findUnique({
+        where: { id: postId },
+        select: {
+          title: true,
+          userId: true,
+          user: {
+            select: { firstName: true, lastName: true },
+          },
+        },
+      });
+
+      if (!author || !post) {
+        this.logger.warn(
+          `Author or post not found for comment notification: ${commentId}`,
+          {
+            authorFound: !!author,
+            postFound: !!post,
+            authorId,
+            postId,
+            commentId,
+          },
+        );
+        return;
+      }
+
+      const authorName = `${author.firstName} ${author.lastName}`;
+      const recipients = new Set<string>();
+
+      // Notify post author (if not the commenter)
+      if (post.userId !== authorId) {
+        recipients.add(post.userId);
+      }
+
+      // If this is a reply to another comment, notify the parent comment author
+      if (parentCommentId) {
+        const parentComment = await this.prisma.comment.findUnique({
+          where: { id: parentCommentId },
+          select: { userId: true },
+        });
+
+        if (
+          parentComment &&
+          parentComment.userId !== authorId &&
+          parentComment.userId !== post.userId
+        ) {
+          recipients.add(parentComment.userId);
+        }
+      }
+
+      // Create notifications for all recipients
+      const notifications = Array.from(recipients).map((recipientId) => ({
+        userId: recipientId,
+        title: parentCommentId
+          ? 'New Reply to Your Comment'
+          : 'New Comment on Your Post',
+        message: `${authorName} ${parentCommentId ? 'replied to your comment' : 'commented on your post'}: "${content.substring(0, 100)}${content.length > 100 ? '...' : ''}"`,
+        type: NotificationType.COMMUNITY_REPLY,
+        priority: NotificationPriority.NORMAL,
+        actionUrl: `/communities/posts/${postId}#comment-${commentId}`,
+        data: {
+          commentId,
+          postId,
+          authorId,
+          authorName,
+          parentCommentId,
+          postTitle: post.title,
+        },
+      }));
+
+      if (notifications.length > 0) {
+        await this.createBatch(notifications, {
+          realTime: true,
+          email: false,
+          push: true,
+        });
+
+        this.logger.log(
+          `Comment notifications sent to ${notifications.length} users for comment ${commentId}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(`Error handling comment added event:`, error);
     }
   }
 
@@ -978,8 +1243,10 @@ export class NotificationsService implements OnModuleInit {
     // Since scheduledFor and sentAt fields don't exist in the Notification model,
     // this method returns a stub response. In a real implementation with these fields,
     // this would process and send scheduled notifications.
-    this.logger.log('Scheduled notifications check completed (no scheduled fields available)');
-    
+    this.logger.log(
+      'Scheduled notifications check completed (no scheduled fields available)',
+    );
+
     return { sent: 0 };
   }
 
@@ -992,7 +1259,7 @@ export class NotificationsService implements OnModuleInit {
   async handleAppointmentBooked(event: any) {
     try {
       const { data } = event;
-      
+
       // Get therapist and client details
       const [therapist, client] = await Promise.all([
         this.prisma.user.findUnique({
@@ -1059,10 +1326,7 @@ export class NotificationsService implements OnModuleInit {
         `Appointment booked notifications sent for appointment ${data.appointmentId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling appointment booked event:`,
-        error,
-      );
+      this.logger.error(`Error handling appointment booked event:`, error);
     }
   }
 
@@ -1073,7 +1337,7 @@ export class NotificationsService implements OnModuleInit {
   async handleAppointmentCancelled(event: any) {
     try {
       const { data } = event;
-      
+
       // Get therapist and client details
       const [therapist, client] = await Promise.all([
         this.prisma.user.findUnique({
@@ -1091,11 +1355,13 @@ export class NotificationsService implements OnModuleInit {
       const isCancelledByClient = data.cancelledBy === data.clientId;
 
       // Notify the other party about the cancellation
-      const notifyUserId = isCancelledByClient ? data.therapistId : data.clientId;
-      const cancellerName = isCancelledByClient 
+      const notifyUserId = isCancelledByClient
+        ? data.therapistId
+        : data.clientId;
+      const cancellerName = isCancelledByClient
         ? `${client.firstName} ${client.lastName}`
         : `${therapist.firstName} ${therapist.lastName}`;
-      
+
       await this.create(
         {
           userId: notifyUserId,
@@ -1103,7 +1369,9 @@ export class NotificationsService implements OnModuleInit {
           message: `Your session scheduled for ${new Date(data.originalStartTime).toLocaleDateString()} at ${new Date(data.originalStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} has been cancelled by ${cancellerName}. ${data.cancellationReason}`,
           type: NotificationType.APPOINTMENT_CANCELLED,
           priority: NotificationPriority.HIGH,
-          actionUrl: isCancelledByClient ? '/therapist/schedule' : '/client/booking',
+          actionUrl: isCancelledByClient
+            ? '/therapist/schedule'
+            : '/client/booking',
           data: {
             appointmentId: data.appointmentId,
             cancelledBy: data.cancelledBy,
@@ -1126,7 +1394,9 @@ export class NotificationsService implements OnModuleInit {
           message: `Your session with ${isCancelledByClient ? therapist.firstName + ' ' + therapist.lastName : client.firstName + ' ' + client.lastName} scheduled for ${new Date(data.originalStartTime).toLocaleDateString()} has been successfully cancelled.`,
           type: NotificationType.APPOINTMENT_CANCELLED,
           priority: NotificationPriority.NORMAL,
-          actionUrl: isCancelledByClient ? '/client/booking' : '/therapist/schedule',
+          actionUrl: isCancelledByClient
+            ? '/client/booking'
+            : '/therapist/schedule',
           data: {
             appointmentId: data.appointmentId,
             originalStartTime: data.originalStartTime,
@@ -1144,10 +1414,7 @@ export class NotificationsService implements OnModuleInit {
         `Appointment cancellation notifications sent for appointment ${data.appointmentId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling appointment cancelled event:`,
-        error,
-      );
+      this.logger.error(`Error handling appointment cancelled event:`, error);
     }
   }
 
@@ -1158,7 +1425,7 @@ export class NotificationsService implements OnModuleInit {
   async handleAppointmentRescheduled(event: any) {
     try {
       const { data } = event;
-      
+
       // Get therapist and client details
       const [therapist, client] = await Promise.all([
         this.prisma.user.findUnique({
@@ -1174,13 +1441,15 @@ export class NotificationsService implements OnModuleInit {
       if (!therapist || !client) return;
 
       const isRescheduledByClient = data.rescheduledBy === data.clientId;
-      
+
       // Notify the other party about the reschedule
-      const notifyUserId = isRescheduledByClient ? data.therapistId : data.clientId;
-      const reschedulerName = isRescheduledByClient 
+      const notifyUserId = isRescheduledByClient
+        ? data.therapistId
+        : data.clientId;
+      const reschedulerName = isRescheduledByClient
         ? `${client.firstName} ${client.lastName}`
         : `${therapist.firstName} ${therapist.lastName}`;
-      
+
       await this.create(
         {
           userId: notifyUserId,
@@ -1230,10 +1499,7 @@ export class NotificationsService implements OnModuleInit {
         `Appointment rescheduled notifications sent for appointment ${data.appointmentId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling appointment rescheduled event:`,
-        error,
-      );
+      this.logger.error(`Error handling appointment rescheduled event:`, error);
     }
   }
 
@@ -1244,7 +1510,7 @@ export class NotificationsService implements OnModuleInit {
   async handleAppointmentCompleted(event: any) {
     try {
       const { data } = event;
-      
+
       // Get therapist and client details
       const [therapist, client] = await Promise.all([
         this.prisma.user.findUnique({
@@ -1312,10 +1578,7 @@ export class NotificationsService implements OnModuleInit {
         `Appointment completed notifications sent for appointment ${data.appointmentId}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error handling appointment completed event:`,
-        error,
-      );
+      this.logger.error(`Error handling appointment completed event:`, error);
     }
   }
 }

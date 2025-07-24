@@ -55,6 +55,7 @@ export class MeetingsService {
    * Get meeting details with access validation
    */
   async getMeetingById(meetingId: string, userId: string) {
+    this.logger.debug(`getMeetingById called with meetingId: ${meetingId}, userId: ${userId}`);
     const meeting = await this.prisma.meeting.findFirst({
       where: {
         id: meetingId,
@@ -99,7 +100,7 @@ export class MeetingsService {
    * Get user's upcoming meetings
    */
   async getUpcomingMeetings(userId: string, limit = 10) {
-    // First validate that user exists as either client or therapist
+    // First validate that user exists
     const userExists = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -113,9 +114,14 @@ export class MeetingsService {
       throw new NotFoundException('User not found');
     }
 
+    // If user exists but is not a client or therapist, return empty meetings
+    // This follows REST API best practices: return 200 with empty array rather than 404
     if (!userExists.client && !userExists.therapist) {
-      this.logger.warn(`User ${userId} is not a client or therapist`);
-      throw new NotFoundException('User must be a client or therapist to access meetings');
+      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      return {
+        meetings: [],
+        total: 0,
+      };
     }
 
     const meetings = await this.prisma.meeting.findMany({
@@ -688,5 +694,231 @@ export class MeetingsService {
 
     this.logger.log(`Session data saved for meeting ${meetingId}`);
     return session;
+  }
+
+  /**
+   * Get user's completed meetings
+   */
+  async getCompletedMeetings(userId: string, limit = 10) {
+    // First validate that user exists
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        client: { select: { userId: true } },
+        therapist: { select: { userId: true } },
+      },
+    });
+
+    if (!userExists) {
+      this.logger.warn(`User not found: ${userId}`);
+      throw new NotFoundException('User not found');
+    }
+
+    // If user exists but is not a client or therapist, return empty meetings
+    if (!userExists.client && !userExists.therapist) {
+      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      return [];
+    }
+    
+    const meetings = await this.prisma.meeting.findMany({
+      where: {
+        OR: [{ clientId: userId }, { therapistId: userId }],
+        status: 'COMPLETED',
+      },
+      include: this.getMeetingIncludeOptions(),
+      orderBy: { startTime: 'desc' },
+      take: limit,
+    });
+
+    return this.transformMeetings(meetings);
+  }
+
+  /**
+   * Get user's cancelled meetings
+   */
+  async getCancelledMeetings(userId: string, limit = 10) {
+    // First validate that user exists
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        client: { select: { userId: true } },
+        therapist: { select: { userId: true } },
+      },
+    });
+
+    if (!userExists) {
+      this.logger.warn(`User not found: ${userId}`);
+      throw new NotFoundException('User not found');
+    }
+
+    // If user exists but is not a client or therapist, return empty meetings
+    if (!userExists.client && !userExists.therapist) {
+      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      return [];
+    }
+    
+    const meetings = await this.prisma.meeting.findMany({
+      where: {
+        OR: [{ clientId: userId }, { therapistId: userId }],
+        status: { in: ['CANCELLED', 'NO_SHOW'] },
+      },
+      include: this.getMeetingIncludeOptions(),
+      orderBy: { startTime: 'desc' },
+      take: limit,
+    });
+
+    return this.transformMeetings(meetings);
+  }
+
+  /**
+   * Get user's in-progress meetings
+   */
+  async getInProgressMeetings(userId: string, limit = 10) {
+    // First validate that user exists
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        client: { select: { userId: true } },
+        therapist: { select: { userId: true } },
+      },
+    });
+
+    if (!userExists) {
+      this.logger.warn(`User not found: ${userId}`);
+      throw new NotFoundException('User not found');
+    }
+
+    // If user exists but is not a client or therapist, return empty meetings
+    if (!userExists.client && !userExists.therapist) {
+      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      return [];
+    }
+    
+    const meetings = await this.prisma.meeting.findMany({
+      where: {
+        OR: [{ clientId: userId }, { therapistId: userId }],
+        status: 'IN_PROGRESS',
+      },
+      include: this.getMeetingIncludeOptions(),
+      orderBy: { startTime: 'desc' },
+      take: limit,
+    });
+
+    return this.transformMeetings(meetings);
+  }
+
+  /**
+   * Get all meetings with filtering options
+   */
+  async getAllMeetings(userId: string, queryOptions: {
+    status?: string;
+    type?: string;
+    limit?: number;
+    offset?: number;
+    dateFrom?: string;
+    dateTo?: string;
+  }) {
+    // First validate that user exists
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        client: { select: { userId: true } },
+        therapist: { select: { userId: true } },
+      },
+    });
+
+    if (!userExists) {
+      this.logger.warn(`User not found: ${userId}`);
+      throw new NotFoundException('User not found');
+    }
+
+    // If user exists but is not a client or therapist, return empty meetings
+    if (!userExists.client && !userExists.therapist) {
+      this.logger.log(`User ${userId} is not a client or therapist, returning empty meetings`);
+      return [];
+    }
+    
+    const whereClause: any = {
+      OR: [{ clientId: userId }, { therapistId: userId }],
+    };
+
+    // Add status filter
+    if (queryOptions.status) {
+      whereClause.status = queryOptions.status.toUpperCase();
+    }
+
+    // Add date range filter
+    if (queryOptions.dateFrom || queryOptions.dateTo) {
+      whereClause.startTime = {};
+      if (queryOptions.dateFrom) {
+        whereClause.startTime.gte = new Date(queryOptions.dateFrom);
+      }
+      if (queryOptions.dateTo) {
+        whereClause.startTime.lte = new Date(queryOptions.dateTo);
+      }
+    }
+
+    const meetings = await this.prisma.meeting.findMany({
+      where: whereClause,
+      include: this.getMeetingIncludeOptions(),
+      orderBy: { startTime: 'desc' },
+      take: queryOptions.limit || 20,
+      skip: queryOptions.offset || 0,
+    });
+
+    return this.transformMeetings(meetings);
+  }
+
+
+
+  /**
+   * Helper method to get consistent meeting include options
+   */
+  private getMeetingIncludeOptions() {
+    return {
+      client: {
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      },
+      therapist: {
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      },
+    };
+  }
+
+  /**
+   * Helper method to transform meetings data
+   */
+  private transformMeetings(meetings: any[]) {
+    return meetings.map(meeting => ({
+      id: meeting.id,
+      title: meeting.title,
+      description: meeting.description,
+      status: meeting.status,
+      startTime: meeting.startTime,
+      endTime: meeting.endTime,
+      duration: meeting.duration,
+      meetingType: meeting.meetingType,
+      meetingUrl: meeting.meetingUrl,
+      client: meeting.client,
+      therapist: meeting.therapist,
+      createdAt: meeting.createdAt,
+      updatedAt: meeting.updatedAt,
+    }));
   }
 }

@@ -3,7 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-import { TEST_ACCOUNTS, SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
+import { TEST_ACCOUNTS, SEED_CONFIG } from './config';
 import { SeedDataGenerator } from './data-generator';
 
 export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehensive' = 'comprehensive') {
@@ -18,19 +18,32 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     return await createSimpleUsers(prisma);
   }
 
-  // Create test accounts first with defined IDs for testing
-  console.log('🧪 Creating test accounts...');
+  // Import bulk operations utilities
+  const { chunkedBulkInsert, batchedTransaction } = await import('./scripts/bulk-operations');
 
-  // Create test admin users
+  // Create test accounts first with auto-generated UUIDs
+  console.log('🧪 Creating test accounts...');
+  console.log('🔹 Test Admin Accounts:');
+
+  // Create test admin users (individual creation for logging)
   for (const adminData of TEST_ACCOUNTS.ADMINS) {
     const userData = SeedDataGenerator.generateUserData('admin', adminData);
     const user = await prisma.user.create({ data: userData });
     users.push(user);
-    console.log(
-      `✅ Created test admin: ${adminData.firstName} ${adminData.lastName}`,
-    );
+    
+    // Create admin profile
+    await prisma.admin.create({
+      data: {
+        userId: user.id,
+        permissions: ['user_management', 'therapist_approval', 'system_admin'],
+        adminLevel: 'admin',
+      },
+    });
+    
+    console.log(`  ${adminData.firstName} ${adminData.lastName}: ${user.id} (${user.email})`);
   }
 
+  console.log('🔹 Test Moderator Accounts:');
   // Create test moderator users
   for (const moderatorData of TEST_ACCOUNTS.MODERATORS) {
     const userData = SeedDataGenerator.generateUserData(
@@ -39,11 +52,20 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     );
     const user = await prisma.user.create({ data: userData });
     users.push(user);
-    console.log(
-      `✅ Created test moderator: ${moderatorData.firstName} ${moderatorData.lastName}`,
-    );
+    
+    // Create moderator profile
+    await prisma.moderator.create({
+      data: {
+        userId: user.id,
+        permissions: ['content_moderation', 'community_management'],
+        assignedCommunities: {},
+      },
+    });
+    
+    console.log(`  ${moderatorData.firstName} ${moderatorData.lastName}: ${user.id} (${user.email})`);
   }
 
+  console.log('🔹 Test Client Accounts:');
   // Create test client users
   for (const clientData of TEST_ACCOUNTS.CLIENTS) {
     const userData = SeedDataGenerator.generateUserData('client', clientData);
@@ -56,11 +78,10 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     });
     clients.push({ user, client });
     users.push(user);
-    console.log(
-      `✅ Created test client: ${clientData.firstName} ${clientData.lastName}`,
-    );
+    console.log(`  ${clientData.firstName} ${clientData.lastName}: ${user.id} (${user.email})`);
   }
 
+  console.log('🔹 Test Therapist Accounts:');
   // Create test therapist users
   for (const therapistData of TEST_ACCOUNTS.THERAPISTS) {
     const userData = SeedDataGenerator.generateUserData(
@@ -78,95 +99,199 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     });
     therapists.push({ user, therapist });
     users.push(user);
-    console.log(
-      `✅ Created test therapist: ${therapistData.firstName} ${therapistData.lastName}`,
-    );
+    console.log(`  ${therapistData.firstName} ${therapistData.lastName}: ${user.id} (${user.email})`);
   }
 
-  // Create additional fake users for testing (if needed)
-  console.log('🤖 Creating additional fake users...');
+  // Create additional users using bulk operations for better performance
+  console.log('🤖 Creating additional users with bulk operations...');
 
-  // Create additional admin users
-  const additionalAdmins =
-    SEED_CONFIG.USERS.ADMINS - TEST_ACCOUNTS.ADMINS.length;
+  // Prepare bulk data for additional users
+  const additionalUserData: any[] = [];
+  const clientOperations: (() => Promise<any>)[] = [];
+  const therapistOperations: (() => Promise<any>)[] = [];
+
+  // Generate additional admin users data
+  const additionalAdmins = SEED_CONFIG.USERS.ADMINS - TEST_ACCOUNTS.ADMINS.length;
   for (let i = 0; i < additionalAdmins; i++) {
     const userData = SeedDataGenerator.generateUserData('admin', {
-      id: `fake_admin_${i + 1}`,
       email: `admin${i + 1}@mentara.com`,
       firstName: 'Admin',
       lastName: `User ${i + 1}`,
     });
-    const user = await prisma.user.create({ data: userData });
-    users.push(user);
-    console.log(
-      `✅ Created additional admin: ${userData.firstName} ${userData.lastName}`,
-    );
+    additionalUserData.push(userData);
   }
 
-  // Create additional moderator users
-  const additionalModerators =
-    SEED_CONFIG.USERS.MODERATORS - TEST_ACCOUNTS.MODERATORS.length;
+  // Generate additional moderator users data
+  const additionalModerators = SEED_CONFIG.USERS.MODERATORS - TEST_ACCOUNTS.MODERATORS.length;
   for (let i = 0; i < additionalModerators; i++) {
     const userData = SeedDataGenerator.generateUserData('moderator', {
-      id: `fake_moderator_${i + 1}`,
       email: `moderator${i + 1}@mentara.com`,
       firstName: 'Moderator',
       lastName: `User ${i + 1}`,
     });
-    const user = await prisma.user.create({ data: userData });
-    users.push(user);
-    console.log(
-      `✅ Created additional moderator: ${userData.firstName} ${userData.lastName}`,
-    );
+    additionalUserData.push(userData);
   }
 
-  // Create additional client users
-  const additionalClients =
-    SEED_CONFIG.USERS.CLIENTS - TEST_ACCOUNTS.CLIENTS.length;
+  // Generate additional client users data
+  const additionalClients = SEED_CONFIG.USERS.CLIENTS - TEST_ACCOUNTS.CLIENTS.length;
+  const clientUserData: any[] = [];
   for (let i = 0; i < additionalClients; i++) {
-    const userData = SeedDataGenerator.generateUserData('client', {
-      id: `fake_client_${i + 1}`,
+    const userData = SeedDataGenerator.generateUserData('client', {});
+    clientUserData.push(userData);
+    additionalUserData.push(userData);
+  }
+
+  // Generate additional therapist users data  
+  const additionalTherapists = SEED_CONFIG.USERS.THERAPISTS - TEST_ACCOUNTS.THERAPISTS.length;
+  const therapistUserData: any[] = [];
+  for (let i = 0; i < additionalTherapists; i++) {
+    const userData = SeedDataGenerator.generateUserData('therapist', {});
+    therapistUserData.push(userData);
+    additionalUserData.push(userData);
+  }
+
+  // Bulk insert all additional users
+  if (additionalUserData.length > 0) {
+    console.log(`📦 Bulk inserting ${additionalUserData.length} additional users...`);
+    await chunkedBulkInsert(prisma, 'user', additionalUserData, {
+      operationName: 'additional users',
+      chunkSize: 1000
     });
-    const user = await prisma.user.create({ data: userData });
-    const client = await prisma.client.create({
-      data: {
-        userId: user.id,
-        hasSeenTherapistRecommendations: Math.random() > 0.5,
-      },
+
+    // Get the inserted users to create relationships
+    const insertedUsers = await prisma.user.findMany({
+      where: {
+        email: {
+          in: additionalUserData.map(u => u.email)
+        }
+      }
     });
-    clients.push({ user, client });
-    users.push(user);
-    console.log(
-      `✅ Created additional client: ${userData.firstName} ${userData.lastName}`,
+
+    users.push(...insertedUsers);
+
+    // Create client profiles for client users using batched transactions
+    if (clientUserData.length > 0) {
+      const clientUsers = insertedUsers.filter(u => u.role === 'client');
+      console.log(`👤 Creating ${clientUsers.length} client profiles with batched transactions...`);
+      
+      const clientProfileOperations = clientUsers.map(user => {
+        return () => prisma.client.create({
+          data: {
+            userId: user.id,
+            hasSeenTherapistRecommendations: Math.random() > 0.5,
+          },
+        });
+      });
+
+      const clientProfiles = await batchedTransaction(
+        prisma,
+        clientProfileOperations,
+        {
+          operationName: 'client profiles',
+          batchSize: 100
+        }
+      );
+
+      const clientPairs = clientUsers.map((user, index) => ({
+        user,
+        client: clientProfiles[index]
+      }));
+      clients.push(...clientPairs);
+    }
+
+    // Create therapist profiles for therapist users using batched transactions
+    if (therapistUserData.length > 0) {
+      const therapistUsers = insertedUsers.filter(u => u.role === 'therapist');
+      console.log(`🩺 Creating ${therapistUsers.length} therapist profiles with batched transactions...`);
+      
+      const therapistProfileOperations = therapistUsers.map(user => {
+        const therapistProfileData = SeedDataGenerator.generateTherapistData();
+        return () => prisma.therapist.create({
+          data: {
+            userId: user.id,
+            ...therapistProfileData,
+            status: 'APPROVED' as const,
+          },
+        });
+      });
+
+      const therapistProfiles = await batchedTransaction(
+        prisma,
+        therapistProfileOperations,
+        {
+          operationName: 'therapist profiles',
+          batchSize: 100
+        }
+      );
+
+      const therapistPairs = therapistUsers.map((user, index) => ({
+        user,
+        therapist: therapistProfiles[index]
+      }));
+      therapists.push(...therapistPairs);
+    }
+  }
+
+  // Create admin profiles for admin users using batched transactions
+  const adminUsers = users.filter(u => u.role === 'admin');
+  if (adminUsers.length > 0) {
+    console.log(`👨‍💼 Creating ${adminUsers.length} admin profiles with batched transactions...`);
+    
+    const adminProfileOperations = adminUsers.map(user => {
+      return () => prisma.admin.create({
+        data: {
+          userId: user.id,
+          permissions: ['user_management', 'therapist_approval', 'system_admin'],
+          adminLevel: 'admin',
+        },
+      });
+    });
+
+    await batchedTransaction(
+      prisma,
+      adminProfileOperations,
+      {
+        operationName: 'admin profiles',
+        batchSize: 100
+      }
     );
   }
 
-  // Create additional therapist users
-  const additionalTherapists =
-    SEED_CONFIG.USERS.THERAPISTS - TEST_ACCOUNTS.THERAPISTS.length;
-  for (let i = 0; i < additionalTherapists; i++) {
-    const userData = SeedDataGenerator.generateUserData('therapist', {
-      id: `fake_therapist_${i + 1}`,
+  // Create moderator profiles for moderator users using batched transactions
+  const moderatorUsers = users.filter(u => u.role === 'moderator');
+  if (moderatorUsers.length > 0) {
+    console.log(`👮 Creating ${moderatorUsers.length} moderator profiles with batched transactions...`);
+    
+    const moderatorProfileOperations = moderatorUsers.map(user => {
+      return () => prisma.moderator.create({
+        data: {
+          userId: user.id,
+          permissions: ['content_moderation', 'community_management'],
+          assignedCommunities: {},
+        },
+      });
     });
-    const user = await prisma.user.create({ data: userData });
-    const therapistProfileData = SeedDataGenerator.generateTherapistData();
-    const therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        ...therapistProfileData,
-        status: 'APPROVED' as const,
-      },
-    });
-    therapists.push({ user, therapist });
-    users.push(user);
-    console.log(
-      `✅ Created additional therapist: ${userData.firstName} ${userData.lastName}`,
+
+    await batchedTransaction(
+      prisma,
+      moderatorProfileOperations,
+      {
+        operationName: 'moderator profiles',
+        batchSize: 100
+      }
     );
   }
 
   // Extract moderators and admins from users array
   const moderators = users.filter(user => user.role === 'moderator');
   const admins = users.filter(user => user.role === 'admin');
+
+  console.log(`✅ User creation completed with bulk operations:`);
+  console.log(`   👥 Total users: ${users.length}`);
+  console.log(`   👤 Clients: ${clients.length}`);
+  console.log(`   🩺 Therapists: ${therapists.length}`);
+  console.log(`   👮 Moderators: ${moderators.length}`);
+  console.log(`   👨‍💼 Admins: ${admins.length}`);
   
   return { users, clients, therapists, moderators, admins };
 }
@@ -181,7 +306,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
 
   // Create 3 Clients
   console.log('🔹 Development Client Accounts:');
-  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.CLIENTS; i++) {
+  for (let i = 1; i <= SEED_CONFIG.USERS.CLIENTS; i++) {
     const clientId = uuidv4();
     const clientUser = await prisma.user.create({
       data: {
@@ -210,7 +335,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
 
   // Create 3 Therapists
   console.log('🔹 Development Therapist Accounts:');
-  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.THERAPISTS; i++) {
+  for (let i = 1; i <= SEED_CONFIG.USERS.THERAPISTS; i++) {
     const therapistId = uuidv4();
     const therapistUser = await prisma.user.create({
       data: {
@@ -261,7 +386,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
 
   // Create 3 Admins
   console.log('🔹 Development Admin Accounts:');
-  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.ADMINS; i++) {
+  for (let i = 1; i <= SEED_CONFIG.USERS.ADMINS; i++) {
     const adminId = uuidv4();
     const adminUser = await prisma.user.create({
       data: {
@@ -291,7 +416,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
 
   // Create 3 Moderators
   console.log('🔹 Development Moderator Accounts:');
-  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.MODERATORS; i++) {
+  for (let i = 1; i <= SEED_CONFIG.USERS.MODERATORS; i++) {
     const moderatorId = uuidv4();
     const moderatorUser = await prisma.user.create({
       data: {

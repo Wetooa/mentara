@@ -1,19 +1,16 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { 
-  FileText, 
-  MessageCircle, 
-  ExternalLink, 
-  Eye, 
-  EyeOff,
-  Calendar 
-} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { PublicProfileResponse } from '@/lib/api/services/profile';
 import { format, parseISO } from 'date-fns';
+import {
+  Calendar,
+  EyeOff,
+  FileText,
+  MessageCircle
+} from 'lucide-react';
 import Link from 'next/link';
 
 interface ProfileActivityProps {
@@ -22,6 +19,7 @@ interface ProfileActivityProps {
 }
 
 export function ProfileActivity({ recentActivity, stats }: ProfileActivityProps) {
+  const { userRole } = useAuth();
   const hasActivity = recentActivity.length > 0;
 
   return (
@@ -55,9 +53,9 @@ export function ProfileActivity({ recentActivity, stats }: ProfileActivityProps)
         {hasActivity ? (
           <div className="space-y-4">
             {recentActivity.map((activity) => (
-              <ActivityItem key={activity.id} activity={activity} />
+              <ActivityItem key={activity.id} activity={activity} userRole={userRole} />
             ))}
-            
+
             {recentActivity.length >= 20 && (
               <div className="text-center pt-4">
                 <p className="text-sm text-gray-500">
@@ -80,14 +78,16 @@ export function ProfileActivity({ recentActivity, stats }: ProfileActivityProps)
   );
 }
 
-function ActivityItem({ 
-  activity 
-}: { 
-  activity: PublicProfileResponse['recentActivity'][0] 
+function ActivityItem({
+  activity,
+  userRole
+}: {
+  activity: PublicProfileResponse['recentActivity'][0];
+  userRole: UserRole | null;
 }) {
   const formattedDate = format(parseISO(activity.createdAt), 'MMM d, yyyy');
   const isPost = activity.type === 'post';
-  
+
   return (
     <div className="border-l-2 border-l-gray-200 pl-4 pb-4">
       <div className="flex items-start justify-between gap-3">
@@ -102,8 +102,8 @@ function ActivityItem({
             <span className="text-sm font-medium text-gray-900">
               {isPost ? 'Posted in' : 'Commented in'}
             </span>
-            <Link 
-              href={`/communities/${activity.community.slug}`}
+            <Link
+              href={`/${userRole}/community/${activity.community.slug}`}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               {activity.community.name}
@@ -118,17 +118,16 @@ function ActivityItem({
                 {activity.title}
               </h4>
             )}
-            
+
             {/* Content with Privacy Indicator */}
             <div className="flex items-start gap-2">
               <div className="flex-1">
-                <p className={`text-sm text-gray-600 line-clamp-3 ${
-                  !activity.isFromSharedCommunity ? 'italic' : ''
-                }`}>
+                <p className={`text-sm text-gray-600 line-clamp-3 ${!activity.isFromSharedCommunity ? 'italic' : ''
+                  }`}>
                   {activity.content}
                 </p>
               </div>
-              
+
               {/* Privacy Indicator */}
               {!activity.isFromSharedCommunity && (
                 <div className="flex-shrink-0">
@@ -148,7 +147,7 @@ function ActivityItem({
           </div>
         </div>
       </div>
-      
+
       {/* Privacy Explanation */}
       {!activity.isFromSharedCommunity && (
         <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">

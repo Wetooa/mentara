@@ -77,7 +77,9 @@ export class MessagingService {
       type: rawType = 'direct',
       title,
     } = createConversationDto;
-    
+
+    console.log(createConversationDto);
+
     const type = this.mapConversationType(rawType);
 
     // Validate conversation type and participants
@@ -166,9 +168,9 @@ export class MessagingService {
   async getUserConversations(userId: string, page = 1, limit = 20) {
     console.log('🔍 [MESSAGING SERVICE] getUserConversations called');
     console.log('📊 [PARAMETERS]', { userId, page, limit });
-    
+
     const skip = (page - 1) * limit;
-    
+
     try {
       console.log('🗃️ [DATABASE] Executing conversation query...');
       const conversations = await this.prisma.conversation.findMany({
@@ -229,20 +231,139 @@ export class MessagingService {
         take: limit,
       });
 
-      console.log('✅ [DATABASE RESULT] Found conversations:', conversations.length);
+      console.log(
+        '✅ [DATABASE RESULT] Found conversations:',
+        conversations.length,
+      );
       console.log('📝 [CONVERSATION DETAILS]:');
       conversations.forEach((conv, index) => {
-        console.log(`   ${index + 1}. ${conv.type} - "${conv.title || 'Untitled'}" (ID: ${conv.id})`);
-        console.log(`      Participants: ${conv.participants.length}, Messages: ${conv.messages.length}`);
+        console.log(
+          `   ${index + 1}. ${conv.type} - "${conv.title || 'Untitled'}" (ID: ${conv.id})`,
+        );
+        console.log(
+          `      Participants: ${conv.participants.length}, Messages: ${conv.messages.length}`,
+        );
         if (conv.participants.length > 0) {
-          const otherParticipants = conv.participants.filter(p => p.userId !== userId);
-          console.log(`      Other participants: ${otherParticipants.map(p => `${p.user.firstName} ${p.user.lastName} (${p.user.role})`).join(', ')}`);
+          const otherParticipants = conv.participants.filter(
+            (p) => p.userId !== userId,
+          );
+          console.log(
+            `      Other participants: ${otherParticipants.map((p) => `${p.user.firstName} ${p.user.lastName} (${p.user.role})`).join(', ')}`,
+          );
         }
       });
 
       return conversations;
     } catch (error) {
       console.error('❌ [DATABASE ERROR] getUserConversations failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get recent communications for dashboard
+   * Returns a simplified format optimized for the dashboard recent communications widget
+   */
+  async getRecentCommunications(userId: string, limit = 5) {
+    console.log('📧 [MESSAGING SERVICE] getRecentCommunications called');
+    console.log('📊 [PARAMETERS]', { userId, limit });
+
+    try {
+      // Get user's recent conversations with detailed information
+      const conversations = await this.prisma.conversation.findMany({
+        where: {
+          participants: {
+            some: {
+              userId,
+              isActive: true,
+            },
+          },
+          isActive: true,
+          lastMessageAt: { not: null }, // Only conversations with messages
+        },
+        include: {
+          participants: {
+            where: { 
+              userId: { not: userId }, // Get other participants only
+              isActive: true 
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                  role: true,
+                },
+              },
+            },
+          },
+          messages: {
+            take: 1,
+            orderBy: { createdAt: 'desc' },
+            where: { isDeleted: false },
+            select: {
+              id: true,
+              content: true,
+              createdAt: true,
+              messageType: true,
+              senderId: true,
+            },
+          },
+          _count: {
+            select: {
+              messages: {
+                where: {
+                  isDeleted: false,
+                  readReceipts: {
+                    none: { userId },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: { lastMessageAt: 'desc' },
+        take: limit,
+      });
+
+      console.log('✅ [DATABASE RESULT] Found recent communications:', conversations.length);
+
+      // Transform conversations to recent communications format
+      const recentCommunications = conversations.map((conversation) => {
+        const otherParticipant = conversation.participants[0]; // Get the other participant
+        const lastMessage = conversation.messages[0];
+        const unreadCount = conversation._count.messages;
+
+        if (!otherParticipant) {
+          console.log('⚠️ [WARNING] Conversation has no other participants:', conversation.id);
+          return null;
+        }
+
+        return {
+          id: otherParticipant.user.id,
+          conversationId: conversation.id,
+          name: `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`,
+          role: otherParticipant.user.role,
+          avatar: otherParticipant.user.avatarUrl || null,
+          lastMessage: lastMessage ? {
+            content: lastMessage.content,
+            time: lastMessage.createdAt.toISOString(),
+            isFromUser: lastMessage.senderId === userId,
+            messageType: lastMessage.messageType,
+          } : null,
+          unreadCount,
+          status: 'offline', // Default status, could be enhanced with real-time presence
+          conversationType: conversation.type,
+        };
+      }).filter(Boolean); // Remove null entries
+
+      console.log('📱 [FORMATTED RESULT] Recent communications formatted:', recentCommunications.length);
+
+      return recentCommunications;
+    } catch (error) {
+      console.error('❌ [DATABASE ERROR] getRecentCommunications failed:', error);
       throw error;
     }
   }
@@ -299,9 +420,24 @@ export class MessagingService {
         messageType,
         replyToId,
         // Use multiple attachment fields (schema only supports these)
-        attachmentUrls: attachmentUrls.length > 0 ? attachmentUrls : (attachmentUrl ? [attachmentUrl] : []),
-        attachmentNames: attachmentNames.length > 0 ? attachmentNames : (attachmentName ? [attachmentName] : []),
-        attachmentSizes: attachmentSizes.length > 0 ? attachmentSizes : (attachmentSize ? [attachmentSize] : []),
+        attachmentUrls:
+          attachmentUrls.length > 0
+            ? attachmentUrls
+            : attachmentUrl
+              ? [attachmentUrl]
+              : [],
+        attachmentNames:
+          attachmentNames.length > 0
+            ? attachmentNames
+            : attachmentName
+              ? [attachmentName]
+              : [],
+        attachmentSizes:
+          attachmentSizes.length > 0
+            ? attachmentSizes
+            : attachmentSize
+              ? [attachmentSize]
+              : [],
       },
       include: {
         sender: {
@@ -369,7 +505,9 @@ export class MessagingService {
         recipientIds,
         replyToMessageId: message.replyToId || undefined,
         fileAttachments:
-          message.attachmentUrls.length > 0 ? message.attachmentUrls : undefined,
+          message.attachmentUrls.length > 0
+            ? message.attachmentUrls
+            : undefined,
       }),
     );
 

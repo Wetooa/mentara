@@ -9,7 +9,6 @@ import {
   History,
   Settings,
   LogOut,
-  ChevronDown,
   Menu,
   X,
   ChevronLeft,
@@ -17,11 +16,9 @@ import {
   Search,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { cn, getProfileUrl } from "@/lib/utils";
-import Logo from "@/components/Logo";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -33,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
+import { UserDisplay } from "@/components/common/UserDisplay";
 
 
 export default function ModeratorLayout({
@@ -41,10 +39,9 @@ export default function ModeratorLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
 
   // Load sidebar state from localStorage
   useEffect(() => {
@@ -61,12 +58,6 @@ export default function ModeratorLayout({
     localStorage.setItem('moderator-sidebar-expanded', JSON.stringify(newState));
   };
 
-  // Moderator data - uses real user data
-  const moderator = {
-    name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Moderator",
-    email: user?.email || "moderator@mentara.com",
-    avatarUrl: user?.avatarUrl || "/icons/user-avatar.png",
-  };
 
   const navItems = [
     {
@@ -365,11 +356,13 @@ export default function ModeratorLayout({
           {/* Moderator User Info and Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex flex-col items-end">
-                <span className="text-sm font-medium text-gray-900">
-                  {moderator.name}
-                </span>
-                <span className="text-xs text-gray-500">Moderator</span>
+              <div className="hidden sm:flex">
+                <UserDisplay
+                  variant="name-only"
+                  showRole={true}
+                  textClassName="flex flex-col items-end text-gray-900"
+                  className="gap-1"
+                />
               </div>
 
               <DropdownMenu>

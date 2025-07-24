@@ -81,9 +81,12 @@ export class TherapistRecommendationService {
         throw new NotFoundException('User not found');
       }
 
+      // Handle users without pre-assessment more gracefully
       if (!user.preAssessment) {
-        this.logger.warn(`No pre-assessment found for user: ${request.userId}`);
-        throw new NotFoundException('No pre-assessment found for user');
+        this.logger.warn(`No pre-assessment found for user: ${request.userId}, using basic recommendations`);
+        
+        // Provide basic recommendations for users without pre-assessment
+        return await this.getBasicTherapistRecommendations(request, user);
       }
 
       // Get comprehensive clinical analysis for enhanced matching
@@ -104,14 +107,12 @@ export class TherapistRecommendationService {
         clinicalAnalysis = null;
       }
 
-      // Extract user conditions and severity levels
+      // Extract user conditions and AI evaluation data
       const userConditions = this.extractUserConditions(user.preAssessment);
-      // Extract severity levels from the answers JSON field
-      const answers = user.preAssessment.answers as any;
-      const severityLevels = answers?.severityLevels as Record<
-        string,
-        string
-      >;
+      const aiEvaluation = this.extractAiEvaluation(user.preAssessment);
+      
+      // Extract severity levels from the database field (not from answers)
+      const severityLevels = user.preAssessment.severityLevels as Record<string, string>;
 
       // Enhanced therapist filtering based on clinical insights
       const therapistWhere: any = {
@@ -394,6 +395,184 @@ export class TherapistRecommendationService {
   }
 
   /**
+   * Get basic therapist recommendations for users without pre-assessment
+   */
+  private async getBasicTherapistRecommendations(
+    request: TherapistRecommendationRequest,
+    user: any,
+  ): Promise<any> {
+    this.logger.log(
+      `Getting basic recommendations for user ${request.userId} (no pre-assessment)`,
+    );
+
+    try {
+      // Basic therapist filtering without clinical analysis
+      const therapistWhere: any = {
+        status: 'APPROVED',
+        ...(request.province && { province: request.province }),
+        ...(request.maxHourlyRate && {
+          hourlyRate: { lte: request.maxHourlyRate },
+        }),
+      };
+
+      // Fetch therapists with basic data
+      const therapists = await this.prisma.therapist.findMany({
+        where: therapistWhere,
+        orderBy: [
+          { createdAt: 'desc' },
+          { yearsOfExperience: 'desc' },
+        ],
+        take: Math.min(request.limit ?? 10, 20),
+        include: {
+          user: true,
+          reviews: {
+            select: {
+              rating: true,
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Found ${therapists.length} approved therapists for basic recommendations`);
+
+      if (therapists.length === 0) {
+        this.logger.warn('No approved therapists found in database');
+        return {
+          totalCount: 0,
+          recommendations: [],
+          message: 'No therapists available at this time. Please try again later.',
+          userConditions: [],
+          therapists: [],
+          matchCriteria: {
+            primaryConditions: [],
+            secondaryConditions: [],
+            severityLevels: {},
+          },
+          clinicalInsights: null,
+          page: 1,
+          pageSize: request.limit ?? 10,
+        };
+      }
+
+      // Calculate basic scores based on experience and ratings
+      const therapistsWithScores = therapists.map((therapist, index) => {
+        const experienceYears = therapist.yearsOfExperience || 
+          this.calculateYearsOfExperience(therapist.practiceStartDate);
+        
+        const reviews = therapist.reviews || [];
+        const averageRating = reviews.length > 0 ? 
+          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
+        
+        // Basic scoring: experience (60%) + rating (40%)
+        const experienceScore = Math.min(experienceYears * 10, 60);
+        const ratingScore = averageRating * 8;
+        const totalScore = experienceScore + ratingScore;
+
+        return {
+          ...therapist,
+          userId: therapist.userId, // Ensure userId is available as id
+          id: therapist.userId,
+          matchScore: Math.round(totalScore),
+          score: Math.round(totalScore),
+          rank: index + 1,
+          experience: experienceYears,
+          rating: averageRating,
+          totalReviews: reviews.length,
+          // Add frontend-expected fields
+          firstName: therapist.user.firstName,
+          lastName: therapist.user.lastName,
+          specialties: therapist.expertise || [],
+          bio: `${experienceYears} years of experience in mental health therapy`,
+          scoreBreakdown: {
+            conditionScore: 0,
+            approachScore: 0,
+            experienceScore: Math.round(experienceScore),
+            reviewScore: Math.round(ratingScore),
+            logisticsScore: 20, // Base logistics score
+          },
+          matchExplanation: {
+            primaryMatches: [],
+            secondaryMatches: [],
+            approachMatches: [],
+            experienceYears,
+            averageRating,
+            totalReviews: reviews.length,
+            successRates: {},
+          },
+        };
+      });
+
+      // Sort by score descending
+      const sortedTherapists = therapistsWithScores
+        .sort((a, b) => b.matchScore - a.matchScore)
+        .slice(0, request.limit ?? 10);
+
+      return {
+        totalCount: sortedTherapists.length,
+        recommendations: sortedTherapists, // Frontend expects this field
+        userConditions: [],
+        therapists: sortedTherapists,
+        matchCriteria: {
+          primaryConditions: [],
+          secondaryConditions: [],
+          severityLevels: {},
+          note: 'Basic recommendations - complete your mental health assessment for personalized matches',
+        },
+        clinicalInsights: null,
+        page: 1,
+        pageSize: request.limit ?? 10,
+        welcomeMessage: `Hello ${user.user.firstName}! We've found some great therapists for you. Complete your mental health assessment to get personalized recommendations.`,
+        isFirstTime: true,
+        userInfo: {
+          firstName: user.user.firstName,
+          memberSince: user.user.createdAt,
+          needsOnboarding: true,
+        },
+        nextSteps: {
+          canSendRequests: true,
+          recommendedActions: [
+            'Complete your mental health assessment for better matches',
+            'Browse therapist profiles',
+            'Send requests to therapists you find interesting',
+            'Complete your profile for improved recommendations',
+          ],
+        },
+        matchingInsights: {
+          totalAvailableTherapists: sortedTherapists.length,
+          totalAvailableCommunities: 0,
+          recommendationEngine: 'Basic experience and rating-based matching',
+          lastUpdated: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error in getBasicTherapistRecommendations for user ${request.userId}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+      );
+
+      // Return safe fallback
+      return {
+        totalCount: 0,
+        recommendations: [],
+        userConditions: [],
+        therapists: [],
+        matchCriteria: {
+          primaryConditions: [],
+          secondaryConditions: [],
+          severityLevels: {},
+        },
+        clinicalInsights: null,
+        page: 1,
+        pageSize: request.limit ?? 10,
+        error: 'Unable to load therapist recommendations at this time',
+      };
+    }
+  }
+
+  /**
    * Get detailed compatibility analysis between a client and therapist
    */
   async getCompatibilityAnalysis(clientId: string, therapistId: string) {
@@ -439,22 +618,39 @@ export class TherapistRecommendationService {
     preAssessment: PreAssessment,
   ): Record<string, string> {
     const conditions: Record<string, string> = {};
-    // Extract data from the answers JSON field
-    const answers = preAssessment.answers as any;
-    const severityLevels = answers?.severityLevels as Record<
-      string,
-      string
-    >;
-    const questionnaires = answers?.questionnaires as string[];
     
-    if (questionnaires && severityLevels) {
-      questionnaires.forEach((q) => {
-        if (severityLevels[q]) {
-          conditions[q] = severityLevels[q];
+    // Extract data from the separate database fields (corrected approach)
+    const severityLevels = preAssessment.severityLevels as Record<string, string>;
+    const scores = preAssessment.scores as Record<string, number>;
+    
+    if (severityLevels && scores) {
+      // Use questionnaire names from the scores object
+      Object.keys(scores).forEach((questionnaire) => {
+        if (severityLevels[questionnaire]) {
+          conditions[questionnaire] = severityLevels[questionnaire];
         }
       });
     }
+    
     return conditions;
+  }
+
+  /**
+   * Extract AI evaluation data from pre-assessment for enhanced matching
+   */
+  private extractAiEvaluation(preAssessment: PreAssessment): any {
+    const aiEstimate = preAssessment.aiEstimate as any;
+    
+    if (!aiEstimate || typeof aiEstimate !== 'object') {
+      return null;
+    }
+
+    return {
+      confidence: aiEstimate.confidence || 0,
+      riskFactors: aiEstimate.risk_factors || [],
+      recommendations: aiEstimate.recommendations || [],
+      estimatedSeverity: aiEstimate.estimated_severity || {},
+    };
   }
 
   private calculateMatchScore(

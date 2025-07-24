@@ -10,6 +10,7 @@ import { getProfileUrl } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { UserSearchBar, User } from "@/components/search";
 import { DashboardPageMetadata } from "@/components/metadata/SimplePageMetadata";
+import { UserDisplay } from "@/components/common/UserDisplay";
 
 export default function MainLayout({
   children,
@@ -20,6 +21,8 @@ export default function MainLayout({
   const router = useRouter();
   const { logout, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  console.log("Current user:", user);
 
   const handleUserSelect = (user: User) => {
     console.log("Selected user:", user);
@@ -43,6 +46,12 @@ export default function MainLayout({
       path: "/client",
       icon: "/icons/dashboard.svg",
       id: "dashboard",
+    },
+    {
+      name: "Sessions",
+      path: "/client/sessions",
+      icon: "/icons/sessions.svg",
+      id: "sessions",
     },
     {
       name: "Therapist",
@@ -82,6 +91,7 @@ export default function MainLayout({
               width={50}
               height={50}
               priority
+              className="hover:scale-110 transition-transform duration-300"
             />
           </Link>
           <div className="flex flex-1 flex-col items-center gap-6">
@@ -246,27 +256,29 @@ export default function MainLayout({
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              <NotificationDropdown 
-                variant="default" 
-                maxNotifications={5} 
+              <NotificationDropdown
+                variant="default"
+                maxNotifications={5}
                 showConnectionStatus={true}
                 className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-primary/30"
               />
               <div className="flex items-center gap-3">
-                <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-sm font-medium text-foreground">
-                    {user ? `${user.firstName} ${user.lastName}` : "User"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{user?.role || "User"}</span>
+                <div className="hidden sm:flex">
+                  <UserDisplay
+                    variant="name-only"
+                    showRole={true}
+                    textClassName="flex flex-col items-end"
+                    className="gap-1"
+                  />
                 </div>
-                <button 
-                  className="relative group cursor-pointer" 
+                <button
+                  className="relative group cursor-pointer"
                   onClick={handleAvatarClick}
                   title="View Profile"
                 >
                   <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
                     <Image
-                      src="/avatar-placeholder.png"
+                      src={user?.avatarUrl || "/icons/avatar-placeholder.svg"}
                       alt="User Avatar"
                       width={36}
                       height={36}

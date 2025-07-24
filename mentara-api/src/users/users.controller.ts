@@ -142,6 +142,8 @@ export class UsersController {
     files?: { avatar?: Express.Multer.File[]; cover?: Express.Multer.File[] },
   ): Promise<UserDto> {
     try {
+      this.logger.log('User Data:', userData);
+
       // Users can only update their own profile unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
 

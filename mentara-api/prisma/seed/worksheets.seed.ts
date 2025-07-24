@@ -3,6 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { SEED_CONFIG } from './config';
 
 export async function seedWorksheets(
   prisma: PrismaClient,
@@ -81,8 +82,8 @@ export async function seedWorksheets(
   // Create worksheets for each client-therapist relationship
   for (const { relationship, client, therapist } of relationships) {
     try {
-      // Create 2-5 worksheets per relationship
-      const worksheetCount = faker.number.int({ min: 2, max: 5 });
+      // Create worksheets per relationship based on SEED_CONFIG
+      const worksheetCount = SEED_CONFIG.WORKSHEETS.SUBMISSIONS_PER_RELATIONSHIP;
       const selectedTemplates = faker.helpers.arrayElements(worksheetTemplates, worksheetCount);
 
       for (const template of selectedTemplates) {

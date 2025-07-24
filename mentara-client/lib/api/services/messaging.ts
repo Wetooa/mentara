@@ -1,22 +1,26 @@
-import { AxiosInstance } from 'axios';
+import { User } from "@/types";
+import { AxiosInstance } from "axios";
 
-// Types for messaging API
+// Types for messaging API - synchronized with backend
 export interface MessagingMessage {
   id: string;
+  conversationId: string;
   senderId: string;
   content: string;
-  messageType: 'TEXT' | 'IMAGE' | 'AUDIO' | 'VIDEO' | 'SYSTEM';
-  createdAt: string;
-  updatedAt: string;
-  isRead: boolean;
+  messageType: "text" | "image" | "audio" | "video" | "system"; // Updated to match your backend types
+  attachmentUrls: string[];
+  attachmentNames: string[];
+  attachmentSizes: number[];
+  replyToId: string | null;
   isEdited: boolean;
   isDeleted: boolean;
-  editedAt?: string;
-  replyToId?: string;
-  conversationId: string;
-  attachments?: MessagingAttachment[];
-  reactions?: MessagingReaction[];
-  readReceipts?: MessagingReadReceipt[];
+  editedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  sender: User;
+  replyTo: MessagingMessage | null;
+  reactions: MessagingReaction[];
+  readReceipts: MessagingReadReceipt[];
 }
 
 export interface MessagingAttachment {
@@ -45,7 +49,7 @@ export interface MessagingReadReceipt {
 
 export interface MessagingConversation {
   id: string;
-  type: 'DIRECT' | 'GROUP' | 'SESSION' | 'SUPPORT';
+  type: "direct" | "group" | "therapy_session"; // Fixed: lowercase to match backend
   title?: string;
   description?: string;
   avatarUrl?: string;
@@ -62,7 +66,7 @@ export interface MessagingParticipant {
   id: string;
   conversationId: string;
   userId: string;
-  role: 'MEMBER' | 'MODERATOR' | 'ADMIN';
+  role: "member" | "moderator" | "admin"; // Fixed: lowercase to match backend
   joinedAt: string;
   leftAt?: string;
   isMuted: boolean;
@@ -82,16 +86,16 @@ export interface MessagingTypingIndicator {
 }
 
 export interface CreateConversationDto {
-  participantUserIds: string[];
-  type?: 'DIRECT' | 'GROUP';
+  participantIds: string[];
+  type?: "direct" | "group"; // Fixed: lowercase to match backend
   title?: string;
   description?: string;
 }
 
 export interface SendMessageDto {
   content: string;
-  messageType?: 'TEXT' | 'IMAGE' | 'AUDIO' | 'VIDEO';
-  replyToId?: string;
+  type?: "text" | "image" | "audio" | "video"; // Fixed: lowercase to match backend
+  replyToMessageId?: string; // Fixed: backend uses replyToMessageId
   attachments?: {
     url: string;
     fileName: string;
@@ -137,53 +141,114 @@ export function createMessagingService(axios: AxiosInstance) {
   return {
     // Conversation Management
     async getConversations(params?: GetConversationsParams) {
-      const { data } = await axios.get<MessagingConversation[]>('/messaging/conversations', { params });
+      const { data } = await axios.get<MessagingConversation[]>(
+        "/messaging/conversations",
+        { params }
+      );
+      return data;
+    },
+
+    async getRecentCommunications(limit?: number) {
+      const { data } = await axios.get('/messaging/recent-communications', { 
+        params: { limit } 
+      });
       return data;
     },
 
     async createConversation(conversationData: CreateConversationDto) {
-      const { data } = await axios.post<MessagingConversation>('/messaging/conversations', conversationData);
+      const { data } = await axios.post<MessagingConversation>(
+        "/messaging/conversations",
+        conversationData
+      );
       return data;
     },
 
+    /**
+     * Start a direct conversation with another user
+     * Finds existing direct conversation or creates a new one
+     * @param targetUserId - The user ID to start conversation with
+     * @returns Promise<MessagingConversation> - The conversation (existing or newly created)
+     */
+    async startDirectConversation(targetUserId: string) {
+      // First, try to find existing direct conversation
+      const conversations = await this.getConversations();
+
+      const existingDirectConversation = conversations.find(
+        (conv) =>
+          conv.type === "direct" && // Fixed: lowercase to match backend
+          conv.participants.some((p) => p.userId === targetUserId)
+      );
+
+      if (existingDirectConversation) {
+        return existingDirectConversation;
+      }
+
+      // If no existing conversation, create a new direct conversation
+      const newConversation = await this.createConversation({
+        participantIds: [targetUserId],
+        type: "direct", // Fixed: lowercase to match backend
+      });
+
+      return newConversation;
+    },
+
     async getConversation(conversationId: string) {
-      const { data } = await axios.get<MessagingConversation>(`/messaging/conversations/${conversationId}`);
+      const { data } = await axios.get<MessagingConversation>(
+        `/messaging/conversations/${conversationId}`
+      );
       return data;
     },
 
     async archiveConversation(conversationId: string) {
-      const { data } = await axios.patch(`/messaging/conversations/${conversationId}/archive`);
+      const { data } = await axios.patch(
+        `/messaging/conversations/${conversationId}/archive`
+      );
       return data;
     },
 
     async unarchiveConversation(conversationId: string) {
-      const { data } = await axios.patch(`/messaging/conversations/${conversationId}/unarchive`);
+      const { data } = await axios.patch(
+        `/messaging/conversations/${conversationId}/unarchive`
+      );
       return data;
     },
 
     async muteConversation(conversationId: string) {
-      const { data } = await axios.patch(`/messaging/conversations/${conversationId}/mute`);
+      const { data } = await axios.patch(
+        `/messaging/conversations/${conversationId}/mute`
+      );
       return data;
     },
 
     async unmuteConversation(conversationId: string) {
-      const { data } = await axios.patch(`/messaging/conversations/${conversationId}/unmute`);
+      const { data } = await axios.patch(
+        `/messaging/conversations/${conversationId}/unmute`
+      );
       return data;
     },
 
     // Message Management
     async getMessages(conversationId: string, params?: GetMessagesParams) {
-      const { data } = await axios.get<MessagingMessage[]>(`/messaging/conversations/${conversationId}/messages`, { params });
+      const { data } = await axios.get<MessagingMessage[]>(
+        `/messaging/conversations/${conversationId}/messages`,
+        { params }
+      );
       return data;
     },
 
     async sendMessage(conversationId: string, messageData: SendMessageDto) {
-      const { data } = await axios.post<MessagingMessage>(`/messaging/conversations/${conversationId}/messages`, messageData);
+      const { data } = await axios.post<MessagingMessage>(
+        `/messaging/conversations/${conversationId}/messages`,
+        messageData
+      );
       return data;
     },
 
     async updateMessage(messageId: string, messageData: UpdateMessageDto) {
-      const { data } = await axios.put<MessagingMessage>(`/messaging/messages/${messageId}`, messageData);
+      const { data } = await axios.put<MessagingMessage>(
+        `/messaging/messages/${messageId}`,
+        messageData
+      );
       return data;
     },
 
@@ -194,35 +259,47 @@ export function createMessagingService(axios: AxiosInstance) {
 
     // Read Receipts
     async markMessageAsRead(messageId: string) {
-      const { data } = await axios.post(`/messaging/messages/${messageId}/read`);
+      const { data } = await axios.post(
+        `/messaging/messages/${messageId}/read`
+      );
       return data;
     },
 
     async markConversationAsRead(conversationId: string) {
-      const { data } = await axios.post(`/messaging/conversations/${conversationId}/read`);
+      const { data } = await axios.post(
+        `/messaging/conversations/${conversationId}/read`
+      );
       return data;
     },
 
     // Reactions
     async addReaction(messageId: string, emoji: string) {
-      const { data } = await axios.post(`/messaging/messages/${messageId}/reactions`, { emoji });
+      const { data } = await axios.post(
+        `/messaging/messages/${messageId}/reactions`,
+        { emoji }
+      );
       return data;
     },
 
     async removeReaction(messageId: string, emoji: string) {
-      const { data } = await axios.delete(`/messaging/messages/${messageId}/reactions/${emoji}`);
+      const { data } = await axios.delete(
+        `/messaging/messages/${messageId}/reactions/${emoji}`
+      );
       return data;
     },
 
     // Search
     async searchMessages(params: SearchMessagesParams) {
-      const { data } = await axios.get<MessagingMessage[]>('/messaging/search', { params });
+      const { data } = await axios.get<MessagingMessage[]>(
+        "/messaging/search",
+        { params }
+      );
       return data;
     },
 
     // User Blocking
     async blockUser(blockData: BlockUserDto) {
-      const { data } = await axios.post('/messaging/block', blockData);
+      const { data } = await axios.post("/messaging/block", blockData);
       return data;
     },
 
@@ -232,25 +309,33 @@ export function createMessagingService(axios: AxiosInstance) {
     },
 
     async getBlockedUsers() {
-      const { data } = await axios.get('/messaging/blocked');
+      const { data } = await axios.get("/messaging/blocked");
       return data;
     },
 
     // Typing Indicators (for WebSocket integration)
     async sendTypingIndicator(conversationId: string, isTyping: boolean) {
       // This will be handled via WebSocket, but we provide REST fallback
-      const { data } = await axios.post(`/messaging/conversations/${conversationId}/typing`, { isTyping });
+      const { data } = await axios.post(
+        `/messaging/conversations/${conversationId}/typing`,
+        { isTyping }
+      );
       return data;
     },
 
     // File Upload Support
-    async uploadMessageFile(file: File): Promise<{ url: string; fileName: string; fileSize: number; mimeType: string }> {
+    async uploadMessageFile(file: File): Promise<{
+      url: string;
+      fileName: string;
+      fileSize: number;
+      mimeType: string;
+    }> {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
-      const { data } = await axios.post('/messaging/upload', formData, {
+      const { data } = await axios.post("/messaging/upload", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -264,44 +349,70 @@ export function createMessagingService(axios: AxiosInstance) {
 
     // Advanced Features
     async forwardMessage(messageId: string, conversationIds: string[]) {
-      const { data } = await axios.post(`/messaging/messages/${messageId}/forward`, { conversationIds });
+      const { data } = await axios.post(
+        `/messaging/messages/${messageId}/forward`,
+        { conversationIds }
+      );
       return data;
     },
 
     async reportMessage(messageId: string, reason: string) {
-      const { data } = await axios.post(`/messaging/messages/${messageId}/report`, { reason });
+      const { data } = await axios.post(
+        `/messaging/messages/${messageId}/report`,
+        { reason }
+      );
       return data;
     },
 
     // Conversation Participants
     async addParticipants(conversationId: string, userIds: string[]) {
-      const { data } = await axios.post(`/messaging/conversations/${conversationId}/participants`, { userIds });
+      const { data } = await axios.post(
+        `/messaging/conversations/${conversationId}/participants`,
+        { userIds }
+      );
       return data;
     },
 
     async removeParticipant(conversationId: string, userId: string) {
-      const { data } = await axios.delete(`/messaging/conversations/${conversationId}/participants/${userId}`);
+      const { data } = await axios.delete(
+        `/messaging/conversations/${conversationId}/participants/${userId}`
+      );
       return data;
     },
 
-    async updateParticipantRole(conversationId: string, userId: string, role: 'MEMBER' | 'MODERATOR' | 'ADMIN') {
-      const { data } = await axios.patch(`/messaging/conversations/${conversationId}/participants/${userId}`, { role });
+    async updateParticipantRole(
+      conversationId: string,
+      userId: string,
+      role: "member" | "moderator" | "admin" // Fixed: lowercase to match backend
+    ) {
+      const { data } = await axios.patch(
+        `/messaging/conversations/${conversationId}/participants/${userId}`,
+        { role }
+      );
       return data;
     },
 
     // Message Analytics (for therapist-client sessions)
     async getConversationAnalytics(conversationId: string) {
-      const { data } = await axios.get(`/messaging/conversations/${conversationId}/analytics`);
+      const { data } = await axios.get(
+        `/messaging/conversations/${conversationId}/analytics`
+      );
       return data;
     },
 
     // Conversation Settings
-    async updateConversationSettings(conversationId: string, settings: {
-      title?: string;
-      description?: string;
-      avatarUrl?: string;
-    }) {
-      const { data } = await axios.patch(`/messaging/conversations/${conversationId}/settings`, settings);
+    async updateConversationSettings(
+      conversationId: string,
+      settings: {
+        title?: string;
+        description?: string;
+        avatarUrl?: string;
+      }
+    ) {
+      const { data } = await axios.patch(
+        `/messaging/conversations/${conversationId}/settings`,
+        settings
+      );
       return data;
     },
   };
