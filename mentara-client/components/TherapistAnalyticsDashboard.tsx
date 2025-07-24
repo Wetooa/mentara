@@ -59,7 +59,7 @@ export function TherapistAnalyticsDashboard({ className }: TherapistAnalyticsDas
   // Calculate date range based on selection
   const getDateRange = () => {
     const now = new Date();
-    
+
     switch (dateRange) {
       case "week":
         const startOfWeek = new Date(now);
@@ -284,14 +284,14 @@ export function TherapistAnalyticsDashboard({ className }: TherapistAnalyticsDas
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis tickFormatter={(value) => `₱${value}`} />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: any) => [formatCurrency(value), "Revenue"]}
                     labelStyle={{ color: "#374151" }}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#10b981" 
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#10b981"
                     fill="#dcfce7"
                     strokeWidth={2}
                   />
@@ -389,11 +389,10 @@ export function TherapistAnalyticsDashboard({ className }: TherapistAnalyticsDas
             {analytics.recentSessions.map((session: any) => (
               <div key={session.id} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    session.status === 'COMPLETED' ? 'bg-green-500' :
-                    session.status === 'SCHEDULED' ? 'bg-blue-500' :
-                    session.status === 'CANCELLED' ? 'bg-red-500' : 'bg-gray-500'
-                  }`} />
+                  <div className={`w-3 h-3 rounded-full ${session.status === 'COMPLETED' ? 'bg-green-500' :
+                      session.status === 'SCHEDULED' ? 'bg-blue-500' :
+                        session.status === 'CANCELLED' ? 'bg-red-500' : 'bg-gray-500'
+                    }`} />
                   <div>
                     <p className="font-medium text-gray-900">{session.clientName}</p>
                     <p className="text-sm text-gray-600">
@@ -407,7 +406,7 @@ export function TherapistAnalyticsDashboard({ className }: TherapistAnalyticsDas
                   </p>
                   <Badge variant={
                     session.status === 'COMPLETED' ? 'default' :
-                    session.status === 'SCHEDULED' ? 'secondary' : 'destructive'
+                      session.status === 'SCHEDULED' ? 'secondary' : 'destructive'
                   } className="text-xs">
                     {session.status.toLowerCase()}
                   </Badge>

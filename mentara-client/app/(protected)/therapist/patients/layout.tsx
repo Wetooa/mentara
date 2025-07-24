@@ -156,7 +156,7 @@ export default function PatientsLayout({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Link href={`/therapist/patients/${patient.userId}`}>
+          <Link href={`/therapist/profile/${patient.userId}`}>
             <Button
               size="sm"
               variant="outline"
@@ -318,8 +318,8 @@ export default function PatientsLayout({
           <button
             onClick={() => setActiveTab("patients")}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors rounded-md text-center ${activeTab === "patients"
-                ? "bg-primary text-white"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              ? "bg-primary text-white"
+              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
               }`}
           >
             My Patients ({filteredPatients?.length || 0})
@@ -327,8 +327,8 @@ export default function PatientsLayout({
           <button
             onClick={() => setActiveTab("requests")}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors rounded-md text-center ${activeTab === "requests"
-                ? "bg-primary text-white"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              ? "bg-primary text-white"
+              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
               }`}
           >
             Requests ({filteredRequests?.length || 0})
@@ -382,8 +382,8 @@ export default function PatientsLayout({
           <button
             onClick={() => setActiveTab("patients")}
             className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${activeTab === "patients"
-                ? "bg-primary text-white"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              ? "bg-primary text-white"
+              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
               }`}
           >
             My Patients ({filteredPatients?.length || 0})
@@ -391,8 +391,8 @@ export default function PatientsLayout({
           <button
             onClick={() => setActiveTab("requests")}
             className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${activeTab === "requests"
-                ? "bg-primary text-white"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+              ? "bg-primary text-white"
+              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
               }`}
           >
             Requests ({filteredRequests?.length || 0})
