@@ -42,7 +42,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   // Load sidebar state from localStorage
   useEffect(() => {
@@ -381,8 +381,8 @@ export default function AdminLayout({
                   <Button variant="ghost" className="relative group p-0">
                     <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-blue-100 to-blue-200 ring-2 ring-border/50 group-hover:ring-blue-300 transition-all duration-300 shadow-sm group-hover:shadow-md">
                       <Avatar className="h-full w-full">
-                        <AvatarImage src={admin.avatarUrl} alt={admin.name} className="transition-transform duration-300 group-hover:scale-110" />
-                        <AvatarFallback className="bg-blue-100 text-blue-700">{admin.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={user?.avatarUrl} alt={user?.firstName || 'Admin'} className="transition-transform duration-300 group-hover:scale-110" />
+                        <AvatarFallback className="bg-blue-100 text-blue-700">{user?.firstName?.charAt(0) || 'A'}</AvatarFallback>
                       </Avatar>
                     </div>
                     {/* Online status indicator */}

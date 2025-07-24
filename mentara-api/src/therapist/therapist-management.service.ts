@@ -306,6 +306,23 @@ export class TherapistManagementService {
 
   async getMatchedClients(therapistId: string): Promise<any> {
     try {
+      console.log('🔍 [DEBUG] getMatchedClients called with therapistId:', therapistId);
+      
+      // First, verify the therapist exists
+      const therapist = await this.prisma.therapist.findUnique({
+        where: { userId: therapistId },
+        select: { userId: true, user: { select: { firstName: true, lastName: true } } }
+      });
+      
+      console.log('🔍 [DEBUG] Therapist found:', therapist ? 
+        `${therapist.user.firstName} ${therapist.user.lastName} (ID: ${therapist.userId})` : 
+        'NOT FOUND');
+      
+      if (!therapist) {
+        console.error('❌ [ERROR] Therapist not found with ID:', therapistId);
+        throw new NotFoundException(`Therapist with ID ${therapistId} not found`);
+      }
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -330,6 +347,15 @@ export class TherapistManagementService {
         },
         orderBy: { assignedAt: 'desc' }
       });
+      
+      console.log('🔍 [DEBUG] ClientTherapist records found:', allMatches.length);
+      console.log('🔍 [DEBUG] Raw matches:', allMatches.map(m => ({
+        id: m.id,
+        clientId: m.clientId,
+        therapistId: m.therapistId,
+        assignedAt: m.assignedAt,
+        status: m.status
+      })));
 
       // Separate recent matches (last 30 days) from older ones
       const recentMatches = allMatches.filter(match => 
