@@ -179,9 +179,6 @@ export function ReportedContent() {
     );
   }
 
-  function logFormDowntown(data: any) {
-    console.log("Logging: ", data);
-  }
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -291,7 +288,6 @@ export function ReportedContent() {
                   <TableBody>
                     {filteredReports.map((report: any) => (
                       <TableRow key={report.id}>
-                        {logFormDowntown(report)}
                         <TableCell>
                           <Badge variant="outline" className="capitalize">
                             {report.type}
