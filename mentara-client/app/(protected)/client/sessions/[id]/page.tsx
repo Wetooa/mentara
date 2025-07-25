@@ -8,12 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Clock, 
-  User, 
-  Video, 
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  User,
+  Video,
   MessageCircle,
   Edit,
   Trash2,
@@ -23,20 +23,21 @@ import {
   RefreshCw,
   FileText,
   MapPin,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useSessionById } from "@/hooks/sessions";
+import { toast } from "sonner";
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const itemVariants = {
@@ -47,54 +48,54 @@ const itemVariants = {
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 24
-    }
-  }
+      damping: 24,
+    },
+  },
 };
 
 const getStatusConfig = (status: string) => {
   switch (status) {
-    case 'SCHEDULED':
+    case "SCHEDULED":
       return {
-        label: 'Scheduled',
-        color: 'bg-blue-100 text-blue-800',
-        icon: Calendar
+        label: "Scheduled",
+        color: "bg-blue-100 text-blue-800",
+        icon: Calendar,
       };
-    case 'CONFIRMED':
+    case "CONFIRMED":
       return {
-        label: 'Confirmed',
-        color: 'bg-green-100 text-green-800',
-        icon: CheckCircle
+        label: "Confirmed",
+        color: "bg-green-100 text-green-800",
+        icon: CheckCircle,
       };
-    case 'IN_PROGRESS':
+    case "IN_PROGRESS":
       return {
-        label: 'In Progress',
-        color: 'bg-purple-100 text-purple-800',
-        icon: Video
+        label: "In Progress",
+        color: "bg-purple-100 text-purple-800",
+        icon: Video,
       };
-    case 'COMPLETED':
+    case "COMPLETED":
       return {
-        label: 'Completed',
-        color: 'bg-gray-100 text-gray-800',
-        icon: CheckCircle
+        label: "Completed",
+        color: "bg-gray-100 text-gray-800",
+        icon: CheckCircle,
       };
-    case 'CANCELLED':
+    case "CANCELLED":
       return {
-        label: 'Cancelled',
-        color: 'bg-red-100 text-red-800',
-        icon: XCircle
+        label: "Cancelled",
+        color: "bg-red-100 text-red-800",
+        icon: XCircle,
       };
-    case 'NO_SHOW':
+    case "NO_SHOW":
       return {
-        label: 'No Show',
-        color: 'bg-orange-100 text-orange-800',
-        icon: AlertCircle
+        label: "No Show",
+        color: "bg-orange-100 text-orange-800",
+        icon: AlertCircle,
       };
     default:
       return {
         label: status,
-        color: 'bg-gray-100 text-gray-800',
-        icon: Calendar
+        color: "bg-gray-100 text-gray-800",
+        icon: Calendar,
       };
   }
 };
@@ -103,25 +104,49 @@ interface SessionDetailsPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function SessionDetailsPage({ params }: SessionDetailsPageProps) {
+export default function SessionDetailsPage({
+  params,
+}: SessionDetailsPageProps) {
   const router = useRouter();
   const { id: sessionId } = use(params);
 
-  const { 
-    data: session, 
-    isLoading, 
-    error, 
+  const {
+    data: session,
+    isLoading,
+    error,
     refetch,
-    isRefetching
+    isRefetching,
   } = useSessionById(sessionId);
 
   const handleBackToSessions = () => {
-    router.push('/client/sessions');
+    router.push("/client/sessions");
   };
 
-  const handleJoinSession = () => {
-    // This would integrate with video calling system
-    console.log('Joining session:', sessionId);
+  const handleJoinSession = async () => {
+    if (session?.meetingUrl) {
+      try {
+        await navigator.clipboard.writeText(session.meetingUrl);
+        const message = session.meetingUrl.includes("http")
+          ? "Meeting URL copied to clipboard!"
+          : "Meeting location copied to clipboard!";
+        toast.success(message);
+      } catch (err) {
+        console.error("Failed to copy: ", err);
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = session.meetingUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        const message = session.meetingUrl.includes("http")
+          ? "Meeting URL copied to clipboard!"
+          : "Meeting location copied to clipboard!";
+        toast.success(message);
+      }
+    } else {
+      toast.error("No meeting information available");
+    }
   };
 
   const handleRescheduleSession = () => {
@@ -130,7 +155,7 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
 
   const handleCancelSession = () => {
     // This would open a confirmation dialog
-    console.log('Cancelling session:', sessionId);
+    console.log("Cancelling session:", sessionId);
   };
 
   const handleMessageTherapist = () => {
@@ -191,7 +216,9 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
               disabled={isRefetching}
               className="ml-4"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isRefetching ? "animate-spin" : ""}`}
+              />
               Retry
             </Button>
           </AlertDescription>
@@ -217,7 +244,8 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
         <Alert className="max-w-md mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Session not found. It may have been deleted or you don&apos;t have permission to view it.
+            Session not found. It may have been deleted or you don&apos;t have
+            permission to view it.
           </AlertDescription>
         </Alert>
       </div>
@@ -226,10 +254,12 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
 
   const statusConfig = getStatusConfig(session.status);
   const StatusIcon = statusConfig.icon;
-  const isUpcoming = session.status === 'SCHEDULED' || session.status === 'CONFIRMED';
-  const isCompleted = session.status === 'COMPLETED';
-  const isInProgress = session.status === 'IN_PROGRESS';
-  const isCancelled = session.status === 'CANCELLED' || session.status === 'NO_SHOW';
+  const isUpcoming =
+    session.status === "SCHEDULED" || session.status === "CONFIRMED";
+  const isCompleted = session.status === "COMPLETED";
+  const isInProgress = session.status === "IN_PROGRESS";
+  const isCancelled =
+    session.status === "CANCELLED" || session.status === "NO_SHOW";
 
   return (
     <motion.div
@@ -239,7 +269,7 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
       animate="visible"
     >
       {/* Page Header */}
-      <motion.div 
+      <motion.div
         className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
         variants={itemVariants}
       >
@@ -255,17 +285,18 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
           </Button>
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold tracking-tight">Session Details</h1>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Session Details
+              </h1>
               <Badge className={statusConfig.color}>
                 <StatusIcon className="h-3 w-3 mr-1" />
                 {statusConfig.label}
               </Badge>
             </div>
             <p className="text-muted-foreground">
-              {session.dateTime 
+              {session.dateTime
                 ? `${format(new Date(session.dateTime), "EEEE, MMMM d, yyyy")} at ${format(new Date(session.dateTime), "h:mm a")}`
-                : "Date not available"
-              }
+                : "Date not available"}
             </p>
           </div>
         </div>
@@ -275,14 +306,27 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
           {isUpcoming && (
             <>
               <Button onClick={handleJoinSession} className="gap-2">
-                <Video className="h-4 w-4" />
-                Join Session
+                {session?.meetingUrl?.includes("http") ? (
+                  <>
+                    <Video className="h-4 w-4" />
+                    Copy Meeting Link
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="h-4 w-4" />
+                    Copy Location
+                  </>
+                )}
               </Button>
               <Button variant="outline" onClick={handleRescheduleSession}>
                 <Edit className="h-4 w-4 mr-2" />
                 Reschedule
               </Button>
-              <Button variant="outline" onClick={handleCancelSession} className="text-red-600 hover:text-red-700">
+              <Button
+                variant="outline"
+                onClick={handleCancelSession}
+                className="text-red-600 hover:text-red-700"
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
@@ -315,7 +359,9 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <div className="font-medium">Duration</div>
-                    <div className="text-sm text-muted-foreground">{session.duration} minutes</div>
+                    <div className="text-sm text-muted-foreground">
+                      {session.duration} minutes
+                    </div>
                   </div>
                 </div>
 
@@ -323,7 +369,9 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
                   <Video className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <div className="font-medium">Type</div>
-                    <div className="text-sm text-muted-foreground">{session.meetingType || 'Video Session'}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {session.meetingType || "Video Session"}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -333,23 +381,25 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
                 <div className="col-span-2">
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-start gap-2">
-                      {session.meetingUrl.includes('http') ? (
+                      {session.meetingUrl.includes("http") ? (
                         <Video className="h-4 w-4 text-blue-600 mt-0.5" />
                       ) : (
                         <MapPin className="h-4 w-4 text-blue-600 mt-0.5" />
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-blue-900 mb-1">
-                          {session.meetingUrl.includes('http') ? 'Video Meeting Link' : 'Meeting Location'}
+                          {session.meetingUrl.includes("http")
+                            ? "Video Meeting Link"
+                            : "Meeting Location"}
                         </p>
                         <p className="text-sm text-blue-800 break-all">
                           {session.meetingUrl}
                         </p>
-                        {session.meetingUrl.includes('http') && (
+                        {session.meetingUrl.includes("http") && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              window.open(session.meetingUrl, '_blank');
+                              window.open(session.meetingUrl, "_blank");
                             }}
                             className="text-sm text-blue-600 hover:text-blue-800 underline mt-1 flex items-center gap-1"
                           >
@@ -393,19 +443,25 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
                 {isCompleted && (
                   <div className="space-y-3">
                     <div className="text-sm text-muted-foreground">
-                      This session was completed successfully. Great work on your mental health journey!
+                      This session was completed successfully. Great work on
+                      your mental health journey!
                     </div>
                     {session.feedback && (
                       <div className="bg-green-50 p-3 rounded-md">
-                        <div className="font-medium text-green-800 mb-1">Session Feedback</div>
-                        <p className="text-sm text-green-700">{session.feedback}</p>
+                        <div className="font-medium text-green-800 mb-1">
+                          Session Feedback
+                        </div>
+                        <p className="text-sm text-green-700">
+                          {session.feedback}
+                        </p>
                       </div>
                     )}
                   </div>
                 )}
                 {isCancelled && (
                   <div className="text-sm text-muted-foreground">
-                    This session was cancelled. You can schedule a new session or reschedule for a different time.
+                    This session was cancelled. You can schedule a new session
+                    or reschedule for a different time.
                   </div>
                 )}
               </CardContent>
@@ -431,7 +487,9 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
                   </div>
                   <div className="flex-1">
                     <div className="font-medium">{session.therapist.name}</div>
-                    <div className="text-sm text-muted-foreground">{session.therapist.specialization}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {session.therapist.specialization}
+                    </div>
                     {session.therapist.experience && (
                       <div className="text-xs text-muted-foreground mt-1">
                         {session.therapist.experience} years experience
@@ -455,7 +513,7 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push('/client/therapist')}
+                    onClick={() => router.push("/client/therapist")}
                     className="gap-2"
                   >
                     <User className="h-4 w-4" />
@@ -475,16 +533,16 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
               <Button
                 variant="outline"
                 className="w-full justify-start gap-3"
-                onClick={() => router.push('/client/booking')}
+                onClick={() => router.push("/client/booking")}
               >
                 <Calendar className="h-4 w-4" />
                 Schedule Another Session
               </Button>
-              
+
               <Button
                 variant="outline"
                 className="w-full justify-start gap-3"
-                onClick={() => router.push('/client/worksheets')}
+                onClick={() => router.push("/client/worksheets")}
               >
                 <FileText className="h-4 w-4" />
                 View Worksheets
@@ -493,7 +551,7 @@ export default function SessionDetailsPage({ params }: SessionDetailsPageProps) 
               <Button
                 variant="outline"
                 className="w-full justify-start gap-3"
-                onClick={() => router.push('/client/sessions')}
+                onClick={() => router.push("/client/sessions")}
               >
                 <Calendar className="h-4 w-4" />
                 All Sessions

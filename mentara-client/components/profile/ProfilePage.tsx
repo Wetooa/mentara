@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useProfile } from "@/hooks/profile/useProfile";
+import { useProfile, useReportUser } from "@/hooks/profile/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,10 @@ import { ProfileCommunities } from "./ProfileCommunities";
 import { ProfileActivity } from "./ProfileActivity";
 import { ProfileInfo } from "./ProfileInfo";
 import { ProfileEditModal } from "./ProfileEditModal";
+import { ReportUserModal } from "./ReportUserModal";
+import { TherapistAvailability } from "./TherapistAvailability";
 import { cn } from "@/lib/utils";
+import { getUserDisplayName } from "@/lib/utils/userUtils";
 
 interface ProfilePageProps {
   userId: string;
@@ -35,11 +38,18 @@ interface ProfilePageProps {
 
 export function ProfilePage({ userId, className }: ProfilePageProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const { user: currentUser } = useAuth();
   const { data: profile, isLoading, error } = useProfile(userId);
+  const reportUserMutation = useReportUser();
 
   // Determine if current user is viewing their own profile
   const isOwnProfile = currentUser?.id === userId;
+
+  // Handle report user functionality
+  const handleReportClick = () => {
+    setIsReportModalOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -78,6 +88,7 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
           profile={profile}
           isOwnProfile={isOwnProfile}
           onEditClick={() => setIsEditModalOpen(true)}
+          onReportClick={handleReportClick}
         />
 
         {/* Main Content Grid */}
@@ -85,6 +96,12 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
           {/* Left Column - Profile Info & Communities */}
           <div className="lg:col-span-1 space-y-6">
             <ProfileInfo profile={profile} />
+            
+            {/* Show availability for therapist profiles */}
+            {profile.user.role === 'therapist' && profile.therapist?.availability && (
+              <TherapistAvailability availability={profile.therapist.availability} />
+            )}
+            
             <ProfileCommunities
               mutualCommunities={profile.mutualCommunities}
               stats={profile.stats}
@@ -109,6 +126,14 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
           profile={profile}
         />
       )}
+
+      {/* Report User Modal */}
+      <ReportUserModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        userId={userId}
+        userName={getUserDisplayName(profile.user)}
+      />
     </>
   );
 }
