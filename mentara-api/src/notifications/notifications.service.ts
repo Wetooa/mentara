@@ -20,7 +20,6 @@ import {
   PostCreatedEvent,
   CommentAddedEvent,
 } from '../common/events/social-events';
-import { MessagingGateway } from '../messaging/messaging.gateway';
 
 interface WebSocketServer {
   to(room: string): {

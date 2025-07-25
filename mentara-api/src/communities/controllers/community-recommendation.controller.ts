@@ -12,6 +12,7 @@ import {
   ParseUUIDPipe,
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
   Logger,
 } from '@nestjs/common';
 import {
@@ -431,6 +432,10 @@ export class CommunityRecommendationController {
         where: { id: userId },
       });
 
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+
       // Input validation
       if (!dto.communitySlugs || !Array.isArray(dto.communitySlugs)) {
         this.logger.warn(
@@ -528,11 +533,11 @@ export class CommunityRecommendationController {
 
       // Log unexpected errors with context
       this.logger.error(
-        `Unexpected error in joinRecommendedCommunities for user ${user.id}:`,
+        `Unexpected error in joinRecommendedCommunities for user ${userId}:`,
         {
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
-          userId: user.id,
+          userId: userId,
           communitySlugs: dto.communitySlugs,
         },
       );
