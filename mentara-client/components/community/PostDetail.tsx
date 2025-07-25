@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -47,6 +47,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import CommentSection from "@/components/community/CommentSection";
+import { ReportModal } from "@/components/community/ReportModal";
+import { useReportPost } from "@/hooks/community/useCommunityReporting";
 
 import type { Post } from "@/types/api/posts";
 
@@ -69,6 +71,8 @@ export function PostDetail({
   const router = useRouter();
 
   const isAuthor = user?.id === post?.author?.id;
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const reportPostMutation = useReportPost();
 
   // Heart mutation
   const heartMutation = useMutation({
@@ -116,8 +120,16 @@ export function PostDetail({
   };
 
   const handleReport = () => {
-    // TODO: Implement report functionality
-    toast.info('Report functionality coming soon');
+    setIsReportModalOpen(true);
+  };
+
+  const handleReportSubmit = (reason: string, content?: string) => {
+    reportPostMutation.mutate({
+      postId: post.id,
+      reason,
+      content,
+    });
+    setIsReportModalOpen(false);
   };
 
   const getUserInitials = (firstName: string, lastName: string) => {
@@ -418,6 +430,16 @@ export function PostDetail({
             <CommentSection postId={post.id} />
           </CardContent>
         </Card>
+
+        {/* Report Modal */}
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          onSubmit={handleReportSubmit}
+          targetType="post"
+          targetId={post.id}
+          isLoading={reportPostMutation.isPending}
+        />
       </div>
     </div>
   );
