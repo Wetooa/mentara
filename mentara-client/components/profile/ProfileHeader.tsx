@@ -67,8 +67,6 @@ export function ProfileHeader({
         {!user.coverImageUrl && (
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/80 to-purple-600/80" />
         )}
-
-
       </div>
 
       {/* Profile Info */}
@@ -139,17 +137,6 @@ export function ProfileHeader({
                     <Edit className="w-4 h-4" />
                     Edit Profile
                   </Button>
-                  
-                  {/* Report button - Users can report their own profile */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onReportClick}
-                    className="flex items-center gap-2 text-gray-600 hover:text-red-600"
-                  >
-                    <Flag className="w-4 h-4" />
-                    Report
-                  </Button>
                 </>
               ) : (
                 <>
@@ -160,7 +147,7 @@ export function ProfileHeader({
                     variant="default"
                     size="sm"
                   />
-                  
+
                   {/* Connect with Therapist Button - Only for therapist profiles */}
                   {user.role === "therapist" && (
                     <ConnectTherapistButton
@@ -171,7 +158,7 @@ export function ProfileHeader({
                       size="sm"
                     />
                   )}
-                  
+
                   {/* Report button - Always available for other profiles */}
                   <Button
                     variant="ghost"

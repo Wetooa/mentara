@@ -36,10 +36,21 @@ import { AlertTriangle, Flag } from "lucide-react";
 
 // Form validation schema
 const reportFormSchema = z.object({
-  reason: z.enum(['harassment', 'inappropriate', 'spam', 'fake_profile', 'impersonation', 'other'], {
-    required_error: "Please select a reason for reporting",
-  }),
-  content: z.string()
+  reason: z.enum(
+    [
+      "harassment",
+      "inappropriate",
+      "spam",
+      "fake_profile",
+      "impersonation",
+      "other",
+    ],
+    {
+      required_error: "Please select a reason for reporting",
+    }
+  ),
+  content: z
+    .string()
     .max(1000, "Description must be less than 1000 characters")
     .optional(),
 });
@@ -50,22 +61,47 @@ interface ReportUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
-  userName: string;
+  user: {
+    id: string;
+    firstName?: string;
+    middleName?: string;
+    lastName?: string;
+    bio?: string;
+    avatarUrl?: string;
+    coverImageUrl?: string;
+    role: string;
+    createdAt: string;
+  };
 }
 
 // Map reason codes to user-friendly labels
-const reasonLabels: Record<UserReportDto['reason'], string> = {
+const reasonLabels: Record<UserReportDto["reason"], string> = {
   harassment: "Harassment or Bullying",
-  inappropriate: "Inappropriate Content or Behavior", 
+  inappropriate: "Inappropriate Content or Behavior",
   spam: "Spam or Unwanted Messages",
   fake_profile: "Fake or Misleading Profile",
   impersonation: "Impersonation of Another Person",
   other: "Other Violation",
 };
 
-export function ReportUserModal({ isOpen, onClose, userId, userName }: ReportUserModalProps) {
+export function ReportUserModal({
+  isOpen,
+  onClose,
+  userId,
+  user,
+}: ReportUserModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const reportUserMutation = useReportUser();
+
+  console.log(
+    "ReportUserModal rendered with userId:",
+    userId,
+    "userName:",
+    user.firstName || user.middleName || user.lastName || "Unknown User"
+  );
+
+  const userName =
+    user.firstName || user.middleName || user.lastName || "Unknown User";
 
   const form = useForm<ReportFormData>({
     resolver: zodResolver(reportFormSchema),
@@ -79,6 +115,8 @@ export function ReportUserModal({ isOpen, onClose, userId, userName }: ReportUse
     if (isSubmitting) return;
 
     setIsSubmitting(true);
+
+    console.log("Submitting report with data:", data, userId);
     try {
       await reportUserMutation.mutateAsync({
         userId,
@@ -100,7 +138,7 @@ export function ReportUserModal({ isOpen, onClose, userId, userName }: ReportUse
 
   const handleClose = () => {
     if (isSubmitting) return; // Prevent closing during submission
-    
+
     form.reset();
     onClose();
   };
@@ -114,13 +152,16 @@ export function ReportUserModal({ isOpen, onClose, userId, userName }: ReportUse
             Report User
           </DialogTitle>
           <DialogDescription>
-            Report <strong>{userName}</strong> for violating community guidelines. 
-            Your report will be reviewed by our moderation team.
+            Report <strong>{userName}</strong> for violating community
+            guidelines. Your report will be reviewed by our moderation team.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Reason Selection */}
             <FormField
               control={form.control}
@@ -130,7 +171,10 @@ export function ReportUserModal({ isOpen, onClose, userId, userName }: ReportUse
                   <FormLabel className="text-base font-medium">
                     Reason for Report <span className="text-red-500">*</span>
                   </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a reason" />
@@ -170,8 +214,8 @@ export function ReportUserModal({ isOpen, onClose, userId, userName }: ReportUse
                     />
                   </FormControl>
                   <FormDescription>
-                    Provide specific examples or additional context. 
-                    Maximum 1000 characters ({field.value?.length || 0}/1000)
+                    Provide specific examples or additional context. Maximum
+                    1000 characters ({field.value?.length || 0}/1000)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -182,10 +226,12 @@ export function ReportUserModal({ isOpen, onClose, userId, userName }: ReportUse
             <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="font-medium text-amber-800 mb-1">Important Notice</p>
+                <p className="font-medium text-amber-800 mb-1">
+                  Important Notice
+                </p>
                 <p className="text-amber-700">
-                  False reports may result in account restrictions. Please only report 
-                  genuine violations of our community guidelines.
+                  False reports may result in account restrictions. Please only
+                  report genuine violations of our community guidelines.
                 </p>
               </div>
             </div>

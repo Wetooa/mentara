@@ -46,6 +46,8 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
   // Determine if current user is viewing their own profile
   const isOwnProfile = currentUser?.id === userId;
 
+  console.log("OLOK data:", profile);
+
   // Handle report user functionality
   const handleReportClick = () => {
     setIsReportModalOpen(true);
@@ -96,12 +98,15 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
           {/* Left Column - Profile Info & Communities */}
           <div className="lg:col-span-1 space-y-6">
             <ProfileInfo profile={profile} />
-            
+
             {/* Show availability for therapist profiles */}
-            {profile.user.role === 'therapist' && profile.therapist?.availability && (
-              <TherapistAvailability availability={profile.therapist.availability} />
-            )}
-            
+            {profile.user.role === "therapist" &&
+              profile.therapist?.availability && (
+                <TherapistAvailability
+                  availability={profile.therapist.availability}
+                />
+              )}
+
             <ProfileCommunities
               mutualCommunities={profile.mutualCommunities}
               stats={profile.stats}
@@ -132,7 +137,7 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
         userId={userId}
-        userName={getUserDisplayName(profile.user)}
+        user={profile.user}
       />
     </>
   );

@@ -295,19 +295,6 @@ export function MeetingDetailsSheet({
                 )}
               </>
             )}
-
-            {meeting.meetingUrl && (
-              <Button
-                onClick={handleOpenMeetingUrl}
-                size="sm"
-                variant="outline"
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                {meeting.meetingUrl.includes("http")
-                  ? "Join Video"
-                  : "View Location"}
-              </Button>
-            )}
           </div>
         </SheetHeader>
 

@@ -47,8 +47,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { format } from "date-fns";
-
-
+import { da } from "date-fns/locale";
 
 export function ReportedContent() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,10 +59,20 @@ export function ReportedContent() {
   >(null);
 
   // API hooks
-  const { data: reportsData, isLoading, error } = useAdminReports({
+  const {
+    data: reportsData,
+    isLoading,
+    error,
+  } = useAdminReports({
     search: searchTerm || undefined,
   });
-  const { banUser, restrictUser, deleteContent, dismissReport, isLoading: isActionLoading } = useReportActions();
+  const {
+    banUser,
+    restrictUser,
+    deleteContent,
+    dismissReport,
+    isLoading: isActionLoading,
+  } = useReportActions();
 
   const reports = reportsData?.reports || [];
   const totalCount = reportsData?.pagination?.total || 0;
@@ -78,15 +87,16 @@ export function ReportedContent() {
 
   const filteredReports = useMemo(() => {
     if (!searchTerm.trim()) return reports;
-    
+
     const searchLower = searchTerm.toLowerCase();
-    return reports.filter((report: any) => 
-      report.reportedUserName?.toLowerCase().includes(searchLower) ||
-      report.reporterName?.toLowerCase().includes(searchLower) ||
-      report.reason?.toLowerCase().includes(searchLower) ||
-      report.type?.toLowerCase().includes(searchLower) ||
-      report.postTitle?.toLowerCase().includes(searchLower) ||
-      report.commentContent?.toLowerCase().includes(searchLower)
+    return reports.filter(
+      (report: any) =>
+        report.reportedUserName?.toLowerCase().includes(searchLower) ||
+        report.reporterName?.toLowerCase().includes(searchLower) ||
+        report.reason?.toLowerCase().includes(searchLower) ||
+        report.type?.toLowerCase().includes(searchLower) ||
+        report.postTitle?.toLowerCase().includes(searchLower) ||
+        report.commentContent?.toLowerCase().includes(searchLower)
     );
   }, [reports, searchTerm]);
 
@@ -103,17 +113,26 @@ export function ReportedContent() {
     try {
       switch (actionType) {
         case "ban":
-          await banUser(selectedReport.id, "User banned due to reported content");
+          await banUser(
+            selectedReport.id,
+            "User banned due to reported content"
+          );
           break;
         case "restrict":
-          await restrictUser(selectedReport.id, "User restricted due to reported content");
+          await restrictUser(
+            selectedReport.id,
+            "User restricted due to reported content"
+          );
           break;
         case "dismiss":
           await dismissReport(selectedReport.id, "Report dismissed by admin");
           break;
         case "suspend":
           // For therapists, we use restrict functionality
-          await restrictUser(selectedReport.id, "Therapist suspended due to reported content");
+          await restrictUser(
+            selectedReport.id,
+            "Therapist suspended due to reported content"
+          );
           break;
       }
     } catch (error) {
@@ -160,6 +179,9 @@ export function ReportedContent() {
     );
   }
 
+  function logFormDowntown(data: any) {
+    console.log("Logging: ", data);
+  }
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -195,7 +217,9 @@ export function ReportedContent() {
           <CardContent className="p-4">
             <p className="text-sm font-medium text-yellow-600">Pending</p>
             <h3 className="text-2xl font-bold mt-1">
-              {isLoading ? "..." : reports.filter((r: any) => r.status === "pending").length}
+              {isLoading
+                ? "..."
+                : reports.filter((r: any) => r.status === "pending").length}
             </h3>
           </CardContent>
         </Card>
@@ -203,7 +227,12 @@ export function ReportedContent() {
           <CardContent className="p-4">
             <p className="text-sm font-medium text-green-600">Resolved</p>
             <h3 className="text-2xl font-bold mt-1">
-              {isLoading ? "..." : reports.filter((r: any) => r.status === "resolved" || r.status === "reviewed").length}
+              {isLoading
+                ? "..."
+                : reports.filter(
+                    (r: any) =>
+                      r.status === "resolved" || r.status === "reviewed"
+                  ).length}
             </h3>
           </CardContent>
         </Card>
@@ -211,10 +240,13 @@ export function ReportedContent() {
           <CardContent className="p-4">
             <p className="text-sm font-medium text-red-600">Critical</p>
             <h3 className="text-2xl font-bold mt-1">
-              {isLoading ? "..." : reports.filter((r: any) =>
-                r.reason?.toLowerCase().includes("harassment") ||
-                r.reason?.toLowerCase().includes("impersonation")
-              ).length}
+              {isLoading
+                ? "..."
+                : reports.filter(
+                    (r: any) =>
+                      r.reason?.toLowerCase().includes("harassment") ||
+                      r.reason?.toLowerCase().includes("impersonation")
+                  ).length}
             </h3>
           </CardContent>
         </Card>
@@ -259,6 +291,7 @@ export function ReportedContent() {
                   <TableBody>
                     {filteredReports.map((report: any) => (
                       <TableRow key={report.id}>
+                        {logFormDowntown(report)}
                         <TableCell>
                           <Badge variant="outline" className="capitalize">
                             {report.type}
@@ -337,7 +370,9 @@ export function ReportedContent() {
                           <TableCell>{report.reporterName}</TableCell>
                           <TableCell>{report.reportedUserName}</TableCell>
                           <TableCell>{report.reason}</TableCell>
-                          <TableCell>{formatDate(report.dateReported)}</TableCell>
+                          <TableCell>
+                            {formatDate(report.dateReported)}
+                          </TableCell>
                           <TableCell>{getStatusBadge(report.status)}</TableCell>
                           <TableCell className="text-right">
                             <Button
@@ -386,7 +421,9 @@ export function ReportedContent() {
                           <TableCell>{report.reporterName}</TableCell>
                           <TableCell>{report.reportedUserName}</TableCell>
                           <TableCell>{report.reason}</TableCell>
-                          <TableCell>{formatDate(report.dateReported)}</TableCell>
+                          <TableCell>
+                            {formatDate(report.dateReported)}
+                          </TableCell>
                           <TableCell>{getStatusBadge(report.status)}</TableCell>
                           <TableCell className="text-right">
                             <Button
@@ -435,7 +472,9 @@ export function ReportedContent() {
                           <TableCell>{report.reporterName}</TableCell>
                           <TableCell>{report.reportedUserName}</TableCell>
                           <TableCell>{report.reason}</TableCell>
-                          <TableCell>{formatDate(report.dateReported)}</TableCell>
+                          <TableCell>
+                            {formatDate(report.dateReported)}
+                          </TableCell>
                           <TableCell>{getStatusBadge(report.status)}</TableCell>
                           <TableCell className="text-right">
                             <Button
@@ -484,7 +523,9 @@ export function ReportedContent() {
                           <TableCell>{report.reporterName}</TableCell>
                           <TableCell>{report.reportedUserName}</TableCell>
                           <TableCell>{report.reason}</TableCell>
-                          <TableCell>{formatDate(report.dateReported)}</TableCell>
+                          <TableCell>
+                            {formatDate(report.dateReported)}
+                          </TableCell>
                           <TableCell>{getStatusBadge(report.status)}</TableCell>
                           <TableCell className="text-right">
                             <Button
