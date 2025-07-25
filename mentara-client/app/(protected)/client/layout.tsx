@@ -83,6 +83,7 @@ export default function MainLayout({
   return (
     <>
       <DashboardPageMetadata role="client" />
+
       <div className="flex h-screen w-full bg-white">
         <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
           <Link href="/client" className="mb-8 px-2">
@@ -220,7 +221,7 @@ export default function MainLayout({
           </div>
         )}
 
-        <div className="flex flex-1 flex-col w-full h-screen md:pl-[70px]">
+        <div className="flex flex-1 flex-col w-full h-full md:pl-[70px]">
           <header className="fixed top-0 right-0 z-20 flex h-[60px] w-full md:w-[calc(100%-70px)] items-center justify-between border-b border-gray-200 bg-white px-4">
             <div className="flex items-center gap-3 md:hidden">
               <button
