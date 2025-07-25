@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -47,6 +47,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import CommentSection from "@/components/community/CommentSection";
+import { ReportModal } from "@/components/community/ReportModal";
+import { useReportPost } from "@/hooks/community/useCommunityReporting";
 
 import type { Post } from "@/types/api/posts";
 
@@ -68,7 +70,9 @@ export function PostDetail({
   const { user, userRole } = useAuth();
   const router = useRouter();
 
-  const isAuthor = user?.id === post.author.id;
+  const isAuthor = user?.id === post?.author?.id;
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const reportPostMutation = useReportPost();
 
   // Heart mutation
   const heartMutation = useMutation({
@@ -116,8 +120,16 @@ export function PostDetail({
   };
 
   const handleReport = () => {
-    // TODO: Implement report functionality
-    toast.info('Report functionality coming soon');
+    setIsReportModalOpen(true);
+  };
+
+  const handleReportSubmit = (reason: string, content?: string) => {
+    reportPostMutation.mutate({
+      postId: post.id,
+      reason,
+      content,
+    });
+    setIsReportModalOpen(false);
   };
 
   const getUserInitials = (firstName: string, lastName: string) => {
@@ -179,14 +191,14 @@ export function PostDetail({
                 <div className="flex items-center gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-10 w-10 ring-2 ring-community-accent/20 ring-offset-2 ring-offset-white">
-                      <AvatarImage src={post.author.avatarUrl} className="object-cover" />
+                      <AvatarImage src={post?.author?.avatarUrl} className="object-cover" />
                       <AvatarFallback className="bg-community-accent/20 text-community-accent-foreground font-semibold">
-                        {getUserInitials(post.author.firstName, post.author.lastName)}
+                        {getUserInitials(post?.author?.firstName || '', post?.author?.lastName || '')}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-semibold text-community-calm-foreground">
-                        {post.author.firstName} {post.author.lastName}
+                        {post?.author?.firstName} {post?.author?.lastName}
                       </p>
                       <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">
                         <Clock className="h-3 w-3" />
@@ -204,10 +216,10 @@ export function PostDetail({
                   {/* Role Badge */}
                   <Badge 
                     variant="outline" 
-                    className={`text-xs font-semibold ${getRoleColor(post.author.role || 'client')}`}
+                    className={`text-xs font-semibold ${getRoleColor(post?.author?.role || 'client')}`}
                   >
                     <User className="h-3 w-3 mr-1" />
-                    {getRoleLabel(post.author.role || 'client')}
+                    {getRoleLabel(post?.author?.role || 'client')}
                   </Badge>
                 </div>
 
@@ -418,6 +430,16 @@ export function PostDetail({
             <CommentSection postId={post.id} />
           </CardContent>
         </Card>
+
+        {/* Report Modal */}
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          onSubmit={handleReportSubmit}
+          targetType="post"
+          targetId={post.id}
+          isLoading={reportPostMutation.isPending}
+        />
       </div>
     </div>
   );

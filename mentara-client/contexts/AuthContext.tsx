@@ -149,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Fetch profile data if user is authenticated
   const { data: profileData, refetch: refetchProfile } = useQuery({
-    queryKey: ["auth", "current-user-profile", userId, userRole],
+    queryKey: ["auth", "current-user-profile"],
     queryFn: async () => {
       if (!userRole) {
         throw new Error("User role not available");
@@ -372,6 +372,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ) {
         if (!pathname.startsWith("/client/welcome")) {
           router.push("/client/welcome");
+          return;
+        }
+      } else if (
+        isAuthenticated &&
+        userRole === "client" &&
+        user?.hasSeenTherapistRecommendations === true
+      ) {
+        if (pathname.startsWith("/client/welcome")) {
+          router.back();
           return;
         }
       }

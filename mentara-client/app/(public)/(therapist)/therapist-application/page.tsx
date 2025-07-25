@@ -30,7 +30,7 @@ import { SidebarContent } from "@/components/therapist-application/SidebarConten
 // Store and API
 import useTherapistForm from "@/store/therapistform";
 import { useIsMobile } from "@/hooks/utils/useMobile";
-import { useAutoSave } from "@/hooks/utils/useAutoSave";
+
 import { useSectionCompletion } from "@/hooks/user/useSectionCompletion";
 import { useApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -406,7 +406,7 @@ export default function SinglePageTherapistApplication() {
     resolver: zodResolver(
       unifiedTherapistSchema
     ) as unknown as Resolver<UnifiedTherapistForm>,
-    values: {
+    defaultValues: {
       firstName: formValues.firstName || "",
       lastName: formValues.lastName || "",
       mobile: formValues.mobile || "",
@@ -467,12 +467,7 @@ export default function SinglePageTherapistApplication() {
     reValidateMode: "onChange",
   });
 
-  // Auto-save integration
-  useAutoSave({
-    control: form.control,
-    interval: 30000, // 30 seconds
-    debounceMs: 2000, // 2 seconds
-  });
+
 
   // Watch form values for conditional rendering and progress calculation
   const watchedValues = useWatch({ control: form.control });
@@ -579,30 +574,7 @@ export default function SinglePageTherapistApplication() {
 
   const currentSection = sections[currentSectionIndex];
 
-  // Auto-save functionality
-  const autoSave = useCallback(
-    (values: UnifiedTherapistForm) => {
-      try {
-        // Save to Zustand store
-        Object.entries(values).forEach(([key, value]) => {
-          if (key === "teletherapyReadiness" || key === "compliance") {
-            Object.entries(value).forEach(([subKey, subValue]) => {
-              updateNestedField(key, subKey, subValue);
-            });
-          } else {
-            updateField(key, value);
-          }
-        });
 
-        // Update last saved time in Zustand store
-        const { saveFormData } = useTherapistForm.getState();
-        saveFormData();
-      } catch (error) {
-        console.error("Error auto-saving:", error);
-      }
-    },
-    [updateField, updateNestedField]
-  );
 
   // Restart form handler
   const handleRestartForm = useCallback(() => {
@@ -634,8 +606,10 @@ export default function SinglePageTherapistApplication() {
     async (values: UnifiedTherapistForm) => {
       setIsSubmitting(true);
       try {
-        // First, save the data locally
-        autoSave(values);
+        // Save to Zustand store for persistence
+        Object.entries(values).forEach(([key, value]) => {
+          updateField(key, value);
+        });
 
         // Transform form data to match backend unified registration DTO format
         const transformedData = {
@@ -851,7 +825,7 @@ export default function SinglePageTherapistApplication() {
         setIsSubmitting(false);
       }
     },
-    [autoSave, router, documents, api]
+    [router, documents, api, updateField]
   );
 
   // Memoized sidebar content props to prevent unnecessary re-renders

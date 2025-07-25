@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -36,73 +36,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, Eye, Flag, Trash2, Ban } from "lucide-react";
+import { Search, Eye, Flag, Trash2, Ban, Loader2 } from "lucide-react";
 import { format } from "date-fns";
-
-// Mock data for reported posts
-const mockReportedPosts = [
-  {
-    id: "report1",
-    postId: "post123",
-    postTitle: "Feeling overwhelmed with anxiety",
-    content:
-      "I've been struggling with anxiety lately and don't know how to cope...",
-    reporterName: "John Doe",
-    reporterId: "user123",
-    authorName: "Sarah Miller",
-    authorId: "user456",
-    reason: "Needs immediate attention",
-    description:
-      "This post indicates the user might need immediate professional help.",
-    dateReported: "2025-05-02T14:22:00Z",
-    status: "pending",
-    community: "Anxiety Support",
-  },
-  {
-    id: "report2",
-    postId: "post789",
-    postTitle: "Alternative treatment for depression",
-    content:
-      "I've found that certain herbs and supplements have completely cured my depression...",
-    reporterName: "Michael Brown",
-    reporterId: "user444",
-    authorName: "Jennifer Lee",
-    authorId: "user777",
-    reason: "Misinformation",
-    description:
-      "This post contains potentially dangerous health misinformation.",
-    dateReported: "2025-04-26T13:10:00Z",
-    status: "pending",
-    community: "Depression Support",
-  },
-  {
-    id: "report3",
-    postId: "post456",
-    postTitle: "Struggling with medication side effects",
-    content:
-      "The side effects of my medication are really difficult to deal with...",
-    reporterName: "Emily Chen",
-    reporterId: "user789",
-    authorName: "Kevin Smith",
-    authorId: "user555",
-    reason: "Potentially harmful advice",
-    description:
-      "There are comments suggesting dangerous medication practices.",
-    dateReported: "2025-05-01T09:15:00Z",
-    status: "resolved",
-    community: "Medication Support",
-  },
-];
+import { useAdminReports, useReportActions } from "@/hooks/admin";
 
 export default function ReportedPostsPage() {
-  const [reports, setReports] = useState(mockReportedPosts);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedReport, setSelectedReport] = useState<typeof mockReportedPosts[0] | null>(null);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<
-    "delete" | "dismiss" | "ban" | null
+    "delete" | "dismiss" | "ban" | "restrict" | null
   >(null);
+
+  // API hooks
+  const { data: reportsData, isLoading, error } = useAdminReports({
+    type: 'post',
+    search: searchTerm || undefined,
+  });
+  const { banUser, restrictUser, deleteContent, dismissReport, isLoading: isActionLoading } = useReportActions();
+
+  const reports = reportsData?.reports || [];
+  const totalCount = reportsData?.pagination?.total || 0;
 
   const formatDate = (dateString: string) => {
     try {
@@ -112,33 +67,45 @@ export default function ReportedPostsPage() {
     }
   };
 
-  const filteredReports = reports.filter((report) => {
+  // Use useMemo for filtered reports (though API handles filtering, we keep this for client-side refinement)
+  const filteredReports = useMemo(() => {
+    if (!searchTerm.trim()) return reports;
+    
     const searchLower = searchTerm.toLowerCase();
-    return (
-      report.postTitle.toLowerCase().includes(searchLower) ||
-      report.authorName.toLowerCase().includes(searchLower) ||
-      report.reporterName.toLowerCase().includes(searchLower) ||
-      report.reason.toLowerCase().includes(searchLower) ||
-      report.community.toLowerCase().includes(searchLower)
+    return reports.filter((report: any) => 
+      report.postTitle?.toLowerCase().includes(searchLower) ||
+      report.reportedUserName?.toLowerCase().includes(searchLower) ||
+      report.reporterName?.toLowerCase().includes(searchLower) ||
+      report.reason?.toLowerCase().includes(searchLower) ||
+      report.community?.toLowerCase().includes(searchLower)
     );
-  });
+  }, [reports, searchTerm]);
 
-  const handleReportAction = (type: "delete" | "dismiss" | "ban") => {
+  const handleReportAction = (type: "delete" | "dismiss" | "ban" | "restrict") => {
     setActionType(type);
     setActionDialogOpen(true);
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (!selectedReport || !actionType) return;
 
-    // In a real application, you would make API calls to perform these actions
-    if (actionType === "dismiss" || actionType === "delete") {
-      const updatedReports = reports.map((report) =>
-        report.id === selectedReport.id
-          ? { ...report, status: "resolved" }
-          : report
-      );
-      setReports(updatedReports);
+    try {
+      switch (actionType) {
+        case "ban":
+          await banUser(selectedReport.id, "User banned due to reported content");
+          break;
+        case "restrict":
+          await restrictUser(selectedReport.id, "User restricted due to reported content");
+          break;
+        case "delete":
+          await deleteContent(selectedReport.id, "Content deleted due to report");
+          break;
+        case "dismiss":
+          await dismissReport(selectedReport.id, "Report dismissed by admin");
+          break;
+      }
+    } catch (error) {
+      console.error("Failed to perform action:", error);
     }
 
     setActionDialogOpen(false);
@@ -188,14 +155,16 @@ export default function ReportedPostsPage() {
         <Card className="bg-blue-50 border-blue-100">
           <CardContent className="p-4">
             <p className="text-sm font-medium text-blue-600">Total Reports</p>
-            <h3 className="text-2xl font-bold mt-1">{reports.length}</h3>
+            <h3 className="text-2xl font-bold mt-1">
+              {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : totalCount}
+            </h3>
           </CardContent>
         </Card>
         <Card className="bg-yellow-50 border-yellow-100">
           <CardContent className="p-4">
             <p className="text-sm font-medium text-yellow-600">Pending</p>
             <h3 className="text-2xl font-bold mt-1">
-              {reports.filter((r) => r.status === "pending").length}
+              {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : reports.filter((r: any) => r.status === "pending").length}
             </h3>
           </CardContent>
         </Card>
@@ -203,7 +172,7 @@ export default function ReportedPostsPage() {
           <CardContent className="p-4">
             <p className="text-sm font-medium text-green-600">Resolved</p>
             <h3 className="text-2xl font-bold mt-1">
-              {reports.filter((r) => r.status === "resolved").length}
+              {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : reports.filter((r: any) => r.status === "reviewed" || r.status === "dismissed").length}
             </h3>
           </CardContent>
         </Card>
@@ -217,60 +186,74 @@ export default function ReportedPostsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Post Title</TableHead>
-                <TableHead>Community</TableHead>
-                <TableHead>Reported By</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredReports.map((report) => (
-                <TableRow key={report.id}>
-                  <TableCell className="font-medium max-w-[200px] truncate">
-                    {report.postTitle}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{report.community}</Badge>
-                  </TableCell>
-                  <TableCell>{report.reporterName}</TableCell>
-                  <TableCell>{report.authorName}</TableCell>
-                  <TableCell>{report.reason}</TableCell>
-                  <TableCell>{formatDate(report.dateReported)}</TableCell>
-                  <TableCell>{getStatusBadge(report.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedReport(report);
-                        setDetailsOpen(true);
-                      }}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredReports.length === 0 && (
+          {error && (
+            <div className="text-center py-6 text-red-500">
+              Error loading reports: {error.message}
+            </div>
+          )}
+          
+          {isLoading ? (
+            <div className="text-center py-6">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+              <p className="text-gray-500">Loading reports...</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="text-center py-6 text-gray-500"
-                  >
-                    No reports found matching your search criteria
-                  </TableCell>
+                  <TableHead>Post Title</TableHead>
+                  <TableHead>Community</TableHead>
+                  <TableHead>Reported By</TableHead>
+                  <TableHead>Author</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredReports.map((report: any) => (
+                  <TableRow key={report.id}>
+                    <TableCell className="font-medium max-w-[200px] truncate">
+                      {report.postTitle || 'Untitled Post'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{report.community || 'General'}</Badge>
+                    </TableCell>
+                    <TableCell>{report.reporterName}</TableCell>
+                    <TableCell>{report.reportedUserName}</TableCell>
+                    <TableCell>{report.reason}</TableCell>
+                    <TableCell>{formatDate(report.dateReported)}</TableCell>
+                    <TableCell>{getStatusBadge(report.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedReport(report);
+                          setDetailsOpen(true);
+                        }}
+                        disabled={isActionLoading}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {!isLoading && filteredReports.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={8}
+                      className="text-center py-6 text-gray-500"
+                    >
+                      No reports found matching your search criteria
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -288,12 +271,12 @@ export default function ReportedPostsPage() {
             <div className="space-y-4">
               <div className="border-b pb-3">
                 <h2 className="text-lg font-semibold">
-                  {selectedReport.postTitle}
+                  {selectedReport.postTitle || 'Untitled Post'}
                 </h2>
                 <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                  <Badge variant="outline">{selectedReport.community}</Badge>
+                  <Badge variant="outline">{selectedReport.community || 'General'}</Badge>
                   <span>•</span>
-                  <span>Posted by {selectedReport.authorName}</span>
+                  <span>Posted by {selectedReport.reportedUserName}</span>
                 </div>
               </div>
 
@@ -357,9 +340,29 @@ export default function ReportedPostsPage() {
                           size="sm"
                           className="text-green-600 border-green-200 hover:bg-green-50"
                           onClick={() => handleReportAction("dismiss")}
+                          disabled={isActionLoading}
                         >
-                          <Flag className="h-4 w-4 mr-1" />
+                          {isActionLoading && actionType === "dismiss" ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Flag className="h-4 w-4 mr-1" />
+                          )}
                           Dismiss Report
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                          onClick={() => handleReportAction("restrict")}
+                          disabled={isActionLoading}
+                        >
+                          {isActionLoading && actionType === "restrict" ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Ban className="h-4 w-4 mr-1" />
+                          )}
+                          Restrict User
                         </Button>
 
                         <Button
@@ -367,8 +370,13 @@ export default function ReportedPostsPage() {
                           size="sm"
                           className="text-red-600 border-red-200 hover:bg-red-50"
                           onClick={() => handleReportAction("delete")}
+                          disabled={isActionLoading}
                         >
-                          <Trash2 className="h-4 w-4 mr-1" />
+                          {isActionLoading && actionType === "delete" ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4 mr-1" />
+                          )}
                           Delete Post
                         </Button>
 
@@ -377,8 +385,13 @@ export default function ReportedPostsPage() {
                           size="sm"
                           className="text-red-600 border-red-200 hover:bg-red-50"
                           onClick={() => handleReportAction("ban")}
+                          disabled={isActionLoading}
                         >
-                          <Ban className="h-4 w-4 mr-1" />
+                          {isActionLoading && actionType === "ban" ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Ban className="h-4 w-4 mr-1" />
+                          )}
                           Ban User
                         </Button>
                       </>
@@ -402,6 +415,7 @@ export default function ReportedPostsPage() {
               {actionType === "delete" && "Delete Post"}
               {actionType === "dismiss" && "Dismiss Report"}
               {actionType === "ban" && "Ban User"}
+              {actionType === "restrict" && "Restrict User"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionType === "delete" &&
@@ -409,7 +423,9 @@ export default function ReportedPostsPage() {
               {actionType === "dismiss" &&
                 "This will dismiss the report and no action will be taken against the post or its author."}
               {actionType === "ban" &&
-                `This will ban ${selectedReport?.authorName} from the platform. Their account will be deactivated and they will not be able to log in.`}
+                `This will ban ${selectedReport?.reportedUserName} from the platform. Their account will be deactivated and they will not be able to log in.`}
+              {actionType === "restrict" &&
+                `This will restrict ${selectedReport?.reportedUserName} from posting and commenting. They will still be able to log in but with limited privileges.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -419,9 +435,15 @@ export default function ReportedPostsPage() {
               className={
                 actionType === "delete" || actionType === "ban"
                   ? "bg-red-600 hover:bg-red-700"
+                  : actionType === "restrict"
+                  ? "bg-orange-600 hover:bg-orange-700"
                   : ""
               }
+              disabled={isActionLoading}
             >
+              {isActionLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : null}
               Confirm
             </AlertDialogAction>
           </AlertDialogFooter>

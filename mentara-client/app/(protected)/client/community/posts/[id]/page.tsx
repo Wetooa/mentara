@@ -15,13 +15,13 @@ function PostDetailContent() {
   const router = useRouter();
   const postId = params.id as string;
 
-  const { 
-    post, 
-    isLoading, 
-    isError, 
-    error, 
-    deletePost
-  } = usePostDetail(postId);
+  const { post, isLoading, isError, error, deletePost } = usePostDetail(postId);
+
+  console.log("Post Detail Page - Post:", isLoading, isError, post);
+
+  if (isLoading && !post) {
+    return <PostDetailLoading />;
+  }
 
   const handleBackToCommunity = () => {
     router.push("/client/community");
@@ -89,13 +89,7 @@ function PostDetailContent() {
     return <PostDetailLoading />;
   }
 
-  return (
-    <PostDetail 
-      post={post}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-    />
-  );
+  return <PostDetail post={post} onEdit={handleEdit} onDelete={handleDelete} />;
 }
 
 function PostDetailLoading() {

@@ -450,12 +450,136 @@ export function createAdminService(axios: AxiosInstance) {
       },
     },
 
-    // Moderation Methods
+    // Reports Methods
+    reports: {
+      /**
+       * Get all reports with filtering
+       * Endpoint: GET /admin/reports
+       * @throws MentaraApiError on request failure
+       */
+      async getList(params?: {
+        type?: 'post' | 'comment' | 'user';
+        status?: 'pending' | 'reviewed' | 'dismissed';
+        page?: number;
+        limit?: number;
+        search?: string;
+      }) {
+        try {
+          const { data } = await axios.get("/admin/reports", { params });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Get specific report by ID
+       * Endpoint: GET /admin/reports/:id
+       * @throws MentaraApiError on request failure
+       */
+      async getById(reportId: string) {
+        try {
+          const { data } = await axios.get(`/admin/reports/${reportId}`);
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Update report status
+       * Endpoint: PUT /admin/reports/:id/status
+       * @throws MentaraApiError on request failure
+       */
+      async updateStatus(reportId: string, status: 'reviewed' | 'dismissed', reason?: string) {
+        try {
+          const { data } = await axios.put(`/admin/reports/${reportId}/status`, {
+            status,
+            reason,
+          });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Take action on a report (ban user, restrict user, delete content, dismiss)
+       * Endpoint: POST /admin/reports/:id/action
+       * @throws MentaraApiError on request failure
+       */
+      async takeAction(
+        reportId: string,
+        action: 'ban_user' | 'restrict_user' | 'delete_content' | 'dismiss',
+        reason?: string
+      ) {
+        try {
+          const { data } = await axios.post(`/admin/reports/${reportId}/action`, {
+            action,
+            reason,
+          });
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+
+      /**
+       * Ban user from a report
+       * Endpoint: POST /admin/reports/:id/action
+       * @throws MentaraApiError on request failure
+       */
+      async banUser(reportId: string, reason?: string) {
+        return this.takeAction(reportId, 'ban_user', reason);
+      },
+
+      /**
+       * Restrict user from a report
+       * Endpoint: POST /admin/reports/:id/action
+       * @throws MentaraApiError on request failure
+       */
+      async restrictUser(reportId: string, reason?: string) {
+        return this.takeAction(reportId, 'restrict_user', reason);
+      },
+
+      /**
+       * Delete content from a report
+       * Endpoint: POST /admin/reports/:id/action
+       * @throws MentaraApiError on request failure
+       */
+      async deleteContent(reportId: string, reason?: string) {
+        return this.takeAction(reportId, 'delete_content', reason);
+      },
+
+      /**
+       * Dismiss report
+       * Endpoint: POST /admin/reports/:id/action
+       * @throws MentaraApiError on request failure
+       */
+      async dismissReport(reportId: string, reason?: string) {
+        return this.takeAction(reportId, 'dismiss', reason);
+      },
+
+      /**
+       * Get reports overview statistics
+       * Endpoint: GET /admin/reports/stats/overview
+       * @throws MentaraApiError on request failure
+       */
+      async getOverview() {
+        try {
+          const { data } = await axios.get("/admin/reports/stats/overview");
+          return data;
+        } catch (error) {
+          handleApiError(error);
+        }
+      },
+    },
+
+    // Legacy Moderation Methods (kept for backward compatibility)
     moderation: {
       /**
-       * Get moderation reports
-       * Endpoint: GET /admin/moderation/reports
-       * @throws MentaraApiError on request failure
+       * Get moderation reports (deprecated - use reports.getList instead)
+       * @deprecated Use reports.getList instead
        */
       async getReports(params?: any) {
         try {
@@ -467,9 +591,8 @@ export function createAdminService(axios: AxiosInstance) {
       },
 
       /**
-       * Update moderation report
-       * Endpoint: PUT /admin/moderation/reports/:id
-       * @throws MentaraApiError on request failure
+       * Update moderation report (deprecated - use reports.updateStatus instead)
+       * @deprecated Use reports.updateStatus instead
        */
       async updateReport(reportId: string, reportData: any) {
         try {

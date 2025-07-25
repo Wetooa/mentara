@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { format, parseISO, isToday } from "date-fns";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface WorksheetStatusProps {
   worksheets: UserDashboardData["worksheets"];
@@ -21,9 +22,9 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15
-    }
-  }
+      staggerChildren: 0.15,
+    },
+  },
 };
 
 const sectionVariants = {
@@ -32,12 +33,12 @@ const sectionVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 24,
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const worksheetCardVariants = {
@@ -47,11 +48,11 @@ const worksheetCardVariants = {
     x: 0,
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
-      damping: 24
-    }
-  }
+      damping: 24,
+    },
+  },
 };
 
 const progressBarVariants = {
@@ -60,13 +61,15 @@ const progressBarVariants = {
     width: `${progress}%`,
     transition: {
       duration: 1,
-      ease: "easeOut",
-      delay: 0.5
-    }
-  })
+      ease: "easeOut" as const,
+      delay: 0.5,
+    },
+  }),
 };
 
 export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
+  const router = useRouter();
+
   // Group worksheets by status
   const pendingWorksheets = worksheets.filter((ws) => ws.status === "pending");
   const overdueWorksheets = worksheets.filter((ws) => ws.status === "overdue");
@@ -76,36 +79,36 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
 
   // Check if there are worksheets due today
   const dueTodayWorksheets = worksheets.filter(
-    (ws) => isToday(parseISO(ws.dueDate)) && ws.status !== "completed"
+    (ws) =>
+      ws.dueDate && isToday(parseISO(ws.dueDate)) && ws.status !== "completed"
   );
 
+  const handleViewAll = () => {
+    router.push("client/worksheets");
+  };
+
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
+    <motion.div initial="hidden" animate="visible" variants={containerVariants}>
       <Card className="shadow-sm">
         <CardContent className="p-4 sm:p-6">
-          <motion.div 
+          <motion.div
             className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2"
             variants={sectionVariants}
           >
             <h2 className="text-lg sm:text-xl font-bold">Worksheets</h2>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button variant="ghost" size="sm" className="text-primary gap-1 self-start">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary gap-1 self-start"
+                onClick={handleViewAll}
+              >
                 View All <ArrowRight size={16} />
               </Button>
             </motion.div>
           </motion.div>
 
-          <motion.div 
-            className="space-y-6"
-            variants={containerVariants}
-          >
+          <motion.div className="space-y-6" variants={containerVariants}>
             {/* Worksheets due today */}
             {dueTodayWorksheets.length > 0 && (
               <motion.div variants={sectionVariants}>
@@ -114,9 +117,9 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
                 </h3>
                 <div className="space-y-3">
                   {dueTodayWorksheets.map((worksheet, index) => (
-                    <WorksheetCard 
-                      key={worksheet.id} 
-                      worksheet={worksheet} 
+                    <WorksheetCard
+                      key={worksheet.id}
+                      worksheet={worksheet}
                       index={index}
                     />
                   ))}
@@ -132,12 +135,14 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
                 </h3>
                 <div className="space-y-3">
                   {pendingWorksheets
-                    .filter((ws) => !isToday(parseISO(ws.dueDate)))
+                    .filter(
+                      (ws) => ws.dueDate && !isToday(parseISO(ws.dueDate))
+                    )
                     .slice(0, 3)
                     .map((worksheet, index) => (
-                      <WorksheetCard 
-                        key={worksheet.id} 
-                        worksheet={worksheet} 
+                      <WorksheetCard
+                        key={worksheet.id}
+                        worksheet={worksheet}
                         index={index}
                       />
                     ))}
@@ -153,9 +158,9 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
                 </h3>
                 <div className="space-y-3">
                   {overdueWorksheets.slice(0, 2).map((worksheet, index) => (
-                    <WorksheetCard 
-                      key={worksheet.id} 
-                      worksheet={worksheet} 
+                    <WorksheetCard
+                      key={worksheet.id}
+                      worksheet={worksheet}
                       index={index}
                     />
                   ))}
@@ -165,7 +170,7 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
 
             {/* If no worksheets are assigned */}
             {worksheets.length === 0 && (
-              <motion.div 
+              <motion.div
                 className="text-center py-8 text-muted-foreground"
                 variants={sectionVariants}
               >
@@ -216,32 +221,34 @@ function WorksheetCard({
   const status = statusProps[worksheet.status];
 
   return (
-    <motion.div 
+    <motion.div
       variants={worksheetCardVariants}
-      whileHover={{ 
-        scale: 1.02, 
+      whileHover={{
+        scale: 1.02,
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        transition: { duration: 0.2 }
+        transition: { duration: 0.2 },
       }}
       className={`p-3 sm:p-4 rounded-lg border ${status.bgColor}`}
     >
       <div className="flex flex-col sm:flex-row items-start gap-3">
-        <motion.div 
+        <motion.div
           className="p-2 bg-white rounded-md flex-shrink-0 self-start sm:self-auto"
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={{ 
-            delay: 0.2 + index * 0.1, 
-            type: "spring", 
+          transition={{
+            delay: 0.2 + index * 0.1,
+            type: "spring",
             stiffness: 300,
-            damping: 20 
+            damping: 20,
           }}
         >
           <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
         </motion.div>
 
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm sm:text-base truncate">{worksheet.title}</h4>
+          <h4 className="font-semibold text-sm sm:text-base truncate">
+            {worksheet.title}
+          </h4>
           <p className="text-xs sm:text-sm text-muted-foreground truncate">
             Assigned by {worksheet.therapistName}
           </p>
@@ -272,7 +279,7 @@ function WorksheetCard({
                 custom={worksheet.progress}
               />
             </div>
-            <motion.span 
+            <motion.span
               className="text-xs text-muted-foreground flex-shrink-0 sm:mt-1 sm:text-right sm:block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

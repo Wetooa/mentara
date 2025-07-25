@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { useReportComment } from '@/hooks/community/useCommunityReporting';
+import { ReportModal } from '@/components/community/ReportModal';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -76,8 +78,10 @@ export function CommentItem({
   const [isEditing, setIsEditing] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [editContent, setEditContent] = useState(comment.content);
-  const [reportReason, setReportReason] = useState('');
-  const [reportDetails, setReportDetails] = useState('');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  
+  // Report hook
+  const reportComment = useReportComment();
 
   // Heart mutation
   const heartMutation = useMutation({
@@ -113,20 +117,9 @@ export function CommentItem({
     }
   };
 
-  // Report mutation
-  const reportMutation = useMutation({
-    mutationFn: (data: { reason: string; content?: string }) => 
-      api.comments.report(comment.id, data),
-    onSuccess: () => {
-      toast.success('Comment reported successfully');
-    },
-    onError: () => {
-      toast.error('Failed to report comment');
-    },
-  });
-
-  const handleReport = (reason: string, content?: string) => {
-    reportMutation.mutate({ reason, content });
+  const handleReport = async (reason: string, content?: string) => {
+    await reportComment.mutateAsync({ commentId: comment.id, reason, content });
+    setIsReportModalOpen(false);
   };
 
   const getRoleColor = (role?: string) => {
@@ -278,71 +271,10 @@ export function CommentItem({
                   <DropdownMenuSeparator />
                 </>
               )}
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Flag className="h-4 w-4 mr-2" />
-                    Report
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Report Comment</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Help us maintain a safe community by reporting inappropriate content.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-3">
-                      <label className="text-sm font-medium">Reason for reporting:</label>
-                      <select 
-                        className="w-full p-2 border rounded-md"
-                        onChange={(e) => setReportReason(e.target.value)}
-                        value={reportReason}
-                      >
-                        <option value="">Select a reason</option>
-                        <option value="harassment">Harassment or bullying</option>
-                        <option value="spam">Spam or unwanted content</option>
-                        <option value="inappropriate">Inappropriate content</option>
-                        <option value="misinformation">Misinformation</option>
-                        <option value="hate_speech">Hate speech</option>
-                        <option value="self_harm">Self-harm or suicidal content</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Additional details (optional):</label>
-                      <Textarea
-                        placeholder="Provide more context about why you're reporting this comment..."
-                        value={reportDetails}
-                        onChange={(e) => setReportDetails(e.target.value)}
-                        rows={3}
-                        className="resize-none"
-                      />
-                    </div>
-                  </div>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => {
-                      setReportReason('');
-                      setReportDetails('');
-                    }}>
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={() => {
-                        if (reportReason) {
-                          handleReport(reportReason, reportDetails || undefined);
-                          setReportReason('');
-                          setReportDetails('');
-                        }
-                      }}
-                      disabled={!reportReason || reportMutation.isPending}
-                    >
-                      {reportMutation.isPending ? 'Submitting...' : 'Submit Report'}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <DropdownMenuItem onClick={() => setIsReportModalOpen(true)}>
+                <Flag className="h-4 w-4 mr-2" />
+                Report
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <Award className="h-4 w-4 mr-2" />
                 Give Award
@@ -569,5 +501,15 @@ export function CommentItem({
         )}
       </div>
     </div>
+    
+    {/* Report Modal */}
+    <ReportModal
+      isOpen={isReportModalOpen}
+      onClose={() => setIsReportModalOpen(false)}
+      onSubmit={handleReport}
+      type="comment"
+      contentPreview={comment.content}
+      isLoading={reportComment.isPending}
+    />
   );
 }

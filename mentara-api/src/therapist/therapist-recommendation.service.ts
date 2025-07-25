@@ -35,7 +35,7 @@ export class TherapistRecommendationService {
     private readonly advancedMatching: AdvancedMatchingService,
     private readonly compatibilityAnalysis: CompatibilityAnalysisService,
     private readonly preAssessmentService: PreAssessmentService,
-  ) {}
+  ) { }
 
   private calculateYearsOfExperience(startDate: Date): number {
     const now = new Date();
@@ -83,8 +83,10 @@ export class TherapistRecommendationService {
 
       // Handle users without pre-assessment more gracefully
       if (!user.preAssessment) {
-        this.logger.warn(`No pre-assessment found for user: ${request.userId}, using basic recommendations`);
-        
+        this.logger.warn(
+          `No pre-assessment found for user: ${request.userId}, using basic recommendations`,
+        );
+
         // Provide basic recommendations for users without pre-assessment
         return await this.getBasicTherapistRecommendations(request, user);
       }
@@ -110,9 +112,12 @@ export class TherapistRecommendationService {
       // Extract user conditions and AI evaluation data
       const userConditions = this.extractUserConditions(user.preAssessment);
       const aiEvaluation = this.extractAiEvaluation(user.preAssessment);
-      
+
       // Extract severity levels from the database field (not from answers)
-      const severityLevels = user.preAssessment.severityLevels as Record<string, string>;
+      const severityLevels = user.preAssessment.severityLevels as Record<
+        string,
+        string
+      >;
 
       // Enhanced therapist filtering based on clinical insights
       const therapistWhere: any = {
@@ -148,19 +153,20 @@ export class TherapistRecommendationService {
       }
 
       // Fetch therapists with comprehensive data
-      const therapists: TherapistWithRelations[] = await this.prisma.therapist.findMany({
-        where: therapistWhere,
-        orderBy: { createdAt: 'desc' },
-        take: Math.min(request.limit ?? 10, 50), // Increase limit for better filtering
-        include: {
-          user: true,
-          reviews: {
-            select: {
-              rating: true,
+      const therapists: TherapistWithRelations[] =
+        await this.prisma.therapist.findMany({
+          where: therapistWhere,
+          orderBy: { createdAt: 'desc' },
+          take: Math.min(request.limit ?? 10, 50), // Increase limit for better filtering
+          include: {
+            user: true,
+            reviews: {
+              select: {
+                rating: true,
+              },
             },
           },
-        },
-      });
+        });
 
       // Use advanced matching algorithm with proper error handling and logging
       const therapistScores: TherapistScore[] = [];
@@ -313,14 +319,14 @@ export class TherapistRecommendationService {
       // Determine primary and secondary conditions (enhanced if clinical analysis available)
       const primaryConditions = clinicalAnalysis
         ? clinicalAnalysis.clinicalProfile.primaryConditions.map(
-            (pc) => pc.condition,
-          )
+          (pc) => pc.condition,
+        )
         : this.getPrimaryConditions(userConditions);
 
       const secondaryConditions = clinicalAnalysis
         ? clinicalAnalysis.clinicalProfile.secondaryConditions.map(
-            (sc) => sc.condition,
-          )
+          (sc) => sc.condition,
+        )
         : this.getSecondaryConditions(userConditions);
 
       return {
@@ -345,19 +351,19 @@ export class TherapistRecommendationService {
         },
         clinicalInsights: clinicalAnalysis
           ? {
-              overallRiskLevel:
-                clinicalAnalysis.clinicalProfile.overallRiskLevel,
-              primaryConditionsCount:
-                clinicalAnalysis.clinicalProfile.primaryConditions.length,
-              therapeuticPriorities:
-                clinicalAnalysis.clinicalProfile.therapeuticPriorities.slice(
-                  0,
-                  3,
-                ),
-              recommendedSessionFrequency:
-                clinicalAnalysis.treatmentPlan.therapistCriteria
-                  .sessionFrequency,
-            }
+            overallRiskLevel:
+              clinicalAnalysis.clinicalProfile.overallRiskLevel,
+            primaryConditionsCount:
+              clinicalAnalysis.clinicalProfile.primaryConditions.length,
+            therapeuticPriorities:
+              clinicalAnalysis.clinicalProfile.therapeuticPriorities.slice(
+                0,
+                3,
+              ),
+            recommendedSessionFrequency:
+              clinicalAnalysis.treatmentPlan.therapistCriteria
+                .sessionFrequency,
+          }
           : null,
         page: 1,
         pageSize: request.limit ?? 10,
@@ -418,10 +424,7 @@ export class TherapistRecommendationService {
       // Fetch therapists with basic data
       const therapists = await this.prisma.therapist.findMany({
         where: therapistWhere,
-        orderBy: [
-          { createdAt: 'desc' },
-          { yearsOfExperience: 'desc' },
-        ],
+        orderBy: [{ createdAt: 'desc' }, { yearsOfExperience: 'desc' }],
         take: Math.min(request.limit ?? 10, 20),
         include: {
           user: true,
@@ -433,14 +436,17 @@ export class TherapistRecommendationService {
         },
       });
 
-      this.logger.log(`Found ${therapists.length} approved therapists for basic recommendations`);
+      this.logger.log(
+        `Found ${therapists.length} approved therapists for basic recommendations`,
+      );
 
       if (therapists.length === 0) {
         this.logger.warn('No approved therapists found in database');
         return {
           totalCount: 0,
           recommendations: [],
-          message: 'No therapists available at this time. Please try again later.',
+          message:
+            'No therapists available at this time. Please try again later.',
           userConditions: [],
           therapists: [],
           matchCriteria: {
@@ -456,13 +462,16 @@ export class TherapistRecommendationService {
 
       // Calculate basic scores based on experience and ratings
       const therapistsWithScores = therapists.map((therapist, index) => {
-        const experienceYears = therapist.yearsOfExperience || 
+        const experienceYears =
+          therapist.yearsOfExperience ||
           this.calculateYearsOfExperience(therapist.practiceStartDate);
-        
+
         const reviews = therapist.reviews || [];
-        const averageRating = reviews.length > 0 ? 
-          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
-        
+        const averageRating =
+          reviews.length > 0
+            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+            : 0;
+
         // Basic scoring: experience (60%) + rating (40%)
         const experienceScore = Math.min(experienceYears * 10, 60);
         const ratingScore = averageRating * 8;
@@ -584,17 +593,18 @@ export class TherapistRecommendationService {
       },
     });
 
-    const therapist: TherapistWithRelations | null = await this.prisma.therapist.findUnique({
-      where: { userId: therapistId },
-      include: {
-        user: true,
-        reviews: {
-          select: {
-            rating: true,
+    const therapist: TherapistWithRelations | null =
+      await this.prisma.therapist.findUnique({
+        where: { userId: therapistId },
+        include: {
+          user: true,
+          reviews: {
+            select: {
+              rating: true,
+            },
           },
         },
-      },
-    });
+      });
 
     if (!client || !therapist) {
       throw new NotFoundException('Client or therapist not found');
@@ -618,11 +628,14 @@ export class TherapistRecommendationService {
     preAssessment: PreAssessment,
   ): Record<string, string> {
     const conditions: Record<string, string> = {};
-    
+
     // Extract data from the separate database fields (corrected approach)
-    const severityLevels = preAssessment.severityLevels as Record<string, string>;
+    const severityLevels = preAssessment.severityLevels as Record<
+      string,
+      string
+    >;
     const scores = preAssessment.scores as Record<string, number>;
-    
+
     if (severityLevels && scores) {
       // Use questionnaire names from the scores object
       Object.keys(scores).forEach((questionnaire) => {
@@ -631,7 +644,7 @@ export class TherapistRecommendationService {
         }
       });
     }
-    
+
     return conditions;
   }
 
@@ -640,7 +653,7 @@ export class TherapistRecommendationService {
    */
   private extractAiEvaluation(preAssessment: PreAssessment): any {
     const aiEstimate = preAssessment.aiEstimate as any;
-    
+
     if (!aiEstimate || typeof aiEstimate !== 'object') {
       return null;
     }
