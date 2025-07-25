@@ -10,4 +10,5 @@ export {
   UserIdParamSchema,
   DeactivateUserDtoSchema,
   UpdateUserRequestSchema,
+  UserReportDtoSchema,
 } from './user.schemas';

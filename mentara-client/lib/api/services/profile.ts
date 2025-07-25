@@ -1,5 +1,4 @@
 import { AxiosInstance } from "axios";
-import { profile } from "console";
 
 export interface PublicProfileResponse {
   user: {
@@ -20,6 +19,21 @@ export interface PublicProfileResponse {
     hourlyRate?: number;
     areasOfExpertise?: string[];
     languages?: string[];
+    availability?: Array<{
+      id: string;
+      dayOfWeek: string;
+      startTime: string;
+      endTime: string;
+      timezone: string;
+      isAvailable: boolean;
+      notes?: string;
+      bookedSlots?: Array<{
+        id: string;
+        startTime: string;
+        endTime: string;
+        status: string;
+      }>;
+    }>;
   };
   connectionStatus?: 'connected' | 'pending' | null; // Connection status to this user/therapist
   mutualCommunities: Array<{
@@ -79,6 +93,16 @@ export interface UpdateProfileResponse {
     createdAt: string;
     updatedAt: string;
   };
+}
+
+export interface UserReportDto {
+  reason: 'harassment' | 'inappropriate' | 'spam' | 'fake_profile' | 'impersonation' | 'other';
+  content?: string;
+}
+
+export interface ReportUserResponse {
+  success: boolean;
+  reportId: string;
 }
 
 /**
@@ -185,6 +209,18 @@ export function createProfileService(axios: AxiosInstance) {
         console.error("Failed to update user profile:", error);
         throw error;
       }
+    },
+
+    /**
+     * Report a user profile
+     * Any authenticated user can report any profile (including their own)
+     */
+    async reportUser(
+      userId: string,
+      reportData: UserReportDto
+    ): Promise<ReportUserResponse> {
+      const { data } = await axios.post(`/profile/${userId}/report`, reportData);
+      return data;
     },
   };
 }

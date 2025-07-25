@@ -67,3 +67,18 @@ export const UpdateUserRequestSchema = z
     role: z.enum(['client', 'therapist', 'moderator', 'admin']).optional(),
   })
   .strict();
+
+// User report validation
+export const UserReportDtoSchema = z.object({
+  reason: z.enum(
+    ['harassment', 'inappropriate', 'spam', 'fake_profile', 'impersonation', 'other'],
+    {
+      required_error: 'Report reason is required',
+      invalid_type_error: 'Invalid report reason',
+    }
+  ),
+  content: z
+    .string()
+    .max(1000, 'Description must be less than 1000 characters')
+    .optional(),
+}).strict();

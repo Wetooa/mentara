@@ -70,22 +70,25 @@ model PostHeart {
 }
 
 model Report {
-  id         String       @id @default(uuid())
-  reason     String
-  content    String?
-  status     ReportStatus @default(PENDING)
-  postId     String?
-  commentId  String?
-  reporterId String
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  comment    Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  post       Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
-  reporter   User         @relation("UserReports", fields: [reporterId], references: [id], onDelete: Cascade)
+  id             String       @id @default(uuid())
+  reason         String
+  content        String?
+  status         ReportStatus @default(PENDING)
+  postId         String?
+  commentId      String?
+  reportedUserId String?
+  reporterId     String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  comment        Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  post           Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reportedUser   User?        @relation("UserBeingReported", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reporter       User         @relation("UserReports", fields: [reporterId], references: [id], onDelete: Cascade)
 
   @@index([reporterId])
   @@index([postId])
   @@index([commentId])
+  @@index([reportedUserId])
 }
 
 enum ReportStatus {

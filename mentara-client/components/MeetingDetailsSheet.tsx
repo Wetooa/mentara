@@ -9,12 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -146,11 +141,11 @@ export function MeetingDetailsSheet({
 
   const handleSaveNotes = async () => {
     if (!meeting) return;
-    
+
     try {
       setIsSavingNotes(true);
       await api.meetings.saveNotes(meeting.id, notes);
-      
+
       const updatedMeeting = { ...meeting, notes };
       onMeetingUpdate?.(updatedMeeting);
       setIsEditingNotes(false);
@@ -164,7 +159,7 @@ export function MeetingDetailsSheet({
 
   const handleStartMeeting = async () => {
     if (!meeting) return;
-    
+
     try {
       await api.meetings.start(meeting.id);
       const updatedMeeting = { ...meeting, status: "IN_PROGRESS" };
@@ -177,7 +172,7 @@ export function MeetingDetailsSheet({
 
   const handleCompleteMeeting = async () => {
     if (!meeting) return;
-    
+
     try {
       await api.meetings.complete(meeting.id);
       const updatedMeeting = { ...meeting, status: "COMPLETED" };
@@ -190,7 +185,7 @@ export function MeetingDetailsSheet({
 
   const handleCancelMeeting = async () => {
     if (!meeting) return;
-    
+
     try {
       await api.meetings.cancel(meeting.id);
       const updatedMeeting = { ...meeting, status: "CANCELLED" };
@@ -203,7 +198,7 @@ export function MeetingDetailsSheet({
 
   const handleMarkNoShow = async () => {
     if (!meeting) return;
-    
+
     try {
       await api.meetings.markNoShow(meeting.id);
       const updatedMeeting = { ...meeting, status: "NO_SHOW" };
@@ -216,13 +211,19 @@ export function MeetingDetailsSheet({
 
   const handleOpenMeetingUrl = () => {
     if (meeting?.meetingUrl) {
-      window.open(meeting.meetingUrl, '_blank');
+      window.open(meeting.meetingUrl, "_blank");
     }
   };
 
-  const canStartMeeting = meeting.status === "WAITING" || meeting.status === "SCHEDULED" || meeting.status === "CONFIRMED";
+  const canStartMeeting =
+    meeting.status === "WAITING" ||
+    meeting.status === "SCHEDULED" ||
+    meeting.status === "CONFIRMED";
   const canCompleteMeeting = meeting.status === "IN_PROGRESS";
-  const canCancelOrNoShow = meeting.status === "IN_PROGRESS" || meeting.status === "SCHEDULED" || meeting.status === "CONFIRMED";
+  const canCancelOrNoShow =
+    meeting.status === "IN_PROGRESS" ||
+    meeting.status === "SCHEDULED" ||
+    meeting.status === "CONFIRMED";
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -237,8 +238,8 @@ export function MeetingDetailsSheet({
                 {formatDate(meeting.startTime)}
               </SheetDescription>
             </div>
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className={`${getStatusColor(meeting.status)} font-medium`}
             >
               {meeting.status?.toLowerCase().replace("_", " ")}
@@ -248,40 +249,51 @@ export function MeetingDetailsSheet({
           {/* Quick Actions */}
           <div className="flex gap-2 flex-wrap">
             {canStartMeeting && (
-              <Button onClick={handleStartMeeting} size="sm" className="bg-green-600 hover:bg-green-700">
+              <Button
+                onClick={handleStartMeeting}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+              >
                 <Play className="h-4 w-4 mr-1" />
                 Start Meeting
               </Button>
             )}
-            
+
             {canCompleteMeeting && (
-              <Button onClick={handleCompleteMeeting} size="sm" className="bg-blue-600 hover:bg-blue-700">
+              <Button
+                onClick={handleCompleteMeeting}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700"
+              >
                 <CheckCircle className="h-4 w-4 mr-1" />
                 Complete Meeting
               </Button>
             )}
-            
+
             {canCancelOrNoShow && (
               <>
-                <Button onClick={handleCancelMeeting} size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50">
+                <Button
+                  onClick={handleCancelMeeting}
+                  size="sm"
+                  variant="outline"
+                  className="border-red-200 text-red-700 hover:bg-red-50"
+                >
                   <XCircle className="h-4 w-4 mr-1" />
                   Cancel
                 </Button>
-                
+
                 {meeting.status === "IN_PROGRESS" && (
-                  <Button onClick={handleMarkNoShow} size="sm" variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-50">
+                  <Button
+                    onClick={handleMarkNoShow}
+                    size="sm"
+                    variant="outline"
+                    className="border-orange-200 text-orange-700 hover:bg-orange-50"
+                  >
                     <UserX className="h-4 w-4 mr-1" />
                     No Show
                   </Button>
                 )}
               </>
-            )}
-            
-            {meeting.meetingUrl && (
-              <Button onClick={handleOpenMeetingUrl} size="sm" variant="outline">
-                <ExternalLink className="h-4 w-4 mr-1" />
-                {meeting.meetingUrl.includes('http') ? 'Join Video' : 'View Location'}
-              </Button>
             )}
           </div>
         </SheetHeader>
@@ -319,7 +331,8 @@ export function MeetingDetailsSheet({
                     <div>
                       <p className="text-sm font-medium">Time</p>
                       <p className="text-sm text-muted-foreground">
-                        {formatTime(meeting.startTime)} - {formatTime(meeting.endTime)}
+                        {formatTime(meeting.startTime)} -{" "}
+                        {formatTime(meeting.endTime)}
                       </p>
                     </div>
                   </div>
@@ -338,19 +351,21 @@ export function MeetingDetailsSheet({
                 {meeting.meetingUrl && (
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-start gap-3">
-                      {meeting.meetingUrl.includes('http') ? (
+                      {meeting.meetingUrl.includes("http") ? (
                         <Video className="h-5 w-5 text-blue-600 mt-0.5" />
                       ) : (
                         <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
                       )}
                       <div className="flex-1">
                         <p className="text-sm font-medium text-blue-900 mb-1">
-                          {meeting.meetingUrl.includes('http') ? 'Video Meeting Link' : 'Meeting Location'}
+                          {meeting.meetingUrl.includes("http")
+                            ? "Video Meeting Link"
+                            : "Meeting Location"}
                         </p>
                         <p className="text-sm text-blue-800 break-all">
                           {meeting.meetingUrl}
                         </p>
-                        {meeting.meetingUrl.includes('http') && (
+                        {meeting.meetingUrl.includes("http") && (
                           <button
                             onClick={handleOpenMeetingUrl}
                             className="text-xs text-blue-600 hover:text-blue-800 underline mt-1"
@@ -381,7 +396,8 @@ export function MeetingDetailsSheet({
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">
-                        {meeting.therapist.user.firstName} {meeting.therapist.user.lastName}
+                        {meeting.therapist.user.firstName}{" "}
+                        {meeting.therapist.user.lastName}
                       </p>
                       <p className="text-sm text-muted-foreground">Therapist</p>
                       {meeting.therapist.specialization && (
@@ -408,7 +424,8 @@ export function MeetingDetailsSheet({
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">
-                        {meeting.client.user.firstName} {meeting.client.user.lastName}
+                        {meeting.client.user.firstName}{" "}
+                        {meeting.client.user.lastName}
                       </p>
                       <p className="text-sm text-muted-foreground">Client</p>
                       <p className="text-xs text-muted-foreground">
@@ -508,28 +525,36 @@ export function MeetingDetailsSheet({
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Session Rate</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Session Rate
+                    </p>
                     <p className="text-lg font-semibold">₱120.00</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Duration</p>
-                    <p className="text-lg font-semibold">{meeting.duration || 60} min</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Duration
+                    </p>
+                    <p className="text-lg font-semibold">
+                      {meeting.duration || 60} min
+                    </p>
                   </div>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="flex justify-between items-center">
                   <p className="text-sm font-medium">Total Amount</p>
                   <p className="text-xl font-bold">₱120.00</p>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Payment Status</p>
-                  <Badge 
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Payment Status
+                  </p>
+                  <Badge
                     variant="outline"
                     className={
-                      meeting.status === "COMPLETED" 
+                      meeting.status === "COMPLETED"
                         ? "bg-green-100 text-green-800 border-green-200"
                         : "bg-yellow-100 text-yellow-800 border-yellow-200"
                     }

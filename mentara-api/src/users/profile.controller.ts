@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Put,
+  Post,
   Param,
   Body,
   HttpCode,
@@ -14,8 +15,8 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
-import { UserIdParamSchema } from './validation';
-import type { UserIdParam } from './types';
+import { UserIdParamSchema, UserReportDtoSchema } from './validation';
+import type { UserIdParam, UserReportDto } from './types';
 import { ProfileService } from './profile.service';
 
 /**
@@ -76,6 +77,38 @@ export class ProfileController {
       );
       throw new HttpException(
         `Failed to update profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Report a user profile
+   * Any authenticated user can report any profile (including their own)
+   */
+  @Post(':id/report')
+  @HttpCode(HttpStatus.OK)
+  async reportUser(
+    @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
+    @CurrentUserId() currentUserId: string,
+    @Body(new ZodValidationPipe(UserReportDtoSchema)) reportData: UserReportDto,
+  ): Promise<{ success: boolean; reportId: string }> {
+    try {
+      this.logger.log(`User ${currentUserId} reporting profile ${params.id}`);
+      const reportId = await this.profileService.reportUser(
+        params.id,
+        currentUserId,
+        reportData.reason,
+        reportData.content,
+      );
+      return { success: true, reportId };
+    } catch (error) {
+      this.logger.error(
+        `Failed to report user ${params.id}:`,
+        error,
+      );
+      throw new HttpException(
+        `Failed to report user: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

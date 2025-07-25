@@ -5,6 +5,8 @@ import {
   PublicProfileResponse,
   UpdateProfileRequest,
   UpdateProfileResponse,
+  UserReportDto,
+  ReportUserResponse,
 } from "@/lib/api/services/profile";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
@@ -192,6 +194,39 @@ export function useUploadCoverImage() {
       toast.error("Failed to update cover image", {
         description:
           error.message || "Please try again with a different image.",
+      });
+    },
+  });
+}
+
+// Hook for reporting a user profile
+export function useReportUser() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      reportData,
+    }: {
+      userId: string;
+      reportData: UserReportDto;
+    }): Promise<ReportUserResponse> => {
+      return api.profile.reportUser(userId, reportData);
+    },
+    onSuccess: (data, variables) => {
+      toast.success("Report submitted successfully", {
+        description: "Thank you for helping keep our community safe.",
+      });
+      
+      // Optionally invalidate related queries
+      queryClient.invalidateQueries({ 
+        queryKey: ["profile", variables.userId] 
+      });
+    },
+    onError: (error: MentaraApiError) => {
+      toast.error("Failed to submit report", {
+        description: error.message || "Please try again later.",
       });
     },
   });

@@ -33,6 +33,12 @@ export interface UpdateUserRequest {
 }
 
 // User DTO (output type for API responses)
+// User report DTO
+export interface UserReportDto {
+  reason: 'harassment' | 'inappropriate' | 'spam' | 'fake_profile' | 'impersonation' | 'other';
+  content?: string;
+}
+
 export interface UserDto {
   id: string;
   email: string;

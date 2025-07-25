@@ -4,36 +4,31 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Edit, MapPin, Calendar, Shield, Star } from "lucide-react";
+import { Edit, MapPin, Calendar, Shield, Star, Flag } from "lucide-react";
 import { PublicProfileResponse } from "@/lib/api/services/profile";
 import { format, parseISO } from "date-fns";
 import { ChatButton } from "./ChatButton";
 import { ConnectTherapistButton } from "./ConnectTherapistButton";
+import { getUserDisplayName, getUserInitials } from "@/lib/utils/userUtils";
 
 interface ProfileHeaderProps {
   profile: PublicProfileResponse;
   isOwnProfile: boolean;
   onEditClick: () => void;
+  onReportClick: () => void;
 }
 
 export function ProfileHeader({
   profile,
   isOwnProfile,
   onEditClick,
+  onReportClick,
 }: ProfileHeaderProps) {
   const { user, therapist } = profile;
 
-  // Get user's full name
-  const displayName =
-    [user.firstName, user.middleName, user.lastName]
-      .filter(Boolean)
-      .join(" ") || "Anonymous User";
-
-  // Get user initials for avatar fallback
-  const initials = [user.firstName, user.lastName]
-    .filter(Boolean)
-    .map((name) => name.charAt(0).toUpperCase())
-    .join("");
+  // Get user's full name and initials
+  const displayName = getUserDisplayName(user);
+  const initials = getUserInitials(user);
 
   // Format join date
   const joinDate = format(parseISO(user.createdAt), "MMMM yyyy");
@@ -71,45 +66,6 @@ export function ProfileHeader({
         )}
         {!user.coverImageUrl && (
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/80 to-purple-600/80" />
-        )}
-
-        {/* Edit Button (Own Profile Only) */}
-        {isOwnProfile && (
-          <Button
-            variant="secondary"
-            size="sm"
-            className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-900"
-            onClick={onEditClick}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Profile
-          </Button>
-        )}
-
-        {/* Buttons for Other Profiles */}
-        {!isOwnProfile && (
-          <div className="absolute top-4 right-4 flex gap-2">
-            {/* Connect with Therapist Button (Therapist Profiles Only) */}
-            {user.role === "therapist" && (
-              <ConnectTherapistButton
-                therapistId={user.id}
-                connectionStatus={profile.connectionStatus || null}
-                therapistName={displayName}
-                variant="secondary"
-                size="sm"
-                className="bg-white/90 hover:bg-white text-gray-900"
-              />
-            )}
-            
-            {/* Chat Button */}
-            <ChatButton
-              targetUserId={user.id}
-              targetUserName={displayName}
-              variant="secondary"
-              size="sm"
-              className="bg-white/90 hover:bg-white text-gray-900"
-            />
-          </div>
         )}
       </div>
 
@@ -164,6 +120,55 @@ export function ProfileHeader({
                       </span>
                     </div>
                   )}
+                </>
+              )}
+            </div>
+
+            {/* Action Buttons - Better positioned below profile info */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {isOwnProfile ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onEditClick}
+                    className="flex items-center gap-2"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit Profile
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {/* Chat Button - Always available for non-own profiles */}
+                  <ChatButton
+                    targetUserId={user.id}
+                    targetUserName={displayName}
+                    variant="default"
+                    size="sm"
+                  />
+
+                  {/* Connect with Therapist Button - Only for therapist profiles */}
+                  {user.role === "therapist" && (
+                    <ConnectTherapistButton
+                      therapistId={user.id}
+                      connectionStatus={profile.connectionStatus || null}
+                      therapistName={displayName}
+                      variant="outline"
+                      size="sm"
+                    />
+                  )}
+
+                  {/* Report button - Always available for other profiles */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onReportClick}
+                    className="flex items-center gap-2 text-gray-600 hover:text-red-600"
+                  >
+                    <Flag className="w-4 h-4" />
+                    Report
+                  </Button>
                 </>
               )}
             </div>

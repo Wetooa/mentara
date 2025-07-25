@@ -86,13 +86,12 @@ const formatMessageTime = (dateString: string) => {
   return format(date, "MMM d");
 };
 
-
 interface MessageBubbleProps {
   message: MessagingMessage;
   isOwn: boolean;
   showAvatar: boolean;
   showTime?: boolean;
-  messagePosition?: 'single' | 'first' | 'middle' | 'last';
+  messagePosition?: "single" | "first" | "middle" | "last";
   onReact: (emoji: string) => void;
   onReply: () => void;
   onEdit?: () => void;
@@ -107,7 +106,7 @@ const MessageBubble = ({
   isOwn,
   showAvatar,
   showTime = true,
-  messagePosition = 'single',
+  messagePosition = "single",
   onReact,
   onReply,
   onEdit,
@@ -144,18 +143,25 @@ const MessageBubble = ({
 
   // Modern messenger-style layout
   return (
-    <div className={cn(
-      "flex w-full group mb-1",
-      isOwn ? "justify-end" : "justify-start"
-    )}>
+    <div
+      className={cn(
+        "flex w-full group mb-1",
+        isOwn ? "justify-end" : "justify-start"
+      )}
+    >
       {/* Avatar for other person's messages - only show on first message of group */}
       {!isOwn && (
         <div className="flex-shrink-0 w-8 mr-2">
           {showAvatar ? (
             <Avatar className="h-8 w-8">
-              <AvatarImage src={message.sender?.avatar || "/avatar-placeholder.png"} />
+              <AvatarImage
+                src={message.sender?.avatar || "/avatar-placeholder.png"}
+              />
               <AvatarFallback className="text-xs bg-gray-200 text-gray-600">
-                {getInitials(message.sender?.firstName || "User", message.sender?.lastName || "")}
+                {getInitials(
+                  message.sender?.firstName || "User",
+                  message.sender?.lastName || ""
+                )}
               </AvatarFallback>
             </Avatar>
           ) : (
@@ -190,30 +196,26 @@ const MessageBubble = ({
           className={cn(
             "relative px-4 py-2.5 text-sm shadow-sm",
             // Modern messenger colors and styling
-            isOwn 
-              ? "bg-blue-500 text-white" 
+            isOwn
+              ? "bg-blue-500 text-white"
               : "bg-white text-gray-900 border border-gray-200",
             // Improved bubble shapes for better visual hierarchy
-            messagePosition === 'single' && (
-              isOwn 
-                ? "rounded-[18px] rounded-br-[6px]" 
-                : "rounded-[18px] rounded-bl-[6px]"
-            ),
-            messagePosition === 'first' && (
-              isOwn 
-                ? "rounded-[18px] rounded-br-[6px]" 
-                : "rounded-[18px] rounded-bl-[6px]"
-            ),
-            messagePosition === 'middle' && (
-              isOwn 
-                ? "rounded-l-[18px] rounded-r-[6px]" 
-                : "rounded-r-[18px] rounded-l-[6px]"
-            ),
-            messagePosition === 'last' && (
-              isOwn 
-                ? "rounded-[18px] rounded-tr-[6px] rounded-br-[6px]" 
-                : "rounded-[18px] rounded-tl-[6px] rounded-bl-[6px]"
-            ),
+            messagePosition === "single" &&
+              (isOwn
+                ? "rounded-[18px] rounded-br-[6px]"
+                : "rounded-[18px] rounded-bl-[6px]"),
+            messagePosition === "first" &&
+              (isOwn
+                ? "rounded-[18px] rounded-br-[6px]"
+                : "rounded-[18px] rounded-bl-[6px]"),
+            messagePosition === "middle" &&
+              (isOwn
+                ? "rounded-l-[18px] rounded-r-[6px]"
+                : "rounded-r-[18px] rounded-l-[6px]"),
+            messagePosition === "last" &&
+              (isOwn
+                ? "rounded-[18px] rounded-tr-[6px] rounded-br-[6px]"
+                : "rounded-[18px] rounded-tl-[6px] rounded-bl-[6px]"),
             // Subtle visual feedback
             message.isEdited && "opacity-95",
             "transition-all duration-150 hover:shadow-md"
@@ -244,7 +246,7 @@ const MessageBubble = ({
                 >
                   <Paperclip className="h-4 w-4" />
                   <span className="text-xs truncate">
-                    {message.attachmentNames?.[index] || 'File'}
+                    {message.attachmentNames?.[index] || "File"}
                   </span>
                 </div>
               ))}
@@ -359,9 +361,7 @@ const MessageBubble = ({
       </div>
     </div>
   );
-};;
-
-
+};
 
 interface ConversationItemProps {
   conversation: MessagingConversation;
@@ -372,13 +372,13 @@ interface ConversationItemProps {
   user: User;
 }
 
-const ConversationItem = ({ 
-  conversation, 
-  isSelected, 
-  onSelect, 
-  isOnline, 
-  isTyping, 
-  user 
+const ConversationItem = ({
+  conversation,
+  isSelected,
+  onSelect,
+  isOnline,
+  isTyping,
+  user,
 }: ConversationItemProps) => {
   const otherParticipant = getOtherParticipant(conversation, user.id); // Assuming direct conversation
   const displayName = otherParticipant
@@ -488,7 +488,6 @@ export function MessengerInterface({
     null
   );
   const [isTyping, setIsTyping] = useState(false);
-  
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
@@ -609,9 +608,9 @@ export function MessengerInterface({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ 
+      messagesEndRef.current.scrollIntoView({
         behavior: "smooth",
-        block: "end"
+        block: "end",
       });
     }
   }, [messages]);
@@ -621,9 +620,9 @@ export function MessengerInterface({
     if (selectedConversationId && messagesEndRef.current) {
       // Small delay to ensure messages are rendered
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ 
+        messagesEndRef.current?.scrollIntoView({
           behavior: "smooth",
-          block: "end"
+          block: "end",
         });
       }, 100);
     }
@@ -746,7 +745,10 @@ export function MessengerInterface({
         className
       )}
     >
-      <ResizablePanelGroup direction="horizontal" className="h-full w-full overflow-hidden">
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="h-full w-full overflow-hidden"
+      >
         <ResizablePanel
           defaultSize={25}
           minSize={20}
@@ -850,7 +852,10 @@ export function MessengerInterface({
             </ScrollArea>
           </div>
         </ResizablePanel>
-        <ResizableHandle withHandle className="w-1.5 bg-gray-200/60 hover:bg-blue-400/40 transition-colors duration-200" />
+        <ResizableHandle
+          withHandle
+          className="w-1.5 bg-gray-200/60 hover:bg-blue-400/40 transition-colors duration-200"
+        />
         <ResizablePanel defaultSize={75} className="h-full overflow-hidden">
           <div className="h-full flex flex-col overflow-hidden">
             {selectedConversationId ? (
@@ -860,54 +865,26 @@ export function MessengerInterface({
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={otherParticipant?.user.avatarUrl} />
-                      <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+                      <AvatarFallback>
+                        {getInitials(displayName)}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
                       <h3 className="font-semibold text-sm">{displayName}</h3>
                       <p className="text-xs text-muted-foreground">
-                        {onlineUsers.has(otherParticipant?.userId || '') ? (
+                        {onlineUsers.has(otherParticipant?.userId || "") ? (
                           <span className="text-green-600 flex items-center gap-1">
                             <Circle className="h-2 w-2 fill-current" />
                             Online
                           </span>
                         ) : (
-                          'Offline'
+                          "Offline"
                         )}
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onCallInitiate?.(selectedConversationId, "audio")}
-                          >
-                            <Phone className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Audio call</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onCallInitiate?.(selectedConversationId, "video")}
-                          >
-                            <Video className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Video call</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
@@ -943,68 +920,103 @@ export function MessengerInterface({
                       ) : messages.length === 0 ? (
                         <div className="flex items-center justify-center flex-1 min-h-[200px] text-muted-foreground">
                           <div className="text-center">
-                            <h4 className="font-medium mb-1">No messages yet</h4>
-                            <p className="text-sm">Start the conversation with {displayName}</p>
+                            <h4 className="font-medium mb-1">
+                              No messages yet
+                            </h4>
+                            <p className="text-sm">
+                              Start the conversation with {displayName}
+                            </p>
                           </div>
                         </div>
                       ) : (
                         <div className="space-y-1 flex-1">
-                        {messages.map((message, index) => {
-                          const isOwn = message.senderId === user?.id;
-                          const prevMessage = messages[index - 1];
-                          const nextMessage = messages[index + 1];
-                          
-                          // Determine message grouping position
-                          const isConsecutiveFromPrev = prevMessage && prevMessage.senderId === message.senderId;
-                          const isConsecutiveToNext = nextMessage && nextMessage.senderId === message.senderId;
-                          
-                          const showAvatar = !isConsecutiveFromPrev;
-                          const showTime = !isConsecutiveToNext || (isConsecutiveToNext && 
-                            differenceInMinutes(new Date(nextMessage.createdAt), new Date(message.createdAt)) > 5);
-                          
-                          // Determine message position in group for border radius
-                          let messagePosition: 'single' | 'first' | 'middle' | 'last' = 'single';
-                          if (isConsecutiveFromPrev && isConsecutiveToNext) {
-                            messagePosition = 'middle';
-                          } else if (isConsecutiveFromPrev) {
-                            messagePosition = 'last';
-                          } else if (isConsecutiveToNext) {
-                            messagePosition = 'first';
-                          }
-                          
-                          return (
-                            <div 
-                              key={message.id}
-                              className={cn(
-                                "transition-all duration-200",
-                                !isConsecutiveFromPrev ? "mt-4" : "mt-1"
-                              )}
-                            >
-                              <MessageBubble
-                                message={message}
-                                isOwn={isOwn}
-                                showAvatar={showAvatar}
-                                showTime={showTime}
-                                messagePosition={messagePosition}
-                                onReact={(emoji) => addReaction(message.id, emoji)}
-                                onReply={() => setReplyToMessage(message)}
-                                onEdit={isOwn ? () => setEditingMessage(message) : undefined}
-                                onDelete={isOwn ? () => {/* TODO: implement delete */} : undefined}
-                                onCopy={() => {/* Already handled in MessageBubble */}}
-                                onForward={() => {/* TODO: implement forward */}}
-                                onReport={() => {/* TODO: implement report */}}
-                              />
-                            </div>
-                          );
-                        })}
+                          {messages.map((message, index) => {
+                            const isOwn = message.senderId === user?.id;
+                            const prevMessage = messages[index - 1];
+                            const nextMessage = messages[index + 1];
+
+                            // Determine message grouping position
+                            const isConsecutiveFromPrev =
+                              prevMessage &&
+                              prevMessage.senderId === message.senderId;
+                            const isConsecutiveToNext =
+                              nextMessage &&
+                              nextMessage.senderId === message.senderId;
+
+                            const showAvatar = !isConsecutiveFromPrev;
+                            const showTime =
+                              !isConsecutiveToNext ||
+                              (isConsecutiveToNext &&
+                                differenceInMinutes(
+                                  new Date(nextMessage.createdAt),
+                                  new Date(message.createdAt)
+                                ) > 5);
+
+                            // Determine message position in group for border radius
+                            let messagePosition:
+                              | "single"
+                              | "first"
+                              | "middle"
+                              | "last" = "single";
+                            if (isConsecutiveFromPrev && isConsecutiveToNext) {
+                              messagePosition = "middle";
+                            } else if (isConsecutiveFromPrev) {
+                              messagePosition = "last";
+                            } else if (isConsecutiveToNext) {
+                              messagePosition = "first";
+                            }
+
+                            return (
+                              <div
+                                key={message.id}
+                                className={cn(
+                                  "transition-all duration-200",
+                                  !isConsecutiveFromPrev ? "mt-4" : "mt-1"
+                                )}
+                              >
+                                <MessageBubble
+                                  message={message}
+                                  isOwn={isOwn}
+                                  showAvatar={showAvatar}
+                                  showTime={showTime}
+                                  messagePosition={messagePosition}
+                                  onReact={(emoji) =>
+                                    addReaction(message.id, emoji)
+                                  }
+                                  onReply={() => setReplyToMessage(message)}
+                                  onEdit={
+                                    isOwn
+                                      ? () => setEditingMessage(message)
+                                      : undefined
+                                  }
+                                  onDelete={
+                                    isOwn
+                                      ? () => {
+                                          /* TODO: implement delete */
+                                        }
+                                      : undefined
+                                  }
+                                  onCopy={() => {
+                                    /* Already handled in MessageBubble */
+                                  }}
+                                  onForward={() => {
+                                    /* TODO: implement forward */
+                                  }}
+                                  onReport={() => {
+                                    /* TODO: implement report */
+                                  }}
+                                />
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
-                      
+
                       {/* Typing Indicators */}
                       {currentTypingUsers.length > 0 && (
                         <TypingIndicator users={currentTypingUsers} />
                       )}
-                        
+
                       {/* Auto-scroll anchor */}
                       <div ref={messagesEndRef} />
                     </div>
@@ -1015,7 +1027,10 @@ export function MessengerInterface({
                     <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 flex items-center justify-between flex-shrink-0">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Reply className="h-4 w-4" />
-                        <span>Replying to: {replyToMessage.content.substring(0, 50)}...</span>
+                        <span>
+                          Replying to: {replyToMessage.content.substring(0, 50)}
+                          ...
+                        </span>
                       </div>
                       <Button
                         variant="ghost"
@@ -1034,8 +1049,15 @@ export function MessengerInterface({
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="ghost" size="sm" className="flex-shrink-0">
-                              <label htmlFor="file-upload" className="cursor-pointer">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-shrink-0"
+                            >
+                              <label
+                                htmlFor="file-upload"
+                                className="cursor-pointer"
+                              >
                                 <Paperclip className="h-4 w-4" />
                               </label>
                               <input
@@ -1085,8 +1107,12 @@ export function MessengerInterface({
             ) : (
               <div className="flex-1 flex items-center justify-center text-center">
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Select a conversation</h3>
-                  <p className="text-muted-foreground">Choose a conversation to start messaging</p>
+                  <h3 className="text-lg font-medium mb-2">
+                    Select a conversation
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Choose a conversation to start messaging
+                  </p>
                 </div>
               </div>
             )}
@@ -1095,4 +1121,4 @@ export function MessengerInterface({
       </ResizablePanelGroup>
     </div>
   );
-};
+}
