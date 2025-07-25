@@ -431,10 +431,10 @@ export default function UserCommunity() {
                 </div>
 
                 {/* Posts Content */}
-                <ScrollArea className="flex-1 min-h-0 bg-community-warm/10 relative [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]">
+                <ScrollArea className="h-[calc(100vh-240px)] bg-community-warm/10 relative">
                   {/* Background decoration */}
                   <div className="absolute inset-0 bg-community-gradient opacity-20" />
-                  <div className="relative max-w-4xl mx-auto p-4 lg:p-6">
+                  <div className="relative max-w-4xl mx-auto p-4 lg:p-6 pb-8">
                     {postsLoading ? (
                       // Loading state
                       <div className="space-y-6">
