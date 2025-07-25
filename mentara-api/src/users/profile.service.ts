@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 
 export interface PublicProfileResponse {
@@ -20,6 +20,21 @@ export interface PublicProfileResponse {
     hourlyRate?: number;
     areasOfExpertise?: string[];
     languages?: string[];
+    availability?: Array<{
+      id: string;
+      dayOfWeek: string;
+      startTime: string;
+      endTime: string;
+      timezone: string;
+      isAvailable: boolean;
+      notes?: string;
+      bookedSlots?: Array<{
+        id: string;
+        startTime: string;
+        endTime: string;
+        status: string;
+      }>;
+    }>;
   };
   connectionStatus?: 'connected' | 'pending' | null; // Connection status to this user/therapist
   mutualCommunities: Array<{
@@ -240,6 +255,58 @@ export class ProfileService {
 
     // Add therapist info if applicable
     if (user.role === 'therapist' && user.therapist) {
+      // Fetch therapist availability
+      const availability = await this.prisma.therapistAvailability.findMany({
+        where: { therapistId: user.id },
+        orderBy: [
+          { dayOfWeek: 'asc' },
+          { startTime: 'asc' },
+        ],
+      });
+
+      // For each availability slot, get booked meetings
+      const availabilityWithBookings = await Promise.all(
+        availability.map(async (slot) => {
+          // Get meetings that overlap with this availability slot
+          const bookedSlots = await this.prisma.meeting.findMany({
+            where: {
+              therapistId: user.id,
+              status: {
+                in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'],
+              },
+              startTime: {
+                gte: new Date(),
+              },
+            },
+            select: {
+              id: true,
+              startTime: true,
+              endTime: true,
+              status: true,
+            },
+            orderBy: {
+              startTime: 'asc',
+            },
+          });
+
+          return {
+            id: slot.id,
+            dayOfWeek: slot.dayOfWeek,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            timezone: slot.timezone,
+            isAvailable: slot.isAvailable,
+            notes: slot.notes ?? undefined,
+            bookedSlots: bookedSlots.map((meeting) => ({
+              id: meeting.id,
+              startTime: meeting.startTime.toISOString(),
+              endTime: meeting.endTime ? meeting.endTime.toISOString() : meeting.startTime.toISOString(),
+              status: meeting.status,
+            })),
+          };
+        })
+      );
+
       response.therapist = {
         specializations: user.therapist.areasOfExpertise,
         yearsOfExperience: user.therapist.yearsOfExperience ?? undefined,
@@ -249,6 +316,7 @@ export class ProfileService {
           : undefined,
         areasOfExpertise: user.therapist.areasOfExpertise,
         languages: user.therapist.languagesOffered,
+        availability: availabilityWithBookings,
       };
     }
 
@@ -298,5 +366,58 @@ export class ProfileService {
         updatedAt: updatedUser.updatedAt.toISOString(),
       },
     };
+  }
+
+  async reportUser(
+    reportedUserId: string,
+    reporterId: string,
+    reason: string,
+    content?: string,
+  ): Promise<string> {
+    try {
+      // Verify the reported user exists
+      const reportedUser = await this.prisma.user.findUnique({
+        where: { id: reportedUserId },
+      });
+
+      if (!reportedUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if user already reported this user
+      const existingReport = await this.prisma.report.findFirst({
+        where: {
+          reportedUserId,
+          reporterId,
+        },
+      });
+
+      if (existingReport) {
+        throw new ForbiddenException('You have already reported this user');
+      }
+
+      // Create the report
+      const report = await this.prisma.report.create({
+        data: {
+          reportedUserId,
+          reporterId,
+          reason,
+          content,
+          status: 'PENDING',
+        },
+      });
+
+      return report.id;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   }
 }
