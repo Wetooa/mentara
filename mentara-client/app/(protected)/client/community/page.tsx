@@ -431,7 +431,7 @@ export default function UserCommunity() {
             </div>
 
             {/* Posts Content */}
-            <ScrollArea className="flex-1 min-h-0 bg-community-warm/10 relative">
+            <ScrollArea className="flex-1 min-h-0 h-0 bg-community-warm/10 relative">
               {/* Background decoration */}
               <div className="absolute inset-0 bg-community-gradient opacity-20" />
               <div className="relative max-w-4xl mx-auto p-4 lg:p-6">
@@ -782,7 +782,7 @@ export default function UserCommunity() {
                   {selectedRoom?.name}
                 </h1>
               </div>
-              <ScrollArea className="flex-1 min-h-0 bg-community-warm/10">
+              <ScrollArea className="flex-1 min-h-0 h-0 bg-community-warm/10">
                 <div className="p-4">
                   <div className="text-center py-8">
                     <p className="text-community-soothing-foreground">Mobile room content loading...</p>

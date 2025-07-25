@@ -299,7 +299,7 @@ export default function MainLayout({
           </div>
 
           {/* Main Content - Responsive padding */}
-          <main className="flex-1 w-full h-full pt-[60px] md:pt-[60px] pb-16 md:pb-0 overflow-y-auto bg-gray-100">
+          <main className="flex-1 w-full h-full pt-[60px] md:pt-[60px] pb-16 md:pb-0 bg-gray-100">
             <div className="md:hidden h-[50px]" />{" "}
             {/* Extra space for mobile search */}
             {children}

@@ -3,10 +3,13 @@ import {
   NotFoundException,
   Logger,
   OnModuleInit,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Server } from 'socket.io';
+import { MessagingGateway } from '../messaging/messaging.gateway';
 import {
   Notification,
   NotificationType,
@@ -49,13 +52,15 @@ export class NotificationsService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
+    @Inject(forwardRef(() => MessagingGateway))
+    private readonly messagingGateway: MessagingGateway,
   ) {}
 
   onModuleInit() {
     // Configure WebSocket server for real-time notifications
     // Use a slight delay to ensure MessagingGateway is fully initialized
     setTimeout(() => {
-      // this.setWebSocketServer(this.messagingGateway.server);
+      this.setWebSocketServer(this.messagingGateway.server);
     }, 1000);
 
     this.logger.log(

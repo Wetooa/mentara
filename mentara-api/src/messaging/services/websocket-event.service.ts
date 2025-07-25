@@ -116,7 +116,7 @@ export class WebSocketEventService implements OnModuleInit {
               readReceipts: [],
             },
             eventType: 'message_sent',
-          });
+          }, senderId); // Pass senderId to exclude sender from broadcast
           
           this.logger.log(`✅ [WEBSOCKET] MessagingGateway.broadcastMessage completed for conversation ${conversationId}`);
 

@@ -241,7 +241,7 @@ export class MessagingGateway
   /**
    * Broadcast message to conversation participants
    */
-  broadcastMessage(conversationId: string, messageData: any): void {
+  broadcastMessage(conversationId: string, messageData: any, senderId?: string): void {
     try {
       const room = this.getConversationRoom(conversationId);
       this.logger.log(`🚀 [BROADCAST] Broadcasting message to conversation room: ${room}`);
@@ -272,11 +272,47 @@ export class MessagingGateway
         this.logger.warn(`⚠️ [BROADCAST] No sockets connected to room ${room}`);
       }
 
-      this.server.to(room).emit('new_message', {
-        ...messageData,
-        eventType: 'new_message',
-        timestamp: new Date(),
-      });
+      // Broadcast to all participants except the sender
+      if (senderId) {
+        // Get sender's socket ID to exclude them from broadcast
+        const senderSocketId = this.userToSocket.get(senderId);
+        if (senderSocketId) {
+          // Broadcast to room but exclude sender
+          const senderSocket = this.server.sockets.sockets.get(senderSocketId);
+          if (senderSocket) {
+            senderSocket.to(room).emit('new_message', {
+              ...messageData,
+              eventType: 'new_message',
+              timestamp: new Date(),
+            });
+            this.logger.log(`🚫 [BROADCAST] Excluded sender ${senderId} (socket: ${senderSocketId}) from broadcast`);
+          } else {
+            // Fallback: sender socket not found, broadcast to all
+            this.server.to(room).emit('new_message', {
+              ...messageData,
+              eventType: 'new_message',
+              timestamp: new Date(),
+            });
+            this.logger.warn(`⚠️ [BROADCAST] Sender socket not found, broadcasting to all in room ${room}`);
+          }
+        } else {
+          // Fallback: sender not connected, broadcast to all
+          this.server.to(room).emit('new_message', {
+            ...messageData,
+            eventType: 'new_message',
+            timestamp: new Date(),
+          });
+          this.logger.warn(`⚠️ [BROADCAST] Sender not connected, broadcasting to all in room ${room}`);
+        }
+      } else {
+        // No sender specified, broadcast to all (backward compatibility)
+        this.server.to(room).emit('new_message', {
+          ...messageData,
+          eventType: 'new_message',
+          timestamp: new Date(),
+        });
+        this.logger.log(`📢 [BROADCAST] Broadcasting to all participants (no sender specified)`);
+      }
       
       this.logger.log(`✅ [BROADCAST] Message broadcasted successfully to room: ${room}`);
     } catch (error) {
@@ -499,8 +535,8 @@ export class MessagingGateway
         replyToId: data.replyToMessageId || null,
       };
 
-      // Broadcast to conversation participants
-      this.broadcastMessage(data.conversationId, messageData);
+      // Broadcast to conversation participants (excluding sender)
+      this.broadcastMessage(data.conversationId, messageData, userId);
 
       // Return acknowledgment
       return {
