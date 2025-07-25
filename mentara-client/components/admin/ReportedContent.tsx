@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { useAdminReports, useReportActions } from "@/hooks/admin";
 import {
   Card,
   CardContent,
@@ -47,113 +48,25 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
-// Mock data for reported content
-const mockReports = [
-  {
-    id: "rep1",
-    type: "post",
-    reportedItemId: "post123",
-    reporterName: "John Doe",
-    reporterId: "user123",
-    reportedUserName: "Sarah Miller",
-    reportedUserId: "user456",
-    reason: "Harassment",
-    description:
-      "This post contains targeted harassment against a community member.",
-    dateReported: "2025-04-29T14:22:00Z",
-    status: "pending",
-    content:
-      "This is the content of the reported post which contains some harmful text that was reported by a user.",
-    reportedUserIsTherapist: false,
-  },
-  {
-    id: "rep2",
-    type: "comment",
-    reportedItemId: "comment456",
-    reporterName: "Emily Chen",
-    reporterId: "user789",
-    reportedUserName: "Mark Johnson",
-    reportedUserId: "user101",
-    reason: "Inappropriate content",
-    description:
-      "Comment contains inappropriate language not suitable for the platform.",
-    dateReported: "2025-04-28T09:15:00Z",
-    status: "resolved",
-    content:
-      "This is the reported comment content that was flagged for inappropriate language.",
-    reportedUserIsTherapist: false,
-  },
-  {
-    id: "rep3",
-    type: "user",
-    reportedItemId: "user555",
-    reporterName: "Amanda Wilson",
-    reporterId: "user222",
-    reportedUserName: "Kevin Smith",
-    reportedUserId: "user555",
-    reason: "Impersonation",
-    description: "This user is impersonating a licensed therapist.",
-    dateReported: "2025-04-30T11:30:00Z",
-    status: "pending",
-    content: "",
-    reportedUserIsTherapist: false,
-  },
-  {
-    id: "rep4",
-    type: "therapist",
-    reportedItemId: "therapist789",
-    reporterName: "Lisa Park",
-    reporterId: "user333",
-    reportedUserName: "Dr. Robert Thompson",
-    reportedUserId: "therapist789",
-    reason: "Unprofessional conduct",
-    description: "The therapist was rude and dismissive during our session.",
-    dateReported: "2025-04-27T16:45:00Z",
-    status: "pending",
-    content: "",
-    reportedUserIsTherapist: true,
-  },
-  {
-    id: "rep5",
-    type: "post",
-    reportedItemId: "post789",
-    reporterName: "Michael Brown",
-    reporterId: "user444",
-    reportedUserName: "Jennifer Lee",
-    reportedUserId: "user777",
-    reason: "Misinformation",
-    description: "This post contains dangerous health misinformation.",
-    dateReported: "2025-04-26T13:10:00Z",
-    status: "pending",
-    content:
-      "This is the content of the post that contains potentially misleading health information.",
-    reportedUserIsTherapist: false,
-  },
-];
+
 
 export function ReportedContent() {
-  const [reports, setReports] = useState(mockReports);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedReport, setSelectedReport] = useState<{
-    id: string;
-    type: string;
-    reportedItemId: string;
-    reporterName: string;
-    reporterId: string;
-    reportedUserName: string;
-    reportedUserId: string;
-    reason: string;
-    description: string;
-    dateReported: string;
-    status: string;
-    content: string;
-    reportedUserIsTherapist: boolean;
-  } | null>(null);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<
     "ban" | "restrict" | "dismiss" | "suspend" | null
   >(null);
+
+  // API hooks
+  const { data: reportsData, isLoading, error } = useAdminReports({
+    search: searchTerm || undefined,
+  });
+  const { banUser, restrictUser, deleteContent, dismissReport, isLoading: isActionLoading } = useReportActions();
+
+  const reports = reportsData?.reports || [];
+  const totalCount = reportsData?.pagination?.total || 0;
 
   const formatDate = (dateString: string) => {
     try {
@@ -163,15 +76,19 @@ export function ReportedContent() {
     }
   };
 
-  const filteredReports = reports.filter((report) => {
+  const filteredReports = useMemo(() => {
+    if (!searchTerm.trim()) return reports;
+    
     const searchLower = searchTerm.toLowerCase();
-    return (
-      report.reportedUserName.toLowerCase().includes(searchLower) ||
-      report.reporterName.toLowerCase().includes(searchLower) ||
-      report.reason.toLowerCase().includes(searchLower) ||
-      report.type.toLowerCase().includes(searchLower)
+    return reports.filter((report: any) => 
+      report.reportedUserName?.toLowerCase().includes(searchLower) ||
+      report.reporterName?.toLowerCase().includes(searchLower) ||
+      report.reason?.toLowerCase().includes(searchLower) ||
+      report.type?.toLowerCase().includes(searchLower) ||
+      report.postTitle?.toLowerCase().includes(searchLower) ||
+      report.commentContent?.toLowerCase().includes(searchLower)
     );
-  });
+  }, [reports, searchTerm]);
 
   const handleReportAction = (
     type: "ban" | "restrict" | "dismiss" | "suspend"
@@ -180,20 +97,27 @@ export function ReportedContent() {
     setActionDialogOpen(true);
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (!selectedReport || !actionType) return;
 
-    // In a real application, you would make API calls to perform these actions
-    const updatedReports = [...reports];
-    const index = updatedReports.findIndex((r) => r.id === selectedReport.id);
-
-    if (index !== -1) {
-      updatedReports[index] = {
-        ...updatedReports[index],
-        status: "resolved",
-      };
-
-      setReports(updatedReports);
+    try {
+      switch (actionType) {
+        case "ban":
+          await banUser(selectedReport.id, "User banned due to reported content");
+          break;
+        case "restrict":
+          await restrictUser(selectedReport.id, "User restricted due to reported content");
+          break;
+        case "dismiss":
+          await dismissReport(selectedReport.id, "Report dismissed by admin");
+          break;
+        case "suspend":
+          // For therapists, we use restrict functionality
+          await restrictUser(selectedReport.id, "Therapist suspended due to reported content");
+          break;
+      }
+    } catch (error) {
+      console.error("Failed to perform action:", error);
     }
 
     setActionDialogOpen(false);
@@ -209,15 +133,32 @@ export function ReportedContent() {
           </Badge>
         );
       case "resolved":
+      case "reviewed":
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
             Resolved
+          </Badge>
+        );
+      case "dismissed":
+        return (
+          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+            Dismissed
           </Badge>
         );
       default:
         return <Badge>{status}</Badge>;
     }
   };
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-6 text-red-500">
+          Error loading reports: {error.message}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -245,14 +186,16 @@ export function ReportedContent() {
         <Card className="bg-blue-50 border-blue-100">
           <CardContent className="p-4">
             <p className="text-sm font-medium text-blue-600">Total Reports</p>
-            <h3 className="text-2xl font-bold mt-1">{reports.length}</h3>
+            <h3 className="text-2xl font-bold mt-1">
+              {isLoading ? "..." : totalCount}
+            </h3>
           </CardContent>
         </Card>
         <Card className="bg-yellow-50 border-yellow-100">
           <CardContent className="p-4">
             <p className="text-sm font-medium text-yellow-600">Pending</p>
             <h3 className="text-2xl font-bold mt-1">
-              {reports.filter((r) => r.status === "pending").length}
+              {isLoading ? "..." : reports.filter((r: any) => r.status === "pending").length}
             </h3>
           </CardContent>
         </Card>
@@ -260,7 +203,7 @@ export function ReportedContent() {
           <CardContent className="p-4">
             <p className="text-sm font-medium text-green-600">Resolved</p>
             <h3 className="text-2xl font-bold mt-1">
-              {reports.filter((r) => r.status === "resolved").length}
+              {isLoading ? "..." : reports.filter((r: any) => r.status === "resolved" || r.status === "reviewed").length}
             </h3>
           </CardContent>
         </Card>
@@ -268,13 +211,10 @@ export function ReportedContent() {
           <CardContent className="p-4">
             <p className="text-sm font-medium text-red-600">Critical</p>
             <h3 className="text-2xl font-bold mt-1">
-              {
-                reports.filter(
-                  (r) =>
-                    r.reason.toLowerCase().includes("harassment") ||
-                    r.reason.toLowerCase().includes("impersonation")
-                ).length
-              }
+              {isLoading ? "..." : reports.filter((r: any) =>
+                r.reason?.toLowerCase().includes("harassment") ||
+                r.reason?.toLowerCase().includes("impersonation")
+              ).length}
             </h3>
           </CardContent>
         </Card>
@@ -298,223 +238,273 @@ export function ReportedContent() {
             </TabsList>
 
             <TabsContent value="all" className="space-y-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Reported By</TableHead>
-                    <TableHead>Reported User</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredReports.map((report) => (
-                    <TableRow key={report.id}>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {report.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{report.reporterName}</TableCell>
-                      <TableCell>
-                        {report.reportedUserName}
-                        {report.reportedUserIsTherapist && (
-                          <Badge
-                            variant="outline"
-                            className="ml-2 bg-blue-50 text-blue-700"
-                          >
-                            Therapist
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{report.reason}</TableCell>
-                      <TableCell>{formatDate(report.dateReported)}</TableCell>
-                      <TableCell>{getStatusBadge(report.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedReport(report);
-                            setDetailsOpen(true);
-                          }}
-                          className="mr-2"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                      </TableCell>
+              {isLoading ? (
+                <div className="text-center py-6">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Loading reports...</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Reported By</TableHead>
+                      <TableHead>Reported User</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports.map((report: any) => (
+                      <TableRow key={report.id}>
+                        <TableCell>
+                          <Badge variant="outline" className="capitalize">
+                            {report.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{report.reporterName}</TableCell>
+                        <TableCell>
+                          {report.reportedUserName}
+                          {report.reportedUserIsTherapist && (
+                            <Badge
+                              variant="outline"
+                              className="ml-2 bg-blue-50 text-blue-700"
+                            >
+                              Therapist
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>{report.reason}</TableCell>
+                        <TableCell>{formatDate(report.dateReported)}</TableCell>
+                        <TableCell>{getStatusBadge(report.status)}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedReport(report);
+                              setDetailsOpen(true);
+                            }}
+                            className="mr-2"
+                            disabled={isActionLoading}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {!isLoading && filteredReports.length === 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={7}
+                          className="text-center py-6 text-gray-500"
+                        >
+                          No reports found matching your search criteria
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </TabsContent>
 
             <TabsContent value="posts">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Reported By</TableHead>
-                    <TableHead>Author</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredReports
-                    .filter((r) => r.type === "post")
-                    .map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell>{report.reporterName}</TableCell>
-                        <TableCell>{report.reportedUserName}</TableCell>
-                        <TableCell>{report.reason}</TableCell>
-                        <TableCell>{formatDate(report.dateReported)}</TableCell>
-                        <TableCell>{getStatusBadge(report.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setDetailsOpen(true);
-                            }}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              {isLoading ? (
+                <div className="text-center py-6">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Loading reports...</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Reported By</TableHead>
+                      <TableHead>Author</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports
+                      .filter((r: any) => r.type === "post")
+                      .map((report: any) => (
+                        <TableRow key={report.id}>
+                          <TableCell>{report.reporterName}</TableCell>
+                          <TableCell>{report.reportedUserName}</TableCell>
+                          <TableCell>{report.reason}</TableCell>
+                          <TableCell>{formatDate(report.dateReported)}</TableCell>
+                          <TableCell>{getStatusBadge(report.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setDetailsOpen(true);
+                              }}
+                              disabled={isActionLoading}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
             </TabsContent>
 
             <TabsContent value="comments">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Reported By</TableHead>
-                    <TableHead>Author</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredReports
-                    .filter((r) => r.type === "comment")
-                    .map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell>{report.reporterName}</TableCell>
-                        <TableCell>{report.reportedUserName}</TableCell>
-                        <TableCell>{report.reason}</TableCell>
-                        <TableCell>{formatDate(report.dateReported)}</TableCell>
-                        <TableCell>{getStatusBadge(report.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setDetailsOpen(true);
-                            }}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              {isLoading ? (
+                <div className="text-center py-6">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Loading reports...</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Reported By</TableHead>
+                      <TableHead>Author</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports
+                      .filter((r: any) => r.type === "comment")
+                      .map((report: any) => (
+                        <TableRow key={report.id}>
+                          <TableCell>{report.reporterName}</TableCell>
+                          <TableCell>{report.reportedUserName}</TableCell>
+                          <TableCell>{report.reason}</TableCell>
+                          <TableCell>{formatDate(report.dateReported)}</TableCell>
+                          <TableCell>{getStatusBadge(report.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setDetailsOpen(true);
+                              }}
+                              disabled={isActionLoading}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
             </TabsContent>
 
             <TabsContent value="users">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Reported By</TableHead>
-                    <TableHead>Reported User</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredReports
-                    .filter((r) => r.type === "user")
-                    .map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell>{report.reporterName}</TableCell>
-                        <TableCell>{report.reportedUserName}</TableCell>
-                        <TableCell>{report.reason}</TableCell>
-                        <TableCell>{formatDate(report.dateReported)}</TableCell>
-                        <TableCell>{getStatusBadge(report.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setDetailsOpen(true);
-                            }}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              {isLoading ? (
+                <div className="text-center py-6">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Loading reports...</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Reported By</TableHead>
+                      <TableHead>Reported User</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports
+                      .filter((r: any) => r.type === "user")
+                      .map((report: any) => (
+                        <TableRow key={report.id}>
+                          <TableCell>{report.reporterName}</TableCell>
+                          <TableCell>{report.reportedUserName}</TableCell>
+                          <TableCell>{report.reason}</TableCell>
+                          <TableCell>{formatDate(report.dateReported)}</TableCell>
+                          <TableCell>{getStatusBadge(report.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setDetailsOpen(true);
+                              }}
+                              disabled={isActionLoading}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
             </TabsContent>
 
             <TabsContent value="therapists">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Reported By</TableHead>
-                    <TableHead>Therapist</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredReports
-                    .filter((r) => r.type === "therapist")
-                    .map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell>{report.reporterName}</TableCell>
-                        <TableCell>{report.reportedUserName}</TableCell>
-                        <TableCell>{report.reason}</TableCell>
-                        <TableCell>{formatDate(report.dateReported)}</TableCell>
-                        <TableCell>{getStatusBadge(report.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setDetailsOpen(true);
-                            }}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              {isLoading ? (
+                <div className="text-center py-6">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Loading reports...</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Reported By</TableHead>
+                      <TableHead>Therapist</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports
+                      .filter((r: any) => r.type === "therapist")
+                      .map((report: any) => (
+                        <TableRow key={report.id}>
+                          <TableCell>{report.reporterName}</TableCell>
+                          <TableCell>{report.reportedUserName}</TableCell>
+                          <TableCell>{report.reason}</TableCell>
+                          <TableCell>{formatDate(report.dateReported)}</TableCell>
+                          <TableCell>{getStatusBadge(report.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedReport(report);
+                                setDetailsOpen(true);
+                              }}
+                              disabled={isActionLoading}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -614,6 +604,7 @@ export function ReportedContent() {
                           size="sm"
                           className="text-green-600 border-green-200 hover:bg-green-50"
                           onClick={() => handleReportAction("dismiss")}
+                          disabled={isActionLoading}
                         >
                           <Check className="h-4 w-4 mr-1" />
                           Dismiss Report
@@ -625,6 +616,7 @@ export function ReportedContent() {
                             size="sm"
                             className="text-amber-600 border-amber-200 hover:bg-amber-50"
                             onClick={() => handleReportAction("suspend")}
+                            disabled={isActionLoading}
                           >
                             <AlertTriangle className="h-4 w-4 mr-1" />
                             Suspend Therapist
@@ -636,6 +628,7 @@ export function ReportedContent() {
                               size="sm"
                               className="text-amber-600 border-amber-200 hover:bg-amber-50"
                               onClick={() => handleReportAction("restrict")}
+                              disabled={isActionLoading}
                             >
                               <ShieldAlert className="h-4 w-4 mr-1" />
                               Restrict User
@@ -646,6 +639,7 @@ export function ReportedContent() {
                               size="sm"
                               className="text-red-600 border-red-200 hover:bg-red-50"
                               onClick={() => handleReportAction("ban")}
+                              disabled={isActionLoading}
                             >
                               <Ban className="h-4 w-4 mr-1" />
                               Ban User
@@ -690,6 +684,7 @@ export function ReportedContent() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmAction}
+              disabled={isActionLoading}
               className={
                 actionType === "ban"
                   ? "bg-red-600 hover:bg-red-700"
@@ -700,7 +695,14 @@ export function ReportedContent() {
                       : ""
               }
             >
-              Confirm
+              {isActionLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Processing...
+                </>
+              ) : (
+                "Confirm"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

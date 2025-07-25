@@ -83,7 +83,7 @@ export default function ClientWelcomePage() {
   const joinCommunitiesMutation = useMutation({
     mutationFn: (communitySlugs: string[]) =>
       api.communities.joinCommunities(communitySlugs),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       const successCount = result.data.successfulJoins.length;
       const failureCount = result.data.failedJoins.length;
 
@@ -94,13 +94,21 @@ export default function ClientWelcomePage() {
         toast.warning(`Could not join ${failureCount} communities`);
       }
 
-      queryClient.invalidateQueries({ queryKey: ["user", "communities"] });
+      await api.auth.client.markRecommendationsSeen();
+      toast.info(
+        "You can explore your joined communities from your dashboard."
+      );
+
       setCurrentStep("complete");
 
       // Redirect to dashboard after a brief delay
       setTimeout(() => {
-        router.push("/client?tab=communities");
-      }, 2000);
+        queryClient.invalidateQueries({ queryKey: ["user", "communities"] });
+        queryClient.invalidateQueries({
+          queryKey: ["auth", "current-user-profile"],
+        });
+        router.push("/client");
+      }, 5000);
     },
     onError: () => {
       toast.error("Failed to join communities. Please try again.");
@@ -156,23 +164,35 @@ export default function ClientWelcomePage() {
     if (selectedCommunities.length === 0) {
       // User can skip community joining
       await api.auth.client.markRecommendationsSeen();
+
+      queryClient.invalidateQueries({ queryKey: ["user", "communities"] });
+      queryClient.invalidateQueries({
+        queryKey: ["auth", "current-user-profile"],
+      });
+
       setCurrentStep("complete");
-      router.push("/client");
       return;
     }
 
-    setCurrentStep("joining");
     await joinCommunitiesMutation.mutateAsync(selectedCommunities);
   };
 
   const handleSkipCommunities = async () => {
     await api.auth.client.markRecommendationsSeen();
+    queryClient.invalidateQueries({ queryKey: ["user", "communities"] });
+    queryClient.invalidateQueries({
+      queryKey: ["auth", "current-user-profile"],
+    });
     setCurrentStep("complete");
     router.push("/client");
   };
 
   const handleSkipForNow = async () => {
     await api.auth.client.markRecommendationsSeen();
+    queryClient.invalidateQueries({ queryKey: ["user", "communities"] });
+    queryClient.invalidateQueries({
+      queryKey: ["auth", "current-user-profile"],
+    });
     toast.info(
       "You can explore therapist recommendations later from your dashboard."
     );
