@@ -5,6 +5,7 @@ import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, parseISO, isToday, addMinutes } from "date-fns";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface UpcomingSessionsProps {
   sessions: UserDashboardData["upcomingSessions"];
@@ -16,9 +17,9 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15
-    }
-  }
+      staggerChildren: 0.15,
+    },
+  },
 };
 
 const sectionVariants = {
@@ -27,12 +28,12 @@ const sectionVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 24,
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const sessionCardVariants = {
@@ -42,78 +43,60 @@ const sessionCardVariants = {
     x: 0,
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
-      damping: 24
-    }
-  }
+      damping: 24,
+    },
+  },
 };
 
 export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
-  // Function to format the session time
-  // const formatSessionTime = (dateTimeStr: string, durationMinutes: number) => {
-  //   const dateTime = parseISO(dateTimeStr);
-  //   const endTime = addMinutes(dateTime, durationMinutes);
-
-  //   return `${format(dateTime, "h:mm a")} - ${format(endTime, "h:mm a")}`;
-  // };
-
-  // Function to format the date with special handling for today
-  // const formatSessionDate = (dateTimeStr: string) => {
-  //   const dateTime = parseISO(dateTimeStr);
-
-  //   if (isToday(dateTime)) {
-  //     return "Today";
-  //   }
-
-  //   return format(dateTime, "EEEE, MMMM d");
-  // };
+  const router = useRouter();
 
   // Check if there are any sessions scheduled for today
   const todaySessions = sessions.filter((session) => {
-    if (!session.dateTime) return false;
+    if (!session.startTime) return false;
     try {
-      return isToday(parseISO(session.dateTime));
+      return isToday(parseISO(session.startTime));
     } catch {
       return false;
     }
   });
 
+  const handleViewAll = () => {
+    router.push("/client/sessions");
+  };
+
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
+    <motion.div initial="hidden" animate="visible" variants={containerVariants}>
       <Card className="shadow-sm">
         <CardContent className="p-4 sm:p-6">
-          <motion.div 
+          <motion.div
             className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2"
             variants={sectionVariants}
           >
             <h2 className="text-lg sm:text-xl font-bold">Upcoming Sessions</h2>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button variant="ghost" size="sm" className="text-primary gap-1 self-start">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary gap-1 self-start"
+                onClick={handleViewAll}
+              >
                 View All <ArrowRight size={16} />
               </Button>
             </motion.div>
           </motion.div>
 
           {sessions.length === 0 ? (
-            <motion.div 
+            <motion.div
               className="text-center py-8 text-muted-foreground"
               variants={sectionVariants}
             >
               No upcoming sessions scheduled
             </motion.div>
           ) : (
-            <motion.div 
-              className="space-y-6"
-              variants={containerVariants}
-            >
+            <motion.div className="space-y-6" variants={containerVariants}>
               {/* Today's sessions (if any) */}
               {todaySessions.length > 0 && (
                 <motion.div variants={sectionVariants}>
@@ -122,9 +105,9 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
                   </h3>
                   <div className="space-y-4">
                     {todaySessions.map((session, index) => (
-                      <SessionCard 
-                        key={session.id} 
-                        session={session} 
+                      <SessionCard
+                        key={session.id}
+                        session={session}
                         index={index}
                       />
                     ))}
@@ -140,17 +123,17 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
                 <div className="space-y-4">
                   {sessions
                     .filter((session) => {
-                      if (!session.dateTime) return false;
+                      if (!session.startTime) return false;
                       try {
-                        return !isToday(parseISO(session.dateTime));
+                        return !isToday(parseISO(session.startTime));
                       } catch {
                         return false;
                       }
                     })
                     .map((session, index) => (
-                      <SessionCard 
-                        key={session.id} 
-                        session={session} 
+                      <SessionCard
+                        key={session.id}
+                        session={session}
                         index={index}
                       />
                     ))}
@@ -172,15 +155,15 @@ function SessionCard({
   session: UserDashboardData["upcomingSessions"][0];
   index?: number;
 }) {
-  if (!session.dateTime) {
+  if (!session.startTime) {
     return (
       <div className="p-4 rounded-lg border bg-red-50 border-red-200">
         <p className="text-red-600">Invalid session data</p>
       </div>
     );
   }
-  
-  const dateTime = parseISO(session.dateTime);
+
+  const dateTime = parseISO(session.startTime);
   if (isNaN(dateTime.getTime())) {
     return (
       <div className="p-4 rounded-lg border bg-red-50 border-red-200">
@@ -188,20 +171,25 @@ function SessionCard({
       </div>
     );
   }
-  
-  const endTime = addMinutes(dateTime, session.duration || 60);
+
+  // Calculate end time based on endTime field or default to 60 minutes
+  const endTime = session.endTime
+    ? parseISO(session.endTime)
+    : addMinutes(dateTime, 60);
   const sessionTime = `${format(dateTime, "h:mm a")} - ${format(endTime, "h:mm a")}`;
   const sessionDate = isToday(dateTime)
     ? "Today"
     : format(dateTime, "EEEE, MMMM d");
 
-  // Get initials for avatar fallback
-  const initials = session.therapistName
-    ? session.therapistName
-        .split(" ")
-        .map((name) => name.charAt(0))
-        .join("")
-    : "??";
+  // Get therapist name and initials
+  const therapistName = session.therapist
+    ? `${session.therapist.user.firstName} ${session.therapist.user.lastName}`
+    : "Unknown Therapist";
+
+  const initials = therapistName
+    .split(" ")
+    .map((name: string) => name.charAt(0))
+    .join("");
 
   // Check if session is happening now
   const now = new Date();
@@ -210,10 +198,10 @@ function SessionCard({
   return (
     <motion.div
       variants={sessionCardVariants}
-      whileHover={{ 
-        scale: 1.02, 
+      whileHover={{
+        scale: 1.02,
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        transition: { duration: 0.2 }
+        transition: { duration: 0.2 },
       }}
       className={`p-3 sm:p-4 rounded-lg border ${isSessionLive ? "bg-green-50 border-green-200" : "bg-card"}`}
     >
@@ -221,7 +209,11 @@ function SessionCard({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.2 + index * 0.1, type: "spring", stiffness: 300 }}
+          transition={{
+            delay: 0.2 + index * 0.1,
+            type: "spring",
+            stiffness: 300,
+          }}
           className="flex-shrink-0"
         >
           <Avatar className="h-10 w-10 sm:h-12 sm:w-12 bg-primary text-white">
@@ -231,9 +223,11 @@ function SessionCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-            <h4 className="font-semibold text-sm sm:text-base truncate">{session.title}</h4>
+            <h4 className="font-semibold text-sm sm:text-base truncate">
+              {session.title}
+            </h4>
             {isSessionLive && (
-              <motion.span 
+              <motion.span
                 className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full self-start"
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
@@ -243,9 +237,9 @@ function SessionCard({
             )}
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground truncate">
-            {session.therapistName}
+            {therapistName}
           </p>
-          
+
           {/* Mobile: Show date/time below therapist name */}
           <div className="flex flex-col sm:hidden gap-1 mt-2">
             <div className="flex items-center text-xs text-muted-foreground gap-1">
@@ -269,10 +263,7 @@ function SessionCard({
             <Clock size={14} />
             <span>{sessionTime}</span>
           </div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               size="sm"
               className={isSessionLive ? "bg-green-600 hover:bg-green-700" : ""}

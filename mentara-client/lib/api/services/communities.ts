@@ -89,7 +89,6 @@ export interface CommunityStats {
   activeCommunities: number;
 }
 
-
 /**
  * Community API service for recommendations, joining, and management
  */
@@ -115,7 +114,10 @@ export function createCommunityService(axios: AxiosInstance) {
       data: CommunityRecommendation[];
       message: string;
     }> {
-      const { data } = await axios.post("/communities/recommendations/generate", { force });
+      const { data } = await axios.post(
+        "/communities/recommendations/generate",
+        { force }
+      );
       return data;
     },
 
@@ -125,20 +127,20 @@ export function createCommunityService(axios: AxiosInstance) {
     async joinCommunities(communitySlugs: string[]): Promise<{
       success: boolean;
       data: {
-        successfulJoins: Array<{ 
-          communityId: string; 
-          communityName: string; 
-          slug: string; 
+        successfulJoins: Array<{
+          communityId: string;
+          communityName: string;
+          slug: string;
         }>;
-        failedJoins: Array<{ 
-          slug: string; 
-          reason: string; 
+        failedJoins: Array<{
+          slug: string;
+          reason: string;
         }>;
       };
       message: string;
     }> {
       const { data } = await axios.post("/communities/recommendations/join", {
-        communitySlugs
+        communitySlugs,
       });
       return data;
     },
@@ -202,22 +204,26 @@ export function createCommunityService(axios: AxiosInstance) {
     /**
      * Get community posts
      */
-    async getCommunityPosts(communityId: string, params?: {
-      page?: number;
-      limit?: number;
-      sortBy?: 'newest' | 'popular' | 'trending';
-    }) {
-      const { data } = await axios.get(`/communities/${communityId}/posts`, { params });
+    async getCommunityPosts(
+      communityId: string,
+      params?: {
+        page?: number;
+        limit?: number;
+        sortBy?: "newest" | "popular" | "trending";
+      }
+    ) {
+      const { data } = await axios.get(`/communities/${communityId}/posts`, {
+        params,
+      });
       return data;
     },
-
 
     /**
      * Interact with recommendation (accept/reject)
      */
     async interactWithRecommendation(
-      recommendationId: string, 
-      action: 'accept' | 'reject'
+      recommendationId: string,
+      action: "accept" | "reject"
     ) {
       const { data } = await axios.put(
         `/communities/recommendations/${recommendationId}/interact`,
@@ -237,8 +243,12 @@ export function createCommunityService(axios: AxiosInstance) {
     /**
      * Get community with full structure (room groups and rooms)
      */
-    async getCommunityWithStructure(communityId: string): Promise<CommunityWithStructure> {
-      const { data } = await axios.get(`/communities/${communityId}/with-structure`);
+    async getCommunityWithStructure(
+      communityId: string
+    ): Promise<CommunityWithStructure> {
+      const { data } = await axios.get(
+        `/communities/${communityId}/with-structure`
+      );
       return data;
     },
 
@@ -246,41 +256,61 @@ export function createCommunityService(axios: AxiosInstance) {
      * Get all communities with full structure (room groups and rooms)
      */
     async getCommunitiesWithStructure(): Promise<CommunityWithStructure[]> {
-      const { data } = await axios.get('/communities/with-structure');
+      const { data } = await axios.get("/communities/with-structure");
       return data;
     },
 
     /**
      * Create a room group in a community (admin/moderator only)
      */
-    async createRoomGroup(communityId: string, name: string, order: number): Promise<RoomGroup> {
-      const { data } = await axios.post(`/communities/${communityId}/room-group`, {
-        name,
-        order,
-      });
+    async createRoomGroup(
+      communityId: string,
+      name: string,
+      order: number
+    ): Promise<RoomGroup> {
+      const { data } = await axios.post(
+        `/communities/${communityId}/room-group`,
+        {
+          name,
+          order,
+        }
+      );
       return data;
     },
 
     /**
      * Create a room in a room group (admin/moderator only)
      */
-    async createRoom(roomGroupId: string, name: string, order: number): Promise<Room> {
-      const { data } = await axios.post(`/communities/room-group/${roomGroupId}/room`, {
-        name,
-        order,
-      });
+    async createRoom(
+      roomGroupId: string,
+      name: string,
+      order: number
+    ): Promise<Room> {
+      const { data } = await axios.post(
+        `/communities/room-group/${roomGroupId}/room`,
+        {
+          name,
+          order,
+        }
+      );
       return data;
     },
 
     /**
      * Get community members
      */
-    async getCommunityMembers(communityId: string, limit?: number, offset?: number): Promise<{
+    async getCommunityMembers(
+      communityId: string,
+      limit?: number,
+      offset?: number
+    ): Promise<{
       members: any[];
       total: number;
     }> {
       const params = { limit, offset };
-      const { data } = await axios.get(`/communities/${communityId}/members`, { params });
+      const { data } = await axios.get(`/communities/${communityId}/members`, {
+        params,
+      });
       return data;
     },
 
@@ -288,7 +318,7 @@ export function createCommunityService(axios: AxiosInstance) {
      * Get user's community memberships
      */
     async getMyMemberships(): Promise<CommunityMembership[]> {
-      const { data } = await axios.get('/communities/memberships/me');
+      const { data } = await axios.get("/communities/memberships/me");
       return data;
     },
 
@@ -297,7 +327,7 @@ export function createCommunityService(axios: AxiosInstance) {
      * This replaces the need for multiple individual getCommunityWithStructure calls
      */
     async getMyCommunitiesWithStructure(): Promise<CommunityWithStructure[]> {
-      const { data } = await axios.get('/communities/me/with-structure');
+      const { data } = await axios.get("/communities/me/with-structure");
       return data;
     },
 
@@ -320,7 +350,7 @@ export function createCommunityService(axios: AxiosInstance) {
      * Get community statistics
      */
     async getCommunityStats(): Promise<CommunityStats> {
-      const { data } = await axios.get('/communities/stats');
+      const { data } = await axios.get("/communities/stats");
       return data;
     },
 
@@ -336,24 +366,24 @@ export function createCommunityService(axios: AxiosInstance) {
       // If files are included, use FormData for multipart submission
       if (postData.files && postData.files.length > 0) {
         const formData = new FormData();
-        formData.append('title', postData.title);
-        formData.append('content', postData.content);
-        formData.append('roomId', postData.roomId);
-        
+        formData.append("title", postData.title);
+        formData.append("content", postData.content);
+        formData.append("roomId", postData.roomId);
+
         // Append each file
         postData.files.forEach((file) => {
-          formData.append('files', file);
+          formData.append("files", file);
         });
 
-        const { data } = await axios.post('/communities/posts', formData, {
+        const { data } = await axios.post("/communities/posts", formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
         return data;
       } else {
         // No files, use regular JSON submission
-        const { data } = await axios.post('/communities/posts', {
+        const { data } = await axios.post("/communities/posts", {
           title: postData.title,
           content: postData.content,
           roomId: postData.roomId,
@@ -382,7 +412,7 @@ export function createCommunityService(axios: AxiosInstance) {
      * Get joined communities for current user
      */
     async getJoined(): Promise<CommunityWithStructure[]> {
-      const { data } = await axios.get('/communities/me/joined');
+      const { data } = await axios.get("/communities/me/joined");
       return data;
     },
 
@@ -390,7 +420,7 @@ export function createCommunityService(axios: AxiosInstance) {
      * Get recommended communities
      */
     async getRecommended(): Promise<CommunityWithStructure[]> {
-      const { data } = await axios.get('/communities/me/recommended');
+      const { data } = await axios.get("/communities/me/recommended");
       return data;
     },
 
@@ -398,10 +428,9 @@ export function createCommunityService(axios: AxiosInstance) {
      * Get recent community activity
      */
     async getRecentActivity(): Promise<any[]> {
-      const { data } = await axios.get('/communities/activity/recent');
+      const { data } = await axios.get("/communities/activity/recent");
       return data;
     },
-
 
     /**
      * Join a community by ID
@@ -423,7 +452,9 @@ export function createCommunityService(axios: AxiosInstance) {
      * Request to join a private community
      */
     async requestJoin(communityId: string): Promise<{ success: boolean }> {
-      const { data } = await axios.post(`/communities/${communityId}/request-join`);
+      const { data } = await axios.post(
+        `/communities/${communityId}/request-join`
+      );
       return data;
     },
 
@@ -441,7 +472,7 @@ export function createCommunityService(axios: AxiosInstance) {
      * Create a new comment
      */
     async createComment(request: CreateCommentRequest): Promise<Comment> {
-      const { data } = await axios.post('/comments', request);
+      const { data } = await axios.post("/comments", request);
       return data;
     },
 
@@ -488,16 +519,30 @@ export function createCommunityService(axios: AxiosInstance) {
     /**
      * Report a comment for inappropriate content
      */
-    async reportComment(commentId: string, reason: string, content?: string): Promise<{ success: boolean; reportId: string }> {
-      const { data } = await axios.post(`/comments/${commentId}/report`, { reason, content });
+    async reportComment(
+      commentId: string,
+      reason: string,
+      content?: string
+    ): Promise<{ success: boolean; reportId: string }> {
+      const { data } = await axios.post(`/comments/${commentId}/report`, {
+        reason,
+        content,
+      });
       return data;
     },
 
     /**
      * Report a post for inappropriate content
      */
-    async reportPost(postId: string, reason: string, content?: string): Promise<{ success: boolean; reportId: string }> {
-      const { data } = await axios.post(`/posts/${postId}/report`, { reason, content });
+    async reportPost(
+      postId: string,
+      reason: string,
+      content?: string
+    ): Promise<{ success: boolean; reportId: string }> {
+      const { data } = await axios.post(`/posts/${postId}/report`, {
+        reason,
+        content,
+      });
       return data;
     },
 
@@ -506,7 +551,10 @@ export function createCommunityService(axios: AxiosInstance) {
     /**
      * Update a post (only by owner)
      */
-    async updatePost(postId: string, postData: { title?: string; content?: string }): Promise<PostData> {
+    async updatePost(
+      postId: string,
+      postData: { title?: string; content?: string }
+    ): Promise<PostData> {
       const { data } = await axios.put(`/posts/${postId}`, postData);
       return data;
     },
@@ -524,6 +572,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getPost(postId: string): Promise<PostData> {
       const { data } = await axios.get(`/posts/${postId}`);
+      console.log("Fetched post data:", data);
       return data;
     },
   };
