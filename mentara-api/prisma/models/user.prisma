@@ -43,6 +43,7 @@ model User {
   posts               Post[]
   postHearts          PostHeart[]
   reports             Report[]                  @relation("UserReports")
+  reportsAgainstMe    Report[]                  @relation("UserBeingReported")
   therapist           Therapist?                @relation("UserTherapist")
   blockedBy           UserBlock[]               @relation("UserBlocked")
   blocking            UserBlock[]               @relation("UserBlocking")
