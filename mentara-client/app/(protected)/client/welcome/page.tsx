@@ -155,6 +155,7 @@ export default function ClientWelcomePage() {
   const handleJoinCommunities = async () => {
     if (selectedCommunities.length === 0) {
       // User can skip community joining
+      await api.auth.client.markRecommendationsSeen();
       setCurrentStep("complete");
       router.push("/client");
       return;
@@ -164,7 +165,8 @@ export default function ClientWelcomePage() {
     await joinCommunitiesMutation.mutateAsync(selectedCommunities);
   };
 
-  const handleSkipCommunities = () => {
+  const handleSkipCommunities = async () => {
+    await api.auth.client.markRecommendationsSeen();
     setCurrentStep("complete");
     router.push("/client");
   };

@@ -572,7 +572,6 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getPost(postId: string): Promise<PostData> {
       const { data } = await axios.get(`/posts/${postId}`);
-      console.log("Fetched post data:", data);
       return data;
     },
   };

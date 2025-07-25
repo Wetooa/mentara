@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -36,76 +36,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, Eye, Flag, Trash2, Ban } from "lucide-react";
+import { Search, Eye, Flag, Trash2, Ban, Loader2 } from "lucide-react";
 import { format } from "date-fns";
-
-// Mock data for reported comments
-const mockReportedComments = [
-  {
-    id: "report1",
-    commentId: "comment456",
-    commentContent:
-      "You should stop taking your medication, it's not helping you anyway. Just try these herbal supplements instead.",
-    postTitle: "Struggling with medication side effects",
-    postId: "post123",
-    reporterName: "Dr. Lisa Johnson",
-    reporterId: "therapist123",
-    authorName: "Michael Brown",
-    authorId: "user789",
-    reason: "Dangerous medical advice",
-    description:
-      "This comment is recommending that users stop taking prescribed medication which could be harmful.",
-    dateReported: "2025-05-01T10:15:00Z",
-    status: "pending",
-    community: "Medication Support",
-  },
-  {
-    id: "report2",
-    commentId: "comment789",
-    commentContent:
-      "This is completely useless advice. Maybe try actually being helpful next time.",
-    postTitle: "Mindfulness techniques that actually work",
-    postId: "post456",
-    reporterName: "Emily Chen",
-    reporterId: "user555",
-    authorName: "Kevin Smith",
-    authorId: "user123",
-    reason: "Harassment",
-    description:
-      "This comment is unnecessarily hostile and attacking another user.",
-    dateReported: "2025-04-29T15:30:00Z",
-    status: "pending",
-    community: "Stress Management",
-  },
-  {
-    id: "report3",
-    commentId: "comment123",
-    commentContent:
-      "You're just being weak. If you were stronger mentally you wouldn't have these problems.",
-    postTitle: "Feeling overwhelmed with anxiety",
-    postId: "post789",
-    reporterName: "John Doe",
-    reporterId: "user444",
-    authorName: "Jennifer Lee",
-    authorId: "user222",
-    reason: "Stigmatizing language",
-    description:
-      "This comment stigmatizes mental health conditions and blames the user for their symptoms.",
-    dateReported: "2025-04-25T09:45:00Z",
-    status: "resolved",
-    community: "Anxiety Support",
-  },
-];
+import { useAdminReports, useReportActions } from "@/hooks/admin";
 
 export default function ReportedCommentsPage() {
-  const [reports, setReports] = useState(mockReportedComments);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedReport, setSelectedReport] = useState<typeof mockReportedComments[0] | null>(null);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<
-    "delete" | "dismiss" | "ban" | null
+    "delete" | "dismiss" | "ban" | "restrict" | null
   >(null);
+
+  // API hooks
+  const { data: reportsData, isLoading, error } = useAdminReports({
+    type: 'comment',
+    search: searchTerm || undefined,
+  });
+  const { banUser, restrictUser, deleteContent, dismissReport, isLoading: isActionLoading } = useReportActions();
+
+  const reports = reportsData?.reports || [];
+  const totalCount = reportsData?.pagination?.total || 0;
 
   const formatDate = (dateString: string) => {
     try {

@@ -24,8 +24,6 @@ export function usePostDetail(postId: string) {
     queryKey: ["post", postId],
     queryFn: async () => {
       const result = await api.communities.getPost(postId);
-      console.log("API returned:", result); // Check what API actually returns
-      
       // Transform user to author and compute additional fields
       const transformedPost = {
         ...result,
@@ -34,8 +32,6 @@ export function usePostDetail(postId: string) {
         commentCount: result._count?.comments || 0,
         isHearted: Boolean(result.hearts && result.hearts.length > 0),
       };
-      
-      console.log("Transformed post:", transformedPost); // Verify transformation
       return transformedPost;
     },
     retry: (failureCount, error) => {
