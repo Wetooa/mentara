@@ -327,7 +327,7 @@ export function PreAssessmentSignUp({
                       control={form.control}
                       name="termsAccepted"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormItem className="flex flex-row items-start gap-x-3">
                           <FormControl>
                             <Checkbox
                               checked={field.value}
@@ -335,7 +335,7 @@ export function PreAssessmentSignUp({
                               className="mt-1"
                             />
                           </FormControl>
-                          <div className="space-y-1 leading-none">
+                          <div className="flex-1 min-w-0">
                             <FormLabel className="text-sm leading-relaxed">
                               I agree to the{" "}
                               <a
