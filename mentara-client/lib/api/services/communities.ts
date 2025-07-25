@@ -102,7 +102,7 @@ export function createCommunityService(axios: AxiosInstance) {
       data: CommunityRecommendation[];
       message: string;
     }> {
-      const { data } = await axios.get("/communities/recommendations/me");
+      const { data } = await axios.get("/communities-recommendations/me");
       return data;
     },
 
@@ -115,7 +115,7 @@ export function createCommunityService(axios: AxiosInstance) {
       message: string;
     }> {
       const { data } = await axios.post(
-        "/communities/recommendations/generate",
+        "/communities-recommendations/generate",
         { force }
       );
       return data;
@@ -139,7 +139,7 @@ export function createCommunityService(axios: AxiosInstance) {
       };
       message: string;
     }> {
-      const { data } = await axios.post("/communities/recommendations/join", {
+      const data = await axios.post("/communities-recommendations/join", {
         communitySlugs,
       });
       return data;
@@ -152,7 +152,7 @@ export function createCommunityService(axios: AxiosInstance) {
       success: boolean;
       message: string;
     }> {
-      const { data } = await axios.post("/communities/recommendations/refresh");
+      const { data } = await axios.post("/communities-recommendations/refresh");
       return data;
     },
 
@@ -226,7 +226,7 @@ export function createCommunityService(axios: AxiosInstance) {
       action: "accept" | "reject"
     ) {
       const { data } = await axios.put(
-        `/communities/recommendations/${recommendationId}/interact`,
+        `/communities-recommendations/${recommendationId}/interact`,
         { action }
       );
       return data;
@@ -236,7 +236,7 @@ export function createCommunityService(axios: AxiosInstance) {
      * Get recommendation statistics
      */
     async getRecommendationStats() {
-      const { data } = await axios.get("/communities/recommendations/stats/me");
+      const { data } = await axios.get("/communities-recommendations/stats/me");
       return data;
     },
 

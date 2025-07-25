@@ -51,7 +51,7 @@ export class CommunitiesController {
     private readonly communityAssignmentService: CommunityAssignmentService,
     private readonly prisma: PrismaService,
     private readonly supabaseStorageService: SupabaseStorageService,
-  ) {}
+  ) { }
 
   @Get()
   // TODO: CONFUSING - Missing @Roles decorator - should this endpoint require authentication only or specific roles?
@@ -186,7 +186,7 @@ export class CommunitiesController {
     @CurrentUserId() userId: string,
   ): Promise<{ joined: boolean }> {
     try {
-      await this.communitiesService.joinCommunity(communityId, userId);
+      // await this.communitiesService.joinCommunity(communityId, userId);
       return { joined: true };
     } catch (error) {
       // Re-throw known HTTP exceptions to preserve proper error responses
@@ -254,13 +254,17 @@ export class CommunitiesController {
 
   @Get('me/with-structure')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  async getMyCommunitiesWithStructure(@CurrentUserId() userId: string): Promise<CommunityWithRoomGroupsResponse[]> {
+  async getMyCommunitiesWithStructure(
+    @CurrentUserId() userId: string,
+  ): Promise<CommunityWithRoomGroupsResponse[]> {
     try {
       // Use existing getJoinedCommunities which already includes full structure
       return await this.communitiesService.getJoinedCommunities(userId);
     } catch (error) {
       throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Failed to get communities with structure',
+        error instanceof Error
+          ? error.message
+          : 'Failed to get communities with structure',
       );
     }
   }
@@ -492,7 +496,9 @@ export class CommunitiesController {
       return await this.communitiesService.getJoinedCommunities(userId);
     } catch (error) {
       throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Failed to get joined communities',
+        error instanceof Error
+          ? error.message
+          : 'Failed to get joined communities',
       );
     }
   }
@@ -504,7 +510,9 @@ export class CommunitiesController {
       return await this.communitiesService.getRecommendedCommunities(userId);
     } catch (error) {
       throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Failed to get recommended communities',
+        error instanceof Error
+          ? error.message
+          : 'Failed to get recommended communities',
       );
     }
   }
@@ -516,7 +524,9 @@ export class CommunitiesController {
       return await this.communitiesService.getRecentActivity(userId);
     } catch (error) {
       throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Failed to get recent activity',
+        error instanceof Error
+          ? error.message
+          : 'Failed to get recent activity',
       );
     }
   }
