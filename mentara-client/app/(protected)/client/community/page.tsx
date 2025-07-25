@@ -137,7 +137,7 @@ export default function UserCommunity() {
             />
           </ResizablePanel>
           <ResizableHandle withHandle className="w-1.5 bg-community-calm/20 hover:bg-community-accent/40 transition-colors duration-200" />
-          <ResizablePanel defaultSize={80} className="h-full">
+          <ResizablePanel defaultSize={80} className="h-full !overflow-y-auto">
             {/* Desktop Main Content Area */}
             {!selectedRoomId ? (
               // Welcome/No Room Selected State
@@ -431,7 +431,7 @@ export default function UserCommunity() {
                 </div>
 
                 {/* Posts Content */}
-                <ScrollArea className="flex-1 min-h-0 bg-community-warm/10 relative">
+                <ScrollArea className="flex-1 min-h-0 bg-community-warm/10 relative [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-160px)]">
                   {/* Background decoration */}
                   <div className="absolute inset-0 bg-community-gradient opacity-20" />
                   <div className="relative max-w-4xl mx-auto p-4 lg:p-6">
@@ -782,7 +782,7 @@ export default function UserCommunity() {
                   {selectedRoom?.name}
                 </h1>
               </div>
-              <ScrollArea className="flex-1 min-h-0 h-0 bg-community-warm/10">
+              <ScrollArea className="flex-1 min-h-0 bg-community-warm/10 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-200px)]">
                 <div className="p-4">
                   <div className="text-center py-8">
                     <p className="text-community-soothing-foreground">Mobile room content loading...</p>
