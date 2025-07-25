@@ -193,18 +193,47 @@ export interface Community {
   updatedAt: string;
 }
 
-// Post type
+// Post type - Updated to match backend response structure
 export interface Post {
   id: string;
   title: string;
   content: string;
-  authorId: string;
-  communityId: string;
-  isAnonymous: boolean;
-  heartCount: number;
-  commentCount: number;
+  userId: string; // Backend field
+  roomId?: string; // Backend field
+  attachmentUrls: string[];
+  attachmentNames: string[];
+  attachmentSizes: number[];
   createdAt: string;
   updatedAt: string;
+  
+  // Author information (transformed from user field)
+  author: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+  };
+  
+  // Room information
+  room?: {
+    id: string;
+    name: string;
+  };
+  
+  // Heart and comment data
+  hearts: any[]; // Contains user's heart if they hearted it
+  _count: {
+    comments: number;
+    hearts: number;
+  };
+  
+  // Computed fields for easier access
+  heartCount: number;
+  commentCount: number;
+  isHearted: boolean;
+  
+  // Comments included in detail views
+  comments?: Comment[];
 }
 
 // Comment type

@@ -68,7 +68,7 @@ export function PostDetail({
   const { user, userRole } = useAuth();
   const router = useRouter();
 
-  const isAuthor = user?.id === post.author.id;
+  const isAuthor = user?.id === post?.author?.id;
 
   // Heart mutation
   const heartMutation = useMutation({
@@ -179,14 +179,14 @@ export function PostDetail({
                 <div className="flex items-center gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-10 w-10 ring-2 ring-community-accent/20 ring-offset-2 ring-offset-white">
-                      <AvatarImage src={post.author.avatarUrl} className="object-cover" />
+                      <AvatarImage src={post?.author?.avatarUrl} className="object-cover" />
                       <AvatarFallback className="bg-community-accent/20 text-community-accent-foreground font-semibold">
-                        {getUserInitials(post.author.firstName, post.author.lastName)}
+                        {getUserInitials(post?.author?.firstName || '', post?.author?.lastName || '')}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-semibold text-community-calm-foreground">
-                        {post.author.firstName} {post.author.lastName}
+                        {post?.author?.firstName} {post?.author?.lastName}
                       </p>
                       <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">
                         <Clock className="h-3 w-3" />
@@ -204,10 +204,10 @@ export function PostDetail({
                   {/* Role Badge */}
                   <Badge 
                     variant="outline" 
-                    className={`text-xs font-semibold ${getRoleColor(post.author.role || 'client')}`}
+                    className={`text-xs font-semibold ${getRoleColor(post?.author?.role || 'client')}`}
                   >
                     <User className="h-3 w-3 mr-1" />
-                    {getRoleLabel(post.author.role || 'client')}
+                    {getRoleLabel(post?.author?.role || 'client')}
                   </Badge>
                 </div>
 

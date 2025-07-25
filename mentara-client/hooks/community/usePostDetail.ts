@@ -13,7 +13,7 @@ export function usePostDetail(postId: string) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Fetch post data
+  // Fetch post data with transformation
   const {
     data: post,
     isLoading,
@@ -25,7 +25,18 @@ export function usePostDetail(postId: string) {
     queryFn: async () => {
       const result = await api.communities.getPost(postId);
       console.log("API returned:", result); // Check what API actually returns
-      return result;
+      
+      // Transform user to author and compute additional fields
+      const transformedPost = {
+        ...result,
+        author: result.user, // Map user to author
+        heartCount: result._count?.hearts || 0,
+        commentCount: result._count?.comments || 0,
+        isHearted: Boolean(result.hearts && result.hearts.length > 0),
+      };
+      
+      console.log("Transformed post:", transformedPost); // Verify transformation
+      return transformedPost;
     },
     retry: (failureCount, error) => {
       // Don't retry on 404 or auth errors
@@ -53,7 +64,10 @@ export function usePostDetail(postId: string) {
       await queryClient.cancelQueries({ queryKey: ["post", postId] });
 
       // Snapshot the previous value
-      const previousPost = queryClient.getQueryData<Post>(["post", postId]);
+      const previousPost = queryClient.getQueryData<Post>([
+        "post",
+        postId,
+      ]);
 
       // Optimistically update the cache
       if (previousPost) {
@@ -65,6 +79,10 @@ export function usePostDetail(postId: string) {
           ...previousPost,
           isHearted: !previousPost.isHearted,
           heartCount: newHeartCount,
+          _count: {
+            ...previousPost._count,
+            hearts: newHeartCount,
+          },
         });
       }
 
@@ -95,8 +113,17 @@ export function usePostDetail(postId: string) {
       data: { title?: string; content?: string };
     }) => api.communities.updatePost(postId, data),
     onSuccess: (updatedPost) => {
-      // Update the cache with the new post data
-      queryClient.setQueryData<Post>(["post", postId], updatedPost);
+      // Transform the updated post response as well
+      const transformedPost = {
+        ...updatedPost,
+        author: updatedPost.user,
+        heartCount: updatedPost._count?.hearts || 0,
+        commentCount: updatedPost._count?.comments || 0,
+        isHearted: Boolean(updatedPost.hearts && updatedPost.hearts.length > 0),
+      };
+      
+      // Update the cache with the transformed post data
+      queryClient.setQueryData<Post>(["post", postId], transformedPost);
 
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -153,7 +180,8 @@ export function usePostDetail(postId: string) {
     deleteMutation.mutate(post.id);
   };
 
-  const isOwner = user?.id === post?.author.id;
+  // Safe author access with optional chaining
+  const isOwner = user?.id === post?.author?.id;
 
   return {
     // Data
