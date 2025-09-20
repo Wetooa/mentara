@@ -1,0 +1,18 @@
+# AI Patient Evaluation (Python) ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+.env.*
+.logs/
+logs/
+models/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.DS_Store
+*.log 

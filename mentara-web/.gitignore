@@ -1,14 +1,13 @@
-# Mentara API ignores
+# Mentara Web (Next.js) ignores
 node_modules/
-dist/
+.next/
+.out/
+.next-static/
 coverage/
 *.tsbuildinfo
 .env
 .env.*
 logs/
 uploads/
-.prisma/
-.prisma/client/
-prisma/migrations/
 .DS_Store
 *.log

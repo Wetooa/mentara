@@ -1,0 +1,123 @@
+# AI Patient Evaluation Service - Docker Compose Configuration
+# Production-ready Python Flask ML service
+
+version: '3.8'
+
+services:
+  # Main AI Service (ML-based)
+  ml-patient-evaluator-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mentara-ml-patient-evaluator
+    environment:
+      FLASK_ENV: ${FLASK_ENV:-production}
+      FLASK_DEBUG: ${FLASK_DEBUG:-0}
+      PORT: ${PORT:-10002}
+      MODEL_PATH: ${MODEL_PATH:-mental_model_config2.pt}
+      MAX_WORKERS: ${MAX_WORKERS:-4}
+      TIMEOUT: ${TIMEOUT:-120}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:10001,http://localhost:10000}
+      BACKEND_API_URL: ${BACKEND_API_URL:-http://localhost:10000}
+      SECRET_KEY: ${SECRET_KEY}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
+      ENABLE_METRICS: ${ENABLE_METRICS:-true}
+      ENABLE_LOGGING: ${ENABLE_LOGGING:-true}
+      PREDICTION_CACHE_TTL: ${PREDICTION_CACHE_TTL:-300}
+    ports:
+      - "${PORT:-10002}:${PORT:-10002}"
+    volumes:
+      # Mount logs directory for persistent logging
+      - logs_data:/app/logs
+      # Mount models directory for ML model files
+      - models_data:/app/models
+    networks:
+      - ml-patient-evaluator-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-5000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+volumes:
+  # Persistent storage for logs
+  logs_data:
+    driver: local
+
+  # Persistent storage for ML models
+  models_data:
+    driver: local
+
+networks:
+  ml-patient-evaluator-network:
+    driver: bridge
+    name: ml-patient-evaluator-network
+
+# =============================================================================
+# USAGE INSTRUCTIONS
+# =============================================================================
+#
+# Development:
+#   docker-compose up --build
+#
+# Production:
+#   docker-compose -f docker-compose.yml up -d --build
+#
+# View logs:
+#   docker-compose logs -f ai-patient-evaluation
+#
+# Stop services:
+#   docker-compose down
+#
+# Remove all data (DESTRUCTIVE):
+#   docker-compose down -v
+#
+# =============================================================================
+# ENVIRONMENT VARIABLES
+# =============================================================================
+#
+# Required variables (must be set in .env file):
+# - SECRET_KEY: Flask secret key for security
+#
+# Optional variables:
+# - FLASK_ENV: Environment (default: production)
+# - PORT: Service port (default: 5000)
+# - MODEL_PATH: Path to ML model file (default: mental_model_config2.pt)
+# - MAX_WORKERS: Gunicorn workers (default: 4)
+# - TIMEOUT: Request timeout in seconds (default: 120)
+# - LOG_LEVEL: Logging level (default: INFO)
+# - CORS_ORIGINS: Allowed CORS origins
+# - BACKEND_API_URL: Backend API endpoint
+# - RATE_LIMIT_PER_MINUTE: Rate limiting (default: 60)
+# - ENABLE_METRICS: Enable metrics collection (default: true)
+# - PREDICTION_CACHE_TTL: Cache TTL in seconds (default: 300)
+#
+# =============================================================================
+# ML MODEL SETUP
+# =============================================================================
+#
+# The service requires a trained PyTorch model file:
+# 1. Place mental_model_config2.pt in the service directory
+# 2. Ensure the model is compatible with the MultiLabelNN architecture
+# 3. Model expects 201 input features for mental health assessments
+# 4. Model outputs 19 mental health condition predictions
+#
+# Model will be automatically validated on startup.
+#
+# =============================================================================

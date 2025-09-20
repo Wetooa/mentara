@@ -12,7 +12,7 @@ services:
     container_name: mentara-api
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      PORT: ${PORT:-3001}
+      PORT: ${PORT:-10000}
       DATABASE_URL: ${DATABASE_URL}
       DIRECT_URL: ${DIRECT_URL}
       JWT_SECRET: ${JWT_SECRET}
@@ -24,13 +24,13 @@ services:
       MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET}
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_API_KEY: ${SUPABASE_API_KEY}
-      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://localhost:5001}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://localhost:10002}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:10001}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
       REDIS_URL: ${REDIS_URL}
     ports:
-      - "${PORT:-3001}:${PORT:-3001}"
+      - "${PORT:-10000}:${PORT:-10000}"
     volumes:
       # Mount uploads directory for file handling
       - uploads_data:/app/uploads
