@@ -46,9 +46,15 @@ export class AdminReportsService {
       if (type === 'post') {
         where.postId = { not: null };
         where.commentId = null;
+        where.reportedUserId = null;
       } else if (type === 'comment') {
         where.commentId = { not: null };
         where.postId = null;
+        where.reportedUserId = null;
+      } else if (type === 'user') {
+        where.reportedUserId = { not: null };
+        where.postId = null;
+        where.commentId = null;
       }
 
       const reports = await this.prisma.report.findMany({
@@ -58,6 +64,14 @@ export class AdminReportsService {
         orderBy: { createdAt: 'desc' },
         include: {
           reporter: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+            },
+          },
+          reportedUser: {
             select: {
               id: true,
               firstName: true,
@@ -171,16 +185,29 @@ export class AdminReportsService {
           };
         }
 
-        // For user reports (if implemented later)
-        return {
-          ...baseReport,
-          type: 'user' as const,
-          reportedItemId: report.reporterId, // This would need to be adjusted for actual user reports
-          content: '',
-          reportedUserName: 'Unknown User',
-          reportedUserId: report.reporterId,
-          reportedUserIsTherapist: false,
-        };
+        // For user reports
+        if (report.reportedUser) {
+          return {
+            ...baseReport,
+            type: 'user' as const,
+            reportedItemId: report.reportedUser.id,
+            content: report.content || '',
+            reportedUserName: `${report.reportedUser.firstName} ${report.reportedUser.lastName}`,
+            reportedUserId: report.reportedUser.id,
+            reportedUserIsTherapist: report.reportedUser.role === 'therapist',
+          };
+        } else {
+          // Fallback for reports where reportedUser is null (shouldn't happen)
+          return {
+            ...baseReport,
+            type: 'user' as const,
+            reportedItemId: report.reportedUserId || '',
+            content: report.content || '',
+            reportedUserName: 'Unknown User',
+            reportedUserId: report.reportedUserId || '',
+            reportedUserIsTherapist: false,
+          };
+        }
       });
 
       return {
@@ -210,6 +237,17 @@ export class AdminReportsService {
               lastName: true,
               role: true,
               email: true,
+            },
+          },
+          reportedUser: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              email: true,
+              isActive: true,
+              suspendedAt: true,
             },
           },
           post: {
@@ -334,9 +372,32 @@ export class AdminReportsService {
           community: report.comment.post.room?.roomGroup?.community?.name || 'General',
           commentCreatedAt: report.comment.createdAt.toISOString(),
         };
+      } else if (report.reportedUser) {
+        // Handle user reports
+        return {
+          ...baseReport,
+          type: 'user' as const,
+          reportedItemId: report.reportedUser.id,
+          content: report.content || '',
+          reportedUserName: `${report.reportedUser.firstName} ${report.reportedUser.lastName}`,
+          reportedUserId: report.reportedUser.id,
+          reportedUserEmail: report.reportedUser.email,
+          reportedUserIsTherapist: report.reportedUser.role === 'therapist',
+          reportedUserIsActive: report.reportedUser.isActive,
+          reportedUserIsSuspended: !!report.reportedUser.suspendedAt,
+        };
       }
 
-      return baseReport;
+      // Fallback for reports with missing data
+      return {
+        ...baseReport,
+        type: 'unknown' as const,
+        reportedItemId: '',
+        content: report.content || '',
+        reportedUserName: 'Unknown User',
+        reportedUserId: '',
+        reportedUserIsTherapist: false,
+      };
     } catch (error) {
       this.logger.error(`Failed to retrieve report ${reportId}:`, error);
       throw error;
@@ -412,7 +473,7 @@ export class AdminReportsService {
           throw new NotFoundException(`Report with ID ${reportId} not found`);
         }
 
-        const reportedUserId = report.post?.userId || report.comment?.userId;
+        const reportedUserId = report.post?.userId || report.comment?.userId || report.reportedUserId;
         let actionResult: any = { success: true, action };
 
         switch (action) {
