@@ -15,10 +15,13 @@
     <Hero />
 
     <!-- Features Section -->
-    <section class="py-20 bg-muted/30">
+    <section class="py-20 bg-gradient-to-b from-white to-emerald-50/30">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-5xl font-bold font-futura mb-4" style="color: var(--primary);">
+          <div class="inline-block px-4 py-2 bg-emerald-100 rounded-full mb-4">
+            <span class="text-emerald-700 font-semibold font-kollektif text-sm">Why Choose Mentara</span>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold font-futura mb-4 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
             Our Approach
           </h2>
           <p class="text-xl text-muted-foreground font-kollektif max-w-2xl mx-auto">
@@ -28,46 +31,46 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Feature 1 -->
-          <div class="p-8 rounded-2xl bg-white border border-border hover:shadow-xl transition-all">
-            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6" style="background-color: var(--community-calm);">
-              <svg class="w-8 h-8" style="color: var(--community-calm-foreground);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="group p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-cyan-200 hover:border-cyan-400 hover:shadow-2xl transition-all hover:-translate-y-2">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <h3 class="text-xl font-bold font-futura mb-3" style="color: var(--primary);">
+            <h3 class="text-2xl font-bold font-futura mb-3 text-cyan-900">
               Education & Awareness
             </h3>
-            <p class="text-muted-foreground font-kollektif">
+            <p class="text-cyan-800 font-kollektif leading-relaxed">
               Reducing stigma and normalizing mental health through comprehensive resources and tools for personal development.
             </p>
           </div>
 
           <!-- Feature 2 -->
-          <div class="p-8 rounded-2xl bg-white border border-border hover:shadow-xl transition-all">
-            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6" style="background-color: var(--community-warm);">
-              <svg class="w-8 h-8" style="color: var(--community-warm-foreground);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="group p-8 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-2xl transition-all hover:-translate-y-2">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
-            <h3 class="text-xl font-bold font-futura mb-3" style="color: var(--primary);">
+            <h3 class="text-2xl font-bold font-futura mb-3 text-emerald-900">
               Diagnostic Approach
             </h3>
-            <p class="text-muted-foreground font-kollektif">
+            <p class="text-emerald-800 font-kollektif leading-relaxed">
               Make better business decisions with insights from qualitative and quantitative mental health data.
             </p>
           </div>
 
           <!-- Feature 3 -->
-          <div class="p-8 rounded-2xl bg-white border border-border hover:shadow-xl transition-all">
-            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6" style="background-color: var(--community-soothing);">
-              <svg class="w-8 h-8" style="color: var(--community-soothing-foreground);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="group p-8 rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 hover:border-violet-400 hover:shadow-2xl transition-all hover:-translate-y-2">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 class="text-xl font-bold font-futura mb-3" style="color: var(--primary);">
+            <h3 class="text-2xl font-bold font-futura mb-3 text-violet-900">
               Convenient Access
             </h3>
-            <p class="text-muted-foreground font-kollektif">
+            <p class="text-violet-800 font-kollektif leading-relaxed">
               24/7 access to mental health resources, talk therapy scheduling, and coaching in one seamless ecosystem.
             </p>
           </div>

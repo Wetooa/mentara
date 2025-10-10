@@ -1,34 +1,57 @@
 <script lang="ts">
-  import Navbar from '$lib/components/Navbar.svelte';
-  import { sendDemoRequest, type DemoFormData } from '$lib/utils/email';
+  import Navbar from "$lib/components/Navbar.svelte";
+
+  interface DemoFormData {
+    firstName: string;
+    lastName: string;
+    companyName: string;
+    jobTitle: string;
+    email: string;
+    contactNumber: string;
+    companySize?: string;
+    message?: string;
+  }
+
+  // Check if we're in debug mode
+  const IS_DEBUG = import.meta.env.MODE === "development";
 
   let formData = $state<DemoFormData>({
-    firstName: '',
-    lastName: '',
-    companyName: '',
-    jobTitle: '',
-    email: '',
-    contactNumber: '',
-    companySize: '',
-    message: '',
+    firstName: IS_DEBUG ? "John" : "",
+    lastName: IS_DEBUG ? "Doe" : "",
+    companyName: IS_DEBUG ? "Acme Corporation" : "",
+    jobTitle: IS_DEBUG ? "HR Manager" : "",
+    email: IS_DEBUG ? "derpykidyt@gmail.com" : "",
+    contactNumber: IS_DEBUG ? "+63 912 345 6789" : "",
+    companySize: IS_DEBUG ? "51-200" : "",
+    message: IS_DEBUG
+      ? "I would like to learn more about Mentara for our organization."
+      : "",
   });
 
   let isSubmitting = $state(false);
-  let submitStatus = $state<{ type: 'success' | 'error' | null; message: string }>({
+  let submitStatus = $state<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({
     type: null,
-    message: '',
+    message: "",
   });
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
-    
+
     if (isSubmitting) return;
 
     // Basic validation
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.companyName) {
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.companyName
+    ) {
       submitStatus = {
-        type: 'error',
-        message: 'Please fill in all required fields.',
+        type: "error",
+        message: "Please fill in all required fields.",
       };
       return;
     }
@@ -37,20 +60,20 @@
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       submitStatus = {
-        type: 'error',
-        message: 'Please enter a valid email address.',
+        type: "error",
+        message: "Please enter a valid email address.",
       };
       return;
     }
 
     isSubmitting = true;
-    submitStatus = { type: null, message: '' };
+    submitStatus = { type: null, message: "" };
 
     try {
-      const response = await fetch('/api/submit-demo', {
-        method: 'POST',
+      const response = await fetch("/api/submit-demo", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -59,30 +82,30 @@
 
       if (result.success) {
         submitStatus = {
-          type: 'success',
+          type: "success",
           message: result.message,
         };
         // Reset form
         formData = {
-          firstName: '',
-          lastName: '',
-          companyName: '',
-          jobTitle: '',
-          email: '',
-          contactNumber: '',
-          companySize: '',
-          message: '',
+          firstName: "",
+          lastName: "",
+          companyName: "",
+          jobTitle: "",
+          email: "",
+          contactNumber: "",
+          companySize: "",
+          message: "",
         };
       } else {
         submitStatus = {
-          type: 'error',
+          type: "error",
           message: result.message,
         };
       }
     } catch (error) {
       submitStatus = {
-        type: 'error',
-        message: 'An error occurred. Please try again later.',
+        type: "error",
+        message: "An error occurred. Please try again later.",
       };
     } finally {
       isSubmitting = false;
@@ -92,7 +115,10 @@
 
 <svelte:head>
   <title>Book a Demo - Mentara</title>
-  <meta name="description" content="Book a demo to see how Mentara can transform your organization's mental health approach." />
+  <meta
+    name="description"
+    content="Book a demo to see how Mentara can transform your organization's mental health approach."
+  />
 </svelte:head>
 
 <div class="min-h-screen bg-background">
@@ -102,21 +128,31 @@
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold font-futura mb-4" style="color: var(--primary);">
+        <h1
+          class="text-4xl md:text-5xl font-bold font-futura mb-4"
+          style="color: var(--primary);"
+        >
           Book a Demo
         </h1>
         <p class="text-xl text-muted-foreground font-kollektif">
-          Let's explore how Mentara can support your organization's mental health needs
+          Let's explore how Mentara can support your organization's mental
+          health needs
         </p>
       </div>
 
       <!-- Form -->
-      <div class="bg-white rounded-2xl shadow-xl border border-border p-8 md:p-12">
+      <div
+        class="bg-white rounded-2xl shadow-xl border border-border p-8 md:p-12"
+      >
         <form onsubmit={handleSubmit} class="space-y-6">
           <!-- Name Fields -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label for="firstName" class="block text-sm font-semibold font-kollektif mb-2" style="color: var(--foreground);">
+              <label
+                for="firstName"
+                class="block text-sm font-semibold font-kollektif mb-2"
+                style="color: var(--foreground);"
+              >
                 First Name <span class="text-destructive">*</span>
               </label>
               <input
@@ -130,7 +166,11 @@
             </div>
 
             <div>
-              <label for="lastName" class="block text-sm font-semibold font-kollektif mb-2" style="color: var(--foreground);">
+              <label
+                for="lastName"
+                class="block text-sm font-semibold font-kollektif mb-2"
+                style="color: var(--foreground);"
+              >
                 Last Name <span class="text-destructive">*</span>
               </label>
               <input
@@ -146,7 +186,11 @@
 
           <!-- Company Name -->
           <div>
-            <label for="companyName" class="block text-sm font-semibold font-kollektif mb-2" style="color: var(--foreground);">
+            <label
+              for="companyName"
+              class="block text-sm font-semibold font-kollektif mb-2"
+              style="color: var(--foreground);"
+            >
               Company Name <span class="text-destructive">*</span>
             </label>
             <input
@@ -161,7 +205,11 @@
 
           <!-- Job Title -->
           <div>
-            <label for="jobTitle" class="block text-sm font-semibold font-kollektif mb-2" style="color: var(--foreground);">
+            <label
+              for="jobTitle"
+              class="block text-sm font-semibold font-kollektif mb-2"
+              style="color: var(--foreground);"
+            >
               Job Title <span class="text-destructive">*</span>
             </label>
             <input
@@ -176,7 +224,11 @@
 
           <!-- Email -->
           <div>
-            <label for="email" class="block text-sm font-semibold font-kollektif mb-2" style="color: var(--foreground);">
+            <label
+              for="email"
+              class="block text-sm font-semibold font-kollektif mb-2"
+              style="color: var(--foreground);"
+            >
               Email Address <span class="text-destructive">*</span>
             </label>
             <input
@@ -191,7 +243,11 @@
 
           <!-- Contact Number -->
           <div>
-            <label for="contactNumber" class="block text-sm font-semibold font-kollektif mb-2" style="color: var(--foreground);">
+            <label
+              for="contactNumber"
+              class="block text-sm font-semibold font-kollektif mb-2"
+              style="color: var(--foreground);"
+            >
               Contact Number <span class="text-destructive">*</span>
             </label>
             <input
@@ -206,7 +262,11 @@
 
           <!-- Company Size -->
           <div>
-            <label for="companySize" class="block text-sm font-semibold font-kollektif mb-2" style="color: var(--foreground);">
+            <label
+              for="companySize"
+              class="block text-sm font-semibold font-kollektif mb-2"
+              style="color: var(--foreground);"
+            >
               Company Size
             </label>
             <select
@@ -226,7 +286,11 @@
 
           <!-- Message -->
           <div>
-            <label for="message" class="block text-sm font-semibold font-kollektif mb-2" style="color: var(--foreground);">
+            <label
+              for="message"
+              class="block text-sm font-semibold font-kollektif mb-2"
+              style="color: var(--foreground);"
+            >
               Additional Information
             </label>
             <textarea
@@ -256,7 +320,7 @@
             class="w-full py-4 rounded-lg text-lg font-semibold font-kollektif transition-all hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             style="background-color: var(--primary); color: var(--primary-foreground);"
           >
-            {isSubmitting ? 'Sending...' : 'Submit Demo Request'}
+            {isSubmitting ? "Sending..." : "Submit Demo Request"}
           </button>
         </form>
       </div>
@@ -264,8 +328,18 @@
       <!-- Additional Info -->
       <div class="mt-8 text-center">
         <p class="text-muted-foreground font-kollektif">
-          We'll get back to you within 24 hours to schedule your personalized demo.
+          We'll get back to you within 24 hours to schedule your personalized
+          demo.
         </p>
+        {#if IS_DEBUG}
+          <div
+            class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+          >
+            <p class="text-sm text-yellow-800 font-kollektif">
+              🐛 <strong>Debug Mode Active</strong> - Form pre-filled with test data
+            </p>
+          </div>
+        {/if}
       </div>
     </div>
   </main>
@@ -274,7 +348,10 @@
   <footer class="py-12 border-t border-border bg-muted/30 mt-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
-        <div class="text-2xl font-bold font-futura mb-4" style="color: var(--primary);">
+        <div
+          class="text-2xl font-bold font-futura mb-4"
+          style="color: var(--primary);"
+        >
           Mentara
         </div>
         <p class="text-muted-foreground font-kollektif mb-4">
@@ -287,4 +364,3 @@
     </div>
   </footer>
 </div>
-

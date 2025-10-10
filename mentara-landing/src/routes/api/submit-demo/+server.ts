@@ -1,12 +1,15 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import emailjs from '@emailjs/browser';
+import emailjs from '@emailjs/nodejs';
+import { env } from '$env/dynamic/private';
 
 // Environment variables for EmailJS configuration
 // These should be set in .env file
-const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || '';
-const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID || '';
-const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || '';
+const EMAILJS_SERVICE_ID = env.EMAILJS_SERVICE_ID || '';
+const EMAILJS_TEMPLATE_ID = env.EMAILJS_TEMPLATE_ID || '';
+const EMAILJS_PUBLIC_KEY = env.EMAILJS_PUBLIC_KEY || '';
+const EMAILJS_PRIVATE_KEY = env.EMAILJS_PRIVATE_KEY || '';
+const IS_DEBUG = env.NODE_ENV === 'development';
 
 interface DemoFormData {
   firstName: string;
@@ -49,7 +52,23 @@ export const POST: RequestHandler = async ({ request }) => {
 
     // Check if EmailJS is configured
     if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
-      console.error('EmailJS not configured. Missing environment variables.');
+      const missingVars = [];
+      if (!EMAILJS_SERVICE_ID) missingVars.push('EMAILJS_SERVICE_ID');
+      if (!EMAILJS_TEMPLATE_ID) missingVars.push('EMAILJS_TEMPLATE_ID');
+      if (!EMAILJS_PUBLIC_KEY) missingVars.push('EMAILJS_PUBLIC_KEY');
+      
+      console.error('EmailJS not configured. Missing environment variables:', missingVars.join(', '));
+      
+      if (IS_DEBUG) {
+        return json(
+          {
+            success: false,
+            message: `Debug: Missing environment variables: ${missingVars.join(', ')}. Check your .env file.`,
+          },
+          { status: 500 }
+        );
+      }
+      
       return json(
         {
           success: false,
@@ -58,11 +77,28 @@ export const POST: RequestHandler = async ({ request }) => {
         { status: 500 }
       );
     }
+    
+    if (IS_DEBUG) {
+      console.log('📧 Debug Mode - EmailJS Config Status:', {
+        hasServiceId: !!EMAILJS_SERVICE_ID,
+        hasTemplateId: !!EMAILJS_TEMPLATE_ID,
+        hasPublicKey: !!EMAILJS_PUBLIC_KEY,
+        hasPrivateKey: !!EMAILJS_PRIVATE_KEY,
+        serviceId: EMAILJS_SERVICE_ID.substring(0, 10) + '...',
+      });
+    }
 
-    // Initialize EmailJS (this is safe to call multiple times)
-    emailjs.init({
+    // Initialize EmailJS for Node.js (server-side)
+    const initConfig: any = {
       publicKey: EMAILJS_PUBLIC_KEY,
-    });
+    };
+    
+    // Add private key if available for enhanced security
+    if (EMAILJS_PRIVATE_KEY) {
+      initConfig.privateKey = EMAILJS_PRIVATE_KEY;
+    }
+    
+    emailjs.init(initConfig);
 
     // Prepare email template parameters
     const templateParams = {
