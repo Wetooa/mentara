@@ -1,0 +1,203 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useApi } from "@/lib/api";
+
+import { toast } from "sonner";
+import { MentaraApiError } from "@/lib/api/errorHandler";
+
+interface Therapist {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  bio?: string;
+  profileImageUrl?: string;
+  hourlyRate?: number;
+  patientSatisfaction?: number;
+  totalPatients: number;
+  province: string;
+  providerType: string;
+  yearsOfExperience?: number;
+  illnessSpecializations: string[];
+  therapeuticApproaches: string[];
+  languages: string[];
+  isActive: boolean;
+  isVerified: boolean;
+}
+
+/**
+ * Hook for managing client-therapist relationship
+ * Uses React Query for better state management and caching
+ */
+export function useTherapist() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  // Query to get assigned therapist
+  const {
+    data: therapist,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['client', 'assignedTherapist'],
+    queryFn: () => api.client.getAssignedTherapist(),
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    retry: (failureCount, error: MentaraApiError) => {
+      // Don't retry on 404 (no therapist assigned)
+      if (error?.response?.status === 404) return false;
+      return failureCount < 3;
+    },
+  });
+
+  // Mutation to assign a therapist
+  const assignTherapistMutation = useMutation({
+    mutationFn: async (therapistId: string) => {
+      return api.client.assignTherapist(therapistId);
+    },
+    onSuccess: (data, therapistId) => {
+      toast.success("Therapist assigned successfully!");
+      // Invalidate both single and multiple therapist queries
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapists'] });
+      // Also invalidate booking-related queries
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+    },
+    onError: (error: MentaraApiError) => {
+      const message = error?.response?.data?.message || error?.message || "Failed to assign therapist";
+      toast.error(message);
+    },
+  });
+
+  // Mutation to remove/change therapist
+  const removeTherapistMutation = useMutation({
+    mutationFn: async () => {
+      return api.client.removeTherapist();
+    },
+    onSuccess: () => {
+      toast.success("Therapist removed successfully!");
+      // Invalidate both single and multiple therapist queries
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapists'] });
+      // Also invalidate booking-related queries
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+    },
+    onError: (error: MentaraApiError) => {
+      const message = error?.response?.data?.message || error?.message || "Failed to remove therapist";
+      toast.error(message);
+    },
+  });
+
+  // Helper functions for backward compatibility
+  const assignTherapist = async (therapistId: string): Promise<void> => {
+    await assignTherapistMutation.mutateAsync(therapistId);
+  };
+
+  const removeTherapist = async (): Promise<void> => {
+    await removeTherapistMutation.mutateAsync();
+  };
+
+  return {
+    therapist: therapist || null,
+    loading: loading || assignTherapistMutation.isPending || removeTherapistMutation.isPending,
+    error: error?.message || null,
+    assignTherapist,
+    removeTherapist,
+    refetch: () => refetch(),
+    // Expose mutation states for more granular control
+    isAssigning: assignTherapistMutation.isPending,
+    isRemoving: removeTherapistMutation.isPending,
+    assignError: assignTherapistMutation.error,
+    removeError: removeTherapistMutation.error,
+  };
+}
+
+/**
+ * Hook for requesting therapist assignment (simplified version)
+ */
+export function useTherapistAssignment() {
+  const { assignTherapist, removeTherapist, isAssigning, isRemoving } = useTherapist();
+
+  return {
+    assignTherapist,
+    removeTherapist,
+    isAssigning,
+    isRemoving,
+  };
+}
+
+/**
+ * Hook for just getting assigned therapist data
+ */
+export function useAssignedTherapist() {
+  const { therapist, loading, error, refetch } = useTherapist();
+
+  return {
+    therapist,
+    isLoading: loading,
+    error,
+    refetch,
+  };
+}
+
+/**
+ * Hook for getting multiple assigned therapists (for clients with multiple therapists)
+ */
+export function useAssignedTherapists() {
+  const api = useApi();
+
+  return useQuery({
+    queryKey: ['client', 'assignedTherapists'],
+    queryFn: async () => {
+      const response = await api.client.getAssignedTherapists();
+      return response.therapists;
+    },
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    retry: (failureCount, error: MentaraApiError) => {
+      // Don't retry on 404 (no therapists assigned)
+      if (error?.response?.status === 404) return false;
+      return failureCount < 3;
+    },
+  });
+}
+
+/**
+ * Hook for getting therapist profile by ID
+ */
+export function useTherapistProfile(therapistId: string, enabled: boolean = true) {
+  const api = useApi();
+
+  return useQuery({
+    queryKey: ['therapist-profile', therapistId],
+    queryFn: async () => {
+      try {
+        console.log('Fetching therapist profile for ID:', therapistId);
+        const result = await api.therapists.getTherapistProfile(therapistId);
+        console.log('Therapist profile result:', result);
+        return result;
+      } catch (error) {
+        console.error('Failed to fetch therapist profile:', error);
+        // Re-throw to let React Query handle it
+        throw error;
+      }
+    },
+    enabled: enabled && !!therapistId,
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    retry: (failureCount, error: MentaraApiError) => {
+      console.log('Retry attempt', failureCount, 'for therapist profile error:', error);
+      // Don't retry on 404 (therapist not found) or 401 (unauthorized)
+      if (error?.response?.status === 404 || error?.response?.status === 401) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+}
+
+// Export namespace for better organization
+export const TherapistHooks = {
+  useAssignedTherapist,
+  useAssignedTherapists,
+  useTherapistAssignment,
+  useTherapistProfile,
+};

@@ -1,0 +1,413 @@
+{
+  "info": {
+    "name": "Mentara - Comments",
+    "description": "Comments API endpoints for basic CRUD operations, heart reactions, and comment reporting on community posts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "comments-collection-v2"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure comment ID is set for parameterized requests",
+          "if (!pm.environment.get('commentId')) {",
+          "    pm.environment.set('commentId', '550e8400-e29b-41d4-a716-446655440001');",
+          "}",
+          "",
+          "// Ensure post ID is set for post-related requests",
+          "if (!pm.environment.get('postId')) {",
+          "    pm.environment.set('postId', '550e8400-e29b-41d4-a716-446655440002');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Common test for response time",
+          "pm.test('Response time is under 3 seconds', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});",
+          "",
+          "// Handle authentication errors",
+          "if (pm.response.code === 401) {",
+          "    console.error('❌ Authentication failed - check access token');",
+          "}",
+          "",
+          "// Handle permission errors",
+          "if (pm.response.code === 403) {",
+          "    console.error('❌ Insufficient permissions - community access required');",
+          "}",
+          "",
+          "// Auto-save comment IDs from successful responses",
+          "if (pm.response.code >= 200 && pm.response.code < 300) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.id) {",
+          "            pm.environment.set('commentId', responseJson.id);",
+          "        }",
+          "        if (responseJson.reportId) {",
+          "            pm.environment.set('reportId', responseJson.reportId);",
+          "        }",
+          "    } catch (e) {",
+          "        // Silent fail for non-JSON responses",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Comment Management",
+      "description": "Basic CRUD operations for comments",
+      "item": [
+        {
+          "name": "Get All Comments for User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Retrieve all comments for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comment by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"]
+            },
+            "description": "Retrieve a specific comment by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comments for Post",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comments/post/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "post", "{{postId}}"]
+            },
+            "description": "Retrieve all comments for a specific post"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\"content\\": \\"This is a helpful post! I've found that mindfulness techniques really help with anxiety management. Thank you for sharing these resources.\\",\\n  \\"postId\\": \\"{{postId}}\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Create a new comment on a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Comment with Files",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "content",
+                  "value": "Here's a helpful breathing exercise diagram that goes with the post!",
+                  "type": "text"
+                },
+                {
+                  "key": "postId",
+                  "value": "{{postId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Create a comment with file attachments (up to 5 files)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\"content\\": \\"This is an updated comment with additional information about mindfulness techniques. I've also found that the 4-7-8 breathing method works well.\\",\\n  \\"editReason\\": \\"Added breathing technique information\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"]
+            },
+            "description": "Update an existing comment (author only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"]
+            },
+            "description": "Delete a comment (author, moderator, or admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comment Interactions",
+      "description": "Heart reactions and interaction features",
+      "item": [
+        {
+          "name": "Heart/Unheart Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/heart",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "heart"]
+            },
+            "description": "Toggle heart status on a comment (heart if not hearted, unheart if already hearted)"
+          },
+          "response": []
+        },
+        {
+          "name": "Check if Comment is Hearted",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/hearted",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "hearted"]
+            },
+            "description": "Check if the current user has hearted a specific comment"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comment Reporting",
+      "description": "Report inappropriate or harmful comments",
+      "item": [
+        {
+          "name": "Report Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\"reason\\": \\"inappropriate_content\\",\\n  \\"content\\": \\"This comment contains harmful advice that could be dangerous for people struggling with mental health issues.\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/report",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "report"]
+            },
+            "description": "Report a comment for inappropriate or harmful content"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "description": "Test error scenarios and validation",
+      "item": [
+        {
+          "name": "Create Comment - Invalid Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\"content\\": \\"\\",\\n  \\"postId\\": \\"invalid-uuid\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Test validation error handling for invalid comment data"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comment - Not Found",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comments/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Test 404 error handling for non-existent comment"
+          },
+          "response": []
+        },
+        {
+          "name": "Unauthorized Access",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Test 401 error handling for unauthenticated requests"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

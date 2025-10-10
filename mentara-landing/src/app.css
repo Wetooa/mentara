@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+:root {
+  --radius: 1.25rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
+  --primary: oklch(0.56 0.1223 127.47);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.4 0.0812 92.8);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  --tertiary: oklch(0.98 0.0464 124.31);
+
+  /* Mental Health Community Colors */
+  /* Calm blue-green for peaceful interactions */
+  --community-calm: oklch(0.85 0.05 180);
+  --community-calm-foreground: oklch(0.25 0.08 180);
+
+  /* Warm, gentle color for supportive elements */
+  --community-warm: oklch(0.92 0.03 60);
+  --community-warm-foreground: oklch(0.35 0.06 60);
+
+  /* Soothing lavender for stress relief areas */
+  --community-soothing: oklch(0.88 0.04 280);
+  --community-soothing-foreground: oklch(0.3 0.07 280);
+
+  /* Gentle pink for heart/like interactions */
+  --community-heart: oklch(0.82 0.06 350);
+  --community-heart-foreground: oklch(0.4 0.1 350);
+
+  /* Soft accent for community features */
+  --community-accent: oklch(0.75 0.08 160);
+  --community-accent-foreground: oklch(0.98 0.01 160);
+
+  /* Text colors */
+  --text-white-background: oklch(0.6 0 0);
+}
+
+* {
+  border-color: var(--border);
+  outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+@font-face {
+  font-family: "Futura";
+  src: url("/fonts/Futura Md BT Medium.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kollektif";
+  src: url("/fonts/Kollektif.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Global Loading Bar Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+/* Mentara Community Scrollbar Styling */
+.mentara-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--community-accent) var(--community-warm);
+}
+
+.mentara-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.mentara-scrollbar::-webkit-scrollbar-track {
+  background: var(--community-warm);
+  border-radius: 10px;
+}
+
+.mentara-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--community-accent);
+  border-radius: 10px;
+  border: 1px solid var(--community-warm);
+}
+
+.mentara-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--community-calm);
+}
+
+/* Remove underlines from hover states globally for community components */
+.no-underline-hover:hover {
+  text-decoration: none !important;
+}
+
+/* Gentle glow animation for mental health theming */
+@keyframes gentle-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px var(--community-heart);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--community-heart), 0 0 30px var(--community-heart);
+  }
+}
+
+.animate-gentle-glow {
+  animation: gentle-glow 3s ease-in-out infinite;
+}
+
+/* Heart beat animation for community interactions */
+@keyframes heart-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.animate-heart-beat {
+  animation: heart-beat 2s ease-in-out infinite;
+}

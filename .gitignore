@@ -3,7 +3,17 @@ mentara-api/prisma/migrations/
 node_modules
 .serena/
 node_modules/
-.tsbuildinfo
-.tsbuildinfo
-.tsbuildinfo
-.vscode/
+mentara-api/.tsbuildinfo
+mentara-api/.tsbuildinfo
+mentara-api/.tsbuildinfo
+
+# Root ignores
+logs/
+scripts/
+security-hardening/
+turn-server/
+run.sh
+setup-dev.sh
+test-axios-unwrapping.js
+COMMONS_MIGRATION_INVENTORY.md
+COMMONS_TYPE_MIGRATION_MAPPING.md

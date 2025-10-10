@@ -1,0 +1,1278 @@
+{
+  "info": {
+    "name": "Mentara - Therapist",
+    "description": "Comprehensive therapist API endpoints for profile management, client relationships, request handling, worksheet management, and recommendations. Includes both public registration endpoints and protected therapist-only functionality.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "therapist-collection-v2"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure therapist authentication token is set",
+          "if (!pm.environment.get('accessToken')) {",
+          "    console.warn('⚠️ Therapist access token not set in environment');",
+          "}",
+          "",
+          "// Verify therapist role if available",
+          "const userRole = pm.environment.get('userRole');",
+          "if (userRole && userRole !== 'therapist' && userRole !== 'admin') {",
+          "    console.warn('⚠️ Therapist role required for protected endpoints - current role:', userRole);",
+          "}",
+          "",
+          "// Ensure required UUIDs are valid",
+          "const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+          "",
+          "if (!pm.environment.get('therapistId') || !uuidRegex.test(pm.environment.get('therapistId'))) {",
+          "    pm.environment.set('therapistId', '987fcdeb-51a2-43d7-8ace-123456789012');",
+          "}",
+          "",
+          "if (!pm.environment.get('clientId') || !uuidRegex.test(pm.environment.get('clientId'))) {",
+          "    pm.environment.set('clientId', '123e4567-e89b-12d3-a456-426614174000');",
+          "}",
+          "",
+          "if (!pm.environment.get('requestId') || !uuidRegex.test(pm.environment.get('requestId'))) {",
+          "    pm.environment.set('requestId', 'req12345-6789-abcd-efgh-ijklmnopqrst');",
+          "}",
+          "",
+          "if (!pm.environment.get('worksheetId') || !uuidRegex.test(pm.environment.get('worksheetId'))) {",
+          "    pm.environment.set('worksheetId', 'wks98765-4321-fedc-ba09-876543210fed');",
+          "}",
+          "",
+          "if (!pm.environment.get('applicationId') || !uuidRegex.test(pm.environment.get('applicationId'))) {",
+          "    pm.environment.set('applicationId', 'app12345-6789-abcd-efgh-ijklmnopqrst');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Common test for response time",
+          "pm.test('Response time is under 3 seconds', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});",
+          "",
+          "// Handle common therapist endpoint errors",
+          "if (pm.response.code === 401) {",
+          "    console.error('❌ Authentication failed - check therapist access token');",
+          "}",
+          "",
+          "if (pm.response.code === 403) {",
+          "    console.error('❌ Insufficient permissions - therapist role required');",
+          "}",
+          "",
+          "if (pm.response.code === 404) {",
+          "    console.error('❌ Resource not found - check entity IDs');",
+          "}",
+          "",
+          "// Auto-save useful data from successful responses",
+          "if (pm.response.code >= 200 && pm.response.code < 300) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        ",
+          "        // Save client request IDs from request lists",
+          "        if (responseJson.requests && Array.isArray(responseJson.requests) && responseJson.requests.length > 0) {",
+          "            pm.environment.set('requestId', responseJson.requests[0].id);",
+          "        }",
+          "        ",
+          "        // Save client IDs from client lists",
+          "        if (responseJson.clients && Array.isArray(responseJson.clients) && responseJson.clients.length > 0) {",
+          "            pm.environment.set('clientId', responseJson.clients[0].id);",
+          "        }",
+          "        ",
+          "        // Save worksheet IDs from worksheet lists",
+          "        if (responseJson.worksheets && Array.isArray(responseJson.worksheets) && responseJson.worksheets.length > 0) {",
+          "            pm.environment.set('worksheetId', responseJson.worksheets[0].id);",
+          "        }",
+          "        ",
+          "        // Save authentication tokens",
+          "        if (responseJson.accessToken) {",
+          "            pm.environment.set('accessToken', responseJson.accessToken);",
+          "        }",
+          "        ",
+          "        // Save application IDs from application lists",
+          "        if (responseJson.applications && Array.isArray(responseJson.applications) && responseJson.applications.length > 0) {",
+          "            pm.environment.set('applicationId', responseJson.applications[0].id);",
+          "        }",
+          "        ",
+          "        // Save application ID from single application response",
+          "        if (responseJson.id && responseJson.status) {",
+          "            pm.environment.set('applicationId', responseJson.id);",
+          "        }",
+          "    } catch (e) {",
+          "        // Silent fail for non-JSON responses",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Therapist registration, login, and application endpoints (/auth/therapist)",
+      "item": [
+        {
+          "name": "Register Therapist",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{therapistEmail}}\",\n  \"password\": \"{{therapistPassword}}\",\n  \"firstName\": \"{{therapistFirstName}}\",\n  \"lastName\": \"{{therapistLastName}}\",\n  \"phoneNumber\": \"+1234567890\",\n  \"licenseNumber\": \"PSY123456\",\n  \"licenseState\": \"Ontario\",\n  \"specializations\": [\n    \"Anxiety Disorders\",\n    \"Depression\",\n    \"Cognitive Behavioral Therapy\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/therapist/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "therapist", "register"]
+            },
+            "description": "Register a new therapist account. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Therapist Login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{therapistEmail}}\",\n  \"password\": \"{{therapistPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/therapist/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "therapist", "login"]
+            },
+            "description": "Authenticate therapist and return access tokens. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Therapist Application",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "applicationData",
+                  "value": "{\n  \"personalInfo\": {\n    \"firstName\": \"Dr. Sarah\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"sarah.johnson@example.com\",\n    \"phone\": \"+1234567890\",\n    \"address\": {\n      \"street\": \"123 Medical Plaza\",\n      \"city\": \"Toronto\",\n      \"province\": \"Ontario\",\n      \"postalCode\": \"M5V 3A8\"\n    }\n  },\n  \"professionalInfo\": {\n    \"licenseNumber\": \"PSY123456\",\n    \"licenseState\": \"Ontario\",\n    \"licenseExpiry\": \"2025-12-31\",\n    \"specializations\": [\"Anxiety\", \"Depression\", \"CBT\"],\n    \"yearsOfExperience\": 8\n  }\n}",
+                  "type": "text"
+                },
+                {
+                  "key": "license",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "resume",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "certifications",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/therapist/apply-with-documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "therapist", "apply-with-documents"]
+            },
+            "description": "Submit therapist application with supporting documents. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Therapist Profile (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/therapist/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "therapist", "profile"]
+            },
+            "description": "Get authenticated therapist's profile information."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin - Application Management",
+      "description": "Admin-only endpoints for therapist application management (/auth/therapist/applications)",
+      "item": [
+        {
+          "name": "Get All Therapist Applications (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/therapist/applications?status=pending&page=1&limit=20&sortBy=submittedAt&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "therapist", "applications"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "submittedAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get all therapist applications with filtering. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Therapist Application by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/therapist/applications/{{applicationId}}?includeDocuments=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "therapist", "applications", "{{applicationId}}"],
+              "query": [
+                {
+                  "key": "includeDocuments",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get detailed therapist application information. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Application Status (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"reviewNotes\": \"Application approved after thorough review. License verification completed.\",\n  \"reviewedBy\": \"admin@mentara.com\",\n  \"conditions\": [\n    \"Complete platform orientation\",\n    \"Upload additional certifications within 30 days\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/therapist/applications/{{applicationId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "therapist", "applications", "{{applicationId}}", "status"]
+            },
+            "description": "Update therapist application status (approve/reject/pending). Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application Files (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/therapist/applications/{{applicationId}}/files?fileType=license&includeUrls=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "therapist", "applications", "{{applicationId}}", "files"],
+              "query": [
+                {
+                  "key": "fileType",
+                  "value": "license"
+                },
+                {
+                  "key": "includeUrls",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get therapist application documents and files. Admin only."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile Management",
+      "description": "Therapist profile and specialization management (/therapist/profile)",
+      "item": [
+        {
+          "name": "Get Therapist Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile"]
+            },
+            "description": "Get comprehensive therapist profile with professional details."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Therapist Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Experienced clinical psychologist specializing in anxiety, depression, and trauma recovery. I use evidence-based approaches including CBT and EMDR.\",\n  \"hourlyRate\": 220.00,\n  \"acceptingNewClients\": true,\n  \"preferredClientTypes\": [\"Adults\", \"Young Adults\"],\n  \"workSettings\": [\"Individual Therapy\", \"Group Therapy\"],\n  \"languages\": [\"English\", \"French\"],\n  \"availability\": {\n    \"monday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"tuesday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"wednesday\": { \"start\": \"10:00\", \"end\": \"18:00\" },\n    \"thursday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"friday\": { \"start\": \"09:00\", \"end\": \"15:00\" }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile"]
+            },
+            "description": "Update therapist profile information including bio, rates, and availability."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Therapist Specializations",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"specializations\": [\n    \"Anxiety Disorders\",\n    \"Depression and Mood Disorders\",\n    \"PTSD and Trauma Recovery\",\n    \"Mindfulness-Based Therapy\",\n    \"Cognitive Behavioral Therapy (CBT)\",\n    \"Dialectical Behavior Therapy (DBT)\",\n    \"Family and Relationship Counseling\"\n  ],\n  \"updateReason\": \"Added new specializations after completing additional training\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile/specializations",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile", "specializations"]
+            },
+            "description": "Update therapist specializations and areas of expertise."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Client Management",
+      "description": "Therapist client relationship management (/therapist/clients)",
+      "item": [
+        {
+          "name": "Get Assigned Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/clients/assigned?includeInactive=false&sortBy=lastSession&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "clients", "assigned"],
+              "query": [
+                {
+                  "key": "includeInactive",
+                  "value": "false"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "lastSession"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get list of clients assigned to the therapist."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/clients/all?page=1&limit=50&status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "clients", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            },
+            "description": "Get comprehensive list of all clients with pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Client by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/clients/{{clientId}}?includeHistory=true&includeProgress=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "clients", "{{clientId}}"],
+              "query": [
+                {
+                  "key": "includeHistory",
+                  "value": "true"
+                },
+                {
+                  "key": "includeProgress",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get detailed information about a specific client including history and progress."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Request Management",
+      "description": "Client request handling and management (/therapist/requests)",
+      "item": [
+        {
+          "name": "Dashboard & Analytics",
+          "item": [
+            {
+              "name": "Get Dashboard Summary",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/dashboard/summary",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "dashboard", "summary"]
+                },
+                "description": "Get dashboard summary with key metrics for therapist overview."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Request Statistics",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/statistics?period=month&includeComparisons=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "statistics"],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "month"
+                    },
+                    {
+                      "key": "includeComparisons",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get detailed request statistics and performance metrics."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Pending Request Count",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/count/pending",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "count", "pending"]
+                },
+                "description": "Get quick count of pending client requests."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Response Time Analytics",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/analytics/response-time?period=quarter",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "analytics", "response-time"],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "quarter"
+                    }
+                  ]
+                },
+                "description": "Get response time analytics for performance tracking."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Request Lists",
+          "item": [
+            {
+              "name": "Get All Requests",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests?status=pending&priority=high&page=1&limit=20&sortBy=submittedAt&sortOrder=desc",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests"],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "key": "priority",
+                      "value": "high"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "submittedAt"
+                    },
+                    {
+                      "key": "sortOrder",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Get all client requests with advanced filtering and pagination."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Pending Requests",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/pending?sortBy=priority&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "pending"],
+                  "query": [
+                    {
+                      "key": "sortBy",
+                      "value": "priority"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "Get all pending client requests requiring therapist action."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Priority Requests",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/priority?urgentOnly=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "priority"],
+                  "query": [
+                    {
+                      "key": "urgentOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get high priority and urgent client requests."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Recent Requests",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/recent?days=7&limit=15",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "recent"],
+                  "query": [
+                    {
+                      "key": "days",
+                      "value": "7"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "15"
+                    }
+                  ]
+                },
+                "description": "Get recently submitted client requests."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Filter Options",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/filters/options",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "filters", "options"]
+                },
+                "description": "Get available filter options for request management."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Request Details",
+          "item": [
+            {
+              "name": "Get Request Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/{{requestId}}?includeClientDetails=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "{{requestId}}"],
+                  "query": [
+                    {
+                      "key": "includeClientDetails",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get detailed information about a specific client request."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Client Request History",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/client/{{clientId}}/history?limit=20&includeResolved=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "client", "{{clientId}}", "history"],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "includeResolved",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get historical requests from a specific client."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Request Actions",
+          "item": [
+            {
+              "name": "Accept Request",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"acceptanceMessage\": \"I'll be happy to work with you. Let's schedule an initial consultation to discuss your needs.\",\n  \"proposedSchedule\": {\n    \"sessionType\": \"individual\",\n    \"frequency\": \"weekly\",\n    \"duration\": 60,\n    \"preferredDays\": [\"Monday\", \"Wednesday\"],\n    \"preferredTimes\": [\"10:00\", \"14:00\"]\n  },\n  \"nextSteps\": \"Please review the proposed schedule and let me know your availability.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/{{requestId}}/accept",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "{{requestId}}", "accept"]
+                },
+                "description": "Accept a client request with personalized message and schedule proposal."
+              },
+              "response": []
+            },
+            {
+              "name": "Decline Request",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"declineReason\": \"schedule_conflict\",\n  \"declineMessage\": \"Thank you for considering me as your therapist. Unfortunately, I'm currently at full capacity and cannot take on new clients at this time.\",\n  \"referralSuggestions\": [\n    {\n      \"therapistName\": \"Dr. Smith\",\n      \"specialization\": \"Anxiety and Depression\",\n      \"contactInfo\": \"dr.smith@example.com\"\n    }\n  ],\n  \"canRecontactDate\": \"2024-03-01\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/{{requestId}}/decline",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "{{requestId}}", "decline"]
+                },
+                "description": "Decline a client request with reason and optional referrals."
+              },
+              "response": []
+            },
+            {
+              "name": "Bulk Action on Requests",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"mark_reviewed\",\n  \"requestIds\": [\n    \"{{requestId}}\",\n    \"req98765-4321-fedc-ba09-876543210fed\"\n  ],\n  \"notes\": \"Bulk marking requests as reviewed after initial assessment\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/therapist/requests/bulk-action",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["therapist", "requests", "bulk-action"]
+                },
+                "description": "Perform bulk actions on multiple client requests."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Worksheet Management",
+      "description": "Therapist worksheet creation and management (/therapist/worksheets)",
+      "item": [
+        {
+          "name": "Get Therapist Worksheets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/worksheets?category=therapy&status=active&clientId={{clientId}}&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "worksheets"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "therapy"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "clientId",
+                  "value": "{{clientId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get therapist's created worksheets with filtering options."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Worksheet by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/worksheets/{{worksheetId}}?includeSubmissions=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "worksheets", "{{worksheetId}}"],
+              "query": [
+                {
+                  "key": "includeSubmissions",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get detailed information about a specific worksheet including client submissions."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Therapist Worksheet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Daily Mood and Activity Tracker\",\n  \"description\": \"Track your daily mood, activities, and thoughts to identify patterns and triggers.\",\n  \"category\": \"mood_tracking\",\n  \"difficulty\": \"beginner\",\n  \"estimatedTime\": 15,\n  \"instructions\": \"Complete this worksheet daily for one week. Rate your mood on a scale of 1-10 and note any significant activities or thoughts.\",\n  \"fields\": [\n    {\n      \"type\": \"date\",\n      \"label\": \"Date\",\n      \"required\": true\n    },\n    {\n      \"type\": \"number\",\n      \"label\": \"Morning Mood (1-10)\",\n      \"required\": true,\n      \"min\": 1,\n      \"max\": 10\n    },\n    {\n      \"type\": \"textarea\",\n      \"label\": \"Key Activities\",\n      \"required\": false,\n      \"placeholder\": \"Describe the main activities of your day\"\n    }\n  ],\n  \"assignedClients\": [\"{{clientId}}\"],\n  \"dueDate\": \"2024-02-15T23:59:59.000Z\",\n  \"isTemplate\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/worksheets",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "worksheets"]
+            },
+            "description": "Create a new custom worksheet for clients with detailed structure and instructions."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Therapist Worksheet",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Daily Mood and Activity Tracker\",\n  \"description\": \"Enhanced version with additional reflection questions for deeper insight into mood patterns.\",\n  \"instructions\": \"Complete this worksheet daily. Take 10-15 minutes to thoughtfully reflect on your day and mood patterns.\",\n  \"dueDate\": \"2024-02-20T23:59:59.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/worksheets/{{worksheetId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "worksheets", "{{worksheetId}}"]
+            },
+            "description": "Update an existing worksheet with enhanced content and structure."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "description": "Therapist recommendation and compatibility endpoints (/therapist-recommendations)",
+      "item": [
+        {
+          "name": "Get Recommended Therapists",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations?specialization=anxiety&location=Toronto&maxRate=250&acceptingClients=true&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations"],
+              "query": [
+                {
+                  "key": "specialization",
+                  "value": "anxiety"
+                },
+                {
+                  "key": "location",
+                  "value": "Toronto"
+                },
+                {
+                  "key": "maxRate",
+                  "value": "250"
+                },
+                {
+                  "key": "acceptingClients",
+                  "value": "true"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get recommended therapists based on criteria. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Compatibility Analysis",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations/compatibility/{{therapistId}}?includeDetails=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations", "compatibility", "{{therapistId}}"],
+              "query": [
+                {
+                  "key": "includeDetails",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get detailed compatibility analysis between client and therapist."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Welcome Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations/welcome?newClient=true&personalizedGreeting=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations", "welcome"],
+              "query": [
+                {
+                  "key": "newClient",
+                  "value": "true"
+                },
+                {
+                  "key": "personalizedGreeting",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get personalized welcome recommendations for new clients."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "therapistId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clientId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "requestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "worksheetId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "therapistEmail",
+      "value": "dr.therapist@example.com",
+      "type": "string"
+    },
+    {
+      "key": "therapistPassword",
+      "value": "SecurePassword123!",
+      "type": "string"
+    },
+    {
+      "key": "therapistFirstName",
+      "value": "Dr. Sarah",
+      "type": "string"
+    },
+    {
+      "key": "therapistLastName",
+      "value": "Johnson",
+      "type": "string"
+    },
+    {
+      "key": "applicationId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

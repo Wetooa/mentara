@@ -1,0 +1,90 @@
+# Cursor Rules for Mentara
+
+[directives]
+root_readme_single = true
+root_readme_nesting = false
+markdown_directory = "docs"
+preserve_claude_md = true
+compose_per_service = true
+root_compose = false
+compose_env_variants = false
+dev_uses_local_processes = true
+base_port = 10000
+service_ports = { api = 10000, web = 10001, ai_eval = 10002 }
+separate_networks_per_service = true
+container_name_prefix = "mentara-"
+no_root_shell_orchestration = true
+no_root_makefile = true
+root_gitignore = true
+service_gitignore_required = true
+include_reverse_proxy = false
+remove_obsolete = [
+  "run.sh",
+  "setup-dev.sh",
+  "test-axios-unwrapping.js",
+  "COMMONS_MIGRATION_INVENTORY.md",
+  "COMMONS_TYPE_MIGRATION_MAPPING.md"
+]
+remove_dirs = ["logs", "scripts", "security-hardening", "turn-server"]
+
+[naming]
+service_names = { client = "mentara-web", api = "mentara-api", ai_eval = "ml-patient-evaluator-api" }
+
+[questions]
+# Add any extra directives you want enforced:
+# - Code style, commit format, branch model
+# - Reserved ports beyond 10000-10002
+# - Env var naming conventions
+# - Exceptions to the single README rule
+
+[conventions.commit]
+type_enforced = true
+types = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "build", "ci", "revert"]
+scopes = ["api", "web", "ai-eval", "db", "infra", "docs"]
+subject_imperative = true
+subject_max_length = 72
+body_wrap_column = 100
+breaking_change_footer = true
+
+[conventions.branching]
+main_branches = ["master", "dev"]
+feature_pattern = "type/scope/short-description"
+hotfix_pattern = "hotfix/short-description"
+release_pattern = "release/x.y.z"
+require_pr = true
+
+[conventions.pr]
+title_format = "type(scope): subject"
+description_requirements = [
+  "Summary of changes and rationale",
+  "Linked issues (e.g., Closes #123)",
+  "Testing steps and results",
+  "Screenshots for UI changes",
+  "Checklist: docs updated, tests added, breaking changes noted"
+]
+labels_required = true
+link_issue_required = true
+
+[code_style]
+readability_first = true
+explicit_naming = true
+early_returns = true
+min_nesting = true
+strict_typing = true
+no_todo_comments = true
+
+[duplication]
+must_search_before_writing = true
+search_instruction = "Search the codebase for existing implementations before adding new code."
+avoid_redundancy = true
+
+[testing]
+no_ad_hoc_runners = true
+ad_hoc_scripts_must_be_deleted_after_use = true
+tests_directory = "tests"
+test_command = "pytest"
+
+[markdown]
+root_single_readme = true
+docs_directory = "docs"
+naming = "UPPER_SNAKE_CASE"

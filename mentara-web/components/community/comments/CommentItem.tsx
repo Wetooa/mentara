@@ -1,0 +1,515 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useApi } from '@/lib/api';
+import { useReportComment } from '@/hooks/community/useCommunityReporting';
+import { ReportModal } from '@/components/community/ReportModal';
+
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Heart, 
+  MessageCircle, 
+  Reply,
+  Edit3,
+  Trash2,
+  MoreHorizontal,
+  Flag,
+  Award,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  ExternalLink,
+  Image as ImageIcon
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import type { Comment } from '@/types/api/comments';
+
+interface CommentItemProps {
+  comment: Comment;
+  depth?: number;
+  isCollapsed?: boolean;
+  showCollapseButton?: boolean;
+  onHeart?: (commentId: string) => void;
+  onReply?: (commentId: string, content: string, parentId?: string) => void;
+  onEdit?: (commentId: string, content: string) => void;
+  onDelete?: (commentId: string) => void;
+  onToggleCollapse?: () => void;
+  className?: string;
+}
+
+export function CommentItem({
+  comment,
+  depth = 0,
+  isCollapsed = false,
+  showCollapseButton = false,
+  onHeart,
+  onReply,
+  onEdit,
+  onDelete,
+  onToggleCollapse,
+  className = ''
+}: CommentItemProps) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  const [isReplying, setIsReplying] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [replyContent, setReplyContent] = useState('');
+  const [editContent, setEditContent] = useState(comment.content);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  
+  // Report hook
+  const reportComment = useReportComment();
+
+  // Heart mutation
+  const heartMutation = useMutation({
+    mutationFn: (commentId: string) => api.comments.heart(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments'] });
+    },
+    onError: () => {
+      toast.error('Failed to heart comment');
+    },
+  });
+
+  const handleHeart = () => {
+    if (onHeart) {
+      onHeart(comment.id);
+    } else {
+      heartMutation.mutate(comment.id);
+    }
+  };
+
+  const handleReply = () => {
+    if (replyContent.trim() && onReply) {
+      onReply(comment.id, replyContent.trim(), comment.id);
+      setReplyContent('');
+      setIsReplying(false);
+    }
+  };
+
+  const handleEdit = () => {
+    if (editContent.trim() && editContent !== comment.content && onEdit) {
+      onEdit(comment.id, editContent.trim());
+      setIsEditing(false);
+    }
+  };
+
+  const handleReport = async (reason: string, content?: string) => {
+    await reportComment.mutateAsync({ commentId: comment.id, reason, content });
+    setIsReportModalOpen(false);
+  };
+
+  const getRoleColor = (role?: string) => {
+    switch (role) {
+      case 'therapist': return 'text-blue-600 bg-blue-50';
+      case 'moderator': return 'text-green-600 bg-green-50';
+      case 'admin': return 'text-purple-600 bg-purple-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getRoleLabel = (role?: string) => {
+    switch (role) {
+      case 'therapist': return 'Therapist';
+      case 'moderator': return 'Moderator';
+      case 'admin': return 'Admin';
+      default: return null;
+    }
+  };
+
+  const getIndentLines = () => {
+    const lines = [];
+    for (let i = 0; i < depth; i++) {
+      lines.push(
+        <div 
+          key={i} 
+          className={`absolute left-${i * 4 + 2} top-0 bottom-0 w-px bg-border`} 
+        />
+      );
+    }
+    return lines;
+  };
+
+  if (isCollapsed) {
+    return (
+      <div className={`py-1 ${className}`}>
+        <div className="text-xs text-muted-foreground italic">
+          [Comment collapsed]
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative ${className}`}>
+      {/* Thread lines for depth visualization */}
+      {depth > 0 && getIndentLines()}
+      
+      <div className={`bg-card rounded-lg border p-3 ${depth > 0 ? `ml-${Math.min(depth * 4, 16)}` : ''}`}>
+        {/* Comment Header */}
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center space-x-2 flex-1 min-w-0">
+            {/* Collapse button for threaded comments */}
+            {showCollapseButton && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                onClick={onToggleCollapse}
+              >
+                {isCollapsed ? (
+                  <ChevronRight className="h-3 w-3" />
+                ) : (
+                  <ChevronDown className="h-3 w-3" />
+                )}
+              </Button>
+            )}
+
+            {/* Author Avatar */}
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={comment.user.avatarUrl} alt={`${comment.user.firstName} ${comment.user.lastName}`} />
+              <AvatarFallback className="text-xs">
+                {comment.user.firstName?.[0]}{comment.user.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Author Info */}
+            <div className="flex items-center space-x-2 flex-1 min-w-0">
+              <span className="font-medium text-sm truncate">
+                {comment.user.firstName} {comment.user.lastName}
+              </span>
+              
+              {getRoleLabel(comment.user.role) && (
+                <Badge variant="secondary" className={`text-xs ${getRoleColor(comment.user.role)}`}>
+                  {getRoleLabel(comment.user.role)}
+                </Badge>
+              )}
+
+              {/* Heart Count */}
+              <div className="flex items-center space-x-1">
+                <span className={`text-xs font-medium ${
+                  comment.heartCount > 0 ? 'text-red-500' : 'text-muted-foreground'
+                }`}>
+                  {comment.heartCount} {comment.heartCount === 1 ? 'heart' : 'hearts'}
+                </span>
+                {comment.heartCount > 0 && (
+                  <span className="text-xs text-muted-foreground">•</span>
+                )}
+              </div>
+
+              {/* Timestamp */}
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+              </span>
+              
+              {comment.updatedAt !== comment.createdAt && (
+                <span className="text-xs text-muted-foreground italic">edited</span>
+              )}
+            </div>
+          </div>
+
+          {/* Action Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <MoreHorizontal className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {/* TODO: Add isOwner logic based on current user */}
+              {false && (
+                <>
+                  <DropdownMenuItem onClick={() => setIsEditing(!isEditing)}>
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this comment? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onDelete?.(comment.id)}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem onClick={() => setIsReportModalOpen(true)}>
+                <Flag className="h-4 w-4 mr-2" />
+                Report
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Award className="h-4 w-4 mr-2" />
+                Give Award
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Comment Content */}
+        <div className="mb-3">
+          {isEditing ? (
+            <div className="space-y-2">
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                placeholder="Edit your comment..."
+                rows={3}
+                className="resize-none text-sm"
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditContent(comment.content);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleEdit}
+                  disabled={!editContent.trim() || editContent === comment.content}
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="prose prose-sm max-w-none">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {comment.content}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Comment Attachments */}
+        {comment.attachmentUrls && comment.attachmentUrls.length > 0 && (
+          <div className="mb-3">
+            <div className="space-y-2">
+              {/* Image Gallery */}
+              {comment.attachmentUrls.some((url, index) => {
+                const fileName = comment.attachmentNames?.[index] || '';
+                return /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+              }) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {comment.attachmentUrls.map((url, index) => {
+                    const fileName = comment.attachmentNames?.[index] || '';
+                    if (!/\.(jpg|jpeg|png|gif|webp)$/i.test(fileName)) return null;
+                    
+                    return (
+                      <div
+                        key={index}
+                        className="relative group cursor-pointer overflow-hidden rounded border bg-muted max-w-xs"
+                        onClick={() => window.open(url, '_blank')}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt={fileName}
+                          className="w-full h-32 object-cover transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <div class="flex items-center justify-center h-32 bg-muted">
+                                  <div class="text-center">
+                                    <svg class="h-6 w-6 mx-auto mb-1 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="text-xs text-muted-foreground">${fileName}</span>
+                                  </div>
+                                </div>
+                              `;
+                            }
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-1">
+                          <p className="text-white text-xs truncate">{fileName}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Non-image Files */}
+              {comment.attachmentUrls.some((url, index) => {
+                const fileName = comment.attachmentNames?.[index] || '';
+                return !/\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+              }) && (
+                <div className="space-y-1">
+                  {comment.attachmentUrls.map((url, index) => {
+                    const fileName = comment.attachmentNames?.[index] || '';
+                    const fileSize = comment.attachmentSizes?.[index];
+                    
+                    if (/\.(jpg|jpeg|png|gif|webp)$/i.test(fileName)) return null;
+                    
+                    const formatFileSize = (bytes: number) => {
+                      if (bytes === 0) return "0 B";
+                      const k = 1024;
+                      const sizes = ["B", "KB", "MB", "GB"];
+                      const i = Math.floor(Math.log(bytes) / Math.log(k));
+                      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+                    };
+
+                    return (
+                      <div 
+                        key={index} 
+                        className="flex items-center space-x-2 p-2 border rounded bg-card hover:bg-muted/50 transition-colors text-xs"
+                      >
+                        <div className="flex-shrink-0">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{fileName}</p>
+                          {fileSize && (
+                            <p className="text-muted-foreground">
+                              {formatFileSize(fileSize)}
+                            </p>
+                          )}
+                        </div>
+                        <Button variant="ghost" size="sm" asChild className="h-6 w-6 p-0">
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            <span className="sr-only">Download {fileName}</span>
+                          </a>
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Comment Actions */}
+        <div className="flex items-center space-x-1">
+          {/* Heart Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-7 px-2 ${comment.isHearted ? 'text-red-500 bg-red-50' : 'text-muted-foreground'}`}
+            onClick={handleHeart}
+            disabled={heartMutation.isPending}
+          >
+            <Heart className={`h-3 w-3 ${comment.isHearted ? 'fill-current' : ''}`} />
+          </Button>
+
+          {/* Reply Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-muted-foreground hover:text-foreground"
+            onClick={() => setIsReplying(!isReplying)}
+          >
+            <Reply className="h-3 w-3 mr-1" />
+            <span className="text-xs">Reply</span>
+          </Button>
+
+          {/* Children Count */}
+          {comment.childrenCount && comment.childrenCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-muted-foreground hover:text-foreground"
+            >
+              <MessageCircle className="h-3 w-3 mr-1" />
+              <span className="text-xs">{comment.childrenCount}</span>
+            </Button>
+          )}
+        </div>
+
+        {/* Reply Form */}
+        {isReplying && (
+          <div className="mt-3 pt-3 border-t space-y-2">
+            <Textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Write a reply..."
+              rows={2}
+              className="resize-none text-sm"
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setIsReplying(false);
+                  setReplyContent('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleReply}
+                disabled={!replyContent.trim()}
+              >
+                Reply
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+    
+    {/* Report Modal */}
+    <ReportModal
+      isOpen={isReportModalOpen}
+      onClose={() => setIsReportModalOpen(false)}
+      onSubmit={handleReport}
+      type="comment"
+      contentPreview={comment.content}
+      isLoading={reportComment.isPending}
+    />
+  );
+}
