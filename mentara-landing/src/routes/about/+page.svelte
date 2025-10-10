@@ -3,6 +3,7 @@
   import Footer from "$lib/components/Footer.svelte";
   import AnimateOnScroll from "$lib/components/AnimateOnScroll.svelte";
   import FeatureShowcase from "$lib/components/FeatureShowcase.svelte";
+  import ParallaxDots from "$lib/components/ParallaxDots.svelte";
 </script>
 
 <svelte:head>
@@ -18,10 +19,11 @@
 
   <main>
     <!-- Hero Section -->
-    <section class="py-20 md:py-32 relative overflow-hidden">
+    <section class="py-20 md:py-32 relative overflow-hidden bg-white">
+      <ParallaxDots variant="white" />
       <div class="absolute inset-0 -z-10">
         <div
-          class="absolute inset-0 bg-gradient-to-br from-[oklch(0.56_0.1223_127.47)]/10 via-white to-[oklch(0.98_0.0464_124.31)]/15"
+          class="absolute inset-0 bg-gradient-to-br from-white via-[oklch(0.98_0.0464_124.31)]/10 to-white"
         ></div>
       </div>
 
@@ -58,7 +60,8 @@
     </section>
 
     <!-- Enterprise Features Section -->
-    <section class="py-20 bg-white">
+    <section class="py-20 relative overflow-hidden" style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.15) 0%, oklch(0.98 0.0464 124.31 / 0.05) 100%);">
+      <ParallaxDots variant="green" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <AnimateOnScroll x={-40} duration={800}>
@@ -169,9 +172,8 @@
     </section>
 
     <!-- Security & Compliance -->
-    <section
-      class="py-20 bg-gradient-to-b from-white via-[oklch(0.98_0.0464_124.31)]/10 to-white"
-    >
+    <section class="py-20 relative overflow-hidden bg-white">
+      <ParallaxDots variant="white" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <AnimateOnScroll x={40} duration={800}>
@@ -287,7 +289,8 @@
     </section>
 
     <!-- Platform Features -->
-    <section class="py-20 bg-white">
+    <section class="py-20 relative overflow-hidden" style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.15) 0%, oklch(0.98 0.0464 124.31 / 0.08) 100%);">
+      <ParallaxDots variant="green" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll y={30} duration={600}>
           {#snippet children()}
@@ -474,9 +477,8 @@
     </section>
 
     <!-- Real-time Features -->
-    <section
-      class="py-20 bg-gradient-to-b from-white to-[oklch(0.98_0.0464_124.31)]/5"
-    >
+    <section class="py-20 relative overflow-hidden bg-white">
+      <ParallaxDots variant="white" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <AnimateOnScroll x={-40} duration={800}>
@@ -590,7 +592,8 @@
     </section>
 
     <!-- Technical Stack -->
-    <section class="py-20">
+    <section class="py-20 relative overflow-hidden" style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.12) 0%, oklch(0.98 0.0464 124.31 / 0.15) 100%);">
+      <ParallaxDots variant="green" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll y={30} duration={600}>
           {#snippet children()}
@@ -776,9 +779,8 @@
     </section>
 
     <!-- AI & Machine Learning -->
-    <section
-      class="py-20 bg-gradient-to-b from-white to-[oklch(0.98_0.0464_124.31)]/5"
-    >
+    <section class="py-20 relative overflow-hidden" style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.15) 0%, oklch(0.98 0.0464 124.31 / 0.1) 100%);">
+      <ParallaxDots variant="green" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <AnimateOnScroll x={40} duration={800}>
@@ -880,9 +882,8 @@
     </section>
 
     <!-- Key Features -->
-    <section
-      class="py-20 bg-gradient-to-b from-white via-[oklch(0.98_0.0464_124.31)]/10 to-white"
-    >
+    <section class="py-20 relative overflow-hidden bg-white">
+      <ParallaxDots variant="white" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll y={30} duration={600}>
           {#snippet children()}
@@ -1043,7 +1044,8 @@
     </section>
 
     <!-- App Screenshots Showcase -->
-    <section class="py-20">
+    <section class="py-20 relative overflow-hidden bg-white">
+      <ParallaxDots variant="white" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll y={30} duration={600}>
           {#snippet children()}
@@ -1699,7 +1701,8 @@
     </section>
 
     <!-- Team Section -->
-    <section class="py-20">
+    <section class="py-20 relative overflow-hidden" style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.08) 0%, oklch(0.98 0.0464 124.31 / 0.12) 100%);">
+      <ParallaxDots variant="green" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll y={30} duration={600}>
           {#snippet children()}
@@ -1817,9 +1820,8 @@
     </section>
 
     <!-- CTA Section -->
-    <section
-      class="py-20 bg-gradient-to-br from-[oklch(0.56_0.1223_127.47)]/5 to-[oklch(0.98_0.0464_124.31)]/10"
-    >
+    <section class="py-20 relative overflow-hidden" style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.12) 0%, oklch(0.98 0.0464 124.31 / 0.18) 100%);">
+      <ParallaxDots variant="green" />
       <AnimateOnScroll y={30} duration={800}>
         {#snippet children()}
           <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
