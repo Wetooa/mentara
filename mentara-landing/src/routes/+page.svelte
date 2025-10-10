@@ -62,7 +62,7 @@
                     needs
                   </p>
                 {/snippet}
-              </AnimateOnScroll>}
+              </AnimateOnScroll>
             </div>
           {/snippet}
         </AnimateOnScroll>

@@ -10,7 +10,8 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       <!-- Logo -->
-      <a href="/" class="flex items-center space-x-2">
+      <a href="/" class="flex items-center space-x-3">
+        <img src="/icons/mentara/mentara-icon.png" alt="Mentara" class="h-10 w-10" />
         <div class="text-2xl font-bold" style="color: var(--primary);">
           <span class="font-futura">Mentara</span>
         </div>
