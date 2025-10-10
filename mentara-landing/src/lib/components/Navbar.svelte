@@ -50,18 +50,6 @@
           {/if}
         </a>
         <a 
-          href="/services" 
-          class="relative py-2 text-foreground transition-colors font-kollektif group"
-          class:font-semibold={isActive('/services')}
-        >
-          <span class="group-hover:opacity-80 transition-opacity" style="color: {isActive('/services') ? 'var(--primary)' : 'inherit'};">
-            Services
-          </span>
-          {#if isActive('/services')}
-            <div class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style="background-color: var(--primary);"></div>
-          {/if}
-        </a>
-        <a 
           href="/demo" 
           class="px-6 py-2 rounded-lg font-kollektif font-semibold transition-all hover:shadow-lg hover:scale-105"
           style="background: linear-gradient(to right, var(--primary), var(--secondary)); color: var(--primary-foreground);"
@@ -119,14 +107,6 @@
           style="color: {isActive('/about') ? 'var(--primary)' : 'var(--foreground)'};"
         >
           About {#if isActive('/about')}✓{/if}
-        </a>
-        <a
-          href="/services"
-          class="block py-2 transition-colors font-kollektif"
-          class:font-semibold={isActive('/services')}
-          style="color: {isActive('/services') ? 'var(--primary)' : 'var(--foreground)'};"
-        >
-          Services {#if isActive('/services')}✓{/if}
         </a>
         <a
           href="/demo"

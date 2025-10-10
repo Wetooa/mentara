@@ -237,23 +237,5 @@
     </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="py-12 border-t border-border bg-muted/30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <div
-          class="text-2xl font-bold font-futura mb-4"
-          style="color: var(--primary);"
-        >
-          Mentara
-        </div>
-        <p class="text-muted-foreground font-kollektif mb-4">
-          Empowering Minds, Transforming Lives
-        </p>
-        <p class="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Mentara. All rights reserved.
-        </p>
-      </div>
-    </div>
-  </footer>
+  <Footer />
 </div>
