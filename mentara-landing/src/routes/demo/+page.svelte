@@ -124,26 +124,109 @@
 <div class="min-h-screen bg-background">
   <Navbar />
 
-  <main class="py-12 md:py-20">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header -->
-      <div class="text-center mb-12">
-        <h1
-          class="text-4xl md:text-5xl font-bold font-futura mb-4"
-          style="color: var(--primary);"
-        >
-          Book a Demo
-        </h1>
-        <p class="text-xl text-muted-foreground font-kollektif">
-          Let's explore how Mentara can support your organization's mental
-          health needs
-        </p>
-      </div>
+  <main class="py-0 md:py-8">
+    <div class="max-w-7xl mx-auto">
+      <!-- Two Panel Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 min-h-[calc(100vh-4rem)]">
+        
+        <!-- Left Panel: Corporate Image -->
+        <div class="relative hidden lg:block bg-gradient-to-br overflow-hidden" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
+          <div class="absolute inset-0">
+            <img
+              src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=1000&fit=crop"
+              alt="Professional team in modern corporate office"
+              class="w-full h-full object-cover opacity-30 mix-blend-overlay"
+            />
+          </div>
+          
+          <!-- Content Overlay -->
+          <div class="relative z-10 flex flex-col justify-between h-full p-12 text-white">
+            <!-- Top Content -->
+            <div class="space-y-6">
+              <div class="inline-block">
+                <img src="/icons/mentara/mentara-with-text.png" alt="Mentara" class="h-12 brightness-0 invert" />
+              </div>
+              <h2 class="text-4xl font-bold font-futura leading-tight">
+                Transform Your Organization's Mental Health
+              </h2>
+              <p class="text-xl font-kollektif text-white/90 leading-relaxed">
+                Join leading organizations in creating a mentally healthy workplace with data-driven insights and 24/7 support.
+              </p>
+            </div>
 
-      <!-- Form -->
-      <div
-        class="bg-white rounded-2xl shadow-xl border border-border p-8 md:p-12"
-      >
+            <!-- Bottom Stats/Features -->
+            <div class="space-y-6">
+              <div class="grid grid-cols-2 gap-6">
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <div class="font-semibold font-kollektif">24/7 Access</div>
+                    <div class="text-sm text-white/80">Always available</div>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <div class="font-semibold font-kollektif">100+ Therapists</div>
+                    <div class="text-sm text-white/80">Licensed professionals</div>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <div class="font-semibold font-kollektif">Data-Driven</div>
+                    <div class="text-sm text-white/80">Insights & analytics</div>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <div class="font-semibold font-kollektif">Trusted by 500+</div>
+                    <div class="text-sm text-white/80">Organizations</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="pt-6 border-t border-white/20">
+                <p class="text-sm text-white/70 font-kollektif">
+                  "Mentara has transformed how we approach employee mental health. The platform is intuitive and our team loves it."
+                </p>
+                <p class="text-sm text-white/90 font-semibold mt-2">
+                  — HR Director, Fortune 500 Company
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Form -->
+        <div class="bg-white lg:bg-background overflow-y-auto">
+          <div class="p-6 md:p-12 lg:p-16">
+            <!-- Header -->
+            <div class="mb-8">
+              <div class="inline-block px-3 py-1 rounded-full mb-4" style="background-color: oklch(0.98 0.0464 124.31);">
+                <span class="text-sm font-semibold font-kollektif" style="color: var(--primary);">Let's Connect</span>
+              </div>
+              <h1
+                class="text-3xl md:text-4xl font-bold font-futura mb-3"
+                style="color: var(--primary);"
+              >
+                Book Your Demo
+              </h1>
+              <p class="text-lg text-muted-foreground font-kollektif">
+                Fill out the form below and we'll get back to you within 24 hours
+              </p>
+            </div>
+
+            <!-- Form -->
         <form onsubmit={handleSubmit} class="space-y-6">
           <!-- Name Fields -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -322,45 +405,24 @@
           >
             {isSubmitting ? "Sending..." : "Submit Demo Request"}
           </button>
-        </form>
-      </div>
+            </form>
 
-      <!-- Additional Info -->
-      <div class="mt-8 text-center">
-        <p class="text-muted-foreground font-kollektif">
-          We'll get back to you within 24 hours to schedule your personalized
-          demo.
-        </p>
-        {#if IS_DEBUG}
-          <div
-            class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
-          >
-            <p class="text-sm text-yellow-800 font-kollektif">
-              🐛 <strong>Debug Mode Active</strong> - Form pre-filled with test data
-            </p>
+            <!-- Additional Info -->
+            <div class="mt-8 text-center">
+              <p class="text-muted-foreground font-kollektif text-sm">
+                We'll get back to you within 24 hours to schedule your personalized demo.
+              </p>
+              {#if IS_DEBUG}
+                <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p class="text-sm text-yellow-800 font-kollektif">
+                    🐛 <strong>Debug Mode Active</strong> - Form pre-filled with test data
+                  </p>
+                </div>
+              {/if}
+            </div>
           </div>
-        {/if}
+        </div>
       </div>
     </div>
   </main>
-
-  <!-- Footer -->
-  <footer class="py-12 border-t border-border bg-muted/30 mt-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <div
-          class="text-2xl font-bold font-futura mb-4"
-          style="color: var(--primary);"
-        >
-          Mentara
-        </div>
-        <p class="text-muted-foreground font-kollektif mb-4">
-          Empowering Minds, Transforming Lives
-        </p>
-        <p class="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Mentara. All rights reserved.
-        </p>
-      </div>
-    </div>
-  </footer>
 </div>

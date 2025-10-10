@@ -1,8 +1,14 @@
 <script lang="ts">
+  import { page } from '$app/stores';
+  
   let isMenuOpen = $state(false);
 
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
+  }
+
+  function isActive(path: string): boolean {
+    return $page.url.pathname === path;
   }
 </script>
 
@@ -19,19 +25,46 @@
 
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center space-x-8">
-        <a href="/" class="text-foreground hover:text-primary transition-colors font-kollektif">
-          Home
+        <a 
+          href="/" 
+          class="relative py-2 text-foreground transition-colors font-kollektif group"
+          class:font-semibold={isActive('/')}
+        >
+          <span class="group-hover:opacity-80 transition-opacity" style="color: {isActive('/') ? 'var(--primary)' : 'inherit'};">
+            Home
+          </span>
+          {#if isActive('/')}
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style="background-color: var(--primary);"></div>
+          {/if}
         </a>
-        <a href="/about" class="text-foreground hover:text-primary transition-colors font-kollektif">
-          About
+        <a 
+          href="/about" 
+          class="relative py-2 text-foreground transition-colors font-kollektif group"
+          class:font-semibold={isActive('/about')}
+        >
+          <span class="group-hover:opacity-80 transition-opacity" style="color: {isActive('/about') ? 'var(--primary)' : 'inherit'};">
+            About
+          </span>
+          {#if isActive('/about')}
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style="background-color: var(--primary);"></div>
+          {/if}
         </a>
-        <a href="/services" class="text-foreground hover:text-primary transition-colors font-kollektif">
-          Services
+        <a 
+          href="/services" 
+          class="relative py-2 text-foreground transition-colors font-kollektif group"
+          class:font-semibold={isActive('/services')}
+        >
+          <span class="group-hover:opacity-80 transition-opacity" style="color: {isActive('/services') ? 'var(--primary)' : 'inherit'};">
+            Services
+          </span>
+          {#if isActive('/services')}
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style="background-color: var(--primary);"></div>
+          {/if}
         </a>
         <a 
           href="/demo" 
-          class="px-6 py-2 rounded-lg font-kollektif font-semibold transition-all hover:shadow-lg"
-          style="background-color: var(--primary); color: var(--primary-foreground);"
+          class="px-6 py-2 rounded-lg font-kollektif font-semibold transition-all hover:shadow-lg hover:scale-105"
+          style="background: linear-gradient(to right, var(--primary), var(--secondary)); color: var(--primary-foreground);"
         >
           Book a Demo
         </a>
@@ -73,26 +106,32 @@
       <div class="md:hidden py-4 space-y-4 border-t border-border">
         <a
           href="/"
-          class="block py-2 text-foreground hover:text-primary transition-colors font-kollektif"
+          class="block py-2 transition-colors font-kollektif"
+          class:font-semibold={isActive('/')}
+          style="color: {isActive('/') ? 'var(--primary)' : 'var(--foreground)'};"
         >
-          Home
+          Home {#if isActive('/')}✓{/if}
         </a>
         <a
           href="/about"
-          class="block py-2 text-foreground hover:text-primary transition-colors font-kollektif"
+          class="block py-2 transition-colors font-kollektif"
+          class:font-semibold={isActive('/about')}
+          style="color: {isActive('/about') ? 'var(--primary)' : 'var(--foreground)'};"
         >
-          About
+          About {#if isActive('/about')}✓{/if}
         </a>
         <a
           href="/services"
-          class="block py-2 text-foreground hover:text-primary transition-colors font-kollektif"
+          class="block py-2 transition-colors font-kollektif"
+          class:font-semibold={isActive('/services')}
+          style="color: {isActive('/services') ? 'var(--primary)' : 'var(--foreground)'};"
         >
-          Services
+          Services {#if isActive('/services')}✓{/if}
         </a>
         <a
           href="/demo"
           class="block px-6 py-2 rounded-lg font-kollektif font-semibold text-center transition-all hover:shadow-lg"
-          style="background-color: var(--primary); color: var(--primary-foreground);"
+          style="background: linear-gradient(to right, var(--primary), var(--secondary)); color: var(--primary-foreground);"
         >
           Book a Demo
         </a>
