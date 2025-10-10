@@ -30,6 +30,7 @@
 		]
 	},
 	"dependencies": {
-		"@emailjs/nodejs": "^5.0.2"
+		"@emailjs/nodejs": "^5.0.2",
+		"svelte-motion": "^0.12.2"
 	}
 }
