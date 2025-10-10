@@ -100,8 +100,14 @@ export const POST: RequestHandler = async ({ request }) => {
     
     emailjs.init(initConfig);
 
-    // Prepare email template parameters
+    // Prepare professional subject line
+    const subject = `🎯 New Demo Request from ${formData.firstName} ${formData.lastName} at ${formData.companyName}`;
+
+    // Prepare email template parameters with beautiful HTML
     const templateParams = {
+      subject,
+      to_name: 'Mentara Team',
+      from_name: `${formData.firstName} ${formData.lastName}`,
       firstName: formData.firstName,
       lastName: formData.lastName,
       fullName: `${formData.firstName} ${formData.lastName}`,
@@ -110,7 +116,7 @@ export const POST: RequestHandler = async ({ request }) => {
       email: formData.email,
       contactNumber: formData.contactNumber,
       companySize: formData.companySize || 'Not specified',
-      message: formData.message || 'No additional message',
+      message: formData.message || 'No additional message provided',
       submittedAt: new Date().toLocaleString('en-US', {
         weekday: 'long',
         year: 'numeric',
@@ -121,36 +127,177 @@ export const POST: RequestHandler = async ({ request }) => {
         timeZoneName: 'short',
       }),
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-          <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <h1 style="color: #436B00; text-align: center; margin-bottom: 30px;">📋 New Demo Request - Mentara</h1>
-            
-            <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 20px; margin: 20px 0; border-radius: 6px;">
-              <h3 style="color: #065F46; margin: 0 0 15px 0;">Contact Information:</h3>
-              <p style="color: #065F46; margin: 5px 0;"><strong>Name:</strong> ${formData.firstName} ${formData.lastName}</p>
-              <p style="color: #065F46; margin: 5px 0;"><strong>Email:</strong> ${formData.email}</p>
-              <p style="color: #065F46; margin: 5px 0;"><strong>Phone:</strong> ${formData.contactNumber}</p>
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Demo Request - Mentara</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f5f5;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden;">
+          
+          <!-- Header with Mentara Branding -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #6B9900 0%, #4A6B00 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="margin: 0; color: white; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">
+                📋 New Demo Request
+              </h1>
+              <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                Someone wants to learn more about Mentara!
+              </p>
+            </td>
+          </tr>
 
-            <div style="background-color: #FEF3C7; border-left: 4px solid #F59E0B; padding: 20px; margin: 20px 0; border-radius: 6px;">
-              <h3 style="color: #92400E; margin: 0 0 15px 0;">Company Information:</h3>
-              <p style="color: #92400E; margin: 5px 0;"><strong>Company:</strong> ${formData.companyName}</p>
-              <p style="color: #92400E; margin: 5px 0;"><strong>Job Title:</strong> ${formData.jobTitle}</p>
-              <p style="color: #92400E; margin: 5px 0;"><strong>Company Size:</strong> ${formData.companySize || 'Not specified'}</p>
-            </div>
+          <!-- Priority Banner -->
+          <tr>
+            <td style="background-color: #FEF3C7; padding: 16px 30px; border-bottom: 3px solid #F59E0B;">
+              <p style="margin: 0; color: #92400E; font-size: 14px; font-weight: 600; text-align: center;">
+                ⚡ High Priority - New Lead
+              </p>
+            </td>
+          </tr>
 
-            ${formData.message ? `
-            <div style="background-color: #EFF6FF; border-left: 4px solid #3B82F6; padding: 20px; margin: 20px 0; border-radius: 6px;">
-              <h3 style="color: #1E40AF; margin: 0 0 15px 0;">Additional Message:</h3>
-              <p style="color: #1E40AF; margin: 5px 0; white-space: pre-wrap;">${formData.message}</p>
-            </div>
-            ` : ''}
+          <!-- Contact Information -->
+          <tr>
+            <td style="padding: 30px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <h2 style="margin: 0 0 20px 0; color: #6B9900; font-size: 20px; font-weight: bold; border-bottom: 2px solid #6B9900; padding-bottom: 10px;">
+                      👤 Contact Information
+                    </h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 20px; background-color: #F0FDF4; border-left: 4px solid #10B981; border-radius: 8px; margin-bottom: 12px;">
+                    <p style="margin: 0 0 8px 0; color: #065F46; font-size: 15px;">
+                      <strong style="display: inline-block; width: 100px;">Name:</strong>
+                      <span style="font-size: 16px; font-weight: 600;">${formData.firstName} ${formData.lastName}</span>
+                    </p>
+                    <p style="margin: 8px 0; color: #065F46; font-size: 15px;">
+                      <strong style="display: inline-block; width: 100px;">Email:</strong>
+                      <a href="mailto:${formData.email}" style="color: #6B9900; text-decoration: none; font-weight: 500;">${formData.email}</a>
+                    </p>
+                    <p style="margin: 8px 0 0 0; color: #065F46; font-size: 15px;">
+                      <strong style="display: inline-block; width: 100px;">Phone:</strong>
+                      <a href="tel:${formData.contactNumber}" style="color: #6B9900; text-decoration: none; font-weight: 500;">${formData.contactNumber}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-            <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">
-              Submitted at: ${new Date().toLocaleString()}
-            </p>
-          </div>
-        </div>
+          <!-- Company Information -->
+          <tr>
+            <td style="padding: 0 30px 30px 30px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <h2 style="margin: 0 0 20px 0; color: #6B9900; font-size: 20px; font-weight: bold; border-bottom: 2px solid #6B9900; padding-bottom: 10px;">
+                      🏢 Company Information
+                    </h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 20px; background-color: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 8px;">
+                    <p style="margin: 0 0 8px 0; color: #78350F; font-size: 15px;">
+                      <strong style="display: inline-block; width: 130px;">Company:</strong>
+                      <span style="font-size: 16px; font-weight: 600;">${formData.companyName}</span>
+                    </p>
+                    <p style="margin: 8px 0; color: #78350F; font-size: 15px;">
+                      <strong style="display: inline-block; width: 130px;">Job Title:</strong>
+                      ${formData.jobTitle}
+                    </p>
+                    <p style="margin: 8px 0 0 0; color: #78350F; font-size: 15px;">
+                      <strong style="display: inline-block; width: 130px;">Company Size:</strong>
+                      ${formData.companySize || 'Not specified'}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          ${formData.message ? `
+          <!-- Additional Message -->
+          <tr>
+            <td style="padding: 0 30px 30px 30px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <h2 style="margin: 0 0 20px 0; color: #6B9900; font-size: 20px; font-weight: bold; border-bottom: 2px solid #6B9900; padding-bottom: 10px;">
+                      💬 Additional Message
+                    </h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 16px 20px; background-color: #EFF6FF; border-left: 4px solid #3B82F6; border-radius: 8px;">
+                    <p style="margin: 0; color: #1E3A8A; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${formData.message}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ''}
+
+          <!-- Action Button -->
+          <tr>
+            <td style="padding: 20px 30px 30px 30px; text-align: center;">
+              <a href="mailto:${formData.email}" style="display: inline-block; background: linear-gradient(135deg, #6B9900 0%, #4A6B00 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(107, 153, 0, 0.3);">
+                📧 Reply to ${formData.firstName}
+              </a>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 30px; background-color: #F9FAFB; border-top: 1px solid #E5E7EB;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="text-align: center;">
+                    <p style="margin: 0 0 8px 0; color: #6B7280; font-size: 13px;">
+                      <strong style="color: #6B9900;">⏰ Submitted:</strong> ${new Date().toLocaleString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        timeZoneName: 'short',
+                      })}
+                    </p>
+                    <p style="margin: 8px 0 0 0; color: #9CA3AF; font-size: 12px;">
+                      This is an automated notification from the Mentara Landing Page
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Branding Footer -->
+          <tr>
+            <td style="padding: 20px; background: linear-gradient(135deg, #6B9900 0%, #4A6B00 100%); text-align: center;">
+              <p style="margin: 0; color: white; font-size: 18px; font-weight: bold;">
+                Mentara
+              </p>
+              <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.8); font-size: 13px;">
+                Empowering Minds, Transforming Lives
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
       `,
     };
 

@@ -127,7 +127,9 @@
   <main class="py-0 md:py-8 lg:px-8 lg:pb-8">
     <div class="max-w-7xl mx-auto h-[calc(100vh-4rem)] lg:h-[calc(100vh-8rem)]">
       <!-- Two Panel Layout with Rounded Container -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 h-full lg:rounded-3xl lg:shadow-2xl overflow-hidden lg:border lg:border-border">
+      <div
+        class="grid grid-cols-1 lg:grid-cols-2 h-full lg:rounded-3xl lg:shadow-2xl overflow-hidden lg:border lg:border-border"
+      >
         <!-- Left Panel: Corporate Image -->
         <div
           class="relative hidden lg:block bg-gradient-to-br overflow-hidden"
@@ -293,24 +295,24 @@
 
             <!-- Form -->
             <form onsubmit={handleSubmit} class="space-y-6">
-          <!-- Name Fields -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Name Fields -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-              <label
-                for="firstName"
-                class="block text-xs font-semibold font-kollektif mb-1"
-                style="color: var(--foreground);"
-              >
-                First Name <span class="text-destructive">*</span>
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                bind:value={formData.firstName}
-                required
-                class="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 font-kollektif transition-all"
-                placeholder="John"
-              />
+                  <label
+                    for="firstName"
+                    class="block text-xs font-semibold font-kollektif mb-1"
+                    style="color: var(--foreground);"
+                  >
+                    First Name <span class="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    bind:value={formData.firstName}
+                    required
+                    class="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 font-kollektif transition-all"
+                    placeholder="John"
+                  />
                 </div>
 
                 <div>
@@ -441,13 +443,13 @@
                 >
                   Additional Information
                 </label>
-              <textarea
-                id="message"
-                bind:value={formData.message}
-                rows="3"
-                class="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 font-kollektif transition-all resize-none"
-                placeholder="Tell us more about your needs..."
-              ></textarea>
+                <textarea
+                  id="message"
+                  bind:value={formData.message}
+                  rows="3"
+                  class="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 font-kollektif transition-all resize-none"
+                  placeholder="Tell us more about your needs..."
+                ></textarea>
               </div>
 
               <!-- Submit Status -->
@@ -461,15 +463,15 @@
                 </div>
               {/if}
 
-          <!-- Submit Button -->
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            class="w-full py-3 text-sm rounded-lg font-semibold font-kollektif transition-all hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            style="background: linear-gradient(to right, var(--primary), var(--secondary)); color: var(--primary-foreground);"
-          >
-            {isSubmitting ? "Sending..." : "Submit Demo Request"}
-          </button>
+              <!-- Submit Button -->
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                class="w-full py-3 text-sm rounded-lg font-semibold font-kollektif transition-all hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                style="background: linear-gradient(to right, var(--primary), var(--secondary)); color: var(--primary-foreground);"
+              >
+                {isSubmitting ? "Sending..." : "Submit Demo Request"}
+              </button>
             </form>
 
             <!-- Additional Info -->
