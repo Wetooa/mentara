@@ -2,13 +2,13 @@
   let { variant = "green" }: { variant?: "green" | "white" } = $props();
 </script>
 
-<div class="absolute inset-0 pointer-events-none">
-  <!-- Large blurred background dots -->
+<div class="absolute inset-0 pointer-events-none overflow-visible -z-10">
+  <!-- Large blurred background dots - kept within bounds -->
   <div
     class="absolute w-64 h-64 rounded-full blur-3xl opacity-20 animate-float-slow"
     style="
-      top: 10%;
-      left: -5%;
+      top: 5%;
+      left: 2%;
       background-color: {variant === 'green'
       ? 'var(--primary)'
       : 'var(--secondary)'};
@@ -16,10 +16,10 @@
   ></div>
 
   <div
-    class="absolute w-96 h-96 rounded-full blur-3xl opacity-15 animate-float-slower"
+    class="absolute w-80 h-80 rounded-full blur-3xl opacity-15 animate-float-slower"
     style="
-      top: 40%;
-      right: -10%;
+      top: 35%;
+      right: 5%;
       background-color: {variant === 'green'
       ? 'var(--secondary)'
       : 'var(--primary)'};
@@ -29,20 +29,20 @@
   <div
     class="absolute w-48 h-48 rounded-full blur-2xl opacity-25 animate-float-medium"
     style="
-      bottom: 20%;
-      left: 10%;
+      bottom: 15%;
+      left: 8%;
       background-color: {variant === 'green'
       ? 'oklch(0.98 0.0464 124.31)'
       : 'var(--primary)'};
     "
   ></div>
 
-  <!-- Small decorative polka dots -->
+  <!-- Small decorative polka dots - within bounds -->
   <div
     class="absolute w-3 h-3 rounded-full animate-pulse"
     style="
-      top: 15%;
-      right: 20%;
+      top: 12%;
+      right: 15%;
       background-color: {variant === 'green'
       ? 'var(--primary)'
       : 'var(--secondary)'};
@@ -53,8 +53,8 @@
   <div
     class="absolute w-2 h-2 rounded-full animate-pulse delay-500"
     style="
-      top: 60%;
-      left: 15%;
+      top: 55%;
+      left: 12%;
       background-color: {variant === 'green'
       ? 'var(--secondary)'
       : 'var(--primary)'};
@@ -65,8 +65,8 @@
   <div
     class="absolute w-4 h-4 rounded-full animate-pulse delay-1000"
     style="
-      bottom: 30%;
-      right: 15%;
+      bottom: 25%;
+      right: 18%;
       background-color: {variant === 'green'
       ? 'oklch(0.98 0.0464 124.31)'
       : 'var(--primary)'};
@@ -74,12 +74,12 @@
     "
   ></div>
 
-  <!-- Medium circles -->
+  <!-- Medium circles - within bounds -->
   <div
     class="absolute w-8 h-8 rounded-full opacity-20 animate-float-fast"
     style="
-      top: 25%;
-      left: 5%;
+      top: 20%;
+      left: 8%;
       background-color: {variant === 'green'
       ? 'var(--primary)'
       : 'var(--secondary)'};
@@ -89,18 +89,42 @@
   <div
     class="absolute w-6 h-6 rounded-full opacity-25 animate-float-medium"
     style="
-      bottom: 40%;
-      right: 8%;
+      bottom: 35%;
+      right: 10%;
       background-color: {variant === 'green'
       ? 'var(--secondary)'
       : 'oklch(0.98 0.0464 124.31)'};
+    "
+  ></div>
+
+  <!-- Additional polka dots for more coverage -->
+  <div
+    class="absolute w-2 h-2 rounded-full opacity-30"
+    style="
+      top: 45%;
+      right: 25%;
+      background-color: {variant === 'green'
+      ? 'var(--primary)'
+      : 'var(--secondary)'};
+    "
+  ></div>
+
+  <div
+    class="absolute w-3 h-3 rounded-full opacity-25 animate-pulse"
+    style="
+      bottom: 50%;
+      left: 20%;
+      background-color: {variant === 'green'
+      ? 'oklch(0.98 0.0464 124.31)'
+      : 'var(--secondary)'};
     "
   ></div>
 </div>
 
 <style>
   @keyframes float-slow {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px) translateX(0px);
     }
     50% {
@@ -109,7 +133,8 @@
   }
 
   @keyframes float-medium {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px) translateX(0px);
     }
     50% {
@@ -118,7 +143,8 @@
   }
 
   @keyframes float-fast {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px) translateX(0px);
     }
     50% {
@@ -127,7 +153,8 @@
   }
 
   @keyframes float-slower {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px) translateX(0px);
     }
     50% {

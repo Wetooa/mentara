@@ -61,7 +61,7 @@
 
     <!-- Enterprise Features Section -->
     <section
-      class="py-20 relative "
+      class="py-20 relative"
       style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.15) 0%, oklch(0.98 0.0464 124.31 / 0.05) 100%);"
     >
       <ParallaxDots variant="green" />
@@ -69,7 +69,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <AnimateOnScroll x={-40} duration={800}>
             {#snippet children()}
-              <div class="relative rounded-2xl  shadow-2xl">
+              <div class="relative rounded-2xl shadow-2xl">
                 <img
                   src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop"
                   alt="Team collaboration and analytics"
@@ -175,7 +175,7 @@
     </section>
 
     <!-- Security & Compliance -->
-    <section class="py-20 relative  bg-white">
+    <section class="py-20 relative bg-white">
       <ParallaxDots variant="white" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -273,9 +273,7 @@
 
           <AnimateOnScroll x={-40} duration={800}>
             {#snippet children()}
-              <div
-                class="lg:order-1 relative rounded-2xl  shadow-2xl"
-              >
+              <div class="lg:order-1 relative rounded-2xl shadow-2xl">
                 <img
                   src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop"
                   alt="Security and data protection"
@@ -293,7 +291,7 @@
 
     <!-- Platform Features -->
     <section
-      class="py-20 relative "
+      class="py-20 relative"
       style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.15) 0%, oklch(0.98 0.0464 124.31 / 0.08) 100%);"
     >
       <ParallaxDots variant="green" />
@@ -483,7 +481,7 @@
     </section>
 
     <!-- Real-time Features -->
-    <section class="py-20 relative  bg-white">
+    <section class="py-20 relative bg-white">
       <ParallaxDots variant="white" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -581,7 +579,7 @@
 
           <AnimateOnScroll x={40} duration={800}>
             {#snippet children()}
-              <div class="relative rounded-2xl  shadow-2xl">
+              <div class="relative rounded-2xl shadow-2xl">
                 <img
                   src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=600&fit=crop"
                   alt="Real-time communication and connectivity"
@@ -599,7 +597,7 @@
 
     <!-- Technical Stack -->
     <section
-      class="py-20 relative "
+      class="py-20 relative"
       style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.12) 0%, oklch(0.98 0.0464 124.31 / 0.15) 100%);"
     >
       <ParallaxDots variant="green" />
@@ -761,7 +759,7 @@
         <!-- Infrastructure Image -->
         <AnimateOnScroll y={50} duration={800}>
           {#snippet children()}
-            <div class="mt-16 relative rounded-2xl  shadow-2xl">
+            <div class="mt-16 relative rounded-2xl shadow-2xl">
               <img
                 src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&fit=crop"
                 alt="Cloud infrastructure and technology"
@@ -789,7 +787,7 @@
 
     <!-- AI & Machine Learning -->
     <section
-      class="py-20 relative "
+      class="py-20 relative"
       style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.15) 0%, oklch(0.98 0.0464 124.31 / 0.1) 100%);"
     >
       <ParallaxDots variant="green" />
@@ -875,9 +873,7 @@
 
           <AnimateOnScroll x={-40} duration={800}>
             {#snippet children()}
-              <div
-                class="lg:order-1 relative rounded-2xl  shadow-2xl"
-              >
+              <div class="lg:order-1 relative rounded-2xl shadow-2xl">
                 <img
                   src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=600&fit=crop"
                   alt="AI and machine learning technology"
@@ -894,7 +890,7 @@
     </section>
 
     <!-- Key Features -->
-    <section class="py-20 relative  bg-white">
+    <section class="py-20 relative bg-white">
       <ParallaxDots variant="white" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll y={30} duration={600}>
@@ -1056,7 +1052,7 @@
     </section>
 
     <!-- App Screenshots Showcase -->
-    <section class="py-20 relative  bg-white">
+    <section class="py-20 relative bg-white">
       <ParallaxDots variant="white" />
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll y={30} duration={600}>
@@ -1134,7 +1130,7 @@
                 </div>
                 <div class="lg:order-2">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1205,7 +1201,7 @@
                 </div>
                 <div class="lg:order-1">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1275,7 +1271,7 @@
                 </div>
                 <div class="lg:order-2">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1345,7 +1341,7 @@
                 </div>
                 <div class="lg:order-1">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1415,7 +1411,7 @@
                 </div>
                 <div class="lg:order-2">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1485,7 +1481,7 @@
                 </div>
                 <div class="lg:order-1">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1555,7 +1551,7 @@
                 </div>
                 <div class="lg:order-2">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1625,7 +1621,7 @@
                 </div>
                 <div class="lg:order-1">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1695,7 +1691,7 @@
                 </div>
                 <div class="lg:order-2">
                   <div
-                    class="relative rounded-2xl  shadow-2xl border-2"
+                    class="relative rounded-2xl shadow-2xl border-2"
                     style="border-color: var(--primary); border-opacity: 0.2;"
                   >
                     <img
@@ -1714,7 +1710,7 @@
 
     <!-- Team Section -->
     <section
-      class="py-20 relative "
+      class="py-20 relative"
       style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.08) 0%, oklch(0.98 0.0464 124.31 / 0.12) 100%);"
     >
       <ParallaxDots variant="green" />
@@ -1742,7 +1738,7 @@
           <AnimateOnScroll y={40} duration={600} delay={100}>
             {#snippet children()}
               <div class="text-center group">
-                <div class="relative mb-6  rounded-2xl">
+                <div class="relative mb-6 rounded-2xl">
                   <img
                     src="/team/tolentino.jpg"
                     alt="Team Member"
@@ -1773,7 +1769,7 @@
           <AnimateOnScroll y={40} duration={600} delay={200}>
             {#snippet children()}
               <div class="text-center group">
-                <div class="relative mb-6  rounded-2xl">
+                <div class="relative mb-6 rounded-2xl">
                   <img
                     src="/team/sajulga.jpg"
                     alt="Team Member"
@@ -1804,7 +1800,7 @@
           <AnimateOnScroll y={40} duration={600} delay={300}>
             {#snippet children()}
               <div class="text-center group">
-                <div class="relative mb-6  rounded-2xl">
+                <div class="relative mb-6 rounded-2xl">
                   <img
                     src="/team/segundo.jpg"
                     alt="Team Member"
@@ -1836,7 +1832,7 @@
 
     <!-- CTA Section -->
     <section
-      class="py-20 relative "
+      class="py-20 relative"
       style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.12) 0%, oklch(0.98 0.0464 124.31 / 0.18) 100%);"
     >
       <ParallaxDots variant="green" />

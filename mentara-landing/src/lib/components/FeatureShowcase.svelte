@@ -61,13 +61,13 @@
       <!-- Image -->
       <div class:lg:order-2={isImageRight} class:lg:order-1={!isImageRight}>
         <div
-          class="relative rounded-2xl overflow-hidden shadow-2xl border-2 group"
+          class="relative rounded-2xl shadow-2xl border-2 group overflow-hidden"
           style="border-color: var(--primary); border-opacity: 0.2;"
         >
           <img
             src={imageSrc}
             alt={imageAlt}
-            class="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+            class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div
             class="absolute inset-0 bg-gradient-to-t from-[oklch(0.56_0.1223_127.47)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { fade, fly, scale } from 'svelte/transition';
-  import { cubicOut } from 'svelte/easing';
+  import { onMount } from "svelte";
+  import { fade, fly, scale } from "svelte/transition";
+  import { cubicOut } from "svelte/easing";
 
   let {
     children,
@@ -11,7 +11,7 @@
     x = 0,
     scaleAmount = 1,
     once = true,
-    className = ''
+    className = "",
   }: {
     children: any;
     delay?: number;
@@ -54,11 +54,9 @@
   });
 </script>
 
-<div bind:this={element} class={className}>
+<div bind:this={element} class={className + " overflow-visible"}>
   {#if isVisible}
-    <div
-      in:fly={{ y, x, duration, delay, easing: cubicOut }}
-    >
+    <div in:fly={{ y, x, duration, delay, easing: cubicOut }}>
       {@render children()}
     </div>
   {:else}
@@ -67,4 +65,3 @@
     </div>
   {/if}
 </div>
-
