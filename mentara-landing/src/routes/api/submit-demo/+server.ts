@@ -1,15 +1,15 @@
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import emailjs from '@emailjs/nodejs';
-import { env } from '$env/dynamic/private';
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import emailjs from "@emailjs/nodejs";
+import { env } from "$env/dynamic/private";
 
 // Environment variables for EmailJS configuration
 // These should be set in .env file
-const EMAILJS_SERVICE_ID = env.EMAILJS_SERVICE_ID || '';
-const EMAILJS_TEMPLATE_ID = env.EMAILJS_TEMPLATE_ID || '';
-const EMAILJS_PUBLIC_KEY = env.EMAILJS_PUBLIC_KEY || '';
-const EMAILJS_PRIVATE_KEY = env.EMAILJS_PRIVATE_KEY || '';
-const IS_DEBUG = env.NODE_ENV === 'development';
+const EMAILJS_SERVICE_ID = env.EMAILJS_SERVICE_ID || "";
+const EMAILJS_TEMPLATE_ID = env.EMAILJS_TEMPLATE_ID || "";
+const EMAILJS_PUBLIC_KEY = env.EMAILJS_PUBLIC_KEY || "";
+const EMAILJS_PRIVATE_KEY = env.EMAILJS_PRIVATE_KEY || "";
+const IS_DEBUG = env.NODE_ENV === "development";
 
 interface DemoFormData {
   firstName: string;
@@ -28,11 +28,16 @@ export const POST: RequestHandler = async ({ request }) => {
     const formData: DemoFormData = await request.json();
 
     // Validate required fields
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.companyName) {
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.companyName
+    ) {
       return json(
         {
           success: false,
-          message: 'Missing required fields',
+          message: "Missing required fields",
         },
         { status: 400 }
       );
@@ -44,7 +49,7 @@ export const POST: RequestHandler = async ({ request }) => {
       return json(
         {
           success: false,
-          message: 'Invalid email format',
+          message: "Invalid email format",
         },
         { status: 400 }
       );
@@ -53,38 +58,43 @@ export const POST: RequestHandler = async ({ request }) => {
     // Check if EmailJS is configured
     if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
       const missingVars = [];
-      if (!EMAILJS_SERVICE_ID) missingVars.push('EMAILJS_SERVICE_ID');
-      if (!EMAILJS_TEMPLATE_ID) missingVars.push('EMAILJS_TEMPLATE_ID');
-      if (!EMAILJS_PUBLIC_KEY) missingVars.push('EMAILJS_PUBLIC_KEY');
-      
-      console.error('EmailJS not configured. Missing environment variables:', missingVars.join(', '));
-      
+      if (!EMAILJS_SERVICE_ID) missingVars.push("EMAILJS_SERVICE_ID");
+      if (!EMAILJS_TEMPLATE_ID) missingVars.push("EMAILJS_TEMPLATE_ID");
+      if (!EMAILJS_PUBLIC_KEY) missingVars.push("EMAILJS_PUBLIC_KEY");
+
+      console.error(
+        "EmailJS not configured. Missing environment variables:",
+        missingVars.join(", ")
+      );
+
       if (IS_DEBUG) {
         return json(
           {
             success: false,
-            message: `Debug: Missing environment variables: ${missingVars.join(', ')}. Check your .env file.`,
+            message: `Debug: Missing environment variables: ${missingVars.join(
+              ", "
+            )}. Check your .env file.`,
           },
           { status: 500 }
         );
       }
-      
+
       return json(
         {
           success: false,
-          message: 'Email service is not configured. Please contact support.',
+          message: "Email service is not configured. Please contact support.",
         },
         { status: 500 }
       );
     }
-    
+
     if (IS_DEBUG) {
-      console.log('📧 Debug Mode - EmailJS Config Status:', {
+      console.log("📧 Debug Mode - EmailJS Config Status:", {
         hasServiceId: !!EMAILJS_SERVICE_ID,
         hasTemplateId: !!EMAILJS_TEMPLATE_ID,
         hasPublicKey: !!EMAILJS_PUBLIC_KEY,
         hasPrivateKey: !!EMAILJS_PRIVATE_KEY,
-        serviceId: EMAILJS_SERVICE_ID.substring(0, 10) + '...',
+        serviceId: EMAILJS_SERVICE_ID.substring(0, 10) + "...",
       });
     }
 
@@ -92,12 +102,12 @@ export const POST: RequestHandler = async ({ request }) => {
     const initConfig: any = {
       publicKey: EMAILJS_PUBLIC_KEY,
     };
-    
+
     // Add private key if available for enhanced security
     if (EMAILJS_PRIVATE_KEY) {
       initConfig.privateKey = EMAILJS_PRIVATE_KEY;
     }
-    
+
     emailjs.init(initConfig);
 
     // Prepare professional subject line
@@ -106,7 +116,7 @@ export const POST: RequestHandler = async ({ request }) => {
     // Prepare email template parameters with beautiful HTML
     const templateParams = {
       subject,
-      to_name: 'Mentara Team',
+      to_name: "Mentara Team",
       from_name: `${formData.firstName} ${formData.lastName}`,
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -115,16 +125,16 @@ export const POST: RequestHandler = async ({ request }) => {
       jobTitle: formData.jobTitle,
       email: formData.email,
       contactNumber: formData.contactNumber,
-      companySize: formData.companySize || 'Not specified',
-      message: formData.message || 'No additional message provided',
-      submittedAt: new Date().toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        timeZoneName: 'short',
+      companySize: formData.companySize || "Not specified",
+      message: formData.message || "No additional message provided",
+      submittedAt: new Date().toLocaleString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
       }),
       html: `
 <!DOCTYPE html>
@@ -176,15 +186,25 @@ export const POST: RequestHandler = async ({ request }) => {
                   <td style="padding: 12px 20px; background-color: #F0FDF4; border-left: 4px solid #10B981; border-radius: 8px; margin-bottom: 12px;">
                     <p style="margin: 0 0 8px 0; color: #065F46; font-size: 15px;">
                       <strong style="display: inline-block; width: 100px;">Name:</strong>
-                      <span style="font-size: 16px; font-weight: 600;">${formData.firstName} ${formData.lastName}</span>
+                      <span style="font-size: 16px; font-weight: 600;">${
+                        formData.firstName
+                      } ${formData.lastName}</span>
                     </p>
                     <p style="margin: 8px 0; color: #065F46; font-size: 15px;">
                       <strong style="display: inline-block; width: 100px;">Email:</strong>
-                      <a href="mailto:${formData.email}" style="color: #6B9900; text-decoration: none; font-weight: 500;">${formData.email}</a>
+                      <a href="mailto:${
+                        formData.email
+                      }" style="color: #6B9900; text-decoration: none; font-weight: 500;">${
+        formData.email
+      }</a>
                     </p>
                     <p style="margin: 8px 0 0 0; color: #065F46; font-size: 15px;">
                       <strong style="display: inline-block; width: 100px;">Phone:</strong>
-                      <a href="tel:${formData.contactNumber}" style="color: #6B9900; text-decoration: none; font-weight: 500;">${formData.contactNumber}</a>
+                      <a href="tel:${
+                        formData.contactNumber
+                      }" style="color: #6B9900; text-decoration: none; font-weight: 500;">${
+        formData.contactNumber
+      }</a>
                     </p>
                   </td>
                 </tr>
@@ -207,7 +227,9 @@ export const POST: RequestHandler = async ({ request }) => {
                   <td style="padding: 12px 20px; background-color: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 8px;">
                     <p style="margin: 0 0 8px 0; color: #78350F; font-size: 15px;">
                       <strong style="display: inline-block; width: 130px;">Company:</strong>
-                      <span style="font-size: 16px; font-weight: 600;">${formData.companyName}</span>
+                      <span style="font-size: 16px; font-weight: 600;">${
+                        formData.companyName
+                      }</span>
                     </p>
                     <p style="margin: 8px 0; color: #78350F; font-size: 15px;">
                       <strong style="display: inline-block; width: 130px;">Job Title:</strong>
@@ -215,7 +237,7 @@ export const POST: RequestHandler = async ({ request }) => {
                     </p>
                     <p style="margin: 8px 0 0 0; color: #78350F; font-size: 15px;">
                       <strong style="display: inline-block; width: 130px;">Company Size:</strong>
-                      ${formData.companySize || 'Not specified'}
+                      ${formData.companySize || "Not specified"}
                     </p>
                   </td>
                 </tr>
@@ -223,7 +245,9 @@ export const POST: RequestHandler = async ({ request }) => {
             </td>
           </tr>
 
-          ${formData.message ? `
+          ${
+            formData.message
+              ? `
           <!-- Additional Message -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
@@ -243,12 +267,16 @@ export const POST: RequestHandler = async ({ request }) => {
               </table>
             </td>
           </tr>
-          ` : ''}
+          `
+              : ""
+          }
 
           <!-- Action Button -->
           <tr>
             <td style="padding: 20px 30px 30px 30px; text-align: center;">
-              <a href="mailto:${formData.email}" style="display: inline-block; background: linear-gradient(135deg, #6B9900 0%, #4A6B00 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(107, 153, 0, 0.3);">
+              <a href="mailto:${
+                formData.email
+              }" style="display: inline-block; background: linear-gradient(135deg, #6B9900 0%, #4A6B00 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(107, 153, 0, 0.3);">
                 📧 Reply to ${formData.firstName}
               </a>
             </td>
@@ -261,15 +289,18 @@ export const POST: RequestHandler = async ({ request }) => {
                 <tr>
                   <td style="text-align: center;">
                     <p style="margin: 0 0 8px 0; color: #6B7280; font-size: 13px;">
-                      <strong style="color: #6B9900;">⏰ Submitted:</strong> ${new Date().toLocaleString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        timeZoneName: 'short',
-                      })}
+                      <strong style="color: #6B9900;">⏰ Submitted:</strong> ${new Date().toLocaleString(
+                        "en-US",
+                        {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          timeZoneName: "short",
+                        }
+                      )}
                     </p>
                     <p style="margin: 8px 0 0 0; color: #9CA3AF; font-size: 12px;">
                       This is an automated notification from the Mentara Landing Page
@@ -302,31 +333,27 @@ export const POST: RequestHandler = async ({ request }) => {
     };
 
     // Send email using EmailJS
-    await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      templateParams
-    );
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
 
-    console.log('✅ Demo request email sent successfully:', {
+    console.log("✅ Demo request email sent successfully:", {
       email: formData.email,
       company: formData.companyName,
     });
 
     return json({
       success: true,
-      message: 'Demo request sent successfully! We will contact you soon.',
+      message: "Demo request sent successfully! We will contact you soon.",
     });
   } catch (error) {
-    console.error('❌ Failed to send demo request email:', error);
-    
+    console.error("❌ Failed to send demo request email:", error);
+
     return json(
       {
         success: false,
-        message: 'Failed to send demo request. Please try again later or contact us directly.',
+        message:
+          "Failed to send demo request. Please try again later or contact us directly.",
       },
       { status: 500 }
     );
   }
 };
-
