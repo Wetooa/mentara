@@ -4,35 +4,59 @@ export default {
   theme: {
     extend: {
       colors: {
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        card: {
+          DEFAULT: 'var(--card)',
+          foreground: 'var(--card-foreground)',
+        },
+        popover: {
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)',
+        },
         primary: {
-          DEFAULT: 'oklch(0.56 0.1223 127.47)',
-          foreground: 'oklch(0.98 0 0)',
+          DEFAULT: 'var(--primary)',
+          foreground: 'var(--primary-foreground)',
         },
         secondary: {
-          DEFAULT: 'oklch(0.4 0.0812 92.8)',
-          foreground: 'oklch(0.98 0 0)',
+          DEFAULT: 'var(--secondary)',
+          foreground: 'var(--secondary-foreground)',
         },
-        tertiary: 'oklch(0.98 0.0464 124.31)',
+        muted: {
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          foreground: 'var(--accent-foreground)',
+        },
+        destructive: {
+          DEFAULT: 'var(--destructive)',
+        },
+        border: 'var(--border)',
+        input: 'var(--input)',
+        ring: 'var(--ring)',
+        tertiary: 'var(--tertiary)',
         community: {
           calm: {
-            DEFAULT: 'oklch(0.85 0.05 180)',
-            foreground: 'oklch(0.25 0.08 180)',
+            DEFAULT: 'var(--community-calm)',
+            foreground: 'var(--community-calm-foreground)',
           },
           warm: {
-            DEFAULT: 'oklch(0.92 0.03 60)',
-            foreground: 'oklch(0.35 0.06 60)',
+            DEFAULT: 'var(--community-warm)',
+            foreground: 'var(--community-warm-foreground)',
           },
           soothing: {
-            DEFAULT: 'oklch(0.88 0.04 280)',
-            foreground: 'oklch(0.3 0.07 280)',
+            DEFAULT: 'var(--community-soothing)',
+            foreground: 'var(--community-soothing-foreground)',
           },
           heart: {
-            DEFAULT: 'oklch(0.82 0.06 350)',
-            foreground: 'oklch(0.4 0.1 350)',
+            DEFAULT: 'var(--community-heart)',
+            foreground: 'var(--community-heart-foreground)',
           },
           accent: {
-            DEFAULT: 'oklch(0.75 0.08 160)',
-            foreground: 'oklch(0.98 0.01 160)',
+            DEFAULT: 'var(--community-accent)',
+            foreground: 'var(--community-accent-foreground)',
           },
         },
       },
@@ -41,9 +65,9 @@ export default {
         kollektif: ['Kollektif', 'sans-serif'],
       },
       borderRadius: {
-        lg: '1.25rem',
-        md: 'calc(1.25rem - 2px)',
-        sm: 'calc(1.25rem - 4px)',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },
