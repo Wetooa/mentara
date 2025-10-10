@@ -4,18 +4,23 @@ A beautiful, modern landing page for Mentara - a mental health technology platfo
 
 ## 🚀 Features
 
-- **Modern Design**: Inspired by leading mental health platforms with custom Mentara branding
+- **Modern Design**: Vibrant, animated landing page with custom Mentara branding
+- **Smooth Animations**: Professional animations using svelte-motion (scroll-triggered, hover effects)
 - **Responsive**: Fully responsive design that works on all devices
 - **Demo Request Form**: Comprehensive form to capture leads and demo requests
-- **Email Integration**: Automated email notifications via EmailJS
+- **Email Integration**: Server-side email notifications via EmailJS (Node.js)
+- **Debug Mode**: Pre-filled forms in development with detailed error messages
 - **Custom Styling**: Using Mentara's custom color scheme and fonts (Futura, Kollektif)
+- **Rich Assets**: Team photos, icons, and brand assets ready for expansion
 
 ## 🛠️ Tech Stack
 
-- **Framework**: SvelteKit
-- **Styling**: TailwindCSS with custom OKLCH color system
-- **Email Service**: EmailJS
+- **Framework**: SvelteKit 2.x (Svelte 5)
+- **Styling**: TailwindCSS 4.x with custom OKLCH color system
+- **Animations**: svelte-motion (Framer Motion for Svelte)
+- **Email Service**: EmailJS (Node.js)
 - **Package Manager**: pnpm
+- **Language**: TypeScript
 
 ## 📦 Installation
 
@@ -38,6 +43,8 @@ cp .env.example .env
 - `EMAILJS_SERVICE_ID`: Your EmailJS service ID
 - `EMAILJS_TEMPLATE_ID`: Your EmailJS template ID
 - `EMAILJS_PUBLIC_KEY`: Your EmailJS public key
+- `EMAILJS_PRIVATE_KEY`: (Optional) Your EmailJS private key for enhanced security
+- `NODE_ENV`: Set to `development` for debug mode with pre-filled forms
 
 Get these from [EmailJS Dashboard](https://dashboard.emailjs.com/)
 
