@@ -594,7 +594,7 @@ export const mockSessions: GroupSession[] = [
     userRSVP: "attending",
   },
 
-  // Past Completed Session - Hybrid Group Therapy
+  // Past Completed Session - Hybrid Group Therapy - OCD SUPPORT COMMUNITY
   {
     id: "session-14",
     title: "OCD Support Group: Managing Intrusive Thoughts",
@@ -612,10 +612,10 @@ export const mockSessions: GroupSession[] = [
     location: "Wellness Center, 555 Peace Street, Room 3B",
     meetingLink: "https://meet.mentara.app/ocd-support",
     host: mockHosts[0],
-    communityId: "community-1",
-    communityName: "Mental Wellness Hub",
-    roomId: "room-1",
-    roomName: "Support Groups",
+    communityId: "a1124eaa-fa27-46e7-b32a-5dc7e446ee29", // REAL OCD Support Community ID
+    communityName: "OCD Support Community",
+    roomId: "5460e7ec-deeb-4fad-abe2-e84fcb0ed199", // General Discussion room
+    roomName: "General Discussion",
     status: "completed",
     tags: ["ocd", "intrusive-thoughts", "support-group", "therapy"],
     requiresApproval: true,
@@ -634,6 +634,118 @@ export const mockSessions: GroupSession[] = [
     ],
     createdAt: subDays(new Date(), 90).toISOString(),
     updatedAt: subDays(new Date(), 6).toISOString(),
+    userRSVP: "attending",
+  },
+
+  // Upcoming Session - OCD SUPPORT COMMUNITY
+  {
+    id: "session-21",
+    title: "Exposure & Response Prevention (ERP) Workshop",
+    description:
+      "Learn and practice ERP techniques with a licensed therapist. This evidence-based approach is the gold standard for OCD treatment. Includes guided exercises and homework planning.",
+    type: "virtual",
+    format: "workshop",
+    startTime: addDays(new Date(), 4).toISOString(),
+    endTime: addHours(addDays(new Date(), 4), 2).toISOString(),
+    timezone: "America/New_York",
+    duration: 120,
+    maxParticipants: 20,
+    currentParticipants: 14,
+    waitlistCount: 2,
+    meetingLink: "https://meet.mentara.app/erp-workshop",
+    meetingPassword: "ocd2024",
+    host: mockHosts[0],
+    communityId: "a1124eaa-fa27-46e7-b32a-5dc7e446ee29", // REAL OCD Support Community ID
+    communityName: "OCD Support Community",
+    roomId: "5460e7ec-deeb-4fad-abe2-e84fcb0ed199",
+    roomName: "General Discussion",
+    status: "upcoming",
+    tags: ["ocd", "erp", "exposure-therapy", "evidence-based", "workshop"],
+    requiresApproval: false,
+    isRecurring: false,
+    participants: generateMockParticipants(14, "session-21"),
+    waitlist: generateMockParticipants(2, "session-21-waitlist"),
+    materials: [
+      "https://mentara.app/resources/erp-guide.pdf",
+      "https://mentara.app/resources/exposure-hierarchy.pdf",
+    ],
+    createdAt: subDays(new Date(), 15).toISOString(),
+    updatedAt: subDays(new Date(), 1).toISOString(),
+    userRSVP: "attending",
+  },
+
+  // Upcoming Session - OCD SUPPORT COMMUNITY
+  {
+    id: "session-22",
+    title: "Living with OCD: Daily Coping Strategies",
+    description:
+      "Virtual support circle for sharing day-to-day coping strategies. Discuss challenges, victories, and practical tips for managing OCD in everyday life.",
+    type: "virtual",
+    format: "support-circle",
+    startTime: addDays(new Date(), 1).toISOString(),
+    endTime: addHours(addDays(new Date(), 1), 1.5).toISOString(),
+    timezone: "America/Los_Angeles",
+    duration: 90,
+    maxParticipants: 15,
+    currentParticipants: 11,
+    waitlistCount: 0,
+    meetingLink: "https://meet.mentara.app/ocd-daily-coping",
+    host: mockHosts[2],
+    communityId: "a1124eaa-fa27-46e7-b32a-5dc7e446ee29", // REAL OCD Support Community ID
+    communityName: "OCD Support Community",
+    roomId: "5460e7ec-deeb-4fad-abe2-e84fcb0ed199",
+    roomName: "General Discussion",
+    status: "upcoming",
+    tags: ["ocd", "coping-strategies", "support-circle", "peer-support"],
+    requiresApproval: false,
+    isRecurring: true,
+    recurrencePattern: {
+      frequency: "weekly",
+      daysOfWeek: [2], // Tuesday
+    },
+    participants: generateMockParticipants(11, "session-22"),
+    waitlist: [],
+    createdAt: subDays(new Date(), 30).toISOString(),
+    updatedAt: new Date().toISOString(),
+    userRSVP: "none",
+  },
+
+  // Past Completed Session - OCD SUPPORT COMMUNITY
+  {
+    id: "session-23",
+    title: "Understanding OCD Subtypes",
+    description:
+      "Educational session on different manifestations of OCD including contamination fears, harm OCD, pure-O, and scrupulosity. Learn that you're not alone in your specific experiences.",
+    type: "virtual",
+    format: "webinar",
+    startTime: subDays(new Date(), 15).toISOString(),
+    endTime: addHours(subDays(new Date(), 15), 1).toISOString(),
+    timezone: "America/New_York",
+    duration: 60,
+    maxParticipants: 50,
+    currentParticipants: 43,
+    waitlistCount: 0,
+    meetingLink: "https://meet.mentara.app/ocd-subtypes",
+    host: mockHosts[1],
+    communityId: "a1124eaa-fa27-46e7-b32a-5dc7e446ee29", // REAL OCD Support Community ID
+    communityName: "OCD Support Community",
+    roomId: "5460e7ec-deeb-4fad-abe2-e84fcb0ed199",
+    roomName: "General Discussion",
+    status: "completed",
+    tags: ["ocd", "education", "subtypes", "webinar", "understanding"],
+    requiresApproval: false,
+    isRecurring: false,
+    participants: generateMockParticipants(43, "session-23"),
+    waitlist: [],
+    recordingUrl: "https://mentara.app/recordings/ocd-subtypes-2024",
+    notes:
+      "Eye-opening session! Many participants felt validated learning about different OCD presentations.",
+    materials: [
+      "https://mentara.app/resources/ocd-subtypes-guide.pdf",
+      "https://mentara.app/resources/identifying-your-ocd-type.pdf",
+    ],
+    createdAt: subDays(new Date(), 45).toISOString(),
+    updatedAt: subDays(new Date(), 15).toISOString(),
     userRSVP: "attending",
   },
 
