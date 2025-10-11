@@ -16,12 +16,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Heart,
   MessageCircle,
   Hash,
   Users,
-  Calendar,
+  Calendar as CalendarIcon,
   PenSquare,
   Send,
   Lock,
@@ -33,7 +34,6 @@ import {
   Trash2,
   Eye,
   Stethoscope,
-  UserCheck,
   Plus
 } from "lucide-react";
 import {
@@ -46,6 +46,9 @@ import { useCommunityStats } from "@/hooks/community";
 import { cn } from "@/lib/utils";
 import { getRoleConfig, type UserRole } from "@/lib/community/roleConfig";
 import type { Post } from "@/types/api/communities";
+import { SessionsList, SessionDetailModal, CreateSessionModal } from "@/components/community/sessions";
+import { useSessions } from "@/hooks/community/useSessions";
+import { GroupSession } from "@/types/api/sessions";
 
 interface CommunityPageProps {
   role: UserRole;
@@ -102,6 +105,36 @@ export default function CommunityPage({ role }: CommunityPageProps) {
 
   // Mobile sidebar visibility state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Sessions state
+  const [activeContentTab, setActiveContentTab] = useState<'posts' | 'sessions'>('posts');
+  const [selectedSession, setSelectedSession] = useState<GroupSession | null>(null);
+  const [isSessionDetailOpen, setIsSessionDetailOpen] = useState(false);
+  const [isCreateSessionOpen, setIsCreateSessionOpen] = useState(false);
+
+  // Sessions hook
+  const { sessions, isLoading: sessionsLoading, handleRSVP } = useSessions({
+    communityId: selectedCommunityId,
+    roomId: selectedRoomId,
+  });
+
+  // Session handlers
+  const handleViewSessionDetails = (session: GroupSession) => {
+    setSelectedSession(session);
+    setIsSessionDetailOpen(true);
+  };
+
+  const handleSessionRSVP = async (sessionId: string, status: 'join' | 'leave') => {
+    await handleRSVP(sessionId, status);
+    if (selectedSession?.id === sessionId) {
+      const updatedSession = sessions.find(s => s.id === sessionId);
+      if (updatedSession) {
+        setSelectedSession(updatedSession);
+      }
+    }
+  };
+
+  const canCreateSession = role === 'therapist' || role === 'moderator';
 
   // Navigation function for viewing post details
   const handleViewPost = (postId: string) => {
@@ -505,11 +538,32 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                   </div>
                 </div>
 
-                {/* Posts Content with fixed scrolling */}
-                <ScrollArea className={cn(
-                  "h-[calc(100vh-240px)] relative",
-                  config.features.advancedTheming ? "bg-community-warm/10" : "bg-neutral-50"
-                )}>
+                {/* Content Tabs: Posts & Sessions */}
+                <Tabs value={activeContentTab} onValueChange={(value) => setActiveContentTab(value as 'posts' | 'sessions')} className="flex-1 flex flex-col">
+                  <div className="px-4 lg:px-6 pt-4 bg-white border-b">
+                    <TabsList className="grid w-full max-w-md grid-cols-2">
+                      <TabsTrigger value="posts" className="gap-2">
+                        <MessageCircle className="h-4 w-4" />
+                        Posts
+                      </TabsTrigger>
+                      <TabsTrigger value="sessions" className="gap-2">
+                        <CalendarIcon className="h-4 w-4" />
+                        Sessions
+                        {sessions.filter(s => s.status === 'upcoming' || s.status === 'ongoing').length > 0 && (
+                          <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                            {sessions.filter(s => s.status === 'upcoming' || s.status === 'ongoing').length}
+                          </Badge>
+                        )}
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+
+                  {/* Posts Tab */}
+                  <TabsContent value="posts" className="flex-1 mt-0">
+                    <ScrollArea className={cn(
+                      "h-[calc(100vh-290px)] relative",
+                      config.features.advancedTheming ? "bg-community-warm/10" : "bg-neutral-50"
+                    )}>
                   {/* Background decoration for advanced theming */}
                   {config.features.advancedTheming && (
                     <div className="absolute inset-0 bg-community-gradient opacity-20" />
@@ -834,7 +888,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                                       "text-sm flex items-center gap-1",
                                       config.features.advancedTheming ? "text-community-soothing-foreground" : "text-neutral-500"
                                     )}>
-                                      <Calendar className="h-3 w-3" />
+                                      <CalendarIcon className="h-3 w-3" />
                                       {formatDistanceToNow(new Date(), { addSuffix: true })}
                                     </p>
                                   </div>
@@ -997,6 +1051,29 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                     )}
                   </div>
                 </ScrollArea>
+                  </TabsContent>
+
+                  {/* Sessions Tab */}
+                  <TabsContent value="sessions" className="flex-1 mt-0">
+                    <ScrollArea className={cn(
+                      "h-[calc(100vh-290px)] relative",
+                      config.features.advancedTheming ? "bg-community-warm/10" : "bg-neutral-50"
+                    )}>
+                      <div className="relative max-w-6xl mx-auto p-4 lg:p-6 pb-8">
+                        <SessionsList
+                          sessions={sessions}
+                          onViewDetails={handleViewSessionDetails}
+                          onRSVP={handleSessionRSVP}
+                          onCreateSession={() => setIsCreateSessionOpen(true)}
+                          canCreateSession={canCreateSession}
+                          communityId={selectedCommunityId}
+                          roomId={selectedRoomId}
+                          isLoading={sessionsLoading}
+                        />
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
           </ResizablePanel>
@@ -1087,17 +1164,38 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                 config.features.advancedTheming ? "border-community-calm/30" : "border-gray-200"
               )}>
                 <h1 className={cn(
-                  "text-xl font-bold truncate",
+                  "text-xl font-bold truncate mb-3",
                   config.features.advancedTheming ? "text-community-calm-foreground" : "text-neutral-800"
                 )}>
                   {selectedRoom?.name}
                 </h1>
+
+                {/* Mobile Tabs */}
+                <Tabs value={activeContentTab} onValueChange={(value) => setActiveContentTab(value as 'posts' | 'sessions')}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="posts" className="text-xs gap-1.5">
+                      <MessageCircle className="h-3 w-3" />
+                      Posts
+                    </TabsTrigger>
+                    <TabsTrigger value="sessions" className="text-xs gap-1.5">
+                      <CalendarIcon className="h-3 w-3" />
+                      Sessions
+                      {sessions.filter(s => s.status === 'upcoming' || s.status === 'ongoing').length > 0 && (
+                        <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
+                          {sessions.filter(s => s.status === 'upcoming' || s.status === 'ongoing').length}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
-              <ScrollArea className={cn(
-                "flex-1 min-h-0",
-                config.features.advancedTheming ? "bg-community-warm/10" : "bg-neutral-50"
-              )}>
-                <div className="p-4">
+
+              <TabsContent value="posts" className="flex-1 mt-0">
+                <ScrollArea className={cn(
+                  "flex-1 min-h-0 h-[calc(100vh-200px)]",
+                  config.features.advancedTheming ? "bg-community-warm/10" : "bg-neutral-50"
+                )}>
+                  <div className="p-4">
                   {postsLoading ? (
                     // Mobile Loading state
                     <div className="space-y-4">
@@ -1285,10 +1383,50 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                   )}
                 </div>
               </ScrollArea>
+              </TabsContent>
+
+              {/* Mobile Sessions Tab */}
+              <TabsContent value="sessions" className="flex-1 mt-0">
+                <ScrollArea className={cn(
+                  "flex-1 min-h-0 h-[calc(100vh-200px)]",
+                  config.features.advancedTheming ? "bg-community-warm/10" : "bg-neutral-50"
+                )}>
+                  <div className="p-4">
+                    <SessionsList
+                      sessions={sessions}
+                      onViewDetails={handleViewSessionDetails}
+                      onRSVP={handleSessionRSVP}
+                      onCreateSession={() => setIsCreateSessionOpen(true)}
+                      canCreateSession={canCreateSession}
+                      communityId={selectedCommunityId}
+                      roomId={selectedRoomId}
+                      isLoading={sessionsLoading}
+                    />
+                  </div>
+                </ScrollArea>
+              </TabsContent>
             </div>
           )}
         </div>
       </div>
+
+      {/* Session Modals */}
+      <SessionDetailModal
+        session={selectedSession}
+        isOpen={isSessionDetailOpen}
+        onClose={() => {
+          setIsSessionDetailOpen(false);
+          setSelectedSession(null);
+        }}
+        onRSVP={handleSessionRSVP}
+      />
+
+      <CreateSessionModal
+        isOpen={isCreateSessionOpen}
+        onClose={() => setIsCreateSessionOpen(false)}
+        communityId={selectedCommunityId}
+        roomId={selectedRoomId}
+      />
     </main>
   );
 }
