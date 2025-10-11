@@ -88,7 +88,7 @@ export function PostsList({
                     <AvatarFallback className={cn(
                       "font-bold text-base",
                       advancedTheming 
-                        ? "bg-gradient-to-br from-community-accent/30 to-community-heart/20 text-community-calm-foreground"
+                        ? "bg-gradient-to-br from-primary/20 to-secondary/20 text-primary"
                         : "bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700"
                     )}>
                       {getUserInitials(post.user.firstName, post.user.lastName)}
@@ -103,22 +103,22 @@ export function PostsList({
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className={cn(
                       "font-semibold truncate",
-                      advancedTheming ? "text-community-calm-foreground" : "text-neutral-800"
+                      advancedTheming ? "text-foreground" : "text-neutral-800"
                     )}>
                       {post.user.firstName} {post.user.lastName}
                     </h3>
                     <div className={cn(
                       "px-3 py-1 rounded-full border shadow-sm",
                       advancedTheming 
-                        ? "bg-gradient-to-r from-community-accent/20 to-community-soothing/20 border-community-accent/30"
+                        ? "bg-primary/10 border-primary/30"
                         : "bg-neutral-50 border-neutral-200"
                     )}>
                       <span className={cn(
                         "text-xs font-semibold flex items-center gap-1",
-                        advancedTheming ? "text-community-calm-foreground" : "text-neutral-700"
+                        advancedTheming ? "text-primary" : "text-neutral-700"
                       )}>
                         {userRole === 'therapist' && (post.user as any)?.role === 'therapist' && (
-                          <Stethoscope className="h-3 w-3 text-blue-600" />
+                          <Stethoscope className="h-3 w-3 text-primary" />
                         )}
                         Member
                       </span>
@@ -126,7 +126,7 @@ export function PostsList({
                   </div>
                   <p className={cn(
                     "text-sm flex items-center gap-1",
-                    advancedTheming ? "text-community-soothing-foreground" : "text-neutral-500"
+                    advancedTheming ? "text-muted-foreground" : "text-neutral-500"
                   )}>
                     <CalendarIcon className="h-3 w-3" />
                     {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
@@ -140,7 +140,7 @@ export function PostsList({
                       variant="ghost"
                       size="sm"
                       onClick={() => onEditPost?.(post)}
-                      className="h-8 w-8 p-0 hover:bg-community-accent/10 text-community-soothing-foreground hover:text-community-accent"
+                      className="h-8 w-8 p-0 hover:bg-primary/10 text-muted-foreground hover:text-primary"
                       disabled={editPostPending}
                     >
                       <Edit3 className="h-4 w-4" />
@@ -149,7 +149,7 @@ export function PostsList({
                       variant="ghost"
                       size="sm"
                       onClick={() => onDeletePost?.(post.id)}
-                      className="h-8 w-8 p-0 hover:bg-community-heart/10 text-community-soothing-foreground hover:text-community-heart"
+                      className="h-8 w-8 p-0 hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                       disabled={deletePostPending}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -161,7 +161,7 @@ export function PostsList({
               <CardTitle className={cn(
                 "mt-6 text-2xl font-bold leading-relaxed transition-colors duration-300",
                 advancedTheming 
-                  ? "text-community-calm-foreground group-hover:text-community-accent"
+                  ? "text-foreground group-hover:text-primary"
                   : "text-neutral-800 group-hover:text-blue-700"
               )}>
                 {post.title}
@@ -178,7 +178,7 @@ export function PostsList({
                 )}>
                   <p className={cn(
                     "whitespace-pre-wrap leading-relaxed text-lg font-medium",
-                    advancedTheming ? "text-community-calm-foreground" : "text-neutral-700"
+                    advancedTheming ? "text-foreground" : "text-neutral-700"
                   )}>
                     {post.content}
                   </p>
@@ -221,22 +221,22 @@ export function PostsList({
                   </button>
 
                   <div className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl border-2 shadow-sm backdrop-blur-sm",
+                    "flex items-center gap-3 px-4 py-3 rounded-xl border-2 shadow-sm",
                     advancedTheming 
-                      ? "bg-gradient-to-r from-community-accent/20 to-community-soothing/15 border-community-accent/30"
+                      ? "bg-primary/10 border-primary/30"
                       : "bg-blue-50 border-blue-200"
                   )}>
                     <MessageCircle className={cn(
                       "h-5 w-5",
-                      advancedTheming ? "text-community-accent" : "text-blue-600"
+                      advancedTheming ? "text-primary" : "text-blue-600"
                     )} />
                     <span className={cn(
                       "font-bold text-base",
-                      advancedTheming ? "text-community-accent-foreground" : "text-blue-700"
+                      advancedTheming ? "text-primary" : "text-blue-700"
                     )}>{commentCount}</span>
                     <span className={cn(
                       "text-sm font-medium",
-                      advancedTheming ? "text-community-accent/80" : "text-blue-600/80"
+                      advancedTheming ? "text-primary/80" : "text-blue-600/80"
                     )}>
                       {commentCount === 1 ? 'comment' : 'comments'}
                     </span>
@@ -247,9 +247,9 @@ export function PostsList({
                     size="sm"
                     onClick={() => onViewPost(post.id)}
                     className={cn(
-                      "flex items-center gap-2 border-2 backdrop-blur-sm transition-all duration-200",
+                      "flex items-center gap-2 border-2 transition-all duration-200",
                       advancedTheming 
-                        ? "bg-white/60 hover:bg-community-calm/10 text-community-calm-foreground hover:text-community-accent border-community-calm/30 hover:border-community-accent/50"
+                        ? "bg-background hover:bg-primary/10 text-foreground hover:text-primary border-border hover:border-primary/50"
                         : "bg-white hover:bg-blue-50 text-neutral-600 hover:text-blue-600 border-neutral-200 hover:border-blue-300"
                     )}
                   >
@@ -261,16 +261,16 @@ export function PostsList({
                 <div className={cn(
                   "flex items-center gap-2 px-3 py-2 rounded-full border",
                   advancedTheming 
-                    ? "bg-community-soothing/20 border-community-soothing/30"
+                    ? "bg-secondary/20 border-secondary/40"
                     : "bg-blue-50 border-blue-200"
                 )}>
                   <Activity className={cn(
                     "h-4 w-4",
-                    advancedTheming ? "text-community-soothing" : "text-blue-600"
+                    advancedTheming ? "text-secondary" : "text-blue-600"
                   )} />
                   <span className={cn(
                     "text-sm font-semibold",
-                    advancedTheming ? "text-community-soothing-foreground" : "text-blue-700"
+                    advancedTheming ? "text-secondary" : "text-blue-700"
                   )}>Mental Health Community</span>
                 </div>
               </div>
