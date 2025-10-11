@@ -329,7 +329,7 @@ export function SessionsList({
         value={viewMode}
         onValueChange={(value) => setViewMode(value as ViewMode)}
       >
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-4 bg-muted p-1">
           <TabsTrigger value="all">
             All
             <Badge variant="secondary" className="ml-2">
