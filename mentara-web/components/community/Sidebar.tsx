@@ -259,9 +259,9 @@ export default function CommunitySidebar({
           <AccordionItem key={community.id} value={community.id} className="border-none mb-2">
             <AccordionTrigger
               className={cn(
-                "group font-medium bg-white/70 hover:bg-community-calm/20 rounded-xl px-4 py-3 text-sm no-underline transition-all duration-200 backdrop-blur-sm border border-white/40 no-underline-hover",
+                "group font-medium bg-white/70 hover:bg-primary/10 rounded-xl px-4 py-3 text-sm no-underline transition-all duration-200 backdrop-blur-sm border border-border/40 no-underline-hover text-foreground",
                 selectedCommunityId === community.id && 
-                "bg-community-accent/20 text-community-accent-foreground hover:bg-community-accent/30 border-community-accent/40 shadow-lg shadow-community-accent/10"
+                "bg-primary/15 hover:bg-primary/20 border-primary/40 shadow-lg shadow-primary/10"
               )}
               onClick={() => {
                 onCommunitySelect?.(community.id);
@@ -272,18 +272,18 @@ export default function CommunitySidebar({
                 <div className={cn(
                   "w-3 h-3 rounded-full shrink-0 transition-colors duration-200",
                   selectedCommunityId === community.id 
-                    ? "bg-community-accent animate-pulse" 
-                    : "bg-community-heart group-hover:bg-community-accent"
+                    ? "bg-primary animate-pulse" 
+                    : "bg-primary/60 group-hover:bg-primary"
                 )} />
-                <span className="truncate font-medium">{community.name}</span>
-                <div className="ml-auto text-xs text-community-soothing-foreground opacity-60 group-hover:opacity-100 transition-opacity">
+                <span className="truncate font-semibold">{community.name}</span>
+                <div className="ml-auto text-xs text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity">
                   {community.roomGroups?.reduce((total, group) => total + group.rooms.length, 0) || 0}
                 </div>
               </div>
             </AccordionTrigger>
 
-            <AccordionContent className="pb-3">
-              <div className="space-y-3 ml-3">
+            <AccordionContent className="pb-3 pt-2">
+              <div className="space-y-3 ml-3 mt-2">
                 {community.roomGroups
                   .sort((a, b) => a.order - b.order)
                   .map(roomGroup => {
@@ -292,20 +292,20 @@ export default function CommunitySidebar({
                       <div key={roomGroup.id} className="space-y-2">
                         <button
                           onClick={() => handleRoomGroupToggle(roomGroup.id)}
-                          className="w-full text-left group flex items-center gap-2 text-xs font-semibold text-community-soothing-foreground uppercase tracking-wider px-3 py-1 bg-community-soothing/10 rounded-lg border border-community-soothing/20 hover:bg-community-soothing/20 transition-colors duration-200 no-underline-hover"
+                          className="w-full text-left group flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-1.5 bg-muted/50 rounded-lg border border-border hover:bg-muted hover:text-foreground transition-colors duration-200 no-underline-hover"
                         >
                           {isCollapsed ? (
-                            <ChevronRight className="h-3 w-3 text-community-soothing-foreground group-hover:text-community-accent transition-colors" />
+                            <ChevronRight className="h-3 w-3 transition-colors" />
                           ) : (
-                            <ChevronDown className="h-3 w-3 text-community-soothing-foreground group-hover:text-community-accent transition-colors" />
+                            <ChevronDown className="h-3 w-3 transition-colors" />
                           )}
                           {roomGroup.name}
-                          <span className="ml-auto text-xs text-community-soothing-foreground/60 group-hover:text-community-accent/80">
+                          <span className="ml-auto text-xs opacity-60">
                             {roomGroup.rooms.length}
                           </span>
                         </button>
                         <div className={`room-group-content ${!isCollapsed ? 'room-group-content--open' : ''}`}>
-                          <div className="space-y-1 ml-2 pl-3 border-l-2 border-community-accent/20">
+                          <div className="space-y-1 ml-2 pl-3 border-l-2 border-primary/30 mt-2">
                         {roomGroup.rooms
                           .sort((a, b) => a.order - b.order)
                           .map(room => {
@@ -318,10 +318,10 @@ export default function CommunitySidebar({
                                 key={room.id}
                                 onClick={() => handleRoomClick(room, community.id)}
                                 className={cn(
-                                  "group w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 text-left backdrop-blur-sm no-underline-hover relative",
+                                  "group w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 text-left no-underline-hover relative",
                                   isSelected 
-                                    ? "bg-community-accent/20 text-community-calm-foreground shadow-md shadow-community-accent/20 border border-community-accent/30" 
-                                    : "hover:bg-community-warm/30 border border-transparent text-community-calm-foreground",
+                                    ? "bg-primary/15 text-primary shadow-md shadow-primary/10 border border-primary/40 font-semibold" 
+                                    : "hover:bg-muted/70 border border-transparent text-foreground font-medium",
                                   !canView && "hidden" // Hide room if can't view (though currently all are viewable)
                                 )}
                                 title={!canPost ? `${room.name} (View only - moderator/admin posting required)` : `Join ${room.name}`}
@@ -330,16 +330,16 @@ export default function CommunitySidebar({
                                 <div className={cn(
                                   "shrink-0 transition-colors duration-200",
                                   !canPost
-                                    ? "text-amber-500"
+                                    ? "text-amber-600"
                                     : isSelected 
-                                      ? "text-community-accent-foreground" 
-                                      : "text-community-calm-foreground group-hover:text-community-accent"
+                                      ? "text-primary" 
+                                      : "text-muted-foreground group-hover:text-primary"
                                 )}>
                                   {canPost ? <Hash className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
                                 </div>
-                                <span className="truncate font-medium">{room.name}</span>
+                                <span className="truncate">{room.name}</span>
                                 {isSelected && (
-                                  <div className="ml-auto w-2 h-2 bg-community-accent rounded-full animate-pulse" />
+                                  <div className="ml-auto w-2 h-2 bg-primary rounded-full animate-pulse" />
                                 )}
                               </button>
                             );
@@ -356,28 +356,28 @@ export default function CommunitySidebar({
       </Accordion>
 
       {/* Channel legend */}
-      <div className="mt-6 pt-4 border-t border-community-calm/30">
+      <div className="mt-6 pt-4 border-t border-border">
         <div className="space-y-3">
-          <h3 className="text-xs font-semibold text-community-calm-foreground uppercase tracking-wider">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Channel Types
           </h3>
           <div className="space-y-2 text-xs">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-community-calm/10 border border-community-calm/20">
-              <Hash className="h-3 w-3 text-community-calm-foreground" />
-              <span className="text-community-calm-foreground">Open to everyone</span>
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10 border border-primary/30">
+              <Hash className="h-3 w-3 text-primary" />
+              <span className="text-primary font-medium">Open to everyone</span>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50/50 border border-amber-200/50">
-              <Lock className="h-3 w-3 text-amber-500" />
-              <span className="text-amber-700">Restricted access</span>
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 border border-amber-300">
+              <Lock className="h-3 w-3 text-amber-700" />
+              <span className="text-amber-800 font-medium">Restricted access</span>
             </div>
           </div>
           
-          <div className="mt-4 p-3 rounded-lg bg-community-soothing/10 border border-community-soothing/20">
+          <div className="mt-4 p-3 rounded-lg bg-secondary/10 border border-secondary/30">
             <div className="flex items-center gap-2 mb-2">
-              <Heart className="h-3 w-3 text-community-heart" />
-              <span className="text-xs font-medium text-community-soothing-foreground">Safe Space</span>
+              <Heart className="h-3 w-3 text-destructive" />
+              <span className="text-xs font-semibold text-foreground">Safe Space</span>
             </div>
-            <p className="text-xs text-community-soothing-foreground leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               All communities are moderated to ensure respectful, supportive conversations.
             </p>
           </div>
