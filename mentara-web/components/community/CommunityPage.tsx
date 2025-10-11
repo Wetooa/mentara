@@ -459,50 +459,147 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                           New Post
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                          <DialogTitle>
-                            Create Post in {selectedRoom?.name}
-                          </DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label>Title</Label>
+                      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
+                        {/* Header with gradient */}
+                        <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 border-b p-6">
+                          <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+                          <DialogHeader className="relative">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="p-2.5 rounded-xl bg-primary/20 border border-primary/30 shadow-sm">
+                                <PenSquare className="h-5 w-5 text-primary" />
+                              </div>
+                              <div className="flex-1">
+                                <DialogTitle className="text-2xl font-bold text-foreground">
+                                  Create New Post
+                                </DialogTitle>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Share your thoughts in <span className="font-semibold text-primary">{selectedRoom?.name}</span>
+                                </p>
+                              </div>
+                            </div>
+                          </DialogHeader>
+                        </div>
+
+                        {/* Form Content */}
+                        <div className="p-6 space-y-6">
+                          {/* Title Input */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="post-title" className="text-base font-semibold flex items-center gap-2">
+                                📝 Post Title
+                              </Label>
+                              <span className={cn(
+                                "text-xs font-medium",
+                                newPostTitle.length > 100 ? "text-destructive" : "text-muted-foreground"
+                              )}>
+                                {newPostTitle.length}/120
+                              </span>
+                            </div>
                             <Input
+                              id="post-title"
                               value={newPostTitle}
                               onChange={(e) => setNewPostTitle(e.target.value)}
-                              placeholder="Post title..."
+                              placeholder="Give your post a clear, descriptive title..."
+                              maxLength={120}
+                              className="text-base h-11 border-2 focus:border-primary/50 transition-colors"
                             />
+                            <p className="text-xs text-muted-foreground">
+                              A good title helps others understand your post at a glance
+                            </p>
                           </div>
-                          <div>
-                            <Label>Content</Label>
+
+                          {/* Content Textarea */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="post-content" className="text-base font-semibold flex items-center gap-2">
+                                💭 Your Thoughts
+                              </Label>
+                              <span className={cn(
+                                "text-xs font-medium",
+                                newPostContent.length > 1800 ? "text-destructive" : "text-muted-foreground"
+                              )}>
+                                {newPostContent.length}/2000
+                              </span>
+                            </div>
                             <Textarea
+                              id="post-content"
                               value={newPostContent}
-                              onChange={(e) =>
-                                setNewPostContent(e.target.value)
-                              }
-                              placeholder="Share your thoughts..."
-                              rows={6}
+                              onChange={(e) => setNewPostContent(e.target.value)}
+                              placeholder="Share your experiences, ask for support, or offer encouragement to others...&#10;&#10;💚 Remember: This is a safe space. Be kind, be respectful, and be yourself."
+                              rows={8}
+                              maxLength={2000}
+                              className="resize-none text-base border-2 focus:border-primary/50 transition-colors leading-relaxed"
                             />
+                            <p className="text-xs text-muted-foreground">
+                              Express yourself openly - your voice matters here
+                            </p>
                           </div>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => setIsCreatePostOpen(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              onClick={handleCreatePost}
-                              disabled={
-                                createPostMutation.isPending ||
-                                !newPostTitle.trim() ||
-                                !newPostContent.trim()
-                              }
-                            >
-                              <Send className="h-4 w-4 mr-2" />
-                              Share
-                            </Button>
+
+                          {/* Tips Section */}
+                          <div className="p-4 rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20">
+                            <div className="flex items-start gap-3">
+                              <div className="p-2 rounded-lg bg-primary/20 mt-0.5">
+                                <Heart className="h-4 w-4 text-primary" />
+                              </div>
+                              <div className="flex-1 space-y-1">
+                                <h4 className="text-sm font-semibold text-foreground">Community Guidelines</h4>
+                                <ul className="text-xs text-muted-foreground space-y-1">
+                                  <li>✓ Be respectful and supportive</li>
+                                  <li>✓ Share authentically and honestly</li>
+                                  <li>✓ Respect others' privacy and experiences</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex justify-between items-center pt-2 border-t">
+                            <div className="text-xs text-muted-foreground">
+                              {createPostMutation.isPending ? (
+                                <span className="flex items-center gap-2">
+                                  <div className="h-3 w-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                  Posting...
+                                </span>
+                              ) : (
+                                <span>Ready to share?</span>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => setIsCreatePostOpen(false)}
+                                disabled={createPostMutation.isPending}
+                                className="border-2"
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleCreatePost}
+                                disabled={
+                                  createPostMutation.isPending ||
+                                  !newPostTitle.trim() ||
+                                  !newPostContent.trim()
+                                }
+                                className={cn(
+                                  "gap-2 shadow-lg min-w-[120px]",
+                                  config.features.advancedTheming
+                                    ? "bg-primary hover:bg-primary/90 shadow-primary/20"
+                                    : "bg-blue-600 hover:bg-blue-700"
+                                )}
+                              >
+                                {createPostMutation.isPending ? (
+                                  <>
+                                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Posting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Send className="h-4 w-4" />
+                                    Share Post
+                                  </>
+                                )}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </DialogContent>
