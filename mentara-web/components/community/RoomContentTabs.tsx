@@ -82,17 +82,19 @@ export function RoomContentTabs({
           {postsContent}
         </TabsContent>
 
-        <TabsContent value="sessions" className="mt-0 p-4 lg:p-6">
-          <SessionsList
-            sessions={sessions}
-            onViewDetails={handleViewSessionDetails}
-            onRSVP={handleSessionRSVP}
-            onCreateSession={() => setIsCreateSessionOpen(true)}
-            canCreateSession={canCreateSession}
-            communityId={communityId}
-            roomId={roomId}
-            isLoading={sessionsLoading}
-          />
+        <TabsContent value="sessions" className="mt-0">
+          <div className="max-w-4xl mx-auto p-4 lg:p-6">
+            <SessionsList
+              sessions={sessions}
+              onViewDetails={handleViewSessionDetails}
+              onRSVP={handleSessionRSVP}
+              onCreateSession={() => setIsCreateSessionOpen(true)}
+              canCreateSession={canCreateSession}
+              communityId={communityId}
+              roomId={roomId}
+              isLoading={sessionsLoading}
+            />
+          </div>
         </TabsContent>
       </Tabs>
 

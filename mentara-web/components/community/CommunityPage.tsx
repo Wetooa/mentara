@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import CommunitySidebar from "@/components/community/Sidebar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Heart, MessageCircle, Hash, Users, PenSquare } from "lucide-react";
+import { Heart, MessageCircle, Hash, Users, PenSquare, Lock } from "lucide-react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -190,7 +190,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
               className="fixed inset-0 bg-black/50"
               onClick={() => {
                 handleCommunitySelect("");
-                setIsSidebarOpen(false);
+              setIsSidebarOpen(false);
               }}
             />
             <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
@@ -207,7 +207,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
           </div>
         )}
       </div>
-
+      
       {/* Desktop resizable layout */}
       <div className="hidden lg:block h-full">
         <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -227,7 +227,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
           <ResizableHandle
             withHandle
             className={cn(
-              "w-1.5 hover:bg-blue-200/80 transition-colors duration-200",
+            "w-1.5 hover:bg-blue-200/80 transition-colors duration-200",
               config.features.advancedTheming
                 ? "bg-slate-100/60"
                 : "bg-gray-200"
@@ -239,23 +239,23 @@ export default function CommunityPage({ role }: CommunityPageProps) {
               <div
                 className={cn(
                   "flex-1 flex items-center justify-center h-full",
-                  config.features.advancedTheming
-                    ? "bg-gradient-to-br from-community-warm/30 via-white to-community-soothing/20"
-                    : "bg-gradient-to-br from-slate-50 to-blue-50"
+                config.features.advancedTheming 
+                  ? "bg-gradient-to-br from-community-warm/30 via-white to-community-soothing/20"
+                  : "bg-gradient-to-br from-slate-50 to-blue-50"
                 )}
               >
                 <div className="text-center max-w-md">
                   <div
                     className={cn(
-                      "rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm",
-                      config.features.advancedTheming
-                        ? "bg-white border border-community-accent/20"
-                        : "bg-white border border-blue-100"
+                    "rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm",
+                    config.features.advancedTheming 
+                      ? "bg-white border border-community-accent/20" 
+                      : "bg-white border border-blue-100"
                     )}
                   >
                     <config.icons.primary
                       className={cn(
-                        "h-8 w-8",
+                      "h-8 w-8",
                         config.features.advancedTheming
                           ? "text-community-accent"
                           : "text-blue-600"
@@ -264,7 +264,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                   </div>
                   <h2
                     className={cn(
-                      "text-2xl font-bold mb-2",
+                    "text-2xl font-bold mb-2",
                       config.features.advancedTheming
                         ? "text-community-calm-foreground"
                         : "text-blue-900"
@@ -274,7 +274,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                   </h2>
                   <p
                     className={cn(
-                      "mb-6",
+                    "mb-6",
                       config.features.advancedTheming
                         ? "text-community-soothing-foreground"
                         : "text-slate-600"
@@ -286,7 +286,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                     <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
                       <config.icons.activity
                         className={cn(
-                          "h-5 w-5 mx-auto mb-1",
+                        "h-5 w-5 mx-auto mb-1",
                           config.features.advancedTheming
                             ? "text-community-accent"
                             : "text-blue-600"
@@ -302,7 +302,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                     <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
                       <MessageCircle
                         className={cn(
-                          "h-5 w-5 mx-auto mb-1",
+                        "h-5 w-5 mx-auto mb-1",
                           config.features.advancedTheming
                             ? "text-community-accent"
                             : "text-blue-600"
@@ -318,7 +318,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                     <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
                       <config.icons.members
                         className={cn(
-                          "h-5 w-5 mx-auto mb-1",
+                        "h-5 w-5 mx-auto mb-1",
                           config.features.advancedTheming
                             ? "text-community-accent"
                             : "text-blue-600"
@@ -334,7 +334,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                     <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200">
                       <Users
                         className={cn(
-                          "h-5 w-5 mx-auto mb-1",
+                        "h-5 w-5 mx-auto mb-1",
                           config.features.advancedTheming
                             ? "text-community-accent"
                             : "text-blue-600"
@@ -356,31 +356,59 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                 {/* Room Header */}
                 <div
                   className={cn(
-                    "bg-white border-b p-4 lg:p-6",
+                  "bg-white border-b p-4 lg:p-6",
                     config.features.advancedTheming
                       ? "border-community-calm/30"
                       : "border-neutral-200"
                   )}
                 >
                   {breadcrumb && (
-                    <div
-                      className={cn(
-                        "flex items-center gap-2 text-sm mb-4",
-                        config.features.advancedTheming
-                          ? "text-community-soothing-foreground"
-                          : "text-neutral-600"
-                      )}
-                    >
-                      <span className="font-medium">
-                        {breadcrumb.communityName}
-                      </span>
-                      <span>/</span>
-                      <span>{breadcrumb.roomGroupName}</span>
-                      <span>/</span>
-                      <span className="font-semibold">
-                        {breadcrumb.roomName}
-                      </span>
+                    <div className="flex items-center gap-2 text-sm mb-4">
+                    <div className={cn(
+                        "flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-gradient-to-r",
+                        config.features.advancedTheming 
+                          ? "from-community-accent/5 to-community-soothing/5 border-community-accent/20"
+                          : "from-blue-50 to-slate-50 border-blue-200"
+                      )}>
+                          <Hash className={cn(
+                          "h-3.5 w-3.5",
+                            config.features.advancedTheming ? "text-community-accent" : "text-blue-600"
+                          )} />
+                        <span className={cn(
+                          "font-semibold",
+                          config.features.advancedTheming ? "text-community-accent-foreground" : "text-blue-700"
+                        )}>
+                          {breadcrumb.communityName}
+                        </span>
+                      </div>
+                      <span className="text-muted-foreground">/</span>
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50">
+                        <span className="text-muted-foreground font-medium">
+                          {breadcrumb.roomGroupName}
+                        </span>
                     </div>
+                      <span className="text-muted-foreground">/</span>
+                        <div className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-md",
+                        breadcrumb.roomPostingRole === "moderator" || breadcrumb.roomPostingRole === "admin"
+                            ? "bg-amber-50 border border-amber-200"
+                          : "bg-slate-100"
+                      )}>
+                        {breadcrumb.roomPostingRole === "moderator" || breadcrumb.roomPostingRole === "admin" ? (
+                          <Lock className="h-3 w-3 text-amber-600" />
+                        ) : (
+                          <Hash className="h-3 w-3 text-muted-foreground" />
+                        )}
+                        <span className={cn(
+                          "font-semibold text-sm",
+                          breadcrumb.roomPostingRole === "moderator" || breadcrumb.roomPostingRole === "admin"
+                            ? "text-amber-700"
+                            : "text-foreground"
+                        )}>
+                          {breadcrumb.roomName}
+                        </span>
+                        </div>
+                      </div>
                   )}
 
                   <div className="flex items-center justify-between gap-4">
@@ -394,7 +422,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                         <Button
                           disabled={!isPostingAllowed()}
                           className={cn(
-                            config.features.advancedTheming
+                            config.features.advancedTheming 
                               ? "bg-community-accent hover:bg-community-accent/90"
                               : "bg-blue-600 hover:bg-blue-700"
                           )}
@@ -444,15 +472,15 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                                 !newPostContent.trim()
                               }
                             >
-                              <Send className="h-4 w-4 mr-2" />
+                                  <Send className="h-4 w-4 mr-2" />
                               Share
                             </Button>
                           </div>
                         </div>
                       </DialogContent>
                     </Dialog>
-                  </div>
-                </div>
+                            </div>
+                            </div>
 
                 {/* Tabs with Posts and Sessions */}
                 <RoomContentTabs
@@ -492,18 +520,18 @@ export default function CommunityPage({ role }: CommunityPageProps) {
           </div>
         </div>
 
-        {!selectedRoomId ? (
+          {!selectedRoomId ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center p-4">
               <h2 className="text-2xl font-bold mb-2">
-                {config.messages.welcomeTitle}
-              </h2>
+                  {config.messages.welcomeTitle}
+                </h2>
               <p className="text-muted-foreground">
                 {config.messages.welcomeDescription}
-              </p>
+                </p>
+              </div>
             </div>
-          </div>
-        ) : (
+          ) : (
           <RoomContentTabs
             postsContent={postsContent}
             communityId={selectedCommunityId}

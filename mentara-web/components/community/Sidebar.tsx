@@ -305,7 +305,7 @@ export default function CommunitySidebar({
                           </span>
                         </button>
                         <div className={`room-group-content ${!isCollapsed ? 'room-group-content--open' : ''}`}>
-                          <div className="space-y-1">
+                          <div className="space-y-1 ml-2 pl-3 border-l-2 border-community-accent/20">
                         {roomGroup.rooms
                           .sort((a, b) => a.order - b.order)
                           .map(room => {
@@ -318,7 +318,7 @@ export default function CommunitySidebar({
                                 key={room.id}
                                 onClick={() => handleRoomClick(room, community.id)}
                                 className={cn(
-                                  "group w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 text-left backdrop-blur-sm no-underline-hover",
+                                  "group w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 text-left backdrop-blur-sm no-underline-hover relative",
                                   isSelected 
                                     ? "bg-community-accent/20 text-community-calm-foreground shadow-md shadow-community-accent/20 border border-community-accent/30" 
                                     : "hover:bg-community-warm/30 border border-transparent text-community-calm-foreground",

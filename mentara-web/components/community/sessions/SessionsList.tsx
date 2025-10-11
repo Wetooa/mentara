@@ -375,7 +375,7 @@ export function SessionsList({
               )}
             </div>
           ) : (
-            <div className="flex flex-col gap-3 max-w-3xl">
+            <div className="flex flex-col gap-3 max-w-3xl mx-auto w-full">
               {filteredSessions.map((session) => (
                 <SessionCard
                   key={session.id}
