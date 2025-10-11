@@ -424,3 +424,4 @@ The application provides health check endpoints to verify configuration:
 - `/api/health/detailed` - Detailed service status including external dependencies
 
 For more information about specific services and their configuration, refer to the individual service documentation in the codebase.
+
