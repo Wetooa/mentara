@@ -61,7 +61,7 @@ export function RoomContentTabs({
         className={className}
       >
         <div className="px-4 lg:px-6 py-4 bg-white border-b flex justify-center">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/50 p-1">
             <TabsTrigger value="posts" className="gap-2">
               <MessageCircle className="h-4 w-4" />
               Posts
