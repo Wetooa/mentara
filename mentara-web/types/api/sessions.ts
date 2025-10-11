@@ -1,89 +1,162 @@
-// Sessions DTOs matching backend exactly
+// Group Session Types for Community Feature
 
-export interface SessionCreateDto {
-  clientId: string;
-  therapistId: string;
-  meetingId?: string; // Link to booking meeting
-  sessionNumber: number;
-  plannedDuration: number; // minutes
-  sessionType: 'initial' | 'regular' | 'followup' | 'final';
-  notes?: string;
-  goals?: string[];
-}
+export type SessionType = "virtual" | "in-person" | "hybrid";
 
-export interface SessionUpdateDto {
-  actualDuration?: number;
-  sessionType?: 'initial' | 'regular' | 'followup' | 'final';
-  notes?: string;
-  goals?: string[];
-  status?: 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  outcomes?: string[];
-  homework?: string[];
-  nextSessionPlan?: string;
-}
+export type SessionFormat =
+  | "group-therapy"
+  | "workshop"
+  | "support-circle"
+  | "webinar"
+  | "meditation"
+  | "social";
 
-export interface Session {
+export type SessionStatus = "upcoming" | "ongoing" | "completed" | "cancelled";
+
+export type HostRole = "therapist" | "moderator";
+
+export type RSVPStatus = "attending" | "waitlist" | "declined" | "none";
+
+export interface SessionHost {
   id: string;
-  clientId: string;
-  client: {
+  name: string;
+  role: HostRole;
+  avatarUrl?: string;
+  credentials?: string; // e.g., "Licensed Therapist, PhD"
+  bio?: string;
+}
+
+export interface SessionParticipant {
+  id: string;
+  userId: string;
+  sessionId: string;
+  status: RSVPStatus;
+  joinedAt: string;
+  user: {
     id: string;
     firstName: string;
     lastName: string;
-    avatarUrl: string;
+    avatarUrl?: string;
   };
-  therapistId: string;
-  therapist: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl: string;
-  };
-  meetingId?: string;
-  meeting?: {
-    id: string;
-    startTime: string;
-    duration: number;
-    meetingUrl?: string;
-  };
-  sessionNumber: number;
-  plannedDuration: number;
-  actualDuration?: number;
-  sessionType: 'initial' | 'regular' | 'followup' | 'final';
-  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  notes?: string;
-  goals?: string[];
-  outcomes?: string[];
-  homework?: string[];
-  nextSessionPlan?: string;
+}
+
+export interface RecurrencePattern {
+  frequency: "daily" | "weekly" | "biweekly" | "monthly";
+  endDate?: string;
+  daysOfWeek?: number[]; // 0-6, Sunday-Saturday
+}
+
+export interface GroupSession {
+  id: string;
+  title: string;
+  description: string;
+  type: SessionType;
+  format: SessionFormat;
+
+  // Scheduling
+  startTime: string;
+  endTime: string;
+  timezone: string;
+  duration: number; // in minutes
+
+  // Capacity
+  maxParticipants: number;
+  currentParticipants: number;
+  waitlistCount: number;
+
+  // Location
+  location?: string; // For in-person/hybrid
+  meetingLink?: string; // For virtual/hybrid
+  meetingPassword?: string;
+
+  // Host info
+  host: SessionHost;
+  coHosts?: SessionHost[];
+
+  // Community context
+  communityId: string;
+  communityName?: string;
+  roomId?: string; // Optional: tie to specific room
+  roomName?: string;
+
+  // Status & metadata
+  status: SessionStatus;
+  tags: string[];
+  requiresApproval: boolean;
+  isRecurring: boolean;
+  recurrencePattern?: RecurrencePattern;
+
+  // Participants
+  participants: SessionParticipant[];
+  waitlist: SessionParticipant[];
+
+  // Additional info
+  materials?: string[]; // URLs to resources
+  recordingUrl?: string; // For completed sessions
+  notes?: string; // Post-session notes
+
+  // Timestamps
   createdAt: string;
   updatedAt: string;
-  completedAt?: string;
+
+  // User interaction
+  userRSVP?: RSVPStatus; // Current user's RSVP status
 }
 
-export interface SessionListParams {
-  clientId?: string;
-  therapistId?: string;
-  sessionType?: 'initial' | 'regular' | 'followup' | 'final';
-  status?: 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+export interface CreateSessionRequest {
+  title: string;
+  description: string;
+  type: SessionType;
+  format: SessionFormat;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+  maxParticipants: number;
+  location?: string;
+  meetingLink?: string;
+  meetingPassword?: string;
+  communityId: string;
+  roomId?: string;
+  tags: string[];
+  requiresApproval: boolean;
+  isRecurring: boolean;
+  recurrencePattern?: RecurrencePattern;
+}
+
+export interface UpdateSessionRequest extends Partial<CreateSessionRequest> {
+  id: string;
+  status?: SessionStatus;
+}
+
+export interface SessionFilters {
+  communityId?: string;
+  roomId?: string;
+  status?: SessionStatus[];
+  type?: SessionType[];
+  format?: SessionFormat[];
+  hostId?: string;
+  tags?: string[];
   startDate?: string;
   endDate?: string;
-  limit?: number;
-  offset?: number;
-  sortBy?: 'sessionNumber' | 'createdAt' | 'completedAt';
-  sortOrder?: 'asc' | 'desc';
+  onlyUserSessions?: boolean; // Only sessions user is attending
 }
 
-export interface SessionListResponse {
-  sessions: Session[];
+export interface SessionsListResponse {
+  sessions: GroupSession[];
   total: number;
-  hasMore: boolean;
+  upcoming: number;
+  ongoing: number;
+  completed: number;
+}
+
+export interface RSVPRequest {
+  sessionId: string;
+  status: "join" | "leave";
 }
 
 export interface SessionStats {
   totalSessions: number;
+  upcomingSessions: number;
   completedSessions: number;
-  cancelledSessions: number;
-  noShowSessions: number;
-  averageDuration: number;
-  totalDuration: number;
+  totalParticipants: number;
+  averageAttendance: number;
 }
