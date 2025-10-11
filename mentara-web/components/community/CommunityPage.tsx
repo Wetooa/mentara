@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import CommunitySidebar from "@/components/community/Sidebar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Heart, MessageCircle, Hash, Users, PenSquare, Lock } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  Hash,
+  Users,
+  PenSquare,
+  Lock,
+} from "lucide-react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -30,7 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, Lock, Send } from "lucide-react";
+import { AlertCircle, Send } from "lucide-react";
 
 interface CommunityPageProps {
   role: UserRole;
@@ -364,20 +371,30 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                 >
                   {breadcrumb && (
                     <div className="flex items-center gap-2 text-sm mb-4">
-                    <div className={cn(
-                        "flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-gradient-to-r",
+                      <div
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-gradient-to-r",
                         config.features.advancedTheming 
-                          ? "from-community-accent/5 to-community-soothing/5 border-community-accent/20"
-                          : "from-blue-50 to-slate-50 border-blue-200"
-                      )}>
-                          <Hash className={cn(
-                          "h-3.5 w-3.5",
-                            config.features.advancedTheming ? "text-community-accent" : "text-blue-600"
-                          )} />
-                        <span className={cn(
+                            ? "from-community-accent/5 to-community-soothing/5 border-community-accent/20"
+                            : "from-blue-50 to-slate-50 border-blue-200"
+                        )}
+                      >
+                        <Hash
+                          className={cn(
+                            "h-3.5 w-3.5",
+                            config.features.advancedTheming
+                              ? "text-community-accent"
+                              : "text-blue-600"
+                          )}
+                        />
+                        <span
+                          className={cn(
                           "font-semibold",
-                          config.features.advancedTheming ? "text-community-accent-foreground" : "text-blue-700"
-                        )}>
+                            config.features.advancedTheming
+                              ? "text-community-accent-foreground"
+                              : "text-blue-700"
+                          )}
+                        >
                           {breadcrumb.communityName}
                         </span>
                       </div>
@@ -388,27 +405,34 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                         </span>
                     </div>
                       <span className="text-muted-foreground">/</span>
-                        <div className={cn(
-                        "flex items-center gap-1.5 px-2 py-1 rounded-md",
-                        breadcrumb.roomPostingRole === "moderator" || breadcrumb.roomPostingRole === "admin"
+                      <div
+                        className={cn(
+                          "flex items-center gap-1.5 px-2 py-1 rounded-md",
+                          breadcrumb.roomPostingRole === "moderator" ||
+                            breadcrumb.roomPostingRole === "admin"
                             ? "bg-amber-50 border border-amber-200"
-                          : "bg-slate-100"
-                      )}>
-                        {breadcrumb.roomPostingRole === "moderator" || breadcrumb.roomPostingRole === "admin" ? (
+                            : "bg-slate-100"
+                        )}
+                      >
+                        {breadcrumb.roomPostingRole === "moderator" ||
+                        breadcrumb.roomPostingRole === "admin" ? (
                           <Lock className="h-3 w-3 text-amber-600" />
                         ) : (
                           <Hash className="h-3 w-3 text-muted-foreground" />
                         )}
-                        <span className={cn(
-                          "font-semibold text-sm",
-                          breadcrumb.roomPostingRole === "moderator" || breadcrumb.roomPostingRole === "admin"
-                            ? "text-amber-700"
-                            : "text-foreground"
-                        )}>
+                        <span
+                          className={cn(
+                            "font-semibold text-sm",
+                            breadcrumb.roomPostingRole === "moderator" ||
+                              breadcrumb.roomPostingRole === "admin"
+                              ? "text-amber-700"
+                              : "text-foreground"
+                          )}
+                        >
                           {breadcrumb.roomName}
                         </span>
                         </div>
-                      </div>
+                        </div>
                   )}
 
                   <div className="flex items-center justify-between gap-4">
