@@ -212,167 +212,99 @@ export function SessionCard({
   }
 
   return (
-    <Card
+    <Card 
       className={cn(
-        "cursor-pointer hover:shadow-lg transition-all duration-200 overflow-hidden",
+        "cursor-pointer hover:shadow-md transition-all duration-200",
         isCancelled && "opacity-60",
-        isOngoing && "ring-2 ring-red-500 ring-opacity-50"
+        isOngoing && "border-l-4 border-l-red-500"
       )}
       onClick={() => onViewDetails?.(session)}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {/* Header: Status + Title */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
               {getStatusBadge(session.status)}
-              <Badge variant="secondary">
-                {getFormatLabel(session.format)}
+              <Badge className={cn("text-xs", typeInfo.color)}>
+                <TypeIcon className="h-3 w-3 mr-1" />
+                {typeInfo.label}
               </Badge>
-              {session.isRecurring && (
-                <Badge variant="outline" className="text-xs">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  Recurring
-                </Badge>
-              )}
             </div>
-            <h3 className="font-bold text-lg mb-1 line-clamp-2">
+            <h3 className="font-bold text-base line-clamp-1 mb-1">
               {session.title}
             </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-              {session.description}
-            </p>
           </div>
-        </div>
 
-        {/* Host Info */}
-        <div className="flex items-center gap-2 py-2 border-t">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={session.host.avatarUrl} alt={session.host.name} />
-            <AvatarFallback>{session.host.name[0]}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{session.host.name}</p>
-            <p className="text-xs text-muted-foreground truncate">
-              {session.host.credentials}
-            </p>
+          {/* Host Info - Compact */}
+          <div className="flex items-center gap-2">
+            <Avatar className="h-7 w-7">
+              <AvatarImage src={session.host.avatarUrl} alt={session.host.name} />
+              <AvatarFallback className="text-xs">{session.host.name[0]}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{session.host.name}</p>
+            </div>
           </div>
-          <Badge className={cn("flex-shrink-0", typeInfo.color)}>
-            <TypeIcon className="h-3 w-3 mr-1" />
-            {typeInfo.label}
-          </Badge>
-        </div>
-      </CardHeader>
 
-      <CardContent className="pt-0 space-y-3">
-        {/* Time & Location */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm">
-            <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <span>{formatSessionTime()}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <span>{session.duration} minutes</span>
-          </div>
-          {(session.type === "in-person" || session.type === "hybrid") &&
-            session.location && (
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <span className="truncate">{session.location}</span>
-              </div>
-            )}
-          {(session.type === "virtual" || session.type === "hybrid") && (
-            <div className="flex items-center gap-2 text-sm">
-              <Video className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span className="text-blue-600">
-                Online meeting link available
+          {/* Key Details - Condensed */}
+          <div className="space-y-1.5 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="truncate">{formatSessionTime()}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="truncate">
+                {session.currentParticipants}/{session.maxParticipants} joined
+                {isFull && <span className="text-amber-600 ml-1">(Full)</span>}
               </span>
             </div>
-          )}
-        </div>
-
-        {/* Capacity */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-1.5">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">
-                {session.currentParticipants}/{session.maxParticipants}{" "}
-                participants
-              </span>
-            </div>
-            {session.waitlistCount > 0 && (
-              <span className="text-xs text-muted-foreground">
-                {session.waitlistCount} on waitlist
-              </span>
-            )}
           </div>
-          <Progress value={capacityPercentage} className="h-2" />
-          {isFull && (
-            <p className="text-xs text-amber-600 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              Session is full - join waitlist
-            </p>
-          )}
-        </div>
 
-        {/* Tags */}
-        {session.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {session.tags.slice(0, 4).map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {session.tags.length > 4 && (
-              <Badge variant="outline" className="text-xs">
-                +{session.tags.length - 4} more
-              </Badge>
-            )}
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-2 pt-2">
+          {/* Action Button */}
           {!isCancelled && !isCompleted && (
             <Button
               size="sm"
               variant={isUserAttending ? "outline" : "default"}
-              className="flex-1"
+              className="w-full"
               onClick={handleRSVPClick}
               disabled={isFull && !isUserAttending && !isUserWaitlisted}
             >
               {isUserAttending && (
                 <>
-                  <CheckCircle2 className="h-4 w-4 mr-1.5" />
+                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
                   Attending
                 </>
               )}
               {isUserWaitlisted && (
                 <>
-                  <AlertCircle className="h-4 w-4 mr-1.5" />
-                  On Waitlist
+                  <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
+                  Waitlisted
                 </>
               )}
               {!isUserAttending && !isUserWaitlisted && (
                 <>
-                  <User className="h-4 w-4 mr-1.5" />
+                  <User className="h-3.5 w-3.5 mr-1.5" />
                   {isFull ? "Join Waitlist" : "Join Session"}
                 </>
               )}
             </Button>
           )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewDetails?.(session);
-            }}
-          >
-            Details
-            <ArrowRight className="h-4 w-4 ml-1.5" />
-          </Button>
+          {isCompleted && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails?.(session);
+              }}
+            >
+              View Recording
+              <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
