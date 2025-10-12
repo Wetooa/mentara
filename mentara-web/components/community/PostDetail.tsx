@@ -138,8 +138,8 @@ export function PostDetail({
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'therapist': return 'text-blue-600 bg-blue-50 border-blue-200';
-      case 'moderator': return 'text-green-600 bg-green-50 border-green-200';
+      case 'therapist': return 'text-primary bg-primary/10 border-primary/20';
+      case 'moderator': return 'text-blue-600 bg-blue-50 border-blue-200';
       case 'admin': return 'text-purple-600 bg-purple-50 border-purple-200';
       default: return 'text-gray-600 bg-gray-50 border-gray-200';
     }
@@ -163,71 +163,71 @@ export function PostDetail({
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-community-warm/10 via-background to-community-soothing/10 ${className}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 ${className}`}>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back Navigation */}
         <div className="mb-6">
           <Button
             variant="ghost"
             onClick={handleBack}
-            className="flex items-center gap-2 text-community-soothing-foreground hover:text-community-accent"
+            className="flex items-center gap-2 text-gray-600 hover:text-primary group"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Community
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Back to Community</span>
           </Button>
         </div>
 
         {/* Post Content */}
-        <Card className="mb-6 bg-white/95 backdrop-blur-sm border-community-calm/20 shadow-lg">
-          <CardHeader className="pb-4">
-            <div className="flex items-start justify-between">
+        <Card className="mb-6 shadow-lg border-border/50 overflow-hidden">
+          {/* Decorative top bar */}
+          <div className="h-1 bg-gradient-to-r from-primary via-primary/60 to-primary"></div>
+          
+          <CardHeader className="p-6 pb-4">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-4">
-                {/* Post Title */}
-                <h1 className="text-2xl lg:text-3xl font-bold text-community-calm-foreground leading-tight">
-                  {post.title}
-                </h1>
-
-                {/* Author and Metadata */}
-                <div className="flex items-center gap-3 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-10 w-10 ring-2 ring-community-accent/20 ring-offset-2 ring-offset-white">
-                      <AvatarImage src={post?.author?.avatarUrl} className="object-cover" />
-                      <AvatarFallback className="bg-community-accent/20 text-community-accent-foreground font-semibold">
-                        {getUserInitials(post?.author?.firstName || '', post?.author?.lastName || '')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold text-community-calm-foreground">
+                {/* Author Info */}
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-md">
+                    <AvatarImage src={post?.author?.avatarUrl} className="object-cover" />
+                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-bold">
+                      {getUserInitials(post?.author?.firstName || '', post?.author?.lastName || '')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-bold text-gray-900">
                         {post?.author?.firstName} {post?.author?.lastName}
                       </p>
-                      <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
-                        {post.updatedAt !== post.createdAt && (
-                          <>
-                            <span>•</span>
-                            <span>edited</span>
-                          </>
-                        )}
-                      </div>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs font-semibold ${getRoleColor(post?.author?.role || 'client')}`}
+                      >
+                        {getRoleLabel(post?.author?.role || 'client')}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Clock className="h-3 w-3" />
+                      <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
+                      {post.updatedAt !== post.createdAt && (
+                        <>
+                          <span>•</span>
+                          <span className="italic">edited</span>
+                        </>
+                      )}
                     </div>
                   </div>
-
-                  {/* Role Badge */}
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs font-semibold ${getRoleColor(post?.author?.role || 'client')}`}
-                  >
-                    <User className="h-3 w-3 mr-1" />
-                    {getRoleLabel(post?.author?.role || 'client')}
-                  </Badge>
                 </div>
+
+                {/* Post Title */}
+                <h1 className="text-2xl font-bold text-gray-900 leading-tight">
+                  {post.title}
+                </h1>
 
                 {/* Tags */}
                 {post.tags && post.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {post.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs bg-community-soothing/20 text-community-soothing-foreground border-community-soothing/30">
+                      <Badge key={tag} variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
                         <Hash className="h-3 w-3 mr-1" />
                         {tag}
                       </Badge>
@@ -242,9 +242,9 @@ export function PostDetail({
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    className="text-community-soothing-foreground hover:text-community-accent"
+                    className="text-gray-600 hover:text-primary hover:bg-primary/10"
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -295,24 +295,24 @@ export function PostDetail({
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="px-6 pb-6 space-y-6">
             {/* Post Content */}
-            <div className="prose prose-lg max-w-none text-community-calm-foreground">
+            <div className="prose prose-base max-w-none">
               <div 
-                className="whitespace-pre-wrap leading-relaxed"
+                className="whitespace-pre-wrap leading-relaxed text-gray-700 text-sm"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
             </div>
 
             {/* Attachments */}
             {post.attachmentUrls && post.attachmentUrls.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-community-calm-foreground flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
+              <div className="space-y-3">
+                <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
                   Attachments
                 </h3>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {post.attachmentUrls.map((url, index) => {
                     const fileName = post.attachmentNames?.[index] || `Attachment ${index + 1}`;
                     const fileSize = post.attachmentSizes?.[index];
@@ -322,7 +322,7 @@ export function PostDetail({
                       return (
                         <div
                           key={index}
-                          className="relative group cursor-pointer overflow-hidden rounded-lg border border-community-calm/20 bg-community-warm/10"
+                          className="relative group cursor-pointer overflow-hidden rounded-xl border border-border shadow-sm hover:shadow-md transition-all"
                           onClick={() => window.open(url, '_blank')}
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -331,9 +331,9 @@ export function PostDetail({
                             alt={fileName}
                             className="w-full h-48 object-cover transition-transform group-hover:scale-105"
                           />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                            <p className="text-white text-sm truncate">{fileName}</p>
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                            <p className="text-white text-xs font-medium truncate">{fileName}</p>
                           </div>
                         </div>
                       );
@@ -341,30 +341,21 @@ export function PostDetail({
                       return (
                         <div 
                           key={index} 
-                          className="flex items-center space-x-3 p-4 border border-community-calm/20 rounded-lg bg-community-warm/10 hover:bg-community-warm/20 transition-colors"
+                          className="flex items-center gap-3 p-3 border border-border rounded-xl bg-gray-50 hover:bg-primary/5 hover:border-primary/30 transition-all cursor-pointer"
+                          onClick={() => window.open(url, '_blank')}
                         >
-                          <div className="flex-shrink-0">
-                            <FileText className="h-8 w-8 text-community-accent" />
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <FileText className="h-5 w-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-community-calm-foreground truncate">{fileName}</p>
+                            <p className="text-sm font-medium text-gray-900 truncate">{fileName}</p>
                             {fileSize && (
-                              <p className="text-xs text-community-soothing-foreground">
+                              <p className="text-xs text-gray-500">
                                 {formatFileSize(fileSize)}
                               </p>
                             )}
                           </div>
-                          <Button variant="ghost" size="sm" asChild>
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-1"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              <span className="sr-only">Download {fileName}</span>
-                            </a>
-                          </Button>
+                          <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-primary" />
                         </div>
                       );
                     }
@@ -373,60 +364,56 @@ export function PostDetail({
               </div>
             )}
 
-            <Separator className="bg-community-calm/20" />
+            <Separator />
 
             {/* Actions Bar */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Button 
-                variant={post.isHearted ? "default" : "ghost"}
+                variant={post.isHearted ? "default" : "outline"}
                 size="sm" 
                 className={`flex items-center gap-2 ${
                   post.isHearted 
-                    ? "bg-community-heart hover:bg-community-heart/90 text-white" 
-                    : "text-community-soothing-foreground hover:text-community-heart hover:bg-community-heart/10"
+                    ? "bg-pink-500 hover:bg-pink-600 text-white border-pink-500" 
+                    : "text-gray-600 hover:text-pink-600 hover:bg-pink-50 hover:border-pink-200"
                 }`}
                 onClick={handleHeart}
                 disabled={heartMutation.isPending}
               >
                 <Heart className={`h-4 w-4 ${post.isHearted ? "fill-current" : ""}`} />
-                <span className="font-medium">{post.heartCount}</span>
-                <span className="hidden sm:inline">
+                <span className="font-semibold">{post.heartCount}</span>
+                <span className="hidden sm:inline text-sm">
                   {post.isHearted ? 'Hearted' : 'Heart'}
                 </span>
               </Button>
               
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center gap-2 text-community-soothing-foreground hover:text-community-accent hover:bg-community-accent/10"
-              >
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
                 <MessageCircle className="h-4 w-4" />
-                <span className="font-medium">{post.commentCount}</span>
-                <span className="hidden sm:inline">Comments</span>
-              </Button>
+                <span className="font-semibold">{post.commentCount}</span>
+                <span className="hidden sm:inline text-sm">Comments</span>
+              </div>
               
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
-                className="flex items-center gap-2 text-community-soothing-foreground hover:text-community-accent hover:bg-community-accent/10"
+                className="flex items-center gap-2 text-gray-600 hover:text-primary hover:bg-primary/10 hover:border-primary/30"
                 onClick={handleShare}
               >
                 <Share2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Share</span>
+                <span className="hidden sm:inline text-sm">Share</span>
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Comments Section */}
-        <Card className="bg-white/95 backdrop-blur-sm border-community-calm/20 shadow-lg">
-          <CardHeader>
-            <h2 className="text-xl font-semibold text-community-calm-foreground flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-community-accent" />
+        <Card className="shadow-lg border-border/50">
+          <CardHeader className="bg-primary/5 border-b border-border/50">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-primary" />
               Comments ({post.commentCount})
             </h2>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <CommentSection postId={post.id} />
           </CardContent>
         </Card>
