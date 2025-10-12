@@ -21,12 +21,16 @@ const createQueryClient = () => {
           if (error instanceof MentaraApiError && error.status === 401) {
             return false;
           }
-          
+
           // Don't retry on 4xx errors except 408 (timeout) and 429 (rate limit)
-          if (error instanceof MentaraApiError && error.status >= 400 && error.status < 500) {
+          if (
+            error instanceof MentaraApiError &&
+            error.status >= 400 &&
+            error.status < 500
+          ) {
             return [408, 429].includes(error.status) && failureCount < 3;
           }
-          
+
           // Retry on network errors and 5xx server errors
           return failureCount < 3;
         },
@@ -44,7 +48,7 @@ const createQueryClient = () => {
             // Retry server errors but limit attempts
             return error.status >= 500 && failureCount < 2;
           }
-          
+
           // Retry network errors
           return failureCount < 2;
         },
@@ -52,7 +56,7 @@ const createQueryClient = () => {
       },
     },
     // Performance monitoring in development
-    ...(process.env.NODE_ENV === 'development' && {
+    ...(process.env.NODE_ENV === "development" && {
       logger: {
         log: (message: string) => {
           console.log(`[React Query] ${message}`);
@@ -74,27 +78,26 @@ export default function QueryProvider({
   children: React.ReactNode;
 }) {
   const [queryClient] = useState(() => createQueryClient());
-  
+
   // Control devtools visibility with environment variable
-  const showDevtools = process.env.NEXT_PUBLIC_SHOW_DEVTOOLS === 'true';
+  const showDevtools = process.env.NEXT_PUBLIC_SHOW_DEVTOOLS === "true";
 
   return (
     <QueryClientProvider client={queryClient}>
       {children}
       {/* Only show dev tools when explicitly enabled via env var */}
-      {showDevtools && (
-        <ReactQueryDevtools 
-          initialIsOpen={false} 
-          position="bottom-right"
+      {/* {showDevtools && (
+        <ReactQueryDevtools
+          initialIsOpen={false}
           toggleButtonProps={{
             style: {
-              marginLeft: '5px',
+              marginLeft: "5px",
               transform: undefined,
               zIndex: 99999,
             },
           }}
         />
-      )}
+      )} */}
     </QueryClientProvider>
   );
 }

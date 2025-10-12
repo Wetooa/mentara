@@ -105,13 +105,15 @@ export default function QuestionnaireForm({
             {question.question}
           </p>
         </div>
-        <div className="w-full flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-3">
           {question.options.map((option, index) => {
+            const isSelected = currentAnswer === index;
             return (
               <Button
-                variant={currentAnswer === index ? "default" : "unclicked"}
+                variant={isSelected ? "default" : "outline"}
                 key={index}
                 onClick={() => handleSelectAnswer(index)}
+                className={isSelected ? "" : "bg-white hover:bg-primary/10 hover:border-primary/50 hover:text-primary border-2"}
               >
                 {option}
               </Button>

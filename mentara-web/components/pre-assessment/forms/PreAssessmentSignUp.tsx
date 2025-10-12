@@ -16,7 +16,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -27,7 +26,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { EmailVerificationForm } from "@/components/auth/EmailVerificationForm";
@@ -38,6 +36,7 @@ const clientRegistrationSchema = z
     firstName: z.string().min(2, "First name must be at least 2 characters"),
     lastName: z.string().min(2, "Last name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
+    dateOfBirth: z.string().min(1, "Date of birth is required"),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
@@ -95,6 +94,7 @@ export function PreAssessmentSignUp({
       firstName: "",
       lastName: "",
       email: "",
+      dateOfBirth: "",
       password: "",
       confirmPassword: "",
       termsAccepted: false,
@@ -112,7 +112,7 @@ export function PreAssessmentSignUp({
   ];
 
   return (
-    <div className={cn("w-full max-w-md mx-auto", className)}>
+    <div className={cn("w-full", className)}>
       <AnimatePresence mode="wait">
         {currentStep === "registration" ? (
           <motion.div
@@ -122,8 +122,9 @@ export function PreAssessmentSignUp({
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card>
-              <CardHeader className="text-center space-y-4">
+            <div className="w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
+              {/* Header */}
+              <div className="text-center space-y-4 mb-8">
                 <motion.div
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{
@@ -131,31 +132,23 @@ export function PreAssessmentSignUp({
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
-                  className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white"
+                  className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-primary to-primary/80 flex items-center justify-center text-white shadow-lg"
                 >
                   <User className="h-8 w-8" />
                 </motion.div>
 
                 <div>
-                  <CardTitle className="text-2xl font-bold">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     Join Mentara
-                  </CardTitle>
-                  <p className="text-muted-foreground mt-2">
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-2">
                     Create your account to start your mental health journey
                   </p>
                 </div>
+              </div>
 
-                {/* Progress */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Step 1 of 2</span>
-                    <span>Account Information</span>
-                  </div>
-                  <Progress value={50} className="h-2" />
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
+              {/* Registration Form */}
+              <div className="space-y-4 max-w-lg mx-auto">
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(handleRegistrationSubmit)}
@@ -208,6 +201,25 @@ export function PreAssessmentSignUp({
                                 {...field}
                               />
                             </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Date of Birth */}
+                    <FormField
+                      control={form.control}
+                      name="dateOfBirth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Date of Birth</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              max={new Date().toISOString().split('T')[0]}
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -401,8 +413,15 @@ export function PreAssessmentSignUp({
                     )}
                   </form>
                 </Form>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+
+            {/* Submit Button Footer */}
+            <div className="bg-white px-10 py-3">
+              <p className="text-xs text-center text-gray-500 mb-2">
+                By continuing, you agree to our Terms of Service and Privacy Policy
+              </p>
+            </div>
           </motion.div>
         ) : (
           <motion.div
@@ -412,39 +431,16 @@ export function PreAssessmentSignUp({
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="space-y-4">
-              {/* Progress Header */}
-              <Card className="p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Step 2 of 2</span>
-                    <span>Email Verification</span>
-                  </div>
-                  <Progress value={100} className="h-2" />
-                </div>
-              </Card>
-
-              {/* Verification Form */}
-              <EmailVerificationForm
-                email={registrationData?.email || ""}
-                name={`${registrationData?.firstName} ${registrationData?.lastName}`}
-                type="registration"
-                onVerificationSuccess={handleVerificationSuccess}
-                onCancel={handleBackToRegistration}
-                onResendCode={handleResendCode}
-                isVerifying={isVerifying}
-              />
-
-              {/* Back Button */}
-              <Button
-                variant="outline"
-                onClick={handleBackToRegistration}
-                className="w-full"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Registration
-              </Button>
-            </div>
+            {/* Verification Form - No redundant progress bar */}
+            <EmailVerificationForm
+              email={registrationData?.email || ""}
+              name={`${registrationData?.firstName} ${registrationData?.lastName}`}
+              type="registration"
+              onVerificationSuccess={handleVerificationSuccess}
+              onCancel={handleBackToRegistration}
+              onResendCode={handleResendCode}
+              isVerifying={isVerifying}
+            />
           </motion.div>
         )}
       </AnimatePresence>

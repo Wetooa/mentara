@@ -1,25 +1,35 @@
-'use client';
+"use client";
 
 /**
  * @deprecated UserSearchBar is deprecated. Use LayoutOmniSearchBar for layout search
  * or OmniSearchBar for comprehensive search functionality instead.
- * 
+ *
  * UserSearchBar provides limited user-only search capabilities and is being phased out
  * in favor of omnisearch components that support multiple entity types with better
  * performance and user experience.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
-import { Search, X, User, UserCircle, Shield } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
-import { useUserSearch } from './hooks/useUserSearch';
-import { useRecentSearches } from './hooks/useRecentSearches';
-import { RecentSearches } from './RecentSearches';
-import { ConnectionStatus, useGlobalConnectionStatus } from '@/components/realtime/ConnectionStatus';
+import React, { useState, useCallback, useRef } from "react";
+import { Search, X, User, UserCircle, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { useUserSearch } from "./hooks/useUserSearch";
+import { useRecentSearches } from "./hooks/useRecentSearches";
+import { RecentSearches } from "./RecentSearches";
+// import { ConnectionStatus, useGlobalConnectionStatus } from '@/components/realtime/ConnectionStatus';
 
 export interface User {
   id: string;
@@ -27,14 +37,14 @@ export interface User {
   lastName: string;
   email: string;
   avatarUrl?: string;
-  role: 'client' | 'therapist' | 'moderator' | 'admin';
+  role: "client" | "therapist" | "moderator" | "admin";
   createdAt: string;
 }
 
 interface UserSearchBarProps {
   placeholder?: string;
   onUserSelect: (user: User) => void;
-  roleFilter?: 'all' | 'client' | 'therapist' | 'moderator';
+  roleFilter?: "all" | "client" | "therapist" | "moderator";
   showRoleFilter?: boolean;
   showConnectionStatus?: boolean;
   className?: string;
@@ -42,10 +52,10 @@ interface UserSearchBarProps {
 
 const getRoleIcon = (role: string) => {
   switch (role) {
-    case 'therapist':
+    case "therapist":
       return <UserCircle className="w-3 h-3" />;
-    case 'moderator':
-    case 'admin':
+    case "moderator":
+    case "admin":
       return <Shield className="w-3 h-3" />;
     default:
       return <User className="w-3 h-3" />;
@@ -54,31 +64,32 @@ const getRoleIcon = (role: string) => {
 
 const getRoleColor = (role: string) => {
   switch (role) {
-    case 'therapist':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-    case 'moderator':
-    case 'admin':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+    case "therapist":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+    case "moderator":
+    case "admin":
+      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
   }
 };
 
 export const UserSearchBar: React.FC<UserSearchBarProps> = ({
-  placeholder = 'Search users...',
+  placeholder = "Search users...",
   onUserSelect,
-  roleFilter = 'all',
+  roleFilter = "all",
   showRoleFilter = false,
   showConnectionStatus = true,
-  className = ''
+  className = "",
 }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentRoleFilter, setCurrentRoleFilter] = useState<string>(roleFilter);
+  const [currentRoleFilter, setCurrentRoleFilter] =
+    useState<string>(roleFilter);
   const [showRecentSearches, setShowRecentSearches] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const { searchUsers } = useUserSearch();
   const { addRecentSearch } = useRecentSearches();
@@ -104,11 +115,12 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       searchTimeoutRef.current = setTimeout(async () => {
         try {
           setIsLoading(true);
-          const role = currentRoleFilter === 'all' ? undefined : currentRoleFilter;
+          const role =
+            currentRoleFilter === "all" ? undefined : currentRoleFilter;
           const results = await searchUsers(searchQuery, role);
           setSuggestions(results || []);
         } catch (error) {
-          console.error('Search error:', error);
+          console.error("Search error:", error);
           setSuggestions([]);
         } finally {
           setIsLoading(false);
@@ -123,27 +135,24 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       const value = e.target.value;
       setQuery(value);
       setShowRecentSearches(false);
-      
+
       // Open popover when typing
       if (value.length > 0) {
         setIsOpen(true);
       }
-      
+
       // Trigger search
       debouncedSearch(value);
     },
     [debouncedSearch]
   );
 
-
-
-
   const handleSuggestionSelected = (suggestion: User) => {
     // Add to recent searches
     addRecentSearch(query, suggestion);
-    
+
     onUserSelect(suggestion);
-    setQuery('');
+    setQuery("");
     setSuggestions([]);
     setShowRecentSearches(false);
     setIsOpen(false);
@@ -158,12 +167,12 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
 
   const handleRecentUserSelect = (user: User) => {
     onUserSelect(user);
-    setQuery('');
+    setQuery("");
     setShowRecentSearches(false);
   };
 
   const clearSearch = () => {
-    setQuery('');
+    setQuery("");
     setSuggestions([]);
     setIsOpen(false);
   };
@@ -178,32 +187,29 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      setQuery('');
+    if (e.key === "Escape") {
+      setQuery("");
       setSuggestions([]);
       setShowRecentSearches(false);
       setIsOpen(false);
-    } else if (e.key === 'ArrowDown' && !isOpen) {
+    } else if (e.key === "ArrowDown" && !isOpen) {
       setIsOpen(true);
     }
   };
 
   return (
-    <div className={cn('relative', className)}>
+    <div className={cn("relative", className)}>
       {/* Screen reader instructions */}
-      <div 
-        id="search-instructions" 
-        className="sr-only"
-        aria-live="polite"
-      >
-        Search for users by name or email. Use arrow keys to navigate suggestions, Enter to select, Escape to clear.
+      <div id="search-instructions" className="sr-only" aria-live="polite">
+        Search for users by name or email. Use arrow keys to navigate
+        suggestions, Enter to select, Escape to clear.
       </div>
 
       <div className="flex items-center gap-3">
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            
+
             <PopoverTrigger asChild>
               <input
                 type="text"
@@ -213,9 +219,9 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
                 onFocus={handleInputFocus}
                 onKeyDown={handleInputKeyDown}
                 className={cn(
-                  'w-full pl-10 pr-4 py-2 text-sm border border-input rounded-md',
-                  'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-                  'placeholder:text-muted-foreground'
+                  "w-full pl-10 pr-4 py-2 text-sm border border-input rounded-md",
+                  "focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent",
+                  "placeholder:text-muted-foreground"
                 )}
                 aria-label="Search for users"
                 aria-describedby="search-instructions"
@@ -225,7 +231,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
                 role="combobox"
               />
             </PopoverTrigger>
-            
+
             {query && (
               <button
                 onClick={clearSearch}
@@ -236,29 +242,33 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
                 <X className="w-4 h-4" />
               </button>
             )}
-            
-            <PopoverContent 
-              className="w-[var(--radix-popover-trigger-width)] p-0" 
+
+            <PopoverContent
+              className="w-[var(--radix-popover-trigger-width)] p-0"
               align="start"
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
               <Command shouldFilter={false}>
                 <CommandList className="max-h-96">
                   {isLoading && (
-                    <div className="flex items-center justify-center p-4" role="status" aria-live="polite">
+                    <div
+                      className="flex items-center justify-center p-4"
+                      role="status"
+                      aria-live="polite"
+                    >
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                         Searching...
                       </div>
                     </div>
                   )}
-                  
-                  {!isLoading && query.length >= 2 && suggestions.length === 0 && (
-                    <CommandEmpty>
-                      No users found for "{query}"
-                    </CommandEmpty>
-                  )}
-                  
+
+                  {!isLoading &&
+                    query.length >= 2 &&
+                    suggestions.length === 0 && (
+                      <CommandEmpty>No users found for "{query}"</CommandEmpty>
+                    )}
+
                   {!isLoading && suggestions.length > 0 && (
                     <CommandGroup>
                       {suggestions.map((suggestion) => (
@@ -270,26 +280,37 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
                           aria-label={`${suggestion.firstName} ${suggestion.lastName}, ${suggestion.role}, ${suggestion.email}`}
                         >
                           <Avatar className="w-8 h-8">
-                            <AvatarImage src={suggestion.avatarUrl} alt={`${suggestion.firstName} ${suggestion.lastName}`} />
+                            <AvatarImage
+                              src={suggestion.avatarUrl}
+                              alt={`${suggestion.firstName} ${suggestion.lastName}`}
+                            />
                             <AvatarFallback>
                               {suggestion.firstName.charAt(0)}
                               {suggestion.lastName.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          
+
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="font-medium text-sm truncate">
                                 {suggestion.firstName} {suggestion.lastName}
                               </p>
-                              <Badge variant="secondary" className={cn('text-xs', getRoleColor(suggestion.role))}>
+                              <Badge
+                                variant="secondary"
+                                className={cn(
+                                  "text-xs",
+                                  getRoleColor(suggestion.role)
+                                )}
+                              >
                                 <span className="flex items-center gap-1">
                                   {getRoleIcon(suggestion.role)}
                                   {suggestion.role}
                                 </span>
                               </Badge>
                             </div>
-                            <p className="text-xs text-muted-foreground truncate">{suggestion.email}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {suggestion.email}
+                            </p>
                           </div>
                         </CommandItem>
                       ))}
@@ -300,7 +321,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
             </PopoverContent>
           </div>
         </Popover>
-        
+
         {/* WebSocket Connection Status Indicator */}
         {showConnectionStatus && (
           <div className="flex-shrink-0">
@@ -330,20 +351,24 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       {showRoleFilter && (
         <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-background border border-border rounded-md shadow-lg z-40">
           <div className="flex flex-wrap gap-2">
-            {(['all', 'client', 'therapist', 'moderator'] as const).map((role) => (
-              <button
-                key={role}
-                onClick={() => setCurrentRoleFilter(role)}
-                className={cn(
-                  'px-3 py-1 text-xs rounded-full transition-colors',
-                  currentRoleFilter === role
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                )}
-              >
-                {role === 'all' ? 'All' : role.charAt(0).toUpperCase() + role.slice(1)}
-              </button>
-            ))}
+            {(["all", "client", "therapist", "moderator"] as const).map(
+              (role) => (
+                <button
+                  key={role}
+                  onClick={() => setCurrentRoleFilter(role)}
+                  className={cn(
+                    "px-3 py-1 text-xs rounded-full transition-colors",
+                    currentRoleFilter === role
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  )}
+                >
+                  {role === "all"
+                    ? "All"
+                    : role.charAt(0).toUpperCase() + role.slice(1)}
+                </button>
+              )
+            )}
           </div>
         </div>
       )}
