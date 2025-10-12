@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, parseISO } from "date-fns";
 import type { Meeting } from "@/lib/api/services/meetings";
 import { useSessions } from "@/hooks/sessions";
@@ -62,28 +62,28 @@ export function SessionsCalendarView({ onSessionClick, filterStatus }: SessionsC
 
   if (isLoading) {
     return (
-      <Card className="h-full shadow-lg border-primary/20">
-        <CardContent className="p-6 flex items-center justify-center">
+      <Card className="h-full shadow-lg border-primary/20 p-0">
+        <div className="p-6 flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
-        </CardContent>
+        </div>
       </Card>
     );
   }
 
   return (
-    <Card className="h-full overflow-y-auto shadow-lg border-primary/20">
-      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+    <Card className="h-full overflow-y-auto shadow-lg border-primary/20 p-0">
+      <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
+          <div className="text-lg font-bold flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-primary" />
             Calendar View
-          </CardTitle>
+          </div>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={previousMonth}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 hover:bg-primary/10 hover:border-primary/30"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -94,14 +94,14 @@ export function SessionsCalendarView({ onSessionClick, filterStatus }: SessionsC
               variant="outline"
               size="sm"
               onClick={nextMonth}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 hover:bg-primary/10 hover:border-primary/30"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="p-6">
+      </div>
+      <div className="p-6">
         {/* Calendar Grid */}
         <div className="space-y-4">
           {/* Weekday Headers */}
@@ -228,7 +228,7 @@ export function SessionsCalendarView({ onSessionClick, filterStatus }: SessionsC
             </div>
           )}
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }

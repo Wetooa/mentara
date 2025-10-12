@@ -196,49 +196,87 @@ export default function SessionsPage() {
         <SessionStats showTrends={false} />
       </motion.div>
 
-      {/* Quick Actions Card - Smaller */}
+      {/* Quick Actions - Reorganized with Sections */}
       <motion.div variants={itemVariants}>
-        <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Session Actions */}
+          <Card className="border-primary/20 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                Session Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
               <Button 
                 variant="outline" 
-                className="justify-center gap-2 h-10 text-sm"
+                className="w-full justify-start gap-3 h-11 hover:bg-primary/10 hover:border-primary/30 hover:text-primary group"
                 onClick={handleScheduleSession}
               >
-                <Plus className="h-4 w-4" />
-                <span>Book</span>
+                <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <Plus className="h-4 w-4 text-primary" />
+                </div>
+                <div className="text-left flex-1">
+                  <div className="font-semibold text-sm">Book New Session</div>
+                  <div className="text-xs text-muted-foreground">Schedule with therapist</div>
+                </div>
               </Button>
               
               <Button 
                 variant="outline" 
-                className="justify-center gap-2 h-10 text-sm"
+                className="w-full justify-start gap-3 h-11 hover:bg-blue-50 hover:border-blue-200 group"
                 onClick={() => setActiveTab("upcoming")}
               >
-                <Clock className="h-4 w-4" />
-                <span>Upcoming</span>
+                <div className="p-1.5 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="text-left flex-1">
+                  <div className="font-semibold text-sm">View Upcoming</div>
+                  <div className="text-xs text-muted-foreground">Scheduled sessions</div>
+                </div>
               </Button>
-              
+            </CardContent>
+          </Card>
+
+          {/* Account Actions */}
+          <Card className="border-purple-200/50 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-purple-600" />
+                Account Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
               <Button 
                 variant="outline" 
-                className="justify-center gap-2 h-10 text-sm"
+                className="w-full justify-start gap-3 h-11 hover:bg-purple-50 hover:border-purple-200 group"
                 onClick={() => router.push('/client/therapist')}
               >
-                <Calendar className="h-4 w-4" />
-                <span>Find Therapist</span>
+                <div className="p-1.5 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                  <Calendar className="h-4 w-4 text-purple-600" />
+                </div>
+                <div className="text-left flex-1">
+                  <div className="font-semibold text-sm">Find Therapist</div>
+                  <div className="text-xs text-muted-foreground">Browse providers</div>
+                </div>
               </Button>
               
               <Button 
                 variant="outline" 
-                className="justify-center gap-2 h-10 text-sm"
+                className="w-full justify-start gap-3 h-11 hover:bg-green-50 hover:border-green-200 group"
                 onClick={handleManagePaymentMethods}
               >
-                <CreditCard className="h-4 w-4" />
-                <span>Payment</span>
+                <div className="p-1.5 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                  <CreditCard className="h-4 w-4 text-green-600" />
+                </div>
+                <div className="text-left flex-1">
+                  <div className="font-semibold text-sm">Payment Methods</div>
+                  <div className="text-xs text-muted-foreground">Manage billing</div>
+                </div>
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </motion.div>
 
       {/* Sessions Content - Split Panel or List View */}
@@ -263,33 +301,43 @@ export default function SessionsPage() {
                 // Split Panel Layout
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-[calc(100vh-450px)] min-h-[500px]">
                   {/* Left: Compact Sessions List */}
-                  <div className="lg:col-span-2 space-y-3 overflow-y-auto pr-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-gray-600">
-                        {tab.description}
-                      </p>
-                    </div>
-                    <SessionsList
-                      defaultStatus={tab.status}
-                      showFilters={false}
-                      showStats={false}
-                      showJoinButtons={tab.id === "upcoming"}
-                      onSessionClick={handleSessionClick}
-                      variant="compact"
-                    />
+                  <div className="lg:col-span-2">
+                    <Card className="h-full shadow-lg border-border/50 p-0 flex flex-col">
+                      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-5 py-4 border-b border-blue-200/50">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-blue-100 rounded-lg">
+                            {tab.icon}
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-bold text-gray-900">{tab.label}</h3>
+                            <p className="text-xs text-gray-600">{tab.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <SessionsList
+                          defaultStatus={tab.status}
+                          showFilters={false}
+                          showStats={false}
+                          showJoinButtons={tab.id === "upcoming"}
+                          onSessionClick={handleSessionClick}
+                          variant="compact"
+                        />
+                      </div>
+                    </Card>
                   </div>
 
                   {/* Right: Calendar or Selected Session */}
                   <div className="lg:col-span-3 hidden lg:block">
                     {selectedSession ? (
-                      <Card className="h-full overflow-y-auto shadow-lg border-primary/20">
-                        <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
-                          <CardTitle className="text-lg flex items-center gap-2">
+                      <Card className="h-full overflow-y-auto shadow-lg border-primary/20 p-0 flex flex-col">
+                        <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b">
+                          <div className="text-lg font-bold flex items-center gap-2">
                             <Calendar className="h-5 w-5 text-primary" />
                             Session Details
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6 space-y-4">
+                          </div>
+                        </div>
+                        <div className="p-6 space-y-4 flex-1 overflow-y-auto">
                           <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">
                               {selectedSession.title || `Session with ${selectedSession.therapist?.user.firstName} ${selectedSession.therapist?.user.lastName}`}
@@ -355,7 +403,7 @@ export default function SessionsPage() {
                             <ExternalLink className="h-4 w-4" />
                             View Full Details
                           </Button>
-                        </CardContent>
+                        </div>
                       </Card>
                     ) : (
                       <SessionsCalendarView 
