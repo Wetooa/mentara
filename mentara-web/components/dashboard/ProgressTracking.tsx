@@ -1,7 +1,8 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UserDashboardData } from "@/types/api/dashboard";
-import { Smile, Frown, Meh } from "lucide-react";
+import { Smile, Frown, Meh, Heart, Activity, TrendingUp } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { motion } from "framer-motion";
 
 interface ProgressTrackingProps {
   progress: UserDashboardData["progress"];
@@ -9,93 +10,130 @@ interface ProgressTrackingProps {
 
 export default function ProgressTracking({ progress }: ProgressTrackingProps) {
   return (
-    <Card className="shadow-sm">
-      <CardContent className="p-6">
-        <h2 className="text-xl font-bold mb-6">Progress Tracking</h2>
-
-        {/* Treatment Progress */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium">Treatment Progress</h3>
-            <span className="text-sm font-bold">
-              {progress.treatmentProgress}%
-            </span>
-          </div>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary rounded-full"
-              style={{ width: `${progress.treatmentProgress}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Weekly Engagement */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium">Weekly Engagement</h3>
-            <span className="text-sm font-bold">
-              {progress.weeklyEngagement}%
-            </span>
-          </div>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-blue-500 rounded-full"
-              style={{ width: `${progress.weeklyEngagement}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Weekly Mood Chart */}
-        <div>
-          <h3 className="text-sm font-medium mb-4">Weekly Mood</h3>
-          <div className="grid grid-cols-7 gap-1">
-            {progress.weeklyMood.map((day, index) => {
-              // Get the right emoji based on mood value (1-5)
-              const moodIcon = getMoodIcon(day.value);
-              // Format date to get just the day name (Mon, Tue, etc.)
-              const dayName = format(parseISO(day.date), "EEE");
-
-              return (
-                <div key={index} className="flex flex-col items-center">
-                  <div
-                    className={`w-8 h-8 flex items-center justify-center rounded-full ${getMoodColor(day.value)}`}
-                  >
-                    {moodIcon}
-                  </div>
-                  <span className="text-xs mt-1 text-muted-foreground">
-                    {dayName}
-                  </span>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-pink-500/5 to-purple-500/5 pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Activity className="h-5 w-5 text-pink-600" />
+            Wellness Pulse
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-5 space-y-5">
+          {/* Treatment Progress - Enhanced */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-primary" />
                 </div>
-              );
-            })}
+                <h3 className="text-sm font-semibold">Treatment Journey</h3>
+              </div>
+              <span className="text-lg font-bold text-primary">
+                {progress.treatmentProgress}%
+              </span>
+            </div>
+            <div className="relative w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary rounded-full shadow-sm"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress.treatmentProgress}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              You're making great progress! Keep it up! 🎉
+            </p>
           </div>
-        </div>
 
-        {/* Mood Legend */}
-        <div className="mt-6 pt-4 border-t flex justify-between">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-red-100"></div>
-            <span className="text-xs text-muted-foreground">Bad</span>
+          {/* Weekly Engagement - Enhanced */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-gradient-to-br from-blue-500/10 to-blue-500/20 rounded-lg">
+                  <Heart className="h-4 w-4 text-blue-600" />
+                </div>
+                <h3 className="text-sm font-semibold">Weekly Activity</h3>
+              </div>
+              <span className="text-lg font-bold text-blue-600">
+                {progress.weeklyEngagement}%
+              </span>
+            </div>
+            <div className="relative w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 rounded-full shadow-sm"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress.weeklyEngagement}%` }}
+                transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {progress.weeklyEngagement >= 70 ? "Excellent engagement this week! 💪" : "Try to engage more this week!"}
+            </p>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-orange-100"></div>
-            <span className="text-xs text-muted-foreground">Poor</span>
+
+          {/* Weekly Mood Chart - Beautifully redesigned */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <span>Mood This Week</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                (Last 7 days)
+              </span>
+            </h3>
+            <div className="grid grid-cols-7 gap-1.5">
+              {progress.weeklyMood.map((day, index) => {
+                const moodIcon = getMoodIcon(day.value);
+                const dayName = format(parseISO(day.date), "EEE");
+                const isToday = index === progress.weeklyMood.length - 1;
+
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex flex-col items-center"
+                  >
+                    <motion.div
+                      whileHover={{ scale: 1.15, rotate: 5 }}
+                      className={`w-10 h-10 flex items-center justify-center rounded-xl ${getMoodColor(day.value)} ${
+                        isToday ? "ring-2 ring-primary ring-offset-2" : ""
+                      } cursor-pointer transition-all`}
+                    >
+                      {moodIcon}
+                    </motion.div>
+                    <span className={`text-xs mt-1.5 ${isToday ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+                      {dayName}
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-yellow-100"></div>
-            <span className="text-xs text-muted-foreground">Okay</span>
+
+          {/* Compact Mood Legend */}
+          <div className="pt-4 border-t border-border/50">
+            <div className="grid grid-cols-5 gap-2 text-center">
+              {[
+                { color: "bg-red-100", label: "Bad", value: 1 },
+                { color: "bg-orange-100", label: "Poor", value: 2 },
+                { color: "bg-yellow-100", label: "Okay", value: 3 },
+                { color: "bg-blue-100", label: "Good", value: 4 },
+                { color: "bg-green-100", label: "Great", value: 5 },
+              ].map((item) => (
+                <div key={item.value} className="flex flex-col items-center gap-1">
+                  <div className={`w-4 h-4 rounded-md ${item.color}`}></div>
+                  <span className="text-xs text-muted-foreground">{item.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-blue-100"></div>
-            <span className="text-xs text-muted-foreground">Good</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-green-100"></div>
-            <span className="text-xs text-muted-foreground">Great</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 

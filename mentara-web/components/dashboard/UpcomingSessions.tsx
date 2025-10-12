@@ -69,24 +69,29 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
 
   return (
     <motion.div initial="hidden" animate="visible" variants={containerVariants}>
-      <Card className="shadow-sm">
-        <CardContent className="p-4 sm:p-6">
+      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden border-border/50">
+        <div className="bg-gradient-to-br from-green-500/5 to-emerald-500/5 px-4 sm:px-6 py-3 border-b border-border/50">
           <motion.div
-            className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
             variants={sectionVariants}
           >
-            <h2 className="text-lg sm:text-xl font-bold">Upcoming Sessions</h2>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-green-600" />
+              <h2 className="text-lg font-bold">Upcoming Sessions</h2>
+            </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-primary gap-1 self-start"
+                className="text-green-600 hover:text-green-700 hover:bg-green-50 gap-1 self-start"
                 onClick={handleViewAll}
               >
                 View All <ArrowRight size={16} />
               </Button>
             </motion.div>
           </motion.div>
+        </div>
+        <CardContent className="p-4 sm:p-5">
 
           {sessions.length === 0 ? (
             <motion.div

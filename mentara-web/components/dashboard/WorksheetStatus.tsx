@@ -73,9 +73,6 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
   // Group worksheets by status
   const pendingWorksheets = worksheets.filter((ws) => ws.status === "pending");
   const overdueWorksheets = worksheets.filter((ws) => ws.status === "overdue");
-  // const completedWorksheets = worksheets.filter(
-  //   (ws) => ws.status === "completed"
-  // );
 
   // Check if there are worksheets due today
   const dueTodayWorksheets = worksheets.filter(
@@ -89,24 +86,29 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
 
   return (
     <motion.div initial="hidden" animate="visible" variants={containerVariants}>
-      <Card className="shadow-sm">
-        <CardContent className="p-4 sm:p-6">
+      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden border-border/50">
+        <div className="bg-gradient-to-br from-purple-500/5 to-pink-500/5 px-4 sm:px-6 py-3 border-b border-border/50">
           <motion.div
-            className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
             variants={sectionVariants}
           >
-            <h2 className="text-lg sm:text-xl font-bold">Worksheets</h2>
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-purple-600" />
+              <h2 className="text-lg font-bold">Worksheets</h2>
+            </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-primary gap-1 self-start"
+                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 gap-1 self-start"
                 onClick={handleViewAll}
               >
                 View All <ArrowRight size={16} />
               </Button>
             </motion.div>
           </motion.div>
+        </div>
+        <CardContent className="p-4 sm:p-5">
 
           <motion.div className="space-y-6" variants={containerVariants}>
             {/* Worksheets due today */}

@@ -10,10 +10,8 @@ import { transformDashboardData } from "@/lib/transformers/dashboardTransformer"
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
-import UpcomingSessionsCalendar from "@/components/dashboard/UpcomingSessionsCalendar";
 import WorksheetStatus from "@/components/dashboard/WorksheetStatus";
 import ProgressTracking from "@/components/dashboard/ProgressTracking";
-import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import AssignedTherapist from "@/components/dashboard/AssignedTherapist";
 import RecentCommunications from "@/components/dashboard/RecentCommunications";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -174,57 +172,54 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="w-full h-full p-6 space-y-8">
-      {/* Page Header */}
-      <DashboardHeader
-        user={dashboardData.user}
-        onBookSession={handleBookSession}
-      />
+    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="w-full h-full p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-[1600px] mx-auto">
+        {/* Page Header */}
+        <DashboardHeader
+          user={dashboardData.user}
+          onBookSession={handleBookSession}
+        />
 
-      {/* Stats Overview */}
-      <StatsOverview
-        stats={dashboardData.stats}
-        onUpcomingSessionsClick={handleUpcomingSessionsClick}
-        onPendingWorksheetsClick={handlePendingWorksheetsClick}
-        onCompletedSessionsClick={handleCompletedSessionsClick}
-        onCompletedWorksheetsClick={handleCompletedWorksheetsClick}
-        onTherapistsClick={handleTherapistsClick}
-      />
+        {/* Stats Overview */}
+        <StatsOverview
+          stats={dashboardData.stats}
+          onUpcomingSessionsClick={handleUpcomingSessionsClick}
+          onPendingWorksheetsClick={handlePendingWorksheetsClick}
+          onCompletedSessionsClick={handleCompletedSessionsClick}
+          onCompletedWorksheetsClick={handleCompletedWorksheetsClick}
+          onTherapistsClick={handleTherapistsClick}
+        />
 
-      {/* Main Dashboard Content - Responsive layout with calendar prominence */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        {/* Primary Column - Full-Width Sessions Calendar */}
-        <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-          {/* Sessions Calendar - Full Width Modern Design */}
-          {/* <UpcomingSessionsCalendar className="h-full" /> */}
+        {/* Main Dashboard Content - Enhanced responsive layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-7">
+          {/* Primary Column - Sessions and Worksheets */}
+          <div className="lg:col-span-2 space-y-5 lg:space-y-6">
+            {/* Main Content - Sessions and Worksheets */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
+              <UpcomingSessions sessions={dashboardData.upcomingSessions} />
+              <WorksheetStatus worksheets={dashboardData.worksheets} />
+            </div>
+          </div>
 
-          {/* Secondary Content - Sessions and Worksheets */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-            <UpcomingSessions sessions={dashboardData.upcomingSessions} />
-            <WorksheetStatus worksheets={dashboardData.worksheets} />
+          {/* Right Sidebar - Therapist, Communications, and Progress */}
+          <div className="space-y-5 lg:space-y-6">
+            <AssignedTherapist
+              assignedTherapists={dashboardApiData?.assignedTherapists || []}
+              isLoading={isDashboardLoading}
+              onMessageTherapist={handleMessageTherapist}
+              onScheduleSession={handleScheduleSession}
+            />
+            <RecentCommunications
+              recentContacts={dashboardData.recentCommunications}
+              onViewAllMessages={handleViewAllMessages}
+              onContactSelect={handleContactSelect}
+            />
+            <ProgressTracking progress={dashboardData.progress} />
           </div>
         </div>
 
-        {/* Right Sidebar - Therapist, Communications, Progress, and Notifications */}
-        <div className="space-y-4 lg:space-y-6">
-          <AssignedTherapist
-            assignedTherapists={dashboardApiData?.assignedTherapists || []}
-            isLoading={isDashboardLoading}
-            onMessageTherapist={handleMessageTherapist}
-            onScheduleSession={handleScheduleSession}
-          />
-          <RecentCommunications
-            recentContacts={dashboardData.recentCommunications}
-            onViewAllMessages={handleViewAllMessages}
-            onContactSelect={handleContactSelect}
-          />
-          <ProgressTracking progress={dashboardData.progress} />
-          {/* <NotificationCenter  */}
-          {/*   className="h-96"  */}
-          {/*   showSettings={false}  */}
-          {/*   maxHeight="384px"  */}
-          {/* /> */}
-        </div>
+        {/* Bottom Spacing */}
+        <div className="h-8" />
       </div>
     </div>
   );
