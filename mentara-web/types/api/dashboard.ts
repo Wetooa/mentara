@@ -1,5 +1,117 @@
 // Dashboard DTOs for all role-specific dashboard endpoints
 
+/**
+ * Response from backend /dashboard/client endpoint
+ * This matches what the backend actually returns
+ */
+export interface ApiDashboardResponse {
+  client: {
+    userId: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      avatarUrl?: string;
+      imageUrl?: string;
+      createdAt: string;
+    };
+    assignedTherapists: Array<{
+      therapist: {
+        userId: string;
+        user: {
+          id: string;
+          firstName: string;
+          lastName: string;
+          email: string;
+          avatarUrl?: string;
+        };
+      };
+    }>;
+    meetings: Array<{
+      id: string;
+      title?: string;
+      startTime: string;
+      dateTime: string;
+      duration: number;
+      status: string;
+      therapist?: {
+        userId: string;
+        user: {
+          firstName: string;
+          lastName: string;
+        };
+      };
+    }>;
+    worksheets: Array<{
+      id: string;
+      title: string;
+      assignedDate: string;
+      dueDate?: string;
+      status: string;
+      isCompleted: boolean;
+      progress?: number;
+      therapist?: {
+        userId: string;
+        user: {
+          firstName: string;
+          lastName: string;
+        };
+      };
+    }>;
+    preAssessment?: unknown;
+  };
+  stats: {
+    completedMeetings: number;
+    completedWorksheets: number;
+    upcomingMeetings: number;
+    pendingWorksheets: number;
+  };
+  upcomingMeetings: Array<{
+    id: string;
+    title?: string;
+    startTime: string;
+    dateTime: string;
+    duration: number;
+    status: string;
+    therapist?: {
+      userId: string;
+      user: {
+        firstName: string;
+        lastName: string;
+      };
+    };
+  }>;
+  pendingWorksheets: Array<{
+    id: string;
+    title: string;
+    assignedDate: string;
+    dueDate?: string;
+    status: string;
+    isCompleted: boolean;
+    progress?: number;
+    therapist?: {
+      userId: string;
+      user: {
+        firstName: string;
+        lastName: string;
+      };
+    };
+  }>;
+  assignedTherapists: Array<{
+    userId: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      avatarUrl?: string;
+    };
+  }>;
+  recentActivity?: unknown[];
+  hasPreAssessment: boolean;
+}
+
 export interface UserDashboardData {
   user: {
     id: string;
