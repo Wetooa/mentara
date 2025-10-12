@@ -35,11 +35,11 @@ export default function PatientDetailPage(
 
   return (
     <div className="p-6">
-      {/* Patient header with info */}
-      <div className="mb-6">
+      {/* Client header with info */}
+      <div className="mb-6 bg-gradient-to-r from-secondary/5 to-white rounded-2xl p-6 border border-secondary/20 shadow-md">
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="relative h-20 w-20 rounded-full overflow-hidden mr-4 border-2 border-primary">
+          <div className="flex items-center gap-4">
+            <div className="relative h-24 w-24 rounded-full overflow-hidden ring-4 ring-secondary/20 shadow-lg">
               <Image
                 src={patient.avatar || "/avatar-placeholder.png"}
                 alt={patient.name}
@@ -48,20 +48,24 @@ export default function PatientDetailPage(
               />
             </div>
             <div>
-              <div className="text-gray-500 text-sm">Patient name</div>
-              <h1 className="text-2xl font-bold">{patient.name}</h1>
+              <div className="text-gray-500 text-sm font-medium mb-1">Client Profile</div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{patient.name}</h1>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-green-700 font-medium">Active Client</span>
+              </div>
             </div>
           </div>
 
-          <div className="flex space-x-2">
-            <button className="p-2 rounded-md bg-green-100 text-primary">
+          <div className="flex gap-2">
+            <button className="p-3 rounded-xl bg-secondary/10 text-secondary hover:bg-secondary/20 transition-all shadow-sm hover:shadow-md">
               <Video className="h-5 w-5" />
             </button>
-            <button className="p-2 rounded-md bg-green-100 text-primary">
+            <button className="p-3 rounded-xl bg-secondary/10 text-secondary hover:bg-secondary/20 transition-all shadow-sm hover:shadow-md">
               <MessageSquare className="h-5 w-5" />
             </button>
             <button
-              className="p-2 rounded-md bg-green-100 text-primary hover:bg-green-200 transition-colors"
+              className="p-3 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-all shadow-md hover:shadow-lg"
               onClick={() => setIsSchedulingModalOpen(true)}
               title="Schedule Session"
             >
@@ -71,18 +75,18 @@ export default function PatientDetailPage(
         </div>
       </div>
 
-      {/* Patient info cards */}
+      {/* Client info cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <PatientInfoCard
           icon={
-            <div className="p-2 rounded-md bg-blue-100 text-blue-600">D</div>
+            <div className="p-2 rounded-md bg-secondary/10 text-secondary">D</div>
           }
           label="DIAGNOSIS"
           value={patient.diagnosis}
         />
         <PatientInfoCard
           icon={
-            <div className="p-2 rounded-md bg-purple-100 text-purple-600">
+            <div className="p-2 rounded-md bg-secondary/15 text-secondary">
               T
             </div>
           }
@@ -91,7 +95,7 @@ export default function PatientDetailPage(
         />
         <PatientInfoCard
           icon={
-            <div className="p-2 rounded-md bg-orange-100 text-orange-600">
+            <div className="p-2 rounded-md bg-secondary/20 text-secondary">
               S
             </div>
           }

@@ -50,9 +50,9 @@ export default function TherapistLayout({
       id: "dashboard",
     },
     {
-      name: "Patients",
+      name: "Clients",
       path: "/therapist/patients",
-      icon: "/icons/therapist.svg", // Using therapist icon for patients
+      icon: "/icons/therapist.svg", // Using therapist icon for clients
       id: "patients",
     },
     {
@@ -273,7 +273,7 @@ export default function TherapistLayout({
           {/* Omnisearch Bar - Hidden on mobile */}
           <div className="relative mx-4 hidden flex-1 max-w-md md:block">
             <LayoutOmniSearchBar
-              placeholder="Search patients, colleagues, posts..."
+              placeholder="Search clients, colleagues, posts..."
               className="w-full"
             />
           </div>
@@ -335,7 +335,7 @@ export default function TherapistLayout({
         {/* Mobile Omnisearch Bar - Shows below header on mobile */}
         <div className="md:hidden fixed top-16 left-0 right-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/50 px-4 py-3 shadow-sm">
           <LayoutOmniSearchBar
-            placeholder="Search patients, posts..."
+            placeholder="Search clients, posts..."
             className="w-full"
           />
         </div>
