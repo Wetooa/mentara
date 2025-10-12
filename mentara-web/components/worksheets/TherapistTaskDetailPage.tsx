@@ -166,7 +166,7 @@ export default function TherapistTaskDetailPage({
         <div className="flex items-center">
           <button
             onClick={onBack}
-            className="flex items-center text-[#436B00] hover:text-[#129316]"
+            className="flex items-center text-secondary hover:text-secondary/80"
           >
             <ArrowLeft className="mr-2 h-5 w-5" />
             Back
@@ -225,7 +225,7 @@ export default function TherapistTaskDetailPage({
               variant="outline"
               size="sm"
               onClick={() => handleEditWorksheet(task)}
-              className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              className="text-secondary border-secondary/30 hover:bg-secondary/10"
             >
               <Edit className="h-4 w-4 mr-2" />
               Edit Worksheet
@@ -339,7 +339,7 @@ export default function TherapistTaskDetailPage({
                   )}
                 </button>
               </div>
-              <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-md border border-blue-200">
+              <p className="text-sm text-gray-600 bg-secondary/5 p-3 rounded-md border border-secondary/20">
                 Click &quot;Mark as Reviewed&quot; to provide feedback and
                 complete the review process.
               </p>
@@ -373,12 +373,12 @@ export default function TherapistTaskDetailPage({
         <SheetContent side="right" className="w-full max-w-2xl sm:max-w-xl p-0 gap-0 overflow-hidden flex flex-col">
           {editingWorksheet && (
             <>
-              <SheetHeader className="px-6 py-5 border-b bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/80 backdrop-blur-sm">
+              <SheetHeader className="px-6 py-5 border-b bg-gradient-to-br from-secondary/5 to-primary/5 backdrop-blur-sm">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900">
-                      <div className="p-2 rounded-lg bg-blue-100/80 shadow-sm">
-                        <Edit className="h-5 w-5 text-blue-600" />
+                      <div className="p-2 rounded-lg bg-secondary shadow-sm">
+                        <Edit className="h-5 w-5 text-secondary-foreground" />
                       </div>
                       Edit Worksheet
                     </SheetTitle>
@@ -426,8 +426,8 @@ export default function TherapistTaskDetailPage({
                       {/* Basic Information Section */}
                       <div className="bg-white rounded-xl border border-gray-200/60 shadow-sm p-6">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="p-2 rounded-lg bg-blue-50">
-                            <FileText className="h-4 w-4 text-blue-600" />
+                          <div className="p-2 rounded-lg bg-secondary">
+                            <FileText className="h-4 w-4 text-secondary-foreground" />
                           </div>
                           <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
                         </div>
@@ -442,7 +442,7 @@ export default function TherapistTaskDetailPage({
                               name="title"
                               defaultValue={editingWorksheet.title}
                               placeholder="Enter worksheet title..."
-                              className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                              className="h-11 border-gray-300 focus:border-secondary focus:ring-secondary/20"
                               required
                             />
                           </div>
@@ -457,7 +457,7 @@ export default function TherapistTaskDetailPage({
                               defaultValue={editingWorksheet.instructions || ''}
                               placeholder="Provide detailed instructions for your client..."
                               rows={4}
-                              className="border-gray-300 focus:border-blue-500 focus:ring-blue-500/20 resize-none"
+                              className="border-gray-300 focus:border-secondary focus:ring-secondary/20 resize-none"
                             />
                           </div>
                           
@@ -474,7 +474,7 @@ export default function TherapistTaskDetailPage({
                                   type="date"
                                   defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toISOString().split('T')[0] : ''}
                                   min={new Date().toISOString().split('T')[0]}
-                                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                                  className="h-11 border-gray-300 focus:border-secondary focus:ring-secondary/20"
                                   onChange={() => setEditDateTimeError(null)}
                                 />
                               </div>
@@ -485,7 +485,7 @@ export default function TherapistTaskDetailPage({
                                   name="dueTime"
                                   type="time"
                                   defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toTimeString().slice(0, 5) : ''}
-                                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                                  className="h-11 border-gray-300 focus:border-secondary focus:ring-secondary/20"
                                   onChange={() => setEditDateTimeError(null)}
                                 />
                               </div>
@@ -574,12 +574,12 @@ export default function TherapistTaskDetailPage({
                               {newFiles.map((file, index) => (
                                 <div
                                   key={index}
-                                  className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg"
+                                  className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-lg"
                                 >
                                   <div className="flex items-center gap-3">
-                                    <FileText className="h-4 w-4 text-blue-500" />
-                                    <span className="text-sm font-medium text-blue-700">{file.name}</span>
-                                    <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full font-medium">
+                                    <FileText className="h-4 w-4 text-primary" />
+                                    <span className="text-sm font-medium text-primary">{file.name}</span>
+                                    <span className="text-xs text-primary-foreground bg-primary px-2 py-1 rounded-full font-medium">
                                       New
                                     </span>
                                   </div>
@@ -611,11 +611,11 @@ export default function TherapistTaskDetailPage({
                           />
                           <Label
                             htmlFor="file-upload-edit"
-                            className="flex items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-200 group"
+                            className="flex items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-secondary hover:bg-secondary/5 transition-all duration-200 group"
                           >
                             <div className="text-center">
-                              <Plus className="h-8 w-8 text-gray-400 mx-auto mb-3 group-hover:text-blue-500 transition-colors" />
-                              <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600 transition-colors">
+                              <Plus className="h-8 w-8 text-gray-400 mx-auto mb-3 group-hover:text-secondary transition-colors" />
+                              <span className="text-sm font-medium text-gray-600 group-hover:text-secondary transition-colors">
                                 Click to upload files or drag and drop
                               </span>
                               <span className="text-xs text-gray-500 block mt-2">
@@ -639,7 +639,7 @@ export default function TherapistTaskDetailPage({
                         <Button
                           type="submit"
                           disabled={editWorksheetMutation.isPending}
-                          className="px-6 bg-blue-600 hover:bg-blue-700"
+                          className="px-6 bg-secondary hover:bg-secondary/90"
                         >
                           {editWorksheetMutation.isPending ? (
                             <>

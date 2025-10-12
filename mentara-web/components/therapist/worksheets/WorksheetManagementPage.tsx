@@ -45,6 +45,7 @@ export function WorksheetManagementPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [clientFilter, setClientFilter] = useState<string>('all');
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingWorksheet, setEditingWorksheet] = useState<Worksheet | null>(null);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
@@ -74,7 +75,10 @@ export function WorksheetManagementPage() {
         worksheet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase());
       
-      return matchesSearch;
+      // Client filter
+      const matchesClient = clientFilter === 'all' || worksheet.clientId === clientFilter;
+      
+      return matchesSearch && matchesClient;
     });
   };
 
@@ -82,6 +86,18 @@ export function WorksheetManagementPage() {
   const allFilteredWorksheets = filterWorksheets(worksheets);
   const completedWorksheets = allFilteredWorksheets.filter((w) => w.status === 'SUBMITTED');
   const nonCompletedWorksheets = allFilteredWorksheets.filter((w) => w.status !== 'SUBMITTED');
+
+  // Get unique clients from worksheets
+  const uniqueClients = Array.from(
+    new Map(worksheets.map(w => [
+      w.clientId, 
+      { 
+        id: w.clientId, 
+        name: `${w.client.user.firstName} ${w.client.user.lastName}`,
+        avatarUrl: w.client.user.avatarUrl 
+      }
+    ])).values()
+  );
 
   // Fetch matched clients for quick assignment
   const { data: matchedClientsData, isLoading: clientsLoading } = useMatchedClients();
@@ -222,7 +238,7 @@ export function WorksheetManagementPage() {
       case 'COMPLETED':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'ASSIGNED':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-secondary/10 text-secondary border-secondary/30';
       case 'OVERDUE':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
@@ -264,8 +280,8 @@ export function WorksheetManagementPage() {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3 text-gray-900">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="h-7 w-7 text-blue-600" />
+            <div className="p-2 bg-secondary rounded-lg">
+              <FileText className="h-7 w-7 text-secondary-foreground" />
             </div>
             Worksheet Management
           </h1>
@@ -278,7 +294,7 @@ export function WorksheetManagementPage() {
               <span>{completedWorksheets.length} completed</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-secondary rounded-full"></div>
               <span>{nonCompletedWorksheets.length} in progress</span>
             </div>
             <div className="flex items-center gap-1">
@@ -294,7 +310,7 @@ export function WorksheetManagementPage() {
           <Button 
             onClick={() => setCreateModalOpen(true)} 
             variant="default"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md"
+            className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md"
           >
             <FileText className="h-4 w-4 mr-2" />
             Create New Worksheet
@@ -303,13 +319,13 @@ export function WorksheetManagementPage() {
           <TabsList className="grid w-full sm:w-auto grid-cols-2 bg-gray-100 p-1 rounded-lg">
             <TabsTrigger 
               value="worksheets"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-6 py-2 rounded-md transition-all"
+              className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-sm px-6 py-2 rounded-md transition-all"
             >
               My Worksheets ({nonCompletedWorksheets.length})
             </TabsTrigger>
             <TabsTrigger 
               value="assign"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-6 py-2 rounded-md transition-all"
+              className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-sm px-6 py-2 rounded-md transition-all"
             >
               Client Submissions ({completedWorksheets.length})
             </TabsTrigger>
@@ -320,15 +336,16 @@ export function WorksheetManagementPage() {
         {/* Worksheets Tab */}
         <TabsContent value="worksheets" className="space-y-6">
           {/* Enhanced Search and Filters */}
-          <Card className="p-4 bg-gradient-to-r from-gray-50 to-white border-gray-200">
-            <div className="flex flex-col md:flex-row gap-4">
+          <Card className="p-4 bg-white border-gray-200 shadow-sm">
+            <div className="flex flex-col gap-4">
+              {/* Search Bar */}
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by worksheet title or patient name..."
+                  placeholder="Search by worksheet title or client name..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="pl-10 pr-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                 />
                 {searchTerm && (
                   <button
@@ -339,42 +356,76 @@ export function WorksheetManagementPage() {
                   </button>
                 )}
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={statusFilter === 'all' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setStatusFilter('all')}
-                  className="transition-all duration-200"
-                >
-                  All
-                </Button>
-                <Button
-                  variant={statusFilter === 'ASSIGNED' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setStatusFilter('ASSIGNED')}
-                  className="transition-all duration-200"
-                >
-                  <Clock className="h-3 w-3 mr-1" />
-                  Assigned
-                </Button>
-                <Button
-                  variant={statusFilter === 'OVERDUE' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setStatusFilter('OVERDUE')}
-                  className="transition-all duration-200"
-                >
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  Overdue
-                </Button>
-                <Button
-                  variant={statusFilter === 'REVIEWED' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setStatusFilter('REVIEWED')}
-                  className="transition-all duration-200"
-                >
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Reviewed
-                </Button>
+              
+              {/* Filters Row */}
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* Client Filter */}
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">Client:</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      variant={clientFilter === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setClientFilter('all')}
+                      className={clientFilter === 'all' ? 'bg-secondary hover:bg-secondary/90' : 'hover:bg-secondary/10'}
+                    >
+                      All Clients
+                    </Button>
+                    {uniqueClients.map((client) => (
+                      <Button
+                        key={client.id}
+                        variant={clientFilter === client.id ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setClientFilter(client.id)}
+                        className={clientFilter === client.id ? 'bg-primary hover:bg-primary/90' : 'hover:bg-primary/10'}
+                      >
+                        {client.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Status Filter */}
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">Status:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant={statusFilter === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter('all')}
+                      className={statusFilter === 'all' ? 'bg-secondary hover:bg-secondary/90' : ''}
+                    >
+                      All
+                    </Button>
+                    <Button
+                      variant={statusFilter === 'ASSIGNED' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter('ASSIGNED')}
+                      className={statusFilter === 'ASSIGNED' ? 'bg-secondary hover:bg-secondary/90' : ''}
+                    >
+                      <Clock className="h-3 w-3 mr-1" />
+                      Assigned
+                    </Button>
+                    <Button
+                      variant={statusFilter === 'OVERDUE' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter('OVERDUE')}
+                      className={statusFilter === 'OVERDUE' ? 'bg-secondary hover:bg-secondary/90' : ''}
+                    >
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      Overdue
+                    </Button>
+                    <Button
+                      variant={statusFilter === 'REVIEWED' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter('REVIEWED')}
+                      className={statusFilter === 'REVIEWED' ? 'bg-secondary hover:bg-secondary/90' : ''}
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Reviewed
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </Card>
@@ -393,12 +444,12 @@ export function WorksheetManagementPage() {
               </Card>
             ) : (
               nonCompletedWorksheets.map((worksheet: Worksheet) => (
-                <Card key={worksheet.id} className="group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-l-4 border-l-blue-500 bg-white">
+                <Card key={worksheet.id} className="group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-l-4 border-l-secondary bg-white">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-3">
-                          <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-700 transition-colors">
+                          <h3 className="font-semibold text-lg text-gray-900 group-hover:text-secondary transition-colors">
                             {worksheet.title}
                           </h3>
                           <Badge variant="outline" className={`${getStatusColor(worksheet.status)} font-medium`}>
@@ -408,14 +459,14 @@ export function WorksheetManagementPage() {
                         </div>
                         
                         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full">
+                          <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/20">
                             <Avatar className="h-5 w-5">
                               <AvatarImage src={worksheet.client.user.avatarUrl} />
-                              <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
+                              <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                                 {worksheet.client.user.firstName[0]}{worksheet.client.user.lastName[0]}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="font-medium">
+                            <span className="font-medium text-gray-900">
                               {worksheet.client.user.firstName} {worksheet.client.user.lastName}
                             </span>
                           </div>
@@ -434,7 +485,7 @@ export function WorksheetManagementPage() {
                         </div>
                         
                         {worksheet.instructions && (
-                          <p className="text-sm text-gray-600 line-clamp-2 bg-gray-50 p-3 rounded-lg border-l-2 border-l-gray-300">
+                          <p className="text-sm text-gray-600 line-clamp-2 bg-gray-50 p-3 rounded-lg border-l-2 border-l-secondary/30">
                             {worksheet.instructions}
                           </p>
                         )}
@@ -445,7 +496,7 @@ export function WorksheetManagementPage() {
                           variant="outline" 
                           size="sm" 
                           onClick={() => handleViewWorksheet(worksheet.id)}
-                          className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 shadow-sm"
+                          className="bg-secondary/5 border-secondary/30 text-secondary hover:bg-secondary/10 hover:border-secondary/40 transition-all duration-200 shadow-sm"
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
