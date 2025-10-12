@@ -123,7 +123,7 @@ const MessageBubble = ({
     const hasReadReceipts =
       message.readReceipts && message.readReceipts.length > 0;
     if (hasReadReceipts) {
-      return <CheckCheck className="h-3 w-3 text-blue-500" />;
+      return <CheckCheck className="h-3 w-3 text-primary" />;
     }
 
     // Simple delivered vs sent logic (could be enhanced with real delivery status)
@@ -195,9 +195,9 @@ const MessageBubble = ({
         <div
           className={cn(
             "relative px-4 py-2.5 text-sm shadow-sm",
-            // Modern messenger colors and styling
+            // Modern messenger colors with brand primary
             isOwn
-              ? "bg-blue-500 text-white"
+              ? "bg-primary text-primary-foreground"
               : "bg-white text-gray-900 border border-gray-200",
             // Improved bubble shapes for better visual hierarchy
             messagePosition === "single" &&
@@ -240,7 +240,7 @@ const MessageBubble = ({
                   className={cn(
                     "p-2 rounded-lg border flex items-center gap-2",
                     isOwn
-                      ? "bg-blue-400/20 border-blue-300"
+                      ? "bg-primary-foreground/20 border-primary-foreground/30"
                       : "bg-white border-gray-200"
                   )}
                 >
@@ -391,7 +391,7 @@ const ConversationItem = ({
       className={cn(
         "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
         isSelected
-          ? "bg-blue-50 border-l-4 border-l-blue-500"
+          ? "bg-primary/10 border-l-4 border-l-primary"
           : "hover:bg-gray-50"
       )}
     >
@@ -417,17 +417,25 @@ const ConversationItem = ({
         </div>
 
         <div className="flex items-center justify-between mt-1">
-          <p className="text-sm text-muted-foreground truncate">
+          <p className="text-sm text-muted-foreground truncate flex-1 min-w-0">
             {isTyping ? (
-              <span className="text-blue-500 italic">typing...</span>
+              <span className="text-primary italic">typing...</span>
             ) : conversation.lastMessage ? (
-              conversation.lastMessage.content
+              <>
+                <span className="font-medium">
+                  {conversation.lastMessage.senderId === user.id ? "You" : otherParticipant?.user.firstName || ""}
+                </span>
+                {": "}
+                <span className="truncate">
+                  {conversation.lastMessage.content}
+                </span>
+              </>
             ) : (
-              "Start a conversation"
+              "No messages yet"
             )}
           </p>
           {conversation.unreadCount && conversation.unreadCount > 0 && (
-            <Badge variant="destructive" className="text-xs h-5 min-w-5 px-1.5">
+            <Badge variant="destructive" className="text-xs h-5 min-w-5 px-1.5 flex-shrink-0 ml-2">
               {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
             </Badge>
           )}
@@ -854,7 +862,7 @@ export function MessengerInterface({
         </ResizablePanel>
         <ResizableHandle
           withHandle
-          className="w-1.5 bg-gray-200/60 hover:bg-blue-400/40 transition-colors duration-200"
+          className="w-1.5 bg-gray-200/60 hover:bg-primary/40 transition-colors duration-200"
         />
         <ResizablePanel defaultSize={75} className="h-full overflow-hidden">
           <div className="h-full flex flex-col overflow-hidden">
@@ -911,7 +919,7 @@ export function MessengerInterface({
                     <div className="min-h-full flex flex-col">
                       {isLoadingMessages ? (
                         <div className="flex items-center justify-center flex-1 min-h-[200px]">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         </div>
                       ) : messagesError ? (
                         <div className="flex items-center justify-center flex-1 min-h-[200px] text-red-500">
@@ -1092,10 +1100,10 @@ export function MessengerInterface({
                       <Button
                         onClick={handleSendMessage}
                         disabled={!messageInput.trim() || isSendingMessage}
-                        className="flex-shrink-0"
+                        className="flex-shrink-0 bg-primary hover:bg-primary/90"
                       >
                         {isSendingMessage ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
                         ) : (
                           <Send className="h-4 w-4" />
                         )}
