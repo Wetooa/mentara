@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -92,6 +93,23 @@ const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
   return { value: time, label };
 });
 
+// Helper functions for time conversion
+const timeToSliderValue = (timeStr: string): number => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 2 + (minutes >= 30 ? 1 : 0); // 30-min intervals (0-47)
+};
+
+const sliderValueToTime = (value: number): string => {
+  const hours = Math.floor(value / 2);
+  const minutes = value % 2 === 0 ? '00' : '30';
+  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+};
+
+const formatTimeDisplay = (timeStr: string): string => {
+  const date = new Date(`1970-01-01T${timeStr}`);
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+};
+
 export function TherapistAvailabilityCalendar() {
   const {
     // State
@@ -121,6 +139,44 @@ export function TherapistAvailabilityCalendar() {
     resetForm,
     handleEditSlot,
   } = useTherapistAvailability();
+
+  // Slider state for time range
+  const [timeRange, setTimeRange] = React.useState<number[]>([18, 34]); // 9:00 AM - 5:00 PM default
+
+  // Update slider when form data changes
+  React.useEffect(() => {
+    if (formData.startTime && formData.endTime) {
+      setTimeRange([
+        timeToSliderValue(formData.startTime),
+        timeToSliderValue(formData.endTime),
+      ]);
+    }
+  }, [formData.startTime, formData.endTime]);
+
+  // Update form data when slider changes
+  const handleTimeRangeChange = (values: number[]) => {
+    setTimeRange(values);
+    setFormData({
+      ...formData,
+      startTime: sliderValueToTime(values[0]),
+      endTime: sliderValueToTime(values[1]),
+    });
+  };
+
+  // Get occupied time ranges for the selected day (excluding current editing slot)
+  const getOccupiedRanges = (): Array<{ start: number; end: number }> => {
+    if (!formData.dayOfWeek) return [];
+    
+    const daySlots = availability.filter(
+      slot => slot.dayOfWeek === formData.dayOfWeek && 
+              (!editingSlot || slot.id !== editingSlot.id)
+    );
+    
+    return daySlots.map(slot => ({
+      start: timeToSliderValue(slot.startTime),
+      end: timeToSliderValue(slot.endTime),
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,7 +301,15 @@ export function TherapistAvailabilityCalendar() {
   });
 
   const handleDayClick = (dayValue: string) => {
-    setFormData({ ...formData, dayOfWeek: dayValue });
+    const defaultStart = '09:00';
+    const defaultEnd = '17:00';
+    setFormData({ 
+      ...formData, 
+      dayOfWeek: dayValue,
+      startTime: defaultStart,
+      endTime: defaultEnd,
+    });
+    setTimeRange([timeToSliderValue(defaultStart), timeToSliderValue(defaultEnd)]);
     setIsAddDialogOpen(true);
   };
 
@@ -328,16 +392,23 @@ export function TherapistAvailabilityCalendar() {
                     <div className="p-2 bg-secondary/10 rounded-lg">
                       <Calendar className="h-5 w-5 text-secondary" />
                     </div>
-                    {editingSlot ? "Edit Availability Slot" : "Add Availability Slot"}
+                    {editingSlot
+                      ? "Edit Availability Slot"
+                      : "Add Availability Slot"}
                   </DialogTitle>
                   <p className="text-sm text-gray-600">
-                    {editingSlot ? "Update your availability details" : "Define when you're available for client sessions"}
+                    {editingSlot
+                      ? "Update your availability details"
+                      : "Define when you're available for client sessions"}
                   </p>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6 pt-4">
                   {/* Day Selection */}
                   <div className="space-y-3">
-                    <Label htmlFor="dayOfWeek" className="text-sm font-semibold text-gray-900">
+                    <Label
+                      htmlFor="dayOfWeek"
+                      className="text-sm font-semibold text-gray-900"
+                    >
                       Day of Week *
                     </Label>
                     <Select
@@ -359,66 +430,138 @@ export function TherapistAvailabilityCalendar() {
                     </Select>
                   </div>
 
-                  {/* Time Range */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-gray-900">Time Range *</Label>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="startTime" className="text-xs text-gray-600">From</Label>
-                        <Select
-                          value={formData.startTime}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, startTime: value })
-                          }
-                        >
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Start time" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60">
-                            {TIME_SLOTS.map((slot) => (
-                              <SelectItem key={slot.value} value={slot.value}>
-                                {slot.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                  {/* Time Range Slider */}
+                  <div className="space-y-4">
+                    <Label className="text-sm font-semibold text-gray-900">
+                      Time Range *
+                    </Label>
+                    
+                    {/* Selected Time Display */}
+                    <div className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/20">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-secondary" />
+                        <span className="text-sm font-bold text-gray-900">
+                          {formatTimeDisplay(formData.startTime || '09:00')}
+                        </span>
+                        <span className="text-sm text-gray-600">to</span>
+                        <span className="text-sm font-bold text-gray-900">
+                          {formatTimeDisplay(formData.endTime || '17:00')}
+                        </span>
+                      </div>
+                      <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/30">
+                        {(() => {
+                          const [startHour, startMin] = (formData.startTime || '09:00').split(':').map(Number);
+                          const [endHour, endMin] = (formData.endTime || '17:00').split(':').map(Number);
+                          const duration = endHour + endMin / 60 - (startHour + startMin / 60);
+                          return `${duration.toFixed(1)}h`;
+                        })()}
+                      </Badge>
+                    </div>
+
+                    {/* Visual Timeline with Occupied Slots */}
+                    <div className="space-y-3">
+                      {/* Hour markers */}
+                      <div className="relative h-6">
+                        <div className="absolute inset-0 flex justify-between text-xs text-gray-500">
+                          <span>12 AM</span>
+                          <span>6 AM</span>
+                          <span>12 PM</span>
+                          <span>6 PM</span>
+                          <span>12 AM</span>
+                        </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="endTime" className="text-xs text-gray-600">To</Label>
-                        <Select
-                          value={formData.endTime}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, endTime: value })
-                          }
+                      {/* Occupied slots visualization */}
+                      {formData.dayOfWeek && (
+                        <div className="relative h-8 bg-gray-100 rounded-lg mb-2">
+                          {getOccupiedRanges().map((range, idx) => {
+                            const leftPercent = (range.start / 48) * 100;
+                            const widthPercent = ((range.end - range.start) / 48) * 100;
+                            return (
+                              <div
+                                key={idx}
+                                className="absolute top-0 h-full bg-red-200 border-l-2 border-r-2 border-red-400 rounded"
+                                style={{
+                                  left: `${leftPercent}%`,
+                                  width: `${widthPercent}%`,
+                                }}
+                                title="Already occupied"
+                              />
+                            );
+                          })}
+                          {/* Current selection indicator */}
+                          <div
+                            className="absolute top-0 h-full bg-secondary/30 border-l-2 border-r-2 border-secondary rounded"
+                            style={{
+                              left: `${(timeRange[0] / 48) * 100}%`,
+                              width: `${((timeRange[1] - timeRange[0]) / 48) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Range Slider */}
+                      <div className="px-1">
+                        <Slider
+                          value={timeRange}
+                          onValueChange={handleTimeRangeChange}
+                          min={0}
+                          max={47}
+                          step={1}
+                          className="w-full"
+                        />
+                      </div>
+
+                      {/* Quick time presets */}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleTimeRangeChange([18, 34])}
+                          className="text-xs"
                         >
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="End time" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60">
-                            {TIME_SLOTS.map((slot) => (
-                              <SelectItem key={slot.value} value={slot.value}>
-                                {slot.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          9 AM - 5 PM
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleTimeRangeChange([16, 32])}
+                          className="text-xs"
+                        >
+                          8 AM - 4 PM
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleTimeRangeChange([20, 36])}
+                          className="text-xs"
+                        >
+                          10 AM - 6 PM
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleTimeRangeChange([26, 40])}
+                          className="text-xs"
+                        >
+                          1 PM - 8 PM
+                        </Button>
                       </div>
                     </div>
-                    {/* Duration Preview */}
-                    {formData.startTime && formData.endTime && (
-                      <div className="p-3 bg-secondary/5 rounded-lg border border-secondary/20">
+
+                    {/* Warning for overlaps */}
+                    {formData.dayOfWeek && getOccupiedRanges().some(range => 
+                      (timeRange[0] < range.end && timeRange[1] > range.start)
+                    ) && (
+                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
                         <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-secondary" />
-                          <p className="text-sm text-gray-700">
-                            Duration: <span className="font-bold text-secondary">
-                              {(() => {
-                                const [startHour, startMin] = formData.startTime.split(':').map(Number);
-                                const [endHour, endMin] = formData.endTime.split(':').map(Number);
-                                const duration = endHour + endMin / 60 - (startHour + startMin / 60);
-                                return duration > 0 ? `${duration.toFixed(1)} hours` : 'Invalid range';
-                              })()}
-                            </span>
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <p className="text-sm text-red-700">
+                            This time range overlaps with existing availability
                           </p>
                         </div>
                       </div>
@@ -427,7 +570,10 @@ export function TherapistAvailabilityCalendar() {
 
                   {/* Timezone */}
                   <div className="space-y-3">
-                    <Label htmlFor="timezone" className="text-sm font-semibold text-gray-900">
+                    <Label
+                      htmlFor="timezone"
+                      className="text-sm font-semibold text-gray-900"
+                    >
                       Timezone
                     </Label>
                     <Select
@@ -451,8 +597,14 @@ export function TherapistAvailabilityCalendar() {
 
                   {/* Notes */}
                   <div className="space-y-3">
-                    <Label htmlFor="notes" className="text-sm font-semibold text-gray-900">
-                      Notes <span className="text-xs text-gray-500 font-normal">(Optional)</span>
+                    <Label
+                      htmlFor="notes"
+                      className="text-sm font-semibold text-gray-900"
+                    >
+                      Notes{" "}
+                      <span className="text-xs text-gray-500 font-normal">
+                        (Optional)
+                      </span>
                     </Label>
                     <Textarea
                       id="notes"
@@ -526,54 +678,57 @@ export function TherapistAvailabilityCalendar() {
                 const daySlots = availabilityByDay[day.value] || [];
                 const dayHours = hoursPerDay[day.value] || 0;
 
-                  return (
+                return (
+                  <div
+                    key={day.value}
+                    className="border border-gray-200 rounded-xl p-5 bg-white hover:border-gray-300 hover:shadow-md transition-all"
+                  >
+                    {/* Day Header - Clickable */}
                     <div
-                      key={day.value}
-                      className="border border-gray-200 rounded-xl p-5 bg-white hover:border-gray-300 hover:shadow-md transition-all"
+                      className="flex items-center justify-between mb-4 cursor-pointer group"
+                      onClick={() => handleDayClick(day.value)}
                     >
-                      {/* Day Header - Clickable */}
-                      <div 
-                        className="flex items-center justify-between mb-4 cursor-pointer group"
-                        onClick={() => handleDayClick(day.value)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-2 h-12 rounded-full transition-colors ${dayHours > 0 ? "bg-secondary" : "bg-gray-200 group-hover:bg-gray-300"}`}
-                          ></div>
-                          <div>
-                            <h4 className="font-bold text-lg text-gray-900 group-hover:text-secondary transition-colors">
-                              {day.label}
-                            </h4>
-                            <p className="text-sm text-gray-600">
-                              {dayHours > 0
-                                ? `${dayHours.toFixed(1)} hours available`
-                                : "Click to add availability"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {dayHours > 0 && (
-                            <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                              {daySlots.length}{" "}
-                              {daySlots.length === 1 ? "slot" : "slots"}
-                            </Badge>
-                          )}
-                          <Plus className="h-5 w-5 text-gray-400 group-hover:text-secondary transition-colors" />
-                        </div>
-                      </div>
-
-                      {/* Time Slots */}
-                      {daySlots.length === 0 ? (
-                        <div 
-                          className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200 cursor-pointer hover:border-gray-300 hover:bg-gray-100 transition-all"
-                          onClick={() => handleDayClick(day.value)}
-                        >
-                          <Clock className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                          <p className="text-sm text-gray-500">
-                            Click to add time slots
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-2 h-12 rounded-full transition-colors ${dayHours > 0 ? "bg-secondary" : "bg-gray-200 group-hover:bg-gray-300"}`}
+                        ></div>
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900 group-hover:text-secondary transition-colors">
+                            {day.label}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {dayHours > 0
+                              ? `${dayHours.toFixed(1)} hours available`
+                              : "Click to add availability"}
                           </p>
                         </div>
-                      ) : (
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {dayHours > 0 && (
+                          <Badge
+                            variant="outline"
+                            className="bg-gray-50 text-gray-700 border-gray-200"
+                          >
+                            {daySlots.length}{" "}
+                            {daySlots.length === 1 ? "slot" : "slots"}
+                          </Badge>
+                        )}
+                        <Plus className="h-5 w-5 text-gray-400 group-hover:text-secondary transition-colors" />
+                      </div>
+                    </div>
+
+                    {/* Time Slots */}
+                    {daySlots.length === 0 ? (
+                      <div
+                        className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200 cursor-pointer hover:border-gray-300 hover:bg-gray-100 transition-all"
+                        onClick={() => handleDayClick(day.value)}
+                      >
+                        <Clock className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">
+                          Click to add time slots
+                        </p>
+                      </div>
+                    ) : (
                       <div className="space-y-3">
                         {daySlots.map((slot, index) => {
                           const [startHour, startMin] = slot.startTime
@@ -586,17 +741,17 @@ export function TherapistAvailabilityCalendar() {
                             endHour + endMin / 60 - (startHour + startMin / 60);
 
                           return (
-                            <div
-                              key={slot.id}
+                          <div
+                            key={slot.id}
                               className="group relative flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-secondary/30 hover:shadow-sm transition-all"
-                            >
+                          >
                               {/* Time Block Visualization */}
                               <div className="flex items-center gap-4 flex-1">
-                                <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
                                   <div className="p-2.5 bg-secondary rounded-lg">
                                     <Clock className="h-5 w-5 text-secondary-foreground" />
                                   </div>
-                                  <div>
+                              <div>
                                     <p className="font-bold text-base text-gray-900">
                                       {new Date(
                                         `1970-01-01T${slot.startTime}`
@@ -614,8 +769,8 @@ export function TherapistAvailabilityCalendar() {
                                     </p>
                                     <div className="flex items-center gap-3 mt-1">
                                       <p className="text-xs text-gray-600">
-                                        {slot.timezone}
-                                      </p>
+                                  {slot.timezone}
+                                </p>
                                       <Badge
                                         variant="outline"
                                         className="text-xs bg-gray-100 text-gray-700 border-gray-200"
@@ -623,18 +778,18 @@ export function TherapistAvailabilityCalendar() {
                                         {duration.toFixed(1)}h
                                       </Badge>
                                     </div>
-                                    {slot.notes && (
+                                {slot.notes && (
                                       <p className="text-xs text-gray-600 mt-2 italic">
                                         "{slot.notes}"
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
+                                  </p>
+                                )}
+                              </div>
+                            </div>
                               </div>
 
                               {/* Actions */}
-                              <div className="flex items-center gap-2">
-                                <Badge
+                            <div className="flex items-center gap-2">
+                              <Badge
                                   className={
                                     slot.isAvailable
                                       ? "bg-green-100 text-green-700 border-green-200"
@@ -642,31 +797,31 @@ export function TherapistAvailabilityCalendar() {
                                   }
                                 >
                                   {slot.isAvailable ? "Available" : "Blocked"}
-                                </Badge>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleEdit(slot)}
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(slot)}
                                   className="h-9 w-9 p-0 hover:bg-secondary/10 hover:text-secondary"
-                                >
+                              >
                                   <Edit className="h-4 w-4" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                       className="h-9 w-9 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
-                                    >
+                                  >
                                       <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
                                         Delete Availability Slot?
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription>
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
                                         This will remove the{" "}
                                         {new Date(
                                           `1970-01-01T${slot.startTime}`
@@ -683,24 +838,24 @@ export function TherapistAvailabilityCalendar() {
                                         })}{" "}
                                         slot on {day.label}. This action cannot
                                         be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>
-                                        Cancel
-                                      </AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleDelete(slot.id)}
-                                        disabled={isDeleting}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      >
-                                        {isDeleting ? "Deleting..." : "Delete"}
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDelete(slot.id)}
+                                      disabled={isDeleting}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      {isDeleting ? "Deleting..." : "Delete"}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
+                          </div>
                           );
                         })}
                       </div>
