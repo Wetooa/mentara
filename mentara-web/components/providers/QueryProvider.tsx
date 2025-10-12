@@ -74,12 +74,15 @@ export default function QueryProvider({
   children: React.ReactNode;
 }) {
   const [queryClient] = useState(() => createQueryClient());
+  
+  // Control devtools visibility with environment variable
+  const showDevtools = process.env.NEXT_PUBLIC_SHOW_DEVTOOLS === 'true';
 
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {/* Only show dev tools in development */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* Only show dev tools when explicitly enabled via env var */}
+      {showDevtools && (
         <ReactQueryDevtools 
           initialIsOpen={false} 
           position="bottom-right"

@@ -24,6 +24,12 @@ const nextConfig: NextConfig = {
   experimental: {
     // Remove serverActions as it's SSR-specific
   },
+
+  // Control development indicators via environment variable
+  devIndicators: {
+    buildActivity: process.env.NEXT_PUBLIC_SHOW_DEVTOOLS === 'true',
+    buildActivityPosition: 'bottom-left',
+  },
 };
 
 export default nextConfig;
