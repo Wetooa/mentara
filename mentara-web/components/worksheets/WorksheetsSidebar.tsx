@@ -39,23 +39,26 @@ export default function WorksheetsSidebar({
   ];
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 p-4 overflow-y-auto h-full min-h-screen flex flex-col sticky top-0">
-      <h2 className="text-lg font-medium text-gray-700 mb-4">Filters</h2>
+    <div className="w-72 bg-white border-r border-border/50 p-6 overflow-y-auto h-full min-h-screen flex flex-col sticky top-0 shadow-sm">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-1">Worksheets</h2>
+        <p className="text-sm text-gray-500">Filter your assignments</p>
+      </div>
 
       {/* Filter buttons */}
-      <div className="space-y-2">
+      <div className="space-y-2 mb-6">
         {filters.map((filter) => (
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`flex items-center w-full px-3 py-2 text-left rounded-md ${
+            className={`flex items-center w-full px-4 py-3 text-left rounded-xl transition-all font-medium ${
               activeFilter === filter.id
-                ? "bg-[#129316]/15 text-[#436B00]"
-                : "text-gray-700 hover:bg-gray-100"
+                ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary border border-primary/20 shadow-sm"
+                : "text-gray-700 hover:bg-gray-50 border border-transparent"
             }`}
           >
             <span
-              className={`mr-3 ${activeFilter === filter.id ? "text-[#436B00]" : "text-gray-500"}`}
+              className={`mr-3 ${activeFilter === filter.id ? "text-primary" : "text-gray-500"}`}
             >
               {filter.icon}
             </span>
@@ -65,20 +68,20 @@ export default function WorksheetsSidebar({
       </div>
 
       {/* Therapist filter */}
-      <div className="mt-6">
+      <div className="pt-6 border-t border-border/50">
         <label
           htmlFor="therapistFilter"
-          className="block text-sm font-medium text-gray-700 mb-2"
+          className="block text-sm font-semibold text-gray-900 mb-3"
         >
-          From Therapist:
+          From Therapist
         </label>
         <input
           type="text"
           id="therapistFilter"
           value={therapistFilter}
           onChange={(e) => setTherapistFilter(e.target.value)}
-          placeholder="Type therapist name..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#436B00]"
+          placeholder="Search therapist..."
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
         />
       </div>
     </div>
