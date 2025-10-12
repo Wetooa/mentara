@@ -39,8 +39,8 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
         );
       case "document":
         return (
-          <div className="flex items-center bg-gray-100 p-2 rounded-lg mb-2 max-w-[240px]">
-            <File className="h-8 w-8 text-blue-500 mr-2 flex-shrink-0" />
+          <div className="flex items-center bg-gray-100 p-2 rounded-lg mb-2 max-w-[240px] hover:bg-gray-200 transition-colors">
+            <File className="h-8 w-8 text-primary mr-2 flex-shrink-0" />
             <div className="overflow-hidden flex-1">
               <p className="text-xs font-medium text-gray-800 truncate">
                 {attachment.name}
@@ -49,15 +49,15 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
                 {formatFileSize(attachment.size || 0)}
               </p>
             </div>
-            <button className="ml-2 text-gray-500 hover:text-gray-700">
+            <button className="ml-2 text-gray-500 hover:text-primary transition-colors">
               <Download className="h-4 w-4" />
             </button>
           </div>
         );
       case "audio":
         return (
-          <div className="flex items-center bg-gray-100 p-2 rounded-lg mb-2 max-w-[240px]">
-            <Music className="h-8 w-8 text-purple-500 mr-2 flex-shrink-0" />
+          <div className="flex items-center bg-gray-100 p-2 rounded-lg mb-2 max-w-[240px] hover:bg-gray-200 transition-colors">
+            <Music className="h-8 w-8 text-secondary mr-2 flex-shrink-0" />
             <div className="overflow-hidden flex-1">
               <p className="text-xs font-medium text-gray-800 truncate">
                 {attachment.name}
@@ -66,7 +66,7 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
                 {formatFileSize(attachment.size || 0)}
               </p>
             </div>
-            <button className="ml-2 text-gray-500 hover:text-gray-700">
+            <button className="ml-2 text-gray-500 hover:text-primary transition-colors">
               <Download className="h-4 w-4" />
             </button>
           </div>
@@ -95,11 +95,11 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
     return (
       <span className="ml-1">
         {message.status === "read" ? (
-          <CheckCheck className="h-3 w-3 inline text-green-200" />
+          <CheckCheck className="h-3 w-3 inline text-primary-foreground/80" />
         ) : message.status === "delivered" ? (
-          <CheckCheck className="h-3 w-3 inline text-green-200" />
+          <CheckCheck className="h-3 w-3 inline text-primary-foreground/80" />
         ) : message.status === "sent" ? (
-          <Check className="h-3 w-3 inline text-green-200" />
+          <Check className="h-3 w-3 inline text-primary-foreground/80" />
         ) : null}
       </span>
     );
@@ -124,8 +124,8 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-2 ${
           isOwn
-            ? "bg-green-600 text-white rounded-br-none"
-            : "bg-white text-gray-800 rounded-bl-none shadow-sm"
+            ? "bg-primary text-primary-foreground rounded-br-none shadow-md"
+            : "bg-white text-gray-800 rounded-bl-none shadow-sm border border-border/50"
         }`}
       >
         {/* Render attachments if any */}
@@ -143,7 +143,7 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
         {/* Message time and status */}
         <div
           className={`flex items-center justify-end text-xs mt-1 ${
-            isOwn ? "text-green-200" : "text-gray-400"
+            isOwn ? "text-primary-foreground/70" : "text-gray-400"
           }`}
         >
           <span>{message.time}</span>

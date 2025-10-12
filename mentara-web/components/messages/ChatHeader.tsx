@@ -45,9 +45,9 @@ export default function ChatHeader({
             />
           </div>
           <span
-            className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${
+            className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white shadow-sm ${
               contact.status === "online"
-                ? "bg-green-500"
+                ? "bg-primary"
                 : contact.status === "away"
                   ? "bg-yellow-400"
                   : "bg-gray-400"
@@ -55,42 +55,42 @@ export default function ChatHeader({
           />
         </div>
         <div>
-          <h3 className="font-medium text-gray-900">{contact.name}</h3>
-          <p className="text-xs text-green-600 capitalize">
+          <h3 className="font-semibold text-gray-900">{contact.name}</h3>
+          <p className="text-xs text-primary font-medium capitalize">
             {contact.isTyping ? "Typing..." : contact.status}
           </p>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1">
         {/* Call Button */}
         <button
-          className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-full hover:bg-primary/10 hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
           title="Voice call"
           onClick={() => onCallInitiate?.(contact.id, 'audio')}
           disabled={!onCallInitiate}
         >
-          <Phone className="h-5 w-5 text-gray-500" />
+          <Phone className="h-5 w-5 text-gray-500 group-hover:text-primary transition-colors" />
         </button>
 
         {/* Video Call Button */}
         <button
-          className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-full hover:bg-primary/10 hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
           title="Video call"
           onClick={() => onCallInitiate?.(contact.id, 'video')}
           disabled={!onCallInitiate}
         >
-          <Video className="h-5 w-5 text-gray-500" />
+          <Video className="h-5 w-5 text-gray-500 group-hover:text-primary transition-colors" />
         </button>
 
         {/* Settings Button */}
         <div className="relative settings-dropdown">
           <button
-            className="p-2 rounded-full hover:bg-gray-100"
+            className="p-2 rounded-full hover:bg-primary/10 group transition-colors"
             onClick={() => setShowSettings(!showSettings)}
           >
-            <Settings className="h-5 w-5 text-gray-500" />
+            <Settings className="h-5 w-5 text-gray-500 group-hover:text-primary transition-colors" />
           </button>
 
           {/* Settings Dropdown */}

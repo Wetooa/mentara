@@ -207,24 +207,26 @@ export function MessageChatArea({
       <div className="flex-1 overflow-y-auto p-4 pb-2">
         {isLoadingMessages ? (
           <div className="flex items-center justify-center h-40">
-            <div className="animate-spin h-8 w-8 border-2 border-green-500 border-t-transparent rounded-full"></div>
+            <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
           </div>
         ) : error ? (
           <div className="text-center p-4 text-red-500">{error}</div>
         ) : !isConnected ? (
-          <div className="text-center p-4 text-yellow-600">
+          <div className="text-center p-4 text-yellow-600 font-medium">
             Connecting to messaging service...
           </div>
         ) : messageGroups.length === 0 ? (
           <div className="text-center p-4 text-gray-500">
-            No messages yet. Start the conversation!
+            <div className="text-4xl mb-2">💬</div>
+            <p className="font-medium">No messages yet</p>
+            <p className="text-sm">Start the conversation!</p>
           </div>
         ) : (
           messageGroups.map((group) => (
             <div key={group.date} className="mb-6">
               {/* Date Divider */}
               <div className="text-center my-4">
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
+                <span className="text-xs bg-primary/10 text-primary font-medium px-3 py-1.5 rounded-full border border-primary/20">
                   {formatDateLabel(group.date)}
                 </span>
               </div>
@@ -271,7 +273,7 @@ export function MessageChatArea({
 
         {/* Message Input Area */}
         <div className="bg-white p-3">
-          <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+          <div className="flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-2.5 focus-within:border-primary focus-within:bg-white transition-all">
             {/* Hidden File Input */}
             <input
               type="file"
@@ -284,8 +286,9 @@ export function MessageChatArea({
 
             {/* Attachment Button */}
             <button
-              className="text-gray-500 hover:text-gray-700 mr-2"
+              className="text-gray-500 hover:text-primary transition-colors mr-2"
               onClick={handleAttachmentClick}
+              title="Attach file"
             >
               <Paperclip className="h-5 w-5" />
             </button>
@@ -293,8 +296,8 @@ export function MessageChatArea({
             {/* Text Input */}
             <input
               type="text"
-              className="flex-1 bg-transparent border-none focus:outline-none text-gray-700 py-1"
-              placeholder="Your message..."
+              className="flex-1 bg-transparent border-none focus:outline-none text-gray-700 py-1 placeholder:text-gray-400"
+              placeholder="Type your message..."
               value={message}
               onChange={handleMessageChange}
               onKeyDown={handleKeyDown}
@@ -303,8 +306,9 @@ export function MessageChatArea({
             {/* Emoji Button */}
             <div className="relative">
               <button
-                className="text-gray-500 hover:text-gray-700 ml-2"
+                className="text-gray-500 hover:text-primary transition-colors ml-2"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                title="Add emoji"
               >
                 <Smile className="h-5 w-5" />
               </button>
@@ -322,13 +326,14 @@ export function MessageChatArea({
 
             {/* Send Button */}
             <button
-              className={`ml-2 ${
+              className={`ml-3 transition-all ${
                 message.trim() || selectedFiles.length > 0
-                  ? "text-green-600 hover:text-green-700"
+                  ? "text-primary hover:text-primary/80 hover:scale-110"
                   : "text-gray-400"
               }`}
               onClick={handleSend}
               disabled={!message.trim() && selectedFiles.length === 0}
+              title="Send message"
             >
               <Send className="h-5 w-5" />
             </button>
