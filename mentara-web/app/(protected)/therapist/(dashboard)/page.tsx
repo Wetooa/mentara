@@ -9,14 +9,26 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTherapistDashboard } from "@/hooks/therapist/useTherapistDashboard";
-import { AlertCircle, RefreshCw, MessageSquare, Calendar as CalendarIcon, Users as UsersIcon, TrendingUp } from "lucide-react";
+import { useRecentCommunications } from "@/hooks/dashboard/useClientDashboard";
+import {
+  AlertCircle,
+  RefreshCw,
+  MessageSquare,
+  Calendar as CalendarIcon,
+  Users as UsersIcon,
+  TrendingUp,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { getInitials } from "@/lib/utils/common";
+import { formatDistanceToNow } from "date-fns";
 
 export default function TherapistDashboardPage() {
   const router = useRouter();
   const { data, isLoading, error, refetch } = useTherapistDashboard();
+  const { data: recentChats = [], isLoading: isChatsLoading } = useRecentCommunications();
 
   // Destructure from updated backend response structure
   const therapist = data?.therapist;
@@ -48,6 +60,10 @@ export default function TherapistDashboardPage() {
 
   const handleRetry = () => {
     refetch();
+  };
+
+  const handleChatClick = (contactId: string) => {
+    router.push(`/therapist/messages?contact=${contactId}`);
   };
 
   // Enhanced error state with retry functionality
@@ -149,9 +165,24 @@ export default function TherapistDashboardPage() {
             onWorksheetsClick={handleWorksheetsClick}
           />
 
-        {/* Main Dashboard Content - Optimized 2-row layout */}
+        {/* Main Dashboard Content - Optimized layout with 2:1 ratio */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min">
-          {/* Row 1: Today's Schedule (2 cols), Client Matches (4 cols - extended) */}
+          {/* Row 1: Client Matches (4 cols - 2x larger than This Week), Today's Schedule (2 cols) */}
+          <div className="md:col-span-2 lg:col-span-4">
+            <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <UsersIcon className="h-5 w-5 text-secondary" />
+                  Client Matches
+                </CardTitle>
+                <p className="text-sm text-gray-600">Recent connections</p>
+              </CardHeader>
+              <CardContent>
+                <MatchedClientsSection />
+              </CardContent>
+            </Card>
+          </div>
+
           {(schedule?.today?.length || 0) > 0 && (
             <div className="md:col-span-1 lg:col-span-2">
               <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
@@ -161,23 +192,28 @@ export default function TherapistDashboardPage() {
                     Today's Schedule
                   </CardTitle>
                   <p className="text-sm text-gray-600">
-                    {schedule?.today?.length || 0} appointment{(schedule?.today?.length || 0) !== 1 ? "s" : ""}
+                    {schedule?.today?.length || 0} appointment
+                    {(schedule?.today?.length || 0) !== 1 ? "s" : ""}
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <DashboardPatientList
-                    appointments={(schedule?.today || []).slice(0, 3).map((appointment) => ({
-                      id: appointment.id,
-                      patientId: appointment.id,
-                      patientName: appointment.patientName,
-                      patientAvatar: "/avatar-placeholder.png",
-                      time: new Date(appointment.startTime).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }),
-                      condition: appointment.type || "Session",
-                    }))}
-                  />
+              <DashboardPatientList
+                    appointments={(schedule?.today || [])
+                      .slice(0, 3)
+                      .map((appointment) => ({
+                  id: appointment.id,
+                        patientId: appointment.id,
+                  patientName: appointment.patientName,
+                  patientAvatar: "/avatar-placeholder.png",
+                        time: new Date(
+                          appointment.startTime
+                        ).toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }),
+                        condition: appointment.type || "Session",
+                }))}
+              />
                   {(schedule?.today?.length || 0) > 3 && (
                     <Button
                       variant="ghost"
@@ -193,23 +229,8 @@ export default function TherapistDashboardPage() {
             </div>
           )}
 
-          <div className={(schedule?.today?.length || 0) > 0 ? "md:col-span-2 lg:col-span-4" : "md:col-span-2 lg:col-span-6"}>
-            <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <UsersIcon className="h-5 w-5 text-secondary" />
-                  Client Matches
-                </CardTitle>
-                <p className="text-sm text-gray-600">Recent connections</p>
-              </CardHeader>
-              <CardContent>
-                <MatchedClientsSection />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Row 2: This Week's Schedule (3 cols), Practice Analytics (3 cols) */}
-          <div className="md:col-span-1 lg:col-span-3">
+          {/* Row 2: This Week's Schedule (2 cols), Recent Chats (2 cols), Practice Analytics (2 cols) */}
+          <div className="md:col-span-1 lg:col-span-2">
             <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -223,47 +244,144 @@ export default function TherapistDashboardPage() {
               <CardContent>
                 {schedule?.thisWeek && schedule.thisWeek.length > 0 ? (
                   <div className="space-y-3">
-                    {schedule.thisWeek.slice(0, 5).map((appointment) => (
+                    {schedule.thisWeek.slice(0, 4).map((appointment) => (
                       <motion.div
                         key={appointment.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/10 hover:border-secondary/30 hover:shadow-sm transition-all cursor-pointer"
-                        onClick={() => router.push(`/therapist/patients/${appointment.id}`)}
+                        onClick={() =>
+                          router.push(`/therapist/patients/${appointment.id}`)
+                        }
                       >
-                        <div>
-                          <p className="font-semibold text-gray-900">{appointment.patientName}</p>
-                          <p className="text-sm text-gray-600">{appointment.type}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 truncate">
+                            {appointment.patientName}
+                          </p>
+                          <p className="text-xs text-gray-600 truncate">
+                            {appointment.type}
+                          </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-secondary">
-                            {new Date(appointment.startTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        <div className="text-right flex-shrink-0 ml-2">
+                          <p className="text-xs font-medium text-secondary">
+                            {new Date(appointment.startTime).toLocaleDateString(
+                              "en-US",
+                              {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {new Date(appointment.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(appointment.startTime).toLocaleTimeString(
+                              "en-US",
+                              { hour: "2-digit", minute: "2-digit" }
+                            )}
                           </p>
                         </div>
                       </motion.div>
                     ))}
-                    <Button
-                      variant="outline"
-                      onClick={handleScheduleClick}
-                      className="w-full border-secondary/30 text-secondary hover:bg-secondary/10"
-                    >
-                      View Full Schedule
-                    </Button>
+                    {(schedule?.thisWeek?.length || 0) > 4 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleScheduleClick}
+                        className="w-full text-secondary hover:bg-secondary/10"
+                      >
+                        +{schedule.thisWeek.length - 4} more
+                      </Button>
+                    )}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <CalendarIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-600">No appointments this week</p>
+                  <div className="text-center py-8">
+                    <CalendarIcon className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">No appointments</p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
 
-          <div className="md:col-span-1 lg:col-span-3">
+          <div className="md:col-span-1 lg:col-span-2">
+            <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-secondary" />
+                  Recent Chats
+                </CardTitle>
+                <p className="text-sm text-gray-600">Client messages</p>
+              </CardHeader>
+              <CardContent>
+                {isChatsLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-16 rounded-lg" />
+                    ))}
+                  </div>
+                ) : recentChats.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentChats.slice(0, 4).map((chat: any) => (
+                      <motion.div
+                        key={chat.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-3 p-3 bg-secondary/5 rounded-lg border border-secondary/10 hover:border-secondary/30 hover:shadow-sm transition-all cursor-pointer"
+                        onClick={() => handleChatClick(chat.id)}
+                      >
+                        <Avatar className="h-10 w-10 ring-2 ring-secondary/20">
+                          <AvatarImage src={chat.avatar} />
+                          <AvatarFallback className="bg-gradient-to-br from-secondary/20 to-secondary/10 text-secondary text-sm font-semibold">
+                            {getInitials(chat.name || "User")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm text-gray-900 truncate">
+                            {chat.name}
+                          </p>
+                          <p className="text-xs text-gray-600 truncate">
+                            {chat.lastMessage || "No messages yet"}
+                          </p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-xs text-gray-500">
+                            {chat.time ? formatDistanceToNow(new Date(chat.time), { addSuffix: true }) : ""}
+                          </p>
+                          {chat.unread > 0 && (
+                            <div className="mt-1 bg-secondary text-secondary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                              {chat.unread}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={handleMessagesClick}
+                      className="w-full border-secondary/30 text-secondary hover:bg-secondary/10"
+                    >
+                      View All Messages
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <MessageSquare className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">No recent messages</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleMessagesClick}
+                      className="mt-3 text-secondary hover:bg-secondary/10"
+                    >
+                      View All Messages
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+              </div>
+
+          <div className="md:col-span-1 lg:col-span-2">
             <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -273,9 +391,9 @@ export default function TherapistDashboardPage() {
                 <p className="text-sm text-gray-600">Growth metrics</p>
               </CardHeader>
               <CardContent>
-                <DashboardOverview
-                  patientStats={{
-                    total: patients?.total || 0,
+              <DashboardOverview
+                patientStats={{
+                  total: patients?.total || 0,
                     percentage: 0,
                     months: 6,
                     chartData: [],
