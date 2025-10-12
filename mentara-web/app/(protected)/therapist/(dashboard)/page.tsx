@@ -52,15 +52,15 @@ export default function TherapistDashboardPage() {
   if (error && !isLoading) {
     return (
       <div className="w-full h-full p-6 space-y-8">
-        <Alert className="max-w-md mx-auto border-amber-200 bg-amber-50">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="flex items-center justify-between text-amber-800">
+        <Alert className="max-w-md mx-auto border-secondary/30 bg-secondary/10">
+          <AlertCircle className="h-4 w-4 text-secondary" />
+          <AlertDescription className="flex items-center justify-between text-gray-900">
             <span>Failed to load dashboard data</span>
             <Button
               variant="outline"
               size="sm"
               onClick={handleRetry}
-              className="ml-4 border-amber-300 text-amber-700 hover:bg-amber-100"
+              className="ml-4 border-secondary/30 text-secondary hover:bg-secondary/20"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Retry
@@ -74,34 +74,39 @@ export default function TherapistDashboardPage() {
   // Enhanced loading state with skeleton components
   if (isLoading || !data) {
     return (
-      <div className="w-full h-full p-6 space-y-8">
-        {/* Loading Header */}
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-64 bg-amber-100" />
-          <Skeleton className="h-4 w-96 bg-amber-50" />
-        </div>
-
-        {/* Loading Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 bg-amber-100" />
-          ))}
-        </div>
-
-        {/* Loading Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Skeleton className="h-64 bg-amber-100" />
-            <Skeleton className="h-64 bg-amber-100" />
+      <div className="w-full min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Loading Header */}
+          <div className="space-y-3">
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-6 w-96" />
           </div>
-          <div className="space-y-6">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-48 bg-amber-100" />
+
+          {/* Loading Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-28 rounded-xl" />
             ))}
           </div>
-          <div className="space-y-6">
-            <Skeleton className="h-48 bg-amber-100" />
-            <Skeleton className="h-48 bg-amber-100" />
+
+          {/* Loading Content Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+            {/* Primary Column */}
+            <div className="xl:col-span-2 space-y-6">
+              <Skeleton className="h-12 w-48" />
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-xl" />
+                ))}
+              </div>
+            </div>
+
+            {/* Secondary Column */}
+            <div className="space-y-6">
+              <Skeleton className="h-12 w-40" />
+              <Skeleton className="h-64 rounded-xl" />
+              <Skeleton className="h-48 rounded-xl" />
+            </div>
           </div>
         </div>
       </div>
@@ -114,15 +119,15 @@ export default function TherapistDashboardPage() {
         {/* Enhanced Page Header */}
         <div className="text-center md:text-left">
           <DashboardGreeting name={therapist ? `${therapist.firstName} ${therapist.lastName}` : 'Therapist'} />
-          <p className="text-amber-700 mt-2 text-lg">Manage your client relationships and grow your practice</p>
+          <p className="text-gray-600 mt-2 text-lg">Manage your client relationships and grow your practice</p>
         </div>
 
         {/* Matched Clients Section - Primary Focus */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-amber-900">Client Matches</h2>
-              <p className="text-amber-700">Your assigned clients and recent connections</p>
+              <h2 className="text-2xl font-bold text-gray-900">Client Matches</h2>
+              <p className="text-gray-600">Your assigned clients and recent connections</p>
             </div>
           </div>
           <MatchedClientsSection />
@@ -131,8 +136,8 @@ export default function TherapistDashboardPage() {
         {/* Stats Overview */}
         <section className="space-y-4">
           <div>
-            <h2 className="text-2xl font-bold text-amber-900">Today's Overview</h2>
-            <p className="text-amber-700">Your schedule and practice metrics</p>
+            <h2 className="text-2xl font-bold text-gray-900">Today's Overview</h2>
+            <p className="text-gray-600">Your schedule and practice metrics</p>
           </div>
           <DashboardStats
             stats={{
@@ -161,10 +166,10 @@ export default function TherapistDashboardPage() {
             <section>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-amber-900">
+                  <h3 className="text-xl font-semibold text-gray-900">
                     Today's Schedule
                   </h3>
-                  <p className="text-amber-700 text-sm">
+                  <p className="text-gray-600 text-sm">
                     {schedule?.today?.length || 0} appointment{(schedule?.today?.length || 0) !== 1 ? 's' : ''} scheduled
                   </p>
                 </div>
@@ -172,7 +177,7 @@ export default function TherapistDashboardPage() {
                   variant="outline"
                   size="sm"
                   onClick={handleScheduleClick}
-                  className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                  className="border-secondary/30 text-secondary hover:bg-secondary/10"
                 >
                   View All
                 </Button>
@@ -197,8 +202,8 @@ export default function TherapistDashboardPage() {
           <div className="space-y-6">
             <section>
               <div className="mb-4">
-                <h3 className="text-xl font-semibold text-amber-900">Practice Analytics</h3>
-                <p className="text-amber-700 text-sm">Your growth and engagement metrics</p>
+                <h3 className="text-xl font-semibold text-gray-900">Practice Analytics</h3>
+                <p className="text-gray-600 text-sm">Your growth and engagement metrics</p>
               </div>
               <DashboardOverview
                 patientStats={{

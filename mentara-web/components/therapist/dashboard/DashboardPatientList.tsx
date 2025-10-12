@@ -87,84 +87,81 @@ export default function DashboardPatientList({
           onMouseEnter={() => setHoveredAppointment(appointment.id)}
           onMouseLeave={() => setHoveredAppointment(null)}
         >
-          <Card className="relative overflow-hidden border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 bg-white group">
-            {/* Accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600" />
+          <Card className="relative overflow-hidden border-2 hover:border-secondary/30 shadow-md hover:shadow-xl transition-all duration-300 bg-white group">
+            {/* Accent bar with secondary color */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-secondary to-secondary/70" />
             
             <CardContent className="p-6">
-              {/* Patient Info */}
-              <div className="flex items-center gap-3 mb-4">
-                <Avatar className="h-12 w-12 border-2 border-background shadow-md">
+              {/* Patient Info Header */}
+              <div className="flex items-start gap-4 mb-4">
+                <Avatar className="h-14 w-14 border-2 border-secondary/20 shadow-md ring-2 ring-secondary/10">
                   <AvatarImage 
                     src={appointment.patientAvatar || "/avatar-placeholder.png"} 
-                    alt={appointment.patientName} 
+                    alt={appointment.patientName}
+                    className="object-cover"
                   />
-                  <AvatarFallback className="bg-amber-100 text-amber-800 font-semibold">
+                  <AvatarFallback className="bg-gradient-to-br from-secondary/20 to-secondary/10 text-secondary font-bold text-base">
                     {getInitials(appointment.patientName)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm sm:text-base truncate">
+                  <h3 className="font-bold text-base text-gray-900 truncate mb-1">
                     {appointment.patientName}
                   </h3>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    {appointment.time}
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary/10 rounded-lg w-fit">
+                    <Clock className="h-3.5 w-3.5 text-secondary" />
+                    <span className="text-sm font-semibold text-secondary">{appointment.time}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Condition */}
-              <div className="space-y-2 mb-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Condition
-                </p>
-                <Badge variant="secondary" className="text-xs font-medium">
+              {/* Condition Badge */}
+              <div className="mb-4">
+                <Badge variant="secondary" className="text-xs font-medium px-3 py-1 bg-gray-100 text-gray-700 border-gray-200">
                   {appointment.condition}
                 </Badge>
               </div>
 
-              {/* Action Buttons - Always visible in modern design */}
-              <div className="flex gap-2">
+              {/* Action Buttons - Modern Grid Layout */}
+              <div className="grid grid-cols-3 gap-2">
                 {appointment.reportId && (
                   <Button 
-                    variant="ghost" 
+                    variant="outline" 
                     size="sm" 
-                    className="flex-1 gap-2 text-xs" 
+                    className="gap-1.5 text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary" 
                     asChild
                   >
                     <Link href={`/therapist/patients/${appointment.patientId}/reports/${appointment.reportId}`}>
-                      <FileText className="h-3 w-3" />
+                      <FileText className="h-3.5 w-3.5" />
                       Report
                     </Link>
                   </Button>
                 )}
                 <Button 
-                  variant="ghost" 
+                  variant="outline" 
                   size="sm" 
-                  className="gap-2 text-xs" 
+                  className="gap-1.5 text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary" 
                   asChild
                 >
                   <Link href={`/therapist/patients/${appointment.patientId}`}>
-                    <MessageSquare className="h-3 w-3" />
+                    <MessageSquare className="h-3.5 w-3.5" />
                     Chat
                   </Link>
                 </Button>
                 <Button 
-                  variant="default" 
                   size="sm" 
-                  className="gap-2 text-xs"
+                  className="gap-1.5 text-xs bg-secondary hover:bg-secondary/90 shadow-sm"
                   asChild
                 >
                   <Link href={`/therapist/patients/${appointment.patientId}/video`}>
-                    <Video className="h-3 w-3" />
+                    <Video className="h-3.5 w-3.5" />
                     Video
                   </Link>
                 </Button>
               </div>
 
               {/* Subtle gradient overlay on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </CardContent>
           </Card>
         </motion.div>

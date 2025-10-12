@@ -22,10 +22,10 @@ export default function DashboardGreeting({ name }: DashboardGreetingProps) {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-amber-900">
+      <h1 className="text-3xl font-bold text-gray-900">
         {getGreeting()}, {name}
       </h1>
-      <p className="text-amber-700 mt-1">{formattedDate}</p>
+      <p className="text-gray-600 mt-1 text-base">{formattedDate}</p>
     </div>
   );
 }

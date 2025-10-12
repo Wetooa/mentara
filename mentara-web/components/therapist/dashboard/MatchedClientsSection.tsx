@@ -65,13 +65,13 @@ export function MatchedClientsSection() {
         {/* Summary cards skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="bg-amber-50/50">
+            <Card key={i} className="bg-secondary/5">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <Skeleton className="h-12 w-12 rounded-full bg-amber-200" />
+                  <Skeleton className="h-12 w-12 rounded-full" />
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-32 bg-amber-200" />
-                    <Skeleton className="h-6 w-16 bg-amber-200" />
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-6 w-16" />
                   </div>
                 </div>
               </CardContent>
@@ -80,23 +80,23 @@ export function MatchedClientsSection() {
         </div>
         
         {/* Recent matches skeleton */}
-        <Card className="bg-amber-50/30">
+        <Card className="bg-white">
           <CardHeader>
-            <Skeleton className="h-6 w-48 bg-amber-200" />
+            <Skeleton className="h-6 w-48" />
           </CardHeader>
           <CardContent className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-white rounded-lg border border-amber-100">
+              <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <Skeleton className="h-10 w-10 rounded-full bg-amber-200" />
+                  <Skeleton className="h-10 w-10 rounded-full" />
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-24 bg-amber-200" />
-                    <Skeleton className="h-3 w-32 bg-amber-200" />
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Skeleton className="h-8 w-20 bg-amber-200" />
-                  <Skeleton className="h-8 w-20 bg-amber-200" />
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-20" />
                 </div>
               </div>
             ))}
@@ -161,11 +161,11 @@ export function MatchedClientsSection() {
     <div className="space-y-6">
       {/* Enhanced Summary Cards with professional healthcare theme */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="bg-white border-gray-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-white border-2 hover:border-secondary/30 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="bg-amber-500 p-3 rounded-xl shadow-sm">
-                <UserCheck className="h-5 w-5 text-white" />
+              <div className="bg-secondary p-3 rounded-xl shadow-sm">
+                <UserCheck className="h-5 w-5 text-secondary-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Recent Matches</p>
@@ -176,11 +176,11 @@ export function MatchedClientsSection() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-white border-2 hover:border-secondary/30 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="bg-amber-600 p-3 rounded-xl shadow-sm">
-                <Users className="h-5 w-5 text-white" />
+              <div className="bg-secondary/80 p-3 rounded-xl shadow-sm">
+                <Users className="h-5 w-5 text-secondary-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Total Clients</p>
@@ -191,11 +191,11 @@ export function MatchedClientsSection() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-200 hover:shadow-md transition-all duration-300">
+        <Card className="bg-white border-2 hover:border-secondary/30 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="bg-amber-700 p-3 rounded-xl shadow-sm">
-                <Activity className="h-5 w-5 text-white" />
+              <div className="bg-secondary/60 p-3 rounded-xl shadow-sm">
+                <Activity className="h-5 w-5 text-secondary-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Active Rate</p>
@@ -215,15 +215,15 @@ export function MatchedClientsSection() {
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-amber-600 p-2 rounded-lg">
-                  <UserCheck className="h-5 w-5 text-white" />
+                <div className="bg-secondary p-2 rounded-lg">
+                  <UserCheck className="h-5 w-5 text-secondary-foreground" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Recent Client Matches</h3>
                   <p className="text-sm text-gray-600">New connections from the last 30 days</p>
                 </div>
               </div>
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-300">
+              <Badge variant="secondary" className="bg-secondary/10 text-secondary border-secondary/30">
                 {recentMatches.length} new
               </Badge>
             </CardTitle>
@@ -234,31 +234,31 @@ export function MatchedClientsSection() {
                 key={match.relationshipId}
                 className={cn(
                   "group flex items-center justify-between p-4 rounded-xl border transition-all duration-300",
-                  "bg-white hover:bg-gradient-to-r hover:from-amber-50 hover:to-white",
-                  "border-slate-200 hover:border-amber-300 hover:shadow-md"
+                  "bg-white hover:bg-gradient-to-r hover:from-secondary/5 hover:to-white",
+                  "border-slate-200 hover:border-secondary/30 hover:shadow-md"
                 )}
               >
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <Avatar className="h-12 w-12 ring-2 ring-amber-200 group-hover:ring-amber-300 transition-all">
+                    <Avatar className="h-12 w-12 ring-2 ring-secondary/20 group-hover:ring-secondary/40 transition-all">
                       <AvatarImage src={match.client.profilePicture} />
-                      <AvatarFallback className="bg-gradient-to-br from-amber-100 to-amber-200 text-amber-800 font-semibold">
+                      <AvatarFallback className="bg-gradient-to-br from-secondary/20 to-secondary/10 text-secondary font-semibold">
                         {match.client.firstName[0]}{match.client.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
                   <div className="space-y-1">
-                    <p className="font-semibold text-gray-900 group-hover:text-amber-900 transition-colors">
+                    <p className="font-semibold text-gray-900 group-hover:text-secondary transition-colors">
                       {match.client.firstName} {match.client.lastName}
                     </p>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-amber-600" />
+                        <Calendar className="h-3 w-3 text-secondary" />
                         <span className="font-medium">{match.matchInfo.daysSinceMatch}</span> days ago
                       </span>
                       {match.assessmentInfo.hasAssessment && (
-                        <Badge variant="outline" className="text-xs bg-amber-50 border-amber-200 text-amber-700">
+                        <Badge variant="outline" className="text-xs bg-secondary/10 border-secondary/30 text-secondary">
                           {match.assessmentInfo.assessmentType}
                         </Badge>
                       )}
@@ -269,7 +269,7 @@ export function MatchedClientsSection() {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                    className="border-secondary/30 text-secondary hover:bg-secondary/10"
                     onClick={() => handleStartConversation(
                       match.client.id, 
                       `${match.client.firstName} ${match.client.lastName}`
@@ -293,7 +293,7 @@ export function MatchedClientsSection() {
                   />
                   <Button 
                     size="sm" 
-                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                    className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                   >
                     Schedule
                   </Button>
@@ -308,8 +308,8 @@ export function MatchedClientsSection() {
       {summary.totalMatches === 0 && (
         <Card className="bg-white border-gray-200">
           <CardContent className="p-12 text-center">
-            <div className="bg-gradient-to-br from-amber-100 to-amber-200 p-6 rounded-2xl w-fit mx-auto mb-6 shadow-sm">
-              <Users className="h-12 w-12 text-amber-700" />
+            <div className="bg-gradient-to-br from-secondary/20 to-secondary/10 p-6 rounded-2xl w-fit mx-auto mb-6 shadow-sm">
+              <Users className="h-12 w-12 text-secondary" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Welcome to Your Client Dashboard!</h3>
             <p className="text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
@@ -325,14 +325,14 @@ export function MatchedClientsSection() {
                 Review Profile
               </Button>
               <Button 
-                className="bg-amber-600 hover:bg-amber-700 text-white"
+                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
                 View Analytics
               </Button>
             </div>
-            <div className="mt-8 p-4 bg-amber-50 rounded-lg border border-amber-200">
-              <p className="text-sm text-amber-800">
+            <div className="mt-8 p-4 bg-secondary/10 rounded-lg border border-secondary/30">
+              <p className="text-sm text-gray-700">
                 <strong>💡 Tip:</strong> Make sure your profile is complete and your specializations are up-to-date to attract the right clients.
               </p>
             </div>
