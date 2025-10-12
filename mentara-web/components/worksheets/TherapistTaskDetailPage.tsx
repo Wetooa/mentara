@@ -46,7 +46,9 @@ export default function TherapistTaskDetailPage({
   const [editingWorksheet, setEditingWorksheet] = useState<Task | null>(null);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
-  const [editDateTimeError, setEditDateTimeError] = useState<string | null>(null);
+  const [editDateTimeError, setEditDateTimeError] = useState<string | null>(
+    null
+  );
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -142,7 +144,10 @@ export default function TherapistTaskDetailPage({
   };
 
   // Validation function for date and time in edit mode
-  const validateEditDateTime = (dateStr: string, timeStr: string): { isValid: boolean; error?: string } => {
+  const validateEditDateTime = (
+    dateStr: string,
+    timeStr: string
+  ): { isValid: boolean; error?: string } => {
     if (!dateStr || !timeStr) {
       return { isValid: false, error: "Both date and time are required." };
     }
@@ -151,7 +156,10 @@ export default function TherapistTaskDetailPage({
     const now = new Date();
 
     if (selectedDateTime <= now) {
-      return { isValid: false, error: "Due date and time must be in the future." };
+      return {
+        isValid: false,
+        error: "Due date and time must be in the future.",
+      };
     }
 
     return { isValid: true };
@@ -255,11 +263,15 @@ export default function TherapistTaskDetailPage({
                   <FileText className="h-8 w-8 text-secondary-foreground" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{task.title}</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {task.title}
+                  </h2>
                   <div className="flex flex-wrap items-center gap-3 text-sm">
                     <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
                       <User className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-gray-900">Client: {task.patientName}</span>
+                      <span className="font-medium text-gray-900">
+                        Client: {task.patientName}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-gray-600">
                       <Calendar className="h-4 w-4" />
@@ -312,10 +324,12 @@ export default function TherapistTaskDetailPage({
                         <div className="p-2 bg-primary/10 rounded-md">
                           <FileText className="h-5 w-5 text-primary" />
                         </div>
-                        <span className="font-medium text-gray-900">{material.filename}</span>
+                        <span className="font-medium text-gray-900">
+                          {material.filename}
+                        </span>
                       </div>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         className="text-primary border-primary/30 hover:bg-primary/10"
                       >
@@ -328,7 +342,9 @@ export default function TherapistTaskDetailPage({
               ) : (
                 <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                   <FileText className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500">No reference materials attached</p>
+                  <p className="text-gray-500">
+                    No reference materials attached
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -357,7 +373,9 @@ export default function TherapistTaskDetailPage({
                           <FileText className="h-5 w-5 text-primary-foreground" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{work.filename}</p>
+                          <p className="font-medium text-gray-900">
+                            {work.filename}
+                          </p>
                           {work.submittedAt && (
                             <p className="text-xs text-gray-600 mt-1">
                               Submitted {formatDate(work.submittedAt)}
@@ -365,8 +383,8 @@ export default function TherapistTaskDetailPage({
                           )}
                         </div>
                       </div>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         className="bg-primary text-primary-foreground hover:bg-primary/90 border-primary"
                       >
@@ -381,8 +399,12 @@ export default function TherapistTaskDetailPage({
                   <div className="p-4 bg-gray-100 rounded-full mb-4">
                     <FileText className="h-12 w-12 text-gray-400" />
                   </div>
-                  <p className="text-gray-600 font-medium mb-1">No submission yet</p>
-                  <p className="text-sm text-gray-500">Client hasn't submitted their work</p>
+                  <p className="text-gray-600 font-medium mb-1">
+                    No submission yet
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Client hasn't submitted their work
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -422,8 +444,9 @@ export default function TherapistTaskDetailPage({
               <CardContent className="pt-6">
                 <div className="p-4 bg-secondary/5 rounded-lg border border-secondary/20">
                   <p className="text-sm text-gray-700">
-                    Click &quot;Mark as Reviewed&quot; to provide feedback and complete the review process.
-                    Your feedback will be shared with the client.
+                    Click &quot;Mark as Reviewed&quot; to provide feedback and
+                    complete the review process. Your feedback will be shared
+                    with the client.
                   </p>
                 </div>
               </CardContent>
@@ -443,7 +466,9 @@ export default function TherapistTaskDetailPage({
               </div>
               <CardContent className="pt-6">
                 <div className="bg-white p-5 rounded-lg border border-green-200">
-                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{task.feedback}</p>
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    {task.feedback}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -462,8 +487,14 @@ export default function TherapistTaskDetailPage({
       />
 
       {/* Edit Worksheet Sheet */}
-      <Sheet open={!!editingWorksheet} onOpenChange={open => !open && setEditingWorksheet(null)}>
-        <SheetContent side="right" className="w-full max-w-2xl sm:max-w-xl p-0 gap-0 overflow-hidden flex flex-col">
+      <Sheet
+        open={!!editingWorksheet}
+        onOpenChange={(open) => !open && setEditingWorksheet(null)}
+      >
+        <SheetContent
+          side="right"
+          className="w-full max-w-2xl sm:max-w-xl p-0 gap-0 overflow-hidden flex flex-col"
+        >
           {editingWorksheet && (
             <>
               <SheetHeader className="px-6 py-5 border-b bg-gradient-to-br from-secondary/5 to-primary/5 backdrop-blur-sm">
@@ -477,35 +508,44 @@ export default function TherapistTaskDetailPage({
                     </SheetTitle>
                   </div>
                   <SheetDescription className="text-sm text-gray-600 font-medium">
-                    Update the worksheet details, instructions, and reference materials for your client.
+                    Update the worksheet details, instructions, and reference
+                    materials for your client.
                   </SheetDescription>
                 </div>
               </SheetHeader>
-              
+
               <div className="flex-1 min-h-0 bg-gradient-to-b from-gray-50/30 to-white">
                 <div className="h-full overflow-y-auto">
                   <div className="p-6 space-y-6">
-                    <form 
+                    <form
                       onSubmit={(e) => {
                         e.preventDefault();
                         setEditDateTimeError(null);
                         const formData = new FormData(e.currentTarget);
-                        const dueDateValue = formData.get('dueDate') as string;
-                        const dueTimeValue = formData.get('dueTime') as string;
-                        
+                        const dueDateValue = formData.get("dueDate") as string;
+                        const dueTimeValue = formData.get("dueTime") as string;
+
                         // Validate date and time if both are provided
                         if (dueDateValue && dueTimeValue) {
-                          const dateTimeValidation = validateEditDateTime(dueDateValue, dueTimeValue);
+                          const dateTimeValidation = validateEditDateTime(
+                            dueDateValue,
+                            dueTimeValue
+                          );
                           if (!dateTimeValidation.isValid) {
                             setEditDateTimeError(dateTimeValidation.error!);
                             return;
                           }
                         }
-                        
+
                         const updateData = {
-                          title: formData.get('title') as string,
-                          instructions: formData.get('instructions') as string,
-                          dueDate: (dueDateValue && dueTimeValue) ? new Date(`${dueDateValue}T${dueTimeValue}`).toISOString() : undefined,
+                          title: formData.get("title") as string,
+                          instructions: formData.get("instructions") as string,
+                          dueDate:
+                            dueDateValue && dueTimeValue
+                              ? new Date(
+                                  `${dueDateValue}T${dueTimeValue}`
+                                ).toISOString()
+                              : undefined,
                         };
                         editWorksheetMutation.mutate({
                           worksheetId: editingWorksheet.id,
@@ -522,12 +562,17 @@ export default function TherapistTaskDetailPage({
                           <div className="p-2 rounded-lg bg-secondary">
                             <FileText className="h-4 w-4 text-secondary-foreground" />
                           </div>
-                          <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Basic Information
+                          </h3>
                         </div>
-                        
+
                         <div className="space-y-4">
                           <div className="space-y-2">
-                            <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                            <Label
+                              htmlFor="title"
+                              className="text-sm font-medium text-gray-700"
+                            >
                               Worksheet Title
                             </Label>
                             <Input
@@ -539,52 +584,79 @@ export default function TherapistTaskDetailPage({
                               required
                             />
                           </div>
-                          
+
                           <div className="space-y-2">
-                            <Label htmlFor="instructions" className="text-sm font-medium text-gray-700">
+                            <Label
+                              htmlFor="instructions"
+                              className="text-sm font-medium text-gray-700"
+                            >
                               Instructions
                             </Label>
                             <Textarea
                               id="instructions"
                               name="instructions"
-                              defaultValue={editingWorksheet.instructions || ''}
+                              defaultValue={editingWorksheet.instructions || ""}
                               placeholder="Provide detailed instructions for your client..."
                               rows={4}
                               className="border-gray-300 focus:border-secondary focus:ring-secondary/20 resize-none"
                             />
                           </div>
-                          
+
                           <div className="space-y-3">
                             <Label className="text-sm font-medium text-gray-700">
                               Due Date & Time
                             </Label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div className="space-y-2">
-                                <Label htmlFor="editDueDate" className="text-xs font-medium text-gray-600">Date</Label>
+                                <Label
+                                  htmlFor="editDueDate"
+                                  className="text-xs font-medium text-gray-600"
+                                >
+                                  Date
+                                </Label>
                                 <Input
                                   id="editDueDate"
                                   name="dueDate"
                                   type="date"
-                                  defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toISOString().split('T')[0] : ''}
-                                  min={new Date().toISOString().split('T')[0]}
+                                  defaultValue={
+                                    editingWorksheet.date
+                                      ? new Date(editingWorksheet.date)
+                                          .toISOString()
+                                          .split("T")[0]
+                                      : ""
+                                  }
+                                  min={new Date().toISOString().split("T")[0]}
                                   className="h-11 border-gray-300 focus:border-secondary focus:ring-secondary/20"
                                   onChange={() => setEditDateTimeError(null)}
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="editDueTime" className="text-xs font-medium text-gray-600">Time</Label>
+                                <Label
+                                  htmlFor="editDueTime"
+                                  className="text-xs font-medium text-gray-600"
+                                >
+                                  Time
+                                </Label>
                                 <Input
                                   id="editDueTime"
                                   name="dueTime"
                                   type="time"
-                                  defaultValue={editingWorksheet.date ? new Date(editingWorksheet.date).toTimeString().slice(0, 5) : ''}
+                                  defaultValue={
+                                    editingWorksheet.date
+                                      ? new Date(editingWorksheet.date)
+                                          .toTimeString()
+                                          .slice(0, 5)
+                                      : ""
+                                  }
                                   className="h-11 border-gray-300 focus:border-secondary focus:ring-secondary/20"
                                   onChange={() => setEditDateTimeError(null)}
                                 />
                               </div>
                             </div>
                             {editDateTimeError && (
-                              <p className="text-red-500 text-sm">{editDateTimeError}</p>
+                              <p className="text-red-500 text-sm">
+                                {editDateTimeError}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -596,73 +668,94 @@ export default function TherapistTaskDetailPage({
                           <div className="p-2 rounded-lg bg-purple-50">
                             <FileText className="h-4 w-4 text-purple-600" />
                           </div>
-                          <h3 className="text-lg font-semibold text-gray-900">Reference Files</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Reference Files
+                          </h3>
                         </div>
-                        
+
                         {/* Existing Files */}
-                        {editingWorksheet.materials && editingWorksheet.materials.length > 0 && (
-                          <div className="space-y-3 mb-6">
-                            <Label className="text-sm font-medium text-gray-700">Current Files</Label>
-                            <div className="space-y-2">
-                              {editingWorksheet.materials.map((material, index) => {
-                                const fileName = material.filename;
-                                const fileUrl = material.url || `file-${index}`;
-                                const isMarkedForRemoval = filesToRemove.includes(fileUrl);
-                                
-                                return (
-                                  <div
-                                    key={fileUrl}
-                                    className={`flex items-center justify-between p-4 border rounded-lg transition-all duration-200 ${
-                                      isMarkedForRemoval 
-                                        ? 'bg-red-50 border-red-200 opacity-60' 
-                                        : 'bg-gray-50 border-gray-200 hover:border-gray-300'
-                                    }`}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <FileText className="h-4 w-4 text-gray-500" />
-                                      <span className={`text-sm font-medium ${isMarkedForRemoval ? 'line-through text-gray-500' : 'text-gray-700'}`}>
-                                        {fileName}
-                                      </span>
-                                      {isMarkedForRemoval && (
-                                        <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded-full font-medium">
-                                          Will be removed
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="flex gap-2">
-                                      {!isMarkedForRemoval ? (
-                                        <Button
-                                          type="button"
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleRemoveExistingFile(fileUrl)}
-                                          className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                                        >
-                                          <Trash2 className="h-3 w-3" />
-                                        </Button>
-                                      ) : (
-                                        <Button
-                                          type="button"
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleRestoreExistingFile(fileUrl)}
-                                          className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
-                                        >
-                                          Restore
-                                        </Button>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                        {editingWorksheet.materials &&
+                          editingWorksheet.materials.length > 0 && (
+                            <div className="space-y-3 mb-6">
+                              <Label className="text-sm font-medium text-gray-700">
+                                Current Files
+                              </Label>
+                              <div className="space-y-2">
+                                {editingWorksheet.materials.map(
+                                  (material, index) => {
+                                    const fileName = material.filename;
+                                    const fileUrl =
+                                      material.url || `file-${index}`;
+                                    const isMarkedForRemoval =
+                                      filesToRemove.includes(fileUrl);
+
+                                    return (
+                                      <div
+                                        key={fileUrl}
+                                        className={`flex items-center justify-between p-4 border rounded-lg transition-all duration-200 ${
+                                          isMarkedForRemoval
+                                            ? "bg-red-50 border-red-200 opacity-60"
+                                            : "bg-gray-50 border-gray-200 hover:border-gray-300"
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <FileText className="h-4 w-4 text-gray-500" />
+                                          <span
+                                            className={`text-sm font-medium ${isMarkedForRemoval ? "line-through text-gray-500" : "text-gray-700"}`}
+                                          >
+                                            {fileName}
+                                          </span>
+                                          {isMarkedForRemoval && (
+                                            <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded-full font-medium">
+                                              Will be removed
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex gap-2">
+                                          {!isMarkedForRemoval ? (
+                                            <Button
+                                              type="button"
+                                              variant="outline"
+                                              size="sm"
+                                              onClick={() =>
+                                                handleRemoveExistingFile(
+                                                  fileUrl
+                                                )
+                                              }
+                                              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                            >
+                                              <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                          ) : (
+                                            <Button
+                                              type="button"
+                                              variant="outline"
+                                              size="sm"
+                                              onClick={() =>
+                                                handleRestoreExistingFile(
+                                                  fileUrl
+                                                )
+                                              }
+                                              className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                                            >
+                                              Restore
+                                            </Button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
                         {/* New Files */}
                         {newFiles.length > 0 && (
                           <div className="space-y-3 mb-6">
-                            <Label className="text-sm font-medium text-gray-700">New Files to Upload</Label>
+                            <Label className="text-sm font-medium text-gray-700">
+                              New Files to Upload
+                            </Label>
                             <div className="space-y-2">
                               {newFiles.map((file, index) => (
                                 <div
@@ -671,7 +764,9 @@ export default function TherapistTaskDetailPage({
                                 >
                                   <div className="flex items-center gap-3">
                                     <FileText className="h-4 w-4 text-primary" />
-                                    <span className="text-sm font-medium text-primary">{file.name}</span>
+                                    <span className="text-sm font-medium text-primary">
+                                      {file.name}
+                                    </span>
                                     <span className="text-xs text-primary-foreground bg-primary px-2 py-1 rounded-full font-medium">
                                       New
                                     </span>
@@ -693,7 +788,9 @@ export default function TherapistTaskDetailPage({
 
                         {/* File Upload */}
                         <div>
-                          <Label className="text-sm font-medium text-gray-700 mb-2 block">Add Files</Label>
+                          <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                            Add Files
+                          </Label>
                           <input
                             type="file"
                             multiple
@@ -740,7 +837,7 @@ export default function TherapistTaskDetailPage({
                               Updating...
                             </>
                           ) : (
-                            'Update Worksheet'
+                            "Update Worksheet"
                           )}
                         </Button>
                       </div>
