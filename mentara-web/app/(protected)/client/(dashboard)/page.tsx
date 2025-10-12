@@ -190,14 +190,18 @@ export default function DashboardPage() {
           onTherapistsClick={handleTherapistsClick}
         />
 
-        {/* Main Dashboard Content - Balanced grid layout */}
+        {/* Main Dashboard Content - Compact 2-row layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min">
-          {/* Row 1: Sessions and Therapist */}
-          <div className="md:col-span-2 lg:col-span-3">
+          {/* Row 1: Sessions, Worksheets, Therapist (3 cards) */}
+          <div className="md:col-span-1 lg:col-span-2">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
           </div>
           
-          <div className="md:col-span-2 lg:col-span-3">
+          <div className="md:col-span-1 lg:col-span-2">
+            <WorksheetStatus worksheets={dashboardData.worksheets} />
+          </div>
+          
+          <div className="md:col-span-2 lg:col-span-2">
             <AssignedTherapist
               assignedTherapists={dashboardApiData?.assignedTherapists || []}
               isLoading={isDashboardLoading}
@@ -206,21 +210,16 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Row 2: Worksheets and Recent Chats */}
-          <div className="md:col-span-2 lg:col-span-3">
-            <WorksheetStatus worksheets={dashboardData.worksheets} />
-          </div>
-          
-          <div className="md:col-span-2 lg:col-span-3">
+          {/* Row 2: Recent Chats and Wellness Pulse (2 cards) */}
+          <div className="md:col-span-1 lg:col-span-3">
             <RecentCommunications
               recentContacts={dashboardData.recentCommunications}
               onViewAllMessages={handleViewAllMessages}
               onContactSelect={handleContactSelect}
             />
           </div>
-
-          {/* Row 3: Wellness Pulse - Full Width */}
-          <div className="md:col-span-2 lg:col-span-6">
+          
+          <div className="md:col-span-1 lg:col-span-3">
             <ProgressTracking progress={dashboardData.progress} />
           </div>
         </div>

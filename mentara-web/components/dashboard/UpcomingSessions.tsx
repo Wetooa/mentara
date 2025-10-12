@@ -68,8 +68,8 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
   };
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants}>
-      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden border-border/50 p-0">
+    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="h-full">
+      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden border-border/50 p-0 h-full flex flex-col">
         <div className="bg-gradient-to-br from-green-500/5 to-emerald-500/5 px-4 sm:px-5 py-4 border-b border-border/50">
           <motion.div
             className="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
@@ -91,8 +91,7 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
             </motion.div>
           </motion.div>
         </div>
-        <div className="p-4 sm:p-5">
-
+        <div className="p-4 sm:p-5 flex-1">
           {sessions.length === 0 ? (
             <motion.div
               className="text-center py-8 text-muted-foreground"

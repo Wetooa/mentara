@@ -23,14 +23,15 @@ export default function RecentCommunications({
     if (!time) {
       return "Unknown";
     }
-    
+
     const messageTime = new Date(time);
     if (isNaN(messageTime.getTime())) {
       return "Invalid Date";
     }
-    
+
     const now = new Date();
-    const diffInHours = (now.getTime() - messageTime.getTime()) / (1000 * 60 * 60);
+    const diffInHours =
+      (now.getTime() - messageTime.getTime()) / (1000 * 60 * 60);
 
     if (diffInHours < 1) {
       return "Now";
@@ -57,7 +58,7 @@ export default function RecentCommunications({
   const getInitials = (name: string) => {
     return name
       .split(" ")
-      .map(word => word[0])
+      .map((word) => word[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
@@ -68,8 +69,9 @@ export default function RecentCommunications({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.25 }}
+      className="h-full"
     >
-      <Card className="h-fit max-h-96 shadow-sm hover:shadow-md transition-shadow overflow-hidden p-0">
+      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden p-0 h-full flex flex-col">
         <div className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 px-5 py-4">
           <div className="flex flex-row items-center justify-between">
             <div className="text-lg font-semibold flex items-center gap-2">
@@ -89,7 +91,7 @@ export default function RecentCommunications({
             </motion.div>
           </div>
         </div>
-        <div className="space-y-2 overflow-y-auto p-3">
+        <div className="space-y-2 overflow-y-auto p-3 flex-1 min-h-0">
           {recentContacts.length > 0 ? (
             <>
               {recentContacts.slice(0, 4).map((contact, index) => (
@@ -129,7 +131,10 @@ export default function RecentCommunications({
                         {contact.lastMessage}
                       </p>
                       {contact.unread > 0 && (
-                        <Badge variant="destructive" className="h-5 min-w-5 text-xs px-1.5 flex-shrink-0">
+                        <Badge
+                          variant="destructive"
+                          className="h-5 min-w-5 text-xs px-1.5 flex-shrink-0"
+                        >
                           {contact.unread}
                         </Badge>
                       )}
@@ -138,7 +143,7 @@ export default function RecentCommunications({
                 </motion.div>
               ))}
               {recentContacts.length > 4 && (
-                <motion.div 
+                <motion.div
                   className="pt-2 border-t"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -156,7 +161,7 @@ export default function RecentCommunications({
               )}
             </>
           ) : (
-            <motion.div 
+            <motion.div
               className="text-center py-8"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -164,8 +169,12 @@ export default function RecentCommunications({
               <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
                 <MessageCircle className="h-8 w-8 text-blue-400" />
               </div>
-              <p className="text-sm text-gray-600 font-medium mb-1">No recent chats</p>
-              <p className="text-xs text-gray-500 mb-3">Start a conversation with your therapist</p>
+              <p className="text-sm text-gray-600 font-medium mb-1">
+                No recent chats
+              </p>
+              <p className="text-xs text-gray-500 mb-3">
+                Start a conversation with your therapist
+              </p>
               <Button
                 variant="outline"
                 size="sm"

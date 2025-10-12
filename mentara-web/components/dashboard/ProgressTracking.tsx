@@ -71,7 +71,9 @@ export default function ProgressTracking({ progress }: ProgressTrackingProps) {
               />
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              {progress.weeklyEngagement >= 70 ? "Excellent engagement this week! 💪" : "Try to engage more this week!"}
+              {progress.weeklyEngagement >= 70
+                ? "Excellent engagement this week! 💪"
+                : "Try to engage more this week!"}
             </p>
           </div>
 
@@ -105,7 +107,9 @@ export default function ProgressTracking({ progress }: ProgressTrackingProps) {
                     >
                       {moodIcon}
                     </motion.div>
-                    <span className={`text-xs mt-1.5 ${isToday ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+                    <span
+                      className={`text-xs mt-1.5 ${isToday ? "font-semibold text-primary" : "text-muted-foreground"}`}
+                    >
                       {dayName}
                     </span>
                   </motion.div>
@@ -124,9 +128,14 @@ export default function ProgressTracking({ progress }: ProgressTrackingProps) {
                 { color: "bg-blue-100", label: "Good", value: 4 },
                 { color: "bg-green-100", label: "Great", value: 5 },
               ].map((item) => (
-                <div key={item.value} className="flex flex-col items-center gap-1">
+                <div
+                  key={item.value}
+                  className="flex flex-col items-center gap-1"
+                >
                   <div className={`w-4 h-4 rounded-md ${item.color}`}></div>
-                  <span className="text-xs text-muted-foreground">{item.label}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {item.label}
+                  </span>
                 </div>
               ))}
             </div>
