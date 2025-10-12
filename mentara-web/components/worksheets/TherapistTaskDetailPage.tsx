@@ -248,14 +248,14 @@ export default function TherapistTaskDetailPage({
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Worksheet Header Card */}
-          <Card className="border-2 border-secondary/20 shadow-md">
-            <CardHeader className="bg-gradient-to-r from-secondary/5 to-primary/5 pb-4">
+          <Card className="border-2 border-secondary/20 shadow-md overflow-hidden">
+            <div className="bg-gradient-to-r from-secondary/5 to-primary/5 p-6">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-secondary rounded-xl">
                   <FileText className="h-8 w-8 text-secondary-foreground" />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-2xl text-gray-900 mb-2">{task.title}</CardTitle>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{task.title}</h2>
                   <div className="flex flex-wrap items-center gap-3 text-sm">
                     <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
                       <User className="h-4 w-4 text-primary" />
@@ -268,20 +268,20 @@ export default function TherapistTaskDetailPage({
                   </div>
                 </div>
               </div>
-            </CardHeader>
+            </div>
           </Card>
 
           {/* Instructions Card */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
+          <Card className="shadow-md overflow-hidden">
+            <div className="p-6 border-b bg-white">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
                 <div className="p-2 bg-secondary/10 rounded-lg">
                   <FileText className="h-5 w-5 text-secondary" />
                 </div>
                 Instructions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h3>
+            </div>
+            <CardContent className="pt-6">
               <div className="bg-secondary/5 p-4 rounded-lg border-l-4 border-l-secondary">
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {task.instructions || "No instructions provided"}
@@ -291,16 +291,16 @@ export default function TherapistTaskDetailPage({
           </Card>
 
           {/* Reference Materials Card */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
+          <Card className="shadow-md overflow-hidden">
+            <div className="p-6 border-b bg-white">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <FileText className="h-5 w-5 text-primary" />
                 </div>
                 Reference Materials
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h3>
+            </div>
+            <CardContent className="pt-6">
               {task.materials && task.materials.length > 0 ? (
                 <div className="space-y-3">
                   {task.materials.map((material, index) => (
@@ -335,15 +335,15 @@ export default function TherapistTaskDetailPage({
           </Card>
 
           {/* Client's Submission Card */}
-          <Card className="shadow-md border-2 border-primary/20">
-            <CardHeader className="bg-primary/5">
-              <CardTitle className="text-lg flex items-center gap-2">
+          <Card className="shadow-md border-2 border-primary/20 overflow-hidden">
+            <div className="bg-primary/5 p-6 border-b border-primary/10">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
                 <div className="p-2 bg-primary rounded-lg">
                   <Upload className="h-5 w-5 text-primary-foreground" />
                 </div>
                 Client Submission
-              </CardTitle>
-            </CardHeader>
+              </h3>
+            </div>
             <CardContent className="pt-6">
               {task.myWork && task.myWork.length > 0 ? (
                 <div className="space-y-3">
@@ -390,15 +390,15 @@ export default function TherapistTaskDetailPage({
 
           {/* Review Actions */}
           {task.status === "completed" && (
-            <Card className="shadow-lg border-2 border-secondary/30">
-              <CardHeader className="bg-gradient-to-r from-secondary/10 to-primary/5">
+            <Card className="shadow-lg border-2 border-secondary/30 overflow-hidden">
+              <div className="bg-gradient-to-r from-secondary/10 to-primary/5 p-6 border-b">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
                     <div className="p-2 bg-secondary rounded-lg">
                       <CheckCircle className="h-5 w-5 text-secondary-foreground" />
                     </div>
                     Review Worksheet
-                  </CardTitle>
+                  </h3>
                   <Button
                     onClick={handleMarkAsReviewed}
                     disabled={markAsReviewedMutation.isPending}
@@ -418,8 +418,8 @@ export default function TherapistTaskDetailPage({
                     )}
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-4">
+              </div>
+              <CardContent className="pt-6">
                 <div className="p-4 bg-secondary/5 rounded-lg border border-secondary/20">
                   <p className="text-sm text-gray-700">
                     Click &quot;Mark as Reviewed&quot; to provide feedback and complete the review process.
@@ -432,15 +432,15 @@ export default function TherapistTaskDetailPage({
 
           {/* Existing Feedback (if worksheet was already reviewed) */}
           {task.status === "reviewed" && task.feedback && (
-            <Card className="shadow-lg border-2 border-green-300">
-              <CardHeader className="bg-green-50">
-                <CardTitle className="text-lg flex items-center gap-2 text-green-800">
+            <Card className="shadow-lg border-2 border-green-300 overflow-hidden">
+              <div className="bg-green-50 p-6 border-b border-green-200">
+                <h3 className="text-lg font-semibold flex items-center gap-2 text-green-800">
                   <div className="p-2 bg-green-500 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-white" />
                   </div>
                   Your Feedback
-                </CardTitle>
-              </CardHeader>
+                </h3>
+              </div>
               <CardContent className="pt-6">
                 <div className="bg-white p-5 rounded-lg border border-green-200">
                   <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{task.feedback}</p>

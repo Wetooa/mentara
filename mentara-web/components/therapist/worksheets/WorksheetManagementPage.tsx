@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   FileText, 
   Search, 
@@ -24,7 +25,9 @@ import {
   MoreHorizontal,
   X,
   Trash2,
-  Plus
+  Plus,
+  Filter,
+  Users
 } from 'lucide-react';
 
 import { useMatchedClients } from '@/hooks/therapist/useMatchedClients';
@@ -45,7 +48,8 @@ export function WorksheetManagementPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [clientFilter, setClientFilter] = useState<string>('all');
+  const [selectedClientIds, setSelectedClientIds] = useState<string[]>([]);
+  const [clientFilterOpen, setClientFilterOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingWorksheet, setEditingWorksheet] = useState<Worksheet | null>(null);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
@@ -75,11 +79,24 @@ export function WorksheetManagementPage() {
         worksheet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Client filter
-      const matchesClient = clientFilter === 'all' || worksheet.clientId === clientFilter;
+      // Client filter - if no clients selected, show all
+      const matchesClient = selectedClientIds.length === 0 || selectedClientIds.includes(worksheet.clientId);
       
       return matchesSearch && matchesClient;
     });
+  };
+
+  // Handle client selection toggle
+  const toggleClientFilter = (clientId: string) => {
+    setSelectedClientIds(prev => 
+      prev.includes(clientId) 
+        ? prev.filter(id => id !== clientId)
+        : [...prev, clientId]
+    );
+  };
+
+  const clearClientFilters = () => {
+    setSelectedClientIds([]);
   };
 
   // Filter worksheets for each tab with enhanced search
@@ -358,37 +375,39 @@ export function WorksheetManagementPage() {
               </div>
               
               {/* Filters Row */}
-              <div className="flex flex-col md:flex-row gap-4">
-                {/* Client Filter */}
+              <div className="flex items-center justify-between gap-4">
+                {/* Client Filter Button */}
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">Client:</Label>
-                  <div className="flex gap-2 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setClientFilterOpen(true)}
+                    className="hover:bg-primary/10 hover:border-primary/30"
+                  >
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filter by Client
+                    {selectedClientIds.length > 0 && (
+                      <Badge className="ml-2 bg-primary text-primary-foreground">
+                        {selectedClientIds.length}
+                      </Badge>
+                    )}
+                  </Button>
+                  {selectedClientIds.length > 0 && (
                     <Button
-                      variant={clientFilter === 'all' ? 'default' : 'outline'}
+                      variant="ghost"
                       size="sm"
-                      onClick={() => setClientFilter('all')}
-                      className={clientFilter === 'all' ? 'bg-secondary hover:bg-secondary/90' : 'hover:bg-secondary/10'}
+                      onClick={clearClientFilters}
+                      className="text-gray-600 hover:text-gray-900"
                     >
-                      All Clients
+                      Clear
                     </Button>
-                    {uniqueClients.map((client) => (
-                      <Button
-                        key={client.id}
-                        variant={clientFilter === client.id ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setClientFilter(client.id)}
-                        className={clientFilter === client.id ? 'bg-primary hover:bg-primary/90' : 'hover:bg-primary/10'}
-                      >
-                        {client.name}
-                      </Button>
-                    ))}
-                  </div>
+                  )}
                 </div>
                 
                 {/* Status Filter */}
                 <div className="flex items-center gap-2">
                   <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">Status:</Label>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex gap-2">
                     <Button
                       variant={statusFilter === 'all' ? 'default' : 'outline'}
                       size="sm"
@@ -429,6 +448,76 @@ export function WorksheetManagementPage() {
               </div>
             </div>
           </Card>
+
+          {/* Client Filter Modal */}
+          <Dialog open={clientFilterOpen} onOpenChange={setClientFilterOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <div className="p-2 bg-primary rounded-lg">
+                    <Users className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  Filter by Client
+                </DialogTitle>
+                <DialogDescription>
+                  Select which clients' worksheets you want to view
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {uniqueClients.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                    <p className="text-gray-500">No clients found</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    {uniqueClients.map((client) => (
+                      <div
+                        key={client.id}
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => toggleClientFilter(client.id)}
+                      >
+                        <Checkbox
+                          id={client.id}
+                          checked={selectedClientIds.includes(client.id)}
+                          onCheckedChange={() => toggleClientFilter(client.id)}
+                          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        />
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={client.avatarUrl} />
+                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                            {client.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <Label
+                          htmlFor={client.id}
+                          className="flex-1 text-sm font-medium text-gray-900 cursor-pointer"
+                        >
+                          {client.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-between gap-3">
+                <Button
+                  variant="outline"
+                  onClick={clearClientFilters}
+                  className="flex-1"
+                  disabled={selectedClientIds.length === 0}
+                >
+                  Clear All
+                </Button>
+                <Button
+                  onClick={() => setClientFilterOpen(false)}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  Apply Filter
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Worksheets List */}
           <div className="space-y-4">
