@@ -105,21 +105,21 @@ export default function TherapistLayout({
                 className={cn(
                   "relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out",
                   isActive
-                    ? "text-amber-600"
-                    : "text-muted-foreground hover:text-amber-600"
+                    ? "text-secondary"
+                    : "text-muted-foreground hover:text-secondary"
                 )}
               >
                 <div
                   className={cn(
                     "absolute inset-0 transition-all duration-400 ease-in-out",
                     isActive
-                      ? "bg-amber-100 rounded-2xl scale-100"
-                      : "bg-transparent rounded-full scale-75 group-hover:bg-amber-50 group-hover:rounded-2xl group-hover:scale-100"
+                      ? "bg-secondary/10 rounded-2xl scale-100"
+                      : "bg-transparent rounded-full scale-75 group-hover:bg-secondary/5 group-hover:rounded-2xl group-hover:scale-100"
                   )}
                 />
                 <div
                   className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-amber-600 rounded-r-full transition-all duration-300 ease-in-out",
+                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-secondary rounded-r-full transition-all duration-300 ease-in-out",
                     isActive
                       ? "h-8 opacity-100"
                       : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
@@ -142,8 +142,8 @@ export default function TherapistLayout({
                     className={cn(
                       "mt-1 text-center text-[9px] font-medium transition-all duration-300",
                       isActive
-                        ? "text-amber-600 opacity-100"
-                        : "text-muted-foreground opacity-75 group-hover:text-amber-600 group-hover:opacity-100"
+                        ? "text-secondary opacity-100"
+                        : "text-muted-foreground opacity-75 group-hover:text-secondary group-hover:opacity-100"
                     )}
                   >
                     {item.name}
@@ -198,16 +198,16 @@ export default function TherapistLayout({
                       className={cn(
                         "relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300",
                         isActive
-                          ? "bg-amber-50 text-amber-600"
-                          : "text-gray-700 hover:bg-amber-50/50 hover:text-amber-600"
+                          ? "bg-secondary/10 text-secondary"
+                          : "text-gray-700 hover:bg-secondary/5 hover:text-secondary"
                       )}
                     >
                       <div
                         className={cn(
                           "transition-all duration-300",
                           isActive
-                            ? "text-amber-600 scale-110"
-                            : "text-gray-500 group-hover:text-amber-600 group-hover:scale-105"
+                            ? "text-secondary scale-110"
+                            : "text-gray-500 group-hover:text-secondary group-hover:scale-105"
                         )}
                       >
                         {item.icon}
@@ -216,8 +216,8 @@ export default function TherapistLayout({
                         className={cn(
                           "font-medium transition-all duration-300",
                           isActive
-                            ? "text-amber-600"
-                            : "text-gray-700 group-hover:text-amber-600"
+                            ? "text-secondary"
+                            : "text-gray-700 group-hover:text-secondary"
                         )}
                       >
                         {item.name}
@@ -284,7 +284,7 @@ export default function TherapistLayout({
               variant="default"
               maxNotifications={5}
               showConnectionStatus={true}
-              className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-amber-50 text-gray-600 hover:text-amber-600 transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-amber-200"
+              className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-secondary/5 text-gray-600 hover:text-secondary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-secondary/30"
             />
 
             <div className="flex items-center gap-3">
@@ -301,10 +301,10 @@ export default function TherapistLayout({
 
               <button
                 onClick={handleAvatarClick}
-                className="relative group focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 rounded-full transition-all duration-300"
+                className="relative group focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:ring-offset-2 rounded-full transition-all duration-300"
                 title="Go to profile"
               >
-                <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-amber-100 to-amber-200 ring-2 ring-border/50 group-hover:ring-amber-300 transition-all duration-300 shadow-sm group-hover:shadow-md cursor-pointer">
+                <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-secondary/20 to-secondary/10 ring-2 ring-border/50 group-hover:ring-secondary/30 transition-all duration-300 shadow-sm group-hover:shadow-md cursor-pointer">
                   <Image
                     src={user?.avatarUrl || "/avatar-placeholder.png"}
                     alt="User Avatar"
@@ -363,16 +363,16 @@ export default function TherapistLayout({
                   className={cn(
                     "relative group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0",
                     isActive
-                      ? "text-amber-600"
-                      : "text-gray-600 hover:text-amber-600"
+                      ? "text-secondary"
+                      : "text-gray-600 hover:text-secondary"
                   )}
                 >
                   <div
                     className={cn(
                       "transition-all duration-300",
                       isActive
-                        ? "text-amber-600 scale-110"
-                        : "text-gray-600 group-hover:text-amber-600 group-hover:scale-105"
+                        ? "text-secondary scale-110"
+                        : "text-gray-600 group-hover:text-secondary group-hover:scale-105"
                     )}
                   >
                     {item.icon}
@@ -381,8 +381,8 @@ export default function TherapistLayout({
                     className={cn(
                       "text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300",
                       isActive
-                        ? "text-amber-600 font-medium"
-                        : "text-gray-600 group-hover:text-amber-600"
+                        ? "text-secondary font-medium"
+                        : "text-gray-600 group-hover:text-secondary"
                     )}
                   >
                     {item.name}

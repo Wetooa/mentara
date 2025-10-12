@@ -59,11 +59,5 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
     },
   ];
 
-  return (
-    <StatCard 
-      items={statItems}
-      gridCols={4}
-      animationDelay={0.2}
-    />
-  );
+  return <StatCard items={statItems} gridCols={4} animationDelay={0.2} />;
 }

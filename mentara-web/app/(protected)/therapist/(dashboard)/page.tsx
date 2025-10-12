@@ -25,23 +25,23 @@ export default function TherapistDashboardPage() {
 
   // Navigation handlers for clickable dashboard elements
   const handlePatientsClick = () => {
-    router.push('/therapist/patients');
+    router.push("/therapist/patients");
   };
 
   const handleScheduleClick = () => {
-    router.push('/therapist/schedule');
+    router.push("/therapist/schedule");
   };
 
   const handleMessagesClick = () => {
-    router.push('/therapist/messages');
+    router.push("/therapist/messages");
   };
 
   const handleCommunityClick = () => {
-    router.push('/therapist/community');
+    router.push("/therapist/community");
   };
 
   const handleWorksheetsClick = () => {
-    router.push('/therapist/worksheets');
+    router.push("/therapist/worksheets");
   };
 
   const handleRetry = () => {
@@ -118,16 +118,28 @@ export default function TherapistDashboardPage() {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Enhanced Page Header */}
         <div className="text-center md:text-left">
-          <DashboardGreeting name={therapist ? `${therapist.firstName} ${therapist.lastName}` : 'Therapist'} />
-          <p className="text-gray-600 mt-2 text-lg">Manage your client relationships and grow your practice</p>
+          <DashboardGreeting
+            name={
+              therapist
+                ? `${therapist.firstName} ${therapist.lastName}`
+                : "Therapist"
+            }
+          />
+          <p className="text-gray-600 mt-2 text-lg">
+            Manage your client relationships and grow your practice
+          </p>
         </div>
 
         {/* Matched Clients Section - Primary Focus */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Client Matches</h2>
-              <p className="text-gray-600">Your assigned clients and recent connections</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Client Matches
+              </h2>
+              <p className="text-gray-600">
+                Your assigned clients and recent connections
+              </p>
             </div>
           </div>
           <MatchedClientsSection />
@@ -136,7 +148,9 @@ export default function TherapistDashboardPage() {
         {/* Stats Overview */}
         <section className="space-y-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Today's Overview</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Today's Overview
+            </h2>
             <p className="text-gray-600">Your schedule and practice metrics</p>
           </div>
           <DashboardStats
@@ -149,8 +163,8 @@ export default function TherapistDashboardPage() {
                 total: patients?.total || 0,
                 percentage: 0, // Not available in new structure
                 months: 6, // Default to 6 months
-                chartData: [] as Array<{ month: string; value: number }>
-              }
+                chartData: [] as Array<{ month: string; value: number }>,
+              },
             }}
             onPatientsClick={handlePatientsClick}
             onScheduleClick={handleScheduleClick}
@@ -170,7 +184,8 @@ export default function TherapistDashboardPage() {
                     Today's Schedule
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    {schedule?.today?.length || 0} appointment{(schedule?.today?.length || 0) !== 1 ? 's' : ''} scheduled
+                    {schedule?.today?.length || 0} appointment
+                    {(schedule?.today?.length || 0) !== 1 ? "s" : ""} scheduled
                   </p>
                 </div>
                 <Button
@@ -183,16 +198,19 @@ export default function TherapistDashboardPage() {
                 </Button>
               </div>
               <DashboardPatientList
-                appointments={(schedule?.today || []).map(appointment => ({
+                appointments={(schedule?.today || []).map((appointment) => ({
                   id: appointment.id,
                   patientId: appointment.id, // Using appointment id as patient id
                   patientName: appointment.patientName,
                   patientAvatar: "/avatar-placeholder.png",
-                  time: new Date(appointment.startTime).toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  }),
-                  condition: appointment.type || "Session"
+                  time: new Date(appointment.startTime).toLocaleTimeString(
+                    "en-US",
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  ),
+                  condition: appointment.type || "Session",
                 }))}
               />
             </section>
@@ -202,15 +220,19 @@ export default function TherapistDashboardPage() {
           <div className="space-y-6">
             <section>
               <div className="mb-4">
-                <h3 className="text-xl font-semibold text-gray-900">Practice Analytics</h3>
-                <p className="text-gray-600 text-sm">Your growth and engagement metrics</p>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Practice Analytics
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Your growth and engagement metrics
+                </p>
               </div>
               <DashboardOverview
                 patientStats={{
                   total: patients?.total || 0,
                   percentage: 0, // Not available in new structure
                   months: 6, // Default to 6 months
-                  chartData: [] // Not available in new structure, could be added later
+                  chartData: [], // Not available in new structure, could be added later
                 }}
               />
             </section>

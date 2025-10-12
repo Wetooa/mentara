@@ -207,11 +207,11 @@ export default function DashboardPage() {
           <div className="md:col-span-1 lg:col-span-2">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
           </div>
-          
+
           <div className="md:col-span-1 lg:col-span-2">
             <WorksheetStatus worksheets={dashboardData.worksheets} />
           </div>
-          
+
           <div className="md:col-span-2 lg:col-span-2">
             <AssignedTherapist
               assignedTherapists={dashboardApiData?.assignedTherapists || []}
@@ -229,7 +229,7 @@ export default function DashboardPage() {
               onContactSelect={handleContactSelect}
             />
           </div>
-          
+
           <div className="md:col-span-1 lg:col-span-3">
             <ProgressTracking progress={dashboardData.progress} />
           </div>

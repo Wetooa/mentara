@@ -30,9 +30,9 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const itemVariants = {
@@ -44,9 +44,9 @@ const itemVariants = {
     transition: {
       type: "spring",
       stiffness: 300,
-      damping: 24
-    }
-  }
+      damping: 24,
+    },
+  },
 };
 
 export default function DashboardPatientList({
@@ -63,7 +63,9 @@ export default function DashboardPatientList({
           <div className="rounded-xl bg-gray-50 p-4 w-fit mx-auto mb-4">
             <Clock className="h-8 w-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-semibold mb-2 text-gray-900">No appointments today</h3>
+          <h3 className="text-lg font-semibold mb-2 text-gray-900">
+            No appointments today
+          </h3>
           <p className="text-gray-600">
             Your schedule is clear. Enjoy your free time!
           </p>
@@ -73,7 +75,7 @@ export default function DashboardPatientList({
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
       variants={containerVariants}
       initial="hidden"
@@ -90,13 +92,13 @@ export default function DashboardPatientList({
           <Card className="relative overflow-hidden border-2 hover:border-secondary/30 shadow-md hover:shadow-xl transition-all duration-300 bg-white group">
             {/* Accent bar with secondary color */}
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-secondary to-secondary/70" />
-            
+
             <CardContent className="p-6">
               {/* Patient Info Header */}
               <div className="flex items-start gap-4 mb-4">
                 <Avatar className="h-14 w-14 border-2 border-secondary/20 shadow-md ring-2 ring-secondary/10">
-                  <AvatarImage 
-                    src={appointment.patientAvatar || "/avatar-placeholder.png"} 
+                  <AvatarImage
+                    src={appointment.patientAvatar || "/avatar-placeholder.png"}
                     alt={appointment.patientName}
                     className="object-cover"
                   />
@@ -110,14 +112,19 @@ export default function DashboardPatientList({
                   </h3>
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary/10 rounded-lg w-fit">
                     <Clock className="h-3.5 w-3.5 text-secondary" />
-                    <span className="text-sm font-semibold text-secondary">{appointment.time}</span>
+                    <span className="text-sm font-semibold text-secondary">
+                      {appointment.time}
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Condition Badge */}
               <div className="mb-4">
-                <Badge variant="secondary" className="text-xs font-medium px-3 py-1 bg-gray-100 text-gray-700 border-gray-200">
+                <Badge
+                  variant="secondary"
+                  className="text-xs font-medium px-3 py-1 bg-gray-100 text-gray-700 border-gray-200"
+                >
                   {appointment.condition}
                 </Badge>
               </div>
@@ -125,22 +132,24 @@ export default function DashboardPatientList({
               {/* Action Buttons - Modern Grid Layout */}
               <div className="grid grid-cols-3 gap-2">
                 {appointment.reportId && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1.5 text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary" 
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
                     asChild
                   >
-                    <Link href={`/therapist/patients/${appointment.patientId}/reports/${appointment.reportId}`}>
+                    <Link
+                      href={`/therapist/patients/${appointment.patientId}/reports/${appointment.reportId}`}
+                    >
                       <FileText className="h-3.5 w-3.5" />
                       Report
                     </Link>
                   </Button>
                 )}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-1.5 text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary" 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
                   asChild
                 >
                   <Link href={`/therapist/patients/${appointment.patientId}`}>
@@ -148,12 +157,14 @@ export default function DashboardPatientList({
                     Chat
                   </Link>
                 </Button>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="gap-1.5 text-xs bg-secondary hover:bg-secondary/90 shadow-sm"
                   asChild
                 >
-                  <Link href={`/therapist/patients/${appointment.patientId}/video`}>
+                  <Link
+                    href={`/therapist/patients/${appointment.patientId}/video`}
+                  >
                     <Video className="h-3.5 w-3.5" />
                     Video
                   </Link>
