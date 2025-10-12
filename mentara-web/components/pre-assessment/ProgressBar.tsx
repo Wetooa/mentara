@@ -4,8 +4,7 @@ import { QUESTIONNAIRE_MAP } from "@/constants/questionnaire/questionnaire-mappi
 import { CheckCircle, Circle } from "lucide-react";
 
 export default function PreAssessmentProgressBar() {
-  const { step, miniStep, questionnaires } =
-    usePreAssessmentChecklistStore();
+  const { step, miniStep, questionnaires } = usePreAssessmentChecklistStore();
 
   // Calculate total questions across all questionnaires
   const totalQuestions = questionnaires.reduce((sum, qName) => {
@@ -34,11 +33,11 @@ export default function PreAssessmentProgressBar() {
     completedQuestions += miniStep;
     currentProgress = checklistWeight + completedQuestions;
   } else if (step === questionnaires.length + 1) {
-    // In registration form
-    currentProgress = checklistWeight + assessmentWeight + 0.5;
+    // In registration form (first half of sign up)
+    currentProgress = checklistWeight + assessmentWeight;
   } else {
-    // In verification
-    currentProgress = checklistWeight + assessmentWeight + 1.5;
+    // In verification (second half of sign up)
+    currentProgress = checklistWeight + assessmentWeight + 1;
   }
 
   const progressPercent = (currentProgress / totalWeight) * 100;
@@ -154,14 +153,14 @@ export default function PreAssessmentProgressBar() {
             style={{ width: `${progressPercent}%` }}
           />
 
-          {/* MAJOR checkpoint separators (bold white lines) */}
+          {/* MAJOR checkpoint separators (bold dark green lines) */}
           <div
-            className="absolute top-0 h-full w-1 bg-white shadow-sm z-10"
+            className="absolute top-0 h-full w-1 bg-primary/60 shadow-sm z-10"
             style={{ left: `${checklistEnd}%` }}
             title="Checklist → Assessment"
           />
           <div
-            className="absolute top-0 h-full w-1 bg-white shadow-sm z-10"
+            className="absolute top-0 h-full w-1 bg-primary/60 shadow-sm z-10"
             style={{ left: `${assessmentEnd}%` }}
             title="Assessment → Sign Up"
           />
@@ -192,7 +191,7 @@ export default function PreAssessmentProgressBar() {
                 return (
                   <div
                     key={`q-${qName}-${qIndex}`}
-                    className="absolute top-0 h-full w-px bg-white/30"
+                    className="absolute top-0 h-full w-px bg-primary/20"
                     style={{ left: `${positionPercent}%` }}
                   />
                 );
@@ -202,7 +201,7 @@ export default function PreAssessmentProgressBar() {
 
           {/* MINOR separator for sign up (between registration and verification) */}
           <div
-            className="absolute top-0 h-full w-px bg-white/30"
+            className="absolute top-0 h-full w-px bg-primary/20"
             style={{
               left: `${assessmentEnd + (100 - assessmentEnd) / 2}%`,
             }}

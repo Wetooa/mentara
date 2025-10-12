@@ -33,7 +33,8 @@ export default function PreAssessmentInitialCheckList({
           <div className="flex flex-col gap-2">
             {LIST_OF_QUESTIONNAIRES.map((questionnaire) => {
               const isSelected = isQuestionnaireSelected(questionnaire);
-              const handleSelect = () => handleSelectQuestionnaire(questionnaire);
+              const handleSelect = () =>
+                handleSelectQuestionnaire(questionnaire);
 
               return (
                 <div

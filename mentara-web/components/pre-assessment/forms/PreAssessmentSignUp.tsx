@@ -148,7 +148,7 @@ export function PreAssessmentSignUp({
               </div>
 
               {/* Registration Form */}
-              <div className="space-y-4 max-w-lg mx-auto">
+              <div className="space-y-4 max-w-2xl mx-auto">
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(handleRegistrationSubmit)}
