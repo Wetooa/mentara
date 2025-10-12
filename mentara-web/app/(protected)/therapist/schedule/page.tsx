@@ -81,14 +81,20 @@ export default function TherapistSchedulePage() {
   const [isMeetingSheetOpen, setIsMeetingSheetOpen] = useState(false);
 
   // Get meetings data
-  const { meetings, isLoading: meetingsLoading, refetch: refetchMeetings } = useMeetings({
+  const {
+    meetings,
+    isLoading: meetingsLoading,
+    refetch: refetchMeetings,
+  } = useMeetings({
     limit: 100,
   });
 
   // Get booking requests data
   const { bookingRequests } = useBookingRequests();
 
-  const meetingsArray = Array.isArray(meetings) ? meetings : meetings?.meetings || [];
+  const meetingsArray = Array.isArray(meetings)
+    ? meetings
+    : meetings?.meetings || [];
 
   const handleMeetingClick = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
@@ -108,7 +114,9 @@ export default function TherapistSchedulePage() {
   const getTabBadgeCount = (tab: string) => {
     switch (tab) {
       case "requests":
-        const waitingMeetings = meetingsArray.filter(meeting => meeting.status === "WAITING");
+        const waitingMeetings = meetingsArray.filter(
+          (meeting) => meeting.status === "WAITING"
+        );
         return waitingMeetings.length;
       case "overview":
         const todayMeetings = meetingsArray.filter((meeting) => {
@@ -159,7 +167,8 @@ export default function TherapistSchedulePage() {
               >
                 <Inbox className="h-4 w-4" />
                 <span className="text-sm font-medium">
-                  {bookingRequests.length} Pending Request{bookingRequests.length !== 1 ? "s" : ""}
+                  {bookingRequests.length} Pending Request
+                  {bookingRequests.length !== 1 ? "s" : ""}
                 </span>
               </motion.div>
             )}
@@ -167,7 +176,11 @@ export default function TherapistSchedulePage() {
         </motion.div>
 
         {/* Enhanced Tab Navigation */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-5 h-14 p-1 bg-white/80 backdrop-blur border shadow-sm">
             <TabsTrigger
               value="overview"
@@ -176,7 +189,10 @@ export default function TherapistSchedulePage() {
               <Clock className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
               {getTabBadgeCount("overview") > 0 && (
-                <Badge variant="secondary" className="ml-1 h-5 min-w-5 text-xs bg-secondary-foreground/20">
+                <Badge
+                  variant="secondary"
+                  className="ml-1 h-5 min-w-5 text-xs bg-secondary-foreground/20"
+                >
                   {getTabBadgeCount("overview")}
                 </Badge>
               )}
@@ -195,7 +211,10 @@ export default function TherapistSchedulePage() {
               <Inbox className="h-4 w-4" />
               <span className="hidden sm:inline">Requests</span>
               {getTabBadgeCount("requests") > 0 && (
-                <Badge variant="destructive" className="ml-1 h-5 min-w-5 text-xs">
+                <Badge
+                  variant="destructive"
+                  className="ml-1 h-5 min-w-5 text-xs"
+                >
                   {getTabBadgeCount("requests")}
                 </Badge>
               )}

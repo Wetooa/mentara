@@ -225,30 +225,35 @@ export function TherapistAvailabilityCalendar() {
   // Calculate total hours per week
   const totalHoursPerWeek = availability.reduce((total, slot) => {
     if (!slot.isAvailable) return total;
-    const [startHour, startMin] = slot.startTime.split(':').map(Number);
-    const [endHour, endMin] = slot.endTime.split(':').map(Number);
-    const hours = (endHour + endMin / 60) - (startHour + startMin / 60);
+    const [startHour, startMin] = slot.startTime.split(":").map(Number);
+    const [endHour, endMin] = slot.endTime.split(":").map(Number);
+    const hours = endHour + endMin / 60 - (startHour + startMin / 60);
     return total + hours;
   }, 0);
 
   // Calculate hours per day
   const hoursPerDay: Record<string, number> = {};
-  DAYS_OF_WEEK.forEach(day => {
+  DAYS_OF_WEEK.forEach((day) => {
     const daySlots = availabilityByDay[day.value] || [];
     hoursPerDay[day.value] = daySlots.reduce((total, slot) => {
       if (!slot.isAvailable) return total;
-      const [startHour, startMin] = slot.startTime.split(':').map(Number);
-      const [endHour, endMin] = slot.endTime.split(':').map(Number);
-      const hours = (endHour + endMin / 60) - (startHour + startMin / 60);
+      const [startHour, startMin] = slot.startTime.split(":").map(Number);
+      const [endHour, endMin] = slot.endTime.split(":").map(Number);
+      const hours = endHour + endMin / 60 - (startHour + startMin / 60);
       return total + hours;
     }, 0);
   });
+
+  const handleDayClick = (dayValue: string) => {
+    setFormData({ ...formData, dayOfWeek: dayValue });
+    setIsAddDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6">
       {/* Weekly Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-2 border-secondary/20">
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-secondary rounded-xl">
@@ -256,13 +261,15 @@ export function TherapistAvailabilityCalendar() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Weekly Hours</p>
-                <p className="text-3xl font-bold text-gray-900">{totalHoursPerWeek.toFixed(1)}</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {totalHoursPerWeek.toFixed(1)}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="border-2 border-secondary/20">
+
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-secondary/80 rounded-xl">
@@ -271,14 +278,14 @@ export function TherapistAvailabilityCalendar() {
               <div>
                 <p className="text-sm text-gray-600">Active Days</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {Object.values(hoursPerDay).filter(h => h > 0).length}/7
+                  {Object.values(hoursPerDay).filter((h) => h > 0).length}/7
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="border-2 border-secondary/20">
+
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-secondary/60 rounded-xl">
@@ -286,14 +293,16 @@ export function TherapistAvailabilityCalendar() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Time Slots</p>
-                <p className="text-3xl font-bold text-gray-900">{availability.length}</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {availability.length}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-2 hover:border-secondary/30 transition-all">
+      <Card className="shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -302,7 +311,8 @@ export function TherapistAvailabilityCalendar() {
                 Weekly Availability Calendar
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Visual overview of your weekly schedule • {totalHoursPerWeek.toFixed(1)} hours/week
+                Visual overview of your weekly schedule •{" "}
+                {totalHoursPerWeek.toFixed(1)} hours/week
               </p>
             </div>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -312,23 +322,32 @@ export function TherapistAvailabilityCalendar() {
                   Add Slot
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                  <DialogTitle>
-                    {editingSlot ? "Edit Availability" : "Add Availability"}
+                  <DialogTitle className="text-2xl flex items-center gap-3">
+                    <div className="p-2 bg-secondary/10 rounded-lg">
+                      <Calendar className="h-5 w-5 text-secondary" />
+                    </div>
+                    {editingSlot ? "Edit Availability Slot" : "Add Availability Slot"}
                   </DialogTitle>
+                  <p className="text-sm text-gray-600">
+                    {editingSlot ? "Update your availability details" : "Define when you're available for client sessions"}
+                  </p>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="dayOfWeek">Day of Week *</Label>
+                <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+                  {/* Day Selection */}
+                  <div className="space-y-3">
+                    <Label htmlFor="dayOfWeek" className="text-sm font-semibold text-gray-900">
+                      Day of Week *
+                    </Label>
                     <Select
                       value={formData.dayOfWeek}
                       onValueChange={(value) =>
                         setFormData({ ...formData, dayOfWeek: value })
                       }
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select day" />
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Select a day" />
                       </SelectTrigger>
                       <SelectContent>
                         {DAYS_OF_WEEK.map((day, _) => (
@@ -339,58 +358,85 @@ export function TherapistAvailabilityCalendar() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="startTime">Start Time *</Label>
-                      <Select
-                        value={formData.startTime}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, startTime: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Start" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TIME_SLOTS.map((slot) => (
-                            <SelectItem key={slot.value} value={slot.value}>
-                              {slot.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="endTime">End Time *</Label>
-                      <Select
-                        value={formData.endTime}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, endTime: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="End" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TIME_SLOTS.map((slot) => (
-                            <SelectItem key={slot.value} value={slot.value}>
-                              {slot.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  {/* Time Range */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-gray-900">Time Range *</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="startTime" className="text-xs text-gray-600">From</Label>
+                        <Select
+                          value={formData.startTime}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, startTime: value })
+                          }
+                        >
+                          <SelectTrigger className="h-11">
+                            <SelectValue placeholder="Start time" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {TIME_SLOTS.map((slot) => (
+                              <SelectItem key={slot.value} value={slot.value}>
+                                {slot.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="endTime" className="text-xs text-gray-600">To</Label>
+                        <Select
+                          value={formData.endTime}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, endTime: value })
+                          }
+                        >
+                          <SelectTrigger className="h-11">
+                            <SelectValue placeholder="End time" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {TIME_SLOTS.map((slot) => (
+                              <SelectItem key={slot.value} value={slot.value}>
+                                {slot.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
+                    {/* Duration Preview */}
+                    {formData.startTime && formData.endTime && (
+                      <div className="p-3 bg-secondary/5 rounded-lg border border-secondary/20">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-secondary" />
+                          <p className="text-sm text-gray-700">
+                            Duration: <span className="font-bold text-secondary">
+                              {(() => {
+                                const [startHour, startMin] = formData.startTime.split(':').map(Number);
+                                const [endHour, endMin] = formData.endTime.split(':').map(Number);
+                                const duration = endHour + endMin / 60 - (startHour + startMin / 60);
+                                return duration > 0 ? `${duration.toFixed(1)} hours` : 'Invalid range';
+                              })()}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="timezone">Timezone</Label>
+
+                  {/* Timezone */}
+                  <div className="space-y-3">
+                    <Label htmlFor="timezone" className="text-sm font-semibold text-gray-900">
+                      Timezone
+                    </Label>
                     <Select
                       value={formData.timezone}
                       onValueChange={(value) =>
                         setFormData({ ...formData, timezone: value })
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -402,30 +448,38 @@ export function TherapistAvailabilityCalendar() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Notes (Optional)</Label>
+
+                  {/* Notes */}
+                  <div className="space-y-3">
+                    <Label htmlFor="notes" className="text-sm font-semibold text-gray-900">
+                      Notes <span className="text-xs text-gray-500 font-normal">(Optional)</span>
+                    </Label>
                     <Textarea
                       id="notes"
                       value={formData.notes}
                       onChange={(e) =>
                         setFormData({ ...formData, notes: e.target.value })
                       }
-                      placeholder="Add any notes about this availability slot..."
+                      placeholder="e.g., Available for regular client sessions, Preferred for new clients, etc."
                       rows={3}
+                      className="resize-none"
                     />
                   </div>
-                  <div className="flex justify-end gap-2 pt-4">
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end gap-3 pt-2">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={handleCancelEdit}
+                      className="min-w-24"
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
                       disabled={isCreating || isUpdating}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 min-w-24"
                     >
                       {isCreating || isUpdating ? (
                         <>
@@ -435,7 +489,7 @@ export function TherapistAvailabilityCalendar() {
                       ) : (
                         <>
                           <Save className="h-4 w-4" />
-                          {editingSlot ? "Update" : "Create"}
+                          {editingSlot ? "Update Slot" : "Add Slot"}
                         </>
                       )}
                     </Button>
@@ -451,12 +505,17 @@ export function TherapistAvailabilityCalendar() {
               <div className="bg-gradient-to-br from-secondary/20 to-secondary/10 p-6 rounded-2xl w-fit mx-auto mb-6">
                 <Calendar className="h-16 w-16 text-secondary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No Availability Set</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                No Availability Set
+              </h3>
               <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                Set your weekly availability to let clients book sessions with you. 
-                Define your working hours for each day of the week.
+                Set your weekly availability to let clients book sessions with
+                you. Define your working hours for each day of the week.
               </p>
-              <Button onClick={() => setIsAddDialogOpen(true)} className="bg-secondary hover:bg-secondary/90 shadow-md">
+              <Button
+                onClick={() => setIsAddDialogOpen(true)}
+                className="bg-secondary hover:bg-secondary/90 shadow-md"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Your First Availability
               </Button>
@@ -466,44 +525,70 @@ export function TherapistAvailabilityCalendar() {
               {DAYS_OF_WEEK.map((day) => {
                 const daySlots = availabilityByDay[day.value] || [];
                 const dayHours = hoursPerDay[day.value] || 0;
-                
-                return (
-                  <div key={day.value} className="border-2 border-gray-200 rounded-xl p-5 bg-gradient-to-r from-white to-gray-50 hover:border-secondary/30 transition-all">
-                    {/* Day Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-2 h-12 rounded-full ${dayHours > 0 ? 'bg-secondary' : 'bg-gray-200'}`}></div>
-                        <div>
-                          <h4 className="font-bold text-lg text-gray-900">{day.label}</h4>
-                          <p className="text-sm text-gray-600">
-                            {dayHours > 0 ? `${dayHours.toFixed(1)} hours available` : 'Not available'}
-                          </p>
+
+                  return (
+                    <div
+                      key={day.value}
+                      className="border border-gray-200 rounded-xl p-5 bg-white hover:border-gray-300 hover:shadow-md transition-all"
+                    >
+                      {/* Day Header - Clickable */}
+                      <div 
+                        className="flex items-center justify-between mb-4 cursor-pointer group"
+                        onClick={() => handleDayClick(day.value)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-2 h-12 rounded-full transition-colors ${dayHours > 0 ? "bg-secondary" : "bg-gray-200 group-hover:bg-gray-300"}`}
+                          ></div>
+                          <div>
+                            <h4 className="font-bold text-lg text-gray-900 group-hover:text-secondary transition-colors">
+                              {day.label}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {dayHours > 0
+                                ? `${dayHours.toFixed(1)} hours available`
+                                : "Click to add availability"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {dayHours > 0 && (
+                            <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                              {daySlots.length}{" "}
+                              {daySlots.length === 1 ? "slot" : "slots"}
+                            </Badge>
+                          )}
+                          <Plus className="h-5 w-5 text-gray-400 group-hover:text-secondary transition-colors" />
                         </div>
                       </div>
-                      {dayHours > 0 && (
-                        <Badge className="bg-secondary/10 text-secondary border-secondary/30">
-                          {daySlots.length} {daySlots.length === 1 ? 'slot' : 'slots'}
-                        </Badge>
-                      )}
-                    </div>
 
-                    {/* Time Slots */}
-                    {daySlots.length === 0 ? (
-                      <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                        <Clock className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">No time slots set for this day</p>
-                      </div>
-                    ) : (
+                      {/* Time Slots */}
+                      {daySlots.length === 0 ? (
+                        <div 
+                          className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200 cursor-pointer hover:border-gray-300 hover:bg-gray-100 transition-all"
+                          onClick={() => handleDayClick(day.value)}
+                        >
+                          <Clock className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                          <p className="text-sm text-gray-500">
+                            Click to add time slots
+                          </p>
+                        </div>
+                      ) : (
                       <div className="space-y-3">
                         {daySlots.map((slot, index) => {
-                          const [startHour, startMin] = slot.startTime.split(':').map(Number);
-                          const [endHour, endMin] = slot.endTime.split(':').map(Number);
-                          const duration = (endHour + endMin / 60) - (startHour + startMin / 60);
-                          
+                          const [startHour, startMin] = slot.startTime
+                            .split(":")
+                            .map(Number);
+                          const [endHour, endMin] = slot.endTime
+                            .split(":")
+                            .map(Number);
+                          const duration =
+                            endHour + endMin / 60 - (startHour + startMin / 60);
+
                           return (
                             <div
                               key={slot.id}
-                              className="group relative flex items-center justify-between p-4 bg-secondary/5 rounded-lg border-2 border-secondary/20 hover:border-secondary/40 hover:shadow-md transition-all"
+                              className="group relative flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-secondary/30 hover:shadow-sm transition-all"
                             >
                               {/* Time Block Visualization */}
                               <div className="flex items-center gap-4 flex-1">
@@ -513,15 +598,28 @@ export function TherapistAvailabilityCalendar() {
                                   </div>
                                   <div>
                                     <p className="font-bold text-base text-gray-900">
-                                      {new Date(`1970-01-01T${slot.startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                                      {' → '}
-                                      {new Date(`1970-01-01T${slot.endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                                      {new Date(
+                                        `1970-01-01T${slot.startTime}`
+                                      ).toLocaleTimeString([], {
+                                        hour: "numeric",
+                                        minute: "2-digit",
+                                      })}
+                                      {" → "}
+                                      {new Date(
+                                        `1970-01-01T${slot.endTime}`
+                                      ).toLocaleTimeString([], {
+                                        hour: "numeric",
+                                        minute: "2-digit",
+                                      })}
                                     </p>
                                     <div className="flex items-center gap-3 mt-1">
                                       <p className="text-xs text-gray-600">
                                         {slot.timezone}
                                       </p>
-                                      <Badge variant="outline" className="text-xs bg-secondary/10 text-secondary border-secondary/30">
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs bg-gray-100 text-gray-700 border-gray-200"
+                                      >
                                         {duration.toFixed(1)}h
                                       </Badge>
                                     </div>
@@ -537,7 +635,11 @@ export function TherapistAvailabilityCalendar() {
                               {/* Actions */}
                               <div className="flex items-center gap-2">
                                 <Badge
-                                  className={slot.isAvailable ? "bg-green-100 text-green-700 border-green-200" : "bg-gray-100 text-gray-600"}
+                                  className={
+                                    slot.isAvailable
+                                      ? "bg-green-100 text-green-700 border-green-200"
+                                      : "bg-gray-100 text-gray-600"
+                                  }
                                 >
                                   {slot.isAvailable ? "Available" : "Blocked"}
                                 </Badge>
@@ -565,7 +667,22 @@ export function TherapistAvailabilityCalendar() {
                                         Delete Availability Slot?
                                       </AlertDialogTitle>
                                       <AlertDialogDescription>
-                                        This will remove the {new Date(`1970-01-01T${slot.startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - {new Date(`1970-01-01T${slot.endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} slot on {day.label}. This action cannot be undone.
+                                        This will remove the{" "}
+                                        {new Date(
+                                          `1970-01-01T${slot.startTime}`
+                                        ).toLocaleTimeString([], {
+                                          hour: "numeric",
+                                          minute: "2-digit",
+                                        })}{" "}
+                                        -{" "}
+                                        {new Date(
+                                          `1970-01-01T${slot.endTime}`
+                                        ).toLocaleTimeString([], {
+                                          hour: "numeric",
+                                          minute: "2-digit",
+                                        })}{" "}
+                                        slot on {day.label}. This action cannot
+                                        be undone.
                                       </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
