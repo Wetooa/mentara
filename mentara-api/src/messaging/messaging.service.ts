@@ -253,7 +253,20 @@ export class MessagingService {
         }
       });
 
-      return conversations;
+      // Transform conversations to match frontend expectations
+      // Frontend expects lastMessage, but backend returns messages array
+      const transformedConversations = conversations.map((conv) => {
+        const { messages, _count, ...rest } = conv;
+        return {
+          ...rest,
+          lastMessage: messages.length > 0 ? messages[0] : null,
+          unreadCount: _count.messages,
+        };
+      });
+
+      console.log('🔄 [TRANSFORMATION] Conversations transformed with lastMessage field');
+
+      return transformedConversations;
     } catch (error) {
       console.error('❌ [DATABASE ERROR] getUserConversations failed:', error);
       throw error;
