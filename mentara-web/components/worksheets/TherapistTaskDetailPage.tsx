@@ -8,6 +8,9 @@ import {
   Trash2,
   Plus,
   X,
+  User,
+  Calendar,
+  Upload,
 } from "lucide-react";
 import { Task } from "./types";
 import FeedbackModal from "./FeedbackModal";
@@ -21,6 +24,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -208,15 +212,15 @@ export default function TherapistTaskDetailPage({
   const canEdit = task.status !== "reviewed";
 
   return (
-    <div className="flex flex-col h-full bg-white text-gray-900">
+    <div className="flex flex-col h-full bg-gray-50 text-gray-900">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+      <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shadow-sm">
         <button
           onClick={onBack}
-          className="flex items-center text-[#436B00] hover:text-[#129316]"
+          className="flex items-center text-secondary hover:text-secondary/80 font-medium"
         >
           <ArrowLeft className="mr-2 h-5 w-5" />
-          Back
+          Back to Worksheets
         </button>
 
         <div className="flex items-center gap-3">
@@ -232,9 +236,9 @@ export default function TherapistTaskDetailPage({
             </Button>
           )}
           {turnedInDate && (
-            <div className="flex items-center text-gray-600">
-              <CheckCircle className="mr-2 h-5 w-5 text-[#436B00]" />
-              {turnedInDate}
+            <div className="flex items-center text-green-700 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
+              <CheckCircle className="mr-2 h-4 w-4" />
+              <span className="text-sm font-medium">{turnedInDate}</span>
             </div>
           )}
         </div>
@@ -242,118 +246,207 @@ export default function TherapistTaskDetailPage({
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-3xl mx-auto">
-          {/* Task Title */}
-          <div className="mb-4">
-            <h1 className="text-2xl font-semibold">{task.title}</h1>
-            <p className="text-gray-600 mt-1">Patient: {task.patientName}</p>
-          </div>
-
-          {/* Due Date */}
-          <div className="mb-6 text-gray-600">
-            <p>Due {dueDate}</p>
-          </div>
-
-          {/* Instructions */}
-          <div className="mb-6">
-            <h2 className="text-lg font-medium mb-2">Instructions</h2>
-            <p className="text-gray-600 bg-[#129316]/15 p-4 rounded-md border border-gray-200">
-              {task.instructions || "None"}
-            </p>
-          </div>
-
-          {/* Reference Materials */}
-          <div className="mb-6">
-            <h2 className="text-lg font-medium mb-2">Reference materials</h2>
-            {task.materials && task.materials.length > 0 ? (
-              <div className="space-y-2">
-                {task.materials.map((material, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-gray-50 p-3 rounded-md border border-gray-200"
-                  >
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 text-gray-500 mr-3" />
-                      <span>{material.filename}</span>
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Worksheet Header Card */}
+          <Card className="border-2 border-secondary/20 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-secondary/5 to-primary/5 pb-4">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-secondary rounded-xl">
+                  <FileText className="h-8 w-8 text-secondary-foreground" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-2xl text-gray-900 mb-2">{task.title}</CardTitle>
+                  <div className="flex flex-wrap items-center gap-3 text-sm">
+                    <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
+                      <User className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-gray-900">Client: {task.patientName}</span>
                     </div>
-                    <button className="text-[#436B00] hover:text-[#129316] flex items-center">
-                      <Download className="h-5 w-5 mr-1" />
-                      Download
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500">No reference materials</p>
-            )}
-          </div>
-
-          {/* Patient's Work */}
-          <div className="mb-6">
-            <h2 className="text-lg font-medium mb-2">Patient&apos;s work</h2>
-            {task.myWork && task.myWork.length > 0 ? (
-              <div className="space-y-2">
-                {task.myWork.map((work, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-gray-50 p-3 rounded-md border border-gray-200"
-                  >
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 text-gray-500 mr-3" />
-                      <span>{work.filename}</span>
+                    <div className="flex items-center gap-1.5 text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>Due {dueDate}</span>
                     </div>
-                    <button className="text-[#436B00] hover:text-[#129316] flex items-center">
-                      <Download className="h-5 w-5 mr-1" />
-                      Download
-                    </button>
                   </div>
-                ))}
+                </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-6 bg-[#129316]/15 rounded-lg border border-gray-200">
-                <p className="mb-2 text-gray-500">No work submitted yet</p>
+            </CardHeader>
+          </Card>
+
+          {/* Instructions Card */}
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <div className="p-2 bg-secondary/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-secondary" />
+                </div>
+                Instructions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-secondary/5 p-4 rounded-lg border-l-4 border-l-secondary">
+                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {task.instructions || "No instructions provided"}
+                </p>
               </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
+
+          {/* Reference Materials Card */}
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                Reference Materials
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {task.materials && task.materials.length > 0 ? (
+                <div className="space-y-3">
+                  {task.materials.map((material, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200 hover:border-primary/30 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-md">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <span className="font-medium text-gray-900">{material.filename}</span>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-primary border-primary/30 hover:bg-primary/10"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                  <FileText className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500">No reference materials attached</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Client's Submission Card */}
+          <Card className="shadow-md border-2 border-primary/20">
+            <CardHeader className="bg-primary/5">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <div className="p-2 bg-primary rounded-lg">
+                  <Upload className="h-5 w-5 text-primary-foreground" />
+                </div>
+                Client Submission
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {task.myWork && task.myWork.length > 0 ? (
+                <div className="space-y-3">
+                  {task.myWork.map((work, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-primary/30 hover:border-primary hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-primary rounded-lg">
+                          <FileText className="h-5 w-5 text-primary-foreground" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{work.filename}</p>
+                          {work.submittedAt && (
+                            <p className="text-xs text-gray-600 mt-1">
+                              Submitted {formatDate(work.submittedAt)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 border-primary"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                  <div className="p-4 bg-gray-100 rounded-full mb-4">
+                    <FileText className="h-12 w-12 text-gray-400" />
+                  </div>
+                  <p className="text-gray-600 font-medium mb-1">No submission yet</p>
+                  <p className="text-sm text-gray-500">Client hasn't submitted their work</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Review Actions */}
           {task.status === "completed" && (
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium">Review Worksheet</h2>
-                <button
-                  onClick={handleMarkAsReviewed}
-                  disabled={markAsReviewedMutation.isPending}
-                  className="flex items-center px-4 py-2 bg-[#436B00] text-white rounded-md hover:bg-[#129316] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {markAsReviewedMutation.isPending ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Mark as Reviewed
-                    </>
-                  )}
-                </button>
-              </div>
-              <p className="text-sm text-gray-600 bg-secondary/5 p-3 rounded-md border border-secondary/20">
-                Click &quot;Mark as Reviewed&quot; to provide feedback and
-                complete the review process.
-              </p>
-            </div>
+            <Card className="shadow-lg border-2 border-secondary/30">
+              <CardHeader className="bg-gradient-to-r from-secondary/10 to-primary/5">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <div className="p-2 bg-secondary rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-secondary-foreground" />
+                    </div>
+                    Review Worksheet
+                  </CardTitle>
+                  <Button
+                    onClick={handleMarkAsReviewed}
+                    disabled={markAsReviewedMutation.isPending}
+                    className="bg-secondary hover:bg-secondary/90 shadow-md"
+                    size="lg"
+                  >
+                    {markAsReviewedMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Mark as Reviewed
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="p-4 bg-secondary/5 rounded-lg border border-secondary/20">
+                  <p className="text-sm text-gray-700">
+                    Click &quot;Mark as Reviewed&quot; to provide feedback and complete the review process.
+                    Your feedback will be shared with the client.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Existing Feedback (if worksheet was already reviewed) */}
           {task.status === "reviewed" && task.feedback && (
-            <div className="mb-6">
-              <h2 className="text-lg font-medium mb-2">Your feedback</h2>
-              <div className="bg-green-50 p-4 rounded-md border border-green-200">
-                <p className="text-gray-700 whitespace-pre-wrap">{task.feedback}</p>
-              </div>
-            </div>
+            <Card className="shadow-lg border-2 border-green-300">
+              <CardHeader className="bg-green-50">
+                <CardTitle className="text-lg flex items-center gap-2 text-green-800">
+                  <div className="p-2 bg-green-500 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-white" />
+                  </div>
+                  Your Feedback
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="bg-white p-5 rounded-lg border border-green-200">
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{task.feedback}</p>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
