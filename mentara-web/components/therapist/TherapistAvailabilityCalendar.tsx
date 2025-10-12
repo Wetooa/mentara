@@ -41,6 +41,7 @@ import {
   Trash2,
   AlertCircle,
   Save,
+  Users,
 } from "lucide-react";
 import { useTherapistAvailability } from "@/hooks/therapist/useTherapistAvailability";
 import { toast } from "sonner";
@@ -221,25 +222,94 @@ export function TherapistAvailabilityCalendar() {
     );
   }
 
+  // Calculate total hours per week
+  const totalHoursPerWeek = availability.reduce((total, slot) => {
+    if (!slot.isAvailable) return total;
+    const [startHour, startMin] = slot.startTime.split(':').map(Number);
+    const [endHour, endMin] = slot.endTime.split(':').map(Number);
+    const hours = (endHour + endMin / 60) - (startHour + startMin / 60);
+    return total + hours;
+  }, 0);
+
+  // Calculate hours per day
+  const hoursPerDay: Record<string, number> = {};
+  DAYS_OF_WEEK.forEach(day => {
+    const daySlots = availabilityByDay[day.value] || [];
+    hoursPerDay[day.value] = daySlots.reduce((total, slot) => {
+      if (!slot.isAvailable) return total;
+      const [startHour, startMin] = slot.startTime.split(':').map(Number);
+      const [endHour, endMin] = slot.endTime.split(':').map(Number);
+      const hours = (endHour + endMin / 60) - (startHour + startMin / 60);
+      return total + hours;
+    }, 0);
+  });
+
   return (
     <div className="space-y-6">
-      <Card>
+      {/* Weekly Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border-2 border-secondary/20">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-secondary rounded-xl">
+                <Clock className="h-6 w-6 text-secondary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Weekly Hours</p>
+                <p className="text-3xl font-bold text-gray-900">{totalHoursPerWeek.toFixed(1)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-2 border-secondary/20">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-secondary/80 rounded-xl">
+                <Calendar className="h-6 w-6 text-secondary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Active Days</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {Object.values(hoursPerDay).filter(h => h > 0).length}/7
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-2 border-secondary/20">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-secondary/60 rounded-xl">
+                <Users className="h-6 w-6 text-secondary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Time Slots</p>
+                <p className="text-3xl font-bold text-gray-900">{availability.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-2 hover:border-secondary/30 transition-all">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Availability Calendar
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Calendar className="h-5 w-5 text-secondary" />
+                Weekly Availability Calendar
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Manage your weekly availability schedule
+                Visual overview of your weekly schedule • {totalHoursPerWeek.toFixed(1)} hours/week
               </p>
             </div>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
+                <Button className="flex items-center gap-2 bg-secondary hover:bg-secondary/90">
                   <Plus className="h-4 w-4" />
-                  Add Availability
+                  Add Slot
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -377,107 +447,145 @@ export function TherapistAvailabilityCalendar() {
         </CardHeader>
         <CardContent>
           {availability.length === 0 ? (
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No availability set</h3>
-              <p className="text-muted-foreground mb-4">
-                Set your weekly availability to let clients book sessions with
-                you.
+            <div className="text-center py-16">
+              <div className="bg-gradient-to-br from-secondary/20 to-secondary/10 p-6 rounded-2xl w-fit mx-auto mb-6">
+                <Calendar className="h-16 w-16 text-secondary" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No Availability Set</h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                Set your weekly availability to let clients book sessions with you. 
+                Define your working hours for each day of the week.
               </p>
-              <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Button onClick={() => setIsAddDialogOpen(true)} className="bg-secondary hover:bg-secondary/90 shadow-md">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Your First Availability
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {DAYS_OF_WEEK.map((day) => {
                 const daySlots = availabilityByDay[day.value] || [];
+                const dayHours = hoursPerDay[day.value] || 0;
+                
                 return (
-                  <div key={day.value} className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-3">{day.label}</h4>
+                  <div key={day.value} className="border-2 border-gray-200 rounded-xl p-5 bg-gradient-to-r from-white to-gray-50 hover:border-secondary/30 transition-all">
+                    {/* Day Header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-12 rounded-full ${dayHours > 0 ? 'bg-secondary' : 'bg-gray-200'}`}></div>
+                        <div>
+                          <h4 className="font-bold text-lg text-gray-900">{day.label}</h4>
+                          <p className="text-sm text-gray-600">
+                            {dayHours > 0 ? `${dayHours.toFixed(1)} hours available` : 'Not available'}
+                          </p>
+                        </div>
+                      </div>
+                      {dayHours > 0 && (
+                        <Badge className="bg-secondary/10 text-secondary border-secondary/30">
+                          {daySlots.length} {daySlots.length === 1 ? 'slot' : 'slots'}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Time Slots */}
                     {daySlots.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        No availability set
-                      </p>
+                      <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                        <Clock className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">No time slots set for this day</p>
+                      </div>
                     ) : (
-                      <div className="space-y-2">
-                        {daySlots.map((slot) => (
-                          <div
-                            key={slot.id}
-                            className="flex items-center justify-between p-3 bg-accent/50 rounded-md"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="font-medium text-sm">
-                                  {slot.startTime} - {slot.endTime}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {slot.timezone}
-                                </p>
-                                {slot.notes && (
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    {slot.notes}
-                                  </p>
-                                )}
+                      <div className="space-y-3">
+                        {daySlots.map((slot, index) => {
+                          const [startHour, startMin] = slot.startTime.split(':').map(Number);
+                          const [endHour, endMin] = slot.endTime.split(':').map(Number);
+                          const duration = (endHour + endMin / 60) - (startHour + startMin / 60);
+                          
+                          return (
+                            <div
+                              key={slot.id}
+                              className="group relative flex items-center justify-between p-4 bg-secondary/5 rounded-lg border-2 border-secondary/20 hover:border-secondary/40 hover:shadow-md transition-all"
+                            >
+                              {/* Time Block Visualization */}
+                              <div className="flex items-center gap-4 flex-1">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2.5 bg-secondary rounded-lg">
+                                    <Clock className="h-5 w-5 text-secondary-foreground" />
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-base text-gray-900">
+                                      {new Date(`1970-01-01T${slot.startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                                      {' → '}
+                                      {new Date(`1970-01-01T${slot.endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                                    </p>
+                                    <div className="flex items-center gap-3 mt-1">
+                                      <p className="text-xs text-gray-600">
+                                        {slot.timezone}
+                                      </p>
+                                      <Badge variant="outline" className="text-xs bg-secondary/10 text-secondary border-secondary/30">
+                                        {duration.toFixed(1)}h
+                                      </Badge>
+                                    </div>
+                                    {slot.notes && (
+                                      <p className="text-xs text-gray-600 mt-2 italic">
+                                        "{slot.notes}"
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  className={slot.isAvailable ? "bg-green-100 text-green-700 border-green-200" : "bg-gray-100 text-gray-600"}
+                                >
+                                  {slot.isAvailable ? "Available" : "Blocked"}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(slot)}
+                                  className="h-9 w-9 p-0 hover:bg-secondary/10 hover:text-secondary"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-9 w-9 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        Delete Availability Slot?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will remove the {new Date(`1970-01-01T${slot.startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - {new Date(`1970-01-01T${slot.endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} slot on {day.label}. This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>
+                                        Cancel
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDelete(slot.id)}
+                                        disabled={isDeleting}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        {isDeleting ? "Deleting..." : "Delete"}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant={
-                                  slot.isAvailable ? "default" : "secondary"
-                                }
-                                className="text-xs"
-                              >
-                                {slot.isAvailable ? "Available" : "Unavailable"}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(slot)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                      Delete Availability
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete this
-                                      availability slot? This action cannot be
-                                      undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>
-                                      Cancel
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleDelete(slot.id)}
-                                      disabled={isDeleting}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
-                                      {isDeleting ? "Deleting..." : "Delete"}
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>

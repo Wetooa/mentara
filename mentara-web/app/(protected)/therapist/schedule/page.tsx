@@ -143,7 +143,7 @@ export default function TherapistSchedulePage() {
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         >
           <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-secondary to-secondary/70 bg-clip-text text-transparent">
               Schedule Management
             </h1>
             <p className="text-gray-600 text-base sm:text-lg">
@@ -171,26 +171,26 @@ export default function TherapistSchedulePage() {
           <TabsList className="grid w-full grid-cols-5 h-14 p-1 bg-white/80 backdrop-blur border shadow-sm">
             <TabsTrigger
               value="overview"
-              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+              className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
             >
               <Clock className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
               {getTabBadgeCount("overview") > 0 && (
-                <Badge variant="secondary" className="ml-1 h-5 min-w-5 text-xs">
+                <Badge variant="secondary" className="ml-1 h-5 min-w-5 text-xs bg-secondary-foreground/20">
                   {getTabBadgeCount("overview")}
                 </Badge>
               )}
             </TabsTrigger>
             <TabsTrigger
               value="schedule"
-              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+              className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
             >
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Schedule</span>
             </TabsTrigger>
             <TabsTrigger
               value="requests"
-              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+              className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
             >
               <Inbox className="h-4 w-4" />
               <span className="hidden sm:inline">Requests</span>
@@ -202,14 +202,14 @@ export default function TherapistSchedulePage() {
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+              className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
             >
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
             <TabsTrigger
               value="availability"
-              className="flex items-center gap-2 data-[state=active]:bg-teal-600 data-[state=active]:text-white transition-all duration-200"
+              className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
             >
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">Availability</span>

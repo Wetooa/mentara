@@ -36,7 +36,7 @@ export default function PatientsLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  
+
   // Fetch data using the hooks
   const {
     data: myPatients,
@@ -131,15 +131,20 @@ export default function PatientsLayout({
   const MyPatientCard = ({ patient }: { patient: any }) => {
     const isActive = pathname.includes(`/patients/${patient.userId}`);
     const patientName = `${patient.user?.firstName || ""} ${patient.user?.lastName || ""}`;
-    const daysSinceAssigned = Math.floor((Date.now() - new Date(patient.assignedAt).getTime()) / (1000 * 60 * 60 * 24));
-    const lastLogin = patient.user?.lastLoginAt ? new Date(patient.user.lastLoginAt) : null;
+    const daysSinceAssigned = Math.floor(
+      (Date.now() - new Date(patient.assignedAt).getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+    const lastLogin = patient.user?.lastLoginAt
+      ? new Date(patient.user.lastLoginAt)
+      : null;
 
     return (
       <Link href={`/therapist/patients/${patient.userId}`}>
         <div
           className={`group p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-            isActive 
-              ? "bg-secondary/10 border-secondary shadow-md" 
+            isActive
+              ? "bg-secondary/10 border-secondary shadow-md"
               : "bg-white border-gray-200 hover:border-secondary/30 hover:shadow-lg"
           }`}
         >
@@ -148,7 +153,11 @@ export default function PatientsLayout({
             <div className="relative">
               <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-secondary/20 shadow-md">
                 <Image
-                  src={patient.user?.avatarUrl || patient.user?.profilePicture || "/avatar-placeholder.png"}
+                  src={
+                    patient.user?.avatarUrl ||
+                    patient.user?.profilePicture ||
+                    "/avatar-placeholder.png"
+                  }
                   alt={patientName}
                   width={64}
                   height={64}
@@ -156,13 +165,14 @@ export default function PatientsLayout({
                 />
               </div>
               {/* Online indicator if logged in recently */}
-              {lastLogin && (Date.now() - lastLogin.getTime()) < 1000 * 60 * 30 && (
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                </div>
-              )}
+              {lastLogin &&
+                Date.now() - lastLogin.getTime() < 1000 * 60 * 30 && (
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  </div>
+                )}
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <h4 className="text-base font-bold text-gray-900 truncate mb-1 group-hover:text-secondary transition-colors">
                 {patientName}
@@ -173,7 +183,8 @@ export default function PatientsLayout({
               <div className="flex items-center gap-2">
                 <div className="px-2 py-0.5 bg-secondary/10 rounded-full">
                   <p className="text-xs font-semibold text-secondary">
-                    {daysSinceAssigned} {daysSinceAssigned === 1 ? 'day' : 'days'} connected
+                    {daysSinceAssigned}{" "}
+                    {daysSinceAssigned === 1 ? "day" : "days"} connected
                   </p>
                 </div>
               </div>
@@ -193,7 +204,18 @@ export default function PatientsLayout({
           {lastLogin && (
             <div className="mb-3 flex items-center gap-2 text-xs text-gray-600">
               <Clock className="w-3 h-3 text-secondary" />
-              <span>Last active: {new Date(lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(lastLogin).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              <span>
+                Last active:{" "}
+                {new Date(lastLogin).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                at{" "}
+                {new Date(lastLogin).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
             </div>
           )}
 
@@ -203,7 +225,10 @@ export default function PatientsLayout({
               size="sm"
               variant="outline"
               className="text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
-              onClick={(e) => { e.preventDefault(); router.push(`/therapist/messages?contact=${patient.userId}`); }}
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(`/therapist/messages?contact=${patient.userId}`);
+              }}
             >
               <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
               Message
@@ -212,7 +237,10 @@ export default function PatientsLayout({
               size="sm"
               variant="outline"
               className="text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
-              onClick={(e) => { e.preventDefault(); router.push(`/therapist/schedule?client=${patient.userId}`); }}
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(`/therapist/schedule?client=${patient.userId}`);
+              }}
             >
               <Calendar className="w-3.5 h-3.5 mr-1.5" />
               Schedule
@@ -225,7 +253,11 @@ export default function PatientsLayout({
 
   const PatientRequestCard = ({ request }: { request: any }) => {
     const patientName = `${request.user?.firstName || ""} ${request.user?.lastName || ""}`;
-    const daysSinceRequest = Math.floor((Date.now() - new Date(request.requestedAt || request.assignedAt).getTime()) / (1000 * 60 * 60 * 24));
+    const daysSinceRequest = Math.floor(
+      (Date.now() -
+        new Date(request.requestedAt || request.assignedAt).getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
 
     return (
       <div className="p-5 rounded-xl border-2 bg-gradient-to-br from-secondary/5 to-white border-secondary/30 shadow-md hover:shadow-lg transition-all duration-300">
@@ -234,7 +266,11 @@ export default function PatientsLayout({
           <div className="relative">
             <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-secondary/30 shadow-md">
               <Image
-                src={request.user?.avatarUrl || request.user?.profilePicture || "/avatar-placeholder.png"}
+                src={
+                  request.user?.avatarUrl ||
+                  request.user?.profilePicture ||
+                  "/avatar-placeholder.png"
+                }
                 alt={patientName}
                 width={64}
                 height={64}
@@ -243,10 +279,12 @@ export default function PatientsLayout({
             </div>
             {/* New request badge */}
             <div className="absolute -top-1 -right-1 w-6 h-6 bg-secondary rounded-full border-2 border-white shadow-sm flex items-center justify-center">
-              <span className="text-xs font-bold text-secondary-foreground">!</span>
+              <span className="text-xs font-bold text-secondary-foreground">
+                !
+              </span>
             </div>
           </div>
-          
+
           <div className="flex-1 min-w-0">
             <h4 className="text-base font-bold text-gray-900 truncate mb-1">
               {patientName}
@@ -256,7 +294,9 @@ export default function PatientsLayout({
             </p>
             <div className="px-2 py-0.5 bg-secondary/20 rounded-full w-fit">
               <p className="text-xs font-semibold text-secondary">
-                {daysSinceRequest === 0 ? 'Today' : `${daysSinceRequest} ${daysSinceRequest === 1 ? 'day' : 'days'} ago`}
+                {daysSinceRequest === 0
+                  ? "Today"
+                  : `${daysSinceRequest} ${daysSinceRequest === 1 ? "day" : "days"} ago`}
               </p>
             </div>
           </div>
@@ -418,11 +458,13 @@ export default function PatientsLayout({
           >
             <div className="flex items-center justify-between">
               <span>My Clients</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                activeTab === "patients" 
-                  ? "bg-secondary-foreground/20" 
-                  : "bg-gray-100"
-              }`}>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs ${
+                  activeTab === "patients"
+                    ? "bg-secondary-foreground/20"
+                    : "bg-gray-100"
+                }`}
+              >
                 {filteredPatients?.length || 0}
               </span>
             </div>
@@ -437,11 +479,15 @@ export default function PatientsLayout({
           >
             <div className="flex items-center justify-between">
               <span>Requests</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs ${
-                activeTab === "requests" 
-                  ? "bg-secondary-foreground/20" 
-                  : filteredRequests?.length > 0 ? "bg-secondary text-secondary-foreground" : "bg-gray-100"
-              }`}>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs ${
+                  activeTab === "requests"
+                    ? "bg-secondary-foreground/20"
+                    : filteredRequests?.length > 0
+                      ? "bg-secondary text-secondary-foreground"
+                      : "bg-gray-100"
+                }`}
+              >
                 {filteredRequests?.length || 0}
               </span>
             </div>
@@ -456,8 +502,12 @@ export default function PatientsLayout({
             {activeTab === "patients" ? (
               <>
                 <div className="mb-6 hidden lg:block">
-                  <h2 className="text-2xl font-bold text-gray-900">My Clients</h2>
-                  <p className="text-gray-600 mt-1">Manage your client relationships</p>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    My Clients
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Manage your client relationships
+                  </p>
                 </div>
                 {loadingPatients ? (
                   <div className="flex items-center justify-center py-12">
@@ -472,7 +522,8 @@ export default function PatientsLayout({
                       No Active Clients
                     </h3>
                     <p className="text-gray-600 max-w-md">
-                      Accepted client requests will appear here. You'll be able to view their profiles and manage sessions.
+                      Accepted client requests will appear here. You'll be able
+                      to view their profiles and manage sessions.
                     </p>
                   </div>
                 ) : (
@@ -486,8 +537,12 @@ export default function PatientsLayout({
             ) : (
               <>
                 <div className="mb-6 hidden lg:block">
-                  <h2 className="text-2xl font-bold text-gray-900">Client Requests</h2>
-                  <p className="text-gray-600 mt-1">Review and respond to connection requests</p>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Client Requests
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Review and respond to connection requests
+                  </p>
                 </div>
                 {loadingRequests ? (
                   <div className="flex items-center justify-center py-12">
@@ -502,7 +557,8 @@ export default function PatientsLayout({
                       No Pending Requests
                     </h3>
                     <p className="text-gray-600 max-w-md">
-                      Client connection requests will appear here when clients request to work with you.
+                      Client connection requests will appear here when clients
+                      request to work with you.
                     </p>
                   </div>
                 ) : (
