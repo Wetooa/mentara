@@ -260,18 +260,8 @@ export default function TherapistLayout({
             </span>
           </div>
 
-          {/* Desktop title */}
-          <div className="hidden md:block">
-            <h1 className="text-lg font-semibold text-gray-900">
-              {navItems.find(
-                (item) =>
-                  pathname === item.path || pathname.startsWith(`${item.path}/`)
-              )?.name || "Dashboard"}
-            </h1>
-          </div>
-
-          {/* Omnisearch Bar - Hidden on mobile */}
-          <div className="relative mx-4 hidden flex-1 max-w-md md:block">
+          {/* Omnisearch Bar - Hidden on mobile, extends full width */}
+          <div className="relative mx-4 hidden flex-1 md:block">
             <LayoutOmniSearchBar
               placeholder="Search clients, colleagues, posts..."
               className="w-full"
