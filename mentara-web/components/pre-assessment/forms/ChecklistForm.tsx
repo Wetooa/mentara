@@ -21,32 +21,36 @@ export default function PreAssessmentInitialCheckList({
   return (
     <>
       <div className="w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
-        <div className="w-full mb-8 text-center">
+        <div className="w-full mb-6 text-center">
           <h4 className="text-lg text-center text-secondary">
             What can we help you with today?
           </h4>
           <p className="text-xs text-black/80">Select all that apply</p>
         </div>
 
-        <div className="w-full flex flex-col gap-2">
-          {LIST_OF_QUESTIONNAIRES.map((questionnaire) => {
-            const isSelected = isQuestionnaireSelected(questionnaire);
-            const handleSelect = () => handleSelectQuestionnaire(questionnaire);
+        {/* Scrollable checklist with max height */}
+        <div className="w-full max-h-[400px] overflow-y-auto pr-2">
+          <div className="flex flex-col gap-2">
+            {LIST_OF_QUESTIONNAIRES.map((questionnaire) => {
+              const isSelected = isQuestionnaireSelected(questionnaire);
+              const handleSelect = () => handleSelectQuestionnaire(questionnaire);
 
-            return (
-              <div
-                onClick={handleSelect}
-                key={questionnaire}
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "justify-start px-6 gap-4"
-                )}
-              >
-                <Checkbox onClick={handleSelect} checked={isSelected} />
-                <label>{questionnaire}</label>
-              </div>
-            );
-          })}
+              return (
+                <div
+                  onClick={handleSelect}
+                  key={questionnaire}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "justify-start px-6 gap-4 bg-white hover:bg-primary/10 hover:border-primary/30",
+                    isSelected && "border-primary bg-primary/5"
+                  )}
+                >
+                  <Checkbox onClick={handleSelect} checked={isSelected} />
+                  <label className="cursor-pointer">{questionnaire}</label>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

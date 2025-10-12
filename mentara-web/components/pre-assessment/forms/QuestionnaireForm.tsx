@@ -113,7 +113,11 @@ export default function QuestionnaireForm({
                 variant={isSelected ? "default" : "outline"}
                 key={index}
                 onClick={() => handleSelectAnswer(index)}
-                className={isSelected ? "" : "bg-white hover:bg-primary/10 hover:border-primary/50 hover:text-primary border-2"}
+                className={
+                  isSelected
+                    ? ""
+                    : "bg-white hover:bg-primary/10 hover:border-primary/50 hover:text-primary border-2"
+                }
               >
                 {option}
               </Button>

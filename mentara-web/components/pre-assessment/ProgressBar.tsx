@@ -4,58 +4,123 @@ import { QUESTIONNAIRE_MAP } from "@/constants/questionnaire/questionnaire-mappi
 import { CheckCircle, Circle } from "lucide-react";
 
 export default function PreAssessmentProgressBar() {
-  const { step, miniStep, questionnaires } = usePreAssessmentChecklistStore();
+  const { step, miniStep, questionnaires } =
+    usePreAssessmentChecklistStore();
 
-  const questionnaireLength =
-    1 <= step && step <= questionnaires.length
-      ? QUESTIONNAIRE_MAP[questionnaires[step - 1]].questions.length
-      : 1;
-  const totalSteps = questionnaires.length + 2;
+  // Calculate total questions across all questionnaires
+  const totalQuestions = questionnaires.reduce((sum, qName) => {
+    return sum + (QUESTIONNAIRE_MAP[qName]?.questions.length || 0);
+  }, 0);
 
-  const stepValue = step / totalSteps;
-  const miniStepValue = miniStep / questionnaireLength;
-  const value = (stepValue + miniStepValue / totalSteps) * 100;
+  // Calculate section weights (proportional to their complexity)
+  const checklistWeight = 1; // 1 step
+  const assessmentWeight = totalQuestions || 1; // Total questions
+  const signUpWeight = 2; // 2 sub-steps (registration + verification)
+  const totalWeight = checklistWeight + assessmentWeight + signUpWeight;
 
-  // Define major sections
+  // Calculate current progress
+  let currentProgress = 0;
+
+  if (step === 0) {
+    // In checklist
+    currentProgress = 0.5; // Midpoint of checklist
+  } else if (step >= 1 && step <= questionnaires.length) {
+    // In assessment - count completed questionnaires + current question
+    let completedQuestions = 0;
+    for (let i = 0; i < step - 1; i++) {
+      completedQuestions +=
+        QUESTIONNAIRE_MAP[questionnaires[i]]?.questions.length || 0;
+    }
+    completedQuestions += miniStep;
+    currentProgress = checklistWeight + completedQuestions;
+  } else if (step === questionnaires.length + 1) {
+    // In registration form
+    currentProgress = checklistWeight + assessmentWeight + 0.5;
+  } else {
+    // In verification
+    currentProgress = checklistWeight + assessmentWeight + 1.5;
+  }
+
+  const progressPercent = (currentProgress / totalWeight) * 100;
+
+  // Calculate section boundaries as percentages
+  const checklistEnd = (checklistWeight / totalWeight) * 100;
+  const assessmentEnd =
+    ((checklistWeight + assessmentWeight) / totalWeight) * 100;
+
+  // Define major sections with navigation capability
   const majorSections = [
-    { label: "Checklist", step: 0 },
-    { label: "Assessment", step: questionnaires.length > 0 ? 1 : 1 },
-    { label: "Sign Up", step: questionnaires.length + 1 },
+    {
+      label: "Checklist",
+      stepNum: 0,
+      canNavigate: step > 0,
+    },
+    {
+      label: "Assessment",
+      stepNum: 1,
+      canNavigate: step > questionnaires.length,
+    },
+    {
+      label: "Sign Up",
+      stepNum: questionnaires.length + 1,
+      canNavigate: false,
+    },
   ];
 
-  // Calculate if each major section is completed
-  const isSectionCompleted = (sectionStep: number) => step > sectionStep;
-  const isSectionActive = (sectionStep: number) => step === sectionStep;
+  const isSectionCompleted = (sectionStep: number) => {
+    if (sectionStep === 0) return step > 0;
+    if (sectionStep === 1) return step > questionnaires.length;
+    return step > questionnaires.length + 1;
+  };
+
+  const isSectionActive = (sectionStep: number) => {
+    if (sectionStep === 0) return step === 0;
+    if (sectionStep === 1) return step >= 1 && step <= questionnaires.length;
+    return step >= questionnaires.length + 1;
+  };
+
+  const isSectionPartial = (sectionStep: number) => {
+    // Assessment is partial if currently in it and has progress
+    if (sectionStep === 1)
+      return step >= 1 && step <= questionnaires.length && miniStep > 0;
+    // Sign up is partial if in registration step
+    if (sectionStep === questionnaires.length + 1)
+      return step === questionnaires.length + 1;
+    return false;
+  };
 
   return (
     <div className="p-6">
-      {/* Major Sections Progress */}
+      {/* Major Sections Progress - Smaller */}
       <div className="mb-2 flex items-center justify-between relative">
         {majorSections.map((section, index) => {
-          const isCompleted = isSectionCompleted(section.step);
-          const isActive = isSectionActive(section.step);
+          const isCompleted = isSectionCompleted(section.stepNum);
+          const isActive = isSectionActive(section.stepNum);
+          const isPartial = isSectionPartial(section.stepNum);
           const isLast = index === majorSections.length - 1;
 
           return (
             <React.Fragment key={section.label}>
               <div className="flex flex-col items-center relative z-10">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                  className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                     isCompleted
                       ? "bg-primary text-white shadow-md"
-                      : isActive
-                        ? "bg-primary/20 text-primary ring-2 ring-primary/50"
-                        : "bg-gray-200 text-gray-400"
+                      : isActive && isPartial
+                        ? "bg-secondary/30 text-secondary ring-2 ring-secondary shadow-md shadow-secondary/20 animate-pulse"
+                        : isActive
+                          ? "bg-primary/20 text-primary ring-2 ring-primary/50"
+                          : "bg-gray-200 text-gray-400"
                   }`}
                 >
                   {isCompleted ? (
-                    <CheckCircle className="h-5 w-5" />
+                    <CheckCircle className="h-4 w-4" />
                   ) : (
-                    <Circle className="h-4 w-4 fill-current" />
+                    <Circle className="h-3 w-3 fill-current" />
                   )}
                 </div>
                 <span
-                  className={`text-xs mt-1.5 font-medium ${
+                  className={`text-[10px] mt-1 font-medium ${
                     isActive || isCompleted ? "text-primary" : "text-gray-500"
                   }`}
                 >
@@ -65,10 +130,10 @@ export default function PreAssessmentProgressBar() {
 
               {/* Connection line between sections */}
               {!isLast && (
-                <div className="flex-1 h-0.5 bg-gray-200 relative -mt-8">
+                <div className="flex-1 h-0.5 bg-gray-200 relative -mt-6">
                   <div
-                    className={`absolute left-0 top-0 h-full transition-all ${
-                      isSectionCompleted(section.step)
+                    className={`absolute left-0 top-0 h-full transition-all duration-500 ${
+                      isSectionCompleted(section.stepNum)
                         ? "bg-primary w-full"
                         : "bg-gray-200 w-0"
                     }`}
@@ -80,38 +145,86 @@ export default function PreAssessmentProgressBar() {
         })}
       </div>
 
-      {/* Detailed Progress Bar with Mini Steps */}
-      <div className="mt-6">
-        <div className="relative">
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300 rounded-full"
-              style={{ width: `${value}%` }}
-            />
-          </div>
-          
-          {/* Minor separator indicators for questions */}
-          {step > 0 && step <= questionnaires.length && (
-            <div className="absolute top-0 left-0 right-0 h-2 flex">
-              {Array.from({ length: questionnaireLength }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-1 relative"
-                  style={{ width: `${100 / questionnaireLength}%` }}
-                >
-                  {i < questionnaireLength - 1 && (
-                    <div className="absolute right-0 top-0 w-px h-full bg-white/50" />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+      {/* Detailed Progress Bar with Proportional Separators */}
+      <div className="mt-4">
+        <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+          {/* Progress fill */}
+          <div
+            className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 transition-all duration-300 shadow-sm"
+            style={{ width: `${progressPercent}%` }}
+          />
+
+          {/* MAJOR checkpoint separators (bold white lines) */}
+          <div
+            className="absolute top-0 h-full w-1 bg-white shadow-sm z-10"
+            style={{ left: `${checklistEnd}%` }}
+            title="Checklist → Assessment"
+          />
+          <div
+            className="absolute top-0 h-full w-1 bg-white shadow-sm z-10"
+            style={{ left: `${assessmentEnd}%` }}
+            title="Assessment → Sign Up"
+          />
+
+          {/* MINOR separators for questions in assessment (lighter lines) */}
+          {questionnaires.map((qName, qIdx) => {
+            const questionsInThisQuestionnaire =
+              QUESTIONNAIRE_MAP[qName]?.questions.length || 0;
+
+            // Calculate how many questions came before this questionnaire
+            let questionsBefore = 0;
+            for (let i = 0; i < qIdx; i++) {
+              questionsBefore +=
+                QUESTIONNAIRE_MAP[questionnaires[i]]?.questions.length || 0;
+            }
+
+            return Array.from({ length: questionsInThisQuestionnaire }).map(
+              (_, qIndex) => {
+                if (qIndex === 0) return null; // Skip first question separator
+
+                const totalQuestionsSoFar = questionsBefore + qIndex;
+                const progressInAssessment =
+                  totalQuestionsSoFar / (totalQuestions || 1);
+                const positionPercent =
+                  checklistEnd +
+                  progressInAssessment * (assessmentEnd - checklistEnd);
+
+                return (
+                  <div
+                    key={`q-${qName}-${qIndex}`}
+                    className="absolute top-0 h-full w-px bg-white/30"
+                    style={{ left: `${positionPercent}%` }}
+                  />
+                );
+              }
+            );
+          })}
+
+          {/* MINOR separator for sign up (between registration and verification) */}
+          <div
+            className="absolute top-0 h-full w-px bg-white/30"
+            style={{
+              left: `${assessmentEnd + (100 - assessmentEnd) / 2}%`,
+            }}
+            title="Registration → Verification"
+          />
         </div>
+
         <div className="mt-2 text-center">
           <p className="text-xs text-gray-600">
-            {Math.round(value)}% Complete
+            {Math.round(progressPercent)}% Complete
             {step > 0 && step <= questionnaires.length && (
-              <span className="ml-2">• Question {miniStep + 1} of {questionnaireLength}</span>
+              <span className="ml-2">
+                • Question {miniStep + 1} of{" "}
+                {QUESTIONNAIRE_MAP[questionnaires[step - 1]]?.questions
+                  .length || 0}
+              </span>
+            )}
+            {step === questionnaires.length + 1 && (
+              <span className="ml-2">• Step 1 of 2: Registration</span>
+            )}
+            {step > questionnaires.length + 1 && (
+              <span className="ml-2">• Step 2 of 2: Verification</span>
             )}
           </p>
         </div>
