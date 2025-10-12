@@ -84,7 +84,7 @@ export default function RecommendedSection() {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold">Recommended</h2>
-            <div className="flex items-center gap-2 text-blue-600">
+            <div className="flex items-center gap-2 text-primary">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-sm font-medium animate-pulse">
                 Finding perfect matches...
@@ -108,13 +108,13 @@ export default function RecommendedSection() {
                   <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
 
                   {/* Background image placeholder */}
-                  <div className="absolute inset-0 bg-blue-100 animate-pulse"></div>
+                  <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
 
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
                   {/* View Profile button placeholder */}
-                  <div className="absolute top-2 right-2 w-8 h-8 bg-blue-200 rounded-full animate-pulse"></div>
+                  <div className="absolute top-2 right-2 w-8 h-8 bg-gray-300 rounded-full animate-pulse"></div>
 
                   {/* Content */}
                   <CardContent className="p-4 relative z-20 flex flex-col items-center justify-end h-full text-white mt-auto">

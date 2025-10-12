@@ -89,7 +89,7 @@ export default function TherapistCard({ therapist }: TherapistCardProps) {
                 <Badge
                   key={index}
                   variant="outline"
-                  className="text-xs font-medium px-3 py-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 transition-colors duration-200"
+                  className="text-xs font-medium px-3 py-1 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors duration-200"
                 >
                   {specialty}
                 </Badge>

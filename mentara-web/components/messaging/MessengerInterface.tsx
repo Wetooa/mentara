@@ -423,7 +423,9 @@ const ConversationItem = ({
             ) : conversation.lastMessage ? (
               <>
                 <span className="font-medium">
-                  {conversation.lastMessage.senderId === user.id ? "You" : otherParticipant?.user.firstName || ""}
+                  {conversation.lastMessage.senderId === user.id
+                    ? "You"
+                    : otherParticipant?.user.firstName || ""}
                 </span>
                 {": "}
                 <span className="truncate">
@@ -435,7 +437,10 @@ const ConversationItem = ({
             )}
           </p>
           {conversation.unreadCount && conversation.unreadCount > 0 && (
-            <Badge variant="destructive" className="text-xs h-5 min-w-5 px-1.5 flex-shrink-0 ml-2">
+            <Badge
+              variant="destructive"
+              className="text-xs h-5 min-w-5 px-1.5 flex-shrink-0 ml-2"
+            >
               {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
             </Badge>
           )}

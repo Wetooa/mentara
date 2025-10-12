@@ -264,7 +264,9 @@ export class MessagingService {
         };
       });
 
-      console.log('🔄 [TRANSFORMATION] Conversations transformed with lastMessage field');
+      console.log(
+        '🔄 [TRANSFORMATION] Conversations transformed with lastMessage field',
+      );
 
       return transformedConversations;
     } catch (error) {
@@ -296,9 +298,9 @@ export class MessagingService {
         },
         include: {
           participants: {
-            where: { 
+            where: {
               userId: { not: userId }, // Get other participants only
-              isActive: true 
+              isActive: true,
             },
             include: {
               user: {
@@ -341,42 +343,58 @@ export class MessagingService {
         take: limit,
       });
 
-      console.log('✅ [DATABASE RESULT] Found recent communications:', conversations.length);
+      console.log(
+        '✅ [DATABASE RESULT] Found recent communications:',
+        conversations.length,
+      );
 
       // Transform conversations to recent communications format
-      const recentCommunications = conversations.map((conversation) => {
-        const otherParticipant = conversation.participants[0]; // Get the other participant
-        const lastMessage = conversation.messages[0];
-        const unreadCount = conversation._count.messages;
+      const recentCommunications = conversations
+        .map((conversation) => {
+          const otherParticipant = conversation.participants[0]; // Get the other participant
+          const lastMessage = conversation.messages[0];
+          const unreadCount = conversation._count.messages;
 
-        if (!otherParticipant) {
-          console.log('⚠️ [WARNING] Conversation has no other participants:', conversation.id);
-          return null;
-        }
+          if (!otherParticipant) {
+            console.log(
+              '⚠️ [WARNING] Conversation has no other participants:',
+              conversation.id,
+            );
+            return null;
+          }
 
-        return {
-          id: otherParticipant.user.id,
-          conversationId: conversation.id,
-          name: `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`,
-          role: otherParticipant.user.role,
-          avatar: otherParticipant.user.avatarUrl || null,
-          lastMessage: lastMessage ? {
-            content: lastMessage.content,
-            time: lastMessage.createdAt.toISOString(),
-            isFromUser: lastMessage.senderId === userId,
-            messageType: lastMessage.messageType,
-          } : null,
-          unreadCount,
-          status: 'offline', // Default status, could be enhanced with real-time presence
-          conversationType: conversation.type,
-        };
-      }).filter(Boolean); // Remove null entries
+          return {
+            id: otherParticipant.user.id,
+            conversationId: conversation.id,
+            name: `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`,
+            role: otherParticipant.user.role,
+            avatar: otherParticipant.user.avatarUrl || null,
+            lastMessage: lastMessage
+              ? {
+                  content: lastMessage.content,
+                  time: lastMessage.createdAt.toISOString(),
+                  isFromUser: lastMessage.senderId === userId,
+                  messageType: lastMessage.messageType,
+                }
+              : null,
+            unreadCount,
+            status: 'offline', // Default status, could be enhanced with real-time presence
+            conversationType: conversation.type,
+          };
+        })
+        .filter(Boolean); // Remove null entries
 
-      console.log('📱 [FORMATTED RESULT] Recent communications formatted:', recentCommunications.length);
+      console.log(
+        '📱 [FORMATTED RESULT] Recent communications formatted:',
+        recentCommunications.length,
+      );
 
       return recentCommunications;
     } catch (error) {
-      console.error('❌ [DATABASE ERROR] getRecentCommunications failed:', error);
+      console.error(
+        '❌ [DATABASE ERROR] getRecentCommunications failed:',
+        error,
+      );
       throw error;
     }
   }
@@ -451,7 +469,7 @@ export class MessagingService {
         isMuted: false, // Not at conversation level, default to false
         createdAt: conversation.createdAt.toISOString(),
         updatedAt: conversation.updatedAt.toISOString(),
-        participants: conversation.participants.map(p => ({
+        participants: conversation.participants.map((p) => ({
           id: p.id,
           conversationId: p.conversationId,
           userId: p.userId,
@@ -468,12 +486,14 @@ export class MessagingService {
             role: p.user.role.toLowerCase(),
           },
         })),
-        lastMessage: conversation.messages[0] ? {
-          id: conversation.messages[0].id,
-          content: conversation.messages[0].content,
-          createdAt: conversation.messages[0].createdAt.toISOString(),
-          messageType: conversation.messages[0].messageType.toLowerCase(),
-        } : undefined,
+        lastMessage: conversation.messages[0]
+          ? {
+              id: conversation.messages[0].id,
+              content: conversation.messages[0].content,
+              createdAt: conversation.messages[0].createdAt.toISOString(),
+              messageType: conversation.messages[0].messageType.toLowerCase(),
+            }
+          : undefined,
       };
 
       return result;
@@ -495,8 +515,10 @@ export class MessagingService {
     attachmentNames: string[] = [],
     attachmentSizes: number[] = [],
   ) {
-    this.logger.debug(`Sending message from ${userId} to conversation ${conversationId}`);
-    
+    this.logger.debug(
+      `Sending message from ${userId} to conversation ${conversationId}`,
+    );
+
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
 
@@ -593,8 +615,10 @@ export class MessagingService {
         },
       },
     });
-    
-    this.logger.debug(`Message ${message.id} saved successfully to conversation ${message.conversationId}`);
+
+    this.logger.debug(
+      `Message ${message.id} saved successfully to conversation ${message.conversationId}`,
+    );
 
     // Update conversation lastMessageAt
     await this.prisma.conversation.update({
@@ -610,7 +634,9 @@ export class MessagingService {
         .map((p) => p.userId)
         .filter((id) => id !== userId) || [];
 
-    this.logger.debug(`Broadcasting message to ${recipientIds.length} recipients`);
+    this.logger.debug(
+      `Broadcasting message to ${recipientIds.length} recipients`,
+    );
 
     // Publish message sent event
     const messageEvent = new MessageSentEvent({
@@ -629,11 +655,9 @@ export class MessagingService {
       recipientIds,
       replyToMessageId: message.replyToId || undefined,
       fileAttachments:
-        message.attachmentUrls.length > 0
-          ? message.attachmentUrls
-          : undefined,
+        message.attachmentUrls.length > 0 ? message.attachmentUrls : undefined,
     });
-    
+
     await this.eventBus.emit(messageEvent);
     this.logger.debug(`MessageSentEvent emitted for message ${message.id}`);
 

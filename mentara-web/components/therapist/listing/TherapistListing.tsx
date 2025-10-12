@@ -56,9 +56,9 @@ function TherapistCardSkeleton() {
 
       {/* Specialties */}
       <div className="flex flex-wrap gap-2 mb-3">
-        <div className="h-6 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full w-20 animate-pulse"></div>
-        <div className="h-6 bg-gradient-to-r from-green-100 to-green-200 rounded-full w-16 animate-pulse"></div>
-        <div className="h-6 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full w-24 animate-pulse"></div>
+        <div className="h-6 bg-gradient-to-r from-primary/20 to-primary/30 rounded-full w-20 animate-pulse"></div>
+        <div className="h-6 bg-gradient-to-r from-primary/20 to-primary/30 rounded-full w-16 animate-pulse"></div>
+        <div className="h-6 bg-gradient-to-r from-primary/20 to-primary/30 rounded-full w-24 animate-pulse"></div>
       </div>
 
       {/* Available Time */}
@@ -75,7 +75,7 @@ function TherapistCardSkeleton() {
 
       {/* Action Buttons */}
       <div className="flex gap-2">
-        <div className="flex-1 h-9 bg-gradient-to-r from-blue-100 to-blue-200 rounded border animate-pulse"></div>
+        <div className="flex-1 h-9 bg-gradient-to-r from-primary/20 to-primary/30 rounded border animate-pulse"></div>
         <div className="flex-1 h-9 bg-gradient-to-r from-gray-100 to-gray-200 rounded border animate-pulse"></div>
       </div>
 
@@ -227,15 +227,15 @@ export default function TherapistListing() {
                 </div>
                 <ul className="text-sm text-gray-700 space-y-1">
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                     Check your internet connection
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                     Try refreshing the page
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                     Clear your browser cache
                   </li>
                 </ul>
