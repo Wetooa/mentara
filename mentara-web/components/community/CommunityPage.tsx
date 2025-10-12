@@ -473,7 +473,10 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                                   Create New Post
                                 </DialogTitle>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                  Share your thoughts in <span className="font-semibold text-primary">{selectedRoom?.name}</span>
+                                  Share your thoughts in{" "}
+                                  <span className="font-semibold text-primary">
+                                    {selectedRoom?.name}
+                                  </span>
                                 </p>
                               </div>
                             </div>
@@ -485,13 +488,20 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                           {/* Title Input */}
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <Label htmlFor="post-title" className="text-base font-semibold flex items-center gap-2">
+                              <Label
+                                htmlFor="post-title"
+                                className="text-base font-semibold flex items-center gap-2"
+                              >
                                 📝 Post Title
                               </Label>
-                              <span className={cn(
-                                "text-xs font-medium",
-                                newPostTitle.length > 100 ? "text-destructive" : "text-muted-foreground"
-                              )}>
+                              <span
+                                className={cn(
+                                  "text-xs font-medium",
+                                  newPostTitle.length > 100
+                                    ? "text-destructive"
+                                    : "text-muted-foreground"
+                                )}
+                              >
                                 {newPostTitle.length}/120
                               </span>
                             </div>
@@ -504,27 +514,37 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                               className="text-base h-11 border-2 focus:border-primary/50 transition-colors"
                             />
                             <p className="text-xs text-muted-foreground">
-                              A good title helps others understand your post at a glance
+                              A good title helps others understand your post at
+                              a glance
                             </p>
                           </div>
 
                           {/* Content Textarea */}
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <Label htmlFor="post-content" className="text-base font-semibold flex items-center gap-2">
+                              <Label
+                                htmlFor="post-content"
+                                className="text-base font-semibold flex items-center gap-2"
+                              >
                                 💭 Your Thoughts
                               </Label>
-                              <span className={cn(
-                                "text-xs font-medium",
-                                newPostContent.length > 1800 ? "text-destructive" : "text-muted-foreground"
-                              )}>
+                              <span
+                                className={cn(
+                                  "text-xs font-medium",
+                                  newPostContent.length > 1800
+                                    ? "text-destructive"
+                                    : "text-muted-foreground"
+                                )}
+                              >
                                 {newPostContent.length}/2000
                               </span>
                             </div>
                             <Textarea
                               id="post-content"
                               value={newPostContent}
-                              onChange={(e) => setNewPostContent(e.target.value)}
+                              onChange={(e) =>
+                                setNewPostContent(e.target.value)
+                              }
                               placeholder="Share your experiences, ask for support, or offer encouragement to others...&#10;&#10;💚 Remember: This is a safe space. Be kind, be respectful, and be yourself."
                               rows={8}
                               maxLength={2000}
@@ -542,11 +562,15 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                                 <Heart className="h-4 w-4 text-primary" />
                               </div>
                               <div className="flex-1 space-y-1">
-                                <h4 className="text-sm font-semibold text-foreground">Community Guidelines</h4>
+                                <h4 className="text-sm font-semibold text-foreground">
+                                  Community Guidelines
+                                </h4>
                                 <ul className="text-xs text-muted-foreground space-y-1">
                                   <li>✓ Be respectful and supportive</li>
                                   <li>✓ Share authentically and honestly</li>
-                                  <li>✓ Respect others' privacy and experiences</li>
+                                  <li>
+                                    ✓ Respect others' privacy and experiences
+                                  </li>
                                 </ul>
                               </div>
                             </div>
