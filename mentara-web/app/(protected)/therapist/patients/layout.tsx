@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Search,
   RefreshCw,
@@ -35,6 +35,8 @@ export default function PatientsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  
   // Fetch data using the hooks
   const {
     data: myPatients,
@@ -125,145 +127,170 @@ export default function PatientsLayout({
   // Tab state
   const [activeTab, setActiveTab] = useState("patients");
 
-  // Patient Card Components
+  // Client Card Components - Redesigned
   const MyPatientCard = ({ patient }: { patient: any }) => {
     const isActive = pathname.includes(`/patients/${patient.userId}`);
     const patientName = `${patient.user?.firstName || ""} ${patient.user?.lastName || ""}`;
+    const daysSinceAssigned = Math.floor((Date.now() - new Date(patient.assignedAt).getTime()) / (1000 * 60 * 60 * 24));
+    const lastLogin = patient.user?.lastLoginAt ? new Date(patient.user.lastLoginAt) : null;
 
     return (
-      <div
-        className={`p-3 rounded-lg border mb-3 ${isActive ? "bg-primary/10 border-primary" : "bg-white border-gray-200 hover:border-gray-300"}`}
-      >
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-            <Image
-              src={patient.user?.profilePicture || "/avatar-placeholder.png"}
-              alt={patientName}
-              width={40}
-              height={40}
-              className="w-full h-full object-cover"
-            />
+      <Link href={`/therapist/patients/${patient.userId}`}>
+        <div
+          className={`group p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
+            isActive 
+              ? "bg-secondary/10 border-secondary shadow-md" 
+              : "bg-white border-gray-200 hover:border-secondary/30 hover:shadow-lg"
+          }`}
+        >
+          {/* Header with Avatar */}
+          <div className="flex items-start gap-4 mb-4">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-secondary/20 shadow-md">
+                <Image
+                  src={patient.user?.avatarUrl || patient.user?.profilePicture || "/avatar-placeholder.png"}
+                  alt={patientName}
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* Online indicator if logged in recently */}
+              {lastLogin && (Date.now() - lastLogin.getTime()) < 1000 * 60 * 30 && (
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h4 className="text-base font-bold text-gray-900 truncate mb-1 group-hover:text-secondary transition-colors">
+                {patientName}
+              </h4>
+              <p className="text-xs text-gray-500 truncate mb-2">
+                {patient.user?.email}
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="px-2 py-0.5 bg-secondary/10 rounded-full">
+                  <p className="text-xs font-semibold text-secondary">
+                    {daysSinceAssigned} {daysSinceAssigned === 1 ? 'day' : 'days'} connected
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium truncate">{patientName}</h4>
-            <p className="text-xs text-gray-500 truncate">
-              {patient.user?.email}
-            </p>
-            <p className="text-xs text-gray-400 truncate">
-              Active since {new Date(patient.assignedAt).toLocaleDateString()}
-            </p>
-          </div>
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          <Link href={`/therapist/profile/${patient.userId}`}>
+          {/* Bio Preview */}
+          {patient.user?.bio && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-xs text-gray-700 line-clamp-2 leading-relaxed">
+                {patient.user.bio}
+              </p>
+            </div>
+          )}
+
+          {/* Last Activity */}
+          {lastLogin && (
+            <div className="mb-3 flex items-center gap-2 text-xs text-gray-600">
+              <Clock className="w-3 h-3 text-secondary" />
+              <span>Last active: {new Date(lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(lastLogin).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-2">
             <Button
               size="sm"
               variant="outline"
-              className="text-xs h-8 lg:h-7 min-w-0"
+              className="text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
+              onClick={(e) => { e.preventDefault(); router.push(`/therapist/messages?contact=${patient.userId}`); }}
             >
-              <Eye className="w-3 h-3 mr-1 flex-shrink-0" />
-              <span className="hidden sm:inline">View Profile</span>
-              <span className="sm:hidden">View</span>
+              <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+              Message
             </Button>
-          </Link>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-8 lg:h-7 min-w-0"
-          >
-            <MessageCircle className="w-3 h-3 mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">Message</span>
-            <span className="sm:hidden">Chat</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-8 lg:h-7 min-w-0"
-          >
-            <Calendar className="w-3 h-3 mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">Schedule</span>
-            <span className="sm:hidden">Book</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-8 lg:h-7 text-red-600 hover:text-red-700 min-w-0"
-            onClick={() => handleRemovePatient(patient.userId, patientName)}
-            disabled={removePatient.isPending}
-          >
-            <UserMinus className="w-3 h-3 mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">Remove</span>
-            <span className="sm:hidden">Remove</span>
-          </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
+              onClick={(e) => { e.preventDefault(); router.push(`/therapist/schedule?client=${patient.userId}`); }}
+            >
+              <Calendar className="w-3.5 h-3.5 mr-1.5" />
+              Schedule
+            </Button>
+          </div>
         </div>
-      </div>
+      </Link>
     );
   };
 
   const PatientRequestCard = ({ request }: { request: any }) => {
     const patientName = `${request.user?.firstName || ""} ${request.user?.lastName || ""}`;
+    const daysSinceRequest = Math.floor((Date.now() - new Date(request.requestedAt || request.assignedAt).getTime()) / (1000 * 60 * 60 * 24));
 
     return (
-      <div className="p-3 rounded-lg border bg-yellow-50 border-yellow-200 mb-3">
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-            <Image
-              src={request.user?.profilePicture || "/avatar-placeholder.png"}
-              alt={patientName}
-              width={40}
-              height={40}
-              className="w-full h-full object-cover"
-            />
+      <div className="p-5 rounded-xl border-2 bg-gradient-to-br from-secondary/5 to-white border-secondary/30 shadow-md hover:shadow-lg transition-all duration-300">
+        {/* Header with Avatar */}
+        <div className="flex items-start gap-4 mb-4">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-secondary/30 shadow-md">
+              <Image
+                src={request.user?.avatarUrl || request.user?.profilePicture || "/avatar-placeholder.png"}
+                alt={patientName}
+                width={64}
+                height={64}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {/* New request badge */}
+            <div className="absolute -top-1 -right-1 w-6 h-6 bg-secondary rounded-full border-2 border-white shadow-sm flex items-center justify-center">
+              <span className="text-xs font-bold text-secondary-foreground">!</span>
+            </div>
           </div>
+          
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium truncate">{patientName}</h4>
-            <p className="text-xs text-gray-500 truncate">
+            <h4 className="text-base font-bold text-gray-900 truncate mb-1">
+              {patientName}
+            </h4>
+            <p className="text-xs text-gray-500 truncate mb-2">
               {request.user?.email}
             </p>
-            <p className="text-xs text-gray-400 truncate">
-              Requested {new Date(request.requestedAt).toLocaleDateString()}
-            </p>
+            <div className="px-2 py-0.5 bg-secondary/20 rounded-full w-fit">
+              <p className="text-xs font-semibold text-secondary">
+                {daysSinceRequest === 0 ? 'Today' : `${daysSinceRequest} ${daysSinceRequest === 1 ? 'day' : 'days'} ago`}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        {/* Bio Preview */}
+        {request.user?.bio && (
+          <div className="mb-4 p-3 bg-white rounded-lg border border-secondary/20">
+            <p className="text-xs text-gray-700 line-clamp-2 leading-relaxed">
+              {request.user.bio}
+            </p>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-2">
           <Button
             size="sm"
-            className="text-xs h-8 lg:h-7 bg-green-600 hover:bg-green-700 min-w-0 flex-1 sm:flex-none"
+            className="text-xs bg-secondary hover:bg-secondary/90 shadow-sm"
             onClick={() => handleAcceptRequest(request.userId, patientName)}
             disabled={acceptRequest.isPending}
           >
-            <UserCheck className="w-3 h-3 mr-1 flex-shrink-0" />
+            <UserCheck className="w-3.5 h-3.5 mr-1.5" />
             Accept
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="text-xs h-8 lg:h-7 text-red-600 hover:text-red-700 min-w-0 flex-1 sm:flex-none"
+            className="text-xs text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
             onClick={() => handleDenyRequest(request.userId, patientName)}
             disabled={denyRequest.isPending}
           >
-            <UserX className="w-3 h-3 mr-1 flex-shrink-0" />
+            <UserX className="w-3.5 h-3.5 mr-1.5" />
             Deny
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-8 lg:h-7 min-w-0"
-          >
-            <MessageCircle className="w-3 h-3 mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">Message</span>
-            <span className="sm:hidden">Chat</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-8 lg:h-7 min-w-0"
-          >
-            <Eye className="w-3 h-3 mr-1 flex-shrink-0" />
-            <span className="hidden sm:inline">View Profile</span>
-            <span className="sm:hidden">View</span>
           </Button>
         </div>
       </div>
@@ -275,12 +302,12 @@ export default function PatientsLayout({
       {/* Mobile Header with Tabs - visible only on mobile */}
       <div className="lg:hidden border-b border-gray-200 bg-white p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-medium">Patients</h3>
+          <h3 className="font-bold text-lg text-gray-900">My Clients</h3>
           <Button
             size="sm"
             variant="ghost"
             onClick={refreshData}
-            className="p-1.5"
+            className="p-1.5 text-secondary hover:bg-secondary/10"
             disabled={loadingPatients || loadingRequests}
           >
             <RefreshCw
@@ -294,10 +321,10 @@ export default function PatientsLayout({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search patients..."
+            placeholder="Search clients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm"
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm"
           />
         </div>
 
@@ -317,19 +344,21 @@ export default function PatientsLayout({
         <div className="flex space-x-2">
           <button
             onClick={() => setActiveTab("patients")}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors rounded-md text-center ${activeTab === "patients"
-              ? "bg-primary text-white"
-              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-              }`}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-all rounded-lg text-center ${
+              activeTab === "patients"
+                ? "bg-secondary text-secondary-foreground shadow-md"
+                : "bg-white text-gray-700 hover:bg-secondary/5 border border-gray-200"
+            }`}
           >
-            My Patients ({filteredPatients?.length || 0})
+            My Clients ({filteredPatients?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab("requests")}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors rounded-md text-center ${activeTab === "requests"
-              ? "bg-primary text-white"
-              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-              }`}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-all rounded-lg text-center ${
+              activeTab === "requests"
+                ? "bg-secondary text-secondary-foreground shadow-md"
+                : "bg-white text-gray-700 hover:bg-secondary/5 border border-gray-200"
+            }`}
           >
             Requests ({filteredRequests?.length || 0})
           </button>
@@ -339,12 +368,12 @@ export default function PatientsLayout({
       {/* Desktop Left sidebar - Controls only */}
       <div className="hidden lg:flex w-80 border-r border-gray-200 bg-white flex-col p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-medium">Patients</h3>
+          <h3 className="font-bold text-lg text-gray-900">My Clients</h3>
           <Button
             size="sm"
             variant="ghost"
             onClick={refreshData}
-            className="p-1.5"
+            className="p-1.5 text-secondary hover:bg-secondary/10"
             disabled={loadingPatients || loadingRequests}
           >
             <RefreshCw
@@ -358,10 +387,10 @@ export default function PatientsLayout({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search patients..."
+            placeholder="Search clients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm"
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm"
           />
         </div>
 
@@ -381,21 +410,41 @@ export default function PatientsLayout({
         <div className="space-y-2">
           <button
             onClick={() => setActiveTab("patients")}
-            className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${activeTab === "patients"
-              ? "bg-primary text-white"
-              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-              }`}
+            className={`w-full px-4 py-3 text-sm font-semibold transition-all rounded-lg text-left ${
+              activeTab === "patients"
+                ? "bg-secondary text-secondary-foreground shadow-md"
+                : "bg-white text-gray-700 hover:bg-secondary/5 border border-gray-200"
+            }`}
           >
-            My Patients ({filteredPatients?.length || 0})
+            <div className="flex items-center justify-between">
+              <span>My Clients</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === "patients" 
+                  ? "bg-secondary-foreground/20" 
+                  : "bg-gray-100"
+              }`}>
+                {filteredPatients?.length || 0}
+              </span>
+            </div>
           </button>
           <button
             onClick={() => setActiveTab("requests")}
-            className={`w-full px-4 py-3 text-sm font-medium transition-colors rounded-md text-left ${activeTab === "requests"
-              ? "bg-primary text-white"
-              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-              }`}
+            className={`w-full px-4 py-3 text-sm font-semibold transition-all rounded-lg text-left ${
+              activeTab === "requests"
+                ? "bg-secondary text-secondary-foreground shadow-md"
+                : "bg-white text-gray-700 hover:bg-secondary/5 border border-gray-200"
+            }`}
           >
-            Requests ({filteredRequests?.length || 0})
+            <div className="flex items-center justify-between">
+              <span>Requests</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === "requests" 
+                  ? "bg-secondary-foreground/20" 
+                  : filteredRequests?.length > 0 ? "bg-secondary text-secondary-foreground" : "bg-gray-100"
+              }`}>
+                {filteredRequests?.length || 0}
+              </span>
+            </div>
           </button>
         </div>
       </div>
@@ -406,25 +455,28 @@ export default function PatientsLayout({
           <div className="p-4 lg:p-6">
             {activeTab === "patients" ? (
               <>
-                <h2 className="text-lg font-semibold mb-4 hidden lg:block">
-                  My Patients
-                </h2>
+                <div className="mb-6 hidden lg:block">
+                  <h2 className="text-2xl font-bold text-gray-900">My Clients</h2>
+                  <p className="text-gray-600 mt-1">Manage your client relationships</p>
+                </div>
                 {loadingPatients ? (
                   <div className="flex items-center justify-center py-12">
-                    <RefreshCw className="h-8 w-8 text-gray-400 animate-spin" />
+                    <RefreshCw className="h-8 w-8 text-secondary animate-spin" />
                   </div>
                 ) : filteredPatients?.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Users className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mb-4" />
-                    <p className="text-base lg:text-lg text-gray-500 mb-2">
-                      No active patients
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Accepted patient requests will appear here
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="bg-gradient-to-br from-secondary/20 to-secondary/10 p-6 rounded-2xl mb-4">
+                      <Users className="h-16 w-16 text-secondary" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      No Active Clients
+                    </h3>
+                    <p className="text-gray-600 max-w-md">
+                      Accepted client requests will appear here. You'll be able to view their profiles and manage sessions.
                     </p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {filteredPatients?.map((patient: any) => (
                       <MyPatientCard key={patient.userId} patient={patient} />
                     ))}
@@ -433,25 +485,28 @@ export default function PatientsLayout({
               </>
             ) : (
               <>
-                <h2 className="text-lg font-semibold mb-4 hidden lg:block">
-                  Patient Requests
-                </h2>
+                <div className="mb-6 hidden lg:block">
+                  <h2 className="text-2xl font-bold text-gray-900">Client Requests</h2>
+                  <p className="text-gray-600 mt-1">Review and respond to connection requests</p>
+                </div>
                 {loadingRequests ? (
                   <div className="flex items-center justify-center py-12">
-                    <RefreshCw className="h-8 w-8 text-gray-400 animate-spin" />
+                    <RefreshCw className="h-8 w-8 text-secondary animate-spin" />
                   </div>
                 ) : filteredRequests?.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Clock className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mb-4" />
-                    <p className="text-base lg:text-lg text-gray-500 mb-2">
-                      No pending requests
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Patient connection requests will appear here
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="bg-gradient-to-br from-secondary/20 to-secondary/10 p-6 rounded-2xl mb-4">
+                      <Clock className="h-16 w-16 text-secondary" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      No Pending Requests
+                    </h3>
+                    <p className="text-gray-600 max-w-md">
+                      Client connection requests will appear here when clients request to work with you.
                     </p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {filteredRequests?.map((request: any) => (
                       <PatientRequestCard
                         key={request.userId}

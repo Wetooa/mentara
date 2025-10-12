@@ -28,7 +28,8 @@ import { formatDistanceToNow } from "date-fns";
 export default function TherapistDashboardPage() {
   const router = useRouter();
   const { data, isLoading, error, refetch } = useTherapistDashboard();
-  const { data: recentChats = [], isLoading: isChatsLoading } = useRecentCommunications();
+  const { data: recentChats = [], isLoading: isChatsLoading } =
+    useRecentCommunications();
 
   // Destructure from updated backend response structure
   const therapist = data?.therapist;
@@ -94,18 +95,18 @@ export default function TherapistDashboardPage() {
     return (
       <div className="w-full min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
-        {/* Loading Header */}
+          {/* Loading Header */}
           <div className="space-y-3">
             <Skeleton className="h-10 w-64" />
             <Skeleton className="h-6 w-96" />
-        </div>
+          </div>
 
-        {/* Loading Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {/* Loading Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-28 rounded-xl" />
-          ))}
-        </div>
+            ))}
+          </div>
 
           {/* Loading Content Grid */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
@@ -113,14 +114,14 @@ export default function TherapistDashboardPage() {
             <div className="xl:col-span-2 space-y-6">
               <Skeleton className="h-12 w-48" />
               <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
+                {Array.from({ length: 3 }).map((_, i) => (
                   <Skeleton key={i} className="h-24 rounded-xl" />
-            ))}
-          </div>
+                ))}
+              </div>
             </div>
 
             {/* Secondary Column */}
-          <div className="space-y-6">
+            <div className="space-y-6">
               <Skeleton className="h-12 w-40" />
               <Skeleton className="h-64 rounded-xl" />
               <Skeleton className="h-48 rounded-xl" />
@@ -146,24 +147,24 @@ export default function TherapistDashboardPage() {
         />
 
         {/* Stats Overview */}
-          <DashboardStats
-            stats={{
-              activePatients: patients?.active || 0,
-              rescheduled: 0, // Not available in new structure
-              cancelled: 0, // Not available in new structure
-              income: earnings?.thisMonth || 0,
-              patientStats: {
-                total: patients?.total || 0,
-                percentage: 0, // Not available in new structure
-                months: 6, // Default to 6 months
+        <DashboardStats
+          stats={{
+            activePatients: patients?.active || 0,
+            rescheduled: 0, // Not available in new structure
+            cancelled: 0, // Not available in new structure
+            income: earnings?.thisMonth || 0,
+            patientStats: {
+              total: patients?.total || 0,
+              percentage: 0, // Not available in new structure
+              months: 6, // Default to 6 months
               chartData: [] as Array<{ month: string; value: number }>,
             },
-            }}
-            onPatientsClick={handlePatientsClick}
-            onScheduleClick={handleScheduleClick}
-            onMessagesClick={handleMessagesClick}
-            onWorksheetsClick={handleWorksheetsClick}
-          />
+          }}
+          onPatientsClick={handlePatientsClick}
+          onScheduleClick={handleScheduleClick}
+          onMessagesClick={handleMessagesClick}
+          onWorksheetsClick={handleWorksheetsClick}
+        />
 
         {/* Main Dashboard Content - Optimized layout with 2:1 ratio */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min">
@@ -197,14 +198,14 @@ export default function TherapistDashboardPage() {
                   </p>
                 </CardHeader>
                 <CardContent>
-              <DashboardPatientList
+                  <DashboardPatientList
                     appointments={(schedule?.today || [])
                       .slice(0, 3)
                       .map((appointment) => ({
-                  id: appointment.id,
+                        id: appointment.id,
                         patientId: appointment.id,
-                  patientName: appointment.patientName,
-                  patientAvatar: "/avatar-placeholder.png",
+                        patientName: appointment.patientName,
+                        patientAvatar: "/avatar-placeholder.png",
                         time: new Date(
                           appointment.startTime
                         ).toLocaleTimeString("en-US", {
@@ -212,8 +213,8 @@ export default function TherapistDashboardPage() {
                           minute: "2-digit",
                         }),
                         condition: appointment.type || "Session",
-                }))}
-              />
+                      }))}
+                  />
                   {(schedule?.today?.length || 0) > 3 && (
                     <Button
                       variant="ghost"
@@ -345,7 +346,11 @@ export default function TherapistDashboardPage() {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-xs text-gray-500">
-                            {chat.time ? formatDistanceToNow(new Date(chat.time), { addSuffix: true }) : ""}
+                            {chat.time
+                              ? formatDistanceToNow(new Date(chat.time), {
+                                  addSuffix: true,
+                                })
+                              : ""}
                           </p>
                           {chat.unread > 0 && (
                             <div className="mt-1 bg-secondary text-secondary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -379,7 +384,7 @@ export default function TherapistDashboardPage() {
                 )}
               </CardContent>
             </Card>
-              </div>
+          </div>
 
           <div className="md:col-span-1 lg:col-span-2">
             <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
@@ -391,9 +396,9 @@ export default function TherapistDashboardPage() {
                 <p className="text-sm text-gray-600">Growth metrics</p>
               </CardHeader>
               <CardContent>
-              <DashboardOverview
-                patientStats={{
-                  total: patients?.total || 0,
+                <DashboardOverview
+                  patientStats={{
+                    total: patients?.total || 0,
                     percentage: 0,
                     months: 6,
                     chartData: [],
