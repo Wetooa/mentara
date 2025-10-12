@@ -95,19 +95,19 @@ const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
 
 // Helper functions for time conversion
 const timeToSliderValue = (timeStr: string): number => {
-  const [hours, minutes] = timeStr.split(':').map(Number);
+  const [hours, minutes] = timeStr.split(":").map(Number);
   return hours * 2 + (minutes >= 30 ? 1 : 0); // 30-min intervals (0-47)
 };
 
 const sliderValueToTime = (value: number): string => {
   const hours = Math.floor(value / 2);
-  const minutes = value % 2 === 0 ? '00' : '30';
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  const minutes = value % 2 === 0 ? "00" : "30";
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
 };
 
 const formatTimeDisplay = (timeStr: string): string => {
   const date = new Date(`1970-01-01T${timeStr}`);
-  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 };
 
 export function TherapistAvailabilityCalendar() {
@@ -166,13 +166,14 @@ export function TherapistAvailabilityCalendar() {
   // Get occupied time ranges for the selected day (excluding current editing slot)
   const getOccupiedRanges = (): Array<{ start: number; end: number }> => {
     if (!formData.dayOfWeek) return [];
-    
+
     const daySlots = availability.filter(
-      slot => slot.dayOfWeek === formData.dayOfWeek && 
-              (!editingSlot || slot.id !== editingSlot.id)
+      (slot) =>
+        slot.dayOfWeek === formData.dayOfWeek &&
+        (!editingSlot || slot.id !== editingSlot.id)
     );
-    
-    return daySlots.map(slot => ({
+
+    return daySlots.map((slot) => ({
       start: timeToSliderValue(slot.startTime),
       end: timeToSliderValue(slot.endTime),
     }));
@@ -301,15 +302,18 @@ export function TherapistAvailabilityCalendar() {
   });
 
   const handleDayClick = (dayValue: string) => {
-    const defaultStart = '09:00';
-    const defaultEnd = '17:00';
-    setFormData({ 
-      ...formData, 
+    const defaultStart = "09:00";
+    const defaultEnd = "17:00";
+    setFormData({
+      ...formData,
       dayOfWeek: dayValue,
       startTime: defaultStart,
       endTime: defaultEnd,
     });
-    setTimeRange([timeToSliderValue(defaultStart), timeToSliderValue(defaultEnd)]);
+    setTimeRange([
+      timeToSliderValue(defaultStart),
+      timeToSliderValue(defaultEnd),
+    ]);
     setIsAddDialogOpen(true);
   };
 
@@ -403,31 +407,28 @@ export function TherapistAvailabilityCalendar() {
                   </p>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-                  {/* Day Selection */}
+                  {/* Day Selection - Button Group */}
                   <div className="space-y-3">
-                    <Label
-                      htmlFor="dayOfWeek"
-                      className="text-sm font-semibold text-gray-900"
-                    >
+                    <Label className="text-sm font-semibold text-gray-900">
                       Day of Week *
                     </Label>
-                    <Select
-                      value={formData.dayOfWeek}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, dayOfWeek: value })
-                      }
-                    >
-                      <SelectTrigger className="h-11">
-                        <SelectValue placeholder="Select a day" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DAYS_OF_WEEK.map((day, _) => (
-                          <SelectItem key={day.value} value={day.value}>
-                            {day.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="grid grid-cols-4 gap-2">
+                      {DAYS_OF_WEEK.map((day) => (
+                        <Button
+                          key={day.value}
+                          type="button"
+                          variant={formData.dayOfWeek === day.value ? "default" : "outline"}
+                          onClick={() => setFormData({ ...formData, dayOfWeek: day.value })}
+                          className={`h-11 ${
+                            formData.dayOfWeek === day.value
+                              ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                              : "hover:bg-secondary/10 hover:border-secondary/30"
+                          }`}
+                        >
+                          {day.label.slice(0, 3)}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Time Range Slider */}
@@ -435,24 +436,36 @@ export function TherapistAvailabilityCalendar() {
                     <Label className="text-sm font-semibold text-gray-900">
                       Time Range *
                     </Label>
-                    
+
                     {/* Selected Time Display */}
                     <div className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/20">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-secondary" />
                         <span className="text-sm font-bold text-gray-900">
-                          {formatTimeDisplay(formData.startTime || '09:00')}
+                          {formatTimeDisplay(formData.startTime || "09:00")}
                         </span>
                         <span className="text-sm text-gray-600">to</span>
                         <span className="text-sm font-bold text-gray-900">
-                          {formatTimeDisplay(formData.endTime || '17:00')}
+                          {formatTimeDisplay(formData.endTime || "17:00")}
                         </span>
                       </div>
-                      <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/30">
+                      <Badge
+                        variant="outline"
+                        className="bg-secondary/10 text-secondary border-secondary/30"
+                      >
                         {(() => {
-                          const [startHour, startMin] = (formData.startTime || '09:00').split(':').map(Number);
-                          const [endHour, endMin] = (formData.endTime || '17:00').split(':').map(Number);
-                          const duration = endHour + endMin / 60 - (startHour + startMin / 60);
+                          const [startHour, startMin] = (
+                            formData.startTime || "09:00"
+                          )
+                            .split(":")
+                            .map(Number);
+                          const [endHour, endMin] = (
+                            formData.endTime || "17:00"
+                          )
+                            .split(":")
+                            .map(Number);
+                          const duration =
+                            endHour + endMin / 60 - (startHour + startMin / 60);
                           return `${duration.toFixed(1)}h`;
                         })()}
                       </Badge>
@@ -476,7 +489,8 @@ export function TherapistAvailabilityCalendar() {
                         <div className="relative h-8 bg-gray-100 rounded-lg mb-2">
                           {getOccupiedRanges().map((range, idx) => {
                             const leftPercent = (range.start / 48) * 100;
-                            const widthPercent = ((range.end - range.start) / 48) * 100;
+                            const widthPercent =
+                              ((range.end - range.start) / 48) * 100;
                             return (
                               <div
                                 key={idx}
@@ -554,18 +568,21 @@ export function TherapistAvailabilityCalendar() {
                     </div>
 
                     {/* Warning for overlaps */}
-                    {formData.dayOfWeek && getOccupiedRanges().some(range => 
-                      (timeRange[0] < range.end && timeRange[1] > range.start)
-                    ) && (
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <div className="flex items-center gap-2">
-                          <AlertCircle className="h-4 w-4 text-red-600" />
-                          <p className="text-sm text-red-700">
-                            This time range overlaps with existing availability
-                          </p>
+                    {formData.dayOfWeek &&
+                      getOccupiedRanges().some(
+                        (range) =>
+                          timeRange[0] < range.end && timeRange[1] > range.start
+                      ) && (
+                        <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-red-600" />
+                            <p className="text-sm text-red-700">
+                              This time range overlaps with existing
+                              availability
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
 
                   {/* Timezone */}
