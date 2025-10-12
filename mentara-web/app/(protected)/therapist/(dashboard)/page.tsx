@@ -149,49 +149,51 @@ export default function TherapistDashboardPage() {
             onWorksheetsClick={handleWorksheetsClick}
           />
 
-        {/* Main Dashboard Content - Compact 2-row layout like client */}
+        {/* Main Dashboard Content - Optimized 2-row layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min">
-          {/* Row 1: Today's Schedule, Client Matches, Analytics (3 cards) */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <CalendarIcon className="h-5 w-5 text-secondary" />
+          {/* Row 1: Today's Schedule (2 cols), Client Matches (4 cols - extended) */}
+          {(schedule?.today?.length || 0) > 0 && (
+            <div className="md:col-span-1 lg:col-span-2">
+              <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CalendarIcon className="h-5 w-5 text-secondary" />
                     Today's Schedule
-                </CardTitle>
-                <p className="text-sm text-gray-600">
-                  {schedule?.today?.length || 0} appointment{(schedule?.today?.length || 0) !== 1 ? "s" : ""}
-                </p>
-              </CardHeader>
-              <CardContent>
-              <DashboardPatientList
-                  appointments={(schedule?.today || []).slice(0, 3).map((appointment) => ({
-                  id: appointment.id,
-                    patientId: appointment.id,
-                  patientName: appointment.patientName,
-                  patientAvatar: "/avatar-placeholder.png",
-                    time: new Date(appointment.startTime).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }),
-                    condition: appointment.type || "Session",
-                }))}
-              />
-                {(schedule?.today?.length || 0) > 3 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleScheduleClick}
-                    className="w-full mt-4 text-secondary hover:bg-secondary/10"
-                  >
-                    View all {schedule.today.length} appointments
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  </CardTitle>
+                  <p className="text-sm text-gray-600">
+                    {schedule?.today?.length || 0} appointment{(schedule?.today?.length || 0) !== 1 ? "s" : ""}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <DashboardPatientList
+                    appointments={(schedule?.today || []).slice(0, 3).map((appointment) => ({
+                      id: appointment.id,
+                      patientId: appointment.id,
+                      patientName: appointment.patientName,
+                      patientAvatar: "/avatar-placeholder.png",
+                      time: new Date(appointment.startTime).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }),
+                      condition: appointment.type || "Session",
+                    }))}
+                  />
+                  {(schedule?.today?.length || 0) > 3 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleScheduleClick}
+                      className="w-full mt-4 text-secondary hover:bg-secondary/10"
+                    >
+                      View all {schedule.today.length} appointments
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
-          <div className="md:col-span-1 lg:col-span-2">
+          <div className={(schedule?.today?.length || 0) > 0 ? "md:col-span-2 lg:col-span-4" : "md:col-span-2 lg:col-span-6"}>
             <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -204,31 +206,9 @@ export default function TherapistDashboardPage() {
                 <MatchedClientsSection />
               </CardContent>
             </Card>
-              </div>
-
-          <div className="md:col-span-2 lg:col-span-2">
-            <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-secondary" />
-                  Practice Analytics
-                </CardTitle>
-                <p className="text-sm text-gray-600">Growth metrics</p>
-              </CardHeader>
-              <CardContent>
-              <DashboardOverview
-                patientStats={{
-                  total: patients?.total || 0,
-                    percentage: 0,
-                    months: 6,
-                    chartData: [],
-                  }}
-                />
-              </CardContent>
-            </Card>
           </div>
 
-          {/* Row 2: Upcoming Appointments, Quick Actions (2 cards) */}
+          {/* Row 2: This Week's Schedule (3 cols), Practice Analytics (3 cols) */}
           <div className="md:col-span-1 lg:col-span-3">
             <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
@@ -248,7 +228,8 @@ export default function TherapistDashboardPage() {
                         key={appointment.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/10 hover:border-secondary/30 hover:shadow-sm transition-all"
+                        className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/10 hover:border-secondary/30 hover:shadow-sm transition-all cursor-pointer"
+                        onClick={() => router.push(`/therapist/patients/${appointment.id}`)}
                       >
                         <div>
                           <p className="font-semibold text-gray-900">{appointment.patientName}</p>
@@ -286,64 +267,20 @@ export default function TherapistDashboardPage() {
             <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-secondary" />
-                  Quick Actions
+                  <TrendingUp className="h-5 w-5 text-secondary" />
+                  Practice Analytics
                 </CardTitle>
-                <p className="text-sm text-gray-600">Common tasks</p>
+                <p className="text-sm text-gray-600">Growth metrics</p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    onClick={handleMessagesClick}
-                    className="h-24 flex flex-col items-center justify-center gap-2 bg-secondary/10 hover:bg-secondary/20 text-secondary border-2 border-secondary/30"
-                    variant="outline"
-                  >
-                    <MessageSquare className="h-6 w-6" />
-                    <span className="font-semibold">Messages</span>
-                  </Button>
-                  <Button
-                    onClick={handlePatientsClick}
-                    className="h-24 flex flex-col items-center justify-center gap-2 bg-secondary/10 hover:bg-secondary/20 text-secondary border-2 border-secondary/30"
-                    variant="outline"
-                  >
-                    <UsersIcon className="h-6 w-6" />
-                    <span className="font-semibold">Clients</span>
-                  </Button>
-                  <Button
-                    onClick={handleWorksheetsClick}
-                    className="h-24 flex flex-col items-center justify-center gap-2 bg-secondary/10 hover:bg-secondary/20 text-secondary border-2 border-secondary/30"
-                    variant="outline"
-                  >
-                    <TrendingUp className="h-6 w-6" />
-                    <span className="font-semibold">Worksheets</span>
-                  </Button>
-                  <Button
-                    onClick={handleCommunityClick}
-                    className="h-24 flex flex-col items-center justify-center gap-2 bg-secondary/10 hover:bg-secondary/20 text-secondary border-2 border-2 border-secondary/30"
-                    variant="outline"
-                  >
-                    <UsersIcon className="h-6 w-6" />
-                    <span className="font-semibold">Community</span>
-                  </Button>
-                </div>
-                
-                {/* Practice Info */}
-                <div className="mt-6 p-4 bg-secondary/5 rounded-xl border border-secondary/20">
-                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-secondary" />
-                    Practice Performance
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-600">Completion Rate</p>
-                      <p className="text-lg font-bold text-gray-900">{performance?.sessionCompletionRate || 0}%</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Avg. Rating</p>
-                      <p className="text-lg font-bold text-gray-900">{performance?.averageRating || 0}/5</p>
-                    </div>
-                  </div>
-                </div>
+                <DashboardOverview
+                  patientStats={{
+                    total: patients?.total || 0,
+                    percentage: 0,
+                    months: 6,
+                    chartData: [],
+                  }}
+                />
               </CardContent>
             </Card>
           </div>
