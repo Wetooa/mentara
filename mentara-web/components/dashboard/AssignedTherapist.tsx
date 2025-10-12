@@ -104,10 +104,10 @@ export default function AssignedTherapist({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-        <CardHeader className="bg-gradient-to-br from-primary/5 to-primary/10 pb-3">
-          <CardTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-lg">
+      <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow p-0">
+        <div className="bg-gradient-to-br from-primary/5 to-primary/10 px-5 py-4">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2 text-lg font-semibold">
               <Heart className="h-5 w-5 text-primary" />
               Your Therapist
             </span>
@@ -117,9 +117,9 @@ export default function AssignedTherapist({
                 Online
               </Badge>
             )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
+          </div>
+        </div>
+        <CardContent className="p-5">
           <div className="space-y-5">
             {/* Therapist Info with enhanced design */}
             <div className="flex items-start gap-4">

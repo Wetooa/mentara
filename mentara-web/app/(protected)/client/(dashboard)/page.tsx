@@ -190,30 +190,37 @@ export default function DashboardPage() {
           onTherapistsClick={handleTherapistsClick}
         />
 
-        {/* Main Dashboard Content - Enhanced responsive layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-7">
-          {/* Primary Column - Sessions and Worksheets */}
-          <div className="lg:col-span-2 space-y-5 lg:space-y-6">
-            {/* Main Content - Sessions and Worksheets */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
-              <UpcomingSessions sessions={dashboardData.upcomingSessions} />
-              <WorksheetStatus worksheets={dashboardData.worksheets} />
-            </div>
+        {/* Main Dashboard Content - Balanced grid layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min">
+          {/* Row 1: Sessions and Therapist */}
+          <div className="md:col-span-2 lg:col-span-3">
+            <UpcomingSessions sessions={dashboardData.upcomingSessions} />
           </div>
-
-          {/* Right Sidebar - Therapist, Communications, and Progress */}
-          <div className="space-y-5 lg:space-y-6">
+          
+          <div className="md:col-span-2 lg:col-span-3">
             <AssignedTherapist
               assignedTherapists={dashboardApiData?.assignedTherapists || []}
               isLoading={isDashboardLoading}
               onMessageTherapist={handleMessageTherapist}
               onScheduleSession={handleScheduleSession}
             />
+          </div>
+
+          {/* Row 2: Worksheets and Recent Chats */}
+          <div className="md:col-span-2 lg:col-span-3">
+            <WorksheetStatus worksheets={dashboardData.worksheets} />
+          </div>
+          
+          <div className="md:col-span-2 lg:col-span-3">
             <RecentCommunications
               recentContacts={dashboardData.recentCommunications}
               onViewAllMessages={handleViewAllMessages}
               onContactSelect={handleContactSelect}
             />
+          </div>
+
+          {/* Row 3: Wellness Pulse - Full Width */}
+          <div className="md:col-span-2 lg:col-span-6">
             <ProgressTracking progress={dashboardData.progress} />
           </div>
         </div>

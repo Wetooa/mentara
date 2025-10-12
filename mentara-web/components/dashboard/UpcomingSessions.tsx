@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import type { UserDashboardData } from "@/types/api/dashboard";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -69,8 +69,8 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
 
   return (
     <motion.div initial="hidden" animate="visible" variants={containerVariants}>
-      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden border-border/50">
-        <div className="bg-gradient-to-br from-green-500/5 to-emerald-500/5 px-4 sm:px-6 py-3 border-b border-border/50">
+      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden border-border/50 p-0">
+        <div className="bg-gradient-to-br from-green-500/5 to-emerald-500/5 px-4 sm:px-5 py-4 border-b border-border/50">
           <motion.div
             className="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
             variants={sectionVariants}
@@ -91,7 +91,7 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
             </motion.div>
           </motion.div>
         </div>
-        <CardContent className="p-4 sm:p-5">
+        <div className="p-4 sm:p-5">
 
           {sessions.length === 0 ? (
             <motion.div
@@ -146,7 +146,7 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
               </motion.div>
             </motion.div>
           )}
-        </CardContent>
+        </div>
       </Card>
     </motion.div>
   );

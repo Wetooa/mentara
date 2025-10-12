@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import type { UserDashboardData } from "@/types/api/dashboard";
 import { Smile, Frown, Meh, Heart, Activity, TrendingUp } from "lucide-react";
 import { format, parseISO } from "date-fns";
@@ -15,14 +15,14 @@ export default function ProgressTracking({ progress }: ProgressTrackingProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-        <CardHeader className="bg-gradient-to-br from-pink-500/5 to-purple-500/5 pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
+      <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden p-0">
+        <div className="bg-gradient-to-br from-pink-500/5 to-purple-500/5 px-5 py-4">
+          <div className="flex items-center gap-2 text-lg font-semibold">
             <Activity className="h-5 w-5 text-pink-600" />
             Wellness Pulse
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-5 space-y-5">
+          </div>
+        </div>
+        <div className="p-5 space-y-5">
           {/* Treatment Progress - Enhanced */}
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -131,7 +131,7 @@ export default function ProgressTracking({ progress }: ProgressTrackingProps) {
               ))}
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
     </motion.div>
   );

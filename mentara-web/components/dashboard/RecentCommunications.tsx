@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,13 +69,13 @@ export default function RecentCommunications({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.25 }}
     >
-      <Card className="h-fit max-h-96 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-        <CardHeader className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 pb-3">
-          <div className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+      <Card className="h-fit max-h-96 shadow-sm hover:shadow-md transition-shadow overflow-hidden p-0">
+        <div className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 px-5 py-4">
+          <div className="flex flex-row items-center justify-between">
+            <div className="text-lg font-semibold flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-blue-600" />
               Recent Chats
-            </CardTitle>
+            </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="ghost"
@@ -88,8 +88,8 @@ export default function RecentCommunications({
               </Button>
             </motion.div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-2 overflow-y-auto p-3">
+        </div>
+        <div className="space-y-2 overflow-y-auto p-3">
           {recentContacts.length > 0 ? (
             <>
               {recentContacts.slice(0, 4).map((contact, index) => (
@@ -177,7 +177,7 @@ export default function RecentCommunications({
               </Button>
             </motion.div>
           )}
-        </CardContent>
+        </div>
       </Card>
     </motion.div>
   );
