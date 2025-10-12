@@ -321,15 +321,15 @@ export function TherapistAvailabilityCalendar() {
     <div className="space-y-6">
       {/* Weekly Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="shadow-md hover:shadow-lg transition-shadow">
+        <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-secondary">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-secondary rounded-xl">
+              <div className="p-3 bg-gradient-to-br from-secondary to-secondary/80 rounded-xl">
                 <Clock className="h-6 w-6 text-secondary-foreground" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Weekly Hours</p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
                   {totalHoursPerWeek.toFixed(1)}
                 </p>
               </div>
@@ -337,15 +337,15 @@ export function TherapistAvailabilityCalendar() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md hover:shadow-lg transition-shadow">
+        <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-primary">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-secondary/80 rounded-xl">
-                <Calendar className="h-6 w-6 text-secondary-foreground" />
+              <div className="p-3 bg-gradient-to-br from-primary to-primary/80 rounded-xl">
+                <Calendar className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Active Days</p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   {Object.values(hoursPerDay).filter((h) => h > 0).length}/7
                 </p>
               </div>
@@ -353,15 +353,15 @@ export function TherapistAvailabilityCalendar() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md hover:shadow-lg transition-shadow">
+        <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-secondary">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-secondary/60 rounded-xl">
-                <Users className="h-6 w-6 text-secondary-foreground" />
+              <div className="p-3 bg-gradient-to-br from-secondary/80 to-primary/60 rounded-xl">
+                <Users className="h-6 w-6 text-white" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Time Slots</p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
                   {availability.length}
                 </p>
               </div>
@@ -370,37 +370,43 @@ export function TherapistAvailabilityCalendar() {
         </Card>
       </div>
 
-      <Card className="shadow-md hover:shadow-lg transition-shadow">
-        <CardHeader>
+      <Card className="shadow-md hover:shadow-lg transition-shadow border-t-2 border-t-secondary/20">
+        <CardHeader className="bg-gradient-to-r from-secondary/5 via-primary/5 to-secondary/5">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-xl">
-                <Calendar className="h-5 w-5 text-secondary" />
-                Weekly Availability Calendar
+                <div className="p-2 bg-gradient-to-br from-secondary to-primary rounded-lg">
+                  <Calendar className="h-5 w-5 text-white" />
+                </div>
+                <span className="bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
+                  Weekly Availability Calendar
+                </span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1 ml-11">
                 Visual overview of your weekly schedule •{" "}
-                {totalHoursPerWeek.toFixed(1)} hours/week
+                <span className="font-semibold text-secondary">{totalHoursPerWeek.toFixed(1)}</span> hours/week
               </p>
             </div>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="flex items-center gap-2 bg-secondary hover:bg-secondary/90">
+                <Button className="flex items-center gap-2 bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary/80 shadow-md">
                   <Plus className="h-4 w-4" />
                   Add Slot
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
+              <DialogContent className="sm:max-w-lg border-t-4 border-t-secondary">
                 <DialogHeader>
                   <DialogTitle className="text-2xl flex items-center gap-3">
-                    <div className="p-2 bg-secondary/10 rounded-lg">
-                      <Calendar className="h-5 w-5 text-secondary" />
+                    <div className="p-2 bg-gradient-to-br from-secondary via-primary/50 to-secondary rounded-lg">
+                      <Calendar className="h-5 w-5 text-white" />
                     </div>
-                    {editingSlot
-                      ? "Edit Availability Slot"
-                      : "Add Availability Slot"}
+                    <span className="bg-gradient-to-r from-secondary via-primary to-secondary bg-clip-text text-transparent">
+                      {editingSlot
+                        ? "Edit Availability Slot"
+                        : "Add Availability Slot"}
+                    </span>
                   </DialogTitle>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 ml-11">
                     {editingSlot
                       ? "Update your availability details"
                       : "Define when you're available for client sessions"}
@@ -409,20 +415,28 @@ export function TherapistAvailabilityCalendar() {
                 <form onSubmit={handleSubmit} className="space-y-6 pt-4">
                   {/* Day Selection - Button Group */}
                   <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-gray-900">
+                    <Label className="text-sm font-semibold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
                       Day of Week *
                     </Label>
                     <div className="grid grid-cols-4 gap-2">
-                      {DAYS_OF_WEEK.map((day) => (
+                      {DAYS_OF_WEEK.map((day, idx) => (
                         <Button
                           key={day.value}
                           type="button"
-                          variant={formData.dayOfWeek === day.value ? "default" : "outline"}
-                          onClick={() => setFormData({ ...formData, dayOfWeek: day.value })}
+                          variant={
+                            formData.dayOfWeek === day.value
+                              ? "default"
+                              : "outline"
+                          }
+                          onClick={() =>
+                            setFormData({ ...formData, dayOfWeek: day.value })
+                          }
                           className={`h-11 ${
                             formData.dayOfWeek === day.value
-                              ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                              : "hover:bg-secondary/10 hover:border-secondary/30"
+                              ? idx % 2 === 0
+                                ? "bg-gradient-to-br from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary/80 text-secondary-foreground"
+                                : "bg-gradient-to-br from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground"
+                              : "hover:bg-gradient-to-br hover:from-secondary/10 hover:to-primary/10 hover:border-secondary/30"
                           }`}
                         >
                           {day.label.slice(0, 3)}
@@ -433,25 +447,27 @@ export function TherapistAvailabilityCalendar() {
 
                   {/* Time Range Slider */}
                   <div className="space-y-4">
-                    <Label className="text-sm font-semibold text-gray-900">
+                    <Label className="text-sm font-semibold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
                       Time Range *
                     </Label>
 
                     {/* Selected Time Display */}
-                    <div className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/20">
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-secondary/5 via-primary/5 to-secondary/5 rounded-lg border-2 border-secondary/20">
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-secondary" />
-                        <span className="text-sm font-bold text-gray-900">
+                        <div className="p-1.5 bg-gradient-to-br from-secondary to-primary rounded-md">
+                          <Clock className="h-3.5 w-3.5 text-white" />
+                        </div>
+                        <span className="text-sm font-bold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
                           {formatTimeDisplay(formData.startTime || "09:00")}
                         </span>
                         <span className="text-sm text-gray-600">to</span>
-                        <span className="text-sm font-bold text-gray-900">
+                        <span className="text-sm font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                           {formatTimeDisplay(formData.endTime || "17:00")}
                         </span>
                       </div>
                       <Badge
                         variant="outline"
-                        className="bg-secondary/10 text-secondary border-secondary/30"
+                        className="bg-gradient-to-r from-secondary/10 to-primary/10 text-secondary border-secondary/30"
                       >
                         {(() => {
                           const [startHour, startMin] = (
@@ -671,10 +687,10 @@ export function TherapistAvailabilityCalendar() {
         <CardContent>
           {availability.length === 0 ? (
             <div className="text-center py-16">
-              <div className="bg-gradient-to-br from-secondary/20 to-secondary/10 p-6 rounded-2xl w-fit mx-auto mb-6">
+              <div className="bg-gradient-to-br from-secondary/20 via-primary/20 to-secondary/20 p-6 rounded-2xl w-fit mx-auto mb-6 shadow-lg">
                 <Calendar className="h-16 w-16 text-secondary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-secondary via-primary to-secondary bg-clip-text text-transparent mb-2">
                 No Availability Set
               </h3>
               <p className="text-gray-600 mb-6 max-w-md mx-auto">
@@ -683,7 +699,7 @@ export function TherapistAvailabilityCalendar() {
               </p>
               <Button
                 onClick={() => setIsAddDialogOpen(true)}
-                className="bg-secondary hover:bg-secondary/90 shadow-md"
+                className="bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary/80 shadow-md"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Your First Availability
@@ -700,39 +716,41 @@ export function TherapistAvailabilityCalendar() {
                     key={day.value}
                     className="border border-gray-200 rounded-xl p-5 bg-white hover:border-gray-300 hover:shadow-md transition-all"
                   >
-                    {/* Day Header - Clickable */}
-                    <div
-                      className="flex items-center justify-between mb-4 cursor-pointer group"
-                      onClick={() => handleDayClick(day.value)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-2 h-12 rounded-full transition-colors ${dayHours > 0 ? "bg-secondary" : "bg-gray-200 group-hover:bg-gray-300"}`}
-                        ></div>
-                        <div>
-                          <h4 className="font-bold text-lg text-gray-900 group-hover:text-secondary transition-colors">
-                            {day.label}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {dayHours > 0
-                              ? `${dayHours.toFixed(1)} hours available`
-                              : "Click to add availability"}
-                          </p>
+                      {/* Day Header - Clickable */}
+                      <div
+                        className="flex items-center justify-between mb-4 cursor-pointer group"
+                        onClick={() => handleDayClick(day.value)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-2 h-12 rounded-full transition-all ${dayHours > 0 ? "bg-gradient-to-b from-secondary via-primary to-secondary shadow-md" : "bg-gray-200 group-hover:bg-gradient-to-b group-hover:from-secondary/30 group-hover:to-primary/30"}`}
+                          ></div>
+                          <div>
+                            <h4 className="font-bold text-lg text-gray-900 group-hover:bg-gradient-to-r group-hover:from-secondary group-hover:to-primary group-hover:bg-clip-text group-hover:text-transparent transition-all">
+                              {day.label}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {dayHours > 0
+                                ? `${dayHours.toFixed(1)} hours available`
+                                : "Click to add availability"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {dayHours > 0 && (
+                            <Badge
+                              variant="outline"
+                              className="bg-gradient-to-r from-secondary/5 to-primary/5 text-secondary border-secondary/20"
+                            >
+                              {daySlots.length}{" "}
+                              {daySlots.length === 1 ? "slot" : "slots"}
+                            </Badge>
+                          )}
+                          <div className="p-1 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-md group-hover:from-secondary/20 group-hover:to-primary/20 transition-all">
+                            <Plus className="h-4 w-4 text-secondary group-hover:text-primary transition-colors" />
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {dayHours > 0 && (
-                          <Badge
-                            variant="outline"
-                            className="bg-gray-50 text-gray-700 border-gray-200"
-                          >
-                            {daySlots.length}{" "}
-                            {daySlots.length === 1 ? "slot" : "slots"}
-                          </Badge>
-                        )}
-                        <Plus className="h-5 w-5 text-gray-400 group-hover:text-secondary transition-colors" />
-                      </div>
-                    </div>
 
                     {/* Time Slots */}
                     {daySlots.length === 0 ? (
@@ -760,13 +778,13 @@ export function TherapistAvailabilityCalendar() {
                           return (
                           <div
                             key={slot.id}
-                              className="group relative flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-secondary/30 hover:shadow-sm transition-all"
+                              className="group relative flex items-center justify-between p-4 bg-gradient-to-r from-white via-gray-50 to-white rounded-lg border border-gray-200 hover:border-secondary/30 hover:shadow-md transition-all"
                           >
                               {/* Time Block Visualization */}
                               <div className="flex items-center gap-4 flex-1">
                             <div className="flex items-center gap-3">
-                                  <div className="p-2.5 bg-secondary rounded-lg">
-                                    <Clock className="h-5 w-5 text-secondary-foreground" />
+                                  <div className="p-2.5 bg-gradient-to-br from-secondary via-primary/50 to-secondary rounded-lg shadow-sm">
+                                    <Clock className="h-5 w-5 text-white" />
                                   </div>
                               <div>
                                     <p className="font-bold text-base text-gray-900">
