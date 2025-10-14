@@ -203,7 +203,7 @@
                   </svg>
                   <div>
                     <div class="font-semibold font-kollektif">
-                      Growing Network of Licensed Therapists
+                      Licensed Therapists
                     </div>
                     <div class="text-sm text-white/80">
                       Licensed professionals
