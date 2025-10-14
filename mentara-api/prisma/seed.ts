@@ -19,6 +19,7 @@ import { generateCommunities } from './seed/generators/communities';
 import { generateRelationships } from './seed/generators/relationships';
 import { generateContent } from './seed/generators/content';
 import { generateTherapyData } from './seed/generators/therapy';
+import { HybridSeedOrchestrator } from './seed/dynamic/hybrid-seed-orchestrator';
 
 const prisma = new PrismaClient();
 
@@ -94,9 +95,24 @@ class DatabaseSeeder {
       );
       console.log(`✅ Created ${therapyData.meetings.length} meetings and ${therapyData.worksheets.length} worksheets`);
 
+      // NEW: Dynamic enrichment phase
+      console.log('');
+      console.log('✨ Step 6: Dynamic enrichment (ensuring minimums)...');
+      const hybridOrchestrator = new HybridSeedOrchestrator();
+      const enrichmentReport = await hybridOrchestrator.enrichAllTables(prisma);
+      
+      if (enrichmentReport.totalItemsAdded > 0) {
+        console.log(`\n  📊 Enrichment added ${enrichmentReport.totalItemsAdded} items`);
+      }
+
+      // Verification
+      console.log('');
+      console.log('✅ Step 7: Verifying minimum requirements...');
+      await hybridOrchestrator.verifyMinimumRequirements(prisma);
+
       const duration = Date.now() - this.startTime.getTime();
       console.log('');
-      console.log('🎉 Database seeding completed successfully!');
+      console.log('🎉 Hybrid database seeding completed successfully!');
       console.log(`⏱️  Duration: ${(duration / 1000).toFixed(2)}s`);
       await this.printSummary();
 

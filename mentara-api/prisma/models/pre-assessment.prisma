@@ -3,7 +3,7 @@ model PreAssessment {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   clientId       String    @unique
-  answers        Json      // Flat array of 201 numeric responses
+  answers        Json // Flat array of 201 numeric responses
   scores         Json
   severityLevels Json
   aiEstimate     Json

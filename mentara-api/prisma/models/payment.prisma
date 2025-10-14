@@ -27,51 +27,51 @@ model PaymentMethod {
   id        String            @id @default(uuid())
   userId    String
   type      PaymentMethodType @default(CARD)
-  nickname  String?           // User-friendly name like "My Visa Card"
+  nickname  String? // User-friendly name like "My Visa Card"
   isDefault Boolean           @default(false)
   isActive  Boolean           @default(true)
   lastUsed  DateTime?
-  
+
   // Card-specific fields
-  cardLast4       String?
-  cardBrand       String?
-  cardholderName  String?
-  cardNumber      String?       // Masked for demo purposes
-  expiryMonth     Int?
-  expiryYear      Int?
-  cardType        String?       // Visa, Mastercard, etc.
-  
+  cardLast4      String?
+  cardBrand      String?
+  cardholderName String?
+  cardNumber     String? // Masked for demo purposes
+  expiryMonth    Int?
+  expiryYear     Int?
+  cardType       String? // Visa, Mastercard, etc.
+
   // Bank account fields
   bankName          String?
   accountHolderName String?
-  accountType       String?     // Checking, Savings
-  routingNumber     String?     // Masked
+  accountType       String? // Checking, Savings
+  routingNumber     String? // Masked
   accountLast4      String?
-  
+
   // Digital wallet fields
-  walletProvider    String?     // PayPal, Apple Pay, Google Pay
+  walletProvider    String? // PayPal, Apple Pay, Google Pay
   walletEmail       String?
   walletAccountName String?
-  
+
   // GCash fields
-  gcashNumber   String?         // Mobile number
-  gcashName     String?         // Account holder name
-  isVerified    Boolean?        // Verification status
-  gcashEmail    String?         // Associated email
-  
+  gcashNumber String? // Mobile number
+  gcashName   String? // Account holder name
+  isVerified  Boolean? // Verification status
+  gcashEmail  String? // Associated email
+
   // Maya fields
-  mayaNumber    String?         // Mobile number
-  mayaName      String?         // Account holder name
-  mayaVerified  Boolean?        // Verification status
-  mayaEmail     String?         // Associated email
-  
+  mayaNumber   String? // Mobile number
+  mayaName     String? // Account holder name
+  mayaVerified Boolean? // Verification status
+  mayaEmail    String? // Associated email
+
   // Address (stored as JSON)
   billingAddress Json?
-  
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   payments  Payment[]
-  user      User              @relation("UserPaymentMethods", fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation("UserPaymentMethods", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isDefault])
