@@ -1,6 +1,6 @@
 /**
  * Hybrid Seed Orchestrator
- * 
+ *
  * Combines legacy generators with dynamic enrichment
  * Flow: Legacy seed → Dynamic enrichment → Verification
  */
@@ -47,20 +47,20 @@ export class HybridSeedOrchestrator {
       { name: 'Memberships', enricher: new MembershipsEnricher(prisma) },
       { name: 'Relationships', enricher: new RelationshipsEnricher(prisma) },
       { name: 'Availability', enricher: new AvailabilityEnricher(prisma) },
-      
+
       // Tier 2: Depends on memberships
       { name: 'Assessments', enricher: new AssessmentsEnricher(prisma) },
       { name: 'Posts', enricher: new PostsEnricher(prisma) },
-      
+
       // Tier 3: Depends on posts
       { name: 'Comments', enricher: new CommentsEnricher(prisma) },
       { name: 'Hearts', enricher: new HeartsEnricher(prisma) },
-      
+
       // Tier 4: Depends on relationships
       { name: 'Meetings', enricher: new MeetingsEnricher(prisma) },
       { name: 'Worksheets', enricher: new WorksheetsEnricher(prisma) },
       { name: 'Messages', enricher: new MessagesEnricher(prisma) },
-      
+
       // Tier 5: Depends on meetings
       { name: 'Reviews', enricher: new ReviewsEnricher(prisma) },
       { name: 'Notifications', enricher: new NotificationsEnricher(prisma) },
@@ -124,7 +124,9 @@ export class HybridSeedOrchestrator {
     return allSatisfied;
   }
 
-  private async verifyClientRequirements(prisma: PrismaClient): Promise<boolean> {
+  private async verifyClientRequirements(
+    prisma: PrismaClient,
+  ): Promise<boolean> {
     const clients = await prisma.client.findMany({
       include: {
         _count: {
@@ -144,11 +146,15 @@ export class HybridSeedOrchestrator {
       if (client._count.communityMembers < 1) violations++;
     }
 
-    console.log(`     Clients: ${violations === 0 ? '✅' : '⚠️'} (${violations} violations)`);
+    console.log(
+      `     Clients: ${violations === 0 ? '✅' : '⚠️'} (${violations} violations)`,
+    );
     return violations === 0;
   }
 
-  private async verifyTherapistRequirements(prisma: PrismaClient): Promise<boolean> {
+  private async verifyTherapistRequirements(
+    prisma: PrismaClient,
+  ): Promise<boolean> {
     const therapists = await prisma.therapist.findMany({
       where: { status: 'APPROVED' },
       include: {
@@ -169,11 +175,15 @@ export class HybridSeedOrchestrator {
       if (therapist._count.meetings < 4) violations++;
     }
 
-    console.log(`     Therapists: ${violations === 0 ? '✅' : '⚠️'} (${violations} violations)`);
+    console.log(
+      `     Therapists: ${violations === 0 ? '✅' : '⚠️'} (${violations} violations)`,
+    );
     return violations === 0;
   }
 
-  private async verifyCommunityRequirements(prisma: PrismaClient): Promise<boolean> {
+  private async verifyCommunityRequirements(
+    prisma: PrismaClient,
+  ): Promise<boolean> {
     const communities = await prisma.community.findMany({
       include: {
         _count: {
@@ -191,8 +201,9 @@ export class HybridSeedOrchestrator {
       if (community._count.posts < 10) violations++;
     }
 
-    console.log(`     Communities: ${violations === 0 ? '✅' : '⚠️'} (${violations} violations)`);
+    console.log(
+      `     Communities: ${violations === 0 ? '✅' : '⚠️'} (${violations} violations)`,
+    );
     return violations === 0;
   }
 }
-

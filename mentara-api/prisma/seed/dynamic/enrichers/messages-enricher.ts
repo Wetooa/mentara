@@ -28,7 +28,12 @@ export class MessagesEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
   async ensureUserHasConversations(
@@ -36,9 +41,10 @@ export class MessagesEnricher extends BaseEnricher {
     minConversations: number,
     minMessagesPerConversation: number,
   ): Promise<number> {
-    const existingConversations = await this.prisma.conversationParticipant.count({
-      where: { userId },
-    });
+    const existingConversations =
+      await this.prisma.conversationParticipant.count({
+        where: { userId },
+      });
 
     const missing = minConversations - existingConversations;
     if (missing <= 0) return 0;
@@ -110,9 +116,8 @@ export class MessagesEnricher extends BaseEnricher {
       'Have you had a chance to review the worksheet?',
       "Yes, I've been working on it. It's been really helpful!",
       'How have you been feeling this week?',
-      "Things have been getting better, thank you for asking.",
+      'Things have been getting better, thank you for asking.',
       'Let me know if you need anything else!',
     ];
   }
 }
-

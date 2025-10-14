@@ -33,7 +33,12 @@ export class AssessmentsEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
   async createPreAssessment(clientId: string): Promise<number> {
@@ -70,4 +75,3 @@ export class AssessmentsEnricher extends BaseEnricher {
     };
   }
 }
-

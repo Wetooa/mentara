@@ -29,10 +29,18 @@ export class NotificationsEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
-  async ensureUserHasNotifications(userId: string, minNotifications: number): Promise<number> {
+  async ensureUserHasNotifications(
+    userId: string,
+    minNotifications: number,
+  ): Promise<number> {
     const existing = await this.prisma.notification.count({
       where: { userId },
     });
@@ -91,4 +99,3 @@ export class NotificationsEnricher extends BaseEnricher {
     ];
   }
 }
-

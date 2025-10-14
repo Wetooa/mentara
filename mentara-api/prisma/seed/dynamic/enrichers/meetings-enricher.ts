@@ -56,7 +56,12 @@ export class MeetingsEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
   async ensureRelationshipHasMeetings(
@@ -79,7 +84,9 @@ export class MeetingsEnricher extends BaseEnricher {
       const duration = random.pickRandom([30, 60, 90]);
       const endTime = new Date(startTime.getTime() + duration * 60000);
 
-      const status = isPast ? 'COMPLETED' : random.pickRandom(['SCHEDULED', 'CONFIRMED', 'WAITING']);
+      const status = isPast
+        ? 'COMPLETED'
+        : random.pickRandom(['SCHEDULED', 'CONFIRMED', 'WAITING']);
 
       const meeting = await this.prisma.meeting.create({
         data: {
@@ -132,4 +139,3 @@ export class MeetingsEnricher extends BaseEnricher {
     return 1;
   }
 }
-

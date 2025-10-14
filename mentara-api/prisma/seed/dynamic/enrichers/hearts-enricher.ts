@@ -35,17 +35,27 @@ export class HeartsEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
-  async ensureUserGivesHearts(userId: string, minHearts: number): Promise<number> {
+  async ensureUserGivesHearts(
+    userId: string,
+    minHearts: number,
+  ): Promise<number> {
     // Get posts/comments user hasn't hearted yet
     const existingHearts = await this.prisma.heart.findMany({
       where: { userId },
       select: { postId: true, commentId: true },
     });
 
-    const heartedPostIds = existingHearts.filter((h) => h.postId).map((h) => h.postId);
+    const heartedPostIds = existingHearts
+      .filter((h) => h.postId)
+      .map((h) => h.postId);
     const heartedCommentIds = existingHearts
       .filter((h) => h.commentId)
       .map((h) => h.commentId);
@@ -87,4 +97,3 @@ export class HeartsEnricher extends BaseEnricher {
     return added;
   }
 }
-

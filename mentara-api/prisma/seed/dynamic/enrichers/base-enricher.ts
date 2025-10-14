@@ -1,6 +1,6 @@
 /**
  * Base Enricher
- * 
+ *
  * Common functionality for all table enrichers
  */
 
@@ -59,4 +59,3 @@ export abstract class BaseEnricher {
     return createSeededRandom(entityId, context);
   }
 }
-

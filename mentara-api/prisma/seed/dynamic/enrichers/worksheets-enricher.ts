@@ -28,7 +28,10 @@ export class WorksheetsEnricher extends BaseEnricher {
       try {
         const missing = Math.max(0, 3 - therapist._count.worksheets);
         if (missing > 0) {
-          added += await this.ensureTherapistHasWorksheets(therapist.userId, missing);
+          added += await this.ensureTherapistHasWorksheets(
+            therapist.userId,
+            missing,
+          );
         }
       } catch (error) {
         errors++;
@@ -67,18 +70,50 @@ export class WorksheetsEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
-  async ensureTherapistHasWorksheets(therapistId: string, minWorksheets: number): Promise<number> {
+  async ensureTherapistHasWorksheets(
+    therapistId: string,
+    minWorksheets: number,
+  ): Promise<number> {
     const templates = [
-      { title: 'Daily Mood Tracker', category: 'Mood Monitoring', duration: 10 },
-      { title: 'Cognitive Behavioral Thought Record', category: 'CBT', duration: 20 },
-      { title: 'Anxiety Exposure Hierarchy', category: 'Anxiety Management', duration: 30 },
-      { title: 'Gratitude Journal', category: 'Positive Psychology', duration: 15 },
-      { title: 'Sleep Hygiene Assessment', category: 'Sleep Health', duration: 25 },
+      {
+        title: 'Daily Mood Tracker',
+        category: 'Mood Monitoring',
+        duration: 10,
+      },
+      {
+        title: 'Cognitive Behavioral Thought Record',
+        category: 'CBT',
+        duration: 20,
+      },
+      {
+        title: 'Anxiety Exposure Hierarchy',
+        category: 'Anxiety Management',
+        duration: 30,
+      },
+      {
+        title: 'Gratitude Journal',
+        category: 'Positive Psychology',
+        duration: 15,
+      },
+      {
+        title: 'Sleep Hygiene Assessment',
+        category: 'Sleep Health',
+        duration: 25,
+      },
       { title: 'Mindfulness Body Scan', category: 'Mindfulness', duration: 25 },
-      { title: 'Values Clarification Exercise', category: 'Life Purpose', duration: 35 },
+      {
+        title: 'Values Clarification Exercise',
+        category: 'Life Purpose',
+        duration: 35,
+      },
     ];
 
     for (let i = 0; i < minWorksheets; i++) {
@@ -113,7 +148,11 @@ export class WorksheetsEnricher extends BaseEnricher {
     if (worksheets.length === 0) {
       // Create worksheets first
       await this.ensureTherapistHasWorksheets(therapistId, minAssignments);
-      return this.ensureClientHasAssignments(clientId, therapistId, minAssignments);
+      return this.ensureClientHasAssignments(
+        clientId,
+        therapistId,
+        minAssignments,
+      );
     }
 
     const random = this.getRandom(clientId, 'worksheet-assignments');
@@ -141,4 +180,3 @@ export class WorksheetsEnricher extends BaseEnricher {
     return Math.min(minAssignments, worksheets.length);
   }
 }
-

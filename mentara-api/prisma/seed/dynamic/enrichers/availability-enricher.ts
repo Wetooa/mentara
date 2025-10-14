@@ -28,10 +28,18 @@ export class AvailabilityEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
-  async ensureTherapistAvailability(therapistId: string, minDays: number): Promise<number> {
+  async ensureTherapistAvailability(
+    therapistId: string,
+    minDays: number,
+  ): Promise<number> {
     const existingDays = await this.prisma.therapistAvailability.groupBy({
       where: { therapistId, isAvailable: true },
       by: ['dayOfWeek'],
@@ -66,4 +74,3 @@ export class AvailabilityEnricher extends BaseEnricher {
     return added;
   }
 }
-

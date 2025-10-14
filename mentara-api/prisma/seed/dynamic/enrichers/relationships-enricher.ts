@@ -28,17 +28,28 @@ export class RelationshipsEnricher extends BaseEnricher {
       try {
         const missing = Math.max(0, 2 - therapist._count.assignedClients);
         if (missing > 0) {
-          added += await this.ensureTherapistHasClients(therapist.userId, missing);
+          added += await this.ensureTherapistHasClients(
+            therapist.userId,
+            missing,
+          );
         }
       } catch (error) {
         errors++;
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
-  async ensureTherapistHasClients(therapistId: string, minClients: number): Promise<number> {
+  async ensureTherapistHasClients(
+    therapistId: string,
+    minClients: number,
+  ): Promise<number> {
     const existing = await this.prisma.clientTherapist.count({
       where: { therapistId },
     });
@@ -101,4 +112,3 @@ export class RelationshipsEnricher extends BaseEnricher {
     return 1;
   }
 }
-

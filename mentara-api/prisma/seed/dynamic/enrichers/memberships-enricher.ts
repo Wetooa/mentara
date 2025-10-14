@@ -46,17 +46,28 @@ export class MembershipsEnricher extends BaseEnricher {
       try {
         const missing = Math.max(0, 1 - therapist._count.communityMembers);
         if (missing > 0) {
-          added += await this.ensureUserInCommunities(therapist.userId, missing);
+          added += await this.ensureUserInCommunities(
+            therapist.userId,
+            missing,
+          );
         }
       } catch (error) {
         errors++;
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
-  async ensureUserInCommunities(userId: string, minCount: number): Promise<number> {
+  async ensureUserInCommunities(
+    userId: string,
+    minCount: number,
+  ): Promise<number> {
     const existing = await this.prisma.communityMember.findMany({
       where: { userId },
       select: { communityId: true },
@@ -87,7 +98,10 @@ export class MembershipsEnricher extends BaseEnricher {
     return availableCommunities.length;
   }
 
-  async ensureCommunityHasMembers(communityId: string, minMembers: number): Promise<number> {
+  async ensureCommunityHasMembers(
+    communityId: string,
+    minMembers: number,
+  ): Promise<number> {
     const existing = await this.prisma.communityMember.count({
       where: { communityId },
     });
@@ -119,4 +133,3 @@ export class MembershipsEnricher extends BaseEnricher {
     return users.length;
   }
 }
-

@@ -70,10 +70,18 @@ export class CommentsEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
-  async ensureUserHasComments(userId: string, minComments: number): Promise<number> {
+  async ensureUserHasComments(
+    userId: string,
+    minComments: number,
+  ): Promise<number> {
     // Get user's community memberships
     const memberships = await this.prisma.communityMember.findMany({
       where: { userId },
@@ -118,7 +126,10 @@ export class CommentsEnricher extends BaseEnricher {
     return toCreate;
   }
 
-  async ensurePostHasComments(postId: string, minComments: number): Promise<number> {
+  async ensurePostHasComments(
+    postId: string,
+    minComments: number,
+  ): Promise<number> {
     const existing = await this.prisma.comment.count({
       where: { postId },
     });
@@ -175,4 +186,3 @@ export class CommentsEnricher extends BaseEnricher {
     ];
   }
 }
-

@@ -54,7 +54,12 @@ export class PostsEnricher extends BaseEnricher {
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
   async ensureUserHasPosts(userId: string, minPosts: number): Promise<number> {
@@ -71,7 +76,8 @@ export class PostsEnricher extends BaseEnricher {
     const topics = this.getPostTopics();
 
     for (let i = 0; i < minPosts; i++) {
-      const communityId = memberships[random.nextInt(memberships.length)].communityId;
+      const communityId =
+        memberships[random.nextInt(memberships.length)].communityId;
       const topic = topics[i % topics.length];
 
       await this.prisma.post.create({
@@ -87,7 +93,10 @@ export class PostsEnricher extends BaseEnricher {
     return minPosts;
   }
 
-  async ensureCommunityHasPosts(communityId: string, minPosts: number): Promise<number> {
+  async ensureCommunityHasPosts(
+    communityId: string,
+    minPosts: number,
+  ): Promise<number> {
     const existing = await this.prisma.post.count({
       where: { communityId },
     });
@@ -136,4 +145,3 @@ export class PostsEnricher extends BaseEnricher {
     ];
   }
 }
-

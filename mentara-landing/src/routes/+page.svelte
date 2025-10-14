@@ -146,8 +146,8 @@
                   class="font-kollektif leading-relaxed"
                   style="color: var(--secondary);"
                 >
-                  Make better business decisions with insights from qualitative
-                  and quantitative mental health data analytics.
+                  Enabling AI-matching and standardized pre-assessment for
+                  personalized mental health support.
                 </p>
               </div>
             {/snippet}

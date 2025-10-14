@@ -28,17 +28,28 @@ export class ReviewsEnricher extends BaseEnricher {
       try {
         const missing = Math.max(0, 1 - therapist._count.reviews);
         if (missing > 0) {
-          added += await this.ensureTherapistHasReviews(therapist.userId, missing);
+          added += await this.ensureTherapistHasReviews(
+            therapist.userId,
+            missing,
+          );
         }
       } catch (error) {
         errors++;
       }
     }
 
-    return { table: this.tableName, itemsAdded: added, itemsUpdated: 0, errors };
+    return {
+      table: this.tableName,
+      itemsAdded: added,
+      itemsUpdated: 0,
+      errors,
+    };
   }
 
-  async ensureTherapistHasReviews(therapistId: string, minReviews: number): Promise<number> {
+  async ensureTherapistHasReviews(
+    therapistId: string,
+    minReviews: number,
+  ): Promise<number> {
     // Get completed meetings for this therapist
     const completedMeetings = await this.prisma.meeting.findMany({
       where: {
@@ -82,4 +93,3 @@ export class ReviewsEnricher extends BaseEnricher {
     ];
   }
 }
-

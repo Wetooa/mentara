@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
 /**
  * Mentara Database Seeding System
- * 
+ *
  * A simplified, reliable database seeding system that creates realistic test data
  * for development, testing, and demo environments.
- * 
+ *
  * Usage:
  *   npm run db:seed           # Default (medium) seeding
  *   npm run db:seed:light     # Minimal data for development
@@ -65,44 +65,57 @@ class DatabaseSeeder {
       console.log(`✅ Created ${usersData.users.length} users`);
 
       console.log('🏘️  Step 2: Creating communities...');
-      const communitiesData = await generateCommunities(prisma, config.communities);
-      console.log(`✅ Created ${communitiesData.communities.length} communities`);
+      const communitiesData = await generateCommunities(
+        prisma,
+        config.communities,
+      );
+      console.log(
+        `✅ Created ${communitiesData.communities.length} communities`,
+      );
 
       console.log('🤝 Step 3: Creating relationships and memberships...');
       const relationshipsData = await generateRelationships(
-        prisma, 
-        config.relationships, 
-        usersData, 
-        communitiesData
+        prisma,
+        config.relationships,
+        usersData,
+        communitiesData,
       );
-      console.log(`✅ Created ${relationshipsData.clientTherapistRelationships.length} client-therapist relationships`);
+      console.log(
+        `✅ Created ${relationshipsData.clientTherapistRelationships.length} client-therapist relationships`,
+      );
 
       console.log('💬 Step 4: Creating content and engagement...');
       const contentData = await generateContent(
-        prisma, 
-        config.content, 
-        usersData, 
-        communitiesData
+        prisma,
+        config.content,
+        usersData,
+        communitiesData,
       );
-      console.log(`✅ Created ${contentData.posts.length} posts and ${contentData.comments.length} comments`);
+      console.log(
+        `✅ Created ${contentData.posts.length} posts and ${contentData.comments.length} comments`,
+      );
 
       console.log('🩺 Step 5: Creating therapy data...');
       const therapyData = await generateTherapyData(
-        prisma, 
-        config.therapy, 
+        prisma,
+        config.therapy,
         relationshipsData,
-        usersData
+        usersData,
       );
-      console.log(`✅ Created ${therapyData.meetings.length} meetings and ${therapyData.worksheets.length} worksheets`);
+      console.log(
+        `✅ Created ${therapyData.meetings.length} meetings and ${therapyData.worksheets.length} worksheets`,
+      );
 
       // NEW: Dynamic enrichment phase
       console.log('');
       console.log('✨ Step 6: Dynamic enrichment (ensuring minimums)...');
       const hybridOrchestrator = new HybridSeedOrchestrator();
       const enrichmentReport = await hybridOrchestrator.enrichAllTables(prisma);
-      
+
       if (enrichmentReport.totalItemsAdded > 0) {
-        console.log(`\n  📊 Enrichment added ${enrichmentReport.totalItemsAdded} items`);
+        console.log(
+          `\n  📊 Enrichment added ${enrichmentReport.totalItemsAdded} items`,
+        );
       }
 
       // Verification
@@ -115,7 +128,6 @@ class DatabaseSeeder {
       console.log('🎉 Hybrid database seeding completed successfully!');
       console.log(`⏱️  Duration: ${(duration / 1000).toFixed(2)}s`);
       await this.printSummary();
-
     } catch (error) {
       console.error('❌ Seeding failed:', error);
       throw error;
@@ -132,7 +144,7 @@ class DatabaseSeeder {
     console.log('');
     console.log('📊 Database Summary:');
     console.log('===================');
-    
+
     const counts = await Promise.all([
       prisma.user.count(),
       prisma.community.count(),
@@ -144,7 +156,16 @@ class DatabaseSeeder {
       prisma.preAssessment.count(),
     ]);
 
-    const [users, communities, relationships, posts, comments, meetings, worksheets, assessments] = counts;
+    const [
+      users,
+      communities,
+      relationships,
+      posts,
+      comments,
+      meetings,
+      worksheets,
+      assessments,
+    ] = counts;
 
     console.log(`👥 Users: ${users}`);
     console.log(`🏘️  Communities: ${communities}`);
@@ -160,9 +181,11 @@ class DatabaseSeeder {
 // CLI Interface
 async function main() {
   const args = process.argv.slice(2);
-  
+
   // Parse arguments
-  const modeArg = args.find(arg => arg.startsWith('--mode='))?.split('=')[1] as SeedMode;
+  const modeArg = args
+    .find((arg) => arg.startsWith('--mode='))
+    ?.split('=')[1] as SeedMode;
   const mode: SeedMode = modeArg || 'medium';
   const force = args.includes('--force');
   const verbose = args.includes('--verbose');
@@ -174,7 +197,7 @@ async function main() {
   }
 
   const seeder = new DatabaseSeeder({ mode, force, verbose });
-  
+
   try {
     await seeder.seed();
   } catch (error) {
