@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
-import { AdminTherapistService } from './services/admin-therapist.service';
-import { AdminAnalyticsService } from './services/admin-analytics.service';
-import { AdminReportsService } from './services/admin-reports.service';
-import { AdminAccountController } from './controllers/admin-account.controller';
-import { AdminTherapistController } from './controllers/admin-therapist.controller';
-import { AdminUserController } from './controllers/admin-user.controller';
-import { AdminModerationController } from './controllers/admin-moderation.controller';
-import { AdminAnalyticsController } from './controllers/admin-analytics.controller';
-import { AdminReportsController } from './controllers/admin-reports.controller';
+import { AdminTherapistService } from './therapist/admin-therapist.service';
+import { AdminAnalyticsService } from './analytics/admin-analytics.service';
+import { AdminReportsService } from './reports/admin-reports.service';
+import { AdminHealthController } from './admin-health.controller';
+import { AdminAccountController } from './account/admin-account.controller';
+import { AdminTherapistController } from './therapist/admin-therapist.controller';
+import { AdminUserController } from './users/admin-user.controller';
+import { AdminModerationController } from './moderation/admin-moderation.controller';
+import { AdminAnalyticsController } from './analytics/admin-analytics.controller';
+import { AdminReportsController } from './reports/admin-reports.controller';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RoleUtils } from '../utils/role-utils';
@@ -19,7 +19,7 @@ import { EmailService } from 'src/email/email.service';
 @Module({
   imports: [MessagingModule],
   controllers: [
-    AdminController,
+    AdminHealthController,
     AdminAccountController,
     AdminTherapistController,
     AdminUserController,

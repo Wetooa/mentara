@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { RoleBasedAccessGuard } from '../auth/guards/role-based-access.guard';
+import { RoleBasedAccessGuard } from '../auth/core/guards/role-based-access.guard';
 
 describe('Role-Based Access Control Validation', () => {
   let guard: RoleBasedAccessGuard;

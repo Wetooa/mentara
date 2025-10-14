@@ -1,22 +1,13 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import {
-  type CreateAdminDto,
-  type UpdateAdminDto,
-  type AdminResponseDto,
-} from './types/admin.dto';
+import { type UpdateAdminDto, type AdminResponseDto } from './types/admin.dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AdminService {
   private readonly logger = new Logger(AdminService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<AdminResponseDto[]> {
     try {
@@ -107,153 +98,8 @@ export class AdminService {
     }
   }
 
-  // ===== THERAPIST APPLICATION MANAGEMENT =====
-
-  async getAllTherapistApplications(params: {
-    status?: string;
-    page: number;
-    limit: number;
-  }) {
-    try {
-      const { status, page, limit } = params;
-      const skip = (page - 1) * limit;
-
-      const where: any = {};
-      if (status) {
-        where.status = status;
-      }
-
-      const [applications, totalCount] = await Promise.all([
-        this.prisma.therapist.findMany({
-          where,
-          skip,
-          take: limit,
-          orderBy: { submissionDate: 'desc' },
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                createdAt: true,
-              },
-            },
-            processedByAdmin: {
-              include: {
-                user: {
-                  select: {
-                    firstName: true,
-                    lastName: true,
-                  },
-                },
-              },
-            },
-          },
-        }),
-        this.prisma.therapist.count({ where }),
-      ]);
-
-      return {
-        applications,
-        totalCount,
-        page,
-        totalPages: Math.ceil(totalCount / limit),
-      };
-    } catch (error) {
-      this.logger.error('Failed to retrieve therapist applications:', error);
-      throw error;
-    }
-  }
-
-  async getTherapistApplication(applicationId: string) {
-    try {
-      return await this.prisma.therapist.findUnique({
-        where: { userId: applicationId },
-        include: {
-          user: true,
-          processedByAdmin: {
-            include: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                },
-              },
-            },
-          },
-        },
-      });
-    } catch (error) {
-      this.logger.error('Failed to retrieve therapist application:', error);
-      throw error;
-    }
-  }
-
-  async approveTherapistApplication(
-    applicationId: string,
-    adminId: string,
-    notes?: string,
-  ) {
-    try {
-      return await this.prisma.$transaction(async (tx) => {
-        // Update therapist status
-        const therapist = await tx.therapist.update({
-          where: { userId: applicationId },
-          data: {
-            status: 'APPROVED',
-            processedByAdminId: adminId,
-            processingDate: new Date(),
-          },
-        });
-
-        // Update user role
-        await tx.user.update({
-          where: { id: applicationId },
-          data: { role: 'therapist' },
-        });
-
-        // Create audit log
-        // Audit log removed - not needed for student project
-
-        return { success: true, therapist };
-      });
-    } catch (error) {
-      this.logger.error('Failed to approve therapist application:', error);
-      throw error;
-    }
-  }
-
-  async rejectTherapistApplication(
-    applicationId: string,
-    adminId: string,
-    reason: string,
-    notes?: string,
-  ) {
-    try {
-      return await this.prisma.$transaction(async (tx) => {
-        // Update therapist status
-        const therapist = await tx.therapist.update({
-          where: { userId: applicationId },
-          data: {
-            status: 'REJECTED',
-            processedByAdminId: adminId,
-            processingDate: new Date(),
-          },
-        });
-
-        // Create audit log
-        // Audit log removed - not needed for student project
-
-        return { success: true, therapist, reason };
-      });
-    } catch (error) {
-      this.logger.error('Failed to reject therapist application:', error);
-      throw error;
-    }
-  }
-
   // ===== USER MANAGEMENT =====
+  // Note: Therapist application management moved to AdminTherapistService
 
   async getAllUsers(params: {
     role?: string;
@@ -360,10 +206,6 @@ export class AdminService {
   ) {
     try {
       return await this.prisma.$transaction(async (tx) => {
-        const suspensionEnd = duration
-          ? new Date(Date.now() + duration * 24 * 60 * 60 * 1000)
-          : null;
-
         const user = await tx.user.update({
           where: { id: userId },
           data: {
@@ -373,9 +215,6 @@ export class AdminService {
             isActive: false,
           },
         });
-
-        // Create audit log
-        // Audit log removed - not needed for student project
 
         return { success: true, user };
       });
@@ -397,9 +236,6 @@ export class AdminService {
             isActive: true,
           },
         });
-
-        // Create audit log
-        // Audit log removed - not needed for student project
 
         return { success: true, user };
       });
@@ -461,120 +297,12 @@ export class AdminService {
     }
   }
 
-  async getMatchingPerformance(startDate?: string, endDate?: string) {
-    try {
-      // Matching analytics removed - not needed for student project
-      // Return basic stats instead
-      const totalTherapists = await this.prisma.therapist.count({
-        where: { status: 'APPROVED' },
-      });
-      const totalClients = await this.prisma.client.count();
-
-      return {
-        period: {
-          start: startDate
-            ? new Date(startDate)
-            : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-          end: endDate ? new Date(endDate) : new Date(),
-        },
-        metrics: {
-          totalTherapists,
-          totalClients,
-          // Simplified metrics without complex tracking
-          totalRecommendations: 0,
-          successfulMatches: 0,
-          viewedRecommendations: 0,
-          contactedTherapists: 0,
-          averageMatchScore: 0,
-          conversionRate: 0,
-          clickThroughRate: 0,
-        },
-      };
-    } catch (error) {
-      this.logger.error('Failed to retrieve matching performance:', error);
-      throw error;
-    }
-  }
+  // Note: getMatchingPerformance removed - was returning fake/zero data
+  // Use AdminAnalyticsService for actual analytics instead
 
   // ===== CONTENT MODERATION =====
-  async getFlaggedContent(params: {
-    type?: string;
-    page: number;
-    limit: number;
-  }) {
-    try {
-      const { type, page, limit } = params;
-      const skip = (page - 1) * limit;
-
-      // For now, we'll consider posts and comments that might need moderation
-      // In a real system, you'd have a flagging mechanism
-      const flaggedPosts = await this.prisma.post.findMany({
-        where: {
-          // Add conditions for flagged content
-          // For now, let's get recent posts that might need review
-        },
-        skip,
-        take: type === 'comment' ? 0 : limit,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-          room: {
-            select: {
-              name: true,
-              roomGroup: {
-                select: {
-                  community: {
-                    select: {
-                      name: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const flaggedComments = await this.prisma.comment.findMany({
-        where: {
-          // Add conditions for flagged content
-        },
-        skip: type === 'post' ? 0 : skip,
-        take: type === 'post' ? 0 : limit,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-          post: {
-            select: {
-              title: true,
-            },
-          },
-        },
-      });
-
-      return {
-        posts: flaggedPosts,
-        comments: flaggedComments,
-        page,
-        totalItems: flaggedPosts.length + flaggedComments.length,
-      };
-    } catch (error) {
-      this.logger.error('Failed to retrieve flagged content:', error);
-      throw error;
-    }
-  }
+  // Note: getFlaggedContent removed - incomplete implementation with empty WHERE clauses
+  // Use AdminReportsService for actual content moderation instead
 
   async moderateContent(
     contentType: string,
@@ -609,9 +337,6 @@ export class AdminService {
             });
           }
         }
-
-        // Create audit log
-        // Audit log removed - not needed for student project
 
         return { success: true, action, moderatedContent };
       });

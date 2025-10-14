@@ -8,8 +8,8 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../auth/core/decorators/current-user-id.decorator';
 import { TherapistManagementService } from '../therapist-management.service';
 // Using any type to avoid conflicts with service definitions
 

@@ -18,10 +18,10 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RoleGuard } from '../../auth/guards/role.guard';
-import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { RoleGuard } from '../../auth/core/guards/role.guard';
+import { CurrentUserId } from '../../auth/core/decorators/current-user-id.decorator';
+import { Roles } from '../../auth/core/decorators/roles.decorator';
 import { WorksheetsService } from '../../worksheets/worksheets.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../providers/prisma-client.provider';

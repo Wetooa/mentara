@@ -1,15 +1,15 @@
 import { Controller, Get, UseGuards, Query } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RoleBasedAccessGuard } from '../auth/guards/role-based-access.guard';
-import { TherapistDashboardAccessGuard } from '../auth/guards/therapist-dashboard-access.guard';
-import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { RoleBasedAccessGuard } from '../auth/core/guards/role-based-access.guard';
+import { TherapistDashboardAccessGuard } from '../auth/core/guards/therapist-dashboard-access.guard';
+import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 import {
   ClientOnly,
   TherapistOnly,
   AdminOnly,
   ModeratorOnly,
-} from '../auth/decorators/roles.decorator';
+} from '../auth/core/decorators/roles.decorator';
 
 @Controller('dashboard')
 @UseGuards(JwtAuthGuard, RoleBasedAccessGuard)

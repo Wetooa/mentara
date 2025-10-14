@@ -12,8 +12,8 @@ import {
   HttpException,
   Logger,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { UserIdParamSchema, UserReportDtoSchema } from './validation';
 import type { UserIdParam, UserReportDto } from './types';

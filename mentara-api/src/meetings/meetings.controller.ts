@@ -13,8 +13,8 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { MeetingsService } from './meetings.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 // TODO: Add validation schemas when needed
 import type {
   CreateVideoRoomDto,

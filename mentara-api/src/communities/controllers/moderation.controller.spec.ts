@@ -6,8 +6,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { ModerationController } from './moderation.controller';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RoleBasedAccessGuard } from '../../auth/guards/role-based-access.guard';
+import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { RoleBasedAccessGuard } from '../../auth/core/guards/role-based-access.guard';
 import { SecurityGuardTestUtils, RoleBasedTestUtils } from '../../test-utils/auth-testing-helpers';
 import { MockBuilder, TestDataGenerator, TestAssertions } from '../../test-utils/enhanced-test-helpers';
 import { TEST_USER_IDS, TEST_EMAILS } from '../../test-utils/index';

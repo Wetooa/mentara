@@ -2,28 +2,29 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { PrismaService } from 'src/providers/prisma-client.provider';
+import { AuthHealthController } from './auth-health.controller';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { EventBusService } from '../common/events/event-bus.service';
-import { TokenService } from './services/token.service';
-import { EmailVerificationService } from './services/email-verification.service';
-import { PasswordResetService } from './services/password-reset.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { GoogleStrategy } from './strategies/google.strategy';
-import { MicrosoftStrategy } from './strategies/microsoft.strategy';
+import { TokenService } from './shared/token.service';
+import { EmailVerificationService } from './shared/email-verification.service';
+import { PasswordResetService } from './shared/password-reset.service';
+import { JwtStrategy } from './core/strategies/jwt.strategy';
+import { GoogleStrategy } from './core/strategies/google.strategy';
+import { MicrosoftStrategy } from './core/strategies/microsoft.strategy';
 import { EmailModule } from '../email/email.module';
 
 // Role-specific controllers
-import { ClientAuthController } from './controllers/client-auth.controller';
-import { TherapistAuthController } from './controllers/therapist-auth.controller';
-import { AdminAuthController } from './controllers/admin-auth.controller';
-import { ModeratorAuthController } from './controllers/moderator-auth.controller';
+import { ClientAuthController } from './client/client-auth.controller';
+import { TherapistAuthController } from './therapist/therapist-auth.controller';
+import { AdminAuthController } from './admin/admin-auth.controller';
+import { ModeratorAuthController } from './moderator/moderator-auth.controller';
 
 // Role-specific services
-import { ClientAuthService } from './services/client-auth.service';
-import { TherapistAuthService } from './services/therapist-auth.service';
-import { AdminAuthService } from './services/admin-auth.service';
-import { ModeratorAuthService } from './services/moderator-auth.service';
+import { ClientAuthService } from './client/client-auth.service';
+import { TherapistAuthService } from './therapist/therapist-auth.service';
+import { AdminAuthService } from './admin/admin-auth.service';
+import { ModeratorAuthService } from './moderator/moderator-auth.service';
 
 import { TherapistModule } from '../therapist/therapist.module';
 
@@ -40,6 +41,7 @@ import { TherapistModule } from '../therapist/therapist.module';
     TherapistModule,
   ],
   controllers: [
+    AuthHealthController,
     AuthController,
     ClientAuthController,
     TherapistAuthController,

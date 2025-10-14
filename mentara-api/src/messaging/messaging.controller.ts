@@ -16,8 +16,8 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { MessagingService } from './messaging.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 import {
   SupabaseStorageService,
   FileUploadResult,
@@ -49,8 +49,8 @@ export class MessagingController {
       message: 'Messaging service is healthy',
       timestamp: new Date().toISOString(),
       userId,
-      environment: process.env.NODE_ENV || 'unknown',
-      frontendUrl: process.env.FRONTEND_URL || 'not_configured',
+      environment: process.env.NODE_ENV ?? 'unknown',
+      frontendUrl: process.env.FRONTEND_URL ?? 'not_configured',
     };
   }
 
@@ -81,8 +81,8 @@ export class MessagingController {
     try {
       const result = await this.messagingService.getUserConversations(
         userId,
-        params.page || 1,
-        params.limit || 20,
+        params.page ?? 1,
+        params.limit ?? 20,
       );
 
       console.log(
@@ -96,8 +96,8 @@ export class MessagingController {
           id: conv.id,
           type: conv.type,
           title: conv.title,
-          participantCount: conv.participants?.length || 0,
-          messageCount: conv.messages?.length || 0,
+          participantCount: conv.participants?.length ?? 0,
+          hasLastMessage: !!conv.lastMessage,
         })),
       );
 
@@ -116,29 +116,41 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Query('limit') limit?: string,
   ) {
-    console.log('📞 [MESSAGING CONTROLLER] getRecentCommunications endpoint called');
+    console.log(
+      '📞 [MESSAGING CONTROLLER] getRecentCommunications endpoint called',
+    );
     console.log('👤 [USER ID]', userId);
     console.log('📊 [LIMIT]', limit);
-    
+
     try {
       const limitNum = limit ? Number(limit) : 5;
       const result = await this.messagingService.getRecentCommunications(
         userId,
         limitNum,
       );
-      
-      console.log('✅ [CONTROLLER RESPONSE] Returning', result.length, 'recent communications');
-      console.log('📱 [RESPONSE SUMMARY]:', result.map(comm => ({
-        id: comm?.id,
-        name: comm?.name,
-        role: comm?.role,
-        hasLastMessage: !!comm?.lastMessage,
-        unreadCount: comm?.unreadCount
-      })));
-      
+
+      console.log(
+        '✅ [CONTROLLER RESPONSE] Returning',
+        result.length,
+        'recent communications',
+      );
+      console.log(
+        '📱 [RESPONSE SUMMARY]:',
+        result.map((comm) => ({
+          id: comm?.id,
+          name: comm?.name,
+          role: comm?.role,
+          hasLastMessage: !!comm?.lastMessage,
+          unreadCount: comm?.unreadCount,
+        })),
+      );
+
       return result;
     } catch (error) {
-      console.error('❌ [CONTROLLER ERROR] getRecentCommunications failed:', error);
+      console.error(
+        '❌ [CONTROLLER ERROR] getRecentCommunications failed:',
+        error,
+      );
       throw error;
     }
   }
@@ -148,16 +160,18 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Param('conversationId') conversationId: string,
   ) {
-    console.log('🔍 [MESSAGING CONTROLLER] getConversationById endpoint called');
+    console.log(
+      '🔍 [MESSAGING CONTROLLER] getConversationById endpoint called',
+    );
     console.log('👤 [USER ID]', userId);
     console.log('💬 [CONVERSATION ID]', conversationId);
-    
+
     try {
       const result = await this.messagingService.getConversationById(
         userId,
         conversationId,
       );
-      
+
       console.log('✅ [CONTROLLER RESPONSE] Returning conversation details');
       console.log('📝 [RESPONSE SUMMARY]:', {
         id: result.id,
@@ -165,7 +179,7 @@ export class MessagingController {
         title: result.title,
         participantCount: result.participants?.length || 0,
       });
-      
+
       return result;
     } catch (error) {
       console.error('❌ [CONTROLLER ERROR] getConversationById failed:', error);
@@ -179,8 +193,8 @@ export class MessagingController {
     @Param('conversationId') conversationId: string,
     @Query() params: ConversationListParams,
   ) {
-    const pageNum = params.page || 1;
-    const limitNum = params.limit || 50;
+    const pageNum = params.page ?? 1;
+    const limitNum = params.limit ?? 50;
     return this.messagingService.getConversationMessages(
       userId,
       conversationId,
@@ -203,7 +217,9 @@ export class MessagingController {
     console.log('👤 [SENDER]', userId);
     console.log('💬 [CONVERSATION]', conversationId);
     console.log('📝 [MESSAGE DATA]', {
-      content: sendMessageDto.content?.substring(0, 50) + (sendMessageDto.content?.length > 50 ? '...' : ''),
+      content:
+        sendMessageDto.content?.substring(0, 50) +
+        (sendMessageDto.content?.length > 50 ? '...' : ''),
       type: sendMessageDto.type,
       hasReplyTo: !!sendMessageDto.replyToMessageId,
       hasAttachments: files?.length > 0,
@@ -240,17 +256,21 @@ export class MessagingController {
         fileResults.map((f) => f.filename),
         files.map((f) => f.size),
       );
-      
+
       console.log('✅ [MESSAGE CONTROLLER] Message sent successfully');
       console.log('📨 [MESSAGE RESULT]', {
         messageId: result.id,
         conversationId: result.conversationId,
         senderId: result.senderId,
-        content: result.content?.substring(0, 50) + (result.content?.length > 50 ? '...' : ''),
+        content:
+          result.content?.substring(0, 50) +
+          (result.content?.length > 50 ? '...' : ''),
         timestamp: result.createdAt,
       });
-      console.log('🚀 [MESSAGE CONTROLLER] Message should now be broadcasting to participants...');
-      
+      console.log(
+        '🚀 [MESSAGE CONTROLLER] Message should now be broadcasting to participants...',
+      );
+
       return result;
     } catch (error) {
       console.error('❌ [MESSAGE CONTROLLER] Send message failed:', error);
@@ -353,7 +373,7 @@ export class MessagingController {
     const limitNum = limit ? Number(limit) : 20;
     return this.messagingService.searchMessages(
       userId,
-      query || '',
+      query ?? '',
       conversationId,
       pageNum,
       limitNum,

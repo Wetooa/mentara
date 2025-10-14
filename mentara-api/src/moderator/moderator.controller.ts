@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ModeratorService } from './moderator.service';
 import { Moderator, Prisma } from '@prisma/client';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/core/guards/jwt-auth.guard';
 
 @Controller('moderator')
 @UseGuards(JwtAuthGuard)

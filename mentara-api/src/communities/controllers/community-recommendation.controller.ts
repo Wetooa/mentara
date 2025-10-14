@@ -23,9 +23,9 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RoleBasedAccessGuard } from '../../auth/guards/role-based-access.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { RoleBasedAccessGuard } from '../../auth/core/guards/role-based-access.guard';
+import { Roles } from '../../auth/core/decorators/roles.decorator';
 import { GetUser } from '../../decorators/get-user.decorator';
 import { CommunityRecommendationService } from '../services/community-recommendation.service';
 import {
@@ -42,7 +42,7 @@ import type {
   RecommendationInteractionDto,
   RecommendationQueryDto,
 } from '../types';
-import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { CurrentUserId } from 'src/auth/core/decorators/current-user-id.decorator';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 
 @Controller('communities-recommendations')

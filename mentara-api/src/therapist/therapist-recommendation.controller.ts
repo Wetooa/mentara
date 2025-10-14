@@ -12,8 +12,8 @@ import {
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { CommunitiesService } from '../communities/communities.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
   ApiTags,

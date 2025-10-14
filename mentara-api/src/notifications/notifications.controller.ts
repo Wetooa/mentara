@@ -10,8 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from 'src/auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/core/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import { NotificationQuerySchema } from './validation/notification.schemas';
 import type { NotificationQuery } from './types';

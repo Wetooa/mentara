@@ -27,129 +27,104 @@
 
     <div class="space-y-24">
       <FeatureShowcase
-        badge="Client Portal"
-        title="Personalized Dashboard"
-        description="A comprehensive view of your mental health journey. Track appointments, view upcoming sessions, access resources, and monitor your progress all in one place."
+        badge="Smart Matching"
+        title="AI-Powered Matching"
+        description="Our intelligent system pairs clients with therapists who best fit their needs and personality. Using advanced algorithms, we analyze preferences, specializations, and therapeutic approaches to ensure the perfect match."
         features={[
-          "Quick access to upcoming therapy sessions",
-          "Mental health resources and worksheets",
-          "Community engagement overview",
+          "Personalized therapist recommendations",
+          "Compatibility scoring based on needs",
+          "Continuous learning for better matches",
         ]}
-        imageSrc="/app-screenshots/client-dashboard.png"
-        imageAlt="Client Dashboard"
+        imageSrcs={[
+          "/app-screenshots/matching-therapists.png",
+          "/app-screenshots/matching-communities.png",
+        ]}
+        imageAlts={[
+          "AI-Powered Therapist Matching",
+          "AI-Powered Community Matching",
+        ]}
         imagePosition="right"
       />
 
       <FeatureShowcase
-        badge="Therapist Discovery"
-        title="Find Your Perfect Match"
-        description="Browse through 100+ licensed therapists with detailed profiles, specializations, ratings, and availability. Filter by expertise, language, and approach to find the right fit for you."
+        badge="Scheduling"
+        title="Availability-Based Booking"
+        description="Simplifies scheduling for both clients and professionals. Therapists can easily set their availability, and clients can book sessions that fit their schedule seamlessly."
         features={[
-          "Detailed therapist profiles with credentials",
-          "Filter by specialization and availability",
-          "Read reviews and ratings from other clients",
+          "Real-time availability management",
+          "Flexible scheduling options",
+          "Automated booking confirmations",
         ]}
-        imageSrc="/app-screenshots/client-therapists.png"
-        imageAlt="Find Therapists"
+        imageSrc="/app-screenshots/therapist-availability.png"
+        imageAlt="Availability-Based Booking"
         imagePosition="left"
       />
 
       <FeatureShowcase
-        badge="Session Management"
-        title="Easy Appointment Booking"
-        description="Schedule, manage, and track all your therapy sessions in one place. View upcoming appointments, session history, and receive automated reminders."
+        badge="Community"
+        title="Moderated Community Support Space"
+        description="Provides a safe zone for shared healing and peer encouragement. Connect with others on similar journeys in a professionally moderated environment that prioritizes respect and support."
         features={[
-          "Real-time availability calendar",
-          "Automated email and SMS reminders",
-          "Integrated payment processing",
+          "Safe and moderated discussions",
+          "Peer support and encouragement",
+          "Community-driven healing",
         ]}
-        imageSrc="/app-screenshots/client-sessions.png"
-        imageAlt="Session Booking"
+        imageSrc="/app-screenshots/client-community.png"
+        imageAlt="Community Support Space"
         imagePosition="right"
       />
 
       <FeatureShowcase
-        badge="Communication"
-        title="Secure Messaging"
-        description="Stay connected with your therapist through secure, encrypted messaging. Share files, ask questions between sessions, and maintain continuity in your care."
+        badge="Assessment"
+        title="Standardized Pre-Assessment Tools"
+        description="Help therapists understand clients before the first session. Our validated assessment tools provide comprehensive insights into mental health needs, concerns, and goals."
         features={[
-          "End-to-end encrypted conversations",
-          "File sharing and media support",
-          "Real-time notifications and read receipts",
+          "Validated psychological assessments",
+          "Comprehensive mental health screening",
+          "Results shared with your therapist",
         ]}
-        imageSrc="/app-screenshots/client-messages.png"
-        imageAlt="Secure Messaging"
-        imagePosition="left"
-      />
-
-      <FeatureShowcase
-        badge="AI Assessment"
-        title="Intelligent Pre-Assessment"
-        description="Complete comprehensive mental health assessments powered by AI. Get personalized insights and match with the right therapist based on your unique needs and concerns."
-        features={[
-          "Validated psychological assessment tools",
-          "AI-powered analysis and recommendations",
-          "Progress tracking over time",
+        imageSrcs={[
+          "/app-screenshots/preassessment-checklist.png",
+          "/app-screenshots/preassessment-form.png",
         ]}
-        imageSrc="/app-screenshots/preassessment-forms.png"
-        imageAlt="Pre-Assessment Forms"
-        imagePosition="right"
-      />
-
-      <FeatureShowcase
-        badge="Resources"
-        title="Interactive Worksheets"
-        description="Access a library of therapeutic worksheets, exercises, and resources. Work on assignments between sessions and track your personal growth."
-        features={[
-          "Curated mental health resources",
-          "Progress tracking and completion status",
-          "Share results with your therapist",
-        ]}
-        imageSrc="/app-screenshots/client-worksheets.png"
-        imageAlt="Interactive Worksheets"
+        imageAlts={["Pre-Assessment Checklist", "Pre-Assessment Form"]}
         imagePosition="left"
       />
 
       <FeatureShowcase
         badge="Therapist Tools"
-        title="Therapist Dashboard"
-        description="Comprehensive practice management tools for therapists. Manage clients, schedule sessions, track earnings, and access patient assessments all in one platform."
+        title="Digital Tools for Therapists"
+        description="Including optional therapy worksheets and progress tracking for clients between sessions. Comprehensive practice management tools that streamline client care and administrative tasks."
         features={[
-          "Client management and session history",
-          "Revenue tracking and analytics",
-          "AI-powered patient insights",
+          "Client management dashboard",
+          "Therapy worksheets library",
+          "Progress tracking and insights",
         ]}
-        imageSrc="/app-screenshots/therapist-dashboard.png"
-        imageAlt="Therapist Dashboard"
+        imageSrcs={[
+          "/app-screenshots/therapist-worksheet.png",
+          "/app-screenshots/therapist-dashboard.png",
+          "/app-screenshots/therapist-clients.png",
+        ]}
+        imageAlts={[
+          "Therapy Worksheets",
+          "Therapist Dashboard",
+          "Client Management",
+        ]}
         imagePosition="right"
       />
 
       <FeatureShowcase
-        badge="Availability"
-        title="Smart Scheduling"
-        description="Therapists can easily manage their availability with our intuitive calendar system. Set recurring schedules, block time off, and handle bookings effortlessly."
+        badge="Wellness Programs"
+        title="Guided Group Programs and Webinars"
+        description="Focused on stress, resilience, and mental wellness education. Join expert-led sessions designed to build coping skills, foster community, and promote long-term mental health."
         features={[
-          "Flexible availability management",
-          "Automatic conflict detection",
-          "One-click booking confirmation",
+          "Expert-led group sessions",
+          "Stress management workshops",
+          "Resilience building programs",
         ]}
-        imageSrc="/app-screenshots/therapist-scheduling.png"
-        imageAlt="Therapist Scheduling"
+        imageSrc="/app-screenshots/client-community-sessions.png"
+        imageAlt="Group Programs and Webinars"
         imagePosition="left"
-      />
-
-      <FeatureShowcase
-        badge="User Management"
-        title="Comprehensive Profiles"
-        description="Complete profile management with personal information, preferences, and mental health history. Keep your information secure and up-to-date."
-        features={[
-          "Secure data storage and privacy controls",
-          "Customizable preferences and settings",
-          "Mental health history tracking",
-        ]}
-        imageSrc="/app-screenshots/client-profile.png"
-        imageAlt="Client Profile"
-        imagePosition="right"
       />
     </div>
   </div>

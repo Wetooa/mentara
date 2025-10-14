@@ -5,7 +5,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { WorksheetsController } from './worksheets.controller';
 import { WorksheetsService } from './worksheets.service';
 import { SupabaseStorageService } from '../common/services/supabase-storage.service';

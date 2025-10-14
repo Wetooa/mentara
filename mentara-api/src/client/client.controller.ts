@@ -10,8 +10,8 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { ClientService } from './client.service';
 import {
   ApiTags,

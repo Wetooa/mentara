@@ -74,7 +74,7 @@
             {#snippet children()}
               <div
                 class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all"
-                style="background: linear-gradient(135deg, oklch(0.98 0.0464 124.31) 0%, oklch(0.95 0.04 124 / 0.5) 100%); border-color: var(--primary); border-opacity: 0.2;"
+                style="background: linear-gradient(135deg, oklch(from var(--primary) l c h / 0.1) 0%, white 100%); border-color: var(--primary); border-opacity: 0.2;"
               >
                 <div
                   class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"
@@ -116,7 +116,7 @@
             {#snippet children()}
               <div
                 class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all"
-                style="background: linear-gradient(135deg, oklch(0.98 0.0464 124.31) 0%, oklch(0.95 0.04 124 / 0.5) 100%); border-color: var(--primary); border-opacity: 0.2;"
+                style="background: linear-gradient(135deg, oklch(from var(--primary) l c h / 0.1) 0%, white 100%); border-color: var(--primary); border-opacity: 0.2;"
               >
                 <div
                   class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"
@@ -140,14 +140,14 @@
                   class="text-2xl font-bold font-futura mb-3"
                   style="color: var(--primary);"
                 >
-                  Diagnostic Approach
+                  Data-Driven Approach
                 </h3>
                 <p
                   class="font-kollektif leading-relaxed"
                   style="color: var(--secondary);"
                 >
                   Make better business decisions with insights from qualitative
-                  and quantitative mental health data.
+                  and quantitative mental health data analytics.
                 </p>
               </div>
             {/snippet}
@@ -158,7 +158,7 @@
             {#snippet children()}
               <div
                 class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all"
-                style="background: linear-gradient(135deg, oklch(0.98 0.0464 124.31) 0%, oklch(0.95 0.04 124 / 0.5) 100%); border-color: var(--primary); border-opacity: 0.2;"
+                style="background: linear-gradient(135deg, oklch(from var(--primary) l c h / 0.1) 0%, white 100%); border-color: var(--primary); border-opacity: 0.2;"
               >
                 <div
                   class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"

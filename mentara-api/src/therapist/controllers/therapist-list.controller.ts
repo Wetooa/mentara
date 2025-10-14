@@ -15,7 +15,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
 import { TherapistListService } from '../services/therapist-list.service';
 import type {
   TherapistListQuery,

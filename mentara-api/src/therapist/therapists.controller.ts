@@ -10,8 +10,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 import {
   ApiTags,
   ApiOperation,

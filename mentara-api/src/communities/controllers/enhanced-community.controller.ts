@@ -16,9 +16,9 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RoleBasedAccessGuard } from '../../auth/guards/role-based-access.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { RoleBasedAccessGuard } from '../../auth/core/guards/role-based-access.guard';
+import { Roles } from '../../auth/core/decorators/roles.decorator';
 import { GetUser } from '../../decorators/get-user.decorator';
 import { EnhancedCommunityService } from '../services/enhanced-community.service';
 import {

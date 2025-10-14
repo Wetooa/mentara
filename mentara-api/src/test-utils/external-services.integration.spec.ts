@@ -11,7 +11,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AiServiceClient } from '../pre-assessment/services/ai-service.client';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { PrismaService } from '../providers/prisma-client.provider';
 
 describe('External Services Integration', () => {

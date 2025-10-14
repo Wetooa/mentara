@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { AdminAuthGuard } from '../auth/core/guards/admin-auth.guard';
 import { SupabaseStorageService } from '../common/services/supabase-storage.service';
 import { RoleUtils } from '../utils/role-utils';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';

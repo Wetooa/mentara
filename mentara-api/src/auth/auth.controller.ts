@@ -14,9 +14,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
-import { CurrentUserId } from './decorators/current-user-id.decorator';
-import { Public } from './decorators/public.decorator';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { CurrentUserId } from './core/decorators/current-user-id.decorator';
+import { Public } from './core/decorators/public.decorator';
+import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 // Import types from local auth types
 import type { SuccessResponse } from '../types/global';
 import type {
@@ -33,8 +33,8 @@ import type {
 import { Request } from 'express';
 import { SuccessMessageDto } from '../common/dto';
 import { AuthService } from './auth.service';
-import { EmailVerificationService } from './services/email-verification.service';
-import { PasswordResetService } from './services/password-reset.service';
+import { EmailVerificationService } from './shared/email-verification.service';
+import { PasswordResetService } from './shared/password-reset.service';
 import {
   LoginDtoSchema,
   RequestPasswordResetDtoSchema,
@@ -410,43 +410,6 @@ export class AuthController {
     }
   }
 
-  // OAuth Token Exchange API Endpoint (for frontend to call)
-  @Public()
-  @Post('oauth/token-exchange')
-  @HttpCode(HttpStatus.OK)
-  async exchangeOAuthToken(
-    @Body()
-    body: {
-      provider: 'google' | 'microsoft';
-      code: string;
-      state?: string;
-    },
-  ) {
-    const { provider, code } = body;
-
-    if (!code) {
-      throw new UnauthorizedException('Authorization code is required');
-    }
-
-    if (!['google', 'microsoft'].includes(provider)) {
-      throw new UnauthorizedException('Invalid OAuth provider');
-    }
-
-    try {
-      // TODO: Implement proper OAuth token exchange with provider APIs
-      // This would involve exchanging the authorization code for an access token
-      // and then fetching user profile information from the OAuth provider
-
-      // For now, this is a placeholder that expects the full OAuth flow
-      // to be handled by the existing Passport strategies
-      throw new UnauthorizedException(
-        'Direct token exchange not yet implemented. Use OAuth redirect flow.',
-      );
-    } catch (error) {
-      console.error('OAuth token exchange error:', error);
-      throw new UnauthorizedException('OAuth token exchange failed');
-    }
-  }
-
-  // Removed session management endpoints - using single tokens now
+  // Note: OAuth token exchange endpoint removed - was never implemented (dead code)
+  // Use OAuth redirect flow via /auth/google or /auth/microsoft instead
 }

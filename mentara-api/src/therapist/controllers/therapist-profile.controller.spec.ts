@@ -4,7 +4,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
 import { TherapistProfileController } from './therapist-profile.controller';
 import { TherapistManagementService } from '../therapist-management.service';
 import { SecurityGuardTestUtils, RoleBasedTestUtils } from '../../test-utils/auth-testing-helpers';

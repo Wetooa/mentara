@@ -9,8 +9,8 @@ import { CommunitiesController } from './communities.controller';
 import { CommunitiesService } from './communities.service';
 import { CommunityAssignmentService } from './community-assignment.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { Roles } from '../auth/core/decorators/roles.decorator';
 import {
   MockBuilder,
   TestDataGenerator,

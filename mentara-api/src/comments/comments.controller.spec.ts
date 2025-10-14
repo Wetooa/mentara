@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CommunityAccessGuard } from '../auth/guards/community-access.guard';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { CommunityAccessGuard } from '../auth/core/guards/community-access.guard';
 import { SupabaseStorageService } from '../common/services/supabase-storage.service';
 import { Comment } from '@prisma/client';
 import {

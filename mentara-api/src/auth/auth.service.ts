@@ -4,17 +4,20 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 // Event bus and token services for auth operations
 import { EventBusService } from '../common/events/event-bus.service';
 import { UserRegisteredEvent } from '../common/events/user-events';
-import { TokenService, SimpleToken } from './services/token.service';
-import { EmailVerificationService } from './services/email-verification.service';
-import { PasswordResetService } from './services/password-reset.service';
+import { TokenService } from './shared/token.service';
+import { EmailVerificationService } from './shared/email-verification.service';
+import { PasswordResetService } from './shared/password-reset.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventBus: EventBusService,
@@ -55,7 +58,7 @@ export class AuthService {
           'Client registered successfully. Please check your email to verify your account.',
       };
     } catch (error) {
-      console.error(
+      this.logger.error(
         'Client registration error:',
         error instanceof Error ? error.message : error,
       );
@@ -98,7 +101,7 @@ export class AuthService {
           'Therapist registered successfully. Please check your email to verify your account. Your application is pending approval.',
       };
     } catch (error) {
-      console.error(
+      this.logger.error(
         'Therapist registration error:',
         error instanceof Error ? error.message : error,
       );
@@ -184,7 +187,7 @@ export class AuthService {
 
       return { success: true, message: 'User logged out successfully' };
     } catch (error) {
-      console.error(
+      this.logger.error(
         'Force logout error:',
         error instanceof Error ? error.message : error,
       );
@@ -569,7 +572,7 @@ export class AuthService {
         user: roleSpecificUser,
       };
     } catch (error) {
-      console.error('Token validation error:', error);
+      this.logger.error('Token validation error:', error);
       return {
         valid: false,
         error: 'Token validation failed',
@@ -577,34 +580,8 @@ export class AuthService {
     }
   }
 
-  // Email verification methods
-  async verifyEmail(
-    token: string,
-  ): Promise<{ success: boolean; message: string }> {
-    return this.emailVerificationService.verifyEmail(token);
-  }
-
-  async resendVerificationEmail(email: string): Promise<void> {
-    return this.emailVerificationService.resendVerificationEmail(email);
-  }
-
-  // Password reset methods
-  async requestPasswordReset(email: string): Promise<void> {
-    return this.passwordResetService.requestPasswordReset(email);
-  }
-
-  async resetPassword(
-    token: string,
-    newPassword: string,
-  ): Promise<{ success: boolean; message: string }> {
-    return this.passwordResetService.resetPassword(token, newPassword);
-  }
-
-  async validateResetToken(
-    token: string,
-  ): Promise<{ valid: boolean; email?: string }> {
-    return this.passwordResetService.validateResetToken(token);
-  }
+  // Note: Email verification and password reset methods removed - useless wrappers
+  // Controllers use EmailVerificationService and PasswordResetService directly
 
   // Account management methods
   async changePassword(

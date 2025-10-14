@@ -12,8 +12,8 @@ import {
   UploadedFiles,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from 'src/auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/core/decorators/current-user-id.decorator';
 import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
 import { WorksheetsService } from './worksheets.service';
 import { PaginationQuery, FilterQuery } from 'src/types';

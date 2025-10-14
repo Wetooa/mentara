@@ -14,9 +14,9 @@ import {
 } from '@nestjs/common';
 import { PreAssessmentService } from './pre-assessment.service';
 import { AiServiceClient } from './services/ai-service.client';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../auth/core/decorators/current-user-role.decorator';
 import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
 import { PreAssessment } from '@prisma/client';
 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import AnimateOnScroll from "./AnimateOnScroll.svelte";
+  import Carousel from "./Carousel.svelte";
 
   let {
     badge,
@@ -8,18 +9,26 @@
     features,
     imageSrc,
     imageAlt,
+    imageSrcs,
+    imageAlts,
     imagePosition = "right",
   }: {
     badge: string;
     title: string;
     description: string;
     features: string[];
-    imageSrc: string;
-    imageAlt: string;
+    imageSrc?: string;
+    imageAlt?: string;
+    imageSrcs?: string[];
+    imageAlts?: string[];
     imagePosition?: "left" | "right";
   } = $props();
 
   const isImageRight = imagePosition === "right";
+
+  // Always use carousel - convert single image to array if needed
+  const images = imageSrcs || (imageSrc ? [imageSrc] : []);
+  const alts = imageAlts || (imageAlt ? [imageAlt] : []);
 </script>
 
 <AnimateOnScroll y={50} duration={800}>
@@ -60,19 +69,7 @@
 
       <!-- Image -->
       <div class:lg:order-2={isImageRight} class:lg:order-1={!isImageRight}>
-        <div
-          class="relative rounded-2xl shadow-2xl border-2 group overflow-hidden"
-          style="border-color: var(--primary); border-opacity: 0.2;"
-        >
-          <img
-            src={imageSrc}
-            alt={imageAlt}
-            class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-[oklch(0.56_0.1223_127.47)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          ></div>
-        </div>
+        <Carousel {images} {alts} />
       </div>
     </div>
   {/snippet}

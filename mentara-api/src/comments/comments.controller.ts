@@ -13,12 +13,12 @@ import {
   UploadedFiles,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/core/guards/jwt-auth.guard';
 import {
   CommunityAccessGuard,
   RequireRoomAccess,
-} from 'src/auth/guards/community-access.guard';
-import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+} from 'src/auth/core/guards/community-access.guard';
+import { CurrentUserId } from 'src/auth/core/decorators/current-user-id.decorator';
 import {
   SupabaseStorageService,
   FileUploadResult,

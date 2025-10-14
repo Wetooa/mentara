@@ -18,7 +18,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/core/guards/jwt-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
 import { CommunityAssignmentService } from './community-assignment.service';
@@ -40,8 +40,8 @@ import {
   CommunityWithMembersResponse,
   CommunityWithRoomGroupsResponse,
 } from './communities.service';
-import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
-import { Roles } from 'src/auth/decorators/roles.decorator';
+import { CurrentUserId } from 'src/auth/core/decorators/current-user-id.decorator';
+import { Roles } from 'src/auth/core/decorators/roles.decorator';
 
 @Controller('communities')
 @UseGuards(JwtAuthGuard)

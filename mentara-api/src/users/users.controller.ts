@@ -15,9 +15,9 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
-import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
+import { JwtAuthGuard } from 'src/auth/core/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/core/decorators/current-user-id.decorator';
+import { CurrentUserRole } from 'src/auth/core/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
   UserIdParamSchema,

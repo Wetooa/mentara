@@ -4,6 +4,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
+import {
+  buildDateFilter,
+  buildNestedDateFilter,
+} from './shared/date-filter.helpers';
 
 @Injectable()
 export class AnalyticsService {
@@ -13,12 +17,7 @@ export class AnalyticsService {
 
   async getPlatformAnalytics(startDate?: Date, endDate?: Date) {
     try {
-      const dateFilter = {};
-      if (startDate) dateFilter['gte'] = startDate;
-      if (endDate) dateFilter['lte'] = endDate;
-
-      const whereDate =
-        Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {};
+      const whereDate = buildDateFilter(startDate, endDate, 'createdAt');
 
       const [
         totalUsers,
@@ -96,12 +95,7 @@ export class AnalyticsService {
 
   async getUserGrowthStats(startDate?: Date, endDate?: Date) {
     try {
-      const dateFilter = {};
-      if (startDate) dateFilter['gte'] = startDate;
-      if (endDate) dateFilter['lte'] = endDate;
-
-      const whereDate =
-        Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {};
+      const whereDate = buildDateFilter(startDate, endDate, 'createdAt');
 
       const usersByRole = await this.prisma.user.groupBy({
         by: ['role'],
@@ -109,17 +103,40 @@ export class AnalyticsService {
         _count: { role: true },
       });
 
-      const monthlyGrowth = await this.prisma.$queryRaw`
-        SELECT 
-          DATE_TRUNC('month', "createdAt") as month,
-          COUNT(*) as count,
-          role
-        FROM "User"
-        ${whereDate.createdAt ? 'WHERE "createdAt" >= $1 AND "createdAt" <= $2' : ''}
-        GROUP BY month, role
-        ORDER BY month DESC
-        LIMIT 12
-      `;
+      // Get monthly user growth using Prisma instead of raw SQL
+      const allUsers = await this.prisma.user.findMany({
+        where: whereDate,
+        select: {
+          createdAt: true,
+          role: true,
+        },
+      });
+
+      // Group by month and role
+      const monthlyGrowthMap = new Map<string, Map<string, number>>();
+      allUsers.forEach((user) => {
+        const monthKey = new Date(
+          user.createdAt.getFullYear(),
+          user.createdAt.getMonth(),
+          1,
+        ).toISOString();
+
+        if (!monthlyGrowthMap.has(monthKey)) {
+          monthlyGrowthMap.set(monthKey, new Map());
+        }
+
+        const roleMap = monthlyGrowthMap.get(monthKey)!;
+        roleMap.set(user.role, (roleMap.get(user.role) ?? 0) + 1);
+      });
+
+      // Convert to array and sort by month (descending)
+      const monthlyGrowth = Array.from(monthlyGrowthMap.entries())
+        .map(([month, roleMap]) => ({
+          month: new Date(month),
+          counts: Object.fromEntries(roleMap),
+        }))
+        .sort((a, b) => b.month.getTime() - a.month.getTime())
+        .slice(0, 12);
 
       return {
         byRole: usersByRole,
@@ -134,12 +151,7 @@ export class AnalyticsService {
 
   async getEngagementStats(startDate?: Date, endDate?: Date) {
     try {
-      const dateFilter = {};
-      if (startDate) dateFilter['gte'] = startDate;
-      if (endDate) dateFilter['lte'] = endDate;
-
-      const whereDate =
-        Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {};
+      const whereDate = buildDateFilter(startDate, endDate, 'createdAt');
 
       const [
         totalPosts,
@@ -216,12 +228,7 @@ export class AnalyticsService {
 
   async getSessionStats(startDate?: Date, endDate?: Date) {
     try {
-      const dateFilter = {};
-      if (startDate) dateFilter['gte'] = startDate;
-      if (endDate) dateFilter['lte'] = endDate;
-
-      const whereDate =
-        Object.keys(dateFilter).length > 0 ? { startTime: dateFilter } : {};
+      const whereDate = buildDateFilter(startDate, endDate, 'startTime');
 
       const [
         totalSessions,
@@ -258,7 +265,7 @@ export class AnalyticsService {
           completedSessions,
           completionRate:
             totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
-          averageDuration: averageDuration._avg.duration || 0,
+          averageDuration: averageDuration._avg.duration ?? 0,
         },
         sessionsByType,
         topTherapists: therapistPerformance,
@@ -276,12 +283,17 @@ export class AnalyticsService {
     endDate?: Date,
   ) {
     try {
-      const dateFilter = {};
-      if (startDate) dateFilter['gte'] = startDate;
-      if (endDate) dateFilter['lte'] = endDate;
-
-      const whereDate =
-        Object.keys(dateFilter).length > 0 ? { startTime: dateFilter } : {};
+      const whereDate = buildDateFilter(startDate, endDate, 'startTime');
+      const nestedCreatedAt = buildNestedDateFilter(
+        startDate,
+        endDate,
+        'createdAt',
+      );
+      const nestedUpdatedAt = buildNestedDateFilter(
+        startDate,
+        endDate,
+        'updatedAt',
+      );
 
       const [
         totalClients,
@@ -301,70 +313,51 @@ export class AnalyticsService {
           where: { therapistId, status: 'COMPLETED', ...whereDate },
         }),
         this.prisma.review.aggregate({
-          where: { 
-            therapistId, 
-            ...(startDate || endDate
-              ? {
-                  createdAt: {
-                    ...(startDate && { gte: startDate }),
-                    ...(endDate && { lte: endDate }),
-                  },
-                }
-              : {})
+          where: {
+            therapistId,
+            ...nestedCreatedAt,
           },
           _avg: { rating: true },
         }),
         this.prisma.worksheet.count({
           where: {
             therapistId,
-            ...(startDate || endDate
-              ? {
-                  createdAt: {
-                    ...(startDate && { gte: startDate }),
-                    ...(endDate && { lte: endDate }),
-                  },
-                }
-              : {}),
+            ...nestedCreatedAt,
           },
         }),
         this.prisma.worksheet.count({
           where: {
             therapistId,
             status: 'SUBMITTED',
-            ...(startDate || endDate
-              ? {
-                  updatedAt: {
-                    ...(startDate && { gte: startDate }),
-                    ...(endDate && { lte: endDate }),
-                  },
-                }
-              : {}),
+            ...nestedUpdatedAt,
           },
         }),
       ]);
 
       // Get recent client activities instead of therapy progress
-      const recentClientActivities = await this.prisma.clientTherapist.findMany({
-        where: {
-          therapistId,
-        },
-        include: {
-          client: {
-            include: { 
-              user: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  email: true,
-                }
-              }
+      const recentClientActivities = await this.prisma.clientTherapist.findMany(
+        {
+          where: {
+            therapistId,
+          },
+          include: {
+            client: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
             },
           },
+          orderBy: { assignedAt: 'desc' },
+          take: 10,
         },
-        orderBy: { assignedAt: 'desc' },
-        take: 10,
-      });
+      );
 
       return {
         overview: {
@@ -373,7 +366,7 @@ export class AnalyticsService {
           completedSessions,
           sessionCompletionRate:
             activeSessions > 0 ? (completedSessions / activeSessions) * 100 : 0,
-          averageRating: averageRating._avg.rating || 0,
+          averageRating: averageRating._avg.rating ?? 0,
           worksheetsAssigned,
           worksheetsCompleted,
           worksheetCompletionRate:
@@ -392,12 +385,17 @@ export class AnalyticsService {
 
   async getClientAnalytics(clientId: string, startDate?: Date, endDate?: Date) {
     try {
-      const dateFilter = {};
-      if (startDate) dateFilter['gte'] = startDate;
-      if (endDate) dateFilter['lte'] = endDate;
-
-      const whereDate =
-        Object.keys(dateFilter).length > 0 ? { startTime: dateFilter } : {};
+      const whereDate = buildDateFilter(startDate, endDate, 'startTime');
+      const nestedCreatedAt = buildNestedDateFilter(
+        startDate,
+        endDate,
+        'createdAt',
+      );
+      const nestedUpdatedAt = buildNestedDateFilter(
+        startDate,
+        endDate,
+        'updatedAt',
+      );
 
       const [
         totalSessions,
@@ -415,70 +413,35 @@ export class AnalyticsService {
           where: { clientId, status: 'COMPLETED', ...whereDate },
         }),
         this.prisma.review.aggregate({
-          where: { 
-            clientId, 
-            ...(startDate || endDate
-              ? {
-                  createdAt: {
-                    ...(startDate && { gte: startDate }),
-                    ...(endDate && { lte: endDate }),
-                  },
-                }
-              : {})
+          where: {
+            clientId,
+            ...nestedCreatedAt,
           },
           _avg: { rating: true },
         }),
         this.prisma.worksheet.count({
           where: {
             clientId,
-            ...(startDate || endDate
-              ? {
-                  createdAt: {
-                    ...(startDate && { gte: startDate }),
-                    ...(endDate && { lte: endDate }),
-                  },
-                }
-              : {}),
+            ...nestedCreatedAt,
           },
         }),
         this.prisma.worksheet.count({
           where: {
             clientId,
             status: 'SUBMITTED',
-            ...(startDate || endDate
-              ? {
-                  updatedAt: {
-                    ...(startDate && { gte: startDate }),
-                    ...(endDate && { lte: endDate }),
-                  },
-                }
-              : {}),
+            ...nestedUpdatedAt,
           },
         }),
         this.prisma.post.count({
           where: {
             userId: clientId,
-            ...(startDate || endDate
-              ? {
-                  createdAt: {
-                    ...(startDate && { gte: startDate }),
-                    ...(endDate && { lte: endDate }),
-                  },
-                }
-              : {}),
+            ...nestedCreatedAt,
           },
         }),
         this.prisma.comment.count({
           where: {
             userId: clientId,
-            ...(startDate || endDate
-              ? {
-                  createdAt: {
-                    ...(startDate && { gte: startDate }),
-                    ...(endDate && { lte: endDate }),
-                  },
-                }
-              : {}),
+            ...nestedCreatedAt,
           },
         }),
       ]);
@@ -487,14 +450,7 @@ export class AnalyticsService {
       const recentActivityHistory = await this.prisma.worksheet.findMany({
         where: {
           clientId,
-          ...(startDate || endDate
-            ? {
-                createdAt: {
-                  ...(startDate && { gte: startDate }),
-                  ...(endDate && { lte: endDate }),
-                },
-              }
-            : {}),
+          ...nestedCreatedAt,
         },
         include: {
           therapist: {
@@ -504,9 +460,9 @@ export class AnalyticsService {
                   id: true,
                   firstName: true,
                   lastName: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           submission: true,
         },
@@ -520,7 +476,7 @@ export class AnalyticsService {
           completedSessions,
           sessionCompletionRate:
             totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
-          averageSessionRating: averageSessionRating._avg.rating || 0,
+          averageSessionRating: averageSessionRating._avg.rating ?? 0,
           worksheetsAssigned,
           worksheetsCompleted,
           worksheetCompletionRate:

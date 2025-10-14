@@ -8,8 +8,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { AdminAuthGuard } from '../../auth/core/guards/admin-auth.guard';
 import { RoleUtils, UserRole } from '../../utils/role-utils';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { AuthController } from '../../auth/auth.controller';

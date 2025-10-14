@@ -3,7 +3,10 @@
   import ParallaxDots from "../ParallaxDots.svelte";
 </script>
 
-<section class="py-20 relative" style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.08) 0%, oklch(0.98 0.0464 124.31 / 0.12) 100%);">
+<section
+  class="py-20 relative"
+  style="background: linear-gradient(180deg, oklch(0.98 0.0464 124.31 / 0.08) 0%, oklch(0.98 0.0464 124.31 / 0.12) 100%);"
+>
   <ParallaxDots variant="green" />
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <AnimateOnScroll y={30} duration={600}>
@@ -15,7 +18,9 @@
           >
             Meet Our Team
           </h2>
-          <p class="text-lg text-muted-foreground font-kollektif max-w-2xl mx-auto">
+          <p
+            class="text-lg text-muted-foreground font-kollektif max-w-2xl mx-auto"
+          >
             The passionate individuals behind Mentara
           </p>
         </div>
@@ -47,8 +52,8 @@
               Co-Founder & External Partnerships Lead
             </p>
             <p class="text-xs text-muted-foreground font-kollektif">
-              Leading strategic partnerships and business development to
-              expand Mentara's reach and impact in mental health care.
+              Leading strategic partnerships and business development to expand
+              Mentara's reach and impact in mental health care.
             </p>
           </div>
         {/snippet}
@@ -118,4 +123,3 @@
     </div>
   </div>
 </section>
-
