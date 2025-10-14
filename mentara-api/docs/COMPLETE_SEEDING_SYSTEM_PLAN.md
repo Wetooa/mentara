@@ -9,6 +9,7 @@
 ## 🎯 REQUIREMENTS
 
 ### Core Principles:
+
 1. ✅ **Idempotent** - Run multiple times, only fills gaps
 2. ✅ **Comprehensive** - EVERY table covered
 3. ✅ **Balanced** - Not too fast, not too slow
@@ -17,6 +18,7 @@
 6. ✅ **Documented** - Each enricher fully documented
 
 ### Key Goals:
+
 - **First run**: Creates comprehensive test data
 - **Subsequent runs**: Only fills low-data tables
 - **Never**: Creates duplicate or bloated data
@@ -27,6 +29,7 @@
 ## 📊 DATABASE TABLES ANALYSIS
 
 ### **Core Tables** (20+ tables):
+
 ```
 User, Client, Therapist, Admin, Moderator
 Community, CommunityMember
@@ -45,6 +48,7 @@ Session
 ```
 
 ### **Tables Needing Enrichers** (15):
+
 1. ✅ User (handled by base generators)
 2. 🔄 CommunityMember (enricher)
 3. 🔄 ClientTherapist (enricher)
@@ -66,6 +70,7 @@ Session
 ## 🏗️ SIMPLIFIED ARCHITECTURE
 
 ### **New NPM Scripts** (Only 2!):
+
 ```json
 {
   "db:seed": "tsx prisma/seed.ts",
@@ -74,6 +79,7 @@ Session
 ```
 
 ### **Removed Scripts**:
+
 ```json
 // DELETE THESE:
 "db:seed:light"
@@ -89,6 +95,7 @@ Session
 ```
 
 ### **One Seed Command, Smart Behavior**:
+
 ```bash
 npm run db:seed  # Does everything intelligently
 npm run db:reset # Full reset then seed
@@ -99,32 +106,34 @@ npm run db:reset # Full reset then seed
 ## 🔄 COMPLETE SEEDING FLOW
 
 ### **seed.ts** (New unified approach):
+
 ```typescript
 async function main() {
   console.log('🌱 Mentara Database Seeding');
-  
+
   // STEP 1: Check if base data exists
   const audit = await auditDatabase(prisma);
-  
+
   if (audit.users.total === 0) {
     // FIRST RUN: Create base data
     console.log('📦 Creating base data (first run)...');
     await createBaseData(prisma);
   }
-  
+
   // STEP 2: Dynamic enrichment (ALWAYS runs)
   console.log('✨ Ensuring minimum data requirements...');
   await enrichAllTables(prisma);
-  
+
   // STEP 3: Verification
   console.log('✅ Verifying requirements...');
   await verifyAllRequirements(prisma);
-  
+
   console.log('🎉 Seeding complete!');
 }
 ```
 
 **Behavior**:
+
 - **First run** (empty DB): Creates base + enriches
 - **Second run** (has data): Only enriches gaps
 - **Third run** (satisfied): Skips everything, exits fast
@@ -144,21 +153,25 @@ async function main() {
 **Priority**: Tier X
 
 ### Minimum Requirements:
+
 - Entity A: X items
 - Entity B: Y items
 
 ### Logic:
+
 1. Check existing counts
 2. Calculate gaps
 3. Create only missing items
 4. Return items added
 
 ### Idempotency:
+
 - ✅ Safe to run multiple times
 - ✅ Checks before creating
 - ✅ Uses unique constraints
 
 ### Determinism:
+
 - ✅ Uses seeded random
 - ✅ Same entity → same data
 ```
@@ -168,6 +181,7 @@ async function main() {
 ## 🗂️ COMPLETE ENRICHER LIST
 
 ### **Tier 1** - Foundation (3):
+
 ```
 1. MembershipsEnricher
    - Table: CommunityMember
@@ -186,6 +200,7 @@ async function main() {
 ```
 
 ### **Tier 2** - Content (3):
+
 ```
 4. AssessmentsEnricher
    - Table: PreAssessment, PreAssessmentAnswer
@@ -206,6 +221,7 @@ async function main() {
 ```
 
 ### **Tier 3** - Engagement (2):
+
 ```
 7. CommentsEnricher
    - Table: Comment
@@ -221,6 +237,7 @@ async function main() {
 ```
 
 ### **Tier 4** - Therapy (2):
+
 ```
 9. MeetingsEnricher
    - Table: Meeting, MeetingNotes
@@ -236,6 +253,7 @@ async function main() {
 ```
 
 ### **Tier 5** - Communication (2):
+
 ```
 11. MessagesEnricher
     - Table: Conversation, ConversationParticipant, Message
@@ -251,6 +269,7 @@ async function main() {
 ```
 
 ### **Tier 6** - Reviews & Analytics (3):
+
 ```
 13. ReviewsEnricher
     - Table: Review
@@ -275,41 +294,44 @@ async function main() {
 ## 📐 IDEMPOTENCY STRATEGY
 
 ### **Check Before Create** (Every enricher):
+
 ```typescript
 async ensureUserHasPosts(userId: string, minPosts: number) {
   // 1. Check current count
   const current = await this.prisma.post.count({ where: { userId }});
-  
+
   // 2. Calculate gap
   const gap = minPosts - current;
-  
+
   // 3. Only create if gap > 0
   if (gap <= 0) {
     return 0; // ✅ Already satisfied, skip!
   }
-  
+
   // 4. Create exactly what's missing
   for (let i = 0; i < gap; i++) {
     await this.createPost(userId);
   }
-  
+
   return gap;
 }
 ```
 
 ### **Unique Constraints** (Prevent duplicates):
+
 ```typescript
 // Use upsert where possible
 await prisma.communityMember.upsert({
-  where: { 
-    userId_communityId: { userId, communityId }  // Unique constraint
+  where: {
+    userId_communityId: { userId, communityId }, // Unique constraint
   },
   update: {},
-  create: { userId, communityId, role: 'MEMBER' }
+  create: { userId, communityId, role: 'MEMBER' },
 });
 ```
 
 ### **Smart Skip** (Exit early):
+
 ```typescript
 // If ALL requirements satisfied, skip entire enrichment
 if (allRequirementsSatisfied) {
@@ -323,61 +345,69 @@ if (allRequirementsSatisfied) {
 ## 📊 MINIMUM REQUIREMENTS (Final)
 
 ### **Per Client**:
-| Item | Minimum | Reasoning |
-|------|---------|-----------|
-| Community memberships | 1 | Can participate in discussions |
-| Posts | 5 | Active contributor |
-| Comments | 10 | Engaged participant |
-| Hearts given | 3 | Shows engagement |
-| Conversations | 2 | Has social connections |
-| Messages | 10 total | Active communicator |
-| Therapist | 0-1 | Optional (not all clients matched) |
-| Meetings (if therapist) | 3 | Regular therapy sessions |
-| Worksheets (if therapist) | 1 | Therapeutic work |
-| Assessments | 1 | Completed intake |
+
+| Item                      | Minimum  | Reasoning                          |
+| ------------------------- | -------- | ---------------------------------- |
+| Community memberships     | 1        | Can participate in discussions     |
+| Posts                     | 5        | Active contributor                 |
+| Comments                  | 10       | Engaged participant                |
+| Hearts given              | 3        | Shows engagement                   |
+| Conversations             | 2        | Has social connections             |
+| Messages                  | 10 total | Active communicator                |
+| Therapist                 | 0-1      | Optional (not all clients matched) |
+| Meetings (if therapist)   | 3        | Regular therapy sessions           |
+| Worksheets (if therapist) | 1        | Therapeutic work                   |
+| Assessments               | 1        | Completed intake                   |
 
 ### **Per Therapist**:
-| Item | Minimum | Reasoning |
-|------|---------|-----------|
-| Client relationships | 2 | Has active clients |
-| Availability days | 3 | Available Mon-Fri |
-| Posts | 2 | Professional contributions |
-| Comments | 5 | Provides guidance |
-| Meetings | 4 | Conducted sessions |
-| Worksheets created | 3 | Has therapeutic materials |
-| Session notes | 2 | Documents work |
-| Reviews | 1 | Has feedback |
+
+| Item                 | Minimum | Reasoning                  |
+| -------------------- | ------- | -------------------------- |
+| Client relationships | 2       | Has active clients         |
+| Availability days    | 3       | Available Mon-Fri          |
+| Posts                | 2       | Professional contributions |
+| Comments             | 5       | Provides guidance          |
+| Meetings             | 4       | Conducted sessions         |
+| Worksheets created   | 3       | Has therapeutic materials  |
+| Session notes        | 2       | Documents work             |
+| Reviews              | 1       | Has feedback               |
 
 ### **Per Community**:
-| Item | Minimum | Reasoning |
-|------|---------|-----------|
-| Members | 8 | Active community |
-| Posts | 10 | Regular content |
-| Activity (days) | 30 | Recent engagement |
+
+| Item            | Minimum | Reasoning         |
+| --------------- | ------- | ----------------- |
+| Members         | 8       | Active community  |
+| Posts           | 10      | Regular content   |
+| Activity (days) | 30      | Recent engagement |
 
 ### **Per Post**:
-| Item | Minimum | Reasoning |
-|------|---------|-----------|
-| Comments | 2 | Has discussion |
-| Hearts | 1 | Has engagement |
+
+| Item     | Minimum | Reasoning      |
+| -------- | ------- | -------------- |
+| Comments | 2       | Has discussion |
+| Hearts   | 1       | Has engagement |
 
 ### **Per Meeting (if completed)**:
-| Item | Minimum | Reasoning |
-|------|---------|-----------|
-| Notes | 1 | Documented session |
+
+| Item  | Minimum | Reasoning          |
+| ----- | ------- | ------------------ |
+| Notes | 1       | Documented session |
 
 ---
 
 ## 🎨 IMPLEMENTATION STRATEGY
 
 ### **Phase 1: Core Infrastructure** (~1 hour)
+
 1. Create comprehensive base-enricher.ts
 2. Create unified seed.ts (remove all modes)
 3. Create master orchestrator
 4. Update package.json (remove all legacy scripts)
 
 ### **Phase 2: All 15 Enrichers** (~3 hours)
+
 Implement complete, production-ready enrichers:
+
 1. MembershipsEnricher
 2. RelationshipsEnricher
 3. AvailabilityEnricher
@@ -395,7 +425,9 @@ Implement complete, production-ready enrichers:
 15. PaymentsEnricher (placeholder for future)
 
 ### **Phase 3: Comprehensive Documentation** (~1 hour)
+
 Create `SEEDING_SYSTEM_DOCUMENTATION.md`:
+
 - Overview
 - Architecture diagram
 - Each enricher specifications
@@ -404,6 +436,7 @@ Create `SEEDING_SYSTEM_DOCUMENTATION.md`:
 - Troubleshooting
 
 ### **Phase 4: Testing & Refinement** (~1 hour)
+
 1. Test fresh seed
 2. Test idempotent runs (3x)
 3. Test with partial data
@@ -418,35 +451,41 @@ Create `SEEDING_SYSTEM_DOCUMENTATION.md`:
 
 ### **Main Document**: `docs/SEEDING_SYSTEM_DOCUMENTATION.md`
 
-```markdown
+````markdown
 # Mentara Seeding System Documentation
 
 ## Overview
+
 - System architecture
 - Design principles
 - Usage guide
 
 ## Quick Start
-npm run db:seed    # Smart seeding
-npm run db:reset   # Full reset
+
+npm run db:seed # Smart seeding
+npm run db:reset # Full reset
 
 ## Architecture
+
 - Diagram showing enricher dependencies
 - Flow charts
 
 ## Enricher Reference (15 enrichers)
 
 ### 1. MembershipsEnricher
+
 **Table**: CommunityMember
 **Depends On**: User, Community
 **Priority**: Tier 1 (Foundation)
 
 **Minimum Requirements**:
+
 - Every client: ≥1 community
 - Every therapist: ≥1 community
 - Every community: ≥8 members
 
 **Implementation**:
+
 ```typescript
 async enrich() {
   // 1. Check all users
@@ -454,25 +493,30 @@ async enrich() {
   // 3. Balance community sizes
 }
 ```
+````
 
-**Idempotency**: 
+**Idempotency**:
+
 - Checks existing before creating
 - Uses unique constraint (userId + communityId)
 - Skips if satisfied
 
 **Determinism**:
+
 - Seeded random based on userId
 - Same user always joins same communities
 
 ---
 
 ### 2. RelationshipsEnricher
+
 **Table**: ClientTherapist
 **Depends On**: Client, Therapist
 **Priority**: Tier 1 (Foundation)
 
 ... (repeat for all 15)
-```
+
+````
 
 ---
 
@@ -491,9 +535,10 @@ async enrich() {
 "db:seed:dynamic:audit": "...",
 "db:seed:legacy": "...",
 // ... 5 more legacy scripts
-```
+````
 
 ### **After** (2 scripts! ✅):
+
 ```json
 {
   "db:seed": "tsx prisma/seed.ts",
@@ -502,6 +547,7 @@ async enrich() {
 ```
 
 **Environment variables for control**:
+
 ```bash
 # Verbose mode
 SEED_VERBOSE=true npm run db:seed
@@ -518,6 +564,7 @@ SEED_FORCE=true npm run db:seed
 ## 🎯 SMART SEEDING BEHAVIOR
 
 ### **Scenario 1**: Empty database
+
 ```bash
 $ npm run db:seed
 
@@ -528,6 +575,7 @@ $ npm run db:seed
 ```
 
 ### **Scenario 2**: Partially seeded
+
 ```bash
 $ npm run db:seed
 
@@ -540,6 +588,7 @@ $ npm run db:seed
 ```
 
 ### **Scenario 3**: Fully satisfied
+
 ```bash
 $ npm run db:seed
 
@@ -555,6 +604,7 @@ $ npm run db:seed
 ## 📈 COMPLETE TABLE COVERAGE
 
 ### **Enricher Dependency Graph**:
+
 ```
                   User (base)
                      |
@@ -594,32 +644,33 @@ $ npm run db:seed
 ## 🔢 ENRICHMENT ORDER (Final)
 
 ### **Execution Order** (by tier):
+
 ```typescript
 const ENRICHER_ORDER = [
   // Tier 1: Foundation (can run in parallel)
-  'MembershipsEnricher',      // Users → Communities
-  'RelationshipsEnricher',    // Clients → Therapists
-  'AvailabilityEnricher',     // Therapists → Schedule
-  
+  'MembershipsEnricher', // Users → Communities
+  'RelationshipsEnricher', // Clients → Therapists
+  'AvailabilityEnricher', // Therapists → Schedule
+
   // Tier 2: Content (depends on Tier 1)
-  'AssessmentsEnricher',      // Clients → Assessments
-  'PostsEnricher',            // Users + Memberships → Posts
-  'WorksheetsEnricher',       // Therapists → Worksheets
-  
+  'AssessmentsEnricher', // Clients → Assessments
+  'PostsEnricher', // Users + Memberships → Posts
+  'WorksheetsEnricher', // Therapists → Worksheets
+
   // Tier 3: Engagement (depends on Tier 2)
-  'CommentsEnricher',         // Posts → Comments
-  'HeartsEnricher',           // Posts/Comments → Hearts
-  
+  'CommentsEnricher', // Posts → Comments
+  'HeartsEnricher', // Posts/Comments → Hearts
+
   // Tier 4: Therapy (depends on relationships)
-  'MeetingsEnricher',         // Relationships → Meetings + Notes
-  
+  'MeetingsEnricher', // Relationships → Meetings + Notes
+
   // Tier 5: Communication (can run anytime)
-  'MessagesEnricher',         // Users → Conversations → Messages
-  
+  'MessagesEnricher', // Users → Conversations → Messages
+
   // Tier 6: Follow-up (depends on previous)
-  'ReviewsEnricher',          // Meetings → Reviews
-  'NotificationsEnricher',    // Various → Notifications
-  'AuditLogsEnricher',        // Admin actions → Logs
+  'ReviewsEnricher', // Meetings → Reviews
+  'NotificationsEnricher', // Various → Notifications
+  'AuditLogsEnricher', // Admin actions → Logs
 ];
 ```
 
@@ -628,34 +679,38 @@ const ENRICHER_ORDER = [
 ## 📊 EXPECTED OUTCOMES
 
 ### **Metrics After Seeding**:
-| Entity | Count | Quality |
-|--------|-------|---------|
-| Users | 25-30 | Realistic profiles |
-| Communities | 10-15 | Active & balanced |
-| Posts | 150-200 | Varied content |
-| Comments | 300-400 | Engaged discussions |
-| Meetings | 40-60 | Past & future mix |
-| Messages | 200-300 | Realistic conversations |
-| Reviews | 10-15 | Positive feedback |
+
+| Entity      | Count   | Quality                 |
+| ----------- | ------- | ----------------------- |
+| Users       | 25-30   | Realistic profiles      |
+| Communities | 10-15   | Active & balanced       |
+| Posts       | 150-200 | Varied content          |
+| Comments    | 300-400 | Engaged discussions     |
+| Meetings    | 40-60   | Past & future mix       |
+| Messages    | 200-300 | Realistic conversations |
+| Reviews     | 10-15   | Positive feedback       |
 
 ### **Run Time Performance**:
-| Run Type | Duration | Items Added |
-|----------|----------|-------------|
-| First run (empty) | 25-35s | ~800 items |
-| Second run (partial) | 5-10s | 50-150 items |
-| Third run (satisfied) | 1-2s | 0 items |
+
+| Run Type              | Duration | Items Added  |
+| --------------------- | -------- | ------------ |
+| First run (empty)     | 25-35s   | ~800 items   |
+| Second run (partial)  | 5-10s    | 50-150 items |
+| Third run (satisfied) | 1-2s     | 0 items      |
 
 ---
 
 ## 🛡️ SAFETY GUARANTEES
 
 ### **Never**:
+
 - ❌ Create duplicate data
 - ❌ Bloat the database
 - ❌ Fail on subsequent runs
 - ❌ Require manual cleanup
 
 ### **Always**:
+
 - ✅ Check before creating
 - ✅ Respect unique constraints
 - ✅ Maintain minimum thresholds
@@ -666,12 +721,14 @@ const ENRICHER_ORDER = [
 ## 📚 DOCUMENTATION FILES
 
 ### **Create** (in `/docs`):
+
 1. `SEEDING_SYSTEM_DOCUMENTATION.md` - Complete guide
 2. `SEEDING_ENRICHER_REFERENCE.md` - All 15 enrichers detailed
 3. `SEEDING_TROUBLESHOOTING.md` - Common issues & fixes
 4. `SEEDING_ARCHITECTURE.md` - System design
 
 ### **Remove** (obsolete):
+
 - All legacy seed documentation
 - Old seeding guides
 - Outdated references
@@ -681,6 +738,7 @@ const ENRICHER_ORDER = [
 ## 🎯 IMPLEMENTATION CHECKLIST
 
 ### **Code**:
+
 - [ ] Implement all 15 enrichers with proper error handling
 - [ ] Create unified seed.ts (remove modes)
 - [ ] Create master orchestrator
@@ -690,11 +748,13 @@ const ENRICHER_ORDER = [
 - [ ] Add summary statistics
 
 ### **Scripts**:
+
 - [ ] Simplify to 2 scripts only
 - [ ] Remove all legacy scripts
 - [ ] Update README with new commands
 
 ### **Documentation**:
+
 - [ ] Complete system documentation
 - [ ] Enricher reference (15 entries)
 - [ ] Troubleshooting guide
@@ -702,6 +762,7 @@ const ENRICHER_ORDER = [
 - [ ] Usage examples
 
 ### **Testing**:
+
 - [ ] Test empty database
 - [ ] Test partial database
 - [ ] Test fully satisfied database
@@ -714,12 +775,14 @@ const ENRICHER_ORDER = [
 ## 🚀 FINAL SYSTEM FEATURES
 
 ### **Intelligent Seeding**:
+
 - 🧠 Detects database state
 - 🧠 Only fills gaps
 - 🧠 Never bloats
 - 🧠 Self-documenting
 
 ### **Production Ready**:
+
 - ✅ Comprehensive coverage (all tables)
 - ✅ Idempotent (run anytime)
 - ✅ Deterministic (consistent data)
@@ -727,6 +790,7 @@ const ENRICHER_ORDER = [
 - ✅ Documented (complete guides)
 
 ### **Developer Friendly**:
+
 - ✨ One command: `npm run db:seed`
 - ✨ Smart behavior (first vs subsequent runs)
 - ✨ Clear output (what's happening)
@@ -737,6 +801,7 @@ const ENRICHER_ORDER = [
 ## ⏱️ ESTIMATED TIMELINE
 
 ### **Full Implementation**:
+
 - **Infrastructure**: 1 hour
 - **15 Enrichers**: 3 hours
 - **Documentation**: 1 hour
@@ -744,6 +809,7 @@ const ENRICHER_ORDER = [
 - **Total**: **6 hours**
 
 ### **Can be split**:
+
 - **Session 1**: Infrastructure + Core 8 enrichers (3h)
 - **Session 2**: Remaining 7 enrichers + docs (2h)
 - **Session 3**: Testing + polish (1h)
@@ -761,6 +827,7 @@ const ENRICHER_ORDER = [
 5. ✅ **Commit & celebrate** 🎉
 
 **Result**: Production-ready seeding system that:
+
 - Works perfectly every time
 - Never needs manual intervention
 - Self-maintains minimum data
@@ -771,4 +838,3 @@ const ENRICHER_ORDER = [
 **This plan is READY for implementation when you return!** 🚀
 
 **Estimated completion**: ~6 hours of focused work
-

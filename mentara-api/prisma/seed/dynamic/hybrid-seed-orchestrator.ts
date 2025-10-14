@@ -18,6 +18,12 @@ import { MessagesEnricher } from './enrichers/messages-enricher';
 import { AssessmentsEnricher } from './enrichers/assessments-enricher';
 import { ReviewsEnricher } from './enrichers/reviews-enricher';
 import { NotificationsEnricher } from './enrichers/notifications-enricher';
+import { ModeratorAssignmentsEnricher } from './enrichers/moderator-assignments-enricher';
+import { MessageInteractionsEnricher } from './enrichers/message-interactions-enricher';
+import { RoomsEnricher } from './enrichers/rooms-enricher';
+import { ReportsEnricher } from './enrichers/reports-enricher';
+import { UserBlocksEnricher } from './enrichers/user-blocks-enricher';
+import { PaymentsEnricher } from './enrichers/payments-enricher';
 import { EnrichmentResult } from './enrichers/base-enricher';
 
 export interface HybridSeedReport {
@@ -51,6 +57,7 @@ export class HybridSeedOrchestrator {
       // Tier 2: Depends on memberships
       { name: 'Assessments', enricher: new AssessmentsEnricher(prisma) },
       { name: 'Posts', enricher: new PostsEnricher(prisma) },
+      { name: 'Moderators', enricher: new ModeratorAssignmentsEnricher(prisma) },
 
       // Tier 3: Depends on posts
       { name: 'Comments', enricher: new CommentsEnricher(prisma) },
@@ -61,9 +68,16 @@ export class HybridSeedOrchestrator {
       { name: 'Worksheets', enricher: new WorksheetsEnricher(prisma) },
       { name: 'Messages', enricher: new MessagesEnricher(prisma) },
 
-      // Tier 5: Depends on meetings
+      // Tier 5: Depends on meetings/messages
       { name: 'Reviews', enricher: new ReviewsEnricher(prisma) },
+      { name: 'Reactions', enricher: new MessageInteractionsEnricher(prisma) },
+      { name: 'Rooms', enricher: new RoomsEnricher(prisma) },
       { name: 'Notifications', enricher: new NotificationsEnricher(prisma) },
+
+      // Tier 6: Edge cases & system
+      { name: 'Reports', enricher: new ReportsEnricher(prisma) },
+      { name: 'Blocks', enricher: new UserBlocksEnricher(prisma) },
+      { name: 'Payments', enricher: new PaymentsEnricher(prisma) },
     ];
 
     const results: EnrichmentResult[] = [];

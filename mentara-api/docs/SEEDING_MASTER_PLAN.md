@@ -12,6 +12,7 @@
 ### **All 33 Models** (categorized):
 
 **Users & Profiles** (5 models):
+
 - User ← Base generator
 - Client ← Base generator
 - Therapist ← Base generator
@@ -19,6 +20,7 @@
 - Moderator ← Base generator
 
 **Communities & Social** (9 models):
+
 - Community ← Base generator
 - CommunityMember ← **Enricher #1**
 - Membership ← (duplicate of CommunityMember?)
@@ -30,6 +32,7 @@
 - ModeratorCommunity ← **Enricher #5**
 
 **Therapy & Sessions** (8 models):
+
 - ClientTherapist ← **Enricher #6**
 - TherapistAvailability ← **Enricher #7**
 - Meeting ← **Enricher #8**
@@ -40,6 +43,7 @@
 - PreAssessment ← **Enricher #11**
 
 **Messaging** (7 models):
+
 - Conversation ← **Enricher #12**
 - ConversationParticipant ← **Enricher #12** (with conversations)
 - Message ← **Enricher #12** (with conversations)
@@ -50,6 +54,7 @@
 - RoomGroup ← **Enricher #14** (with rooms)
 
 **System & Admin** (4 models):
+
 - Notification ← **Enricher #15**
 - Report ← **Enricher #16**
 - UserBlock ← **Enricher #17**
@@ -63,6 +68,7 @@
 ## 🎯 FINAL ENRICHER LIST
 
 ### **Tier 1 - Foundation** (3 enrichers):
+
 ```
 1. MembershipsEnricher (CommunityMember, Membership)
    → Users into communities
@@ -78,6 +84,7 @@
 ```
 
 ### **Tier 2 - Content** (4 enrichers):
+
 ```
 4. AssessmentsEnricher (PreAssessment)
    → Clients complete intake assessment
@@ -98,6 +105,7 @@
 ```
 
 ### **Tier 3 - Engagement** (2 enrichers):
+
 ```
 8. CommentsEnricher (Comment)
    → Users comment (10 for clients, 5 for therapists)
@@ -109,6 +117,7 @@
 ```
 
 ### **Tier 4 - Therapy** (2 enrichers):
+
 ```
 10. MeetingsEnricher (Meeting, MeetingNotes)
     → Relationships have meetings (3+)
@@ -121,6 +130,7 @@
 ```
 
 ### **Tier 5 - Communication** (3 enrichers):
+
 ```
 12. MessagesEnricher (Conversation, ConversationParticipant, Message)
     → Users have conversations (2+)
@@ -136,6 +146,7 @@
 ```
 
 ### **Tier 6 - System** (4 enrichers):
+
 ```
 15. NotificationsEnricher (Notification)
     → Users have notifications (3-5)
@@ -163,24 +174,29 @@
 ### **Document 1**: `SEEDING_SYSTEM_DOCUMENTATION.md` (~800 lines)
 
 **Sections**:
+
 1. **Overview** (50 lines)
+
    - What is the system
    - Why table-based approach
    - Key features
 
 2. **Quick Start** (100 lines)
+
    - Installation
    - Basic usage
    - Common scenarios
    - Troubleshooting
 
 3. **Architecture** (150 lines)
+
    - System diagram
    - Enricher tiers
    - Dependency graph
    - Execution flow
 
 4. **Configuration** (100 lines)
+
    - Minimum requirements
    - Environment variables
    - Customization
@@ -194,7 +210,8 @@
 ### **Document 2**: `SEEDING_ENRICHER_REFERENCE.md` (~1,500 lines)
 
 **Format** (for each of 18 enrichers):
-```markdown
+
+````markdown
 ## N. EnricherName
 
 **Table(s)**: TableName, RelatedTable  
@@ -203,38 +220,48 @@
 **Execution Priority**: X/18
 
 ### Purpose
+
 Brief description of what this enricher does
 
 ### Minimum Requirements
+
 - Entity A: X items
 - Entity B: Y items
 
 ### Implementation Details
+
 - Check logic
 - Creation logic
 - Validation logic
 
 ### Idempotency Strategy
+
 How it prevents duplicates
 
 ### Deterministic Behavior
+
 How it ensures same data
 
 ### Example Output
+
 Sample data it creates
 
 ### Code Reference
+
 ```typescript
 // Key methods
 async enrich(): Promise<EnrichmentResult>
 async ensureMinimumX(...): Promise<number>
 ```
+````
 
 ### Testing Checklist
+
 - [ ] Empty database
 - [ ] Partial data
 - [ ] Fully satisfied
-```
+
+````
 
 **Total**: ~85 lines × 18 enrichers = ~1,530 lines
 
@@ -279,19 +306,23 @@ async ensureMinimumX(...): Promise<number>
   "seed:legacy:reset": "...",
   "seed:legacy:help": "..."
 }
-```
+````
+
 **Total**: 15 scripts! 😱
 
 ### **After** (Clean):
+
 ```json
 {
   "db:seed": "tsx prisma/seed.ts",
   "db:reset": "prisma migrate reset --force && npm run db:seed"
 }
 ```
+
 **Total**: 2 scripts! ✅
 
 ### **Control via Environment Variables**:
+
 ```bash
 # Verbose output
 SEED_VERBOSE=true npm run db:seed
@@ -312,9 +343,9 @@ SEED_SKIP_VERIFY=true npm run db:seed
 ```typescript
 /**
  * [Name] Enricher
- * 
+ *
  * [Description of what it does]
- * 
+ *
  * Tables: [List]
  * Depends On: [Dependencies]
  * Tier: [X]
@@ -339,7 +370,7 @@ export class [Name]Enricher extends BaseEnricher {
     try {
       // Get entities that need enrichment
       const entities = await this.getEntitiesNeedingData();
-      
+
       // Enrich each entity
       for (const entity of entities) {
         const itemsAdded = await this.enrichEntity(entity);
@@ -379,6 +410,7 @@ export class [Name]Enricher extends BaseEnricher {
 ## 📋 DETAILED ENRICHER SPECIFICATIONS
 
 ### **1. MembershipsEnricher**
+
 ```
 Tables: CommunityMember, Membership
 Depends: User, Community
@@ -393,6 +425,7 @@ Deterministic: Seeded by userId
 ```
 
 ### **2. PostsEnricher**
+
 ```
 Tables: Post
 Depends: CommunityMember
@@ -407,6 +440,7 @@ Deterministic: Seeded by userId + 'posts'
 ```
 
 ### **3. HeartsEnricher**
+
 ```
 Tables: Heart, PostHeart, CommentHeart
 Depends: Post, Comment
@@ -420,6 +454,7 @@ Deterministic: Seeded by userId + 'hearts'
 ```
 
 ### **4. CommentsEnricher**
+
 ```
 Tables: Comment
 Depends: Post
@@ -434,6 +469,7 @@ Deterministic: Seeded by userId + 'comments'
 ```
 
 ### **5. ModeratorAssignmentsEnricher**
+
 ```
 Tables: ModeratorCommunity
 Depends: Moderator, Community
@@ -446,6 +482,7 @@ Deterministic: Seeded by moderatorId
 ```
 
 ### **6. RelationshipsEnricher**
+
 ```
 Tables: ClientTherapist
 Depends: Client, Therapist
@@ -459,6 +496,7 @@ Deterministic: Load-balances therapists
 ```
 
 ### **7. AvailabilityEnricher**
+
 ```
 Tables: TherapistAvailability
 Depends: Therapist
@@ -472,6 +510,7 @@ Deterministic: Seeded by therapistId
 ```
 
 ### **8. MeetingsEnricher**
+
 ```
 Tables: Meeting, MeetingNotes
 Depends: ClientTherapist, TherapistAvailability
@@ -485,6 +524,7 @@ Deterministic: Seeded by relationshipId
 ```
 
 ### **9. WorksheetsEnricher**
+
 ```
 Tables: Worksheet, WorksheetSubmission
 Depends: Therapist, ClientTherapist
@@ -498,6 +538,7 @@ Deterministic: Seeded by therapistId + clientId
 ```
 
 ### **10. ReviewsEnricher**
+
 ```
 Tables: Review
 Depends: Meeting (completed)
@@ -511,6 +552,7 @@ Deterministic: Seeded by meetingId
 ```
 
 ### **11. AssessmentsEnricher**
+
 ```
 Tables: PreAssessment
 Depends: Client
@@ -524,6 +566,7 @@ Deterministic: Seeded by clientId
 ```
 
 ### **12. MessagesEnricher**
+
 ```
 Tables: Conversation, ConversationParticipant, Message
 Depends: User
@@ -537,6 +580,7 @@ Deterministic: Seeded by userId pair
 ```
 
 ### **13. MessageInteractionsEnricher**
+
 ```
 Tables: MessageReaction, MessageReadReceipt
 Depends: Message
@@ -549,6 +593,7 @@ Deterministic: Seeded by messageId
 ```
 
 ### **14. RoomsEnricher**
+
 ```
 Tables: Room, RoomGroup
 Depends: Meeting, User
@@ -561,6 +606,7 @@ Deterministic: Seeded by meetingId
 ```
 
 ### **15. NotificationsEnricher**
+
 ```
 Tables: Notification
 Depends: Various (Post, Meeting, Message, etc.)
@@ -574,6 +620,7 @@ Deterministic: Seeded by userId + type
 ```
 
 ### **16. ReportsEnricher**
+
 ```
 Tables: Report
 Depends: Post, Comment, User
@@ -587,6 +634,7 @@ Deterministic: Seeded randomly but consistently
 ```
 
 ### **17. UserBlocksEnricher**
+
 ```
 Tables: UserBlock
 Depends: User
@@ -599,6 +647,7 @@ Deterministic: Minimal, for testing only
 ```
 
 ### **18. PaymentsEnricher** [FUTURE]
+
 ```
 Tables: Payment, PaymentMethod
 Depends: Meeting, BillingService
@@ -614,6 +663,7 @@ Status: Placeholder - implement when billing ready
 ## 🎯 MINIMUM REQUIREMENTS (Finalized)
 
 ### **Per Client**:
+
 ```typescript
 {
   communityMemberships: 1,
@@ -631,6 +681,7 @@ Status: Placeholder - implement when billing ready
 ```
 
 ### **Per Therapist**:
+
 ```typescript
 {
   clientRelationships: 2,
@@ -647,6 +698,7 @@ Status: Placeholder - implement when billing ready
 ```
 
 ### **Per Community**:
+
 ```typescript
 {
   members: 8,
@@ -657,6 +709,7 @@ Status: Placeholder - implement when billing ready
 ```
 
 ### **Per Moderator**:
+
 ```typescript
 {
   communitiesAssigned: 1,
@@ -669,6 +722,7 @@ Status: Placeholder - implement when billing ready
 ## ⚡ SMART BEHAVIOR EXAMPLES
 
 ### **Scenario 1**: Fresh Database
+
 ```bash
 $ npm run db:seed
 
@@ -676,7 +730,7 @@ $ npm run db:seed
 📊 Database is empty
 📦 Creating base data...
   ✅ 25 users, 10 communities
-  
+
 ✨ Running enrichment (18 enrichers)...
   [1/18] Memberships... ✅ +35
   [2/18] Relationships... ✅ +10
@@ -702,6 +756,7 @@ $ npm run db:seed
 ```
 
 ### **Scenario 2**: Existing Data (Run #2)
+
 ```bash
 $ npm run db:seed
 
@@ -721,6 +776,7 @@ $ npm run db:seed
 ```
 
 ### **Scenario 3**: Partial Data (someone deleted posts)
+
 ```bash
 $ npm run db:seed
 
@@ -747,6 +803,7 @@ $ npm run db:seed
 ### **Rule**: All docs in `/mentara-api/docs`
 
 **Structure**:
+
 ```
 mentara-api/docs/
 ├── seeding/
@@ -766,16 +823,19 @@ mentara-api/docs/
 ## 🗑️ FILES TO REMOVE
 
 ### **Legacy Seed Scripts**:
+
 ```
 prisma/seed/legacy/ (entire folder)
 prisma/seed/scripts/ (entire folder)
 ```
 
 ### **Legacy Documentation** (if any):
+
 - Old seeding guides
 - Outdated phase-based docs
 
 ### **Keep**:
+
 ```
 prisma/seed/config.ts (updated)
 prisma/seed/generators/ (updated for base data)
@@ -788,6 +848,7 @@ prisma/seed/dynamic/ (our new system!)
 ## 🎯 IMPLEMENTATION CHECKLIST
 
 ### **Phase 1: Infrastructure** (~2 hours)
+
 - [ ] Update base-enricher.ts with better helpers
 - [ ] Create unified seed.ts (smart behavior)
 - [ ] Create master orchestrator (18 enrichers)
@@ -795,6 +856,7 @@ prisma/seed/dynamic/ (our new system!)
 - [ ] Add environment variable support
 
 ### **Phase 2: Core 8 Enrichers** (~2 hours)
+
 - [ ] MembershipsEnricher (complete)
 - [ ] RelationshipsEnricher (complete)
 - [ ] AvailabilityEnricher (complete)
@@ -805,6 +867,7 @@ prisma/seed/dynamic/ (our new system!)
 - [ ] HeartsEnricher (complete)
 
 ### **Phase 3: Remaining 10 Enrichers** (~2 hours)
+
 - [ ] MeetingsEnricher
 - [ ] ReviewsEnricher
 - [ ] MessagesEnricher
@@ -817,6 +880,7 @@ prisma/seed/dynamic/ (our new system!)
 - [ ] PaymentsEnricher (placeholder)
 
 ### **Phase 4: Documentation** (~1.5 hours)
+
 - [ ] SEEDING_SYSTEM_DOCUMENTATION.md
 - [ ] SEEDING_ENRICHER_REFERENCE.md (18 entries)
 - [ ] SEEDING_TROUBLESHOOTING.md
@@ -824,6 +888,7 @@ prisma/seed/dynamic/ (our new system!)
 - [ ] Move cleanup docs to cleanup/ subfolder
 
 ### **Phase 5: Testing** (~1 hour)
+
 - [ ] Test fresh seed (empty DB)
 - [ ] Test idempotent run (2x)
 - [ ] Test with partial data
@@ -832,6 +897,7 @@ prisma/seed/dynamic/ (our new system!)
 - [ ] Verify no bloat
 
 ### **Phase 6: Cleanup** (~0.5 hour)
+
 - [ ] Remove legacy seed files
 - [ ] Remove legacy npm scripts
 - [ ] Clean up package.json
@@ -844,6 +910,7 @@ prisma/seed/dynamic/ (our new system!)
 ## 📐 ANTI-BLOAT STRATEGY
 
 ### **Core Principle**: Check, Don't Assume
+
 ```typescript
 // ❌ BAD: Always creates
 async addPosts(userId: string) {
@@ -856,9 +923,9 @@ async addPosts(userId: string) {
 async ensureMinimumPosts(userId: string, minPosts: number) {
   const current = await prisma.post.count({ where: { userId }});
   const gap = minPosts - current;
-  
+
   if (gap <= 0) return 0; // ✅ Already satisfied!
-  
+
   for (let i = 0; i < gap; i++) {
     await prisma.post.create({...}); // Only creates what's missing
   }
@@ -866,6 +933,7 @@ async ensureMinimumPosts(userId: string, minPosts: number) {
 ```
 
 ### **Early Exit** (Performance):
+
 ```typescript
 async enrich() {
   // Quick check at start
@@ -873,20 +941,21 @@ async enrich() {
   if (!needsEnrichment) {
     return { itemsAdded: 0 }; // ✅ Skip entire enricher!
   }
-  
+
   // Continue only if needed...
 }
 ```
 
 ### **Unique Constraints** (Safety):
+
 ```typescript
 // Use database constraints to prevent duplicates
 await prisma.communityMember.upsert({
   where: {
-    userId_communityId: { userId, communityId } // ✅ Unique constraint
+    userId_communityId: { userId, communityId }, // ✅ Unique constraint
   },
   update: {}, // No-op if exists
-  create: { userId, communityId, role: 'MEMBER' }
+  create: { userId, communityId, role: 'MEMBER' },
 });
 ```
 
@@ -895,7 +964,8 @@ await prisma.communityMember.upsert({
 ## 🎨 DOCUMENTATION TEMPLATE
 
 ### **Each Enricher Documentation**:
-```markdown
+
+````markdown
 ## N. EnricherName
 
 **Tables**: TableName  
@@ -906,32 +976,40 @@ await prisma.communityMember.upsert({
 ---
 
 ### 📋 Purpose
+
 [What this enricher does and why]
 
 ### 🎯 Minimum Requirements
+
 **Per Entity A**:
+
 - Field X: ≥ N items
 - Field Y: ≥ M items
 
 **Per Entity B**:
+
 - Field Z: ≥ K items
 
 ### ⚙️ Implementation
+
 **Step 1**: Check existing data
 **Step 2**: Calculate gaps
 **Step 3**: Create missing items
 **Step 4**: Verify creation
 
 ### 🔄 Idempotency
+
 **Strategy**: [How it prevents duplicates]
 **Safety**: [Unique constraints used]
 **Performance**: [Early exit conditions]
 
 ### 🎲 Determinism
+
 **Seeding**: Uses `seededRandom(entityId, 'context')`
 **Result**: Same entity always gets same data
 
 ### 📊 Example Data
+
 ```typescript
 // Example of created data
 {
@@ -940,18 +1018,22 @@ await prisma.communityMember.upsert({
   // ...
 }
 ```
+````
 
 ### 🧪 Testing
+
 - [x] Empty database
 - [x] Partial data
 - [x] Fully satisfied
 - [x] Run 5x (idempotency)
 
 ### 📝 Code Location
+
 `prisma/seed/dynamic/enrichers/name-enricher.ts`
 
 ---
-```
+
+````
 
 **Total**: 18 enrichers × ~85 lines each = ~1,530 lines
 
@@ -965,19 +1047,22 @@ await prisma.communityMember.upsert({
 ```bash
 npm run db:seed   # Smart, complete seeding
 npm run db:reset  # Reset then seed
-```
+````
 
 **Database Coverage**:
+
 - ✅ 33 models analyzed
 - ✅ 18 enrichers implemented
 - ✅ 100% table coverage
 
 **Documentation**:
+
 - ✅ 4 comprehensive docs (~3,000 lines)
 - ✅ All in /docs/seeding/
 - ✅ Clean and organized
 
 **Behavior**:
+
 - ✅ Idempotent (run 100x safely)
 - ✅ Smart (only fills gaps)
 - ✅ Fast (skips satisfied)
@@ -988,16 +1073,19 @@ npm run db:reset  # Reset then seed
 ## 📅 IMPLEMENTATION TIMELINE
 
 ### **Session 1** (~3 hours):
+
 - Infrastructure setup
 - Core 8 enrichers
 - Basic testing
 
 ### **Session 2** (~3 hours):
+
 - Remaining 10 enrichers
 - Complete documentation
 - Full testing
 
 ### **Session 3** (~2 hours):
+
 - Polish & optimization
 - Performance tuning
 - Final verification
@@ -1021,6 +1109,7 @@ npm run db:reset  # Reset then seed
 ## 🎊 NEXT STEPS
 
 **When you return**:
+
 1. Review this plan
 2. Approve approach
 3. I'll implement all 18 enrichers
@@ -1033,4 +1122,3 @@ npm run db:reset  # Reset then seed
 **This plan ensures your seeding system will be WORLD-CLASS!** 🌍✨
 
 **Ready for implementation when you are!** 🚀
-
