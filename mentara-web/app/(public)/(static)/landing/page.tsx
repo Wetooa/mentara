@@ -113,7 +113,7 @@ const features = [
     description:
       "Connect with certified professionals specializing in various mental health areas.",
     icon: Award,
-    stats: "500+ Therapists",
+    stats: "Licensed Therapists",
     gradient: "from-amber-400/20 to-orange-500/20",
   },
   {

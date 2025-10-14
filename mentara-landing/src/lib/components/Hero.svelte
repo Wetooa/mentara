@@ -149,7 +149,7 @@
               class="text-sm font-kollektif font-semibold"
               style="color: var(--primary);"
             >
-              ✨ Join 500+ organizations transforming workplace mental health
+              ✨ Join organizations transforming workplace mental health
             </p>
           </div>
         </div>
