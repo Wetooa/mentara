@@ -203,7 +203,7 @@
                   </svg>
                   <div>
                     <div class="font-semibold font-kollektif">
-                      Licensed Therapists
+                      Growing Therapists
                     </div>
                     <div class="text-sm text-white/80">
                       Licensed professionals
@@ -247,7 +247,7 @@
                   </svg>
                   <div>
                     <div class="font-semibold font-kollektif">
-                      Trusted by 500+
+                      Growing support
                     </div>
                     <div class="text-sm text-white/80">Organizations</div>
                   </div>
