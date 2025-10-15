@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
   //   buildActivity: process.env.NEXT_PUBLIC_SHOW_DEVTOOLS === "true",
   //   buildActivityPosition: "bottom-left",
   // },
+  devIndicators: false,
 };
 
 export default nextConfig;

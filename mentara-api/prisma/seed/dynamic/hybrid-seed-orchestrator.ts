@@ -24,6 +24,7 @@ import { RoomsEnricher } from './enrichers/rooms-enricher';
 import { ReportsEnricher } from './enrichers/reports-enricher';
 import { UserBlocksEnricher } from './enrichers/user-blocks-enricher';
 import { PaymentsEnricher } from './enrichers/payments-enricher';
+import { GroupSessionsEnricher } from './enrichers/group-sessions-enricher';
 import { EnrichmentResult } from './enrichers/base-enricher';
 
 export interface HybridSeedReport {
@@ -78,6 +79,7 @@ export class HybridSeedOrchestrator {
       { name: 'Notifications', enricher: new NotificationsEnricher(prisma) },
 
       // Tier 6: Edge cases & system
+      { name: 'GroupSessions', enricher: new GroupSessionsEnricher(prisma) },
       { name: 'Reports', enricher: new ReportsEnricher(prisma) },
       { name: 'Blocks', enricher: new UserBlocksEnricher(prisma) },
       { name: 'Payments', enricher: new PaymentsEnricher(prisma) },
