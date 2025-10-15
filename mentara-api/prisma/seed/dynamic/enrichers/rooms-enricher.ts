@@ -57,4 +57,3 @@ export class RoomsEnricher extends BaseEnricher {
     return 1;
   }
 }
-

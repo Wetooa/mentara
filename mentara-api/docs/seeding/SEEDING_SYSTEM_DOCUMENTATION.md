@@ -33,6 +33,7 @@ The Mentara Seeding System is an intelligent, idempotent database seeding soluti
 ### Why Table-Based?
 
 Previous seeding systems were role-based (client/therapist) which didn't cover all tables. Our new approach:
+
 - One enricher per database table
 - Comprehensive coverage (18 enrichers)
 - Clear dependencies
@@ -62,6 +63,7 @@ npm run db:seed
 ```
 
 **What it does**:
+
 1. Checks if database is empty
 2. Creates base data if needed (users, communities)
 3. Runs 18 enrichers to ensure minimums
@@ -69,27 +71,34 @@ npm run db:seed
 5. Exits
 
 **Time**:
+
 - First run (empty): ~25-35 seconds
 - Subsequent runs (satisfied): ~1-2 seconds
 
 ### Common Scenarios
 
 #### Scenario 1: Fresh Project Setup
+
 ```bash
 npm run db:reset  # Drops DB, migrates, seeds
 ```
+
 **Result**: Fully populated database ready for testing
 
 #### Scenario 2: After Testing (Some Data Deleted)
+
 ```bash
 npm run db:seed  # Fills gaps only
 ```
+
 **Result**: Missing data restored, existing data untouched
 
 #### Scenario 3: Check Current State
+
 ```bash
 SEED_AUDIT=true npm run db:seed
 ```
+
 **Result**: Shows what's missing without making changes
 
 ---
@@ -160,31 +169,37 @@ END
 ### Enricher Tiers
 
 **Tier 1 - Foundation** (Can run in parallel):
+
 - Memberships (Users → Communities)
 - Relationships (Clients ↔ Therapists)
 - Availability (Therapists → Schedules)
 
 **Tier 2 - Content** (Depends on Tier 1):
+
 - Assessments (Clients → Pre-assessments)
 - Posts (Users + Memberships → Posts)
 - Moderators (Moderators → Communities)
 
 **Tier 3 - Engagement** (Depends on Tier 2):
+
 - Comments (Users + Posts → Comments)
 - Hearts (Users + Posts/Comments → Likes)
 
 **Tier 4 - Therapy** (Depends on relationships):
+
 - Meetings (Relationships → Sessions + Notes)
 - Worksheets (Therapists → Materials + Assignments)
 - Messages (Users → Conversations)
 
 **Tier 5 - Interactions** (Depends on Tier 4):
+
 - Reviews (Completed Meetings → Reviews)
 - Reactions (Messages → Emoji reactions)
 - Rooms (Video Meetings → Chat rooms)
 - Notifications (Various → Alerts)
 
 **Tier 6 - System** (Edge cases):
+
 - Reports (Moderation testing)
 - Blocks (Block feature testing)
 - Payments (Placeholder for future)
@@ -198,6 +213,7 @@ END
 Defined in `prisma/seed/dynamic/minimum-requirements.ts`:
 
 **Per Client**:
+
 ```typescript
 {
   communityMemberships: 1,    // In at least 1 community
@@ -214,6 +230,7 @@ Defined in `prisma/seed/dynamic/minimum-requirements.ts`:
 ```
 
 **Per Therapist**:
+
 ```typescript
 {
   clientRelationships: 2,     // Has active clients
@@ -229,6 +246,7 @@ Defined in `prisma/seed/dynamic/minimum-requirements.ts`:
 ```
 
 **Per Community**:
+
 ```typescript
 {
   members: 8,                 // Active community
@@ -261,18 +279,21 @@ SEED_FORCE=true npm run db:seed
 The system is safe to run multiple times:
 
 **Run 1** (Empty database):
+
 ```bash
 $ npm run db:seed
 📦 Creating base data... ✅ 837 items created
 ```
 
 **Run 2** (Database has data):
+
 ```bash
 $ npm run db:seed
 ✅ All requirements satisfied! (1.2s)
 ```
 
 **Run 3** (Someone deleted some posts):
+
 ```bash
 $ npm run db:seed
 ✨ Adding 7 missing posts... ✅
@@ -289,10 +310,11 @@ Same entity always gets same data:
 // - Same conversation partners
 
 // Because we use seeded random:
-const random = createSeededRandom("abc-123", "posts");
+const random = createSeededRandom('abc-123', 'posts');
 ```
 
 **Benefits**:
+
 - Reproducible bugs
 - Consistent testing
 - Easier debugging
@@ -302,6 +324,7 @@ const random = createSeededRandom("abc-123", "posts");
 To add a new enricher:
 
 1. Create enricher file:
+
 ```typescript
 // prisma/seed/dynamic/enrichers/your-enricher.ts
 import { BaseEnricher } from './base-enricher';
@@ -318,6 +341,7 @@ export class YourEnricher extends BaseEnricher {
 ```
 
 2. Add to orchestrator:
+
 ```typescript
 // hybrid-seed-orchestrator.ts
 import { YourEnricher } from './enrichers/your-enricher';
@@ -374,6 +398,7 @@ import { YourEnricher } from './enrichers/your-enricher';
 ### After Subsequent Runs
 
 If all requirements satisfied:
+
 - **Items added**: 0
 - **Duration**: 1-2 seconds
 - **Output**: "✅ All requirements satisfied!"
@@ -418,4 +443,3 @@ npm run db:seed  # Fills gaps!
 
 **Last Updated**: October 14, 2025  
 **Maintainer**: Mentara Development Team
-

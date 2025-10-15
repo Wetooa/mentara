@@ -9,6 +9,7 @@ Common issues, error messages, and solutions for the Mentara seeding system.
 ### Issue 1: "Database already seeded" Message
 
 **Symptom**:
+
 ```
 🌱 Found existing data (837 items)
 ✅ All requirements satisfied!
@@ -21,6 +22,7 @@ Common issues, error messages, and solutions for the Mentara seeding system.
 **When to worry**: Never. This means your database is properly seeded.
 
 **If you want to reseed anyway**:
+
 ```bash
 npm run db:reset  # Drops and recreates database
 ```
@@ -30,12 +32,14 @@ npm run db:reset  # Drops and recreates database
 ### Issue 2: Slow Seeding Performance
 
 **Symptom**:
+
 ```
 npm run db:seed
 # Takes 2+ minutes
 ```
 
 **Expected Times**:
+
 - First run (empty): 25-35 seconds ✅
 - Subsequent runs: 1-2 seconds ✅
 - More than 60 seconds: ⚠️ Problem
@@ -43,6 +47,7 @@ npm run db:seed
 **Common Causes**:
 
 **A. Database Connection Issues**
+
 ```bash
 # Check PostgreSQL status
 sudo systemctl status postgresql
@@ -52,6 +57,7 @@ psql $DATABASE_URL -c "SELECT 1;"
 ```
 
 **B. Low Memory**
+
 ```bash
 # Check available memory
 free -h
@@ -61,6 +67,7 @@ node --max-old-space-size=2048 node_modules/.bin/ts-node prisma/seed.ts
 ```
 
 **C. Large Existing Dataset**
+
 ```bash
 # Check database size
 psql $DATABASE_URL -c "SELECT COUNT(*) FROM \"User\";"
@@ -74,24 +81,28 @@ npm run db:reset
 ### Issue 3: TypeScript Compilation Errors
 
 **Symptom**:
+
 ```
 TSError: ⨯ Unable to compile TypeScript:
 src/...enricher.ts(10,5): error TS2322
 ```
 
 **Solution 1**: Rebuild
+
 ```bash
 npm run build
 npm run db:seed
 ```
 
 **Solution 2**: Clear cache
+
 ```bash
 rm -rf node_modules/.cache
 npm run db:seed
 ```
 
 **Solution 3**: Check imports
+
 ```typescript
 // ❌ Wrong
 import { PrismaClient } from 'prisma';
@@ -105,17 +116,20 @@ import { PrismaClient } from '@prisma/client';
 ### Issue 4: Prisma Client Not Generated
 
 **Symptom**:
+
 ```
 Error: @prisma/client did not initialize yet
 ```
 
 **Solution**:
+
 ```bash
 npx prisma generate
 npm run db:seed
 ```
 
 **Prevention**: Add to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -129,17 +143,20 @@ npm run db:seed
 ### Issue 5: Migration Pending
 
 **Symptom**:
+
 ```
 Error: Prisma schema and database are out of sync
 ```
 
 **Solution**:
+
 ```bash
 npx prisma migrate dev
 npm run db:seed
 ```
 
 **Or reset**:
+
 ```bash
 npm run db:reset  # Automatically migrates
 ```
@@ -149,6 +166,7 @@ npm run db:reset  # Automatically migrates
 ### Issue 6: Duplicate Key Errors
 
 **Symptom**:
+
 ```
 Error: Unique constraint failed on the fields: (`userId`,`communityId`)
 ```
@@ -158,12 +176,14 @@ Error: Unique constraint failed on the fields: (`userId`,`communityId`)
 **If it does**:
 
 **Step 1**: Check for multiple seed processes
+
 ```bash
 ps aux | grep "seed.ts"
 # Kill duplicates
 ```
 
 **Step 2**: Verify unique constraints in schema
+
 ```prisma
 model CommunityMember {
   @@unique([userId, communityId])  // Must exist
@@ -177,17 +197,20 @@ model CommunityMember {
 ### Issue 7: Out of Memory
 
 **Symptom**:
+
 ```
 FATAL ERROR: Ineffective mark-compacts near heap limit
 ```
 
 **Solution**:
+
 ```bash
 # Increase Node memory
 node --max-old-space-size=2048 node_modules/.bin/ts-node prisma/seed.ts
 ```
 
 **Or update `package.json`**:
+
 ```json
 {
   "scripts": {
@@ -201,17 +224,20 @@ node --max-old-space-size=2048 node_modules/.bin/ts-node prisma/seed.ts
 ### Issue 8: Connection Pool Exhausted
 
 **Symptom**:
+
 ```
 Error: Can't reach database server
 Too many connections
 ```
 
 **Solution 1**: Check connection limit
+
 ```bash
 psql $DATABASE_URL -c "SHOW max_connections;"
 ```
 
 **Solution 2**: Close other connections
+
 ```bash
 # Find active connections
 psql $DATABASE_URL -c "SELECT pid, usename FROM pg_stat_activity;"
@@ -221,6 +247,7 @@ psql $DATABASE_URL -c "SELECT pg_terminate_backend(PID);"
 ```
 
 **Solution 3**: Increase pool size in `prisma/schema.prisma`:
+
 ```prisma
 datasource db {
   provider = "postgresql"
@@ -239,6 +266,7 @@ datasource db {
 **Cause**: Prisma client not installed or generated
 
 **Solution**:
+
 ```bash
 npm install @prisma/client
 npx prisma generate
@@ -251,21 +279,23 @@ npx prisma generate
 **Cause**: Data doesn't match schema
 
 **Example**:
+
 ```
 Required field 'email' is missing
 ```
 
 **Solution**: Check enricher data matches schema:
+
 ```typescript
 // Verify all required fields present
 await prisma.user.create({
   data: {
-    email: "user@example.com",     // Required
-    firstName: "John",              // Required
-    lastName: "Doe",                // Required
-    role: "client",                 // Required
+    email: 'user@example.com', // Required
+    firstName: 'John', // Required
+    lastName: 'Doe', // Required
+    role: 'client', // Required
     // ... other required fields
-  }
+  },
 });
 ```
 
@@ -276,19 +306,21 @@ await prisma.user.create({
 **Cause**: Foreign key constraint violation
 
 **Example**:
+
 ```
 Foreign key constraint failed on field: `userId`
 ```
 
 **Solution**: Ensure parent records exist first:
+
 ```typescript
 // ❌ Bad: Create child before parent
-await prisma.post.create({ data: { userId: "unknown-id" }});
+await prisma.post.create({ data: { userId: 'unknown-id' } });
 
 // ✅ Good: Ensure user exists
-const user = await prisma.user.findUnique({ where: { id: userId }});
+const user = await prisma.user.findUnique({ where: { id: userId } });
 if (user) {
-  await prisma.post.create({ data: { userId: user.id }});
+  await prisma.post.create({ data: { userId: user.id } });
 }
 ```
 
@@ -299,6 +331,7 @@ if (user) {
 **Cause**: Database not running or unreachable
 
 **Solution**:
+
 ```bash
 # Check if PostgreSQL is running
 sudo systemctl status postgresql
@@ -322,6 +355,7 @@ SEED_VERBOSE=true npm run db:seed
 ```
 
 **Output**:
+
 ```
 🌱 Mentara Database Seeding
 📊 Audit: 25 users, 10 communities
@@ -339,6 +373,7 @@ SEED_AUDIT=true npm run db:seed
 ```
 
 **Shows what would be added without making changes**:
+
 ```
 📊 Audit Report:
   Clients:
@@ -432,12 +467,12 @@ Add timing to enrichers:
 ```typescript
 async enrich(): Promise<EnrichmentResult> {
   const start = Date.now();
-  
+
   // ... enrichment logic
-  
+
   const duration = Date.now() - start;
   console.log(`${this.tableName}: ${duration}ms`);
-  
+
   return result;
 }
 ```
@@ -449,13 +484,12 @@ Enable Prisma query logging:
 ```typescript
 // prisma/client.ts
 const prisma = new PrismaClient({
-  log: [
-    { level: 'query', emit: 'event' },
-  ],
+  log: [{ level: 'query', emit: 'event' }],
 });
 
 prisma.$on('query', (e) => {
-  if (e.duration > 1000) {  // > 1 second
+  if (e.duration > 1000) {
+    // > 1 second
     console.log(`Slow query: ${e.query} (${e.duration}ms)`);
   }
 });
@@ -501,6 +535,7 @@ A: Edit `prisma/seed/dynamic/minimum-requirements.ts`
 
 **Q: Can I disable specific enrichers?**  
 A: Yes, comment out in `hybrid-seed-orchestrator.ts`:
+
 ```typescript
 // { name: 'Reports', enricher: new ReportsEnricher(prisma) },
 ```
@@ -515,7 +550,8 @@ A: Not currently. Tiers run sequentially to respect dependencies. Future enhance
 A: Run `npm run db:seed`. It will detect empty database and recreate everything.
 
 **Q: How do I speed up seeding?**  
-A: 
+A:
+
 - Use `SEED_AUDIT=true` to check without seeding
 - Subsequent runs are fast (1-2s)
 - First run will always take 25-35s
@@ -524,4 +560,3 @@ A:
 
 **Last Updated**: October 14, 2025  
 **Need more help?** Check the [main documentation](./SEEDING_SYSTEM_DOCUMENTATION.md)
-

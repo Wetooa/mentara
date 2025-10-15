@@ -49,11 +49,13 @@ Technical architecture and design patterns for the Mentara seeding system.
 ### Component Layers
 
 **Layer 1: Entry Point**
+
 - `seed.ts` - Main orchestrator
 - Environment variable parsing
 - Database connection management
 
 **Layer 2: Base Generators**
+
 - `generators/users.ts` - Initial user creation
 - `generators/communities.ts` - Community setup
 - `generators/relationships.ts` - Basic relationships
@@ -61,11 +63,13 @@ Technical architecture and design patterns for the Mentara seeding system.
 - `generators/therapy.ts` - Basic therapy data
 
 **Layer 3: Dynamic Enrichment**
+
 - `HybridSeedOrchestrator` - Manages enricher execution
 - 18 table-specific enrichers
 - Tier-based dependency management
 
 **Layer 4: Utilities**
+
 - `SeededRandom` - Deterministic randomness
 - `BaseEnricher` - Common enricher functionality
 - Configuration management
@@ -97,6 +101,7 @@ class PostsEnricher implements Enricher {
 ```
 
 **Benefits**:
+
 - Easy to add new enrichers
 - Consistent interface
 - Testable in isolation
@@ -111,20 +116,21 @@ abstract class BaseEnricher {
   async enrich(): Promise<EnrichmentResult> {
     const entities = await this.getEntities();
     let added = 0;
-    
+
     for (const entity of entities) {
       added += await this.enrichEntity(entity); // Subclass implements
     }
-    
+
     return { itemsAdded: added };
   }
-  
+
   // Subclass must implement
   protected abstract enrichEntity(entity: any): Promise<number>;
 }
 ```
 
 **Benefits**:
+
 - Code reuse
 - Enforces consistent structure
 - Common utilities in base class
@@ -135,12 +141,13 @@ Fluent interface for deterministic random number generation:
 
 ```typescript
 const random = new SeededRandom('entity-123-context')
-  .next()          // 0.0 - 1.0
-  .nextInt(10)     // 0 - 9
-  .pickRandom(arr) // Random item from array
+  .next() // 0.0 - 1.0
+  .nextInt(10) // 0 - 9
+  .pickRandom(arr); // Random item from array
 ```
 
 **Benefits**:
+
 - Deterministic across runs
 - Same seed → same sequence
 - Reproducible bugs
@@ -155,13 +162,13 @@ class HybridSeedOrchestrator {
     const enrichers = [
       // Tier 1 (no dependencies)
       { name: 'Memberships', enricher: new MembershipsEnricher(prisma) },
-      
+
       // Tier 2 (depends on Tier 1)
       { name: 'Posts', enricher: new PostsEnricher(prisma) },
-      
+
       // ... etc
     ];
-    
+
     for (const { name, enricher } of enrichers) {
       await enricher.enrich(); // Sequential execution respects dependencies
     }
@@ -170,6 +177,7 @@ class HybridSeedOrchestrator {
 ```
 
 **Benefits**:
+
 - Centralized control
 - Clear dependency order
 - Easy to add/remove enrichers
@@ -221,7 +229,7 @@ System Tables:
     User
       ├──> UserBlock (Tier 6)
       └──> Report (Tier 6)
-      
+
 Meeting
       └──> Payment (Tier 6 - future)
 ```
@@ -229,34 +237,20 @@ Meeting
 ### Execution Order
 
 **Tier 1** (Foundation):
+
 1. MembershipsEnricher
 2. RelationshipsEnricher
 3. AvailabilityEnricher
 
-**Tier 2** (Content):
-4. AssessmentsEnricher
-5. PostsEnricher
-6. ModeratorAssignmentsEnricher
+**Tier 2** (Content): 4. AssessmentsEnricher 5. PostsEnricher 6. ModeratorAssignmentsEnricher
 
-**Tier 3** (Engagement):
-7. CommentsEnricher
-8. HeartsEnricher
+**Tier 3** (Engagement): 7. CommentsEnricher 8. HeartsEnricher
 
-**Tier 4** (Therapy):
-9. MeetingsEnricher
-10. WorksheetsEnricher
-11. MessagesEnricher
+**Tier 4** (Therapy): 9. MeetingsEnricher 10. WorksheetsEnricher 11. MessagesEnricher
 
-**Tier 5** (Interactions):
-12. ReviewsEnricher
-13. MessageInteractionsEnricher
-14. RoomsEnricher
-15. NotificationsEnricher
+**Tier 5** (Interactions): 12. ReviewsEnricher 13. MessageInteractionsEnricher 14. RoomsEnricher 15. NotificationsEnricher
 
-**Tier 6** (System):
-16. ReportsEnricher
-17. UserBlocksEnricher
-18. PaymentsEnricher
+**Tier 6** (System): 16. ReportsEnricher 17. UserBlocksEnricher 18. PaymentsEnricher
 
 ---
 
@@ -270,14 +264,14 @@ Each enricher catches its own errors and reports them:
 async enrich(): Promise<EnrichmentResult> {
   let added = 0;
   let errors = 0;
-  
+
   try {
     // Enrichment logic
   } catch (error) {
     errors++;
     console.error(`Error in ${this.tableName}:`, error);
   }
-  
+
   return {
     table: this.tableName,
     itemsAdded: added,
@@ -287,6 +281,7 @@ async enrich(): Promise<EnrichmentResult> {
 ```
 
 **Principles**:
+
 - Fail gracefully (don't crash entire seeding)
 - Log errors but continue
 - Report error count in results
@@ -295,6 +290,7 @@ async enrich(): Promise<EnrichmentResult> {
 ### Error Recovery
 
 If enrichment fails:
+
 1. Error logged with context
 2. Partial data may exist
 3. Next run will retry missing data
@@ -307,6 +303,7 @@ If enrichment fails:
 ### Strategies
 
 **1. Batch Operations**
+
 ```typescript
 // ❌ Bad: N queries
 for (const item of items) {
@@ -318,15 +315,17 @@ await prisma.post.createMany({ data: items });
 ```
 
 **2. Early Exit**
+
 ```typescript
 // Check before processing
-const count = await prisma.post.count({ where: { userId }});
+const count = await prisma.post.count({ where: { userId } });
 if (count >= minPosts) {
   return 0; // Skip entire enricher!
 }
 ```
 
 **3. Selective Queries**
+
 ```typescript
 // Only query what you need
 const users = await prisma.user.findMany({
@@ -341,25 +340,26 @@ const users = await prisma.user.findMany({
 ```
 
 **4. Smart Counting**
+
 ```typescript
 // Use _count in queries
 const clients = await prisma.client.findMany({
   include: {
     _count: {
-      select: { posts: true }
-    }
-  }
+      select: { posts: true },
+    },
+  },
 });
 // Access: client._count.posts
 ```
 
 ### Benchmarks
 
-| Operation | Time | Items |
-|-----------|------|-------|
-| First run (empty DB) | 25-35s | ~800 items |
-| Second run (satisfied) | 1-2s | 0 items |
-| Partial data (gaps) | 5-10s | 50-150 items |
+| Operation              | Time   | Items        |
+| ---------------------- | ------ | ------------ |
+| First run (empty DB)   | 25-35s | ~800 items   |
+| Second run (satisfied) | 1-2s   | 0 items      |
+| Partial data (gaps)    | 5-10s  | 50-150 items |
 
 ---
 
@@ -368,6 +368,7 @@ const clients = await prisma.client.findMany({
 ### Test Scenarios
 
 **1. Empty Database**
+
 ```bash
 npm run db:reset
 npm run db:seed
@@ -375,6 +376,7 @@ npm run db:seed
 ```
 
 **2. Idempotency**
+
 ```bash
 npm run db:seed  # Run 1
 npm run db:seed  # Run 2
@@ -383,6 +385,7 @@ npm run db:seed  # Run 3
 ```
 
 **3. Partial Data**
+
 ```bash
 npm run db:seed  # Initial seed
 # Manually delete some posts
@@ -391,12 +394,14 @@ npm run db:seed  # Reseed
 ```
 
 **4. Audit Mode**
+
 ```bash
 SEED_AUDIT=true npm run db:seed
 # Verify: No database changes, shows gaps
 ```
 
 **5. Individual Enrichers**
+
 ```typescript
 // In test file
 const enricher = new PostsEnricher(prisma);
@@ -411,13 +416,14 @@ expect(result.itemsAdded).toBeGreaterThan(0);
 ### Adding a New Enricher
 
 **Step 1**: Create enricher file
+
 ```typescript
 // prisma/seed/dynamic/enrichers/my-enricher.ts
 export class MyEnricher extends BaseEnricher {
   constructor(prisma: PrismaClient) {
     super(prisma, 'MyTable');
   }
-  
+
   async enrich(): Promise<EnrichmentResult> {
     // Implementation
   }
@@ -425,6 +431,7 @@ export class MyEnricher extends BaseEnricher {
 ```
 
 **Step 2**: Add to orchestrator
+
 ```typescript
 // hybrid-seed-orchestrator.ts
 import { MyEnricher } from './enrichers/my-enricher';
@@ -434,11 +441,13 @@ import { MyEnricher } from './enrichers/my-enricher';
 ```
 
 **Step 3**: Document it
+
 - Add entry to `SEEDING_ENRICHER_REFERENCE.md`
 - Update tier diagram
 - Update dependency graph
 
 **Step 4**: Test it
+
 ```bash
 npm run db:reset
 npm run db:seed
@@ -470,6 +479,7 @@ export const MINIMUM_REQUIREMENTS = {
 ```
 
 **To modify**:
+
 1. Edit `minimum-requirements.ts`
 2. Enrichers automatically use new values
 3. No code changes needed in enrichers
@@ -489,12 +499,14 @@ export const MINIMUM_REQUIREMENTS = {
 **No transactions for enrichment** (by design):
 
 **Why**:
+
 - Enrichment can take 30+ seconds
 - Long transactions can lock tables
 - Partial seeding is acceptable
 - Idempotency handles retries
 
 **Exception**:
+
 - Base data generation uses transactions
 - Individual enrichers may use transactions for complex operations
 
@@ -505,18 +517,22 @@ export const MINIMUM_REQUIREMENTS = {
 ### Planned
 
 1. **Parallel Tier Execution**
+
    - Run Tier 1 enrichers in parallel
    - Faster first-run seeding
 
 2. **Progress Indicators**
+
    - Real-time progress bar
    - Estimated time remaining
 
 3. **Configurable Requirements**
+
    - Override minimums via environment variables
    - Per-environment configuration
 
 4. **Smart Audit Reports**
+
    - Generate detailed gap analysis
    - Export to JSON/CSV
 
@@ -529,4 +545,3 @@ export const MINIMUM_REQUIREMENTS = {
 
 **Last Updated**: October 14, 2025  
 **Version**: 2.0
-

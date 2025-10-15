@@ -99,4 +99,3 @@ export class MessageInteractionsEnricher extends BaseEnricher {
     return participants.length;
   }
 }
-

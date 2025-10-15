@@ -7,31 +7,37 @@ Complete specification for all 18 table enrichers in the Mentara seeding system.
 ## Table of Contents
 
 ### Tier 1 - Foundation
+
 1. [MembershipsEnricher](#1-membershipsenricher)
 2. [RelationshipsEnricher](#2-relationshipsenricher)
 3. [AvailabilityEnricher](#3-availabilityenricher)
 
 ### Tier 2 - Content
+
 4. [AssessmentsEnricher](#4-assessmentsenricher)
 5. [PostsEnricher](#5-postsenricher)
 6. [ModeratorAssignmentsEnricher](#6-moderatorassignmentsenricher)
 
 ### Tier 3 - Engagement
+
 7. [CommentsEnricher](#7-commentsenricher)
 8. [HeartsEnricher](#8-heartsenricher)
 
 ### Tier 4 - Therapy
+
 9. [MeetingsEnricher](#9-meetingsenricher)
 10. [WorksheetsEnricher](#10-worksheetsenricher)
 11. [MessagesEnricher](#11-messagesenricher)
 
 ### Tier 5 - Interactions
+
 12. [ReviewsEnricher](#12-reviewsenricher)
 13. [MessageInteractionsEnricher](#13-messageinteractionsenricher)
 14. [RoomsEnricher](#14-roomsenricher)
 15. [NotificationsEnricher](#15-notificationsenricher)
 
 ### Tier 6 - System
+
 16. [ReportsEnricher](#16-reportsenricher)
 17. [UserBlocksEnricher](#17-userblocksenricher)
 18. [PaymentsEnricher](#18-paymentsenricher)
@@ -539,12 +545,13 @@ Creates therapy sessions for client-therapist relationships, including past, upc
 
 **Step 1**: Find relationships with < 3 meetings  
 **Step 2**: Create mix of:
+
 - Past completed (with notes)
 - Future scheduled
 - In-progress
-**Step 3**: Use therapist availability for scheduling  
-**Step 4**: Add session notes to completed meetings  
-**Step 5**: Calculate realistic durations (50-60 min)
+  **Step 3**: Use therapist availability for scheduling  
+  **Step 4**: Add session notes to completed meetings  
+  **Step 5**: Calculate realistic durations (50-60 min)
 
 ### Idempotency Strategy
 
@@ -937,12 +944,13 @@ Creates realistic notifications for users, testing notification features.
 
 **Step 1**: Check user's notification count  
 **Step 2**: Generate various notification types:
+
 - New comment on post
 - Upcoming meeting reminder
 - New message received
 - Worksheet assigned
-**Step 3**: Mix of read/unread  
-**Step 4**: Realistic timestamps
+  **Step 3**: Mix of read/unread  
+  **Step 4**: Realistic timestamps
 
 ### Idempotency Strategy
 
@@ -1117,6 +1125,7 @@ Creates same test blocks consistently.
 **Currently**: Skips enrichment (returns 0 items added)
 
 **Future Implementation**:
+
 1. Find completed meetings without payments
 2. Create payment records
 3. Link to payment methods
@@ -1165,4 +1174,3 @@ Not yet implemented (placeholder only).
 **Deterministic**: ✅ All
 
 **Last Updated**: October 14, 2025
-

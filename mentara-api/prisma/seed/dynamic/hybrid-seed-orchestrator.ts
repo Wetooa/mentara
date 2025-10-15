@@ -57,7 +57,10 @@ export class HybridSeedOrchestrator {
       // Tier 2: Depends on memberships
       { name: 'Assessments', enricher: new AssessmentsEnricher(prisma) },
       { name: 'Posts', enricher: new PostsEnricher(prisma) },
-      { name: 'Moderators', enricher: new ModeratorAssignmentsEnricher(prisma) },
+      {
+        name: 'Moderators',
+        enricher: new ModeratorAssignmentsEnricher(prisma),
+      },
 
       // Tier 3: Depends on posts
       { name: 'Comments', enricher: new CommentsEnricher(prisma) },

@@ -49,7 +49,10 @@ export class ModeratorAssignmentsEnricher extends BaseEnricher {
     };
   }
 
-  async ensureModeratorHasCommunity(moderatorId: string, minCommunities: number): Promise<number> {
+  async ensureModeratorHasCommunity(
+    moderatorId: string,
+    minCommunities: number,
+  ): Promise<number> {
     const assignedCommunities = await this.prisma.moderatorCommunity.count({
       where: { moderatorId },
     });
@@ -108,4 +111,3 @@ export class ModeratorAssignmentsEnricher extends BaseEnricher {
     return 1;
   }
 }
-

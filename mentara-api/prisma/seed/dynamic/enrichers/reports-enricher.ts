@@ -40,7 +40,8 @@ export class ReportsEnricher extends BaseEnricher {
               reporterId: reporter.id,
               reportedUserId: post.userId,
               postId: post.id,
-              reason: this.getReportReasons()[i % this.getReportReasons().length],
+              reason:
+                this.getReportReasons()[i % this.getReportReasons().length],
               status: i === 0 ? 'resolved' : 'pending',
               createdAt: this.randomPastDate(15),
             },
@@ -68,4 +69,3 @@ export class ReportsEnricher extends BaseEnricher {
     ];
   }
 }
-
