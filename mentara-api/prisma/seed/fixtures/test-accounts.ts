@@ -3,11 +3,14 @@
  * 
  * Predefined test accounts with known credentials for development and testing.
  * All accounts use password: "password123"
+ * 
+ * These accounts MUST be present after every seed run.
  */
 
 import { DEFAULT_PASSWORD } from '../config';
 
 export interface TestAccount {
+  id: string; // Specific predictable ID
   email: string;
   firstName: string;
   lastName: string;
@@ -18,56 +21,48 @@ export interface TestAccount {
 }
 
 /**
- * Client Test Accounts
+ * Client Test Accounts (MUST ALWAYS EXIST)
+ * From: TEST_ACCOUNTS.md
  */
 export const TEST_CLIENTS: TestAccount[] = [
   {
-    email: 'test.client.basic@mentaradev.local',
-    firstName: 'Sarah',
-    lastName: 'Johnson', 
+    id: 'dev_client_1',
+    email: 'client1@mentaratest.dev',
+    firstName: 'Client',
+    lastName: '1',
     role: 'client',
-    bio: 'New to therapy, looking for support with general anxiety and stress management.',
+    bio: 'Test client account 1 for development and testing.',
   },
   {
-    email: 'test.client.experienced@mentaradev.local',
-    firstName: 'Marcus',
-    lastName: 'Rodriguez',
+    id: 'dev_client_2',
+    email: 'client2@mentaratest.dev',
+    firstName: 'Client',
+    lastName: '2',
     role: 'client',
-    bio: 'Working on depression and relationship challenges with 2+ years of therapy experience.',
+    bio: 'Test client account 2 for development and testing.',
   },
   {
-    email: 'test.client.trauma@mentaradev.local',
-    firstName: 'Jennifer',
-    lastName: 'Chen',
+    id: 'dev_client_3',
+    email: 'client3@mentaratest.dev',
+    firstName: 'Client',
+    lastName: '3',
     role: 'client',
-    bio: 'PTSD survivor focusing on trauma recovery and building healthy coping mechanisms.',
-  },
-  {
-    email: 'test.client.anxiety@mentaradev.local',
-    firstName: 'David',
-    lastName: 'Kim',
-    role: 'client',
-    bio: 'Managing social anxiety and panic disorder. Active in anxiety support communities.',
-  },
-  {
-    email: 'test.client.wellness@mentaradev.local',
-    firstName: 'Maria',
-    lastName: 'Gonzalez',
-    role: 'client',
-    bio: 'Focused on preventive mental health and maintaining overall wellness through mindfulness.',
+    bio: 'Test client account 3 for development and testing.',
   },
 ];
 
 /**
- * Therapist Test Accounts
+ * Therapist Test Accounts (MUST ALWAYS EXIST)
+ * From: TEST_ACCOUNTS.md
  */
 export const TEST_THERAPISTS: TestAccount[] = [
   {
-    email: 'test.therapist.cbt@mentaradev.local',
-    firstName: 'Dr. Michael',
-    lastName: 'Thompson',
+    id: 'dev_therapist_1',
+    email: 'therapist1@mentaratest.dev',
+    firstName: 'Dr. Therapist',
+    lastName: '1',
     role: 'therapist',
-    bio: 'Licensed Clinical Psychologist specializing in Cognitive Behavioral Therapy with 8+ years experience.',
+    bio: 'Licensed therapist specializing in anxiety and depression.',
     specialData: {
       mobile: '+1-555-0101',
       province: 'California',
@@ -76,17 +71,20 @@ export const TEST_THERAPISTS: TestAccount[] = [
       isPRCLicensed: 'Yes',
       prcLicenseNumber: 'PSY12345',
       yearsOfExperience: 8,
-      areasOfExpertise: ['Anxiety Disorders', 'Depression', 'Cognitive Behavioral Therapy'],
-      therapeuticApproachesUsedList: ['CBT', 'Mindfulness-Based Therapy', 'Solution-Focused Therapy'],
-      languagesOffered: ['English', 'Spanish'],
+      areasOfExpertise: ['Anxiety', 'Depression'],
+      therapeuticApproachesUsedList: ['CBT', 'Mindfulness-Based Therapy'],
+      languagesOffered: ['English'],
+      hourlyRate: 100.00,
+      status: 'APPROVED',
     },
   },
   {
-    email: 'test.therapist.trauma@mentaradev.local',
-    firstName: 'Dr. Lisa',
-    lastName: 'Parker',
+    id: 'dev_therapist_2',
+    email: 'therapist2@mentaratest.dev',
+    firstName: 'Dr. Therapist',
+    lastName: '2',
     role: 'therapist', 
-    bio: 'Trauma specialist with expertise in PTSD, EMDR therapy, and complex trauma recovery.',
+    bio: 'Licensed therapist specializing in anxiety and depression.',
     specialData: {
       mobile: '+1-555-0102',
       province: 'New York',
@@ -94,18 +92,21 @@ export const TEST_THERAPISTS: TestAccount[] = [
       professionalLicenseType: 'LCSW',
       isPRCLicensed: 'Yes',
       prcLicenseNumber: 'LCSW67890',
-      yearsOfExperience: 12,
-      areasOfExpertise: ['Trauma Recovery', 'PTSD', 'EMDR', 'Complex Trauma'],
-      therapeuticApproachesUsedList: ['EMDR', 'Trauma-Focused CBT', 'Somatic Therapy'],
-      languagesOffered: ['English', 'French'],
+      yearsOfExperience: 10,
+      areasOfExpertise: ['Anxiety', 'Depression'],
+      therapeuticApproachesUsedList: ['CBT', 'Mindfulness-Based Therapy'],
+      languagesOffered: ['English'],
+      hourlyRate: 100.00,
+      status: 'APPROVED',
     },
   },
   {
-    email: 'test.therapist.family@mentaradev.local',
-    firstName: 'Dr. Amanda',
-    lastName: 'Williams',
+    id: 'dev_therapist_3',
+    email: 'therapist3@mentaratest.dev',
+    firstName: 'Dr. Therapist',
+    lastName: '3',
     role: 'therapist',
-    bio: 'Marriage and Family Therapist focusing on relationship dynamics and family systems.',
+    bio: 'Licensed therapist specializing in anxiety and depression.',
     specialData: {
       mobile: '+1-555-0103',
       province: 'Texas',
@@ -114,104 +115,117 @@ export const TEST_THERAPISTS: TestAccount[] = [
       isPRCLicensed: 'Yes',
       prcLicenseNumber: 'MFT11111',
       yearsOfExperience: 6,
-      areasOfExpertise: ['Family Therapy', 'Couples Counseling', 'Relationship Issues'],
-      therapeuticApproachesUsedList: ['Family Systems Therapy', 'Emotionally Focused Therapy', 'Gottman Method'],
+      areasOfExpertise: ['Anxiety', 'Depression'],
+      therapeuticApproachesUsedList: ['CBT', 'Mindfulness-Based Therapy'],
       languagesOffered: ['English'],
-    },
-  },
-  {
-    email: 'test.therapist.addiction@mentaradev.local',
-    firstName: 'Dr. James',
-    lastName: "O'Connor",
-    role: 'therapist',
-    bio: 'Addiction counselor and dual diagnosis specialist with extensive substance abuse treatment experience.',
-    specialData: {
-      mobile: '+1-555-0104',
-      province: 'Florida',
-      providerType: 'Licensed Professional Counselor',
-      professionalLicenseType: 'LPC',
-      isPRCLicensed: 'Yes',
-      prcLicenseNumber: 'LPC22222',
-      yearsOfExperience: 10,
-      areasOfExpertise: ['Substance Abuse', 'Dual Diagnosis', 'Addiction Recovery'],
-      therapeuticApproachesUsedList: ['Motivational Interviewing', 'Dialectical Behavior Therapy', '12-Step Facilitation'],
-      languagesOffered: ['English'],
+      hourlyRate: 100.00,
+      status: 'APPROVED',
     },
   },
 ];
 
 /**
- * Admin Test Accounts
+ * Admin Test Accounts (MUST ALWAYS EXIST)
+ * From: TEST_ACCOUNTS.md
  */
 export const TEST_ADMINS: TestAccount[] = [
   {
-    email: 'test.admin.super@mentaradev.local',
-    firstName: 'Robert',
-    lastName: 'Anderson',
+    id: 'dev_admin_1',
+    email: 'admin1@mentaratest.dev',
+    firstName: 'Admin',
+    lastName: '1',
     role: 'admin',
-    bio: 'System Administrator with full platform access and user management capabilities.',
+    bio: 'System Administrator with full platform access.',
     specialData: {
-      permissions: ['USER_MANAGEMENT', 'THERAPIST_APPROVAL', 'SYSTEM_CONFIG', 'BILLING_MANAGEMENT'],
-      adminLevel: 'super',
+      permissions: ['user_management', 'therapist_approval', 'system_admin'],
     },
   },
   {
-    email: 'test.admin.user.manager@mentaradev.local',
-    firstName: 'Linda',
-    lastName: 'Martinez',
+    id: 'dev_admin_2',
+    email: 'admin2@mentaratest.dev',
+    firstName: 'Admin',
+    lastName: '2',
     role: 'admin',
-    bio: 'User Management Administrator focused on account oversight and support.',
+    bio: 'System Administrator with full platform access.',
     specialData: {
-      permissions: ['USER_MANAGEMENT', 'SUPPORT_TICKETS'],
-      adminLevel: 'admin',
+      permissions: ['user_management', 'therapist_approval', 'system_admin'],
     },
   },
   {
-    email: 'test.admin.content@mentaradev.local',
-    firstName: 'William',
-    lastName: 'Johnson',
+    id: 'dev_admin_3',
+    email: 'admin3@mentaratest.dev',
+    firstName: 'Admin',
+    lastName: '3',
     role: 'admin',
-    bio: 'Content Administrator managing community moderation and content policies.',
+    bio: 'System Administrator with full platform access.',
     specialData: {
-      permissions: ['CONTENT_MODERATION', 'COMMUNITY_MANAGEMENT'],
-      adminLevel: 'admin',
+      permissions: ['user_management', 'therapist_approval', 'system_admin'],
     },
   },
 ];
 
 /**
- * Moderator Test Accounts
+ * Moderator Test Accounts (MUST ALWAYS EXIST)
+ * From: TEST_ACCOUNTS.md
  */
 export const TEST_MODERATORS: TestAccount[] = [
   {
-    email: 'test.moderator.primary@mentaradev.local',
-    firstName: 'Alex',
-    lastName: 'Morgan',
+    id: 'dev_moderator_1',
+    email: 'moderator1@mentaratest.dev',
+    firstName: 'Moderator',
+    lastName: '1',
     role: 'moderator',
-    bio: 'Primary Community Moderator overseeing multiple mental health support communities.',
+    bio: 'Community Moderator for content moderation.',
     specialData: {
-      permissions: ['MODERATE_POSTS', 'MODERATE_COMMENTS', 'COMMUNITY_MANAGEMENT'],
+      permissions: ['content_moderation', 'community_management'],
     },
   },
   {
-    email: 'test.moderator.anxiety@mentaradev.local',
-    firstName: 'Taylor',
-    lastName: 'Davis',
+    id: 'dev_moderator_2',
+    email: 'moderator2@mentaratest.dev',
+    firstName: 'Moderator',
+    lastName: '2',
     role: 'moderator',
-    bio: 'Anxiety Support Community Moderator with lived experience and peer support training.',
+    bio: 'Community Moderator for content moderation.',
     specialData: {
-      permissions: ['MODERATE_POSTS', 'MODERATE_COMMENTS'],
+      permissions: ['content_moderation', 'community_management'],
     },
   },
   {
-    email: 'test.moderator.trauma@mentaradev.local',
-    firstName: 'Jordan',
-    lastName: 'Smith',
+    id: 'dev_moderator_3',
+    email: 'moderator3@mentaratest.dev',
+    firstName: 'Moderator',
+    lastName: '3',
     role: 'moderator',
-    bio: 'PTSD & Trauma Recovery Community Moderator specializing in crisis intervention.',
+    bio: 'Community Moderator for content moderation.',
     specialData: {
-      permissions: ['MODERATE_POSTS', 'MODERATE_COMMENTS', 'CRISIS_INTERVENTION'],
+      permissions: ['content_moderation', 'community_management'],
     },
+  },
+];
+
+/**
+ * Required Test Communities (MUST ALWAYS EXIST)
+ * From: TEST_ACCOUNTS.md
+ */
+export const TEST_COMMUNITIES = [
+  {
+    id: 'dev_comm_adhd-support',
+    name: 'ADHD Support',
+    slug: 'adhd-support',
+    description: 'A supportive community for individuals with ADHD.',
+  },
+  {
+    id: 'dev_comm_anxiety-support',
+    name: 'Anxiety Support',
+    slug: 'anxiety-support',
+    description: 'A supportive community for individuals with anxiety.',
+  },
+  {
+    id: 'dev_comm_depression-support',
+    name: 'Depression Support',
+    slug: 'depression-support',
+    description: 'A supportive community for individuals with depression.',
   },
 ];
 
