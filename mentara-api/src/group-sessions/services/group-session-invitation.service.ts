@@ -27,17 +27,20 @@ export class GroupSessionInvitationService {
     const invitations: any[] = [];
 
     for (const therapistId of therapistIds) {
-      const invitation = await this.prisma.groupSessionTherapistInvitation.create({
-        data: {
-          sessionId,
-          therapistId,
-          status: InvitationStatus.PENDING,
-        },
-      });
+      const invitation =
+        await this.prisma.groupSessionTherapistInvitation.create({
+          data: {
+            sessionId,
+            therapistId,
+            status: InvitationStatus.PENDING,
+          },
+        });
       invitations.push(invitation);
     }
 
-    this.logger.log(`Created ${invitations.length} invitations for session ${sessionId}`);
+    this.logger.log(
+      `Created ${invitations.length} invitations for session ${sessionId}`,
+    );
 
     return invitations;
   }
@@ -93,12 +96,13 @@ export class GroupSessionInvitationService {
     message?: string,
   ) {
     // Get invitation
-    const invitation = await this.prisma.groupSessionTherapistInvitation.findUnique({
-      where: { id: invitationId },
-      include: {
-        session: true,
-      },
-    });
+    const invitation =
+      await this.prisma.groupSessionTherapistInvitation.findUnique({
+        where: { id: invitationId },
+        include: {
+          session: true,
+        },
+      });
 
     if (!invitation) {
       throw new NotFoundException('Invitation not found');
@@ -111,7 +115,9 @@ export class GroupSessionInvitationService {
 
     // Cannot respond to already responded invitation
     if (invitation.status !== InvitationStatus.PENDING) {
-      throw new BadRequestException(`Invitation already ${invitation.status.toLowerCase()}`);
+      throw new BadRequestException(
+        `Invitation already ${invitation.status.toLowerCase()}`,
+      );
     }
 
     if (action === 'ACCEPTED') {
@@ -138,15 +144,21 @@ export class GroupSessionInvitationService {
         },
       });
 
-      this.logger.log(`Therapist ${therapistId} accepted invitation ${invitationId}`);
+      this.logger.log(
+        `Therapist ${therapistId} accepted invitation ${invitationId}`,
+      );
 
       // Check if all invitations are accepted
-      const allAccepted = await this.checkAllInvitationsAccepted(invitation.sessionId);
+      const allAccepted = await this.checkAllInvitationsAccepted(
+        invitation.sessionId,
+      );
 
       if (allAccepted) {
         // Update session to APPROVED
         await this.groupSessionService.approveSession(invitation.sessionId);
-        this.logger.log(`Session ${invitation.sessionId} approved - all therapists accepted`);
+        this.logger.log(
+          `Session ${invitation.sessionId} approved - all therapists accepted`,
+        );
       }
 
       return { invitation: updated, allAccepted };
@@ -161,7 +173,9 @@ export class GroupSessionInvitationService {
         },
       });
 
-      this.logger.log(`Therapist ${therapistId} declined invitation ${invitationId}`);
+      this.logger.log(
+        `Therapist ${therapistId} declined invitation ${invitationId}`,
+      );
 
       return { invitation: updated, allAccepted: false };
     }
@@ -171,9 +185,10 @@ export class GroupSessionInvitationService {
    * Check if all invitations for a session are accepted
    */
   async checkAllInvitationsAccepted(sessionId: string): Promise<boolean> {
-    const invitations = await this.prisma.groupSessionTherapistInvitation.findMany({
-      where: { sessionId },
-    });
+    const invitations =
+      await this.prisma.groupSessionTherapistInvitation.findMany({
+        where: { sessionId },
+      });
 
     if (invitations.length === 0) {
       return false;
@@ -186,27 +201,28 @@ export class GroupSessionInvitationService {
    * Get invitation by ID
    */
   async getInvitation(invitationId: string) {
-    const invitation = await this.prisma.groupSessionTherapistInvitation.findUnique({
-      where: { id: invitationId },
-      include: {
-        session: {
-          include: {
-            community: true,
+    const invitation =
+      await this.prisma.groupSessionTherapistInvitation.findUnique({
+        where: { id: invitationId },
+        include: {
+          session: {
+            include: {
+              community: true,
+            },
           },
-        },
-        therapist: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
+          therapist: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
     if (!invitation) {
       throw new NotFoundException('Invitation not found');
@@ -215,4 +231,3 @@ export class GroupSessionInvitationService {
     return invitation;
   }
 }
-

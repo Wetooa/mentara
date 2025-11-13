@@ -12,6 +12,10 @@ model Conversation {
   @@index([lastMessageAt])
   @@index([isActive])
   @@index([type])
+  @@index([type, lastMessageAt])
+  @@index([type, isActive, lastMessageAt])
+  @@index([createdAt])
+  @@index([isActive, lastMessageAt])
 }
 
 model ConversationParticipant {
@@ -58,6 +62,10 @@ model Message {
   @@index([senderId])
   @@index([messageType])
   @@index([isDeleted])
+  @@index([senderId, createdAt])
+  @@index([conversationId, senderId, createdAt])
+  @@index([replyToId])
+  @@index([conversationId, messageType])
 }
 
 model MessageReadReceipt {

@@ -31,30 +31,32 @@ export class AvailabilityCheckService {
     }
 
     // Check for conflicts with group therapy sessions
-    const groupSessionConflicts = await this.prisma.groupSessionParticipant.findMany({
-      where: {
-        userId,
-        attendanceStatus: { not: 'CANCELLED' },
-        session: {
-          status: { in: ['APPROVED', 'IN_PROGRESS'] },
-          scheduledAt: { lt: endTime },
-          // We need to check if scheduledAt + duration overlaps
-        },
-      },
-      include: {
-        session: {
-          select: {
-            scheduledAt: true,
-            duration: true,
+    const groupSessionConflicts =
+      await this.prisma.groupSessionParticipant.findMany({
+        where: {
+          userId,
+          attendanceStatus: { not: 'CANCELLED' },
+          session: {
+            status: { in: ['APPROVED', 'IN_PROGRESS'] },
+            scheduledAt: { lt: endTime },
+            // We need to check if scheduledAt + duration overlaps
           },
         },
-      },
-    });
+        include: {
+          session: {
+            select: {
+              scheduledAt: true,
+              duration: true,
+            },
+          },
+        },
+      });
 
     // Check if any group session overlaps
     for (const participant of groupSessionConflicts) {
       const sessionEnd = new Date(
-        participant.session.scheduledAt.getTime() + participant.session.duration * 60000,
+        participant.session.scheduledAt.getTime() +
+          participant.session.duration * 60000,
       );
 
       // Check for overlap
@@ -72,28 +74,30 @@ export class AvailabilityCheckService {
     });
 
     if (therapist) {
-      const invitationConflicts = await this.prisma.groupSessionTherapistInvitation.findMany({
-        where: {
-          therapistId: userId,
-          status: 'ACCEPTED',
-          session: {
-            status: { in: ['APPROVED', 'IN_PROGRESS'] },
-            scheduledAt: { lt: endTime },
-          },
-        },
-        include: {
-          session: {
-            select: {
-              scheduledAt: true,
-              duration: true,
+      const invitationConflicts =
+        await this.prisma.groupSessionTherapistInvitation.findMany({
+          where: {
+            therapistId: userId,
+            status: 'ACCEPTED',
+            session: {
+              status: { in: ['APPROVED', 'IN_PROGRESS'] },
+              scheduledAt: { lt: endTime },
             },
           },
-        },
-      });
+          include: {
+            session: {
+              select: {
+                scheduledAt: true,
+                duration: true,
+              },
+            },
+          },
+        });
 
       for (const invitation of invitationConflicts) {
         const sessionEnd = new Date(
-          invitation.session.scheduledAt.getTime() + invitation.session.duration * 60000,
+          invitation.session.scheduledAt.getTime() +
+            invitation.session.duration * 60000,
         );
 
         if (
@@ -162,23 +166,26 @@ export class AvailabilityCheckService {
     );
 
     // Get group sessions
-    const groupParticipations = await this.prisma.groupSessionParticipant.findMany({
-      where: {
-        userId,
-        attendanceStatus: { not: 'CANCELLED' },
-      },
-      include: {
-        session: {
-          include: {
-            community: true,
+    const groupParticipations =
+      await this.prisma.groupSessionParticipant.findMany({
+        where: {
+          userId,
+          attendanceStatus: { not: 'CANCELLED' },
+        },
+        include: {
+          session: {
+            include: {
+              community: true,
+            },
           },
         },
-      },
-    });
+      });
 
     for (const participation of groupParticipations) {
       const session = participation.session;
-      const sessionEnd = new Date(session.scheduledAt.getTime() + session.duration * 60000);
+      const sessionEnd = new Date(
+        session.scheduledAt.getTime() + session.duration * 60000,
+      );
 
       if (session.scheduledAt < endTime && sessionEnd > scheduledAt) {
         conflicts.push({
@@ -194,4 +201,3 @@ export class AvailabilityCheckService {
     return conflicts;
   }
 }
-

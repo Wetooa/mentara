@@ -17,11 +17,13 @@ The **Group Therapy Sessions** feature is now fully implemented and ready for te
 ### **Database Schema** (3 New Tables + 4 Enums)
 
 **Tables**:
+
 1. ✅ `GroupTherapySession` - Core session information
 2. ✅ `GroupSessionTherapistInvitation` - Invitation tracking
 3. ✅ `GroupSessionParticipant` - Member participation
 
 **Enums**:
+
 1. ✅ `SessionType` (VIRTUAL, IN_PERSON)
 2. ✅ `GroupSessionStatus` (PENDING_APPROVAL, APPROVED, CANCELLED, IN_PROGRESS, COMPLETED)
 3. ✅ `InvitationStatus` (PENDING, ACCEPTED, DECLINED)
@@ -32,6 +34,7 @@ The **Group Therapy Sessions** feature is now fully implemented and ready for te
 ### **5 Core Services**
 
 1. ✅ **GroupSessionService** - Session CRUD operations
+
    - `createSession()` - Create new group session
    - `getSession()` - Get session details
    - `getSessionsByCommunity()` - List community sessions
@@ -39,22 +42,26 @@ The **Group Therapy Sessions** feature is now fully implemented and ready for te
    - `approveSession()` - Update to APPROVED
 
 2. ✅ **GroupSessionInvitationService** - Invitation management
+
    - `createInvitations()` - Send invitations to therapists
    - `getInvitationsForTherapist()` - List therapist invitations
    - `respondToInvitation()` - Accept/decline invitation
    - `checkAllInvitationsAccepted()` - Check if all accepted
 
 3. ✅ **GroupSessionParticipantService** - Participant management
+
    - `joinSession()` - Member joins session
    - `leaveSession()` - Member leaves session
    - `getParticipants()` - List session participants
    - `getSessionsForUser()` - Get user's joined sessions
 
 4. ✅ **AvailabilityCheckService** - Schedule conflict detection
+
    - `checkAvailability()` - Check for conflicts
    - `getConflictingEvents()` - List conflicting events
 
 5. ✅ **ScheduleService** - Unified schedule view
+
    - `getUserSchedule()` - Get all events (1-on-1 + group)
 
 6. ✅ **GroupSessionNotificationService** - Notification handling
@@ -70,6 +77,7 @@ The **Group Therapy Sessions** feature is now fully implemented and ready for te
 ### **3 Controllers** (15+ Endpoints)
 
 **1. GroupSessionController** - Main endpoints
+
 ```typescript
 POST   /group-sessions                    // Create session (Moderator)
 GET    /group-sessions/community/:id      // List by community
@@ -82,15 +90,17 @@ GET    /group-sessions/my/sessions        // My joined sessions
 ```
 
 **2. GroupSessionTherapistController** - Therapist-specific
+
 ```typescript
 GET  /group-sessions/therapist/invitations              // List invitations
 POST /group-sessions/therapist/invitations/:id/respond  // Accept/Decline
 ```
 
 **3. ScheduleController** - Unified schedule
+
 ```typescript
-GET /schedule            // Get user's full schedule
-GET /schedule/conflicts  // Check for conflicts
+GET / schedule; // Get user's full schedule
+GET / schedule / conflicts; // Check for conflicts
 ```
 
 ---
@@ -106,6 +116,7 @@ GET /schedule/conflicts  // Check for conflicts
 ### **Seeding Support**
 
 ✅ **GroupSessionsEnricher** added to dynamic seeding system
+
 - Creates 1-2 group sessions per community
 - Auto-approves for testing
 - Adds 3-8 participants per session
@@ -176,7 +187,7 @@ Check against:
   • One-on-one therapy sessions
   • Other group therapy sessions
   • Therapist invitations (if accepted)
-  
+
 Overlap detection:
   • Event start time < new end time
   • Event end time > new start time
@@ -187,36 +198,42 @@ Overlap detection:
 ## 🎯 Key Features
 
 ### **✅ Moderator-Led Creation**
+
 - Moderators spearhead sessions in their communities
 - Must invite at least 1 therapist
 - Can set virtual or in-person
 - Can cancel sessions
 
 ### **✅ Therapist Invitation System**
+
 - Therapists receive notifications
 - Can accept or decline with optional message
 - Availability checked before acceptance
 - Session approved when all accept
 
 ### **✅ Member Participation**
+
 - Can only join APPROVED sessions
 - Availability checked before joining
 - Can leave before session starts
 - Confirmation notifications sent
 
 ### **✅ Availability Checking**
+
 - Prevents double-booking
 - Checks 1-on-1 sessions
 - Checks other group sessions
 - Returns conflicting events
 
 ### **✅ Unified Schedule View**
+
 - Shows all events (1-on-1 + group)
 - Sorted chronologically
 - Filterable by date range
 - Includes completed events optionally
 
 ### **✅ Notification Integration**
+
 - Invitation notifications
 - Response notifications (accepted/declined)
 - Session approved notifications
@@ -231,6 +248,7 @@ Overlap detection:
 **Total Endpoints**: 12
 
 **By Role**:
+
 - Moderator: 3 endpoints (create, list, cancel)
 - Therapist: 2 endpoints (invitations, respond)
 - Member: 5 endpoints (join, leave, list, my sessions, participants)
@@ -241,11 +259,13 @@ Overlap detection:
 ## 🗄️ Database Schema Updates
 
 **Updated Models**:
+
 - ✅ `User` - Added group session relations
 - ✅ `Community` - Added group sessions relation
 - ✅ `Therapist` - Added invitations relation
 
 **Migration**:
+
 - `add-group-therapy-sessions.sql` (generated)
 
 ---
@@ -253,6 +273,7 @@ Overlap detection:
 ## 🎓 Example Usage
 
 ### **Create a Session** (Moderator)
+
 ```bash
 POST /api/group-sessions
 Authorization: Bearer <moderator_token>
@@ -271,6 +292,7 @@ Authorization: Bearer <moderator_token>
 ```
 
 **Response**:
+
 ```json
 {
   "session": { ... },
@@ -280,6 +302,7 @@ Authorization: Bearer <moderator_token>
 ```
 
 ### **Respond to Invitation** (Therapist)
+
 ```bash
 POST /api/group-sessions/therapist/invitations/:id/respond
 Authorization: Bearer <therapist_token>
@@ -290,18 +313,21 @@ Authorization: Bearer <therapist_token>
 ```
 
 ### **Join Session** (Member)
+
 ```bash
 POST /api/group-sessions/:id/join
 Authorization: Bearer <client_token>
 ```
 
 ### **Get Schedule** (Any User)
+
 ```bash
 GET /api/schedule?startDate=2025-10-14&endDate=2025-10-31
 Authorization: Bearer <user_token>
 ```
 
 **Response**:
+
 ```json
 {
   "events": [
@@ -390,22 +416,26 @@ GET /api/schedule/conflicts?scheduledAt=2025-10-20T15:00:00Z&duration=60
 ## 🎁 Bonus Features Implemented
 
 ### **Smart Availability Checking**
+
 - Checks 1-on-1 therapy sessions
 - Checks other group sessions
 - Checks therapist invitations
 - Returns detailed conflict information
 
 ### **Flexible Session Types**
+
 - Virtual with meeting links
 - In-person with address
 - Future-ready for hybrid
 
 ### **Attendance Tracking**
+
 - Registration tracking
 - Can mark attended/no-show (for future)
 - Soft delete (cancelled status, not deleted)
 
 ### **Notification System**
+
 - 6 notification types
 - Moderator/therapist/member notifications
 - Reminder system (24h before)
@@ -416,6 +446,7 @@ GET /api/schedule/conflicts?scheduledAt=2025-10-20T15:00:00Z&duration=60
 ## 📈 Seeding Data
 
 After running `npm run db:seed`, you'll have:
+
 - **~20 group sessions** across communities
 - Each with 2-3 therapists (accepted invitations)
 - Each with 3-8 participants
@@ -427,11 +458,13 @@ After running `npm run db:seed`, you'll have:
 ## 🚀 Ready For
 
 ✅ **Frontend Development**
+
 - All API endpoints functional
 - Test accounts ready
 - Sample data seeded
 
 ✅ **Feature Testing**
+
 - Create sessions
 - Accept/decline invitations
 - Join/leave sessions
@@ -439,6 +472,7 @@ After running `npm run db:seed`, you'll have:
 - Check availability
 
 ✅ **Production Deployment**
+
 - Error handling complete
 - Logging implemented
 - Guards and validation in place
@@ -448,14 +482,14 @@ After running `npm run db:seed`, you'll have:
 
 ## 📊 Implementation Stats
 
-| Component | Count |
-|-----------|-------|
-| **Tables** | 3 |
-| **Enums** | 4 |
-| **Services** | 6 |
-| **Controllers** | 3 |
-| **Endpoints** | 12 |
-| **DTOs** | 3 |
+| Component         | Count  |
+| ----------------- | ------ |
+| **Tables**        | 3      |
+| **Enums**         | 4      |
+| **Services**      | 6      |
+| **Controllers**   | 3      |
+| **Endpoints**     | 12     |
+| **DTOs**          | 3      |
 | **Lines of Code** | ~1,500 |
 
 ---
@@ -471,11 +505,13 @@ After running `npm run db:seed`, you'll have:
 ## 🎯 Next Steps
 
 ### **1. Run Migration**
+
 ```bash
 npm run db:reset
 ```
 
 ### **2. Test API**
+
 ```bash
 # The backend should be running
 npm run start:dev
@@ -484,6 +520,7 @@ npm run start:dev
 ```
 
 ### **3. Frontend Integration**
+
 - Create group session management page (moderators)
 - Create therapist invitation page
 - Create session browser (community page)
@@ -494,12 +531,14 @@ npm run start:dev
 ## 🎊 Feature Summary
 
 **Moderators can**:
+
 - ✅ Create group therapy sessions
 - ✅ Invite specific therapists
 - ✅ Cancel sessions
 - ✅ View invitation status
 
 **Therapists can**:
+
 - ✅ Receive invitation notifications
 - ✅ View pending invitations
 - ✅ Accept/decline with messages
@@ -507,6 +546,7 @@ npm run start:dev
 - ✅ View all group sessions in schedule
 
 **Members can**:
+
 - ✅ Browse available sessions
 - ✅ Join approved sessions
 - ✅ See conflicts before joining
@@ -514,6 +554,7 @@ npm run start:dev
 - ✅ View unified schedule
 
 **System automatically**:
+
 - ✅ Checks availability
 - ✅ Prevents double-booking
 - ✅ Approves when all therapists accept
@@ -525,4 +566,3 @@ npm run start:dev
 **STATUS**: ✅ **PRODUCTION-READY!**
 
 **This feature is complete and ready for frontend integration!** 🎉✨
-

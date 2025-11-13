@@ -5,5 +5,6 @@ export const RespondToInvitationDtoSchema = z.object({
   message: z.string().max(500).optional(),
 });
 
-export type RespondToInvitationDto = z.infer<typeof RespondToInvitationDtoSchema>;
-
+export type RespondToInvitationDto = z.infer<
+  typeof RespondToInvitationDtoSchema
+>;

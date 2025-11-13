@@ -15,4 +15,3 @@ export const CreateGroupSessionDtoSchema = z.object({
 });
 
 export type CreateGroupSessionDto = z.infer<typeof CreateGroupSessionDtoSchema>;
-

@@ -38,14 +38,20 @@ export class GroupSessionsEnricher extends BaseEnricher {
     for (const community of communities) {
       try {
         // Only create if community has moderator and therapists
-        if (community.moderatorCommunities.length > 0 && community.memberships.length >= 2) {
+        if (
+          community.moderatorCommunities.length > 0 &&
+          community.memberships.length >= 2
+        ) {
           const existingSessions = await this.prisma.groupTherapySession.count({
             where: { communityId: community.id },
           });
 
           const missing = Math.max(0, 2 - existingSessions);
           if (missing > 0) {
-            added += await this.ensureCommunityHasGroupSessions(community, missing);
+            added += await this.ensureCommunityHasGroupSessions(
+              community,
+              missing,
+            );
           }
         }
       } catch (error) {
@@ -121,7 +127,10 @@ export class GroupSessionsEnricher extends BaseEnricher {
       scheduledAt.setHours(10 + random.nextInt(8), 0, 0, 0);
 
       // Select 2-3 therapists to invite
-      const numTherapists = Math.min(2 + random.nextInt(2), therapistMembers.length);
+      const numTherapists = Math.min(
+        2 + random.nextInt(2),
+        therapistMembers.length,
+      );
       const selectedTherapists = [];
       const therapistsCopy = [...therapistMembers];
 
@@ -175,7 +184,10 @@ export class GroupSessionsEnricher extends BaseEnricher {
         where: {
           communityId: community.id,
           userId: {
-            notIn: [moderator.userId, ...selectedTherapists.map((t) => t.userId)],
+            notIn: [
+              moderator.userId,
+              ...selectedTherapists.map((t) => t.userId),
+            ],
           },
         },
         take: 15,
@@ -206,4 +218,3 @@ export class GroupSessionsEnricher extends BaseEnricher {
     return created;
   }
 }
-

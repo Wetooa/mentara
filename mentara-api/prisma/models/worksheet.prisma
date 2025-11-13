@@ -18,6 +18,9 @@ model Worksheet {
   @@index([therapistId])
   @@index([status])
   @@index([dueDate])
+  @@index([status, dueDate])
+  @@index([clientId, status])
+  @@index([therapistId, status])
 }
 
 model WorksheetSubmission {

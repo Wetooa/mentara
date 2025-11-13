@@ -39,11 +39,13 @@ export default function DashboardPage() {
       return null;
     }
 
-    // DEBUG: Log raw API data to trace dateString.split error
-    console.log("🔍 Dashboard API Data:", {
-      dashboardApiData: JSON.stringify(dashboardApiData, null, 2),
-      communicationsData: JSON.stringify(communicationsData, null, 2),
-    });
+    // DEBUG: Log raw API data in development only
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 [Client Dashboard] API Data:", {
+        dashboardApiData: JSON.stringify(dashboardApiData, null, 2),
+        communicationsData: JSON.stringify(communicationsData, null, 2),
+      });
+    }
 
     try {
       const transformedData = transformDashboardData(
@@ -51,14 +53,18 @@ export default function DashboardPage() {
         Array.isArray(communicationsData) ? communicationsData : []
       );
 
-      console.log(
-        "✅ Dashboard data transformed successfully:",
-        transformedData
-      );
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "✅ [Client Dashboard] Data transformed successfully:",
+          transformedData
+        );
+      }
       return transformedData;
     } catch (error) {
-      console.error("❌ Error transforming dashboard data:", error);
-      console.error("❌ Error stack:", error.stack);
+      console.error("❌ [Client Dashboard] Error transforming data:", error);
+      if (error instanceof Error) {
+        console.error("❌ [Client Dashboard] Error stack:", error.stack);
+      }
       throw error; // Re-throw to trigger error boundary
     }
   }, [dashboardApiData, communicationsData]);

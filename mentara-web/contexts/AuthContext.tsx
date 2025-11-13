@@ -7,6 +7,7 @@ import {
   ReactNode,
   useState,
   useRef,
+  useMemo,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +15,6 @@ import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
-import { useCurrentUserProfile } from "@/hooks/auth/useCurrentUserProfile";
 
 // Types
 export type UserRole = "client" | "therapist" | "moderator" | "admin";
@@ -85,7 +85,7 @@ const isAnyRoleRoute = (pathname: string): boolean => {
 };
 
 // Auth Provider Component
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -128,7 +128,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: authData,
     isLoading,
     error,
-    refetch,
   } = useQuery({
     queryKey: ["auth", "user-role"],
     queryFn: () => api.auth.getUserRole(),
@@ -142,12 +141,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // const currentUserProfile = useCurrentUserProfile();
-
   const userRole = (authData as any)?.role as UserRole | null;
   const userId = (authData as any)?.userId || null;
 
   // Fetch profile data if user is authenticated
+  // Only fetch after auth query completes successfully to prevent race conditions
   const { data: profileData, refetch: refetchProfile } = useQuery({
     queryKey: ["auth", "current-user-profile"],
     queryFn: async () => {
@@ -186,7 +184,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           profileResponse.hasSeenTherapistRecommendations,
       };
     },
-    enabled: isClient && !!userId && !!userRole && hasToken === true,
+    // Wait for auth query to complete to prevent race conditions
+    enabled:
+      isClient && !!userId && !!userRole && hasToken === true && !isLoading,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error: any) => {
       // Don't retry on 401/403 errors (auth failures)
@@ -197,22 +197,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  console.log("Auth Data:", authData);
-  console.log("Profile Data:", profileData);
-
   // Create user object with profile data when available
-  const user: User | null =
-    userRole && userId
-      ? {
-          id: userId,
-          role: userRole,
-          firstName: profileData?.firstName,
-          lastName: profileData?.lastName,
-          avatarUrl: profileData?.avatarUrl,
-          hasSeenTherapistRecommendations:
-            profileData?.hasSeenTherapistRecommendations,
-        }
-      : null;
+  // Memoized to prevent unnecessary re-renders
+  const user: User | null = useMemo(() => {
+    if (!userRole || !userId) return null;
+
+    return {
+      id: userId,
+      role: userRole,
+      firstName: profileData?.firstName,
+      lastName: profileData?.lastName,
+      avatarUrl: profileData?.avatarUrl,
+      hasSeenTherapistRecommendations:
+        profileData?.hasSeenTherapistRecommendations,
+    };
+  }, [
+    userId,
+    userRole,
+    profileData?.firstName,
+    profileData?.lastName,
+    profileData?.avatarUrl,
+    profileData?.hasSeenTherapistRecommendations,
+  ]);
 
   const isAuthenticated = !!user && !!hasToken;
 
@@ -431,14 +437,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  const contextValue: AuthContextType = {
-    user,
-    isLoading,
-    isAuthenticated,
-    userRole,
-    logout,
-    refreshProfile,
-  };
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue: AuthContextType = useMemo(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated,
+      userRole,
+      logout,
+      refreshProfile,
+    }),
+    [user, isLoading, isAuthenticated, userRole, logout, refreshProfile]
+  );
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

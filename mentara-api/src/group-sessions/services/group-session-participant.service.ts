@@ -6,7 +6,12 @@ import {
   UnauthorizedException,
   Logger,
 } from '@nestjs/common';
-import { PrismaClient, GroupSessionStatus, AttendanceStatus, InvitationStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  GroupSessionStatus,
+  AttendanceStatus,
+  InvitationStatus,
+} from '@prisma/client';
 import { AvailabilityCheckService } from './availability-check.service';
 
 @Injectable()
@@ -71,7 +76,9 @@ export class GroupSessionParticipantService {
     );
 
     if (hasConflict) {
-      throw new ConflictException('You have a scheduling conflict with this session');
+      throw new ConflictException(
+        'You have a scheduling conflict with this session',
+      );
     }
 
     // Add user as participant
@@ -245,8 +252,9 @@ export class GroupSessionParticipantService {
     });
 
     if (!membership) {
-      throw new UnauthorizedException('You must be a member of this community to join');
+      throw new UnauthorizedException(
+        'You must be a member of this community to join',
+      );
     }
   }
 }
-

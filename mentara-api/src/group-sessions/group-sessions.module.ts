@@ -40,4 +40,3 @@ import { ScheduleController } from './controllers/schedule.controller';
   ],
 })
 export class GroupSessionsModule {}
-

@@ -21,6 +21,9 @@ model Payment {
   @@index([therapistId])
   @@index([status])
   @@index([meetingId])
+  @@index([status, createdAt])
+  @@index([therapistId, status, createdAt])
+  @@index([createdAt])
 }
 
 model PaymentMethod {

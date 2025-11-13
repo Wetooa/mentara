@@ -11,4 +11,7 @@ model ClientTherapist {
   @@index([clientId])
   @@index([therapistId])
   @@index([clientId, status])
+  @@index([therapistId, status])
+  @@index([status])
+  @@index([assignedAt])
 }

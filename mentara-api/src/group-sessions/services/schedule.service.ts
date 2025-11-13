@@ -86,15 +86,18 @@ export class ScheduleService {
         ? `${meeting.client.user.firstName} ${meeting.client.user.lastName}`
         : `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`;
 
-      const endTime = meeting.endTime ?? new Date(meeting.startTime.getTime() + 60 * 60000); // Default 60 min
-      
+      const endTime =
+        meeting.endTime ?? new Date(meeting.startTime.getTime() + 60 * 60000); // Default 60 min
+
       events.push({
         id: meeting.id,
         type: 'ONE_ON_ONE',
         title: `Therapy Session with ${otherPerson}`,
         scheduledAt: meeting.startTime,
         endTime,
-        duration: Math.round((endTime.getTime() - meeting.startTime.getTime()) / 60000),
+        duration: Math.round(
+          (endTime.getTime() - meeting.startTime.getTime()) / 60000,
+        ),
         status: meeting.status,
         details: meeting,
       });
@@ -119,21 +122,23 @@ export class ScheduleService {
       };
     }
 
-    const groupParticipations = await this.prisma.groupSessionParticipant.findMany({
-      where: participationWhere,
-      include: {
-        session: {
-          include: {
-            community: true,
-            therapistInvitations: {
-              where: { status: 'ACCEPTED' },
-              include: {
-                therapist: {
-                  include: {
-                    user: {
-                      select: {
-                        firstName: true,
-                        lastName: true,
+    const groupParticipations =
+      await this.prisma.groupSessionParticipant.findMany({
+        where: participationWhere,
+        include: {
+          session: {
+            include: {
+              community: true,
+              therapistInvitations: {
+                where: { status: 'ACCEPTED' },
+                include: {
+                  therapist: {
+                    include: {
+                      user: {
+                        select: {
+                          firstName: true,
+                          lastName: true,
+                        },
                       },
                     },
                   },
@@ -142,12 +147,13 @@ export class ScheduleService {
             },
           },
         },
-      },
-    });
+      });
 
     for (const participation of groupParticipations) {
       const session = participation.session;
-      const endTime = new Date(session.scheduledAt.getTime() + session.duration * 60000);
+      const endTime = new Date(
+        session.scheduledAt.getTime() + session.duration * 60000,
+      );
 
       events.push({
         id: session.id,
@@ -187,20 +193,23 @@ export class ScheduleService {
         };
       }
 
-      const invitations = await this.prisma.groupSessionTherapistInvitation.findMany({
-        where: invitationWhere,
-        include: {
-          session: {
-            include: {
-              community: true,
+      const invitations =
+        await this.prisma.groupSessionTherapistInvitation.findMany({
+          where: invitationWhere,
+          include: {
+            session: {
+              include: {
+                community: true,
+              },
             },
           },
-        },
-      });
+        });
 
       for (const invitation of invitations) {
         const session = invitation.session;
-        const endTime = new Date(session.scheduledAt.getTime() + session.duration * 60000);
+        const endTime = new Date(
+          session.scheduledAt.getTime() + session.duration * 60000,
+        );
 
         // Don't duplicate if already in participants list
         if (!events.some((e) => e.id === session.id)) {
@@ -221,7 +230,8 @@ export class ScheduleService {
     }
 
     // Sort events by scheduled time
-    return events.sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
+    return events.sort(
+      (a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime(),
+    );
   }
 }
-

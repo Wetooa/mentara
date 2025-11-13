@@ -30,7 +30,9 @@ export class GroupSessionNotificationService {
       });
     }
 
-    this.logger.log(`Sent invitation notifications to ${therapistIds.length} therapists`);
+    this.logger.log(
+      `Sent invitation notifications to ${therapistIds.length} therapists`,
+    );
   }
 
   /**
@@ -125,7 +127,9 @@ export class GroupSessionNotificationService {
    * Send reminder notifications (can be called via cron job)
    */
   async sendSessionReminders(hoursBeforeSession: number = 24): Promise<void> {
-    const reminderTime = new Date(Date.now() + hoursBeforeSession * 60 * 60 * 1000);
+    const reminderTime = new Date(
+      Date.now() + hoursBeforeSession * 60 * 60 * 1000,
+    );
     const reminderTimeEnd = new Date(reminderTime.getTime() + 60 * 60 * 1000); // 1 hour window
 
     // Get upcoming sessions
@@ -179,7 +183,9 @@ export class GroupSessionNotificationService {
       }
     }
 
-    this.logger.log(`Sent reminders for ${upcomingSessions.length} upcoming sessions`);
+    this.logger.log(
+      `Sent reminders for ${upcomingSessions.length} upcoming sessions`,
+    );
   }
 
   /**
@@ -195,13 +201,14 @@ export class GroupSessionNotificationService {
       select: { userId: true },
     });
 
-    const therapists = await this.prisma.groupSessionTherapistInvitation.findMany({
-      where: {
-        sessionId: session.id,
-        status: 'ACCEPTED',
-      },
-      select: { therapistId: true },
-    });
+    const therapists =
+      await this.prisma.groupSessionTherapistInvitation.findMany({
+        where: {
+          sessionId: session.id,
+          status: 'ACCEPTED',
+        },
+        select: { therapistId: true },
+      });
 
     const allUserIds = [
       ...participants.map((p) => p.userId),
@@ -221,8 +228,9 @@ export class GroupSessionNotificationService {
         data: notifications,
       });
 
-      this.logger.log(`Notified ${notifications.length} users of session cancellation`);
+      this.logger.log(
+        `Notified ${notifications.length} users of session cancellation`,
+      );
     }
   }
 }
-

@@ -64,6 +64,13 @@ model Therapist {
   @@index([userId])
   @@index([status])
   @@index([timezone])
+  @@index([status, createdAt])
+  @@index([status, hourlyRate])
+  @@index([province])
+  @@index([yearsOfExperience])
+  @@index([hourlyRate])
+  @@index([createdAt])
+  @@index([province, status])
 }
 
 enum TherapistApplicationStatus {

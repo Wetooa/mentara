@@ -130,7 +130,10 @@ export class GroupSessionController {
     @GetUser('id') userId: string,
     @Param('sessionId') sessionId: string,
   ) {
-    const participant = await this.participantService.joinSession(userId, sessionId);
+    const participant = await this.participantService.joinSession(
+      userId,
+      sessionId,
+    );
 
     // Send confirmation notification
     await this.notificationService.notifyUserJoinedSession(
@@ -177,4 +180,3 @@ export class GroupSessionController {
     );
   }
 }
-

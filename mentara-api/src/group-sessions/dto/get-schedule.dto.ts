@@ -10,4 +10,3 @@ export const GetScheduleDtoSchema = z.object({
 });
 
 export type GetScheduleDto = z.infer<typeof GetScheduleDtoSchema>;
-

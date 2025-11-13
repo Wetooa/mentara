@@ -13,6 +13,8 @@ model Community {
 
   @@index([name])
   @@index([slug])
+  @@index([createdAt])
+  @@index([updatedAt])
 }
 
 model Membership {

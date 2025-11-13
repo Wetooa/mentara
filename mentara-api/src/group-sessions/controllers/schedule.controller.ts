@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-  Logger,
-} from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Logger } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
 import { GetUser } from '../../decorators/get-user.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
@@ -79,4 +73,3 @@ export class ScheduleController {
     };
   }
 }
-
