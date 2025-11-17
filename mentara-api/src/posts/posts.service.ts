@@ -39,7 +39,7 @@ export class PostsService {
         updatedAt: true,
         userId: true,
         roomId: true,
-        isPinned: true,
+        // isPinned: true,
         user: {
           select: {
             id: true,
