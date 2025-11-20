@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type { CreateCommentRequest } from "@/types/api/communities";
@@ -19,18 +21,20 @@ export function useCommunityComments(postId: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['comments', 'byPost', postId],
+    queryKey: [...queryKeys.communities.all, 'comments', 'byPost', postId],
     queryFn: () => api.communities.getCommentsByPost(postId),
     enabled: !!postId,
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Create comment mutation
   const createCommentMutation = useMutation({
     mutationFn: (data: CreateCommentRequest) => api.communities.createComment(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comments', 'byPost', postId] });
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.communities.all, 'comments', 'byPost', postId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(postId) });
       toast.success("Comment added successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -55,8 +59,8 @@ export function useCommunityComments(postId: string) {
   const deleteCommentMutation = useMutation({
     mutationFn: (commentId: string) => api.communities.deleteComment(commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comments', 'byPost', postId] });
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.communities.all, 'comments', 'byPost', postId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(postId) });
       toast.success("Comment deleted successfully");
     },
     onError: (error: MentaraApiError) => {

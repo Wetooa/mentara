@@ -2,6 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { Contact } from '@/components/messages/types';
 import { ConversationResponseDto } from '@/types/api/messaging';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,7 +43,7 @@ export function useContacts() {
     error: queryError,
     refetch: loadContacts
   } = useQuery({
-    queryKey: ['messaging', 'contacts'],
+    queryKey: queryKeys.messaging.contacts(),
     queryFn: async () => {
       if (!user?.id) throw new Error('User not authenticated');
       
@@ -53,7 +55,9 @@ export function useContacts() {
       return conversations.map((conv) => transformConversationToContact(conv, user.id));
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: true,
   });
 
   // Search contacts mutation (searches within existing conversations)
@@ -85,8 +89,8 @@ export function useContacts() {
     },
     onSuccess: () => {
       // Invalidate and refetch contacts
-      queryClient.invalidateQueries({ queryKey: ['messaging', 'contacts'] });
-      queryClient.invalidateQueries({ queryKey: ['messaging', 'conversations'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.contacts() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.conversations() });
     },
   });
 
@@ -97,12 +101,12 @@ export function useContacts() {
     },
     onSuccess: (_, contactId) => {
       // Optimistically update the cache
-      queryClient.setQueryData(['messaging', 'contacts'], (oldContacts: Contact[] = []) => 
+      queryClient.setQueryData(queryKeys.messaging.contacts(), (oldContacts: Contact[] = []) => 
         oldContacts.filter(c => c.id !== contactId)
       );
       
       // Also invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['messaging', 'conversations'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.conversations() });
     },
   });
 

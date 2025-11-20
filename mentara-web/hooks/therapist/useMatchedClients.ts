@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from '@/lib/constants/react-query';
 
 /**
  * Hook for fetching therapist's matched clients (pending requests and recent matches)
@@ -9,7 +11,7 @@ export function useMatchedClients() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['therapist', 'dashboard'],
+    queryKey: queryKeys.therapist.dashboard(),
     queryFn: async () => {
       const response = await api.dashboard.getTherapistDashboard();
       
@@ -47,7 +49,9 @@ export function useMatchedClients() {
         },
       };
     },
-    staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes
-    refetchInterval: 1000 * 60 * 5, // Auto-refresh every 5 minutes for new requests
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchInterval: REFETCH_INTERVAL.MODERATE, // Auto-refresh every 5 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for matched clients
   });
 }

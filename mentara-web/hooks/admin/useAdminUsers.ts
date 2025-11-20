@@ -73,9 +73,11 @@ export function useAdminUsers(params: AdminUsersParams = {}): UseAdminUsersRetur
     error: usersError,
     refetch: refetchUsers
   } = useQuery({
-    queryKey: ['admin', 'users', 'list', params],
+    queryKey: queryKeys.admin.users.list(params),
     queryFn: () => api.admin.users.getList(params),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Fetch user statistics
@@ -83,9 +85,11 @@ export function useAdminUsers(params: AdminUsersParams = {}): UseAdminUsersRetur
     data: userStats, 
     isLoading: statsLoading 
   } = useQuery({
-    queryKey: ['admin', 'analytics', 'userStats'],
+    queryKey: [...queryKeys.admin.all, 'analytics', 'userStats'],
     queryFn: () => api.admin.analytics.getUserStats(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Suspend user mutation
@@ -95,8 +99,8 @@ export function useAdminUsers(params: AdminUsersParams = {}): UseAdminUsersRetur
     onMutate: () => setIsUpdating(true),
     onSuccess: () => {
       toast.success('User suspended successfully');
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'analytics', 'userStats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.users.list() });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.admin.all, 'analytics', 'userStats'] });
     },
     onError: (error: MentaraApiError) => {
       toast.error(error?.message || 'Failed to suspend user');
@@ -110,8 +114,8 @@ export function useAdminUsers(params: AdminUsersParams = {}): UseAdminUsersRetur
     onMutate: () => setIsUpdating(true),
     onSuccess: () => {
       toast.success('User activated successfully');
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'analytics', 'userStats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.users.list() });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.admin.all, 'analytics', 'userStats'] });
     },
     onError: (error: MentaraApiError) => {
       toast.error(error?.message || 'Failed to activate user');
@@ -125,8 +129,8 @@ export function useAdminUsers(params: AdminUsersParams = {}): UseAdminUsersRetur
     onMutate: () => setIsUpdating(true),
     onSuccess: () => {
       toast.success('User deleted successfully');
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'analytics', 'userStats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.users.list() });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.admin.all, 'analytics', 'userStats'] });
     },
     onError: (error: MentaraApiError) => {
       toast.error(error?.message || 'Failed to delete user');
@@ -154,8 +158,8 @@ export function useAdminUsers(params: AdminUsersParams = {}): UseAdminUsersRetur
     onMutate: () => setIsUpdating(true),
     onSuccess: (_, { role }) => {
       toast.success(`User role updated to ${role}`);
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'analytics', 'userStats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.users.list() });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.admin.all, 'analytics', 'userStats'] });
     },
     onError: (error: MentaraApiError) => {
       toast.error(error?.message || 'Failed to update user role');

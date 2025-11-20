@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import type { CommunityMember } from "@/types/api/communities";
 
 /**
@@ -16,10 +17,12 @@ export function useCommunityMembers(communityId: string, limit = 50, offset = 0)
     error,
     refetch,
   } = useQuery({
-    queryKey: ['communities', 'members', 'byCommunity', communityId, limit, offset],
+    queryKey: queryKeys.communities.members(communityId, limit, offset),
     queryFn: () => api.communities.getCommunityMembers(communityId, limit, offset),
     enabled: !!communityId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   return {
@@ -45,12 +48,14 @@ export function useCommunityMemberships(userId?: string) {
     refetch,
   } = useQuery({
     queryKey: userId 
-      ? ['communities', 'memberships', 'byUser', userId]
-      : ['communities', 'memberships', 'my'],
+      ? [...queryKeys.communities.all, 'memberships', 'byUser', userId]
+      : queryKeys.communities.userMemberships(),
     queryFn: () => userId 
       ? api.communities.getUserMemberships(userId)
       : api.communities.getMyMemberships(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   return {

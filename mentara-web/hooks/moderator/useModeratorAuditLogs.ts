@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { AuditLog, AuditLogParams } from '@/types/api';
 
@@ -10,9 +12,11 @@ export function useModeratorAuditLogs(params: AuditLogParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'auditLogs', 'search', params],
+    queryKey: queryKeys.moderator.auditLogs(params),
     queryFn: () => api.moderator.auditLogs.search(params),
-    staleTime: 1000 * 60 * 5, // 5 minutes (audit logs are relatively stable)
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -29,8 +33,10 @@ export function useModeratorAuditLogsStats() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'auditLogs', 'stats'],
+    queryKey: [...queryKeys.moderator.auditLogs(), 'stats'],
     queryFn: () => api.moderator.auditLogs.getStats(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }

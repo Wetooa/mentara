@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 
 interface Community {
@@ -93,31 +95,39 @@ export function useCommunityDashboard(): UseCommunityDashboardReturn {
 
   // Fetch user's communities
   const { data: userCommunities, isLoading: communitiesLoading } = useQuery({
-    queryKey: ['communities', 'joined'],
+    queryKey: queryKeys.communities.joined(),
     queryFn: () => api.communities.getJoined(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Fetch recommended communities
   const { data: recommendedCommunities, isLoading: recommendedLoading } = useQuery({
-    queryKey: ['communities', 'recommended'],
+    queryKey: queryKeys.communities.recommended(),
     queryFn: () => api.communities.getRecommended(),
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Fetch recent activity
   const { data: recentActivity, isLoading: activityLoading } = useQuery({
-    queryKey: ['communities', 'activity'],
+    queryKey: queryKeys.communities.activity(),
     queryFn: () => api.communities.getRecentActivity(),
-    refetchInterval: 30 * 1000, // Refresh every 30 seconds
-    staleTime: 30 * 1000,
+    refetchInterval: REFETCH_INTERVAL.FREQUENT, // Refresh every 1 minute (approximate)
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for activity
   });
 
   // Fetch community stats
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['communities', 'stats'],
+    queryKey: queryKeys.communities.stats(),
     queryFn: () => api.communities.getStats(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Join community mutation
@@ -125,7 +135,7 @@ export function useCommunityDashboard(): UseCommunityDashboardReturn {
     mutationFn: (communityId: string) => api.communities.join(communityId),
     onSuccess: () => {
       toast.success('Successfully joined community!');
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
     },
     onError: () => {
       toast.error('Failed to join community. Please try again.');
@@ -137,7 +147,7 @@ export function useCommunityDashboard(): UseCommunityDashboardReturn {
     mutationFn: (communityId: string) => api.communities.leave(communityId),
     onSuccess: () => {
       toast.success('Successfully left community');
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
     },
     onError: () => {
       toast.error('Failed to leave community. Please try again.');

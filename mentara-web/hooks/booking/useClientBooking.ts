@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 import { TimezoneUtils } from '@/lib/utils/timezone';
 
@@ -88,7 +90,7 @@ export function useClientBooking({
     isLoading: therapistLoading,
     error: therapistError,
   } = useQuery({
-    queryKey: ["therapist-profile", therapistId],
+    queryKey: queryKeys.therapists.byId(therapistId),
     queryFn: async () => {
       try {
         console.log('useClientBooking: Fetching therapist profile for ID:', therapistId);
@@ -101,7 +103,9 @@ export function useClientBooking({
       }
     },
     enabled: enabled && !!therapistId,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
       console.log('useClientBooking: Retry attempt', failureCount, 'for therapist profile error:', error);
       // Don't retry on 404 (therapist not found) or 401 (unauthorized)
@@ -117,10 +121,12 @@ export function useClientBooking({
     data: paymentMethods = [],
     isLoading: paymentMethodsLoading,
   } = useQuery({
-    queryKey: ["payment-methods"],
+    queryKey: [...queryKeys.booking.all, 'payment-methods'],
     queryFn: () => api.booking.payment.getPaymentMethods(),
     enabled: currentStep === 3,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Get durations
@@ -131,7 +137,9 @@ export function useClientBooking({
     queryKey: ["meeting-durations"],
     queryFn: () => api.booking.durations.getAll(),
     enabled: enabled,
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: STALE_TIME.STATIC, // 30 minutes
+    gcTime: GC_TIME.EXTENDED, // 1 hour
+    refetchOnWindowFocus: false,
   });
 
   // Create booking mutation with payment processing

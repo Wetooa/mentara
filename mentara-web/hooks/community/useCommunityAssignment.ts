@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
@@ -17,17 +19,19 @@ export function useCommunityAssignment() {
     error: recommendationsError,
     refetch: refetchRecommendations,
   } = useQuery({
-    queryKey: ['communities', 'assignment', 'recommendations'],
+    queryKey: [...queryKeys.communities.recommended(), 'assignment'],
     queryFn: () => api.communities.getMyRecommendedCommunities(),
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: STALE_TIME.STATIC, // 30 minutes
+    gcTime: GC_TIME.EXTENDED, // 1 hour
+    refetchOnWindowFocus: false,
   });
 
   // Assign communities to current user
   const assignToMeMutation = useMutation({
     mutationFn: () => api.communities.assignCommunitiesToMe(),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['communities', 'memberships', 'my'] });
-      queryClient.invalidateQueries({ queryKey: ['communities', 'assignment', 'recommendations'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.userMemberships() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.recommended() });
       toast.success(`Assigned to ${data.assignedCommunities.length} communities`);
     },
     onError: (error: MentaraApiError) => {
@@ -40,7 +44,7 @@ export function useCommunityAssignment() {
     mutationFn: (userId: string) => api.communities.assignCommunitiesToUser(userId),
     onSuccess: (data, userId) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['communities', 'memberships', 'byUser', userId] 
+        queryKey: [...queryKeys.communities.all, 'memberships', 'byUser', userId] 
       });
       toast.success(`Assigned ${data.assignedCommunities.length} communities to user`);
     },

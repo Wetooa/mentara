@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
@@ -39,9 +40,11 @@ export function useTherapist() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['client', 'assignedTherapist'],
+    queryKey: queryKeys.client.assignedTherapist(),
     queryFn: () => api.client.getAssignedTherapist(),
-    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry on 404 (no therapist assigned)
       if (error?.response?.status === 404) return false;
@@ -57,10 +60,10 @@ export function useTherapist() {
     onSuccess: (data, therapistId) => {
       toast.success("Therapist assigned successfully!");
       // Invalidate both single and multiple therapist queries
-      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
-      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapists'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapist() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapists() });
       // Also invalidate booking-related queries
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
     },
     onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to assign therapist";
@@ -76,10 +79,10 @@ export function useTherapist() {
     onSuccess: () => {
       toast.success("Therapist removed successfully!");
       // Invalidate both single and multiple therapist queries
-      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
-      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapists'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapist() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapists() });
       // Also invalidate booking-related queries
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
     },
     onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to remove therapist";
@@ -146,12 +149,14 @@ export function useAssignedTherapists() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['client', 'assignedTherapists'],
+    queryKey: queryKeys.client.assignedTherapists(),
     queryFn: async () => {
       const response = await api.client.getAssignedTherapists();
       return response.therapists;
     },
-    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry on 404 (no therapists assigned)
       if (error?.response?.status === 404) return false;
@@ -167,7 +172,7 @@ export function useTherapistProfile(therapistId: string, enabled: boolean = true
   const api = useApi();
 
   return useQuery({
-    queryKey: ['therapist-profile', therapistId],
+    queryKey: queryKeys.therapists.byId(therapistId),
     queryFn: async () => {
       try {
         console.log('Fetching therapist profile for ID:', therapistId);
@@ -181,7 +186,9 @@ export function useTherapistProfile(therapistId: string, enabled: boolean = true
       }
     },
     enabled: enabled && !!therapistId,
-    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       console.log('Retry attempt', failureCount, 'for therapist profile error:', error);
       // Don't retry on 404 (therapist not found) or 401 (unauthorized)

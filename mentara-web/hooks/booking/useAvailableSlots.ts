@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { TimezoneUtils } from "@/lib/utils/timezone";
 
 export interface TimeSlot {
@@ -25,7 +27,7 @@ export function useAvailableSlots(therapistId: string, date: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["booking", "slots", therapistId, date],
+    queryKey: queryKeys.booking.slots(therapistId, date),
     queryFn: async () => {
       console.log(
         `[useAvailableSlots] Fetching slots for therapist ${therapistId} on ${date}`
@@ -78,8 +80,8 @@ export function useAvailableSlots(therapistId: string, date: string) {
       }
     },
     enabled: !!(therapistId && date),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
     retry: (failureCount, error: Error) => {
       console.log(
         `[useAvailableSlots] Retry attempt ${failureCount + 1} for error:`,

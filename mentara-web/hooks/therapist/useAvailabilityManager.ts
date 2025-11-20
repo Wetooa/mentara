@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 
 interface AvailabilitySlot {
@@ -89,16 +91,18 @@ export function useAvailabilityManager(): UseAvailabilityManagerReturn {
 
   // Fetch availability slots
   const { data: availability, isLoading, error, refetch } = useQuery({
-    queryKey: ['therapist', 'availability'],
+    queryKey: queryKeys.therapist.availability(),
     queryFn: () => api.booking.availability.get(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Create availability mutation
   const createAvailabilityMutation = useMutation({
     mutationFn: (data: NewAvailabilityData) => api.booking.availability.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['therapist', 'availability'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapist.availability() });
       toast.success('Availability added successfully!');
       setShowAddDialog(false);
       resetForm();
@@ -114,7 +118,7 @@ export function useAvailabilityManager(): UseAvailabilityManagerReturn {
     mutationFn: ({ id, data }: { id: string; data: Partial<AvailabilitySlot> }) =>
       api.booking.availability.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['therapist', 'availability'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapist.availability() });
       toast.success('Availability updated successfully!');
       setEditingSlot(null);
     },
@@ -128,7 +132,7 @@ export function useAvailabilityManager(): UseAvailabilityManagerReturn {
   const deleteAvailabilityMutation = useMutation({
     mutationFn: (id: string) => api.booking.availability.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['therapist', 'availability'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapist.availability() });
       toast.success('Availability deleted successfully!');
     },
     onError: (error) => {

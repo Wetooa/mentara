@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { hasAuthToken } from "@/lib/constants/auth";
 import {
   PublicProfileResponse,
@@ -16,12 +18,14 @@ export function useProfile(userId: string) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["profile", userId],
+    queryKey: queryKeys.profile.byId(userId),
     queryFn: (): Promise<PublicProfileResponse> => {
       return api.profile.getProfile(userId);
     },
     enabled: !!userId && hasAuthToken(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
       // Don't retry on 401/403 errors (auth failures)
       if (error?.response?.status === 401 || error?.response?.status === 403) {
@@ -45,14 +49,14 @@ export function useUpdateProfile() {
     },
     onMutate: async (newProfileData) => {
       // Cancel any outgoing refetches for current user profile
-      await queryClient.cancelQueries({ queryKey: ["profile"] });
+      await queryClient.cancelQueries({ queryKey: queryKeys.profile.all });
 
       // Snapshot the previous value
-      const previousProfile = queryClient.getQueryData(["profile"]);
+      const previousProfile = queryClient.getQueryData(queryKeys.profile.current());
 
       // Optimistically update profile data
       queryClient.setQueryData(
-        ["profile"],
+        queryKeys.profile.current(),
         (old: PublicProfileResponse | undefined) => {
           if (!old) return old;
 
@@ -73,7 +77,7 @@ export function useUpdateProfile() {
     onError: (error: MentaraApiError, variables, context) => {
       // Rollback the optimistic update
       if (context?.previousProfile) {
-        queryClient.setQueryData(["profile"], context.previousProfile);
+        queryClient.setQueryData(queryKeys.profile.current(), context.previousProfile);
       }
 
       toast.error("Failed to update profile", {
@@ -82,7 +86,7 @@ export function useUpdateProfile() {
     },
     onSuccess: (data) => {
       // Invalidate all profile queries to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
 
       toast.success("Profile updated successfully!");
     },
@@ -135,7 +139,7 @@ export function useUploadAvatar() {
     onSuccess: (data) => {
       // Update all profile queries with new avatar URL
       queryClient.setQueryData(
-        ["profile"],
+        queryKeys.profile.current(),
         (old: PublicProfileResponse | undefined) => {
           if (!old) return old;
 
@@ -173,7 +177,7 @@ export function useUploadCoverImage() {
     onSuccess: (data) => {
       // Update all profile queries with new cover image URL
       queryClient.setQueryData(
-        ["profile"],
+        queryKeys.profile.current(),
         (old: PublicProfileResponse | undefined) => {
           if (!old) return old;
 
@@ -221,7 +225,7 @@ export function useReportUser() {
       
       // Optionally invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: ["profile", variables.userId] 
+        queryKey: queryKeys.profile.byId(variables.userId) 
       });
     },
     onError: (error: MentaraApiError) => {

@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { hasAuthToken } from "@/lib/constants/auth";
 import type { UserRole } from "@/contexts/AuthContext";
 
@@ -28,7 +30,7 @@ export function useCurrentUserProfile() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["auth", "current-user-profile", user?.id, user?.role],
+    queryKey: [...queryKeys.profile.all, "current", user?.id, user?.role],
     queryFn: async (): Promise<UserProfileData> => {
       if (!user?.role) {
         throw new Error("User role not available");
@@ -66,8 +68,9 @@ export function useCurrentUserProfile() {
       };
     },
     enabled: isAuthenticated && !!user?.id && !!user?.role && hasAuthToken(),
-    staleTime: 5 * 60 * 1000, // 5 minutes - profile data doesn't change frequently
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
       // Don't retry on 401/403 errors (auth failures)
       if (error?.response?.status === 401 || error?.response?.status === 403) {

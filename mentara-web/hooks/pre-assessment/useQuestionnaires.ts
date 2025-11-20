@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { QuestionnaireDefinition } from "@/types/api/questionnaires";
 import { LIST_OF_QUESTIONNAIRES } from "@/constants/questionnaire/questionnaire-mapping";
 
@@ -12,7 +14,7 @@ export function useQuestionnaires() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["questionnaires"],
+    queryKey: queryKeys.preAssessment.questionnaires(),
     queryFn: async () => {
       try {
         // Try to fetch from API first
@@ -23,8 +25,9 @@ export function useQuestionnaires() {
         return LIST_OF_QUESTIONNAIRES;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - questionnaires don't change often
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes - questionnaires don't change often
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: 1, // Reduced retry count since we have fallback
     retryDelay: 1000,
   });

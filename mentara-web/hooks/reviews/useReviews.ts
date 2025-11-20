@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { 
   Review, 
   ReviewsResponse, 
@@ -18,12 +19,14 @@ export function useReviews(params: GetReviewsParams = {}) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['reviews', 'list', params],
+    queryKey: queryKeys.reviews.list(params),
     queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getAll(params);
     },
     select: (response) => response.data || { reviews: [], total: 0 },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -32,13 +35,15 @@ export function useTherapistReviews(therapistId: string, params: Omit<GetReviews
   const api = useApi();
 
   return useQuery({
-    queryKey: ['reviews', 'byTherapist', therapistId, params],
+    queryKey: queryKeys.reviews.byTherapist(therapistId, params),
     queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getTherapistReviews(therapistId, params);
     },
     select: (response) => response.data || { reviews: [], total: 0 },
     enabled: !!therapistId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -47,13 +52,15 @@ export function useTherapistReviewStats(therapistId: string) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['reviews', 'therapistStats', therapistId],
+    queryKey: queryKeys.reviews.therapistStats(therapistId),
     queryFn: (): Promise<ReviewStats> => {
       return api.reviews.getTherapistStats(therapistId);
     },
     select: (response) => response.data || { averageRating: 0, totalReviews: 0 },
     enabled: !!therapistId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -68,13 +75,13 @@ export function useCreateReview() {
     },
     onMutate: async (newReview) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['reviews'] });
+      await queryClient.cancelQueries({ queryKey: queryKeys.reviews.all });
       
       // Snapshot the previous value
-      const previousReviews = queryClient.getQueryData(['reviews']);
+      const previousReviews = queryClient.getQueryData(queryKeys.reviews.list({}));
       
       // Optimistically update to the new value
-      queryClient.setQueryData(['reviews', 'list', {}], (old: ReviewsResponse | undefined) => {
+      queryClient.setQueryData(queryKeys.reviews.list({}), (old: ReviewsResponse | undefined) => {
         if (!old?.reviews) return old;
         
         const optimisticReview = {
@@ -98,7 +105,7 @@ export function useCreateReview() {
     },
     onError: (err, newReview, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
-      queryClient.setQueryData(['reviews'], context?.previousReviews);
+      queryClient.setQueryData(queryKeys.reviews.list({}), context?.previousReviews);
       
       toast.error('Failed to submit review', {
         description: err.message || 'Please try again later.',
@@ -106,12 +113,12 @@ export function useCreateReview() {
     },
     onSuccess: (data) => {
       // Invalidate and refetch relevant queries
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['therapists'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapists.all });
       
       // Also invalidate therapist-specific queries
-      queryClient.invalidateQueries({ queryKey: ['reviews', 'byTherapist', data.therapistId] });
-      queryClient.invalidateQueries({ queryKey: ['reviews', 'therapistStats', data.therapistId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byTherapist(data.therapistId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.therapistStats(data.therapistId) });
       
       toast.success('Review submitted successfully!', {
         description: 'Your review will be visible after moderation.',
@@ -119,7 +126,7 @@ export function useCreateReview() {
     },
     onSettled: () => {
       // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
     },
   });
 }
@@ -135,9 +142,9 @@ export function useUpdateReview() {
     },
     onSuccess: (data) => {
       // Invalidate and refetch relevant queries
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['reviews', 'byTherapist', data.therapistId] });
-      queryClient.invalidateQueries({ queryKey: ['reviews', 'therapistStats', data.therapistId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byTherapist(data.therapistId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.therapistStats(data.therapistId) });
       
       toast.success('Review updated successfully!');
     },
@@ -160,9 +167,7 @@ export function useDeleteReview() {
     },
     onSuccess: () => {
       // Invalidate and refetch relevant queries
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['therapist-reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['therapist-review-stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
       
       toast.success('Review deleted successfully!');
     },
@@ -185,7 +190,7 @@ export function useMarkReviewHelpful() {
     },
     onSuccess: (data, reviewId) => {
       // Update the specific review in the cache
-      queryClient.setQueryData(['reviews'], (oldData: ReviewsResponse | undefined) => {
+      queryClient.setQueryData(queryKeys.reviews.list({}), (oldData: ReviewsResponse | undefined) => {
         if (!oldData?.reviews) return oldData;
         
         return {
@@ -199,7 +204,7 @@ export function useMarkReviewHelpful() {
       });
 
       // Also update therapist-specific reviews
-      queryClient.invalidateQueries({ queryKey: ['therapist-reviews'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
       
       toast.success(data.helpful ? 'Marked as helpful!' : 'Removed helpful mark');
     },
@@ -230,9 +235,7 @@ export function useModerateReview() {
     },
     onSuccess: () => {
       // Invalidate and refetch all review queries
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['therapist-reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['therapist-review-stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
       
       toast.success('Review moderated successfully!');
     },
@@ -254,6 +257,8 @@ export function usePendingReviews(params: { page?: number; limit?: number } = {}
       return api.reviews.getPending(params);
     },
     select: (response) => response.data || { reviews: [], total: 0 },
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds (pending reviews need frequent refresh)
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for pending reviews
   });
 }

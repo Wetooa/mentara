@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
 // import { useSubscriptionStatus } from '@/hooks/billing'; // Removed - subscriptions are outdated
 import { toast } from "sonner";
 import { TherapistCardData } from "@/types/therapist";
@@ -134,7 +135,7 @@ export function useBookingModal(
     isLoading: slotsLoading,
     error: slotsError,
   } = useQuery({
-    queryKey: ['booking', 'slots', therapist?.id, selectedDate?.toISOString()?.split('T')[0]],
+    queryKey: queryKeys.booking.slots(therapist?.id || '', selectedDate?.toISOString()?.split('T')[0]),
     queryFn: () => {
       if (!therapist || !selectedDate) return [];
       return api.booking.availability.getSlots(
@@ -143,6 +144,9 @@ export function useBookingModal(
       );
     },
     enabled: !!(therapist && selectedDate),
+    staleTime: STALE_TIME.SHORT,
+    gcTime: GC_TIME.MEDIUM,
+    refetchOnWindowFocus: false,
   });
 
   // Create meeting mutation with deduplication
@@ -166,8 +170,8 @@ export function useBookingModal(
     },
     onSuccess: (data) => {
       toast.success("Session booked successfully!");
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'slots'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
       onSuccess?.(data);
       onClose?.();
 

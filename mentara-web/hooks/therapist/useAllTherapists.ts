@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { 
   TherapistCardData,
   transformTherapistForCard,
@@ -30,8 +31,9 @@ export function useAllTherapists() {
       return responseData || { therapists: [], totalCount: 0 };
     },
     enabled: true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
       // Don't retry on auth errors
       if (error?.response?.status === 401 || error?.response?.status === 403) {

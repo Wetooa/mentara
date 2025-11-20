@@ -48,6 +48,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from "@/lib/constants/react-query";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import { toast } from "sonner";
 import type {
@@ -63,20 +65,23 @@ import type {
 } from "@/types/api/admin";
 
 // =============================
-// QUERY KEY FACTORY
+// QUERY KEY FACTORY (use centralized keys)
 // =============================
 
-export const adminTherapistQueryKeys = {
-  all: ['admin', 'therapists'] as const,
+// Use centralized query keys for consistency
+const getAdminTherapistQueryKeys = () => ({
+  all: queryKeys.admin.therapistApplications.list(),
   applications: (filters?: PendingTherapistFiltersDto) => 
-    [...adminTherapistQueryKeys.all, 'applications', filters] as const,
+    queryKeys.admin.therapistApplications.list(filters),
   pending: (filters?: PendingTherapistFiltersDto) => 
-    [...adminTherapistQueryKeys.all, 'pending', filters] as const,
+    [...queryKeys.admin.therapistApplications.list(), 'pending', filters] as const,
   details: (id: string) => 
-    [...adminTherapistQueryKeys.all, 'details', id] as const,
+    queryKeys.admin.therapistApplications.byId(id),
   metrics: (startDate?: string, endDate?: string) => 
-    [...adminTherapistQueryKeys.all, 'metrics', { startDate, endDate }] as const,
-};
+    [...queryKeys.admin.therapistApplications.list(), 'metrics', { startDate, endDate }] as const,
+});
+
+export const adminTherapistQueryKeys = getAdminTherapistQueryKeys();
 
 // =============================
 // QUERY HOOKS
@@ -99,8 +104,10 @@ export function usePendingTherapistApplications(
     queryKey: adminTherapistQueryKeys.pending(filters),
     queryFn: () => api.admin.getPendingTherapistApplications(filters),
     enabled: options?.enabled !== false,
-    refetchInterval: options?.refetchInterval ?? 30000, // 30 seconds
-    staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes
+    refetchInterval: options?.refetchInterval ?? REFETCH_INTERVAL.OCCASIONAL, // 15 minutes (default)
+    staleTime: options?.staleTime ?? STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       // Don't retry on auth errors
       if (error instanceof MentaraApiError && 
@@ -131,7 +138,9 @@ export function useAllTherapistApplications(
     queryFn: () => api.admin.getAllTherapistApplications(filters),
     enabled: options?.enabled !== false,
     refetchInterval: options?.refetchInterval ?? 30000,
-    staleTime: options?.staleTime ?? 1000 * 60 * 5,
+    staleTime: options?.staleTime ?? STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       if (error instanceof MentaraApiError && 
           (error.status === 401 || error.status === 403)) {
@@ -158,7 +167,9 @@ export function useTherapistApplicationDetails(
     queryKey: adminTherapistQueryKeys.details(applicationId || ''),
     queryFn: () => api.admin.getTherapistApplicationDetails(applicationId!),
     enabled: !!applicationId && (options?.enabled !== false),
-    staleTime: options?.staleTime ?? 1000 * 60 * 15, // 15 minutes - details don't change often
+    staleTime: options?.staleTime ?? STALE_TIME.VERY_LONG, // 15 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       // Don't retry on 404 or auth errors
       if (error instanceof MentaraApiError && 
@@ -188,8 +199,10 @@ export function useTherapistApplicationMetrics(
     queryKey: adminTherapistQueryKeys.metrics(startDate, endDate),
     queryFn: () => api.admin.getTherapistApplicationMetrics(startDate, endDate),
     enabled: options?.enabled !== false,
-    refetchInterval: options?.refetchInterval ?? 60000, // 1 minute
-    staleTime: options?.staleTime ?? 1000 * 60 * 10, // 10 minutes - metrics don't change rapidly
+    refetchInterval: options?.refetchInterval ?? REFETCH_INTERVAL.MODERATE, // 5 minutes
+    staleTime: options?.staleTime ?? STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       if (error instanceof MentaraApiError && 
           (error.status === 401 || error.status === 403)) {

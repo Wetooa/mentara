@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
@@ -32,9 +33,10 @@ export function useWorksheets() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['worksheets', 'my'],
+    queryKey: queryKeys.worksheets.my(),
     queryFn: () => api.worksheets.getMy(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
   });
 
   // Submit worksheet responses
@@ -42,7 +44,7 @@ export function useWorksheets() {
     mutationFn: ({ worksheetId, responses }: { worksheetId: string; responses: Record<string, any> }) =>
       api.worksheets.submitResponses(worksheetId, responses),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['worksheets'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
       toast.success("Worksheet submitted successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -55,7 +57,7 @@ export function useWorksheets() {
     mutationFn: ({ worksheetId, responses }: { worksheetId: string; responses: Record<string, any> }) =>
       api.worksheets.saveDraft(worksheetId, responses),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['worksheets'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
     },
     onError: (error: MentaraApiError) => {
       console.error("Failed to save draft:", error);
@@ -90,9 +92,10 @@ export function useTherapistWorksheets() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['worksheets', 'assigned'],
+    queryKey: queryKeys.worksheets.assigned(),
     queryFn: () => api.worksheets.getAssigned(),
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
   });
 
   // Assign worksheet to patient
@@ -100,7 +103,7 @@ export function useTherapistWorksheets() {
     mutationFn: ({ patientId, worksheetData }: { patientId: string; worksheetData: Partial<Worksheet> }) =>
       api.worksheets.assign(patientId, worksheetData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['worksheets'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
       toast.success("Worksheet assigned successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -113,7 +116,7 @@ export function useTherapistWorksheets() {
     mutationFn: ({ worksheetId, feedback }: { worksheetId: string; feedback: string }) =>
       api.worksheets.reviewResponses(worksheetId, feedback),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['worksheets'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
       toast.success("Review submitted successfully");
     },
     onError: (error: MentaraApiError) => {

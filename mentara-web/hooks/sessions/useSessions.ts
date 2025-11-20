@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from '@/lib/constants/react-query';
 import type { Meeting, MeetingsQueryOptions } from '@/lib/api/services/meetings';
 
 /**
@@ -13,7 +14,9 @@ export function useSessions(options: MeetingsQueryOptions = {}) {
   return useQuery({
     queryKey: queryKeys.sessions.list(options),
     queryFn: () => api.meetings.getAllMeetings(options),
-    staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if not authorized
       if (error?.status === 403 || error?.status === 401) {
@@ -33,8 +36,10 @@ export function useUpcomingSessions(limit = 10) {
   return useQuery({
     queryKey: queryKeys.sessions.upcoming(limit),
     queryFn: () => api.meetings.getUpcomingMeetings(limit),
-    staleTime: 1000 * 60 * 1, // Sessions change frequently, refresh every minute
-    refetchInterval: 1000 * 60 * 5, // Auto-refresh every 5 minutes
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds (sessions change frequently)
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchInterval: REFETCH_INTERVAL.MODERATE, // Auto-refresh every 5 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for upcoming sessions
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -51,9 +56,11 @@ export function useCompletedSessions(limit = 10) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['sessions', 'completed', limit],
+    queryKey: queryKeys.sessions.completed(limit),
     queryFn: () => api.meetings.getCompletedMeetings(limit),
-    staleTime: 1000 * 60 * 5, // Completed sessions don't change often
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -70,9 +77,11 @@ export function useCancelledSessions(limit = 10) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['sessions', 'cancelled', limit],
+    queryKey: queryKeys.sessions.cancelled(limit),
     queryFn: () => api.meetings.getCancelledMeetings(limit),
-    staleTime: 1000 * 60 * 5, // Cancelled sessions don't change often
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -89,10 +98,12 @@ export function useInProgressSessions(limit = 10) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['sessions', 'in-progress', limit],
+    queryKey: queryKeys.sessions.inProgress(limit),
     queryFn: () => api.meetings.getInProgressMeetings(limit),
-    staleTime: 1000 * 30, // In-progress sessions change very frequently
-    refetchInterval: 1000 * 60 * 2, // Auto-refresh every 2 minutes
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds (in-progress sessions change very frequently)
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchInterval: REFETCH_INTERVAL.FREQUENT, // Auto-refresh every 1 minute (approximate to 2 minutes)
+    refetchOnWindowFocus: true, // Refetch on focus for in-progress sessions
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -109,9 +120,11 @@ export function useSessionsByStatus(status: Meeting["status"], limit = 10) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['sessions', 'by-status', status, limit],
+    queryKey: queryKeys.sessions.byStatus(status, limit),
     queryFn: () => api.meetings.getMeetingsByStatus(status, limit),
-    staleTime: 1000 * 60 * 2,
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     enabled: !!status,
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
@@ -129,9 +142,11 @@ export function useSessionsInDateRange(dateFrom: string, dateTo: string, limit =
   const api = useApi();
 
   return useQuery({
-    queryKey: ['sessions', 'date-range', dateFrom, dateTo, limit],
+    queryKey: queryKeys.sessions.dateRange(dateFrom, dateTo, limit),
     queryFn: () => api.meetings.getMeetingsInDateRange(dateFrom, dateTo, limit),
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     enabled: !!dateFrom && !!dateTo,
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
@@ -149,9 +164,11 @@ export function useSessionById(sessionId: string) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['sessions', 'by-id', sessionId],
+    queryKey: queryKeys.sessions.byId(sessionId),
     queryFn: () => api.meetings.getMeetingById(sessionId),
-    staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     enabled: !!sessionId,
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if not found or not authorized
@@ -170,7 +187,7 @@ export function useSessionStats() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['sessions', 'stats'],
+    queryKey: queryKeys.sessions.stats(),
     queryFn: async () => {
       // Fetch different session counts in parallel
       const [upcoming, completed, cancelled, inProgress] = await Promise.all([
@@ -188,7 +205,9 @@ export function useSessionStats() {
         total: upcoming + completed + cancelled + inProgress,
       };
     },
-    staleTime: 1000 * 60 * 3, // Stats can be cached for 3 minutes
+    staleTime: STALE_TIME.SHORT, // 2-3 minutes (using SHORT as approximation)
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -208,30 +227,34 @@ export function usePrefetchSessions() {
   return {
     prefetchUpcoming: (limit = 10) => {
       queryClient.prefetchQuery({
-        queryKey: ['sessions', 'upcoming', limit],
+        queryKey: queryKeys.sessions.upcoming(limit),
         queryFn: () => api.meetings.getUpcomingMeetings(limit),
-        staleTime: 1000 * 60 * 2,
+        staleTime: STALE_TIME.SHORT,
+        gcTime: GC_TIME.MEDIUM,
       });
     },
     prefetchCompleted: (limit = 10) => {
       queryClient.prefetchQuery({
-        queryKey: ['sessions', 'completed', limit],
+        queryKey: queryKeys.sessions.completed(limit),
         queryFn: () => api.meetings.getCompletedMeetings(limit),
-        staleTime: 1000 * 60 * 5,
+        staleTime: STALE_TIME.MEDIUM,
+        gcTime: GC_TIME.MEDIUM,
       });
     },
     prefetchCancelled: (limit = 10) => {
       queryClient.prefetchQuery({
-        queryKey: ['sessions', 'cancelled', limit],
+        queryKey: queryKeys.sessions.cancelled(limit),
         queryFn: () => api.meetings.getCancelledMeetings(limit),
-        staleTime: 1000 * 60 * 5,
+        staleTime: STALE_TIME.MEDIUM,
+        gcTime: GC_TIME.MEDIUM,
       });
     },
     prefetchInProgress: (limit = 10) => {
       queryClient.prefetchQuery({
-        queryKey: ['sessions', 'in-progress', limit],
+        queryKey: queryKeys.sessions.inProgress(limit),
         queryFn: () => api.meetings.getInProgressMeetings(limit),
-        staleTime: 1000 * 30,
+        staleTime: STALE_TIME.VERY_SHORT,
+        gcTime: GC_TIME.SHORT,
       });
     },
   };
@@ -245,22 +268,22 @@ export function useInvalidateSessions() {
 
   return {
     invalidateAll: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
     },
     invalidateUpcoming: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', 'upcoming'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.upcoming() });
     },
     invalidateCompleted: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', 'completed'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.completed() });
     },
     invalidateCancelled: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', 'cancelled'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.cancelled() });
     },
     invalidateInProgress: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', 'in-progress'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.inProgress() });
     },
     invalidateStats: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.stats() });
     },
   };
 }

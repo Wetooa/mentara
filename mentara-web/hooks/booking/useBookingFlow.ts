@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 
 interface AvailableSlot {
@@ -88,7 +90,7 @@ export function useBookingFlow(therapistId?: string): UseBookingFlowReturn {
     isLoading: slotsLoading,
     error: slotsError,
   } = useQuery({
-    queryKey: ['booking', 'slots', therapistId, selectedDate?.toISOString()?.split('T')[0]],
+    queryKey: queryKeys.booking.slots(therapistId || '', selectedDate?.toISOString()?.split('T')[0]),
     queryFn: () => {
       if (!therapistId || !selectedDate) {
         return Promise.resolve([]);
@@ -99,21 +101,27 @@ export function useBookingFlow(therapistId?: string): UseBookingFlowReturn {
       });
     },
     enabled: !!therapistId && !!selectedDate,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Get available durations
   const { data: durations = [], isLoading: durationsLoading } = useQuery({
-    queryKey: ["meeting-durations"],
+    queryKey: [...queryKeys.booking.all, 'durations'],
     queryFn: () => api.booking.durations.getAll(),
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: STALE_TIME.STATIC, // 30 minutes
+    gcTime: GC_TIME.EXTENDED, // 1 hour
+    refetchOnWindowFocus: false,
   });
 
   // Get payment methods
   const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = useQuery({
-    queryKey: ["payment-methods"],
+    queryKey: [...queryKeys.booking.all, 'payment-methods'],
     queryFn: () => api.booking.payment.getPaymentMethods(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Create meeting mutation
@@ -123,8 +131,8 @@ export function useBookingFlow(therapistId?: string): UseBookingFlowReturn {
     },
     onSuccess: () => {
       toast.success("Meeting booked successfully!");
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'slots'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
       resetForm();
     },
     onError: (error: any) => {

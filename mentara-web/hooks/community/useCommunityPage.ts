@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from "@/lib/constants/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommunityNavigation } from "@/store/community";
 import { toast } from "sonner";
@@ -39,7 +41,7 @@ export function useCommunityPage() {
 
   // Get selected community data if not already cached in store
   const { data: communityData } = useQuery({
-    queryKey: ['communities', 'withStructure', selectedCommunityId!],
+    queryKey: queryKeys.communities.withStructure(selectedCommunityId!),
     queryFn: () => selectedCommunityId ? api.communities.getCommunityWithStructure(selectedCommunityId) : null,
     enabled: !!selectedCommunityId && !selectedCommunity,
     onSuccess: (data) => {
@@ -62,17 +64,22 @@ export function useCommunityPage() {
     isLoading: postsLoading, 
     error: postsError 
   } = useQuery({
-    queryKey: ['communities', 'roomPosts', selectedRoomId!],
+    queryKey: queryKeys.communities.roomPosts(selectedRoomId!),
     queryFn: () => selectedRoomId ? api.communities.getPostsByRoom(selectedRoomId) : null,
     enabled: !!selectedRoomId,
-    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchInterval: REFETCH_INTERVAL.FREQUENT, // Refresh every minute
+    refetchOnWindowFocus: true, // Refetch on focus for posts
   });
 
   // Get community stats
   const { data: communityStats } = useQuery({
-    queryKey: ['communities', 'stats', 'general'],
+    queryKey: queryKeys.communities.stats(),
     queryFn: () => api.communities.getCommunityStats(),
-    staleTime: 1000 * 60 * 15, // 15 minutes - stats don't change frequently
+    staleTime: STALE_TIME.VERY_LONG, // 15 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Create post mutation
@@ -81,8 +88,8 @@ export function useCommunityPage() {
       api.communities.createPost(data),
     onSuccess: () => {
       // Invalidate relevant queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
-      queryClient.invalidateQueries({ queryKey: ['communities', 'stats', 'general'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.stats() });
       setNewPostTitle("");
       setNewPostContent("");
       setSelectedFiles([]);
@@ -108,7 +115,7 @@ export function useCommunityPage() {
     mutationFn: ({ postId, isHearted }: { postId: string; isHearted: boolean }) =>
       isHearted ? api.communities.unheartPost(postId) : api.communities.heartPost(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
     },
   });
 
@@ -117,7 +124,7 @@ export function useCommunityPage() {
     mutationFn: ({ postId, postData }: { postId: string; postData: { title?: string; content?: string } }) =>
       api.communities.updatePost(postId, postData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
       setIsEditPostOpen(false);
       setEditingPost(null);
       setEditPostTitle("");
@@ -139,7 +146,7 @@ export function useCommunityPage() {
   const deletePostMutation = useMutation({
     mutationFn: (postId: string) => api.communities.deletePost(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
       queryClient.invalidateQueries({ queryKey: ['communities', 'stats', 'general'] });
       toast.success("Post deleted successfully!");
     },
@@ -263,7 +270,7 @@ export function useCommunityPage() {
   };
 
   const retryLoadPosts = () => {
-    queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
+    queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
   };
 
   const isPostingAllowed = () => {

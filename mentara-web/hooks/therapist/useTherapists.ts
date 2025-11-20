@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { useAllTherapists } from "@/hooks/therapist/useAllTherapists";
 
 import type {
@@ -33,7 +34,9 @@ export function useTherapistRecommendations(
     },
     select: (response) => response || { therapists: [], totalCount: 0 },
     enabled: true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -44,10 +47,12 @@ export function useTherapistProfile(therapistId: string | null) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["therapists", "detail", therapistId || ""],
+    queryKey: queryKeys.therapists.detail(therapistId || ""),
     queryFn: () => api.therapists.getProfile(therapistId!),
     enabled: !!therapistId,
-    staleTime: 1000 * 60 * 10, // Profile data is more stable
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -60,14 +65,10 @@ export function useInfiniteTherapistRecommendations(
   const api = useApi();
 
   return useInfiniteQuery({
-    queryKey: [
-      "therapists",
-      "recommendations",
-      {
-        ...baseParams,
-        infinite: true,
-      },
-    ],
+    queryKey: queryKeys.therapists.recommendations({
+      ...baseParams,
+      infinite: true,
+    }),
     queryFn: ({ pageParam = 0 }) =>
       api.therapists.getRecommendations({
         ...baseParams,
@@ -330,9 +331,10 @@ export function usePrefetchTherapistProfile() {
 
   return (therapistId: string) => {
     queryClient.prefetchQuery({
-      queryKey: ["therapists", "detail", therapistId],
+      queryKey: queryKeys.therapists.detail(therapistId),
       queryFn: () => api.therapists.getProfile(therapistId),
-      staleTime: 1000 * 60 * 10,
+      staleTime: STALE_TIME.LONG, // 10 minutes
+      gcTime: GC_TIME.VERY_LONG, // 30 minutes
     });
   };
 }
@@ -346,14 +348,16 @@ export function useTherapistSearch() {
 
   const invalidateRecommendations = () => {
     queryClient.invalidateQueries({
-      queryKey: ["therapists", "recommendations"],
+      queryKey: queryKeys.therapists.all,
     });
   };
 
   const refetchWithParams = (params: TherapistSearchParams) => {
     return queryClient.fetchQuery({
-      queryKey: ["therapists", "recommendations", params],
+      queryKey: queryKeys.therapists.recommendations(params),
       queryFn: () => api.therapists.getRecommendations(params),
+      staleTime: STALE_TIME.MEDIUM,
+      gcTime: GC_TIME.MEDIUM,
     });
   };
 
