@@ -28,7 +28,10 @@ import {
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useSessionById } from "@/hooks/sessions";
+import { logger } from "@/lib/logger";
 import { toast } from "sonner";
+import { PageBreadcrumbs } from "@/components/navigation/PageBreadcrumbs";
+import { BackButton } from "@/components/navigation/BackButton";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -131,7 +134,7 @@ export default function SessionDetailsPage({
           : "Meeting location copied to clipboard!";
         toast.success(message);
       } catch (err) {
-        console.error("Failed to copy: ", err);
+        logger.error("Failed to copy: ", err);
         // Fallback for older browsers
         const textArea = document.createElement("textarea");
         textArea.value = session.meetingUrl;
@@ -155,7 +158,7 @@ export default function SessionDetailsPage({
 
   const handleCancelSession = () => {
     // This would open a confirmation dialog
-    console.log("Cancelling session:", sessionId);
+    logger.debug("Cancelling session:", sessionId);
   };
 
   const handleMessageTherapist = () => {
@@ -261,28 +264,36 @@ export default function SessionDetailsPage({
   const isCancelled =
     session.status === "CANCELLED" || session.status === "NO_SHOW";
 
+  // Generate breadcrumb context
+  const breadcrumbContext = session?.dateTime
+    ? {
+        sessionTitle: format(new Date(session.dateTime), "MMM d, yyyy - Session"),
+      }
+    : undefined;
+
   return (
     <motion.div
-      className="w-full h-full p-6 space-y-8"
+      className="w-full h-full p-6 space-y-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
+      {/* Breadcrumbs */}
+      <PageBreadcrumbs context={breadcrumbContext} />
+
       {/* Page Header */}
       <motion.div
         className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
         variants={itemVariants}
       >
         <div className="flex items-start gap-4">
-          <Button
+          <BackButton
+            label="Back to Sessions"
+            href="/client/sessions"
             variant="outline"
             size="sm"
-            onClick={handleBackToSessions}
-            className="gap-2 mt-1"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Sessions
-          </Button>
+            className="mt-1"
+          />
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold tracking-tight">
@@ -513,11 +524,17 @@ export default function SessionDetailsPage({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push("/client/therapist")}
+                    onClick={() => {
+                      if (session.therapistId) {
+                        router.push(`/client/profile/${session.therapistId}`);
+                      } else {
+                        router.push("/client/therapist");
+                      }
+                    }}
                     className="gap-2"
                   >
                     <User className="h-4 w-4" />
-                    Profile
+                    View Profile
                   </Button>
                 </div>
               </CardContent>

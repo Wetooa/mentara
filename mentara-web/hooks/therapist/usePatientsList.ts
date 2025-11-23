@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type {
@@ -16,10 +17,12 @@ export function usePatientsList() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["clients", "assigned"],
+    queryKey: queryKeys.therapists.patients.list(),
     queryFn: () => api.therapists.patients.getList(),
     select: (response) => response || [],
-    staleTime: 1000 * 60 * 5, // Patient list is relatively stable
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if not authorized to access patient data
       if (error?.status === 403 || error?.status === 401) {
@@ -36,10 +39,12 @@ export function usePatientsRequests() {
   console.log("Fetching patient requests...");
 
   return useQuery({
-    queryKey: ["clients", "requests"],
+    queryKey: [...queryKeys.therapists.patients.list(), "requests"],
     queryFn: () => api.therapists.patients.getRequests(),
     select: (response) => response || [],
-    staleTime: 1000 * 60 * 2, // Patient requests might change more frequently
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if not authorized to access patient data
       if (error?.status === 403 || error?.status === 401) {
@@ -59,8 +64,8 @@ export function useAcceptPatientRequest() {
       api.therapists.patients.acceptRequest(patientId),
     onSuccess: () => {
       // Invalidate both lists to refresh data
-      queryClient.invalidateQueries({ queryKey: ["clients", "requests"] });
-      queryClient.invalidateQueries({ queryKey: ["clients", "assigned"] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.therapists.patients.list(), "requests"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapists.patients.list() });
     },
     onError: (error: MentaraApiError) => {
       console.error("Failed to accept patient request:", error);
@@ -77,7 +82,7 @@ export function useDenyPatientRequest() {
       api.therapists.patients.denyRequest(patientId),
     onSuccess: () => {
       // Invalidate requests list to refresh data
-      queryClient.invalidateQueries({ queryKey: ["clients", "requests"] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.therapists.patients.list(), "requests"] });
     },
     onError: (error: MentaraApiError) => {
       console.error("Failed to deny patient request:", error);
@@ -110,11 +115,13 @@ export function usePatientData(patientId: string | null) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["clients", "detail", patientId || ""],
+    queryKey: [...queryKeys.therapists.patients.list(), "detail", patientId || ""],
     queryFn: () => api.therapists.patients.getById(patientId!),
     select: (response) => response.data || null,
     enabled: !!patientId,
-    staleTime: 1000 * 60 * 10, // Patient details change less frequently
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -125,11 +132,13 @@ export function usePatientSessions(patientId: string | null) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["clients", "sessions", patientId || ""],
+    queryKey: [...queryKeys.therapists.patients.list(), "sessions", patientId || ""],
     queryFn: () => api.therapists.patients.getSessions(patientId!),
     select: (response) => response.data || [],
     enabled: !!patientId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -140,11 +149,13 @@ export function usePatientWorksheets(patientId: string | null) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["clients", "detail", patientId || "", "worksheets"],
+    queryKey: [...queryKeys.therapists.patients.list(), "detail", patientId || "", "worksheets"],
     queryFn: () => api.therapists.patients.getWorksheets(patientId!),
     select: (response) => response.data || [],
     enabled: !!patientId,
-    staleTime: 1000 * 60 * 3, // Worksheets may change more frequently
+    staleTime: STALE_TIME.SHORT, // 3 minutes (uses SHORT for frequent changes)
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -168,12 +179,12 @@ export function useUpdatePatientNotes() {
     onMutate: async ({ patientId, sessionId, notes }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ["clients", "sessions", patientId],
+        queryKey: [...queryKeys.therapists.patients.list(), "sessions", patientId],
       });
 
       // Optimistically update session notes
       queryClient.setQueryData(
-        ["clients", "sessions", patientId],
+        [...queryKeys.therapists.patients.list(), "sessions", patientId],
         (oldSessions: Session[] | undefined) => {
           if (!oldSessions) return oldSessions;
 
@@ -191,7 +202,7 @@ export function useUpdatePatientNotes() {
       // Revert optimistic update
       if (context?.patientId) {
         queryClient.invalidateQueries({
-          queryKey: ["clients", "sessions", context.patientId],
+          queryKey: [...queryKeys.therapists.patients.list(), "sessions", context.patientId],
         });
       }
     },
@@ -200,7 +211,7 @@ export function useUpdatePatientNotes() {
 
       // Invalidate patient details to reflect changes
       queryClient.invalidateQueries({
-        queryKey: ["clients", "detail", patientId],
+        queryKey: [...queryKeys.therapists.patients.list(), "detail", patientId],
       });
     },
   });
@@ -226,12 +237,12 @@ export function useAssignWorksheet() {
 
       // Invalidate patient worksheets
       queryClient.invalidateQueries({
-        queryKey: ["clients", "detail", patientId, "worksheets"],
+        queryKey: [...queryKeys.therapists.patients.list(), "detail", patientId, "worksheets"],
       });
 
       // Invalidate patient details
       queryClient.invalidateQueries({
-        queryKey: ["clients", "detail", patientId],
+        queryKey: [...queryKeys.therapists.patients.list(), "detail", patientId],
       });
     },
     onError: (error: MentaraApiError) => {
@@ -247,11 +258,13 @@ export function usePatientProgress(patientId: string | null) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["clients", "progress", patientId || ""],
+    queryKey: [...queryKeys.therapists.patients.list(), "progress", patientId || ""],
     queryFn: () => api.clients.getProgress(patientId!),
     select: (response) => response.data || null,
     enabled: !!patientId,
-    staleTime: 1000 * 60 * 10, // Progress data changes slowly
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -264,9 +277,10 @@ export function usePrefetchPatientData() {
 
   return (patientId: string) => {
     queryClient.prefetchQuery({
-      queryKey: ["clients", "detail", patientId],
+      queryKey: [...queryKeys.therapists.patients.list(), "detail", patientId],
       queryFn: () => api.therapists.patients.getById(patientId),
-      staleTime: 1000 * 60 * 10,
+      staleTime: STALE_TIME.LONG, // 10 minutes
+      gcTime: GC_TIME.VERY_LONG, // 30 minutes
     });
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ interface UserDisplayProps {
  * Reusable component for displaying user information (name, avatar, role).
  * Handles loading states and provides fallbacks when profile data is not available.
  */
-export function UserDisplay({
+function UserDisplay({
   variant = "full",
   showDropdown = false,
   className,
@@ -38,8 +38,8 @@ export function UserDisplay({
 }: UserDisplayProps) {
   const { user, logout } = useAuth();
 
-  // Generate initials from first and last name
-  const getInitials = (): string => {
+  // Memoize computed values to prevent recalculation on every render
+  const initials = useMemo((): string => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
     }
@@ -48,10 +48,10 @@ export function UserDisplay({
     }
     // Fallback to first letter of role
     return user?.role?.charAt(0).toUpperCase() || "U";
-  };
+  }, [user?.firstName, user?.lastName, user?.role]);
 
-  // Get display name with fallback
-  const getDisplayName = (): string => {
+  // Memoize display name
+  const displayName = useMemo((): string => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName} ${user.lastName}`;
     }
@@ -61,22 +61,18 @@ export function UserDisplay({
     // Fallback to role-based display
     const roleName = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "User";
     return roleName;
-  };
+  }, [user?.firstName, user?.lastName, user?.role]);
 
-  // Get role display text
-  const getRoleDisplay = (): string => {
+  // Memoize role display
+  const roleDisplay = useMemo((): string => {
     if (!user?.role) return "";
     return user.role.charAt(0).toUpperCase() + user.role.slice(1);
-  };
-
-  const displayName = getDisplayName();
-  const initials = getInitials();
-  const roleDisplay = getRoleDisplay();
+  }, [user?.role]);
 
   // Avatar component
   const avatarComponent = (
     <Avatar className={cn("h-8 w-8", avatarClassName)}>
-      {user?.avatarUrl && <AvatarImage src={user.avatarUrl} alt={displayName} />}
+      {user?.avatarUrl && <AvatarImage src={user.avatarUrl} alt={displayName} loading="lazy" />}
       <AvatarFallback className="text-sm font-medium">
         {initials}
       </AvatarFallback>
@@ -137,37 +133,43 @@ export function UserDisplay({
   return content;
 }
 
+// Memoize UserDisplay to prevent unnecessary re-renders
+const MemoizedUserDisplay = memo(UserDisplay);
+
+// Export memoized component
+export { MemoizedUserDisplay as UserDisplay };
+
 /**
  * Simplified user display component for headers and navigation
  */
-export function HeaderUserDisplay() {
+export const HeaderUserDisplay = memo(function HeaderUserDisplay() {
   return (
-    <UserDisplay
+    <MemoizedUserDisplay
       variant="full"
       showDropdown={true}
       className="ml-auto"
       showRole={true}
     />
   );
-}
+});
 
 /**
  * Compact user display for mobile or constrained spaces
  */
-export function CompactUserDisplay() {
+export const CompactUserDisplay = memo(function CompactUserDisplay() {
   return (
-    <UserDisplay
+    <MemoizedUserDisplay
       variant="avatar-only"
       showDropdown={true}
       avatarClassName="h-6 w-6"
     />
   );
-}
+});
 
 /**
  * User display with loading state for when profile data is still being fetched
  */
-export function UserDisplayWithLoading() {
+export const UserDisplayWithLoading = memo(function UserDisplayWithLoading() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -183,4 +185,4 @@ export function UserDisplayWithLoading() {
   }
 
   return <HeaderUserDisplay />;
-}
+});

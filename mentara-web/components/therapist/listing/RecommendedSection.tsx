@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCarouselRecommendations } from "@/hooks/therapist/useRecommendedTherapists";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export default function RecommendedSection() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function RecommendedSection() {
       setRetryCount((prev) => prev + 1);
       toast.success("Recommendations refreshed!");
     } catch (retryError) {
-      console.error("Recommendation retry failed:", retryError);
+      logger.error("Recommendation retry failed:", retryError);
       if (retryCount < 2) {
         toast.error(`Failed to refresh. Trying again...`);
         setTimeout(() => handleRecommendationRetry(), 1500);

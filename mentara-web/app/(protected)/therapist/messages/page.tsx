@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 export default function TherapistMessagesPage() {
   const router = useRouter();
@@ -16,19 +17,19 @@ export default function TherapistMessagesPage() {
 
   const handleCallInitiate = async (conversationId: string, type: 'audio' | 'video') => {
     try {
-      console.log('🚀 [TherapistMessages] Starting call initiation:', { conversationId, type, userId: user?.id });
+      logger.debug('🚀 [TherapistMessages] Starting call initiation:', { conversationId, type, userId: user?.id });
       toast.info(`Initiating ${type} call...`);
       
       if (!user) {
-        console.error('❌ [TherapistMessages] No authenticated user');
+        logger.error('❌ [TherapistMessages] No authenticated user');
         toast.error('Authentication required to start a call');
         return;
       }
 
-      console.log('📞 [TherapistMessages] Fetching conversation details...');
+      logger.debug('📞 [TherapistMessages] Fetching conversation details...');
       // Get conversation details to find the other participant
       const conversation = await api.messaging.getConversation(conversationId);
-      console.log('✅ [TherapistMessages] Conversation fetched:', {
+      logger.debug('✅ [TherapistMessages] Conversation fetched:', {
         id: conversation.id,
         participants: conversation.participants.map(p => ({ id: p.userId, name: `${p.user.firstName} ${p.user.lastName}` }))
       });
@@ -36,24 +37,24 @@ export default function TherapistMessagesPage() {
       const otherParticipant = conversation.participants.find(p => p.userId !== user.id);
       
       if (!otherParticipant) {
-        console.error('❌ [TherapistMessages] No other participant found');
+        logger.error('❌ [TherapistMessages] No other participant found');
         toast.error('Unable to find call recipient');
         return;
       }
 
-      console.log('🎯 [TherapistMessages] Found recipient:', {
+      logger.debug('🎯 [TherapistMessages] Found recipient:', {
         userId: otherParticipant.userId,
         name: `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
       });
 
       // Navigate to the new video call page with recipient ID
       const callUrl = `/therapist/video-call?recipientId=${otherParticipant.userId}&type=${type}`;
-      console.log('🔗 [TherapistMessages] Navigating to:', callUrl);
+      logger.debug('🔗 [TherapistMessages] Navigating to:', callUrl);
       router.push(callUrl);
       
     } catch (error) {
-      console.error('❌ [TherapistMessages] Failed to initiate call:', error);
-      console.error('❌ [TherapistMessages] Error details:', {
+      logger.error('❌ [TherapistMessages] Failed to initiate call:', error);
+      logger.error('❌ [TherapistMessages] Error details:', {
         conversationId,
         type,
         userId: user?.id,

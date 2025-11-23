@@ -1,31 +1,31 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { normalizeSessionDuration } from '@/lib/utils/session-duration';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { normalizeSessionDuration } from "@/lib/utils/session-duration";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 
-import { 
-  Star, 
-  MapPin, 
-  Clock, 
-  GraduationCap, 
+import {
+  Star,
+  MapPin,
+  Clock,
+  GraduationCap,
   Users,
   CheckCircle,
   Info,
   Calendar,
   MessageCircle,
-  CreditCard
-} from 'lucide-react';
+  CreditCard,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 
 interface TherapistRecommendationCardProps {
   therapist: {
@@ -62,9 +62,11 @@ export function TherapistRecommendationCard({
   disabled = false,
 }: TherapistRecommendationCardProps) {
   const matchScore = therapist.matchScore || 0;
-  const averageRating = therapist.reviews?.length > 0 
-    ? therapist.reviews.reduce((sum, r) => sum + r.rating, 0) / therapist.reviews.length 
-    : 0;
+  const averageRating =
+    therapist.reviews?.length > 0
+      ? therapist.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        therapist.reviews.length
+      : 0;
 
   // const getMatchColor = (score: number) => {
   //   if (score >= 80) return 'text-green-600';
@@ -73,15 +75,15 @@ export function TherapistRecommendationCard({
   // };
 
   const getMatchLevel = (score: number) => {
-    if (score >= 80) return 'Excellent Match';
-    if (score >= 60) return 'Good Match';
-    return 'Moderate Match';
+    if (score >= 80) return "Excellent Match";
+    if (score >= 60) return "Good Match";
+    return "Moderate Match";
   };
 
   const getMatchBadgeColor = (score: number) => {
-    if (score >= 80) return 'bg-green-600 text-white';
-    if (score >= 60) return 'bg-blue-600 text-white';
-    return 'bg-gray-600 text-white';
+    if (score >= 80) return "bg-green-600 text-white";
+    if (score >= 60) return "bg-blue-600 text-white";
+    return "bg-gray-600 text-white";
   };
 
   const handleCardClick = () => {
@@ -90,17 +92,18 @@ export function TherapistRecommendationCard({
     }
   };
 
-  const yearsSinceStart = therapist.practiceStartDate 
-    ? new Date().getFullYear() - new Date(therapist.practiceStartDate).getFullYear()
+  const yearsSinceStart = therapist.practiceStartDate
+    ? new Date().getFullYear() -
+      new Date(therapist.practiceStartDate).getFullYear()
     : 0;
 
   return (
-    <Card 
+    <Card
       className={`transition-all duration-200 cursor-pointer group relative overflow-hidden ${
-        isSelected 
-          ? 'ring-2 ring-primary shadow-lg bg-blue-50/50' 
-          : 'hover:shadow-md hover:bg-gray-50/50'
-      } ${disabled ? 'opacity-60 cursor-not-allowed' : ''} border border-gray-200 bg-white`}
+        isSelected
+          ? "ring-2 ring-primary shadow-lg bg-blue-50/50"
+          : "hover:shadow-md hover:bg-gray-50/50"
+      } ${disabled ? "opacity-60 cursor-not-allowed" : ""} border border-gray-200 bg-white`}
       onClick={handleCardClick}
     >
       <CardHeader className="pb-4">
@@ -118,7 +121,7 @@ export function TherapistRecommendationCard({
               className="data-[state=checked]:bg-primary border-2"
             />
           </div>
-          
+
           {/* Therapist Info */}
           <div className="flex-1">
             <div className="flex items-start justify-between mb-4">
@@ -127,7 +130,8 @@ export function TherapistRecommendationCard({
                   <Avatar className="h-16 w-16 border-2 border-gray-200">
                     <AvatarImage src={therapist.user?.avatarUrl} />
                     <AvatarFallback className="text-lg bg-blue-100 text-blue-700 font-bold">
-                      {therapist.user?.firstName?.[0]}{therapist.user?.lastName?.[0]}
+                      {therapist.user?.firstName?.[0]}
+                      {therapist.user?.lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
                   {/* Online indicator */}
@@ -135,13 +139,15 @@ export function TherapistRecommendationCard({
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></div>
                   )}
                 </div>
-                
+
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-1">
                     {therapist.user?.firstName} {therapist.user?.lastName}
                   </h3>
-                  <p className="text-blue-600 font-medium text-sm mb-1">{therapist.providerType}</p>
-                  
+                  <p className="text-blue-600 font-medium text-sm mb-1">
+                    {therapist.providerType}
+                  </p>
+
                   {/* Rating */}
                   {averageRating > 0 && (
                     <div className="flex items-center gap-1 mt-1">
@@ -151,23 +157,26 @@ export function TherapistRecommendationCard({
                             key={i}
                             className={`h-4 w-4 ${
                               i < Math.floor(averageRating)
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
                             }`}
                           />
                         ))}
                       </div>
                       <span className="text-sm text-muted-foreground">
-                        {averageRating.toFixed(1)} ({therapist.reviews?.length || 0} reviews)
+                        {averageRating.toFixed(1)} (
+                        {therapist.reviews?.length || 0} reviews)
                       </span>
                     </div>
                   )}
                 </div>
               </div>
-              
+
               {/* Professional Match Score */}
               <div className="text-right">
-                <Badge className={`${getMatchBadgeColor(matchScore)} px-3 py-1 font-bold text-sm`}>
+                <Badge
+                  className={`${getMatchBadgeColor(matchScore)} px-3 py-1 font-bold text-sm`}
+                >
                   {matchScore}% Match
                 </Badge>
                 <p className="text-xs font-medium text-gray-600 mt-2">
@@ -175,30 +184,39 @@ export function TherapistRecommendationCard({
                 </p>
               </div>
             </div>
-            
+
             {/* Professional Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
                 <MapPin className="h-4 w-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">{therapist.province || 'Remote'}</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {therapist.province || "Remote"}
+                </span>
               </div>
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
                 <Clock className="h-4 w-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">{yearsSinceStart} years exp.</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {yearsSinceStart} years exp.
+                </span>
               </div>
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
                 <CreditCard className="h-4 w-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">₱{therapist.hourlyRate || 'N/A'}/hour</span>
+                <span className="text-sm font-medium text-gray-700">
+                  ₱{therapist.hourlyRate || "N/A"}/hour
+                </span>
               </div>
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
                 <Calendar className="h-4 w-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">{normalizeSessionDuration(therapist.sessionDuration)} min sessions</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {normalizeSessionDuration(therapist.sessionDuration)} min
+                  sessions
+                </span>
               </div>
             </div>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="pt-0 space-y-4">
         {/* Bio */}
         {therapist.bio && (
@@ -238,15 +256,18 @@ export function TherapistRecommendationCard({
             </h4>
             <div className="space-y-2 text-sm">
               {therapist.matchExplanation.reasons?.map((reason, index) => (
-                <div key={index} className="flex items-start gap-3 p-2 bg-white rounded-lg border border-blue-100">
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-2 bg-white rounded-lg border border-blue-100"
+                >
                   <CheckCircle className="h-4 w-4 mt-0.5 text-blue-600 flex-shrink-0" />
                   <span className="text-blue-800 font-medium">{reason}</span>
                 </div>
               ))}
             </div>
-            
+
             {/* Professional Match Score Breakdown */}
-            <div className="mt-4 pt-4 border-t border-blue-200">
+            {/* <div className="mt-4 pt-4 border-t border-blue-200">
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-white rounded-lg border border-blue-100">
                   <div className="font-bold text-blue-800 text-xs mb-2">Compatibility</div>
@@ -279,7 +300,7 @@ export function TherapistRecommendationCard({
                   </span>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 
@@ -292,7 +313,9 @@ export function TherapistRecommendationCard({
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-lg">
                       <Users className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-700">{therapist.activeClients || 0}</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {therapist.activeClients || 0}
+                      </span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -306,7 +329,9 @@ export function TherapistRecommendationCard({
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-lg">
                       <MessageCircle className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-700">{therapist.responseTime || 'N/A'}</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {therapist.responseTime || "N/A"}
+                      </span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -315,7 +340,7 @@ export function TherapistRecommendationCard({
                 </Tooltip>
               </TooltipProvider>
             </div>
-            
+
             <div className="flex items-center gap-3">
               {isSelected && (
                 <Badge className="bg-green-600 text-white px-3 py-1">
@@ -323,7 +348,7 @@ export function TherapistRecommendationCard({
                   Selected
                 </Badge>
               )}
-              
+
               <Button
                 variant="outline"
                 size="sm"

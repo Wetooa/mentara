@@ -62,7 +62,68 @@ async function bootstrap() {
   // Enable graceful shutdown hooks for WebSocket connections
   app.enableShutdownHooks();
 
-  // Enable security headers with helmet
+  // Enable CORS FIRST - before Helmet to prevent conflicts
+  const allowedOrigins =
+    process.env.NODE_ENV === 'production'
+      ? process.env.FRONTEND_URL?.split(',')
+          .map((url) => url.trim())
+          .filter((url) => url.length > 0) || ['https://mentara.app']
+      : [
+          'http://localhost:3000',
+          'http://localhost:3001',
+          'http://127.0.0.1:3000',
+          'http://127.0.0.1:3001',
+          'http://localhost:10001', // Docker compose port
+          'http://127.0.0.1:10001',
+        ];
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        // In development, be more permissive
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`⚠️  CORS: Allowing origin ${origin} in development mode`);
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'X-Requested-With',
+      'X-Request-ID',
+      'X-Request-Time',
+      'x-request-id',
+      'x-request-time',
+      'svix-id',
+      'svix-signature',
+      'svix-timestamp',
+      'x-clerk-auth-token',
+    ],
+    exposedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Total-Count',
+      'X-Page',
+      'X-Per-Page',
+    ],
+    optionsSuccessStatus: 200,
+    preflightContinue: false,
+    maxAge: 86400, // 24 hours
+  });
+
+  // Enable security headers with helmet (AFTER CORS)
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -71,7 +132,7 @@ async function bootstrap() {
           styleSrc: ["'self'", "'unsafe-inline'"],
           scriptSrc: ["'self'"],
           imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: ["'self'"],
+          connectSrc: ["'self'", 'http://localhost:3000', 'http://localhost:3001', 'ws://localhost:3001', 'wss://'],
           fontSrc: ["'self'"],
           objectSrc: ["'none'"],
           mediaSrc: ["'self'"],
@@ -79,6 +140,7 @@ async function bootstrap() {
         },
       },
       crossOriginEmbedderPolicy: false, // Disable for API compatibility
+      crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow cross-origin resources
       hsts: {
         maxAge: 31536000,
         includeSubDomains: true,
@@ -95,29 +157,6 @@ async function bootstrap() {
   //     },
   //   }),
   // );
-
-  // Enable CORS with secure configuration for both HTTP API and WebSocket connections
-  app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL?.split(',')
-            .map((url) => url.trim())
-            .filter((url) => url.length > 0) || ['https://mentara.app']
-        : ['http://localhost:3000', 'http://localhost:3001'], // Only allow local dev in development
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    credentials: true,
-    allowedHeaders: [
-      'Content-Type',
-      'Accept',
-      'Authorization',
-      'X-Requested-With',
-      'svix-id',
-      'svix-signature',
-      'svix-timestamp',
-      'x-clerk-auth-token',
-    ],
-    optionsSuccessStatus: 200,
-  });
 
   // Ensure uploads directory exists
   const uploadsDir = join(__dirname, '..', 'uploads');

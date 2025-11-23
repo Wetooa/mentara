@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import { Clock, Calendar, FileCheck, FileClock, Users, ArrowUpRight } from "lucide-react";
 import type { UserDashboardData } from "@/types/api/dashboard";
 import { motion } from "framer-motion";
@@ -34,7 +35,7 @@ const itemVariants = {
   },
 };
 
-export default function StatsOverview({ 
+function StatsOverview({ 
   stats, 
   onUpcomingSessionsClick,
   onPendingWorksheetsClick,
@@ -66,15 +67,15 @@ export default function StatsOverview({
           className="lg:col-span-5 cursor-pointer"
           onClick={onUpcomingSessionsClick}
         >
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-blue-500/5 border border-blue-200/50 p-6 h-full shadow-sm hover:shadow-lg transition-all group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/20 to-transparent rounded-full blur-2xl" />
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-primary/5 border border-primary/20 p-6 h-full shadow-sm hover:shadow-lg transition-all group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl" />
             
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-blue-500/10 rounded-xl group-hover:bg-blue-500/20 transition-colors">
-                  <Clock className="h-7 w-7 text-blue-600" />
+                <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                  <Clock className="h-7 w-7 text-primary" />
                 </div>
-                <div className="flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                <div className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full">
                   <ArrowUpRight className="h-3 w-3" />
                   <span>Today</span>
                 </div>
@@ -82,7 +83,7 @@ export default function StatsOverview({
               
               <div className="space-y-2">
                 <h3 className="text-sm font-medium text-muted-foreground">Upcoming Sessions</h3>
-                <p className="text-4xl font-bold text-blue-600">{stats.upcomingSessions}</p>
+                <p className="text-4xl font-bold text-primary">{stats.upcomingSessions}</p>
                 <p className="text-xs text-muted-foreground">scheduled this week</p>
               </div>
             </div>
@@ -98,18 +99,18 @@ export default function StatsOverview({
             className="cursor-pointer"
             onClick={onCompletedSessionsClick}
           >
-            <div className="rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-200/50 p-5 hover:shadow-md transition-all group h-full">
+            <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-5 hover:shadow-md transition-all group h-full">
               <div className="flex items-start justify-between mb-3">
-                <div className="p-2.5 bg-green-500/10 rounded-lg group-hover:bg-green-500/20 transition-colors">
-                  <Calendar className="h-5 w-5 text-green-600" />
+                <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <Calendar className="h-5 w-5 text-primary" />
                 </div>
-                <div className="flex items-center gap-1 text-xs text-green-600">
+                <div className="flex items-center gap-1 text-xs text-primary">
                   <ArrowUpRight className="h-3 w-3" />
                   <span>+12%</span>
                 </div>
               </div>
               <h3 className="text-xs font-medium text-muted-foreground mb-1">Completed</h3>
-              <p className="text-2xl font-bold text-green-600">{stats.completedSessions}</p>
+              <p className="text-2xl font-bold text-primary">{stats.completedSessions}</p>
               <p className="text-xs text-muted-foreground mt-1">sessions done</p>
             </div>
           </motion.div>
@@ -121,18 +122,18 @@ export default function StatsOverview({
             className="cursor-pointer"
             onClick={onCompletedWorksheetsClick}
           >
-            <div className="rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-200/50 p-5 hover:shadow-md transition-all group h-full">
+            <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-5 hover:shadow-md transition-all group h-full">
               <div className="flex items-start justify-between mb-3">
-                <div className="p-2.5 bg-purple-500/10 rounded-lg group-hover:bg-purple-500/20 transition-colors">
-                  <FileCheck className="h-5 w-5 text-purple-600" />
+                <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <FileCheck className="h-5 w-5 text-primary" />
                 </div>
-                <div className="flex items-center gap-1 text-xs text-purple-600">
+                <div className="flex items-center gap-1 text-xs text-primary">
                   <ArrowUpRight className="h-3 w-3" />
                   <span>+8%</span>
                 </div>
               </div>
               <h3 className="text-xs font-medium text-muted-foreground mb-1">Worksheets</h3>
-              <p className="text-2xl font-bold text-purple-600">{stats.completedWorksheets}</p>
+              <p className="text-2xl font-bold text-primary">{stats.completedWorksheets}</p>
               <p className="text-xs text-muted-foreground mt-1">completed</p>
             </div>
           </motion.div>
@@ -144,19 +145,19 @@ export default function StatsOverview({
             className="cursor-pointer"
             onClick={onPendingWorksheetsClick}
           >
-            <div className="rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-200/50 p-5 hover:shadow-md transition-all group h-full">
+            <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-5 hover:shadow-md transition-all group h-full">
               <div className="flex items-start justify-between mb-3">
-                <div className="p-2.5 bg-orange-500/10 rounded-lg group-hover:bg-orange-500/20 transition-colors">
-                  <FileClock className="h-5 w-5 text-orange-600" />
+                <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <FileClock className="h-5 w-5 text-primary" />
                 </div>
                 {stats.pendingWorksheets > 0 && (
-                  <div className="flex items-center gap-1 text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium">
+                  <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                     <span>2 new</span>
                   </div>
                 )}
               </div>
               <h3 className="text-xs font-medium text-muted-foreground mb-1">Pending</h3>
-              <p className="text-2xl font-bold text-orange-600">{stats.pendingWorksheets}</p>
+              <p className="text-2xl font-bold text-primary">{stats.pendingWorksheets}</p>
               <p className="text-xs text-muted-foreground mt-1">to complete</p>
             </div>
           </motion.div>
@@ -168,18 +169,18 @@ export default function StatsOverview({
             className="cursor-pointer"
             onClick={onTherapistsClick}
           >
-            <div className="rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/5 border border-indigo-200/50 p-5 hover:shadow-md transition-all group h-full">
+            <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-5 hover:shadow-md transition-all group h-full">
               <div className="flex items-start justify-between mb-3">
-                <div className="p-2.5 bg-indigo-500/10 rounded-lg group-hover:bg-indigo-500/20 transition-colors">
-                  <Users className="h-5 w-5 text-indigo-600" />
+                <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs text-indigo-600 font-medium">Active</span>
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs text-primary font-medium">Active</span>
                 </div>
               </div>
               <h3 className="text-xs font-medium text-muted-foreground mb-1">Therapists</h3>
-              <p className="text-2xl font-bold text-indigo-600">{stats.therapistsConsulted}</p>
+              <p className="text-2xl font-bold text-primary">{stats.therapistsConsulted}</p>
               <p className="text-xs text-muted-foreground mt-1">connected</p>
             </div>
           </motion.div>
@@ -188,3 +189,6 @@ export default function StatsOverview({
     </div>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export default memo(StatsOverview);

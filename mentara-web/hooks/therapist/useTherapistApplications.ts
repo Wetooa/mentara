@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type {
@@ -49,14 +50,16 @@ export function useTherapistApplications(params: ApplicationListParams = {}) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["therapists", "applications", "list", params],
+    queryKey: queryKeys.therapists.applications.list(params),
     queryFn: () => api.therapists.getApplications(params),
     select: (response) => {
       // Transform axios response structure: response.data.applications -> applications
       return response.data?.applications || [];
     },
-    staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes (admin data changes frequently)
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
     retry: getApplicationsRetryConfig,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -70,7 +73,7 @@ export function useTherapistApplicationsWithMetadata(
   const api = useApi();
 
   return useQuery({
-    queryKey: ["therapists", "applications", "list", params, "metadata"],
+    queryKey: queryKeys.therapists.applications.list({ ...params, metadata: true }),
     queryFn: () => api.therapists.getApplications(params),
     select: (response) => {
       // Return the full response data structure for pagination
@@ -83,8 +86,10 @@ export function useTherapistApplicationsWithMetadata(
         }
       );
     },
-    staleTime: 1000 * 60 * 2,
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
     retry: getApplicationsRetryConfig,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -95,11 +100,13 @@ export function useTherapistApplication(applicationId: string | null) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["therapists", "applications", "detail", applicationId || ""],
+    queryKey: queryKeys.therapists.applications.byId(applicationId || ""),
     queryFn: () => api.therapists.application.getById(applicationId!),
     enabled: !!applicationId,
-    staleTime: 1000 * 60 * 5, // Application details are more stable
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
     retry: getApplicationDetailRetryConfig,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -110,10 +117,12 @@ export function useMyTherapistApplication() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["therapists", "applications", "detail", "me"],
+    queryKey: queryKeys.therapists.applications.my(),
     queryFn: () => api.therapists.application.getMy(),
-    staleTime: 1000 * 60 * 10, // My application doesn't change often
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
     retry: getApplicationDetailRetryConfig,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -132,12 +141,12 @@ export function useSubmitTherapistApplication() {
 
       // Invalidate and refetch my application
       queryClient.invalidateQueries({
-        queryKey: ["therapists", "applications", "detail", "me"],
+        queryKey: queryKeys.therapists.applications.my(),
       });
 
       // Invalidate applications list for admin
       queryClient.invalidateQueries({
-        queryKey: ["therapists", "applications"],
+        queryKey: queryKeys.therapists.applications.list(),
       });
     },
     onError: (error: MentaraApiError) => {
@@ -164,20 +173,17 @@ export function useUpdateTherapistApplicationStatus() {
     onMutate: async ({ applicationId, data }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ["therapists", "applications", "detail", applicationId],
+        queryKey: queryKeys.therapists.applications.byId(applicationId),
       });
 
       // Snapshot the previous value
-      const previousApplication = queryClient.getQueryData([
-        "therapists",
-        "applications",
-        "detail",
-        applicationId,
-      ]);
+      const previousApplication = queryClient.getQueryData(
+        queryKeys.therapists.applications.byId(applicationId)
+      );
 
       // Optimistically update to the new value
       queryClient.setQueryData(
-        ["therapists", "applications", "detail", applicationId],
+        queryKeys.therapists.applications.byId(applicationId),
         (old: TherapistApplication | undefined) =>
           old ? { ...old, ...data, reviewedAt: new Date().toISOString() } : old
       );
@@ -188,7 +194,7 @@ export function useUpdateTherapistApplicationStatus() {
       // Rollback to previous value on error
       if (context?.previousApplication) {
         queryClient.setQueryData(
-          ["therapists", "applications", "detail", applicationId],
+          queryKeys.therapists.applications.byId(applicationId),
           context.previousApplication
         );
       }
@@ -205,20 +211,20 @@ export function useUpdateTherapistApplicationStatus() {
 
       // Invalidate related queries
       queryClient.invalidateQueries({
-        queryKey: ["therapists", "applications"],
+        queryKey: queryKeys.therapists.applications.list(),
       });
 
       // If approved, also invalidate therapist-related queries
       if (updateData.status === "approved") {
         queryClient.invalidateQueries({
-          queryKey: ["therapists"],
+          queryKey: queryKeys.therapists.all,
         });
       }
     },
     onSettled: () => {
       // Always refetch applications list
       queryClient.invalidateQueries({
-        queryKey: ["therapists", "applications"],
+        queryKey: queryKeys.therapists.applications.list(),
       });
     },
   });
@@ -258,7 +264,7 @@ export function useBulkUpdateApplications() {
 
       // Invalidate all applications queries
       queryClient.invalidateQueries({
-        queryKey: ["therapists", "applications"],
+        queryKey: queryKeys.therapists.applications.list(),
       });
     },
     onError: (error: MentaraApiError) => {
@@ -276,9 +282,10 @@ export function usePrefetchTherapistApplication() {
 
   return (applicationId: string) => {
     queryClient.prefetchQuery({
-      queryKey: ["therapists", "applications", "detail", applicationId],
+      queryKey: queryKeys.therapists.applications.byId(applicationId),
       queryFn: () => api.therapists.application.getById(applicationId),
-      staleTime: 1000 * 60 * 5,
+      staleTime: STALE_TIME.MEDIUM, // 5 minutes
+      gcTime: GC_TIME.MEDIUM, // 10 minutes
     });
   };
 }

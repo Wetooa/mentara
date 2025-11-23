@@ -23,9 +23,24 @@ export class PostsService {
     });
   }
 
-  async findAll(userId?: string): Promise<Post[]> {
+  async findAll(userId?: string, limit = 20, offset = 0): Promise<Post[]> {
+    // PERFORMANCE FIX: Added pagination (was loading ALL posts with ALL comments - 5-10 second delay!)
+    // PERFORMANCE FIX: Removed full comment loading - use _count instead
+    // Comments should be loaded separately when viewing individual post
     return this.prisma.post.findMany({
-      include: {
+      select: {
+        // PERFORMANCE FIX: Use select instead of include for better performance
+        id: true,
+        title: true,
+        content: true,
+        attachmentUrls: true,
+        attachmentNames: true,
+        attachmentSizes: true,
+        createdAt: true,
+        updatedAt: true,
+        userId: true,
+        roomId: true,
+        // isPinned: true,
         user: {
           select: {
             id: true,
@@ -40,59 +55,26 @@ export class PostsService {
             name: true,
           },
         },
-        comments: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatarUrl: true,
-              },
-            },
-            children: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                    avatarUrl: true,
-                  },
-                },
-                _count: {
-                  select: {
-                    children: true,
-                    hearts: true,
-                  },
-                },
-              },
-              orderBy: {
-                createdAt: 'asc',
-              },
-            },
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
-        hearts: userId
-          ? {
-              where: {
-                userId,
-              },
-            }
-          : false,
+        // Don't load all comments - just counts
         _count: {
           select: {
             comments: true,
             hearts: true,
           },
         },
+        // Only load user's heart status if userId provided
+        ...(userId && {
+          hearts: {
+            where: { userId },
+            select: { id: true },
+          },
+        }),
       },
       orderBy: {
         createdAt: 'desc',
       },
+      take: limit,
+      skip: offset,
     });
   }
 

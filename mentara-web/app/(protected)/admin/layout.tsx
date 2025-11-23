@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
 import Image from "next/image";
+import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 
 export default function AdminLayout({
   children,
@@ -21,6 +22,7 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const { logout, user } = useAuth();
 
   const navItems = [
@@ -68,77 +70,13 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      {/* Desktop Sidebar Navigation */}
-      <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
-        <Link href="/admin" className="mb-8 px-2">
-          <Image
-            src="/icons/mentara/mentara-icon.png"
-            alt="Mentara Logo"
-            width={50}
-            height={50}
-            priority
-            className="hover:scale-110 transition-transform duration-300"
-          />
-        </Link>
-        <div className="flex flex-1 flex-col items-center gap-6">
-          {navItems.map((item) => {
-            const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
-            return (
-              <Link
-                key={item.id}
-                href={item.path}
-                className={cn(
-                  "relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out",
-                  isActive
-                    ? "text-red-600"
-                    : "text-muted-foreground hover:text-red-600"
-                )}
-              >
-                <div
-                  className={cn(
-                    "absolute inset-0 transition-all duration-400 ease-in-out",
-                    isActive
-                      ? "bg-red-100 rounded-2xl scale-100"
-                      : "bg-transparent rounded-full scale-75 group-hover:bg-red-50 group-hover:rounded-2xl group-hover:scale-100"
-                  )}
-                />
-                <div
-                  className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-red-600 rounded-r-full transition-all duration-300 ease-in-out",
-                    isActive
-                      ? "h-8 opacity-100"
-                      : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
-                  )}
-                />
-                <div className="relative z-10 flex flex-col items-center justify-center">
-                  <Image
-                    src={item.icon}
-                    alt={item.name}
-                    width={24}
-                    height={24}
-                    className={cn(
-                      "transition-all duration-300",
-                      isActive
-                        ? "scale-110"
-                        : "group-hover:scale-110"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "mt-1 text-center text-[9px] font-medium transition-all duration-300",
-                      isActive
-                        ? "text-red-600 opacity-100"
-                        : "text-muted-foreground opacity-75 group-hover:text-red-600 group-hover:opacity-100"
-                    )}
-                  >
-                    {item.name}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      <UnifiedSidebar
+        navItems={navItems}
+        role="admin"
+        defaultExpanded={false}
+        activeColor="red"
+        onToggle={setIsSidebarExpanded}
+      />
 
       {/* Mobile Navigation Overlay */}
       {isMobileMenuOpen && (
@@ -231,10 +169,20 @@ export default function AdminLayout({
         </div>
       )}
 
-      {/* Main Content Area - Fixed 70px padding */}
-      <div className="flex flex-1 flex-col w-full h-screen md:ml-[70px]">
-        {/* Top Header - Fixed width for 70px sidebar */}
-        <header className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm w-full md:w-[calc(100%-70px)]">
+      {/* Main Content Area - Responsive padding */}
+      <div
+        className={cn(
+          "flex flex-1 flex-col w-full h-screen transition-all duration-300",
+          isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
+        )}
+      >
+        {/* Top Header - Responsive width */}
+        <header
+          className={cn(
+            "fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm w-full transition-all duration-300",
+            isSidebarExpanded ? "md:w-[calc(100%-256px)]" : "md:w-[calc(100%-70px)]"
+          )}
+        >
           {/* Mobile menu button and title */}
           <div className="flex items-center gap-3 md:hidden">
             <button

@@ -71,13 +71,21 @@ import {
   createVideoCallService,
   type VideoCallService,
 } from "./services/video-calls";
+import {
+  createJournalService,
+  type JournalService,
+} from "./services/journal";
+import {
+  createAuditLogsService,
+  type AuditLogsService,
+} from "./services/audit-logs";
 export type { ApiError, ApiResponse } from "@/types/api";
 
 // Export client utilities
 export { apiClient, createApiClient };
 
 // Export service creators
-export { createAdminService, createAuthService, createBookingService, createClientService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, createWorksheetService, createBillingService, createVideoCallService, type AdminService, type AuthService, type BookingService, type ClientService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse, type WorksheetsService, type BillingService, type VideoCallService };
+export { createAdminService, createAuthService, createBookingService, createClientService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, createWorksheetService, createBillingService, createVideoCallService, createJournalService, createAuditLogsService, type AdminService, type AuthService, type BookingService, type ClientService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse, type WorksheetsService, type BillingService, type VideoCallService, type JournalService, type AuditLogsService };
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -97,6 +105,8 @@ const preAssessmentService = createPreAssessmentService(apiClient);
 const worksheetService = createWorksheetService(apiClient);
 const billingService = createBillingService(apiClient);
 const videoCallService = createVideoCallService(apiClient);
+const journalService = createJournalService(apiClient);
+const auditLogsService = createAuditLogsService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
@@ -118,6 +128,8 @@ export const api = {
   worksheets: worksheetService,
   billing: billingService, // Stub billing service for backwards compatibility
   videoCalls: videoCallService,
+  journal: journalService,
+  auditLogs: auditLogsService,
 
   therapistAuth: authService.therapist, // Backwards compatibility
 };

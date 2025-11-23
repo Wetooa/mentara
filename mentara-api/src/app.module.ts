@@ -28,11 +28,14 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { HealthModule } from './health/health.module';
 import { EmailModule } from './email/email.module';
+import { GroupSessionsModule } from './group-sessions/group-sessions.module';
+import { JournalModule } from './journal/journal.module';
 import { PrismaService } from './providers/prisma-client.provider';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { EventBusService } from './common/events/event-bus.service';
 import { CommonModule } from './common/common.module';
+import { CacheModule } from './cache/cache.module';
 import { JwtAuthGuard } from './auth/core/guards/jwt-auth.guard';
 import { SecurityGuard } from './common/guards/security.guard';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
@@ -77,6 +80,7 @@ import { JwtService } from '@nestjs/jwt';
       verboseMemoryLeak: false,
     }),
     CommonModule,
+    CacheModule,
     AuthModule,
     UsersModule,
     CommunitiesModule,
@@ -100,6 +104,8 @@ import { JwtService } from '@nestjs/jwt';
     OnboardingModule,
     HealthModule,
     EmailModule,
+    GroupSessionsModule,
+    JournalModule,
   ],
   controllers: [AppController],
   providers: [

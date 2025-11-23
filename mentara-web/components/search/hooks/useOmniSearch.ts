@@ -52,7 +52,7 @@ export function useOmniSearch(
     searchParams.types,
   ], [searchParams]);
 
-  // React Query for search
+  // React Query for search with optimized caching
   const {
     data: results,
     isLoading,
@@ -75,6 +75,8 @@ export function useOmniSearch(
     },
     // Don't refetch on window focus for search results
     refetchOnWindowFocus: false,
+    // Keep previous data while fetching new results for smoother UX
+    placeholderData: (previousData) => previousData,
   });
 
   // Search function that can be called manually

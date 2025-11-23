@@ -6,6 +6,7 @@ import WorksheetsList from "@/components/worksheets/WorksheetsList";
 import { Task } from "@/components/worksheets/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 export default function WorksheetsPage() {
   const [activeFilter, setActiveFilter] = useState<string>("everything");
@@ -73,7 +74,7 @@ export default function WorksheetsPage() {
 
         setTasks(transformedTasks);
       } catch (err) {
-        console.error("Error fetching worksheets:", err);
+        logger.error("Error fetching worksheets:", err);
         setError("Failed to load worksheets. Please try again.");
       } finally {
         setIsLoading(false);
@@ -139,26 +140,38 @@ export default function WorksheetsPage() {
     return filtered;
   };
 
+  // Calculate counts for badges
+  const worksheetCounts = {
+    everything: tasks.length,
+    upcoming: tasks.filter((t) => t.status === "upcoming").length,
+    pastDue: tasks.filter((t) => t.status === "past_due").length,
+    completed: tasks.filter((t) => t.status === "completed").length,
+    reviewed: tasks.filter((t) => t.status === "reviewed").length,
+  };
+
   return (
-    <div className="flex h-full min-h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       <WorksheetsSidebar
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
         therapistFilter={therapistFilter}
         setTherapistFilter={setTherapistFilter}
+        worksheetCounts={worksheetCounts}
       />
 
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      ) : error ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-red-500">
-          <p>{error}</p>
-        </div>
-      ) : (
-        <WorksheetsList tasks={getFilteredTasks()} />
-      )}
+      <div className="flex-1 overflow-y-auto min-w-0">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-full text-red-500">
+            <p>{error}</p>
+          </div>
+        ) : (
+          <WorksheetsList tasks={getFilteredTasks()} />
+        )}
+      </div>
     </div>
   );
 }

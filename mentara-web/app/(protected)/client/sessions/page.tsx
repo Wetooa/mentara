@@ -1,42 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import { useRouter } from "next/navigation";
-import { SessionsList, SessionStats } from "@/components/sessions";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock, CheckCircle, XCircle, Plus, CreditCard, LayoutGrid, List, ExternalLink } from "lucide-react";
-import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Meeting } from "@/lib/api/services/meetings";
-import { PaymentMethodsSheet } from "@/components/billing";
-import { SessionsCalendarView } from "@/components/sessions/SessionsCalendarView";
+import { logger } from "@/lib/logger";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
+// Lazy load heavy session components
+const SessionsList = dynamic(() => import("@/components/sessions").then(mod => ({ default: mod.SessionsList })), {
+  ssr: false,
+  loading: () => <Skeleton className="h-64 w-full" />
+});
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 24
-    }
-  }
-};
+const SessionStats = dynamic(() => import("@/components/sessions").then(mod => ({ default: mod.SessionStats })), {
+  ssr: false,
+  loading: () => <Skeleton className="h-24 w-full" />
+});
 
+const PaymentMethodsSheet = dynamic(() => import("@/components/billing").then(mod => ({ default: mod.PaymentMethodsSheet })), {
+  ssr: false
+});
+
+const SessionsCalendarView = dynamic(() => import("@/components/sessions/SessionsCalendarView").then(mod => ({ default: mod.SessionsCalendarView })), {
+  ssr: false,
+  loading: () => <Skeleton className="h-96 w-full" />
+});
+
+// Lazy load framer-motion
+const MotionDiv = dynamic(() => import("framer-motion").then(mod => mod.motion.div), {
+  ssr: false,
+  loading: () => <div className="w-full h-full p-4 sm:p-6 space-y-6" />
+});
+
+// Memoize utility functions
 const getStatusColor = (status: Meeting["status"]) => {
   switch (status) {
     case 'SCHEDULED':
@@ -101,23 +105,25 @@ export default function SessionsPage() {
   const [viewMode, setViewMode] = useState<'split' | 'list'>('split');
   const [selectedSession, setSelectedSession] = useState<Meeting | null>(null);
 
-  const handleScheduleSession = () => {
+  // Memoize callbacks
+  const handleScheduleSession = useCallback(() => {
     router.push('/client/booking');
-  };
+  }, [router]);
 
-  const handleSessionClick = (session: Meeting) => {
+  const handleSessionClick = useCallback((session: Meeting) => {
     if (viewMode === 'split') {
       setSelectedSession(session);
     } else {
       router.push(`/client/sessions/${session.id}`);
     }
-  };
+  }, [viewMode, router]);
 
-  const handleManagePaymentMethods = () => {
+  const handleManagePaymentMethods = useCallback(() => {
     setPaymentMethodsOpen(true);
-  };
+  }, []);
 
-  const tabs = [
+  // Memoize tabs configuration
+  const tabs = useMemo(() => [
     {
       id: "all",
       label: "All Sessions",
@@ -145,17 +151,17 @@ export default function SessionsPage() {
       description: "Cancelled or missed sessions",
       status: "CANCELLED" as const,
     },
-  ];
+  ], []);
 
   return (
-    <motion.div
+    <MotionDiv
       className="w-full h-full p-4 sm:p-6 space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
     >
       {/* Compact Header with Stats */}
-      <motion.div variants={itemVariants}>
+      <Suspense fallback={<Skeleton className="h-24 w-full" />}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">My Sessions</h1>
@@ -194,10 +200,10 @@ export default function SessionsPage() {
 
         {/* Compact Session Statistics */}
         <SessionStats showTrends={false} />
-      </motion.div>
+      </Suspense>
 
       {/* Quick Actions - Reorganized with Sections */}
-      <motion.div variants={itemVariants}>
+      <div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Session Actions */}
           <Card className="border-primary/20 shadow-sm hover:shadow-md transition-shadow">
@@ -277,10 +283,10 @@ export default function SessionsPage() {
             </CardContent>
           </Card>
         </div>
-      </motion.div>
+      </div>
 
       {/* Sessions Content - Split Panel or List View */}
-      <motion.div variants={itemVariants}>
+      <div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-4 lg:w-fit lg:grid-cols-4 bg-gray-100">
             {tabs.map((tab) => (
@@ -427,13 +433,15 @@ export default function SessionsPage() {
             </TabsContent>
           ))}
         </Tabs>
-      </motion.div>
+      </div>
 
       {/* Payment Methods Sheet */}
-      <PaymentMethodsSheet
-        open={paymentMethodsOpen}
-        onOpenChange={setPaymentMethodsOpen}
-      />
-    </motion.div>
+      <Suspense fallback={null}>
+        <PaymentMethodsSheet
+          open={paymentMethodsOpen}
+          onOpenChange={setPaymentMethodsOpen}
+        />
+      </Suspense>
+    </MotionDiv>
   );
 }

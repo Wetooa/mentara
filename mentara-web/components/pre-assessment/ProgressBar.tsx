@@ -21,8 +21,8 @@ export default function PreAssessmentProgressBar() {
   let currentProgress = 0;
 
   if (step === 0) {
-    // In checklist
-    currentProgress = 0.5; // Midpoint of checklist
+    // In checklist - no progress until questionnaires are selected
+    currentProgress = 0;
   } else if (step >= 1 && step <= questionnaires.length) {
     // In assessment - count completed questionnaires + current question
     let completedQuestions = 0;

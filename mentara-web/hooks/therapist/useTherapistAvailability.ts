@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 
 interface AvailabilitySlot {
@@ -74,9 +76,11 @@ export function useTherapistAvailability(): UseTherapistAvailabilityReturn {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["therapist-availability"],
+    queryKey: queryKeys.therapist.availability(),
     queryFn: () => api.booking.availability.getMyAvailability(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Create availability mutation
@@ -85,7 +89,7 @@ export function useTherapistAvailability(): UseTherapistAvailabilityReturn {
       api.booking.availability.create(data),
     onSuccess: () => {
       toast.success("Availability slot created successfully");
-      queryClient.invalidateQueries({ queryKey: ["therapist-availability"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapist.availability() });
       setIsAddDialogOpen(false);
       resetForm();
     },
@@ -100,7 +104,7 @@ export function useTherapistAvailability(): UseTherapistAvailabilityReturn {
       api.booking.availability.update(id, data),
     onSuccess: () => {
       toast.success("Availability slot updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["therapist-availability"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapist.availability() });
       setEditingSlot(null);
       setIsAddDialogOpen(false);
       resetForm();
@@ -115,7 +119,7 @@ export function useTherapistAvailability(): UseTherapistAvailabilityReturn {
     mutationFn: (id: string) => api.booking.availability.delete(id),
     onSuccess: () => {
       toast.success("Availability slot deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ["therapist-availability"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapist.availability() });
     },
     onError: (error: any) => {
       toast.error(error?.message || "Failed to delete availability slot");

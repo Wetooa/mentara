@@ -2,6 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { useBillingQuery } from "@/hooks/errors/useStandardQuery";
 import { useBillingMutation } from "@/hooks/errors/useStandardMutation";
 import { toast } from "sonner";
@@ -20,20 +22,18 @@ import type {
   BillingStats,
 } from "@/lib/api/services/billing";
 
-// Query Keys
-export const billingQueryKeys = {
-  all: ["billing"] as const,
-  subscription: () => [...billingQueryKeys.all, "subscription"] as const,
-  plans: () => [...billingQueryKeys.all, "plans"] as const,
-  plan: (id: string) => [...billingQueryKeys.plans(), id] as const,
-  paymentMethods: () => [...billingQueryKeys.all, "payment-methods"] as const,
-  invoices: (options?: BillingListOptions) =>
-    [...billingQueryKeys.all, "invoices", options] as const,
-  invoice: (id: string) => [...billingQueryKeys.all, "invoice", id] as const,
+// Use centralized query keys (for backward compatibility, keep local alias)
+const billingQueryKeys = {
+  all: queryKeys.billing.all,
+  subscription: queryKeys.billing.subscription,
+  plans: () => [...queryKeys.billing.all, "plans"] as const,
+  plan: (id: string) => [...queryKeys.billing.all, "plans", id] as const,
+  paymentMethods: queryKeys.billing.paymentMethods,
+  invoices: queryKeys.billing.invoices,
+  invoice: (id: string) => [...queryKeys.billing.all, "invoice", id] as const,
   paymentIntent: (id: string) =>
-    [...billingQueryKeys.all, "payment-intent", id] as const,
-  stats: (period: string) =>
-    [...billingQueryKeys.all, "stats", period] as const,
+    [...queryKeys.billing.all, "payment-intent", id] as const,
+  stats: queryKeys.billing.stats,
 };
 
 // Subscription Hooks
@@ -68,7 +68,9 @@ export const useSubscriptionPlans = () => {
       errorMessage: "Failed to load subscription plans",
     },
     {
-      staleTime: 30 * 60 * 1000, // 30 minutes (plans don't change often)
+      staleTime: STALE_TIME.STATIC, // 30 minutes
+      gcTime: GC_TIME.EXTENDED, // 1 hour
+      refetchOnWindowFocus: false,
     }
   );
 };
@@ -80,7 +82,9 @@ export const useSubscriptionPlan = (planId: string) => {
     queryKey: billingQueryKeys.plan(planId),
     queryFn: () => api.billing.getPlan(planId),
     enabled: !!planId,
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: STALE_TIME.STATIC, // 30 minutes
+    gcTime: GC_TIME.EXTENDED, // 1 hour
+    refetchOnWindowFocus: false,
   });
 };
 

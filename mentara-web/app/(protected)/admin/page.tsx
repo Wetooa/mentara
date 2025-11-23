@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { Suspense } from "react";
+import dynamic from "next/dynamic";
 import {
   Card,
   CardContent,
@@ -23,7 +23,12 @@ import {
   BarChart3
 } from "lucide-react";
 import { useAdminDashboard, useAdminSystemStats } from "@/hooks/admin";
-import { fadeDown } from "@/lib/animations";
+
+// Lazy load framer-motion
+const MotionDiv = dynamic(() => import("framer-motion").then(mod => mod.motion.div), {
+  ssr: false,
+  loading: () => <div className="space-y-6" />
+});
 
 // Local interface for dashboard stats that handles all possible response structures
 interface DashboardStats {
@@ -130,11 +135,10 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <motion.div
-      variants={fadeDown}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+    <MotionDiv
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
       className="space-y-6"
     >
       <div>
@@ -263,6 +267,6 @@ export default function AdminDashboardPage() {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </MotionDiv>
   );
 }

@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { TimezoneUtils } from "@/lib/utils/timezone";
-
 
 export interface TimeSlot {
   time: string;
@@ -26,26 +27,47 @@ export function useAvailableSlots(therapistId: string, date: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['booking', 'slots', therapistId, date],
+    queryKey: queryKeys.booking.slots(therapistId, date),
     queryFn: async () => {
-      console.log(`[useAvailableSlots] Fetching slots for therapist ${therapistId} on ${date}`);
+      console.log(
+        `[useAvailableSlots] Fetching slots for therapist ${therapistId} on ${date}`
+      );
       try {
-        const result = await api.booking.availability.getSlots(therapistId, date);
-        console.log(`[useAvailableSlots] Successfully fetched ${result?.length || 0} slots:`, result);
+        const result = await api.booking.availability.getSlots(
+          therapistId,
+          date
+        );
+        console.log(
+          `[useAvailableSlots] Successfully fetched ${result?.length || 0} slots:`,
+          result
+        );
         return result;
       } catch (error: unknown) {
         console.error(`[useAvailableSlots] Error fetching slots:`, error);
         // Add more context to error messages
-        const err = error as { response?: { status: number; data?: { message?: string } }; message?: string };
-        
-        if (err.response?.status === 400 && err.response?.data?.message?.includes('advance')) {
-          throw new Error('Bookings must be made at least 30 minutes in advance');
+        const err = error as {
+          response?: { status: number; data?: { message?: string } };
+          message?: string;
+        };
+
+        if (
+          err.response?.status === 400 &&
+          err.response?.data?.message?.includes("advance")
+        ) {
+          throw new Error(
+            "Bookings must be made at least 24 hours (1 day) in advance"
+          );
         } else if (err.response?.status === 404) {
-          throw new Error(`No availability found for this therapist on ${date}. The therapist may not have set their availability for this day.`);
+          throw new Error(
+            `No availability found for this therapist on ${date}. The therapist may not have set their availability for this day.`
+          );
         } else if (err.response?.status === 401) {
-          throw new Error('Authentication required - please sign in again');
+          throw new Error("Authentication required - please sign in again");
         } else {
-          const errorMessage = err.response?.data?.message || err.message || 'Failed to load available slots';
+          const errorMessage =
+            err.response?.data?.message ||
+            err.message ||
+            "Failed to load available slots";
           console.error(`[useAvailableSlots] Full error details:`, {
             status: err.response?.status,
             data: err.response?.data,
@@ -58,12 +80,18 @@ export function useAvailableSlots(therapistId: string, date: string) {
       }
     },
     enabled: !!(therapistId && date),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
     retry: (failureCount, error: Error) => {
-      console.log(`[useAvailableSlots] Retry attempt ${failureCount + 1} for error:`, error.message);
+      console.log(
+        `[useAvailableSlots] Retry attempt ${failureCount + 1} for error:`,
+        error.message
+      );
       // Don't retry on authentication or validation errors
-      if (error.message?.includes('Authentication') || error.message?.includes('advance')) {
+      if (
+        error.message?.includes("Authentication") ||
+        error.message?.includes("advance")
+      ) {
         return false;
       }
       // Retry up to 2 times for other errors
@@ -74,28 +102,33 @@ export function useAvailableSlots(therapistId: string, date: string) {
 
   // Helper functions
   const getSlotsForTime = (timeString: string) => {
-    return slots?.find(slot => 
-      new Date(slot.startTime).toTimeString().slice(0, 5) === timeString
+    return slots?.find(
+      (slot) =>
+        new Date(slot.startTime).toTimeString().slice(0, 5) === timeString
     );
   };
 
   const getAvailableDurationsForSlot = (startTime: string) => {
-    const slot = slots?.find(s => s.startTime === startTime);
+    const slot = slots?.find((s) => s.startTime === startTime);
     return slot?.availableDurations || [];
   };
 
   const getTimeSlots = () => {
-    return slots?.map(slot => ({
-      time: TimezoneUtils.format(new Date(slot.startTime), 'h:mm a'),
-      startTime: slot.startTime,
-      endTime: slot.endTime || slot.startTime, // Use endTime if available, otherwise use startTime
-      availableDurations: slot.availableDurations,
-    })) || [];
+    return (
+      slots?.map((slot) => ({
+        time: TimezoneUtils.format(new Date(slot.startTime), "h:mm a"),
+        startTime: slot.startTime,
+        endTime: slot.endTime || slot.startTime, // Use endTime if available, otherwise use startTime
+        availableDurations: slot.availableDurations,
+      })) || []
+    );
   };
 
   const isTimeAvailable = (timeString: string, duration: number) => {
     const slot = getSlotsForTime(timeString);
-    return slot?.availableDurations.some(d => d.duration === duration) || false;
+    return (
+      slot?.availableDurations.some((d) => d.duration === duration) || false
+    );
   };
 
   return {

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { 
@@ -20,9 +21,12 @@ export function useFlaggedContent(filters: ContentModerationFilters = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['contentModeration', 'flaggedContent', filters],
+    queryKey: queryKeys.moderator.flaggedContent(filters),
     queryFn: () => api.contentModeration.getFlaggedContent(filters),
-    staleTime: 1000 * 60 * 1, // 1 minute (very dynamic data)
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchInterval: REFETCH_INTERVAL.FREQUENT, // Auto-refresh every minute
+    refetchOnWindowFocus: true, // Refetch on focus for flagged content
     select: (response) => {
       // Transform the response to include both content and metadata
       return {
@@ -66,12 +70,12 @@ export function useModerateContent() {
     onMutate: async ({ contentId, action }) => {
       // Cancel outgoing refetches for flagged content
       await queryClient.cancelQueries({ 
-        queryKey: ['contentModeration'] 
+        queryKey: queryKeys.moderator.flaggedContent() 
       });
       
       // Optimistically update flagged content list
       queryClient.setQueriesData(
-        { queryKey: ['contentModeration'] },
+        { queryKey: queryKeys.moderator.flaggedContent() },
         (old: any) => {
           if (!old?.data?.content) return old;
           
@@ -92,12 +96,12 @@ export function useModerateContent() {
       
       // Invalidate all content moderation queries
       queryClient.invalidateQueries({ 
-        queryKey: ['contentModeration'] 
+        queryKey: queryKeys.moderator.flaggedContent() 
       });
       
       // Invalidate moderator dashboard
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'dashboard'] 
+        queryKey: queryKeys.moderator.dashboard() 
       });
       
       // Invalidate related content queries
@@ -112,7 +116,7 @@ export function useModerateContent() {
       
       // Revert optimistic update on error
       queryClient.invalidateQueries({ 
-        queryKey: ['contentModeration'] 
+        queryKey: queryKeys.moderator.flaggedContent() 
       });
     },
   });
@@ -139,12 +143,12 @@ export function useBulkModerate() {
       
       // Invalidate all content moderation queries
       queryClient.invalidateQueries({ 
-        queryKey: ['contentModeration'] 
+        queryKey: queryKeys.moderator.flaggedContent() 
       });
       
       // Invalidate moderator dashboard
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'dashboard'] 
+        queryKey: queryKeys.moderator.dashboard() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -160,9 +164,11 @@ export function useModerationReports(filters: { status?: string; type?: string; 
   const api = useApi();
   
   return useQuery({
-    queryKey: ['contentModeration', 'reports', filters],
+    queryKey: [...queryKeys.reporting.all, 'moderator', filters],
     queryFn: () => api.contentModeration.getReports(filters),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -188,13 +194,13 @@ export function useUpdateReport() {
       
       // Invalidate reports
       queryClient.invalidateQueries({ 
-        queryKey: ['contentModeration', 'reports'] 
+        queryKey: queryKeys.reporting.all 
       });
       
       // Invalidate stats if resolved
       if (status === 'resolved') {
         queryClient.invalidateQueries({ 
-          queryKey: ['contentModeration', 'stats'] 
+          queryKey: queryKeys.moderator.dashboard() 
         });
       }
     },
@@ -243,7 +249,9 @@ export function useUserViolations(userId: string | null) {
     queryKey: ['contentModeration', 'userViolations', userId || ''],
     queryFn: () => api.contentModeration.getUserViolations(userId!),
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -301,7 +309,9 @@ export function useModerationStats(dateFrom?: string, dateTo?: string) {
   return useQuery({
     queryKey: ['contentModeration', 'stats', dateFrom, dateTo],
     queryFn: () => api.contentModeration.getModerationStats(dateFrom, dateTo),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -314,7 +324,9 @@ export function useModerationHistory(filters: { moderatorId?: string; limit?: nu
   return useQuery({
     queryKey: ['contentModeration', 'history', filters],
     queryFn: () => api.contentModeration.getModerationHistory(filters),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -327,7 +339,9 @@ export function useAutoModerationRules() {
   return useQuery({
     queryKey: ['contentModeration', 'autoRules'],
     queryFn: () => api.contentModeration.getAutoModerationRules(),
-    staleTime: 1000 * 60 * 10, // 10 minutes (rules don't change often)
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -365,7 +379,9 @@ export function useContentPreview(contentType: 'post' | 'comment' | null, conten
     queryKey: ['contentModeration', 'preview', contentType || '', contentId || ''],
     queryFn: () => api.contentModeration.getContentPreview(contentType!, contentId!),
     enabled: !!(contentType && contentId),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -399,7 +415,8 @@ export function useSmartContentFilter() {
         sortOrder: 'desc',
         limit: 20
       }),
-      staleTime: 1000 * 60, // 1 minute for recent content
+      staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
+      gcTime: GC_TIME.SHORT, // 5 minutes
     });
   };
   

@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import { useCallback, useEffect } from "react";
@@ -51,7 +53,7 @@ export function useNotifications(
 
       // Add new notification to the cache optimistically
       queryClient.setQueryData(
-        ["notifications", "list", params],
+        queryKeys.notifications.list(params),
         (oldData: Notification[] | undefined) => {
           if (!oldData) return [notification];
           // Add to beginning of array (most recent first)
@@ -61,7 +63,7 @@ export function useNotifications(
 
       // Update unread count optimistically
       queryClient.setQueryData(
-        ["notifications", "unreadCount"],
+        queryKeys.notifications.unreadCount(),
         (oldData: { count: number } | undefined) => ({
           count: (oldData?.count || 0) + 1,
         })
@@ -145,16 +147,20 @@ export function useNotifications(
     error,
     refetch,
   } = useQuery({
-    queryKey: ["notifications", "list", params],
+    queryKey: queryKeys.notifications.list(params),
     queryFn: () => api.notifications.getMy(params),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for notifications
   });
 
   // Get unread count
   const { data: unreadCount } = useQuery({
-    queryKey: ["notifications", "unreadCount"],
+    queryKey: queryKeys.notifications.unreadCount(),
     queryFn: () => api.notifications.getUnreadCount(),
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for unread count
   });
 
   // Mark as read mutation
@@ -162,7 +168,7 @@ export function useNotifications(
     mutationFn: (notificationId: string) =>
       api.notifications.markAsRead(notificationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
     onError: (error: MentaraApiError) => {
       toast.error("Failed to mark notification as read");
@@ -173,7 +179,7 @@ export function useNotifications(
   const markAllAsReadMutation = useMutation({
     mutationFn: () => api.notifications.markAllAsRead(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
       toast.success("All notifications marked as read");
     },
     onError: (error: MentaraApiError) => {
@@ -186,7 +192,7 @@ export function useNotifications(
     mutationFn: (notificationId: string) =>
       api.notifications.delete(notificationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
       toast.success("Notification deleted");
     },
     onError: (error: MentaraApiError) => {
@@ -212,7 +218,7 @@ export function useNotifications(
 
       // Update unread count optimistically
       queryClient.setQueryData(
-        ["notifications", "unreadCount"],
+        queryKeys.notifications.unreadCount(),
         (oldData: { count: number } | undefined) => ({
           count: Math.max((oldData?.count || 1) - 1, 0),
         })

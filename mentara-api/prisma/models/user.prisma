@@ -47,9 +47,18 @@ model User {
   therapist           Therapist?                @relation("UserTherapist")
   blockedBy           UserBlock[]               @relation("UserBlocked")
   blocking            UserBlock[]               @relation("UserBlocking")
+  journalEntries      JournalEntry[]            @relation("UserJournalEntries")
+
+  // Group Therapy Sessions
+  createdGroupSessions       GroupTherapySession[]     @relation("GroupSessionCreator")
+  groupSessionParticipations GroupSessionParticipant[] @relation("GroupSessionParticipant")
 
   @@index([email])
   @@index([role])
+  @@index([isActive])
+  @@index([role, isActive])
+  @@index([createdAt])
+  @@index([emailVerified])
 }
 
 model Client {

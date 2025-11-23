@@ -9,6 +9,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import type { 
   MessagingMessage, 
   MessagingConversation, 
@@ -88,12 +90,6 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Query keys for React Query
-  const queryKeys = {
-    conversations: ['messaging', 'conversations'] as const,
-    messages: (convId: string) => ['messaging', 'messages', convId] as const,
-  };
-
   // ============ HTTP OPERATIONS (React Query) ============
 
   // Get conversations
@@ -103,9 +99,11 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     error: conversationsError,
     refetch: refetchConversations,
   } = useQuery({
-    queryKey: queryKeys.conversations,
+    queryKey: queryKeys.messaging.conversations(),
     queryFn: () => api.messaging.getConversations(),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for messaging
   });
 
   // Get messages for current conversation
@@ -115,10 +113,12 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     error: messagesError,
     refetch: refetchMessages,
   } = useQuery({
-    queryKey: conversationId ? queryKeys.messages(conversationId) : [],
+    queryKey: conversationId ? queryKeys.messaging.messages(conversationId) : [],
     queryFn: () => conversationId ? api.messaging.getMessages(conversationId) : Promise.resolve([]),
     enabled: !!conversationId,
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 30, // 30 seconds (real-time messaging needs very short stale time)
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: true, // Refetch messages on focus
   });
 
   // Send message mutation with acknowledgment support
@@ -131,10 +131,10 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     },
     onMutate: async ({ conversationId, messageData }) => {
       // Optimistic update
-      await queryClient.cancelQueries({ queryKey: queryKeys.messages(conversationId) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.messaging.messages(conversationId) });
       
       const previousMessages = queryClient.getQueryData<MessagingMessage[]>(
-        queryKeys.messages(conversationId)
+        queryKeys.messaging.messages(conversationId)
       );
 
       // Add optimistic message
@@ -166,7 +166,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       };
 
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messages(conversationId),
+        queryKeys.messaging.messages(conversationId),
         old => old ? [...old, tempMessage] : [tempMessage]
       );
 
@@ -176,7 +176,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       // Rollback optimistic update
       if (context) {
         queryClient.setQueryData(
-          queryKeys.messages(context.conversationId),
+          queryKeys.messaging.messages(context.conversationId),
           context.previousMessages
         );
       }
@@ -185,7 +185,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     onSuccess: (newMessage, { conversationId }) => {
       // Replace temp message with real message
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messages(conversationId),
+        queryKeys.messaging.messages(conversationId),
         old => {
           if (!old) return [newMessage];
           // Remove temp messages and prevent duplicates
@@ -198,7 +198,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
 
       // Update conversations list
       queryClient.setQueryData<MessagingConversation[]>(
-        queryKeys.conversations,
+        queryKeys.messaging.conversations(),
         old => {
           if (!old) return old;
           return old.map(conv => 
@@ -251,7 +251,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
         // Add to current conversation messages (avoid duplicates)
         if (message.conversationId === conversationId) {
           queryClient.setQueryData<MessagingMessage[]>(
-            queryKeys.messages(message.conversationId),
+            queryKeys.messaging.messages(message.conversationId),
             old => {
               if (!old) return [message];
               // Check if message already exists to prevent duplicates
@@ -267,7 +267,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
 
         // Update conversations list
         queryClient.setQueryData<MessagingConversation[]>(
-          queryKeys.conversations,
+          queryKeys.messaging.conversations(),
           old => {
             if (!old) return old;
             return old.map(conv => 
@@ -331,7 +331,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       if (!conversationId) return;
       
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messages(conversationId),
+        queryKeys.messaging.messages(conversationId),
         old => {
           if (!old) return old;
           return old.map(msg => 
@@ -359,7 +359,7 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       if (!conversationId) return;
       
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messages(conversationId),
+        queryKeys.messaging.messages(conversationId),
         old => {
           if (!old) return old;
           return old.map(msg => {

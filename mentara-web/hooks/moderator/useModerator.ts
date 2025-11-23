@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { 
@@ -27,9 +28,11 @@ export function useModeratorDashboard() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'dashboard'],
+    queryKey: queryKeys.moderator.dashboard(),
     queryFn: () => api.moderator.getDashboardStats(),
-    staleTime: 1000 * 60 * 2, // 2 minutes (dashboard data changes frequently)
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -40,9 +43,12 @@ export function useContentModerationQueue(params: ContentModerationParams = {}) 
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'content', 'queue', params],
+    queryKey: queryKeys.moderator.contentQueue(params),
     queryFn: () => api.moderator.content.getQueue(params),
-    staleTime: 1000 * 60 * 1, // 1 minute (moderation queue is very dynamic)
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchInterval: REFETCH_INTERVAL.FREQUENT, // Auto-refresh every minute
+    refetchOnWindowFocus: true, // Refetch on focus for moderation queue
   });
 }
 
@@ -68,17 +74,17 @@ export function useModerateContent() {
       
       // Invalidate moderation queues
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'content'] 
+        queryKey: queryKeys.moderator.contentQueue() 
       });
       
       // Invalidate content moderation data
       queryClient.invalidateQueries({ 
-        queryKey: ['contentModeration'] 
+        queryKey: queryKeys.moderator.flaggedContent() 
       });
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'dashboard'] 
+        queryKey: queryKeys.moderator.dashboard() 
       });
       
       // Invalidate related content queries
@@ -105,9 +111,11 @@ export function useContentModerationReports(params: { type?: string; status?: st
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'content', 'reports', params],
+    queryKey: [...queryKeys.reporting.all, 'moderator', params],
     queryFn: () => api.moderator.content.getReports(params),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -131,13 +139,13 @@ export function useUpdateModerationReport() {
       
       // Invalidate reports
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'content'] 
+        queryKey: queryKeys.reporting.all 
       });
       
       // Invalidate dashboard if resolved
       if (data.status === 'resolved') {
         queryClient.invalidateQueries({ 
-          queryKey: ['moderator', 'dashboard'] 
+          queryKey: queryKeys.moderator.dashboard() 
         });
       }
     },
@@ -154,9 +162,11 @@ export function useFlaggedUsers(params: UserModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'users', 'flagged', params],
+    queryKey: [...queryKeys.moderator.users(), 'flagged', params],
     queryFn: () => api.moderator.users.getFlagged(params),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -183,24 +193,24 @@ export function useModerateUser() {
       
       // Invalidate user moderation data
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'users'] 
+        queryKey: queryKeys.moderator.users() 
       });
       
       // Invalidate specific user data
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users', 'detail', userId] 
+        queryKey: queryKeys.admin.users.byId(userId) 
       });
       
       // Invalidate content moderation if user was suspended
       if (data.action === 'suspend') {
         queryClient.invalidateQueries({ 
-          queryKey: ['contentModeration', 'userViolations', userId] 
+          queryKey: [...queryKeys.moderator.flaggedContent(), 'userViolations', userId] 
         });
       }
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'dashboard'] 
+        queryKey: queryKeys.moderator.dashboard() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -216,10 +226,12 @@ export function useUserModerationHistory(userId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'users', 'history', userId || ''],
+    queryKey: [...queryKeys.moderator.users(), 'history', userId || ''],
     queryFn: () => api.moderator.users.getHistory(userId!),
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -230,9 +242,11 @@ export function useAuditLogsSearch(params: AuditLogParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'auditLogs', 'search', params],
+    queryKey: queryKeys.moderator.auditLogs(params),
     queryFn: () => api.moderator.auditLogs.search(params),
-    staleTime: 1000 * 60 * 5, // 5 minutes (audit logs are relatively stable)
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -243,9 +257,11 @@ export function useAuditLogsStats() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'auditLogs', 'stats'],
+    queryKey: [...queryKeys.moderator.auditLogs(), 'stats'],
     queryFn: () => api.moderator.auditLogs.getStats(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -256,9 +272,12 @@ export function useSystemEvents(params: SystemEventParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'systemEvents', 'list', params],
+    queryKey: [...queryKeys.moderator.all, 'systemEvents', 'list', params],
     queryFn: () => api.moderator.systemEvents.getList(params),
-    staleTime: 1000 * 60 * 2, // 2 minutes (system events are dynamic)
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchInterval: REFETCH_INTERVAL.MODERATE, // Auto-refresh every 5 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for system events
   });
 }
 
@@ -282,12 +301,12 @@ export function useResolveSystemEvent() {
       
       // Invalidate system events
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'systemEvents'] 
+        queryKey: [...queryKeys.moderator.all, 'systemEvents'] 
       });
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'dashboard'] 
+        queryKey: queryKeys.moderator.dashboard() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -303,9 +322,11 @@ export function useModeratorProfile() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'profile'],
+    queryKey: [...queryKeys.profile.all, 'moderator'],
     queryFn: () => api.moderator.profile.get(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -323,7 +344,7 @@ export function useUpdateModeratorProfile() {
       
       // Invalidate profile cache
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'profile'] 
+        queryKey: [...queryKeys.profile.all, 'moderator'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -339,9 +360,11 @@ export function useModeratorActivity() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'activity'],
+    queryKey: [...queryKeys.moderator.all, 'activity'],
     queryFn: () => api.moderator.profile.getActivity(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -358,13 +381,15 @@ export function usePrefetchContentForModeration() {
       queryClient.prefetchQuery({
         queryKey: ['posts', 'detail', contentId],
         queryFn: () => api.posts.getById(contentId),
-        staleTime: 1000 * 60 * 5,
+        staleTime: STALE_TIME.MEDIUM, // 5 minutes
+        gcTime: GC_TIME.MEDIUM, // 10 minutes
       });
     } else {
       queryClient.prefetchQuery({
         queryKey: ['comments', 'detail', contentId],
         queryFn: () => api.comments.getById(contentId),
-        staleTime: 1000 * 60 * 5,
+        staleTime: STALE_TIME.MEDIUM, // 5 minutes
+        gcTime: GC_TIME.MEDIUM, // 10 minutes
       });
     }
   };
@@ -412,13 +437,13 @@ export function useBulkModeration() {
       
       // Invalidate all moderation-related queries
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'content'] 
+        queryKey: queryKeys.moderator.contentQueue() 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ['contentModeration'] 
+        queryKey: queryKeys.moderator.flaggedContent() 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'dashboard'] 
+        queryKey: queryKeys.moderator.dashboard() 
       });
     },
     onError: (error: MentaraApiError) => {

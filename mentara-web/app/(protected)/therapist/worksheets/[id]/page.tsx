@@ -6,6 +6,8 @@ import TherapistTaskDetailPage from "@/components/worksheets/TherapistTaskDetail
 import { Task } from "@/components/worksheets/types";
 import { useApi } from "@/lib/api";
 import { use } from "react";
+import { PageBreadcrumbs } from "@/components/navigation/PageBreadcrumbs";
+import { BackButton } from "@/components/navigation/BackButton";
 
 // Helper function to map worksheet status to task status
 function mapWorksheetStatusToTaskStatus(
@@ -205,10 +207,28 @@ function WorksheetDetailClient({ worksheetId }: { worksheetId: string }) {
   }
 
   return (
-    <TherapistTaskDetailPage
-      task={task}
-      onBack={handleBack}
-      onTaskUpdate={handleTaskUpdate}
-    />
+    <div className="p-6">
+      <div className="mb-6 space-y-3">
+        <PageBreadcrumbs
+          context={
+            task
+              ? {
+                  worksheetTitle: task.title || "Worksheet",
+                }
+              : undefined
+          }
+        />
+        <BackButton
+          label="Back to Worksheets"
+          href="/therapist/worksheets"
+          variant="ghost"
+        />
+      </div>
+      <TherapistTaskDetailPage
+        task={task}
+        onBack={handleBack}
+        onTaskUpdate={handleTaskUpdate}
+      />
+    </div>
   );
 }

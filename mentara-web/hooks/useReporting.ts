@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
 
 export interface CreateReportData {
@@ -25,7 +25,7 @@ export function useReporting() {
     },
     onSuccess: () => {
       toast.success("Report submitted successfully. Our team will review it shortly.");
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reporting.reports() });
     },
     onError: (error) => {
       console.error("Report submission error:", error);

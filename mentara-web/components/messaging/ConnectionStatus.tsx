@@ -67,10 +67,11 @@ export function ConnectionStatus({
         rtt: connection?.rtt,
       });
 
+      // Log network status changes
       if (navigator.onLine) {
-        logger.network.online();
+        logger.debug('Network status: online');
       } else {
-        logger.network.offline();
+        logger.debug('Network status: offline');
       }
     };
 

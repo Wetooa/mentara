@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import type { TherapistRecommendation } from "@/lib/api/services/therapists";
 import { TherapistCardData, transformTherapistForCard, ApiTherapistResponse } from "@/types/therapist";
 
@@ -89,15 +90,17 @@ export function useTherapistRecommendations(
     error,
     refetch 
   } = useQuery({
-    queryKey: ['therapists', 'recommendations', { limit, includeInactive, province, maxHourlyRate }],
+    queryKey: queryKeys.therapists.recommendations({ limit, includeInactive, province, maxHourlyRate }),
     queryFn: () => api.therapists.getRecommendations({ 
       limit, 
       includeInactive, 
       province,
       maxHourlyRate 
     }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
     enabled: true,
+    refetchOnWindowFocus: false,
   });
 
   // Transform and memoize the data - handle actual API response structure
@@ -176,7 +179,9 @@ export function useWelcomeRecommendations(
       province, 
       forceRefresh 
     }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     enabled: true,
   });
 

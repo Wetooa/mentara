@@ -1,11 +1,11 @@
 model Therapist {
-  userId                             String                     @id @unique
+  userId                             String                            @id @unique
   mobile                             String
   province                           String
-  timezone                           String                     @default("UTC")
-  status                             TherapistApplicationStatus @default(PENDING)
-  submissionDate                     DateTime                   @default(now())
-  processingDate                     DateTime                   @default(now())
+  timezone                           String                            @default("UTC")
+  status                             TherapistApplicationStatus        @default(PENDING)
+  submissionDate                     DateTime                          @default(now())
+  processingDate                     DateTime                          @default(now())
   processedByAdminId                 String?
   providerType                       String
   professionalLicenseType            String
@@ -13,21 +13,21 @@ model Therapist {
   prcLicenseNumber                   String
   expirationDateOfLicense            DateTime
   practiceStartDate                  DateTime
-  licenseVerified                    Boolean                    @default(false)
+  licenseVerified                    Boolean                           @default(false)
   licenseVerifiedAt                  DateTime?
   licenseVerifiedBy                  String?
   certifications                     Json?
-  certificateUrls                    String[]                   @default([])
-  certificateNames                   String[]                   @default([])
-  licenseUrls                        String[]                   @default([])
-  licenseNames                       String[]                   @default([])
-  documentUrls                       String[]                   @default([])
-  documentNames                      String[]                   @default([])
+  certificateUrls                    String[]                          @default([])
+  certificateNames                   String[]                          @default([])
+  licenseUrls                        String[]                          @default([])
+  licenseNames                       String[]                          @default([])
+  documentUrls                       String[]                          @default([])
+  documentNames                      String[]                          @default([])
   yearsOfExperience                  Int?
   educationBackground                String?
   specialCertifications              String[]
   practiceLocation                   String?
-  acceptsInsurance                   Boolean                    @default(false)
+  acceptsInsurance                   Boolean                           @default(false)
   acceptedInsuranceTypes             String[]
   areasOfExpertise                   String[]
   assessmentTools                    String[]
@@ -48,21 +48,29 @@ model Therapist {
   acceptTypes                        String[]
   treatmentSuccessRates              Json
   sessionLength                      String
-  hourlyRate                         Decimal                    @db.Decimal(10, 2)
-  createdAt                          DateTime                   @default(now())
-  updatedAt                          DateTime                   @updatedAt
+  hourlyRate                         Decimal                           @db.Decimal(10, 2)
+  createdAt                          DateTime                          @default(now())
+  updatedAt                          DateTime                          @updatedAt
   assignedClients                    ClientTherapist[]
-  meetings                           Meeting[]                  @relation("TherapistMeetings")
+  meetings                           Meeting[]                         @relation("TherapistMeetings")
   paymentsAsTherapist                Payment[]
   reviews                            Review[]
-  processedByAdmin                   Admin?                     @relation(fields: [processedByAdminId], references: [userId])
-  user                               User                       @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
+  processedByAdmin                   Admin?                            @relation(fields: [processedByAdminId], references: [userId])
+  user                               User                              @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
   therapistAvailabilities            TherapistAvailability[]
   worksheets                         Worksheet[]
+  GroupSessionTherapistInvitation    GroupSessionTherapistInvitation[]
 
   @@index([userId])
   @@index([status])
   @@index([timezone])
+  @@index([status, createdAt])
+  @@index([status, hourlyRate])
+  @@index([province])
+  @@index([yearsOfExperience])
+  @@index([hourlyRate])
+  @@index([createdAt])
+  @@index([province, status])
 }
 
 enum TherapistApplicationStatus {

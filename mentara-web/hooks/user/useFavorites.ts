@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
@@ -39,10 +40,11 @@ export function useFavorites() {
     isLoading: isLoadingBackend,
     error: backendError,
   } = useQuery({
-    queryKey: ['users', 'favorites', user?.id || ''],
+    queryKey: queryKeys.users.favorites(user?.id),
     queryFn: () => api.users.getFavorites(),
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
     onSuccess: (data) => {
       // Sync backend data to localStorage
       if (data && user?.id) {
@@ -70,7 +72,7 @@ export function useFavorites() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users', 'favorites', user?.id || ''] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.favorites(user?.id) });
     },
     onError: (error: MentaraApiError, therapistId) => {
       // Rollback optimistic update
@@ -93,7 +95,7 @@ export function useFavorites() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users', 'favorites', user?.id || ''] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.favorites(user?.id) });
     },
     onError: (error: MentaraApiError, therapistId) => {
       // Rollback optimistic update

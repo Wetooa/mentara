@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
   HttpException,
   HttpStatus,
   UseGuards,
@@ -37,11 +38,16 @@ export class PostsController {
   ) {}
 
   @Get()
-  async findAll(@CurrentUserId() id: string): Promise<PostEntity[]> {
+  async findAll(
+    @CurrentUserId() id: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ): Promise<PostEntity[]> {
     try {
       const user = await this.postsService.findUserById(id);
 
-      return await this.postsService.findAll(user?.id);
+      // PERFORMANCE FIX: Added pagination support
+      return await this.postsService.findAll(user?.id, limit, offset);
     } catch (error) {
       throw new HttpException(
         `Failed to fetch posts: ${error instanceof Error ? error.message : 'Unknown error'}`,

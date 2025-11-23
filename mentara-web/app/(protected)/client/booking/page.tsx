@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,31 +17,43 @@ import {
   MapPin,
   ExternalLink,
 } from "lucide-react";
-import BookingCalendar from "@/components/booking/BookingCalendar";
-import { ClientBookingInterface } from "@/components/client/ClientBookingInterface";
+// Lazy load heavy booking components
+const BookingCalendar = dynamic(() => import("@/components/booking/BookingCalendar").then(mod => ({ default: mod.default })), {
+  ssr: false,
+  loading: () => <Skeleton className="h-96 w-full" />
+});
+
+const ClientBookingInterface = dynamic(() => import("@/components/client/ClientBookingInterface").then(mod => ({ default: mod.default })), {
+  ssr: false
+});
 import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
 import { useAssignedTherapists } from "@/hooks/therapist/useTherapist";
 import { MeetingStatus } from "@/types/booking";
 import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
+import { DurationOption } from "@/components/booking/DurationSelector";
 import { toast } from "sonner";
 
 export default function BookingPage() {
   const [selectedTherapistId, setSelectedTherapistId] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(
+    null
+  );
+  const [selectedDuration, setSelectedDuration] =
+    useState<DurationOption | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Get user's assigned therapists
-  const { 
-    data: therapists = [], 
-    isLoading: therapistsLoading, 
-    error: therapistsError 
+  const {
+    data: therapists = [],
+    isLoading: therapistsLoading,
+    error: therapistsError,
   } = useAssignedTherapists();
 
   // Get user's meetings
   const { meetings, isLoading: meetingsLoading } = useMeetings({
     limit: 10,
-    status: 'SCHEDULED,CONFIRMED',
+    status: "SCHEDULED,CONFIRMED",
   });
 
   // Get booking utilities
@@ -52,25 +66,32 @@ export default function BookingPage() {
     }
   }, [therapists, therapistsLoading, selectedTherapistId]);
 
-  const handleSlotSelect = (date: string, timeSlot: TimeSlot) => {
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handleSlotSelect = useCallback((date: string, timeSlot: TimeSlot) => {
     setSelectedDate(new Date(date));
     setSelectedTimeSlot(timeSlot);
     setShowBookingModal(true);
-  };
+  }, []);
 
-  const handleBookingSuccess = () => {
+  const handleBookingSuccess = useCallback(() => {
     toast.success("Session booked successfully!");
     setShowBookingModal(false);
     setSelectedTimeSlot(null);
-  };
+    setSelectedDuration(null);
+  }, []);
 
-  const handleCancelMeeting = async (meetingId: string) => {
+  const handleDurationSelect = useCallback((duration: DurationOption) => {
+    setSelectedDuration(duration);
+  }, []);
+
+  const handleCancelMeeting = useCallback(async (meetingId: string) => {
     if (confirm("Are you sure you want to cancel this meeting?")) {
       cancelMeeting(meetingId);
     }
-  };
+  }, [cancelMeeting]);
 
-  const getStatusBadge = (status: MeetingStatus) => {
+  // Memoize utility functions
+  const getStatusBadge = useCallback((status: MeetingStatus) => {
     switch (status) {
       case MeetingStatus.SCHEDULED:
         return <Badge variant="secondary">Scheduled</Badge>;
@@ -85,12 +106,17 @@ export default function BookingPage() {
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
-  };
+  }, []);
 
-  const getMeetingTypeIcon = () => {
+  const getMeetingTypeIcon = useCallback(() => {
     // All meetings are video-only now
     return <Video className="h-4 w-4" />;
-  };
+  }, []);
+
+  const handleCloseBooking = useCallback(() => {
+    setShowBookingModal(false);
+    setSelectedTimeSlot(null);
+  }, []);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -138,7 +164,8 @@ export default function BookingPage() {
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Failed to load assigned therapists. Please try refreshing the page.
+                    Failed to load assigned therapists. Please try refreshing
+                    the page.
                   </AlertDescription>
                 </Alert>
               ) : therapists.length === 0 ? (
@@ -169,9 +196,12 @@ export default function BookingPage() {
                           <User className="h-5 w-5 text-blue-600" />
                         </div>
                         <div className="flex-1">
-                          <div className="font-medium">{therapist.firstName} {therapist.lastName}</div>
+                          <div className="font-medium">
+                            {therapist.firstName} {therapist.lastName}
+                          </div>
                           <div className="text-sm text-muted-foreground">
-                            {therapist.specialties?.join(", ") || "General Therapy"}
+                            {therapist.specialties?.join(", ") ||
+                              "General Therapy"}
                           </div>
                           {therapist.experience && (
                             <div className="text-xs text-blue-600 mt-1">
@@ -209,110 +239,144 @@ export default function BookingPage() {
                     <Skeleton key={i} className="h-20 w-full" />
                   ))}
                 </div>
-              ) : (Array.isArray(meetings) ? meetings : meetings?.meetings || []).length === 0 ? (
+              ) : (Array.isArray(meetings)
+                  ? meetings
+                  : meetings?.meetings || []
+                ).length === 0 ? (
                 <div className="text-center py-4 text-muted-foreground">
                   <Calendar className="h-8 w-8 mx-auto mb-2 opacity-30" />
                   <p>No upcoming sessions</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {(Array.isArray(meetings) ? meetings : meetings?.meetings || []).slice(0, 5).map((meeting, index) => (
-                    <Card key={`meeting-${meeting.id}-${index}`} className="border border-gray-200">
-                      <CardContent className="p-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              {getMeetingTypeIcon()}
-                              <span className="font-medium text-sm">
-                                {meeting.title || "Therapy Session"}
-                              </span>
-                            </div>
-                            <div className="text-xs text-muted-foreground space-y-1">
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {new Date(meeting.startTime).toLocaleDateString()} at{" "}
-                                {new Date(meeting.startTime).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                  {(Array.isArray(meetings)
+                    ? meetings
+                    : meetings?.meetings || []
+                  )
+                    .slice(0, 5)
+                    .map((meeting, index) => (
+                      <Card
+                        key={`meeting-${meeting.id}-${index}`}
+                        className="border border-gray-200"
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                {getMeetingTypeIcon()}
+                                <span className="font-medium text-sm">
+                                  {meeting.title || "Therapy Session"}
+                                </span>
                               </div>
-                              <div>{meeting.duration} minutes</div>
-                            </div>
-                            
-                            {/* Meeting URL Display */}
-                            {meeting.meetingUrl && (
-                              <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
-                                <div className="flex items-start gap-2">
-                                  {meeting.meetingUrl.includes('http') ? (
-                                    <Video className="h-3 w-3 text-blue-600 mt-0.5" />
-                                  ) : (
-                                    <MapPin className="h-3 w-3 text-blue-600 mt-0.5" />
-                                  )}
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-blue-900">
-                                      {meeting.meetingUrl.includes('http') ? 'Video Meeting' : 'Location'}
-                                    </p>
-                                    <p className="text-xs text-blue-800 break-all">
-                                      {meeting.meetingUrl}
-                                    </p>
-                                    {meeting.meetingUrl.includes('http') && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          window.open(meeting.meetingUrl, '_blank');
-                                        }}
-                                        className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 flex items-center gap-1"
-                                      >
-                                        <ExternalLink className="h-2 w-2" />
-                                        Join Meeting
-                                      </button>
+                              <div className="text-xs text-muted-foreground space-y-1">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {new Date(
+                                    meeting.startTime
+                                  ).toLocaleDateString()}{" "}
+                                  at{" "}
+                                  {new Date(
+                                    meeting.startTime
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                                <div>{meeting.duration} minutes</div>
+                              </div>
+
+                              {/* Meeting URL Display */}
+                              {meeting.meetingUrl && (
+                                <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                                  <div className="flex items-start gap-2">
+                                    {meeting.meetingUrl.includes("http") ? (
+                                      <Video className="h-3 w-3 text-blue-600 mt-0.5" />
+                                    ) : (
+                                      <MapPin className="h-3 w-3 text-blue-600 mt-0.5" />
                                     )}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-medium text-blue-900">
+                                        {meeting.meetingUrl.includes("http")
+                                          ? "Video Meeting"
+                                          : "Location"}
+                                      </p>
+                                      <p className="text-xs text-blue-800 break-all">
+                                        {meeting.meetingUrl}
+                                      </p>
+                                      {meeting.meetingUrl.includes("http") && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            window.open(
+                                              meeting.meetingUrl,
+                                              "_blank"
+                                            );
+                                          }}
+                                          className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 flex items-center gap-1"
+                                        >
+                                          <ExternalLink className="h-2 w-2" />
+                                          Join Meeting
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              {getStatusBadge(
+                                meeting.status as unknown as MeetingStatus
+                              )}
+                              {(meeting.status === "scheduled" ||
+                                meeting.status === "confirmed") && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleCancelMeeting(meeting.id)
+                                  }
+                                  disabled={isCancelling}
+                                  className="text-xs h-6 px-2"
+                                >
+                                  Cancel
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex flex-col items-end gap-1">
-                            {getStatusBadge(meeting.status as unknown as MeetingStatus)}
-                            {(meeting.status === "scheduled" || 
-                              meeting.status === "confirmed") && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleCancelMeeting(meeting.id)}
-                                disabled={isCancelling}
-                                className="text-xs h-6 px-2"
-                              >
-                                Cancel
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    ))}
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Calendar Section */}
+        {/* Calendar Section with Duration-First Selection */}
         <div className="lg:col-span-2">
           {selectedTherapistId ? (
-            <BookingCalendar
+            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+              <BookingCalendar
               therapistId={selectedTherapistId}
               onSlotSelect={handleSlotSelect}
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
+              selectedDuration={selectedDuration}
+              onDurationSelect={handleDurationSelect}
             />
+            </Suspense>
           ) : (
             <Card>
               <CardContent className="p-8">
                 <div className="text-center text-muted-foreground">
                   <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <h3 className="text-lg font-medium mb-2">Select a Therapist</h3>
-                  <p>Choose a therapist from the list to view available time slots</p>
+                  <h3 className="text-lg font-medium mb-2">
+                    Select a Therapist
+                  </h3>
+                  <p>
+                    Choose a therapist from the list to view available time
+                    slots
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -322,17 +386,16 @@ export default function BookingPage() {
 
       {/* Booking Interface */}
       {selectedTimeSlot && selectedDate && (
-        <ClientBookingInterface
-          therapistId={selectedTherapistId}
-          selectedSlot={selectedTimeSlot}
-          selectedDate={selectedDate}
-          isOpen={showBookingModal}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedTimeSlot(null);
-          }}
-          onSuccess={handleBookingSuccess}
-        />
+        <Suspense fallback={null}>
+          <ClientBookingInterface
+            therapistId={selectedTherapistId}
+            selectedSlot={selectedTimeSlot}
+            selectedDate={selectedDate}
+            isOpen={showBookingModal}
+            onClose={handleCloseBooking}
+            onSuccess={handleBookingSuccess}
+          />
+        </Suspense>
       )}
     </div>
   );

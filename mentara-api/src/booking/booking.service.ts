@@ -18,6 +18,8 @@ import { EventBusService } from '../common/events/event-bus.service';
 import { SlotGeneratorService } from './services/slot-generator.service';
 import { ConflictDetectionService } from './services/conflict-detection.service';
 import { AvailabilityValidatorService } from './services/availability-validator.service';
+import { MeetingResponseTransformer } from './services/meeting-response.transformer';
+import { PricingService } from './services/pricing.service';
 import { BillingService } from '../billing/billing.service';
 import {
   AppointmentBookedEvent,
@@ -36,6 +38,7 @@ export class BookingService {
     private readonly slotGenerator: SlotGeneratorService,
     private readonly conflictDetection: ConflictDetectionService,
     private readonly availabilityValidator: AvailabilityValidatorService,
+    private readonly pricingService: PricingService,
     private readonly billingService: BillingService,
   ) {}
 
@@ -135,8 +138,14 @@ export class BookingService {
           },
         });
 
-        // Create automatic mock payment for the meeting
-        const sessionPrice = 100; // Mock session price - should come from therapist rates or duration
+        // Create automatic payment for the meeting using therapist's rate
+        const sessionPrice = await this.pricingService.calculateSessionPrice(
+          meeting.therapistId,
+          meeting.duration,
+          false, // Not initial consultation by default
+          tx, // Pass transaction client
+        );
+
         await this.billingService.createAutomaticMockPayment(
           {
             clientId: meeting.clientId,
@@ -169,13 +178,7 @@ export class BookingService {
         );
 
         // Transform the response to match frontend expectations
-        return {
-          ...meeting,
-          dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-          therapistName: meeting.therapist?.user
-            ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
-            : 'Unknown Therapist',
-        };
+        return MeetingResponseTransformer.transform(meeting);
       },
       {
         isolationLevel: 'Serializable', // Highest isolation level to prevent race conditions
@@ -240,13 +243,7 @@ export class BookingService {
       });
 
       // Transform the response to match frontend expectations
-      return meetings.map((meeting) => ({
-        ...meeting,
-        dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-        therapistName: meeting.therapist?.user
-          ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
-          : 'Unknown Therapist',
-      }));
+      return MeetingResponseTransformer.transformMany(meetings);
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),
@@ -297,13 +294,7 @@ export class BookingService {
       }
 
       // Transform the response to match frontend expectations
-      return {
-        ...meeting,
-        dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-        therapistName: meeting.therapist?.user
-          ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
-          : 'Unknown Therapist',
-      };
+      return MeetingResponseTransformer.transform(meeting);
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),
@@ -502,7 +493,7 @@ export class BookingService {
         }
       } catch (refundError) {
         // Log refund error but don't fail the cancellation
-        console.error(
+        this.logger.error(
           'Failed to process refund for cancelled meeting:',
           refundError,
         );
@@ -653,6 +644,11 @@ export class BookingService {
     ];
   }
 
+  // Cancellation policy
+  getCancellationPolicy() {
+    return this.pricingService.getCancellationPolicy();
+  }
+
   // Enhanced validation method using our services
   async validateMeetingTime(
     therapistId: string,
@@ -680,21 +676,30 @@ export class BookingService {
   }
 
   // Meeting Status Transition Methods
-  async acceptMeetingRequest(meetingId: string, meetingUrl: string, userId: string, role: string) {
+  async acceptMeetingRequest(
+    meetingId: string,
+    meetingUrl: string,
+    userId: string,
+    role: string,
+  ) {
     try {
       const meeting = await this.getMeeting(meetingId, userId, role);
 
       if (meeting.status !== 'WAITING') {
-        throw new BadRequestException('Only meetings with WAITING status can be accepted');
+        throw new BadRequestException(
+          'Only meetings with WAITING status can be accepted',
+        );
       }
 
       if (role !== 'therapist') {
-        throw new ForbiddenException('Only therapists can accept booking requests');
+        throw new ForbiddenException(
+          'Only therapists can accept booking requests',
+        );
       }
 
       const updatedMeeting = await this.prisma.meeting.update({
         where: { id: meetingId },
-        data: { 
+        data: {
           status: 'SCHEDULED',
           meetingUrl: meetingUrl,
         },
@@ -745,7 +750,9 @@ export class BookingService {
       const meeting = await this.getMeeting(meetingId, userId, role);
 
       if (!['WAITING', 'SCHEDULED', 'CONFIRMED'].includes(meeting.status)) {
-        throw new BadRequestException('Meeting cannot be started from current status');
+        throw new BadRequestException(
+          'Meeting cannot be started from current status',
+        );
       }
 
       if (role !== 'therapist') {
@@ -797,12 +804,19 @@ export class BookingService {
     }
   }
 
-  async completeMeeting(meetingId: string, userId: string, role: string, notes?: string) {
+  async completeMeeting(
+    meetingId: string,
+    userId: string,
+    role: string,
+    notes?: string,
+  ) {
     try {
       const meeting = await this.getMeeting(meetingId, userId, role);
 
       if (meeting.status !== 'IN_PROGRESS') {
-        throw new BadRequestException('Only meetings in progress can be completed');
+        throw new BadRequestException(
+          'Only meetings in progress can be completed',
+        );
       }
 
       if (role !== 'therapist') {
@@ -815,7 +829,7 @@ export class BookingService {
         const existingNotes = await this.prisma.meetingNotes.findFirst({
           where: { meetingId },
         });
-        
+
         if (existingNotes) {
           // Update existing notes
           await this.prisma.meetingNotes.update({
@@ -898,11 +912,15 @@ export class BookingService {
       const meeting = await this.getMeeting(meetingId, userId, role);
 
       if (!['IN_PROGRESS', 'SCHEDULED', 'CONFIRMED'].includes(meeting.status)) {
-        throw new BadRequestException('Meeting cannot be marked as no-show from current status');
+        throw new BadRequestException(
+          'Meeting cannot be marked as no-show from current status',
+        );
       }
 
       if (role !== 'therapist') {
-        throw new ForbiddenException('Only therapists can mark meetings as no-show');
+        throw new ForbiddenException(
+          'Only therapists can mark meetings as no-show',
+        );
       }
 
       const updatedMeeting = await this.prisma.meeting.update({
@@ -934,7 +952,9 @@ export class BookingService {
         },
       });
 
-      this.logger.log(`Meeting ${meetingId} marked as no-show by therapist ${userId}`);
+      this.logger.log(
+        `Meeting ${meetingId} marked as no-show by therapist ${userId}`,
+      );
 
       return {
         ...updatedMeeting,
@@ -950,7 +970,12 @@ export class BookingService {
     }
   }
 
-  async saveMeetingNotes(meetingId: string, notes: string, userId: string, role: string) {
+  async saveMeetingNotes(
+    meetingId: string,
+    notes: string,
+    userId: string,
+    role: string,
+  ) {
     try {
       const meeting = await this.getMeeting(meetingId, userId, role);
 
@@ -962,7 +987,7 @@ export class BookingService {
       const existingNotes = await this.prisma.meetingNotes.findFirst({
         where: { meetingId },
       });
-      
+
       let meetingNotes;
       if (existingNotes) {
         // Update existing notes
@@ -981,7 +1006,9 @@ export class BookingService {
         });
       }
 
-      this.logger.log(`Meeting notes saved for meeting ${meetingId} by therapist ${userId}`);
+      this.logger.log(
+        `Meeting notes saved for meeting ${meetingId} by therapist ${userId}`,
+      );
 
       return meetingNotes;
     } catch (error) {

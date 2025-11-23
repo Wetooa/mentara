@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type { PostAttachment } from "@/types/api/communities";
@@ -18,9 +20,10 @@ export function useCommunities() {
     error: userCommunitiesError,
     refetch: refetchUserCommunities,
   } = useQuery({
-    queryKey: ['communities', 'userMemberships'],
+    queryKey: queryKeys.communities.userMemberships(),
     queryFn: () => api.communities.getMyMemberships(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
   });
 
   // Get all available communities
@@ -29,9 +32,10 @@ export function useCommunities() {
     isLoading: isLoadingAllCommunities,
     error: allCommunitiesError,
   } = useQuery({
-    queryKey: ['communities'],
+    queryKey: queryKeys.communities.all,
     queryFn: () => api.communities.getAllCommunities(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
   });
 
   // Join community mutation
@@ -39,9 +43,9 @@ export function useCommunities() {
     mutationFn: (communityId: string) => api.communities.joinCommunity(communityId),
     onSuccess: () => {
       // Invalidate all relevant community-related queries
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
-      queryClient.invalidateQueries({ queryKey: ['communities', 'userMemberships'] });
-      queryClient.invalidateQueries({ queryKey: ['communities', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.userMemberships() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.stats() });
       toast.success("Successfully joined community");
     },
     onError: (error: MentaraApiError) => {
@@ -63,9 +67,9 @@ export function useCommunities() {
     mutationFn: (communityId: string) => api.communities.leaveCommunity(communityId),
     onSuccess: () => {
       // Invalidate all relevant community-related queries
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
-      queryClient.invalidateQueries({ queryKey: ['communities', 'userMemberships'] });
-      queryClient.invalidateQueries({ queryKey: ['communities', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.userMemberships() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.stats() });
       toast.success("Successfully left community");
     },
     onError: (error: MentaraApiError) => {
@@ -111,13 +115,14 @@ export function useCommunityPosts(communityId?: string, roomId?: string) {
     refetch,
   } = useQuery({
     queryKey: roomId 
-      ? ['communities', 'roomPosts', roomId]
-      : ['communities', 'posts', communityId || ''],
+      ? queryKeys.communities.roomPosts(roomId)
+      : [...queryKeys.communities.all, 'posts', communityId || ''],
     queryFn: () => roomId 
       ? api.communities.getPostsByRoom(roomId)
       : api.communities.getPostsByRoom(''), // BROKEN: No direct community posts endpoint - this will likely fail
     enabled: !!(communityId || roomId),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.SHORT, // 5 minutes
   });
 
   // Create post mutation
@@ -131,7 +136,10 @@ export function useCommunityPosts(communityId?: string, roomId?: string) {
         attachments 
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      if (roomId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(roomId) });
+      }
       toast.success("Post created successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -143,7 +151,10 @@ export function useCommunityPosts(communityId?: string, roomId?: string) {
   const heartPostMutation = useMutation({
     mutationFn: (postId: string) => api.communities.heartPost(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      if (roomId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(roomId) });
+      }
     },
     onError: (error: MentaraApiError) => {
       toast.error("Failed to heart post");
@@ -154,7 +165,10 @@ export function useCommunityPosts(communityId?: string, roomId?: string) {
   const unheartPostMutation = useMutation({
     mutationFn: (postId: string) => api.communities.unheartPost(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      if (roomId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(roomId) });
+      }
     },
     onError: (error: MentaraApiError) => {
       toast.error("Failed to unheart post");
@@ -166,7 +180,10 @@ export function useCommunityPosts(communityId?: string, roomId?: string) {
     mutationFn: ({ postId, content }: { postId: string; content: string }) =>
       api.communities.createComment({ postId, content }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      if (roomId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(roomId) });
+      }
     },
     onError: (error: MentaraApiError) => {
       toast.error("Failed to add comment");

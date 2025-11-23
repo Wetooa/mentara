@@ -4,6 +4,8 @@ import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { Conversation, Message } from '@/components/messages/types';
 import { MessageResponseDto, SendMessageDto } from '@/types/api/messaging';
 import type { MessageAttachment } from '@/types/api/messaging';
@@ -49,7 +51,7 @@ export function useConversations() {
   // Get conversations with messages
   const getConversationQuery = (conversationId: string) =>
     useQuery({
-      queryKey: ['messaging', 'conversation', conversationId],
+      queryKey: queryKeys.messaging.conversation(conversationId),
       queryFn: async () => {
         const [conversation, messages] = await Promise.all([
           api.messaging.getConversation(conversationId),
@@ -69,6 +71,8 @@ export function useConversations() {
       },
       enabled: !!conversationId && !!user?.id,
       staleTime: 1000 * 30, // 30 seconds for active conversations
+      gcTime: GC_TIME.MEDIUM, // 10 minutes
+      refetchOnWindowFocus: true,
     });
 
   // Currently selected conversation
@@ -96,7 +100,7 @@ export function useConversations() {
     onSuccess: (newMessage, { conversationId }) => {
       // Optimistically update the conversation cache
       queryClient.setQueryData(
-        ['messaging', 'conversation', conversationId],
+        queryKeys.messaging.conversation(conversationId),
         (oldConversation: Conversation | undefined) => {
           if (!oldConversation) return oldConversation;
 
@@ -110,7 +114,7 @@ export function useConversations() {
       );
 
       // Also invalidate contacts to update last message
-      queryClient.invalidateQueries({ queryKey: ['messaging', 'contacts'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.contacts() });
     },
   });
 
@@ -120,7 +124,7 @@ export function useConversations() {
     onSuccess: (_, messageId) => {
       // Update all conversations that might contain this message
       queryClient.setQueriesData(
-        { queryKey: ['messaging', 'conversation'] },
+        { queryKey: queryKeys.messaging.all },
         (oldConversation: Conversation | undefined) => {
           if (!oldConversation) return oldConversation;
 
@@ -228,7 +232,7 @@ export function useConversations() {
     
     // Prefetch conversation data
     queryClient.prefetchQuery({
-      queryKey: ['messaging', 'conversation', contactId],
+      queryKey: queryKeys.messaging.conversation(contactId),
       queryFn: async () => {
         const [conversation, messages] = await Promise.all([
           api.messaging.getConversation(contactId),

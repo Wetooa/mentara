@@ -27,7 +27,7 @@ export class AvailabilityValidatorService {
       end: '20:00',
     },
     advanceBooking: {
-      minHours: 2,
+      minHours: 24, // 24 hours (1 day) to align with cancellation policy
       maxDays: 90,
     },
     weekendBooking: true,

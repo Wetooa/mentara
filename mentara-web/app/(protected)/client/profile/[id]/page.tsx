@@ -2,6 +2,8 @@
 
 import { ProfilePage } from '@/components/profile';
 import { useEffect, use } from 'react';
+import { PageBreadcrumbs } from '@/components/navigation/PageBreadcrumbs';
+import { BackButton } from '@/components/navigation/BackButton';
 
 interface ClientProfilePageProps {
   params: Promise<{ id: string }>;
@@ -37,6 +39,10 @@ export default function ClientProfilePage({ params }: ClientProfilePageProps) {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="space-y-4 mb-6">
+          <PageBreadcrumbs />
+          <BackButton label="Back" variant="ghost" />
+        </div>
         <ProfilePage userId={id} />
       </div>
     </div>

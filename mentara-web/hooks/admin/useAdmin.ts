@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { 
@@ -31,9 +32,11 @@ export function useAdminCheck() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'checkAdmin'],
+    queryKey: queryKeys.admin.checkAdmin(),
     queryFn: () => api.admin.checkAdmin(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: false,
   });
 }
@@ -45,9 +48,11 @@ export function useAdminDashboard() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'dashboard'],
+    queryKey: queryKeys.admin.dashboard(),
     queryFn: () => api.dashboard.getAdminDashboard(),
-    staleTime: 1000 * 60 * 2, // 2 minutes (dashboard data changes frequently)
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -58,9 +63,11 @@ export function useAdminUsersList(params: AdminUserListParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'users', 'list', params],
+    queryKey: queryKeys.admin.users.list(params),
     queryFn: () => api.admin.users.getList(params),
-    staleTime: 1000 * 60 * 2,
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -71,10 +78,12 @@ export function useAdminUser(userId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'users', 'detail', userId || ''],
+    queryKey: queryKeys.admin.users.byId(userId || ''),
     queryFn: () => api.admin.users.getById(userId!),
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -93,12 +102,12 @@ export function useCreateUser() {
       
       // Invalidate users list
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users'] 
+        queryKey: queryKeys.admin.users.list() 
       });
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'dashboard'] 
+        queryKey: queryKeys.admin.dashboard() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -125,17 +134,17 @@ export function useUpdateUser() {
     onMutate: async ({ userId, userData }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ 
-        queryKey: ['admin', 'users', 'detail', userId] 
+        queryKey: queryKeys.admin.users.byId(userId) 
       });
       
       // Snapshot the previous value
       const previousUser = queryClient.getQueryData(
-        ['admin', 'users', 'detail', userId]
+        queryKeys.admin.users.byId(userId)
       );
       
       // Optimistically update
       queryClient.setQueryData(
-        ['admin', 'users', 'detail', userId],
+        queryKeys.admin.users.byId(userId),
         (old: User | undefined) => 
           old ? { ...old, ...userData } : old
       );
@@ -146,7 +155,7 @@ export function useUpdateUser() {
       // Rollback on error
       if (context?.previousUser) {
         queryClient.setQueryData(
-          ['admin', 'users', 'detail', userId],
+          queryKeys.admin.users.byId(userId),
           context.previousUser
         );
       }
@@ -157,7 +166,7 @@ export function useUpdateUser() {
       
       // Invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users'] 
+        queryKey: queryKeys.admin.users.list() 
       });
     },
   });
@@ -183,10 +192,10 @@ export function useUpdateUserRole() {
       
       // Invalidate user data
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users', 'detail', userId] 
+        queryKey: queryKeys.admin.users.byId(userId) 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users'] 
+        queryKey: queryKeys.admin.users.list() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -215,10 +224,10 @@ export function useSuspendUser() {
       
       // Invalidate user data
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users', 'detail', userId] 
+        queryKey: queryKeys.admin.users.byId(userId) 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users'] 
+        queryKey: queryKeys.admin.users.list() 
       });
       
       // Invalidate moderation data
@@ -246,10 +255,10 @@ export function useUnsuspendUser() {
       
       // Invalidate user data
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users', 'detail', userId] 
+        queryKey: queryKeys.admin.users.byId(userId) 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users'] 
+        queryKey: queryKeys.admin.users.list() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -277,12 +286,12 @@ export function useDeleteUser() {
       
       // Remove specific user from cache
       queryClient.removeQueries({ 
-        queryKey: ['admin', 'users', 'detail', userId] 
+        queryKey: queryKeys.admin.users.byId(userId) 
       });
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'dashboard'] 
+        queryKey: queryKeys.admin.dashboard() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -298,9 +307,11 @@ export function useAdminTherapistApplications(params: { status?: string; limit?:
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'therapistApplications', 'list', params],
+    queryKey: queryKeys.admin.therapistApplications.list(params),
     queryFn: () => api.admin.therapistApplications.getList(params),
-    staleTime: 1000 * 60 * 2,
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -311,10 +322,12 @@ export function useAdminTherapistApplication(applicationId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'therapistApplications', 'detail', applicationId || ''],
+    queryKey: queryKeys.admin.therapistApplications.byId(applicationId || ''),
     queryFn: () => api.admin.therapistApplications.getById(applicationId!),
     enabled: !!applicationId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -340,18 +353,18 @@ export function useUpdateTherapistApplicationStatus() {
       
       // Invalidate applications list
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'therapistApplications'] 
+        queryKey: queryKeys.admin.therapistApplications.list() 
       });
       
       // Invalidate specific application
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'therapistApplications', 'detail', applicationId] 
+        queryKey: queryKeys.admin.therapistApplications.byId(applicationId) 
       });
       
       // If approved, invalidate therapist queries
       if (data.status === 'approved') {
         queryClient.invalidateQueries({ 
-          queryKey: ['therapists'] 
+          queryKey: queryKeys.therapists.all 
         });
       }
     },
@@ -368,9 +381,11 @@ export function useAdminSystemStats() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'analytics', 'systemStats'],
+    queryKey: [...queryKeys.admin.all, 'analytics', 'systemStats'],
     queryFn: () => api.admin.analytics.getSystemStats(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -381,9 +396,11 @@ export function useAdminUserGrowth(params: UserGrowthParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'analytics', 'userGrowth', params],
+    queryKey: [...queryKeys.admin.all, 'analytics', 'userGrowth', params],
     queryFn: () => api.admin.analytics.getUserGrowth(params),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -394,9 +411,11 @@ export function useAdminEngagement(params: EngagementParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'analytics', 'engagement', params],
+    queryKey: [...queryKeys.admin.all, 'analytics', 'engagement', params],
     queryFn: () => api.admin.analytics.getEngagement(params),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -407,9 +426,11 @@ export function useAdminPlatformOverview() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'analytics', 'platformOverview'],
+    queryKey: [...queryKeys.admin.all, 'analytics', 'platformOverview'],
     queryFn: () => api.admin.analytics.getPlatformOverview(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -421,9 +442,11 @@ export function useAdminMatchingPerformance(startDate?: string, endDate?: string
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'analytics', 'matchingPerformance', startDate, endDate],
+    queryKey: [...queryKeys.admin.all, 'analytics', 'matchingPerformance', startDate, endDate],
     queryFn: () => Promise.resolve({}), // TODO: Replace with api.admin.analytics.getMatchingPerformance(startDate, endDate) when endpoint is created
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -434,9 +457,11 @@ export function useAdminModerationReports(params: ModerationReportParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'moderation', 'reports', params],
+    queryKey: queryKeys.admin.reports.list(params),
     queryFn: () => api.admin.moderation.getReports(params),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -460,7 +485,7 @@ export function useUpdateModerationReport() {
       
       // Invalidate reports list
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'moderation'] 
+        queryKey: queryKeys.reporting.all 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -476,9 +501,11 @@ export function useAdminFlaggedContent(params: { type?: string; page?: number; l
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'moderation', 'flaggedContent', params],
+    queryKey: queryKeys.admin.moderation.flaggedContent(params),
     queryFn: () => api.admin.moderation.getFlaggedContent(params),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -506,12 +533,12 @@ export function useAdminModerateContent() {
       
       // Invalidate flagged content
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'moderation'] 
+        queryKey: queryKeys.admin.moderation.flaggedContent() 
       });
       
       // Invalidate content moderation data
       queryClient.invalidateQueries({ 
-        queryKey: ['contentModeration'] 
+        queryKey: queryKeys.moderator.flaggedContent() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -527,9 +554,11 @@ export function useAdminSystemConfig() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'config', 'system'],
+    queryKey: queryKeys.admin.config.system(),
     queryFn: () => api.admin.config.get(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -548,7 +577,7 @@ export function useUpdateSystemConfig() {
       
       // Invalidate config cache
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'config'] 
+        queryKey: queryKeys.admin.config.system() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -564,9 +593,11 @@ export function useAdminFeatureFlags() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['admin', 'config', 'featureFlags'],
+    queryKey: queryKeys.admin.config.featureFlags(),
     queryFn: () => api.admin.config.getFeatureFlags(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -590,7 +621,7 @@ export function useUpdateFeatureFlag() {
       
       // Invalidate feature flags cache
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'config', 'featureFlags'] 
+        queryKey: queryKeys.admin.config.featureFlags() 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -608,7 +639,9 @@ export function useAdminProfile() {
   return useQuery({
     queryKey: ['admin', 'profile'],
     queryFn: () => api.admin.profile.get(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 }
 

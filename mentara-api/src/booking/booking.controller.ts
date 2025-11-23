@@ -110,7 +110,12 @@ export class BookingController {
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
-    return this.bookingService.acceptMeetingRequest(params.id, body.meetingUrl, userId, role);
+    return this.bookingService.acceptMeetingRequest(
+      params.id,
+      body.meetingUrl,
+      userId,
+      role,
+    );
   }
 
   @Post('meetings/:id/start')
@@ -131,7 +136,12 @@ export class BookingController {
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
-    return this.bookingService.completeMeeting(params.id, userId, role, body.notes);
+    return this.bookingService.completeMeeting(
+      params.id,
+      userId,
+      role,
+      body.notes,
+    );
   }
 
   @Post('meetings/:id/no-show')
@@ -152,7 +162,12 @@ export class BookingController {
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
-    return this.bookingService.saveMeetingNotes(params.id, body.notes, userId, role);
+    return this.bookingService.saveMeetingNotes(
+      params.id,
+      body.notes,
+      userId,
+      role,
+    );
   }
 
   // Availability endpoints (therapist only)
@@ -225,6 +240,12 @@ export class BookingController {
   @Get('durations')
   getDurations() {
     return this.bookingService.getDurations();
+  }
+
+  // Cancellation policy endpoint (public)
+  @Get('cancellation-policy')
+  getCancellationPolicy() {
+    return this.bookingService.getCancellationPolicy();
   }
 
   // Available slots endpoint

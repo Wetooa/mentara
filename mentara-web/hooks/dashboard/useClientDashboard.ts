@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import type { ClientDashboardResponseDto } from "@/types/api/dashboard";
 
 /**
@@ -9,11 +11,12 @@ export function useClientDashboard() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["dashboard", "client"],
+    queryKey: queryKeys.dashboard.client(),
     queryFn: () =>
       api.dashboard?.getClientDashboard?.() ||
       Promise.resolve({} as ClientDashboardResponseDto),
-    staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
     retry: (failureCount, error: any) => {
       // Don't retry if not authorized
       if (error?.status === 403 || error?.status === 401) {
@@ -22,6 +25,7 @@ export function useClientDashboard() {
       return failureCount < 3;
     },
     enabled: !!api.dashboard?.getClientDashboard, // Only if dashboard service is available
+    refetchOnWindowFocus: false, // Don't refetch on window focus for dashboard
   });
 }
 
@@ -32,10 +36,12 @@ export function useClientSessions() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["dashboard", "client", "sessions"],
+    queryKey: [...queryKeys.dashboard.client(), "sessions"],
     queryFn: () => api.dashboard?.getClientSessions?.() || Promise.resolve([]),
-    staleTime: 1000 * 60 * 5, // Sessions data changes less frequently
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.LONG, // 15 minutes
     enabled: !!api.dashboard?.getClientSessions,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -46,10 +52,12 @@ export function useClientProgress() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["dashboard", "client", "progress"],
+    queryKey: [...queryKeys.dashboard.client(), "progress"],
     queryFn: () => api.dashboard?.getClientProgress?.() || Promise.resolve({}),
-    staleTime: 1000 * 60 * 10, // Progress data changes slowly
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
     enabled: !!api.dashboard?.getClientProgress,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -60,10 +68,12 @@ export function useClientWellness() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["dashboard", "client", "wellness"],
+    queryKey: [...queryKeys.dashboard.client(), "wellness"],
     queryFn: () => api.dashboard?.getClientWellness?.() || Promise.resolve({}),
-    staleTime: 1000 * 60 * 15, // Wellness metrics change slowly
+    staleTime: STALE_TIME.VERY_LONG, // 15 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
     enabled: !!api.dashboard?.getClientWellness,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -87,9 +97,11 @@ export function useRecentCommunications() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["dashboard", "communications", "recent"],
+    queryKey: queryKeys.messaging.recent(5),
     queryFn: () => api.messaging?.getRecentCommunications?.(5) || Promise.resolve([]),
-    staleTime: 1000 * 60 * 2, // Communications change moderately
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.SHORT, // 5 minutes
     enabled: !!api.messaging?.getRecentCommunications,
+    refetchOnWindowFocus: true, // Refetch communications on focus
   });
 }

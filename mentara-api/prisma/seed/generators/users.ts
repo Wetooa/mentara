@@ -59,9 +59,10 @@ async function createTestAccounts(
   result: UsersData
 ): Promise<void> {
   for (const account of ALL_TEST_ACCOUNTS) {
-    // Create base user
+    // Create base user with specific predictable ID
     const user = await prisma.user.create({
       data: {
+        id: account.id, // Use the specific ID from TEST_ACCOUNTS.md
         email: account.email,
         firstName: account.firstName,
         lastName: account.lastName,

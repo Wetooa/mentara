@@ -420,7 +420,7 @@ export class NotificationsService implements OnModuleInit {
     }
 
     try {
-      // CRITICAL FIX: Use the same room format as MessagingGateway (user_${userId} not user:${userId})
+      // Use standardized room format from ConnectionManagerService
       const userRoom = `user_${notification.userId}`;
       this.logger.log('📍 [NOTIFICATIONS] Target room (corrected format):', userRoom);
 

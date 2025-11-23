@@ -7,6 +7,7 @@ import {
   ReactNode,
   useState,
   useRef,
+  useMemo,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +15,6 @@ import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
-import { useCurrentUserProfile } from "@/hooks/auth/useCurrentUserProfile";
 
 // Types
 export type UserRole = "client" | "therapist" | "moderator" | "admin";
@@ -85,7 +85,7 @@ const isAnyRoleRoute = (pathname: string): boolean => {
 };
 
 // Auth Provider Component
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -117,22 +117,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Check for token on mount and route changes (client-side only)
+  // Set token state immediately for synchronous checks
   useEffect(() => {
     if (isClient) {
-      setHasToken(hasAuthToken());
+      const tokenExists = hasAuthToken();
+      setHasToken(tokenExists);
+      
+      // For protected routes without token, allow optimistic navigation
+      // but mark as needing auth redirect
+      if (!tokenExists && shouldCheckAuth) {
+        // Token will be set to false, triggering redirect in the route protection effect
+        // But page can still render to show loading state
+      }
     }
-  }, [pathname, isClient]);
+  }, [pathname, isClient, shouldCheckAuth]);
 
-  // Fetch user role using React Query (only when we have a token and need auth)
+  // Preload auth check in background if token exists (non-blocking, for faster navigation)
+  // This prefetch happens on all routes but doesn't block UI on public routes
+  useEffect(() => {
+    if (isClient && hasToken === true) {
+      // Prefetch auth data in background (non-blocking) for faster navigation
+      // This won't block public routes but will have data ready if user navigates to protected route
+      queryClient.prefetchQuery({
+        queryKey: ["auth", "user-role"],
+        queryFn: () => api.auth.getUserRole(),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      }).catch(() => {
+        // Silently fail prefetch - it's just for optimization
+      });
+    }
+  }, [isClient, hasToken, queryClient]);
+
+  // Fetch user role using React Query - optimized for performance
   const {
     data: authData,
     isLoading,
     error,
-    refetch,
   } = useQuery({
     queryKey: ["auth", "user-role"],
     queryFn: () => api.auth.getUserRole(),
+    // Only enable on protected routes to avoid unnecessary checks on public pages
     enabled: isClient && shouldCheckAuth && hasToken === true,
+    staleTime: 5 * 60 * 1000, // 5 minutes - keep data fresh longer
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer (formerly cacheTime)
+    refetchOnWindowFocus: false, // Don't refetch on window focus to prevent lag
+    refetchOnMount: false, // Use cached data if available
     retry: (failureCount, error: any) => {
       // Don't retry on 401/403 errors (auth failures)
       if (error?.response?.status === 401 || error?.response?.status === 403) {
@@ -142,12 +171,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // const currentUserProfile = useCurrentUserProfile();
-
   const userRole = (authData as any)?.role as UserRole | null;
   const userId = (authData as any)?.userId || null;
 
+  // Prefetch profile data when auth data is available (only on protected routes)
+  useEffect(() => {
+    if (isClient && userId && userRole && hasToken === true && shouldCheckAuth && !isLoading) {
+      const prefetchProfile = async () => {
+        try {
+          let profileResponse: any;
+          switch (userRole) {
+            case "client":
+              profileResponse = await api.auth.client.getProfile();
+              break;
+            case "therapist":
+              profileResponse = await api.auth.therapist.getProfile();
+              break;
+            case "admin":
+              profileResponse = await api.auth.admin.getProfile();
+              break;
+            case "moderator":
+              profileResponse = await api.auth.moderator.getProfile();
+              break;
+            default:
+              return;
+          }
+
+          const normalizedData = {
+            firstName:
+              profileResponse.user?.firstName || profileResponse.firstName || "",
+            lastName:
+              profileResponse.user?.lastName || profileResponse.lastName || "",
+            avatarUrl: profileResponse.user?.avatarUrl || profileResponse.avatarUrl,
+            hasSeenTherapistRecommendations:
+              profileResponse.hasSeenTherapistRecommendations,
+          };
+
+          // Prefetch into cache
+          queryClient.setQueryData(["auth", "current-user-profile"], normalizedData);
+        } catch (error) {
+          // Silently fail prefetch - query will handle it
+        }
+      };
+      prefetchProfile();
+    }
+  }, [isClient, userId, userRole, hasToken, shouldCheckAuth, isLoading, queryClient]);
+
   // Fetch profile data if user is authenticated
+  // Only fetch after auth query completes successfully to prevent race conditions
   const { data: profileData, refetch: refetchProfile } = useQuery({
     queryKey: ["auth", "current-user-profile"],
     queryFn: async () => {
@@ -186,8 +257,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           profileResponse.hasSeenTherapistRecommendations,
       };
     },
-    enabled: isClient && !!userId && !!userRole && hasToken === true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    // Wait for auth query to complete to prevent race conditions (only on protected routes)
+    enabled:
+      isClient && shouldCheckAuth && !!userId && !!userRole && hasToken === true && !isLoading,
+    staleTime: 5 * 60 * 1000, // 5 minutes - keep data fresh longer
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: false, // Use cached data if available
     retry: (failureCount, error: any) => {
       // Don't retry on 401/403 errors (auth failures)
       if (error?.response?.status === 401 || error?.response?.status === 403) {
@@ -197,22 +273,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  console.log("Auth Data:", authData);
-  console.log("Profile Data:", profileData);
-
   // Create user object with profile data when available
-  const user: User | null =
-    userRole && userId
-      ? {
-          id: userId,
-          role: userRole,
-          firstName: profileData?.firstName,
-          lastName: profileData?.lastName,
-          avatarUrl: profileData?.avatarUrl,
-          hasSeenTherapistRecommendations:
-            profileData?.hasSeenTherapistRecommendations,
-        }
-      : null;
+  // Memoized to prevent unnecessary re-renders
+  const user: User | null = useMemo(() => {
+    if (!userRole || !userId) return null;
+
+    return {
+      id: userId,
+      role: userRole,
+      firstName: profileData?.firstName,
+      lastName: profileData?.lastName,
+      avatarUrl: profileData?.avatarUrl,
+      hasSeenTherapistRecommendations:
+        profileData?.hasSeenTherapistRecommendations,
+    };
+  }, [
+    userId,
+    userRole,
+    profileData?.firstName,
+    profileData?.lastName,
+    profileData?.avatarUrl,
+    profileData?.hasSeenTherapistRecommendations,
+  ]);
 
   const isAuthenticated = !!user && !!hasToken;
 
@@ -318,14 +400,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Handle route protection and redirection
+  // Optimized: Allow navigation first, verify auth in background
   useEffect(() => {
-    // Skip redirections during loading, SSR, or if we don't know token status yet
-    if (!isClient || isLoading || hasToken === null) return;
+    // Skip redirections during SSR
+    if (!isClient) return;
 
+    // Quick synchronous check: if no token and accessing protected route, redirect immediately
     const isPublic = isPublicRoute(pathname);
+    if (!isPublic && !hasAuthToken()) {
+      // No token - redirect immediately without waiting for auth check
+      router.push("/auth/sign-in");
+      return;
+    }
 
-    // Handle authentication errors
-    if (error && shouldCheckAuth) {
+    // Skip other redirections during initial loading to allow optimistic navigation
+    if (hasToken === null) return;
+
+    // Handle authentication errors (after async check completes)
+    if (error && shouldCheckAuth && !isLoading) {
       console.error("Authentication error:", error);
       toast({
         title: "Authentication Required",
@@ -352,14 +444,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Unauthenticated users can access all public routes
     } else {
       // Protected route handling
-      if (!hasToken) {
-        // No token - redirect to sign in
-        router.push("/auth/sign-in");
-        return;
-      }
-
-      if (!isAuthenticated && !isLoading) {
-        // Has token but auth failed - redirect to sign in
+      // Note: Token check already happened synchronously above, so we just verify auth result
+      if (!isAuthenticated && !isLoading && hasToken === false) {
+        // Auth failed - redirect to sign in (but navigation already happened)
         router.push("/auth/sign-in");
         return;
       }
@@ -417,28 +504,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     shouldCheckAuth,
   ]);
 
-  // Show minimal loading state during authentication check
-  // The global loading bar will handle the visual feedback
-  if ((isLoading || hasToken === null || !isClient) && shouldCheckAuth) {
+  // Memoize context value to prevent unnecessary re-renders
+  // MUST be called before any conditional returns to maintain hook order
+  const contextValue: AuthContextType = useMemo(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated,
+      userRole,
+      logout,
+      refreshProfile,
+    }),
+    [user, isLoading, isAuthenticated, userRole, logout, refreshProfile]
+  );
+
+  // Optimistic navigation: Don't block children rendering
+  // Allow page to render immediately with loading states, verify auth in background
+  // Only show blocking screen if we're absolutely sure there's no token on a protected route
+  const shouldBlock = shouldCheckAuth && !isClient;
+  
+  if (shouldBlock) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center justify-center gap-2">
-          <div className="text-sm text-muted-foreground animate-pulse">
-            Verifying authentication...
+      <AuthContext.Provider value={contextValue}>
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="text-sm text-muted-foreground animate-pulse">
+              Loading...
+            </div>
           </div>
         </div>
-      </div>
+      </AuthContext.Provider>
     );
   }
-
-  const contextValue: AuthContextType = {
-    user,
-    isLoading,
-    isAuthenticated,
-    userRole,
-    logout,
-    refreshProfile,
-  };
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

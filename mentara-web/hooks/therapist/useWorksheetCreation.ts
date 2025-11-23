@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -109,8 +110,8 @@ export function useWorksheetCreation(
     },
     onSuccess: (result) => {
       toast.success('Worksheet assigned successfully!');
-      queryClient.invalidateQueries({ queryKey: ['therapist', 'worksheets'] });
-      queryClient.invalidateQueries({ queryKey: ['therapist', 'matched-clients'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapist.worksheets });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapist.matchedClients });
       reset();
       onSuccess?.();
     },

@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { TherapistRecommendation, TherapistRecommendationResponse } from "@/lib/api/services/therapists";
 
 /**
@@ -143,12 +145,14 @@ export function useWelcomePage(): UseWelcomePageReturn {
 
   // Fetch personalized therapist recommendations
   const { data: recommendations, isLoading, error } = useQuery<TherapistRecommendationResponse>({
-    queryKey: ["therapist-recommendations"],
+    queryKey: queryKeys.therapists.therapistRecommendations(),
     queryFn: () => api.therapists.getRecommendations({ 
       limit: 8, // Show 8 recommendations in carousel
       includeInactive: false 
     }),
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch welcome page on focus
   });
 
   const userName = user?.firstName || "User";

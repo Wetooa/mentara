@@ -17,6 +17,11 @@ model Post {
 
   @@index([userId])
   @@index([roomId])
+  @@index([roomId, createdAt])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@index([title])
+  @@index([roomId, userId, createdAt])
 }
 
 model Comment {
@@ -41,6 +46,8 @@ model Comment {
   @@index([userId])
   @@index([parentId])
   @@index([postId, parentId])
+  @@index([postId, createdAt])
+  @@index([createdAt])
 }
 
 model CommentHeart {
@@ -89,6 +96,7 @@ model Report {
   @@index([postId])
   @@index([commentId])
   @@index([reportedUserId])
+  @@index([status, createdAt])
 }
 
 enum ReportStatus {

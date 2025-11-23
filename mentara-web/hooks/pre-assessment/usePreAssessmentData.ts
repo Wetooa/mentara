@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { 
   CreatePreAssessmentDto, 
   UpdatePreAssessmentDto,
@@ -14,7 +16,7 @@ export function useUserPreAssessment() {
   const api = useApi();
 
   return useQuery({
-    queryKey: ["preAssessment", "user"],
+    queryKey: queryKeys.preAssessment.responses({ user: true }),
     queryFn: () => api.preAssessment.getUserAssessment(),
     retry: (failureCount, error: any) => {
       // Don't retry on 404 (no assessment exists yet)
@@ -23,8 +25,9 @@ export function useUserPreAssessment() {
       }
       return failureCount < 3;
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -40,10 +43,10 @@ export function useCreatePreAssessment() {
     mutationFn: (data: CreatePreAssessmentDto) => api.preAssessment.create(data),
     onSuccess: (data: PreAssessment) => {
       // Update the user's pre-assessment cache
-      queryClient.setQueryData(["preAssessment", "user"], data);
+      queryClient.setQueryData(queryKeys.preAssessment.responses({ user: true }), data);
       
       // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ["preAssessment"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.preAssessment.all });
     },
     onError: (error) => {
       console.error("Failed to create pre-assessment:", error);
@@ -63,10 +66,10 @@ export function useUpdatePreAssessment() {
     mutationFn: (data: UpdatePreAssessmentDto) => api.preAssessment.update(data),
     onSuccess: (data: PreAssessment) => {
       // Update the user's pre-assessment cache
-      queryClient.setQueryData(["preAssessment", "user"], data);
+      queryClient.setQueryData(queryKeys.preAssessment.responses({ user: true }), data);
       
       // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ["preAssessment"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.preAssessment.all });
     },
     onError: (error) => {
       console.error("Failed to update pre-assessment:", error);
@@ -86,10 +89,10 @@ export function useDeletePreAssessment() {
     mutationFn: () => api.preAssessment.delete(),
     onSuccess: () => {
       // Clear the user's pre-assessment cache
-      queryClient.removeQueries({ queryKey: ["preAssessment", "user"] });
+      queryClient.removeQueries({ queryKey: queryKeys.preAssessment.responses({ user: true }) });
       
       // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ["preAssessment"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.preAssessment.all });
     },
     onError: (error) => {
       console.error("Failed to delete pre-assessment:", error);

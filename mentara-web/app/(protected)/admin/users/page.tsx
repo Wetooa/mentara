@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { Search, MoreHorizontal, UserCheck, UserX, Mail, Shield, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,10 +39,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { motion } from "framer-motion";
-import { fadeDown } from "@/lib/animations";
 import { format } from "date-fns";
 import { useAdminUsers } from "@/hooks/admin/useAdminUsers";
+import { logger } from "@/lib/logger";
+
+// Lazy load framer-motion
+const MotionDiv = dynamic(() => import("framer-motion").then(mod => mod.motion.div), {
+  ssr: false,
+  loading: () => <div className="space-y-6" />
+});
 
 interface User {
   id: string;
@@ -107,13 +113,14 @@ export default function AdminUsersPage() {
     );
   }, [users, searchQuery]);
 
-  const handleUserAction = (user: User, action: "suspend" | "activate" | "delete") => {
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handleUserAction = useCallback((user: User, action: "suspend" | "activate" | "delete") => {
     setSelectedUser(user);
     setActionType(action);
     setShowActionDialog(true);
-  };
+  }, []);
 
-  const confirmAction = async () => {
+  const confirmAction = useCallback(async () => {
     if (!selectedUser || !actionType) return;
 
     try {
@@ -128,18 +135,25 @@ export default function AdminUsersPage() {
           await deleteUser(selectedUser.id);
           break;
       }
+    } catch (error) {
+      logger.error("Failed to perform user action:", error);
     } finally {
       setShowActionDialog(false);
       setSelectedUser(null);
       setActionType(null);
     }
-  };
+  }, [selectedUser, actionType, suspendUser, activateUser, deleteUser]);
 
-  const handleResendVerification = async (userId: string) => {
-    await sendVerificationEmail(userId);
-  };
+  const handleResendVerification = useCallback(async (userId: string) => {
+    try {
+      await sendVerificationEmail(userId);
+    } catch (error) {
+      logger.error("Failed to resend verification email:", error);
+    }
+  }, [sendVerificationEmail]);
 
-  const getRoleColor = (role: string) => {
+  // Memoize utility functions
+  const getRoleColor = useCallback((role: string) => {
     switch (role) {
       case "admin": return "bg-red-100 text-red-800";
       case "moderator": return "bg-purple-100 text-purple-800";
@@ -147,31 +161,30 @@ export default function AdminUsersPage() {
       case "client": return "bg-green-100 text-green-800";
       default: return "bg-gray-100 text-gray-800";
     }
-  };
+  }, []);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case "active": return "bg-green-100 text-green-800";
       case "suspended": return "bg-red-100 text-red-800";
       case "pending": return "bg-yellow-100 text-yellow-800";
       default: return "bg-gray-100 text-gray-800";
     }
-  };
+  }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     try {
       return format(new Date(dateString), "MMM dd, yyyy");
     } catch {
       return dateString;
     }
-  };
+  }, []);
 
   return (
-    <motion.div
-      variants={fadeDown}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+    <MotionDiv
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="space-y-6">
         {/* Header */}
@@ -422,6 +435,6 @@ export default function AdminUsersPage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </motion.div>
+    </MotionDiv>
   );
 }

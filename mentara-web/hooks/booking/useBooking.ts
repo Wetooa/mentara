@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MeetingType } from "@/types/booking";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
@@ -38,10 +39,12 @@ export function useBooking() {
   // Get available time slots
   const getAvailableSlots = (therapistId: string, date: string) => {
     return useQuery({
-      queryKey: ['booking', 'slots', therapistId, date],
+      queryKey: queryKeys.booking.slots(therapistId, date),
       queryFn: () => api.booking.availability.getSlots(therapistId, date),
       enabled: !!(therapistId && date),
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: STALE_TIME.MEDIUM, // 5 minutes
+      gcTime: GC_TIME.MEDIUM, // 10 minutes
+      refetchOnWindowFocus: false,
     });
   };
 
@@ -50,9 +53,11 @@ export function useBooking() {
     data: durations,
     isLoading: isLoadingDurations,
   } = useQuery({
-    queryKey: ['booking', 'durations'],
+    queryKey: [...queryKeys.booking.all, 'durations'],
     queryFn: () => api.booking.durations.getAll(),
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: STALE_TIME.STATIC, // 30 minutes
+    gcTime: GC_TIME.EXTENDED, // 1 hour
+    refetchOnWindowFocus: false,
   });
 
   // Create meeting mutation (for clients)
@@ -80,8 +85,8 @@ export function useBooking() {
       meetingType,
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['booking'] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.appointments() });
       toast.success("Session booked successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -93,8 +98,8 @@ export function useBooking() {
   const cancelMeetingMutation = useMutation({
     mutationFn: (meetingId: string) => api.booking.meetings.cancel(meetingId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['booking'] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.appointments() });
       toast.success("Meeting cancelled successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -119,8 +124,8 @@ export function useBooking() {
       };
     }) => api.booking.meetings.update(meetingId, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['booking'] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.appointments() });
       toast.success("Meeting updated successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -133,9 +138,9 @@ export function useBooking() {
     mutationFn: ({ meetingId, meetingUrl }: { meetingId: string; meetingUrl: string }) => 
       api.meetings.acceptMeetingRequest(meetingId, meetingUrl),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['booking'] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.appointments() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
       toast.success("Booking request accepted successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -147,9 +152,9 @@ export function useBooking() {
   const startMeetingMutation = useMutation({
     mutationFn: (meetingId: string) => api.meetings.startMeeting(meetingId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['booking'] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.appointments() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
       toast.success("Meeting started successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -162,9 +167,9 @@ export function useBooking() {
     mutationFn: ({ meetingId, notes }: { meetingId: string; notes?: string }) => 
       api.meetings.completeMeeting(meetingId, notes),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['booking'] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.appointments() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
       toast.success("Meeting completed successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -176,9 +181,9 @@ export function useBooking() {
   const markNoShowMutation = useMutation({
     mutationFn: (meetingId: string) => api.meetings.markNoShow(meetingId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['booking'] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.appointments() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
       toast.success("Meeting marked as no-show");
     },
     onError: (error: MentaraApiError) => {
@@ -191,9 +196,9 @@ export function useBooking() {
     mutationFn: ({ meetingId, notes }: { meetingId: string; notes: string }) => 
       api.meetings.saveMeetingNotes(meetingId, notes),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['booking'] });
-      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.booking.appointments() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
       toast.success("Meeting notes saved successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -270,9 +275,11 @@ export function useMeetings(filters: { status?: string; limit?: number; offset?:
     error,
     refetch,
   } = useQuery({
-    queryKey: ['booking', 'meetings', 'list', filters],
+    queryKey: queryKeys.booking.appointments(filters),
     queryFn: () => api.booking.meetings.getAll(filters),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   return {
@@ -297,9 +304,12 @@ export function useBookingRequests(limit?: number) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['meetings', 'booking-requests', limit],
+    queryKey: [...queryKeys.sessions.all, 'booking-requests', limit],
     queryFn: () => api.meetings.getAllMeetings({ status: 'WAITING', limit }),
-    staleTime: 1000 * 60 * 1, // 1 minute (more frequent updates for pending requests)
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds (more frequent updates for pending requests)
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchInterval: REFETCH_INTERVAL.FREQUENT, // Auto-refresh every minute
+    refetchOnWindowFocus: true, // Refetch on focus for booking requests
   });
 
   // Accept booking request mutation
@@ -309,7 +319,7 @@ export function useBookingRequests(limit?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meetings', 'booking-requests'] });
       queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
       toast.success("Booking request accepted successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -328,7 +338,7 @@ export function useBookingRequests(limit?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meetings', 'booking-requests'] });
       queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all });
       toast.success("Booking request denied");
     },
     onError: (error: MentaraApiError) => {
@@ -362,9 +372,11 @@ export function useTherapistAnalytics(dateRange?: { start: string; end: string }
     error,
     refetch,
   } = useQuery({
-    queryKey: ['therapist', 'analytics', dateRange?.start, dateRange?.end],
+    queryKey: [...queryKeys.therapist.all, 'analytics', dateRange?.start, dateRange?.end],
     queryFn: () => api.meetings.getTherapistAnalytics(dateRange?.start, dateRange?.end),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   return {

@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { User, UserModerationParams, ModerateUserRequest } from '@/types/api';
@@ -11,9 +13,11 @@ export function useModeratorFlaggedUsers(params: UserModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'users', 'flagged', params],
+    queryKey: [...queryKeys.moderator.users(), 'flagged', params],
     queryFn: () => api.moderator.users.getFlagged(params),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -30,10 +34,12 @@ export function useModeratorUserHistory(userId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'users', 'history', userId || ''],
+    queryKey: [...queryKeys.moderator.users(), 'history', userId || ''],
     queryFn: () => api.moderator.users.getHistory(userId!),
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -55,12 +61,12 @@ export function useModerateUser() {
     onMutate: async ({ userId, data }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ 
-        queryKey: ['moderator', 'users'] 
+        queryKey: queryKeys.moderator.users() 
       });
       
       // Optimistically update user status
       queryClient.setQueriesData(
-        { queryKey: ['moderator', 'users'] },
+        { queryKey: queryKeys.moderator.users() },
         (old: any) => {
           if (!old?.users) return old;
           
@@ -87,10 +93,10 @@ export function useModerateUser() {
       
       // Invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'dashboard'] 
+        queryKey: queryKeys.moderator.dashboard() 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ['admin', 'users'] 
+        queryKey: queryKeys.admin.users.list() 
       });
     },
     onError: (error: MentaraApiError, variables, context) => {
@@ -98,7 +104,7 @@ export function useModerateUser() {
       
       // Revert optimistic update
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'users'] 
+        queryKey: queryKeys.moderator.users() 
       });
     },
   });

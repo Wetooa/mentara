@@ -1,3 +1,4 @@
+import React, { memo, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { UserDashboardData } from "@/types/api/dashboard";
@@ -50,22 +51,37 @@ const sessionCardVariants = {
   },
 };
 
-export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
+function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
   const router = useRouter();
 
-  // Check if there are any sessions scheduled for today
-  const todaySessions = sessions.filter((session) => {
-    if (!session.startTime) return false;
-    try {
-      return isToday(parseISO(session.startTime));
-    } catch {
-      return false;
-    }
-  });
+  // Memoize today's sessions filtering
+  const todaySessions = useMemo(() => {
+    return sessions.filter((session) => {
+      if (!session.startTime) return false;
+      try {
+        return isToday(parseISO(session.startTime));
+      } catch {
+        return false;
+      }
+    });
+  }, [sessions]);
 
-  const handleViewAll = () => {
+  // Memoize upcoming sessions (excluding today)
+  const upcomingSessions = useMemo(() => {
+    return sessions.filter((session) => {
+      if (!session.startTime) return false;
+      try {
+        return !isToday(parseISO(session.startTime));
+      } catch {
+        return false;
+      }
+    });
+  }, [sessions]);
+
+  // Memoize callback
+  const handleViewAll = useCallback(() => {
     router.push("/client/sessions");
-  };
+  }, [router]);
 
   return (
     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="h-full">
@@ -109,7 +125,7 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
                   </h3>
                   <div className="space-y-4">
                     {todaySessions.map((session, index) => (
-                      <SessionCard
+                      <MemoizedSessionCard
                         key={session.id}
                         session={session}
                         index={index}
@@ -125,22 +141,13 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
                   Upcoming
                 </h3>
                 <div className="space-y-4">
-                  {sessions
-                    .filter((session) => {
-                      if (!session.startTime) return false;
-                      try {
-                        return !isToday(parseISO(session.startTime));
-                      } catch {
-                        return false;
-                      }
-                    })
-                    .map((session, index) => (
-                      <SessionCard
-                        key={session.id}
-                        session={session}
-                        index={index}
-                      />
-                    ))}
+                  {upcomingSessions.map((session, index) => (
+                    <MemoizedSessionCard
+                      key={session.id}
+                      session={session}
+                      index={index}
+                    />
+                  ))}
                 </div>
               </motion.div>
             </motion.div>
@@ -296,3 +303,13 @@ function SessionCard({
     </motion.div>
   );
 }
+
+// Memoize SessionCard to prevent unnecessary re-renders
+const MemoizedSessionCard = memo(SessionCard);
+
+// Memoize main component
+const MemoizedUpcomingSessions = memo(UpcomingSessions);
+
+// Export both default and named for compatibility
+export default MemoizedUpcomingSessions;
+export { MemoizedUpcomingSessions as UpcomingSessions };

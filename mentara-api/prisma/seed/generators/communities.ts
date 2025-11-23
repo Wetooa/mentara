@@ -6,6 +6,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { CommunityConfig, MENTAL_HEALTH_COMMUNITIES, GENERAL_COMMUNITIES } from '../config';
+import { TEST_COMMUNITIES } from '../fixtures/test-accounts';
 
 export interface CommunitiesData {
   communities: any[];
@@ -28,8 +29,29 @@ export async function generateCommunities(
     generalCommunities: [],
   };
 
-  // Create mental health communities
-  const mentalHealthToCreate = MENTAL_HEALTH_COMMUNITIES.slice(0, config.illnessBased);
+  // First, create required test communities with specific IDs
+  for (const testCommunity of TEST_COMMUNITIES) {
+    const community = await prisma.community.create({
+      data: {
+        id: testCommunity.id, // Use specific ID from TEST_ACCOUNTS.md
+        name: testCommunity.name,
+        slug: testCommunity.slug,
+        description: testCommunity.description,
+        imageUrl: `/images/communities/${testCommunity.slug}.jpg`,
+        createdAt: randomPastDate(180),
+      },
+    });
+    
+    result.communities.push(community);
+    result.mentalHealthCommunities.push(community);
+  }
+
+  // Create additional mental health communities if needed
+  const additionalNeeded = Math.max(0, config.illnessBased - TEST_COMMUNITIES.length);
+  const mentalHealthToCreate = MENTAL_HEALTH_COMMUNITIES
+    .filter(c => !TEST_COMMUNITIES.some(tc => tc.slug === c.slug))
+    .slice(0, additionalNeeded);
+  
   for (const communityData of mentalHealthToCreate) {
     const community = await prisma.community.create({
       data: {

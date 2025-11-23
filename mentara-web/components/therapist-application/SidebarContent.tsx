@@ -57,17 +57,17 @@ export const SidebarContent = memo(function SidebarContent({
       </div>
 
       <div className="mt-4 mb-8">
-        <p className="text-sm text-gray-600 mb-1">You&apos;re working on</p>
-        <h1 className="text-2xl font-bold text-green-900">Application</h1>
+        <p className="text-sm text-secondary/70 mb-1">You&apos;re working on</p>
+        <h1 className="text-2xl font-bold text-secondary">Application</h1>
       </div>
 
       {/* Overall Progress */}
       <div className="mb-6" data-testid="overall-progress">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-secondary">
             Overall Progress
           </span>
-          <span className="text-sm text-gray-600">{displayProgress}%</span>
+          <span className="text-sm text-secondary/80">{displayProgress}%</span>
         </div>
         <Progress value={displayProgress} className="h-2" />
       </div>
@@ -84,10 +84,10 @@ export const SidebarContent = memo(function SidebarContent({
               key={section.id}
               className={`p-3 rounded-lg border transition-all cursor-pointer ${
                 isOpen
-                  ? "bg-green-100 border-green-300"
+                  ? "bg-secondary/20 border-secondary/40"
                   : isCompleted
-                    ? "bg-green-50 border-green-200"
-                    : "bg-white border-gray-200 hover:bg-gray-50"
+                    ? "bg-secondary/10 border-secondary/30"
+                    : "bg-white border-secondary/20 hover:bg-secondary/5"
               }`}
               onClick={() => {
                 // Open the section if it's not already open
@@ -114,24 +114,24 @@ export const SidebarContent = memo(function SidebarContent({
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex-shrink-0 ${isCompleted ? "text-green-600" : "text-gray-400"}`}
+                  className={`flex-shrink-0 ${isCompleted ? "text-secondary" : "text-secondary/50"}`}
                 >
                   {section.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-sm text-gray-900 truncate">
+                    <h3 className="font-medium text-sm text-secondary truncate">
                       {section.title}
                     </h3>
                     {isCompleted && (
-                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
                     )}
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-secondary/70">
                       {completion.completed}/{completion.total} complete
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-secondary/70">
                       {completion.percentage}%
                     </span>
                   </div>

@@ -1,10 +1,7 @@
 "use client";
 
-import TherapistDashboardHeader from "@/components/therapist/dashboard/TherapistDashboardHeader";
-import DashboardOverview from "@/components/therapist/dashboard/DashboardOverview";
-import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
-import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
-import { MatchedClientsSection } from "@/components/therapist/dashboard/MatchedClientsSection";
+import { Suspense, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,9 +18,53 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { getInitials } from "@/lib/utils/common";
 import { formatDistanceToNow } from "date-fns";
+
+// Lazy load dashboard components
+const TherapistDashboardHeader = dynamic(() => import("@/components/therapist/dashboard/TherapistDashboardHeader").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-10 w-64" />
+});
+
+const DashboardOverview = dynamic(() => import("@/components/therapist/dashboard/DashboardOverview").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />
+});
+
+const DashboardPatientList = dynamic(() => import("@/components/therapist/dashboard/DashboardPatientList").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />
+});
+
+const DashboardStats = dynamic(() => import("@/components/therapist/dashboard/DashboardStats").then(mod => ({ default: mod.default })), {
+  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    {Array.from({ length: 4 }).map((_, i) => (
+      <Skeleton key={i} className="h-28 rounded-xl" />
+    ))}
+  </div>
+});
+
+const MatchedClientsSection = dynamic(() => import("@/components/therapist/dashboard/MatchedClientsSection").then(mod => ({ default: mod.MatchedClientsSection })), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />
+});
+
+// Lazy load framer-motion wrapper component
+const MotionDivWrapper = dynamic(() => import("framer-motion").then(mod => ({
+  default: ({ children, initial, animate, className, onClick }: any) => {
+    const MotionDiv = mod.motion.div;
+    return (
+      <MotionDiv
+        initial={initial}
+        animate={animate}
+        className={className}
+        onClick={onClick}
+      >
+        {children}
+      </MotionDiv>
+    );
+  }
+})), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/10" />
+});
 
 export default function TherapistDashboardPage() {
   const router = useRouter();
@@ -38,34 +79,34 @@ export default function TherapistDashboardPage() {
   const earnings = data?.earnings;
   const performance = data?.performance;
 
-  // Navigation handlers for clickable dashboard elements
-  const handlePatientsClick = () => {
+  // Memoize navigation handlers to prevent unnecessary re-renders
+  const handlePatientsClick = useCallback(() => {
     router.push("/therapist/patients");
-  };
+  }, [router]);
 
-  const handleScheduleClick = () => {
+  const handleScheduleClick = useCallback(() => {
     router.push("/therapist/schedule");
-  };
+  }, [router]);
 
-  const handleMessagesClick = () => {
+  const handleMessagesClick = useCallback(() => {
     router.push("/therapist/messages");
-  };
+  }, [router]);
 
-  const handleCommunityClick = () => {
+  const handleCommunityClick = useCallback(() => {
     router.push("/therapist/community");
-  };
+  }, [router]);
 
-  const handleWorksheetsClick = () => {
+  const handleWorksheetsClick = useCallback(() => {
     router.push("/therapist/worksheets");
-  };
+  }, [router]);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
-  const handleChatClick = (contactId: string) => {
+  const handleChatClick = useCallback((contactId: string) => {
     router.push(`/therapist/messages?contact=${contactId}`);
-  };
+  }, [router]);
 
   // Enhanced error state with retry functionality
   if (error && !isLoading) {
@@ -246,7 +287,7 @@ export default function TherapistDashboardPage() {
                 {schedule?.thisWeek && schedule.thisWeek.length > 0 ? (
                   <div className="space-y-3">
                     {schedule.thisWeek.slice(0, 4).map((appointment) => (
-                      <motion.div
+                      <MotionDivWrapper
                         key={appointment.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -281,7 +322,7 @@ export default function TherapistDashboardPage() {
                             )}
                           </p>
                         </div>
-                      </motion.div>
+                      </MotionDivWrapper>
                     ))}
                     {(schedule?.thisWeek?.length || 0) > 4 && (
                       <Button
@@ -323,7 +364,7 @@ export default function TherapistDashboardPage() {
                 ) : recentChats.length > 0 ? (
                   <div className="space-y-3">
                     {recentChats.slice(0, 4).map((chat: any) => (
-                      <motion.div
+                      <MotionDivWrapper
                         key={chat.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -358,7 +399,7 @@ export default function TherapistDashboardPage() {
                             </div>
                           )}
                         </div>
-                      </motion.div>
+                      </MotionDivWrapper>
                     ))}
                     <Button
                       variant="outline"

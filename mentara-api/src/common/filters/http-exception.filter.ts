@@ -53,6 +53,26 @@ export class HttpExceptionFilter implements ExceptionFilter {
       request.url,
     );
 
+    // Ensure CORS headers are set on error responses
+    const origin = request.headers.origin;
+    if (origin) {
+      const allowedOrigins = process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_URL?.split(',').map((url) => url.trim()) || []
+        : [
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:3001',
+            'http://localhost:10001',
+            'http://127.0.0.1:10001',
+          ];
+      
+      if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+        response.setHeader('Access-Control-Allow-Origin', origin);
+        response.setHeader('Access-Control-Allow-Credentials', 'true');
+      }
+    }
+
     response.status(status).json(errorResponse);
   }
 }

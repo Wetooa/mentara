@@ -25,6 +25,8 @@ import { ContinueWithMicrosoft } from "@/components/auth/ContinueWithMicrosoft";
 import { useLogin } from "@/hooks/auth/useLogin";
 import { toast } from "sonner";
 import { mapLoginError } from "@/lib/utils/loginErrors";
+import { ArrowLeft, Home } from "lucide-react";
+import Link from "next/link";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -55,37 +57,83 @@ export function UnifiedSignIn() {
         
         // Use simple login hook that handles token storage and redirect
         await login({ email: data.email, password: data.password });
-        toast.success("Welcome back!");
-      } catch (err) {
+        toast.success("Welcome back! Redirecting...", {
+          description: "Taking you to your dashboard",
+        });
+      } catch (err: any) {
         console.error("Login error:", err);
         
-        // Map error to user-friendly message and display in form
+        // Map error to user-friendly message
         const errorResult = mapLoginError(err);
+        
+        // Show proper toast notification based on error type
+        if (err?.response?.status === 401) {
+          toast.error("Invalid credentials", {
+            description: "The email or password you entered is incorrect. Please try again.",
+          });
+        } else if (err?.response?.status === 403) {
+          toast.error("Access denied", {
+            description: "Your account may be suspended or not yet verified.",
+          });
+        } else if (err?.response?.status === 429) {
+          toast.error("Too many attempts", {
+            description: "Please wait a few minutes before trying again.",
+          });
+        } else if (err?.response?.status >= 500) {
+          toast.error("Server error", {
+            description: "Something went wrong on our end. Please try again later.",
+          });
+        } else {
+          toast.error("Sign in failed", {
+            description: errorResult.message || "An unexpected error occurred. Please try again.",
+          });
+        }
         
         // Set form error that will display below the form
         form.setError("root", {
           type: "manual",
-          message: errorResult.message,
+          message: errorResult.message || "Please check your credentials and try again.",
         });
-        
-        // Show minimal toast for additional feedback
-        toast.error("Sign in failed");
       }
     },
     [login, form]
   );
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">
-          Welcome to Mentara
-        </CardTitle>
-        <p className="text-sm text-muted-foreground text-center">
-          Sign in to access your account
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="relative w-full max-w-md mx-auto">
+      {isLoading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
+          <div className="flex flex-col items-center space-y-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Signing you in...</p>
+          </div>
+        </div>
+      )}
+      <Card className="w-full max-w-md mx-auto relative shadow-xl border-2">
+        <CardHeader className="space-y-2 pb-4">
+          <div className="flex items-center justify-between mb-2">
+            <Link
+              href="/landing"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to home</span>
+            </Link>
+            <Link
+              href="/landing"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Home className="h-4 w-4" />
+            </Link>
+          </div>
+          <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            Welcome to Mentara
+          </CardTitle>
+          <p className="text-sm text-muted-foreground text-center">
+            Sign in to access your personalized mental health platform
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-5 pt-2">
         {/* OAuth Buttons */}
         <div className="space-y-3">
           <ContinueWithGoogle />
@@ -176,8 +224,28 @@ export function UnifiedSignIn() {
 
             {/* Display form-level errors */}
             {form.formState.errors.root && (
-              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
-                {form.formState.errors.root.message}
+              <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex items-start gap-2">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg
+                    className="h-5 w-5 text-destructive"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-destructive">Error</p>
+                  <p className="text-destructive/90 mt-1">
+                    {form.formState.errors.root.message}
+                  </p>
+                </div>
               </div>
             )}
 
@@ -195,13 +263,13 @@ export function UnifiedSignIn() {
         </Form>
 
         {/* Additional Links */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3 pt-2 border-t">
           <p className="text-sm text-muted-foreground">
             Forgot your password?{" "}
             <Button
               variant="link"
-              className="p-0 h-auto text-sm"
-              onClick={() => router.push("/reset-password")}
+              className="p-0 h-auto text-sm font-medium"
+              onClick={() => router.push("/auth/reset-password")}
             >
               Reset it here
             </Button>
@@ -210,7 +278,7 @@ export function UnifiedSignIn() {
             New to Mentara?{" "}
             <Button
               variant="link"
-              className="p-0 h-auto text-sm"
+              className="p-0 h-auto text-sm font-medium"
               onClick={() => router.push("/pre-assessment")}
             >
               Start your assessment
@@ -218,6 +286,7 @@ export function UnifiedSignIn() {
           </p>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 }

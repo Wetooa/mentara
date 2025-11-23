@@ -23,7 +23,7 @@ export function createWorksheetService(client: AxiosInstance) {
      * GET /worksheets
      */
     async getAll(params?: WorksheetListParams) : Promise<WorksheetListResponse> {
-      const response = await client.get("worksheets", { params });
+      const response = await client.get("/worksheets", { params });
       return response.data;
     },
 
@@ -32,7 +32,7 @@ export function createWorksheetService(client: AxiosInstance) {
      * GET /worksheets/:id
      */
     async getById(id: string): Promise<Worksheet> {
-      const response = await client.get(`worksheets/${id}`);
+      const response = await client.get(`/worksheets/${id}`);
       return response.data;
     },
 
@@ -42,14 +42,14 @@ export function createWorksheetService(client: AxiosInstance) {
      */
     async create(data: WorksheetCreateInputDto | FormData): Promise<Worksheet> {
       if (typeof FormData !== 'undefined' && data instanceof FormData) {
-        const response = await client.post("worksheets", data, {
+        const response = await client.post("/worksheets", data, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
         return response.data;
       } else {
-        const response = await client.post("worksheets", data);
+        const response = await client.post("/worksheets", data);
         return response.data;
       }
     },
@@ -103,7 +103,7 @@ export function createWorksheetService(client: AxiosInstance) {
      * PUT /worksheets/:id
      */
     async update(id: string, data: WorksheetUpdateInputDto): Promise<Worksheet> {
-      const response = await client.put(`worksheets/${id}`, data);
+      const response = await client.put(`/worksheets/${id}`, data);
       return response.data;
     },
 
@@ -112,7 +112,7 @@ export function createWorksheetService(client: AxiosInstance) {
      * DELETE /worksheets/:id
      */
     async delete(id: string): Promise<{ success: boolean; message: string }> {
-      const response = await client.delete(`worksheets/${id}`);
+      const response = await client.delete(`/worksheets/${id}`);
       return response.data;
     },
 
@@ -127,7 +127,7 @@ export function createWorksheetService(client: AxiosInstance) {
       submittedAt: string;
       message: string;
     }> {
-      const response = await client.post(`worksheets/${id}/submit`, data);
+      const response = await client.post(`/worksheets/${id}/submit`, data);
       return response.data;
     },
 
@@ -142,7 +142,7 @@ export function createWorksheetService(client: AxiosInstance) {
       status: string;
       submittedAt: string;
     }> {
-      const response = await client.post("worksheets/submissions", data);
+      const response = await client.post("/worksheets/submissions", data);
       return response.data;
     },
 
@@ -151,7 +151,7 @@ export function createWorksheetService(client: AxiosInstance) {
      * DELETE /worksheets/:worksheetId/files/:filename
      */
     async deleteSubmission(worksheetId: string, filename: string): Promise<{ success: boolean; message: string }> {
-      const response = await client.delete(`worksheets/${worksheetId}/files/${encodeURIComponent(filename)}`);
+      const response = await client.delete(`/worksheets/${worksheetId}/files/${encodeURIComponent(filename)}`);
       return response.data;
     },
 
@@ -182,7 +182,7 @@ export function createWorksheetService(client: AxiosInstance) {
       formData.append("file", file);
       formData.append("type", type);
 
-      const response = await client.post(`worksheets/${worksheetId}/upload`, formData, {
+      const response = await client.post(`/worksheets/${worksheetId}/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -227,7 +227,7 @@ export function createWorksheetService(client: AxiosInstance) {
      * GET /worksheets/stats
      */
     async getStats(params?: { userId?: string; therapistId?: string }): Promise<WorksheetStats> {
-      const response = await client.get("worksheets/stats", { params });
+      const response = await client.get("/worksheets/stats", { params });
       return response.data;
     },
 
@@ -240,7 +240,7 @@ export function createWorksheetService(client: AxiosInstance) {
       message: string;
       data: Worksheet;
     }> {
-      const response = await client.post(`worksheets/${id}/turn-in`);
+      const response = await client.post(`/worksheets/${id}/turn-in`);
       return response.data;
     },
 
@@ -253,7 +253,7 @@ export function createWorksheetService(client: AxiosInstance) {
       message: string;
       data: Worksheet;
     }> {
-      const response = await client.post(`worksheets/${id}/unturn-in`);
+      const response = await client.post(`/worksheets/${id}/unturn-in`);
       return response.data;
     },
 

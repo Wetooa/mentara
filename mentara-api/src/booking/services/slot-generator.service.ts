@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { ACTIVE_MEETING_STATUSES_ARRAY } from '../constants/meeting-status.constants';
 
@@ -19,6 +19,7 @@ export interface SlotGenerationConfig {
 
 @Injectable()
 export class SlotGeneratorService {
+  private readonly logger = new Logger(SlotGeneratorService.name);
   private readonly defaultConfig: SlotGenerationConfig = {
     slotInterval: 30,
     maxAdvanceBooking: 90,
@@ -47,13 +48,17 @@ export class SlotGeneratorService {
     date: string,
     config: Partial<SlotGenerationConfig> = {},
   ): Promise<TimeSlot[]> {
-    console.log(`[SlotGenerator] Generating slots for therapist ${therapistId} on ${date}`);
-    
+    this.logger.debug(
+      `Generating slots for therapist ${therapistId} on ${date}`,
+    );
+
     const finalConfig = { ...this.defaultConfig, ...config };
     const targetDate = new Date(date);
     const dayOfWeek = targetDate.getDay();
-    
-    console.log(`[SlotGenerator] Target date: ${targetDate.toISOString()}, dayOfWeek: ${dayOfWeek} (${this.getDayName(dayOfWeek)})`);
+
+    this.logger.debug(
+      `Target date: ${targetDate.toISOString()}, dayOfWeek: ${dayOfWeek} (${this.getDayName(dayOfWeek)})`,
+    );
 
     // Validate date is within booking window
     this.validateBookingDate(targetDate, finalConfig);
@@ -63,11 +68,16 @@ export class SlotGeneratorService {
       therapistId,
       dayOfWeek.toString(), // Fixed: ensure consistent string conversion
     );
-    
-    console.log(`[SlotGenerator] Found ${availability.length} availability records:`, availability);
-    
+
+    this.logger.debug(
+      `Found ${availability.length} availability records:`,
+      availability,
+    );
+
     if (availability.length === 0) {
-      console.log(`[SlotGenerator] No availability found for therapist ${therapistId} on ${this.getDayName(dayOfWeek)}`);
+      this.logger.debug(
+        `No availability found for therapist ${therapistId} on ${this.getDayName(dayOfWeek)}`,
+      );
       return [];
     }
 
@@ -76,25 +86,30 @@ export class SlotGeneratorService {
       therapistId,
       targetDate,
     );
-    
-    console.log(`[SlotGenerator] Found ${existingBookings.length} existing bookings:`, existingBookings.map(b => ({
-      id: b.id,
-      startTime: b.startTime,
-      duration: b.duration,
-      status: b.status
-    })));
+
+    this.logger.debug(
+      `Found ${existingBookings.length} existing bookings:`,
+      existingBookings.map((b) => ({
+        id: b.id,
+        startTime: b.startTime,
+        duration: b.duration,
+        status: b.status,
+      })),
+    );
 
     // Generate slots for each availability window
     const allSlots: TimeSlot[] = [];
     for (const avail of availability) {
-      console.log(`[SlotGenerator] Processing availability window: ${avail.startTime} - ${avail.endTime}`);
+      this.logger.debug(
+        `Processing availability window: ${avail.startTime} - ${avail.endTime}`,
+      );
       const slots = this.generateSlotsForAvailabilityWindow(
         targetDate,
         avail,
         existingBookings,
         finalConfig,
       );
-      console.log(`[SlotGenerator] Generated ${slots.length} slots for this window`);
+      this.logger.debug(`Generated ${slots.length} slots for this window`);
       allSlots.push(...slots);
     }
 
@@ -102,14 +117,14 @@ export class SlotGeneratorService {
       (a, b) =>
         new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
     );
-    
-    console.log(`[SlotGenerator] Final result: ${sortedSlots.length} total slots`);
+
+    this.logger.debug(`Final result: ${sortedSlots.length} total slots`);
     return sortedSlots;
   }
 
   private validateBookingDate(date: Date, config: SlotGenerationConfig): void {
     const now = new Date();
-    
+
     // Calculate min and max dates using UTC
     const maxDate = new Date(
       now.getTime() + config.maxAdvanceBooking * 24 * 60 * 60 * 1000,
@@ -315,7 +330,15 @@ export class SlotGeneratorService {
   }
 
   private getDayName(dayOfWeek: number): string {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
     return days[dayOfWeek] || 'Unknown';
   }
 }

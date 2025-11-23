@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from '@/lib/constants/react-query';
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { Post, Comment, ContentModerationParams, ModerateContentRequest } from '@/types/api';
@@ -11,9 +13,12 @@ export function useModeratorContentQueue(params: ContentModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['moderator', 'content', 'queue', params],
+    queryKey: queryKeys.moderator.contentQueue(params),
     queryFn: () => api.moderator.content.getQueue(params),
-    staleTime: 1000 * 60 * 1, // 1 minute (moderation queue is very dynamic)
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchInterval: REFETCH_INTERVAL.FREQUENT, // Auto-refresh every minute
+    refetchOnWindowFocus: true, // Refetch on focus for moderation queue
     retry: (failureCount, error: MentaraApiError) => {
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -43,12 +48,12 @@ export function useModerateContent() {
     onMutate: async ({ contentId }) => {
       // Cancel outgoing refetches for content queue
       await queryClient.cancelQueries({ 
-        queryKey: ['moderator', 'content'] 
+        queryKey: queryKeys.moderator.contentQueue() 
       });
       
       // Optimistically remove item from queue
       queryClient.setQueriesData(
-        { queryKey: ['moderator', 'content'] },
+        { queryKey: queryKeys.moderator.contentQueue() },
         (old: any) => {
           if (!old?.content) return old;
           return {
@@ -66,10 +71,10 @@ export function useModerateContent() {
       
       // Invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'dashboard'] 
+        queryKey: queryKeys.moderator.dashboard() 
       });
       queryClient.invalidateQueries({ 
-        queryKey: ['contentModeration'] 
+        queryKey: queryKeys.moderator.flaggedContent() 
       });
     },
     onError: (error: MentaraApiError, variables, context) => {
@@ -77,7 +82,7 @@ export function useModerateContent() {
       
       // Revert optimistic update on error
       queryClient.invalidateQueries({ 
-        queryKey: ['moderator', 'content'] 
+        queryKey: queryKeys.moderator.contentQueue() 
       });
     },
   });

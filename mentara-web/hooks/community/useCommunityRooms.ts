@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-
+import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type { Room, RoomGroup } from "@/types/api/communities";
@@ -19,12 +20,14 @@ export function useCommunityRooms(communityId?: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: communityId ? ['communities', 'withStructure', communityId] : ['communities', 'withStructure'],
+    queryKey: queryKeys.communities.withStructure(communityId),
     queryFn: () => communityId 
       ? api.communities.getCommunityWithStructure(communityId)
       : api.communities.getCommunitiesWithStructure(),
     enabled: !!communityId,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: STALE_TIME.LONG, // 10 minutes
+    gcTime: GC_TIME.VERY_LONG, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Create room group mutation
@@ -33,7 +36,7 @@ export function useCommunityRooms(communityId?: string) {
       api.communities.createRoomGroup(communityId!, name, order),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: ['communities', 'withStructure', communityId!] 
+        queryKey: queryKeys.communities.withStructure(communityId!) 
       });
       toast.success("Room group created successfully");
     },
@@ -48,7 +51,7 @@ export function useCommunityRooms(communityId?: string) {
       api.communities.createRoom(roomGroupId, name, order),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: ['communities', 'withStructure', communityId!] 
+        queryKey: queryKeys.communities.withStructure(communityId!) 
       });
       toast.success("Room created successfully");
     },
@@ -84,10 +87,12 @@ export function useRoomsByGroup(roomGroupId: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['communities', 'rooms', 'byGroup', roomGroupId],
+    queryKey: [...queryKeys.communities.all, 'rooms', 'byGroup', roomGroupId],
     queryFn: () => api.communities.getRoomsByGroup(roomGroupId),
     enabled: !!roomGroupId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM, // 5 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   return {
