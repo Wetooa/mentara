@@ -14,10 +14,12 @@ export default function PatientInfoCard({
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <div className="flex items-start">
-        {icon}
-        <div className="ml-3">
+        <div className="flex-shrink-0">
+          {icon}
+        </div>
+        <div className="ml-3 min-w-0 flex-1">
           <div className="text-xs text-gray-500">{label}</div>
-          <div className="font-medium">{value}</div>
+          <div className="font-medium break-words">{value}</div>
         </div>
       </div>
     </div>

@@ -4,7 +4,10 @@ import {
   InternalServerErrorException,
   Logger,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { Prisma } from '@prisma/client';
 import type {
@@ -16,8 +19,12 @@ import type {
 @Injectable()
 export class TherapistListService {
   private readonly logger = new Logger(TherapistListService.name);
+  private readonly CACHE_TTL = 300; // 5 minutes
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   private calculateYearsOfExperience(startDate: Date): number {
     const now = new Date();
@@ -32,11 +39,17 @@ export class TherapistListService {
     return Math.max(0, years);
   }
 
-  private calculateAverageRating(reviews: { rating: number }[]): number {
-    if (!reviews || reviews.length === 0) return 0;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return Number((sum / reviews.length).toFixed(1));
+  private generateCacheKey(prefix: string, params: Record<string, any>): string {
+    const sortedParams = Object.keys(params)
+      .sort()
+      .filter(key => params[key] !== undefined && params[key] !== null)
+      .map(key => `${key}:${JSON.stringify(params[key])}`)
+      .join('|');
+    return `${prefix}:${sortedParams}`;
   }
+
+  // Removed calculateAverageRating - now using database aggregation for better performance
+  // This method was causing N+1 query issues when calculating ratings for multiple therapists
 
   async getTherapistList(query: TherapistListQuery): Promise<TherapistListResponse> {
     try {
@@ -44,6 +57,27 @@ export class TherapistListService {
       const limit = Math.min(Math.max(query.limit || 20, 1), 100);
       const offset = Math.max(query.offset || 0, 0);
       const currentPage = Math.floor(offset / limit) + 1;
+
+      // Generate cache key from query parameters
+      const cacheKey = this.generateCacheKey('therapist-list', {
+        limit,
+        offset,
+        search: query.search,
+        specialties: query.specialties,
+        languages: query.languages,
+        province: query.province,
+        minHourlyRate: query.minHourlyRate,
+        maxHourlyRate: query.maxHourlyRate,
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
+      });
+
+      // Try to get from cache
+      const cached = await this.cacheManager.get<TherapistListResponse>(cacheKey);
+      if (cached) {
+        this.logger.debug(`Cache hit for therapist list: ${cacheKey}`);
+        return cached;
+      }
 
       this.logger.log(`Getting therapist list with limit ${limit}, offset ${offset}`);
 
@@ -154,10 +188,21 @@ export class TherapistListService {
         where: whereClause,
       });
 
-      // Fetch therapists with relations
+      // Fetch therapists with relations - optimized to use aggregation for ratings
       const therapists = await this.prisma.therapist.findMany({
         where: whereClause,
-        include: {
+        select: {
+          userId: true,
+          areasOfExpertise: true,
+          languagesOffered: true,
+          approaches: true,
+          province: true,
+          hourlyRate: true,
+          practiceStartDate: true,
+          licenseVerified: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
           user: {
             select: {
               id: true,
@@ -167,9 +212,9 @@ export class TherapistListService {
               bio: true,
             },
           },
-          reviews: {
+          _count: {
             select: {
-              rating: true,
+              reviews: true,
             },
           },
         },
@@ -178,10 +223,26 @@ export class TherapistListService {
         take: limit,
       });
 
+      // Get average ratings in a single aggregated query to avoid N+1
+      const therapistIds = therapists.map(t => t.userId);
+      const ratingAggregates = await this.prisma.review.groupBy({
+        by: ['therapistId'],
+        where: {
+          therapistId: { in: therapistIds },
+        },
+        _avg: {
+          rating: true,
+        },
+      });
+
+      const ratingMap = new Map(
+        ratingAggregates.map(agg => [agg.therapistId, agg._avg.rating || 0])
+      );
+
       // Transform and enrich the data
       let therapistList: TherapistListItem[] = therapists.map((therapist) => {
         const yearsOfExperience = this.calculateYearsOfExperience(therapist.practiceStartDate);
-        const averageRating = this.calculateAverageRating(therapist.reviews);
+        const averageRating = ratingMap.get(therapist.userId) || 0;
 
         return {
           id: therapist.userId,
@@ -200,7 +261,7 @@ export class TherapistListService {
           province: therapist.province,
           hourlyRate: Number(therapist.hourlyRate),
           rating: averageRating,
-          reviewCount: therapist.reviews.length,
+          reviewCount: therapist._count.reviews,
           yearsOfExperience,
           isActive: true, // Only active therapists are returned
           licenseVerified: therapist.licenseVerified,
@@ -238,7 +299,7 @@ export class TherapistListService {
 
       this.logger.log(`Retrieved ${therapistList.length} therapists out of ${totalCount} total`);
 
-      return {
+      const response = {
         therapists: therapistList,
         totalCount,
         currentPage,
@@ -246,6 +307,12 @@ export class TherapistListService {
         hasNextPage,
         hasPreviousPage,
       };
+
+      // Cache the response
+      await this.cacheManager.set(cacheKey, response, this.CACHE_TTL);
+      this.logger.debug(`Cached therapist list: ${cacheKey}`);
+
+      return response;
     } catch (error) {
       this.logger.error('Error getting therapist list:', error);
       throw new InternalServerErrorException(
@@ -258,6 +325,14 @@ export class TherapistListService {
     try {
       if (!therapistId?.trim()) {
         throw new BadRequestException('Therapist ID is required');
+      }
+
+      // Try cache first
+      const cacheKey = `therapist:${therapistId}`;
+      const cached = await this.cacheManager.get<TherapistListItem>(cacheKey);
+      if (cached) {
+        this.logger.debug(`Cache hit for therapist: ${therapistId}`);
+        return cached;
       }
 
       this.logger.log(`Getting therapist details for ID: ${therapistId}`);
@@ -278,11 +353,7 @@ export class TherapistListService {
               isActive: true,
             },
           },
-          reviews: {
-            select: {
-              rating: true,
-            },
-          },
+          // Removed reviews from include - using aggregation instead for better performance
         },
       });
 
@@ -295,9 +366,16 @@ export class TherapistListService {
       }
 
       const yearsOfExperience = this.calculateYearsOfExperience(therapist.practiceStartDate);
-      const averageRating = this.calculateAverageRating(therapist.reviews);
+      
+      // Get average rating using aggregation for better performance
+      const ratingAggregate = await this.prisma.review.aggregate({
+        where: { therapistId: therapist.userId },
+        _avg: { rating: true },
+        _count: { id: true },
+      });
+      const averageRating = ratingAggregate._avg.rating || 0;
 
-      return {
+      const result: TherapistListItem = {
         id: therapist.userId,
         userId: therapist.userId,
         user: {
@@ -314,7 +392,7 @@ export class TherapistListService {
         province: therapist.province,
         hourlyRate: Number(therapist.hourlyRate),
         rating: averageRating,
-        reviewCount: therapist.reviews.length,
+        reviewCount: ratingAggregate._count.id,
         yearsOfExperience,
         isActive: true,
         licenseVerified: therapist.licenseVerified,
@@ -322,6 +400,12 @@ export class TherapistListService {
         createdAt: therapist.createdAt.toISOString(),
         updatedAt: therapist.updatedAt.toISOString(),
       };
+
+      // Cache the response
+      await this.cacheManager.set(cacheKey, result, this.CACHE_TTL);
+      this.logger.debug(`Cached therapist: ${therapistId}`);
+
+      return result;
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;

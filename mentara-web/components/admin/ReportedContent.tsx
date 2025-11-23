@@ -74,7 +74,7 @@ export function ReportedContent() {
     isLoading: isActionLoading,
   } = useReportActions();
 
-  const reports = reportsData?.reports || [];
+  const reports = (reportsData && typeof reportsData === 'object' && 'reports' in reportsData) ? (reportsData as any).reports : [];
   const totalCount = reportsData?.pagination?.total || 0;
 
   const formatDate = (dateString: string) => {

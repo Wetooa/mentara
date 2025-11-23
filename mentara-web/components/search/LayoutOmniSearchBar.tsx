@@ -7,12 +7,15 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { Search, X, Loader2 } from "lucide-react";
+import { Search, X, Loader2, User, Users, FileText, Building, PenTool, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOmniSearch } from "./hooks/useOmniSearch";
 import { type EntityType } from "./OmniSearchBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { logger } from "@/lib/logger";
 
 // Role-based entity type configurations
 const ROLE_ENTITY_TYPES: Record<string, EntityType[]> = {
@@ -118,32 +121,53 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
 
       switch (type) {
         case "users":
-          if (userRole === "therapist") {
-            router.push(`/therapist/profile/${result.id}`);
+          const userId = result.id || result.userId;
+          if (userId) {
+            if (userRole === "therapist") {
+              router.push(`/therapist/profile/${userId}`);
+            } else {
+              router.push(`/client/profile/${userId}`);
+            }
           } else {
-            router.push(`/client/profile/${result.id}`);
+            logger.error("LayoutOmniSearchBar", "User ID not found", { result });
           }
           break;
         case "therapists":
           if (userRole === "client") {
-            router.push(`/client/therapist/${result.id}`);
+            // Therapist search returns userId (therapist's userId) or user.id
+            const therapistId = result.userId || result.user?.id || result.id;
+            if (therapistId) {
+              router.push(`/client/therapist/${therapistId}`);
+            } else {
+              logger.error("LayoutOmniSearchBar", "Therapist ID not found", { result });
+            }
           }
           break;
         case "posts":
-          router.push(`/${userRole}/community/posts/${result.id}`);
+          const postId = result.id;
+          if (postId) {
+            router.push(`/${userRole}/community/posts/${postId}`);
+          } else {
+            logger.error("LayoutOmniSearchBar", "Post ID not found", { result });
+          }
           break;
         case "communities":
           router.push(`/${userRole}/community`);
           break;
         case "worksheets":
-          if (userRole === "therapist") {
-            router.push(`/therapist/worksheets/${result.id}`);
+          const worksheetId = result.id;
+          if (worksheetId) {
+            if (userRole === "therapist") {
+              router.push(`/therapist/worksheets/${worksheetId}`);
+            } else {
+              router.push(`/client/worksheets/${worksheetId}`);
+            }
           } else {
-            router.push(`/client/worksheets/${result.id}`);
+            logger.error("LayoutOmniSearchBar", "Worksheet ID not found", { result });
           }
           break;
         default:
-          console.log("Selected result:", result, "Type:", type);
+          logger.debug("LayoutOmniSearchBar", "Selected result", { result, type });
       }
     },
     [onResultSelect, user?.role, router]
@@ -240,21 +264,103 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
     }
   };
 
-  // Get icon for entity type
-  const getEntityIcon = (type: EntityType): string => {
+  // Get icon component for entity type
+  const getEntityIcon = (type: EntityType) => {
+    const iconClass = "h-5 w-5";
+    switch (type) {
+      case "users":
+        return <User className={iconClass} />;
+      case "therapists":
+        return <Users className={iconClass} />;
+      case "posts":
+        return <FileText className={iconClass} />;
+      case "communities":
+        return <Building className={iconClass} />;
+      case "worksheets":
+        return <PenTool className={iconClass} />;
+      case "messages":
+        return <MessageCircle className={iconClass} />;
+      default:
+        return <Search className={iconClass} />;
+    }
+  };
+
+  // Highlight matching text in a string
+  const highlightText = (text: string, query: string) => {
+    if (!query.trim()) return text;
+    
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return parts.map((part, index) => 
+      part.toLowerCase() === query.toLowerCase() ? (
+        <mark key={index} className="bg-primary/20 text-primary font-medium px-0.5 rounded">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
+
+  // Get additional info for result
+  const getResultInfo = (item: any, type: EntityType): { subtitle?: string; metadata?: string } => {
+    switch (type) {
+      case "users":
+        return {
+          subtitle: item.email,
+          metadata: item.role ? `Role: ${item.role}` : undefined,
+        };
+      case "therapists":
+        return {
+          subtitle: item.user?.email || item.email,
+          metadata: item.bio ? item.bio.substring(0, 60) + '...' : undefined,
+        };
+      case "posts":
+        return {
+          subtitle: item.content ? item.content.substring(0, 80) + '...' : undefined,
+          metadata: item.community?.name ? `Community: ${item.community.name}` : undefined,
+        };
+      case "communities":
+        return {
+          subtitle: item.description ? item.description.substring(0, 80) + '...' : undefined,
+          metadata: item.memberCount ? `${item.memberCount} members` : undefined,
+        };
+      case "worksheets":
+        return {
+          subtitle: item.instructions ? item.instructions.substring(0, 80) + '...' : undefined,
+          metadata: item.status ? `Status: ${item.status}` : undefined,
+        };
+      default:
+        return {};
+    }
+  };
+
+  // Determine which field matched
+  const getMatchedField = (item: any, type: EntityType, query: string): string | null => {
+    const lowerQuery = query.toLowerCase();
+    
     switch (type) {
       case "users":
       case "therapists":
-        return "👤";
+        const name = type === "therapists" 
+          ? `${item.user?.firstName || ''} ${item.user?.lastName || ''}`.toLowerCase()
+          : `${item.firstName || ''} ${item.lastName || ''}`.toLowerCase();
+        if (name.includes(lowerQuery)) return "name";
+        if (item.email?.toLowerCase().includes(lowerQuery)) return "email";
+        break;
       case "posts":
-        return "📝";
+        if (item.title?.toLowerCase().includes(lowerQuery)) return "title";
+        if (item.content?.toLowerCase().includes(lowerQuery)) return "content";
+        break;
       case "communities":
-        return "👥";
+        if (item.name?.toLowerCase().includes(lowerQuery)) return "name";
+        if (item.description?.toLowerCase().includes(lowerQuery)) return "description";
+        break;
       case "worksheets":
-        return "📋";
-      default:
-        return "🔍";
+        if (item.title?.toLowerCase().includes(lowerQuery)) return "title";
+        if (item.instructions?.toLowerCase().includes(lowerQuery)) return "instructions";
+        break;
     }
+    return null;
   };
 
   return (
@@ -321,28 +427,69 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
 
           {!isLoading && flatResults.length > 0 && (
             <div ref={resultsRef} className="py-2">
-              {flatResults.map(({ item, type }, index) => (
-                <button
-                  key={`${type}-${item.id || index}`}
-                  onClick={() => handleResultSelect(item, type)}
-                  className={cn(
-                    "w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors flex items-center gap-3",
-                    selectedIndex === index && "bg-muted/50"
-                  )}
-                >
-                  <span className="text-lg">{getEntityIcon(type)}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">
-                      {getResultDisplayName(item, type)}
+              {flatResults.map(({ item, type }, index) => {
+                const displayName = getResultDisplayName(item, type);
+                const info = getResultInfo(item, type);
+                const matchedField = getMatchedField(item, type, query);
+                const Icon = getEntityIcon(type);
+                const avatarUrl = item.avatarUrl || item.user?.avatarUrl;
+
+                return (
+                  <button
+                    key={`${type}-${item.id || index}`}
+                    onClick={() => handleResultSelect(item, type)}
+                    className={cn(
+                      "w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors flex items-start gap-3",
+                      selectedIndex === index && "bg-muted/50"
+                    )}
+                  >
+                    {/* Icon or Avatar */}
+                    <div className="flex-shrink-0 mt-0.5">
+                      {avatarUrl ? (
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={avatarUrl} alt={displayName} />
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {Icon}
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                          {Icon}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-xs text-muted-foreground capitalize">
-                      {type === "users"
-                        ? item.role || "user"
-                        : type.slice(0, -1)}
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="font-medium text-sm truncate">
+                          {highlightText(displayName, query)}
+                        </div>
+                        <Badge variant="secondary" className="text-xs capitalize flex-shrink-0">
+                          {type === "users" ? item.role || "user" : type.slice(0, -1)}
+                        </Badge>
+                        {matchedField && (
+                          <Badge variant="outline" className="text-xs flex-shrink-0">
+                            Matched: {matchedField}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {info.subtitle && (
+                        <div className="text-xs text-muted-foreground line-clamp-1 mb-1">
+                          {highlightText(info.subtitle, query)}
+                        </div>
+                      )}
+                      
+                      {info.metadata && (
+                        <div className="text-xs text-muted-foreground/70">
+                          {info.metadata}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

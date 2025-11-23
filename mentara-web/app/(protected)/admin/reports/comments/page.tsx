@@ -56,8 +56,8 @@ export default function ReportedCommentsPage() {
   });
   const { banUser, restrictUser, deleteContent, dismissReport, isLoading: isActionLoading } = useReportActions();
 
-  const reports = reportsData?.reports || [];
-  const totalCount = reportsData?.pagination?.total || 0;
+  const reports = (reportsData && typeof reportsData === 'object' && 'reports' in reportsData) ? (reportsData as any).reports : [];
+  const totalCount = (reportsData && typeof reportsData === 'object' && 'pagination' in reportsData && (reportsData as any).pagination) ? (reportsData as any).pagination.total : 0;
 
   const formatDate = (dateString: string) => {
     try {
@@ -67,7 +67,7 @@ export default function ReportedCommentsPage() {
     }
   };
 
-  const filteredReports = reports.filter((report) => {
+  const filteredReports = reports.filter((report: any) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       report.commentContent.toLowerCase().includes(searchLower) ||
@@ -88,13 +88,11 @@ export default function ReportedCommentsPage() {
     if (!selectedReport || !actionType) return;
 
     // In a real application, you would make API calls to perform these actions
+    // Note: Reports are fetched from API, so local state updates are not needed
+    // The API call will refetch the data after the action is performed
     if (actionType === "dismiss" || actionType === "delete") {
-      const updatedReports = reports.map((report) =>
-        report.id === selectedReport.id
-          ? { ...report, status: "resolved" }
-          : report
-      );
-      setReports(updatedReports);
+      // API calls should be made here, which will trigger a refetch
+      // For now, this is a placeholder
     }
 
     setActionDialogOpen(false);
@@ -153,7 +151,7 @@ export default function ReportedCommentsPage() {
           <CardContent className="p-4">
             <p className="text-sm font-medium text-yellow-600">Pending</p>
             <h3 className="text-2xl font-bold mt-1">
-              {reports.filter((r) => r.status === "pending").length}
+              {reports.filter((r: any) => r.status === "pending").length}
             </h3>
           </CardContent>
         </Card>
@@ -161,7 +159,7 @@ export default function ReportedCommentsPage() {
           <CardContent className="p-4">
             <p className="text-sm font-medium text-green-600">Resolved</p>
             <h3 className="text-2xl font-bold mt-1">
-              {reports.filter((r) => r.status === "resolved").length}
+              {reports.filter((r: any) => r.status === "resolved").length}
             </h3>
           </CardContent>
         </Card>
@@ -189,7 +187,7 @@ export default function ReportedCommentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredReports.map((report) => (
+              {filteredReports.map((report: any) => (
                 <TableRow key={report.id}>
                   <TableCell className="font-medium max-w-[200px] truncate">
                     {report.commentContent}

@@ -1,6 +1,9 @@
-import { Controller, Get, HttpStatus, HttpException } from '@nestjs/common';
+import { Controller, Get, HttpStatus, HttpException, UseGuards } from '@nestjs/common';
 import { HealthService } from './health.service';
 import { Public } from '../auth/core/decorators/public.decorator';
+import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { RoleBasedAccessGuard } from '../auth/core/guards/role-based-access.guard';
+import { Roles } from '../auth/core/decorators/roles.decorator';
 
 @Controller('health')
 export class HealthController {
@@ -60,6 +63,8 @@ export class HealthController {
   }
 
   @Get('admin')
+  @UseGuards(JwtAuthGuard, RoleBasedAccessGuard)
+  @Roles('admin')
   async getAdminHealth() {
     return this.healthService.getAdminHealthDashboard();
   }

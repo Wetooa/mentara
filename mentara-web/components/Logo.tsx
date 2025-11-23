@@ -10,6 +10,8 @@ export default function Logo() {
         height={25}
         src={"/icons/mentara/mentara-icon.png"}
         alt={"Mentara Icon"}
+        priority
+        loading="eager"
       />
       <h1 className="font-[Kollektif] font-bold text-3xl leading-none -mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         mentara

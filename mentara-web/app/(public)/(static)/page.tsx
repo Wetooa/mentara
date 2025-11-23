@@ -1,4 +1,7 @@
 "use client";
+
+// Force dynamic rendering to prevent prerender errors
+export const dynamic = 'force-dynamic';
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

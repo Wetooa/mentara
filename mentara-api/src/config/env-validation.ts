@@ -33,6 +33,8 @@ export interface OptionalEnvVars {
   STRIPE_WEBHOOK_SECRET?: string;
   CLERK_SECRET_KEY?: string;
   ALLOWED_ORIGINS?: string;
+  SAMBANOVA_API_KEY?: string;
+  SAMBANOVA_BASE_URL?: string;
   TEST_DATABASE_URL?: string;
 }
 

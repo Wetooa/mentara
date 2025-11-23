@@ -199,7 +199,14 @@ export default function AdminAuditLogsPage() {
   ];
 
   // Use real data if available, otherwise use mock data
-  const logs: DisplayAuditLog[] = auditLogs?.logs || mockAuditLogs;
+  // Transform AuditLog to DisplayAuditLog format, ensuring required fields
+  const logs: DisplayAuditLog[] = auditLogs?.logs 
+    ? auditLogs.logs.map(log => ({
+        ...log,
+        ipAddress: log.ipAddress || 'N/A',
+        userAgent: log.userAgent || 'N/A',
+      }))
+    : mockAuditLogs;
 
   // Filter logs based on search query
   const filteredLogs = useMemo(() => {

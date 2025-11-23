@@ -9,6 +9,8 @@ import PatientWorksheets from "@/components/therapist/patient/PatientWorksheets"
 import PatientProgressDashboard from "@/components/therapist/patient/PatientProgressDashboard";
 import { SessionSchedulingModal } from "@/components/therapist/patient/SessionSchedulingModal";
 import { usePatientData } from "@/hooks/therapist/usePatientsList";
+import { PageBreadcrumbs } from "@/components/navigation/PageBreadcrumbs";
+import { BackButton } from "@/components/navigation/BackButton";
 
 export default function PatientDetailPage(
   props: {
@@ -35,6 +37,20 @@ export default function PatientDetailPage(
 
   return (
     <div className="p-6">
+      {/* Breadcrumbs and Back Button */}
+      <div className="mb-6 space-y-3">
+        <PageBreadcrumbs
+          context={{
+            patientName: patient.name,
+          }}
+        />
+        <BackButton
+          label="Back to Patients"
+          href="/therapist/patients"
+          variant="ghost"
+        />
+      </div>
+
       {/* Client header with info */}
       <div className="mb-6 bg-gradient-to-r from-secondary/5 to-white rounded-2xl p-6 border border-secondary/20 shadow-md">
         <div className="flex items-center justify-between">
@@ -79,14 +95,14 @@ export default function PatientDetailPage(
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <PatientInfoCard
           icon={
-            <div className="p-2 rounded-md bg-secondary/10 text-secondary">D</div>
+            <div className="p-2 rounded-md bg-secondary/10 text-secondary w-fit h-fit flex-shrink-0">D</div>
           }
           label="DIAGNOSIS"
           value={patient.diagnosis}
         />
         <PatientInfoCard
           icon={
-            <div className="p-2 rounded-md bg-secondary/15 text-secondary">
+            <div className="p-2 rounded-md bg-secondary/15 text-secondary w-fit h-fit flex-shrink-0">
               T
             </div>
           }
@@ -95,7 +111,7 @@ export default function PatientDetailPage(
         />
         <PatientInfoCard
           icon={
-            <div className="p-2 rounded-md bg-secondary/20 text-secondary">
+            <div className="p-2 rounded-md bg-secondary/20 text-secondary w-fit h-fit flex-shrink-0">
               S
             </div>
           }

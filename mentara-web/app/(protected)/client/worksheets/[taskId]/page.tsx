@@ -24,6 +24,9 @@ import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { WorksheetStatus } from "@/types/api/worksheets";
 import { use } from "react";
+import { logger } from "@/lib/logger";
+import { PageBreadcrumbs } from "@/components/navigation/PageBreadcrumbs";
+import { BackButton } from "@/components/navigation/BackButton";
 
 interface TaskDetailPageProps {
   params: Promise<{ taskId: string }>;
@@ -101,7 +104,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
         return newSet;
       });
 
-      console.error("Error uploading file:", error);
+      logger.error("Error uploading file:", error);
       toast.error("Failed to upload file. Please try again.");
     },
   });
@@ -116,7 +119,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
       toast.success("Worksheet turned in successfully!");
     },
     onError: (error) => {
-      console.error("Error turning in worksheet:", error);
+      logger.error("Error turning in worksheet:", error);
       toast.error("Failed to turn in worksheet. Please try again.");
     },
   });
@@ -131,7 +134,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
       toast.success("Worksheet turned back in for editing!");
     },
     onError: (error) => {
-      console.error("Error unturning in worksheet:", error);
+      logger.error("Error unturning in worksheet:", error);
       toast.error("Failed to unturn in worksheet. Please try again.");
     },
   });
@@ -175,7 +178,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   ) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      console.log("Selected file:", file.name);
+      logger.debug("Selected file:", file.name);
 
       // Use the built-in validation from the API service
       const validation = api.worksheets.validateFile(file);
@@ -195,7 +198,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   };
 
   const handleDownload = (file: TaskFile) => {
-    console.log("Downloading file:", file.filename);
+    logger.debug("Downloading file:", file.filename);
 
     // Create an anchor element and trigger download
     const link = document.createElement("a");
@@ -223,7 +226,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
 
       toast.success(`Successfully deleted ${filename}`);
     } catch (err) {
-      console.error("Error deleting file:", err);
+      logger.error("Error deleting file:", err);
       toast.error("Failed to delete file. Please try again.");
     } finally {
       // Remove filename from deleting set
@@ -331,16 +334,24 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
         accept=".pdf,.doc,.docx,.txt,.jpg,.png"
       />
 
-      {/* Header with Back Button */}
+      {/* Header with Breadcrumbs and Back Button */}
       <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-border/50 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
-          <button
-            onClick={handleBack}
-            className="flex items-center text-primary hover:text-primary/80 transition-colors group"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Worksheets</span>
-          </button>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 space-y-3">
+          <PageBreadcrumbs
+            context={
+              task
+                ? {
+                    worksheetTitle: task.title || "Worksheet",
+                  }
+                : undefined
+            }
+          />
+          <BackButton
+            label="Back to Worksheets"
+            href="/client/worksheets"
+            variant="ghost"
+            className="text-primary hover:text-primary/80"
+          />
         </div>
       </div>
 
@@ -357,11 +368,20 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                 </h1>
                 <p className="text-gray-600">
                   Assigned by{" "}
-                  <span className="font-semibold text-primary">
-                    {worksheetData?.therapist?.user 
-                      ? `Dr. ${worksheetData.therapist.user.firstName} ${worksheetData.therapist.user.lastName}`
-                      : "Your Therapist"}
-                  </span>{" "}
+                  {worksheetData?.therapist?.user?.id ? (
+                    <button
+                      onClick={() => router.push(`/client/profile/${worksheetData.therapist.user.id}`)}
+                      className="font-semibold text-primary hover:text-primary/80 hover:underline transition-colors"
+                    >
+                      Dr. {worksheetData.therapist.user.firstName} {worksheetData.therapist.user.lastName}
+                    </button>
+                  ) : (
+                    <span className="font-semibold text-primary">
+                      {worksheetData?.therapist?.user 
+                        ? `Dr. ${worksheetData.therapist.user.firstName} ${worksheetData.therapist.user.lastName}`
+                        : "Your Therapist"}
+                    </span>
+                  )}{" "}
                   • {new Date(worksheetData?.createdAt || task.date).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
@@ -460,9 +480,18 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
                   {worksheetData.therapist.user.lastName?.[0]}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900">
-                    Dr. {worksheetData.therapist.user.firstName} {worksheetData.therapist.user.lastName}
-                  </h3>
+                  <button
+                    onClick={() => {
+                      if (worksheetData.therapist.user.id) {
+                        router.push(`/client/profile/${worksheetData.therapist.user.id}`);
+                      }
+                    }}
+                    className="text-left"
+                  >
+                    <h3 className="text-lg font-bold text-gray-900 hover:text-primary transition-colors">
+                      Dr. {worksheetData.therapist.user.firstName} {worksheetData.therapist.user.lastName}
+                    </h3>
+                  </button>
                   <p className="text-sm text-gray-600 font-medium">
                     {worksheetData.therapist.professionalLicenseType || "Licensed Therapist"}
                   </p>

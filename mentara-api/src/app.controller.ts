@@ -9,13 +9,14 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
+import { Public } from './auth/core/decorators/public.decorator';
 
 @ApiTags('app')
-@ApiBearerAuth('JWT-auth')
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  @Public()
   @Get()
   @ApiOperation({
     summary: 'Health check endpoint',

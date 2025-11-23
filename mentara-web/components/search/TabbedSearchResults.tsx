@@ -214,16 +214,16 @@ function SearchResultCard({ result, onClick }: { result: SearchResult; onClick?:
   const borderColor = ENTITY_COLORS[result.type];
 
   return (
-    <Card
-      className={cn(
-        'cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5',
-        'border-2 hover:border-primary/30',
-        borderColor
-      )}
-      onClick={() => onClick?.(result)}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-start gap-4">
+      <Card
+        className={cn(
+          'cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
+          'border-2 hover:border-primary/40 rounded-xl',
+          borderColor
+        )}
+        onClick={() => onClick?.(result)}
+      >
+      <CardContent className="p-5 sm:p-6">
+        <div className="flex items-start gap-4 sm:gap-5">
           {/* Avatar or Icon */}
           <div className="flex-shrink-0">
             {result.avatarUrl ? (
@@ -246,17 +246,17 @@ function SearchResultCard({ result, onClick }: { result: SearchResult; onClick?:
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="font-semibold text-base leading-tight line-clamp-2">{result.title}</h3>
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <h3 className="font-semibold text-base sm:text-lg leading-tight line-clamp-2">{result.title}</h3>
               {result.metadata?.community && (
-                <Badge variant="outline" className="text-xs whitespace-nowrap">
+                <Badge variant="outline" className="text-xs whitespace-nowrap flex-shrink-0 ml-2">
                   {result.metadata.community}
                 </Badge>
               )}
             </div>
             
             {result.subtitle && (
-              <p className="text-sm text-muted-foreground mb-2 line-clamp-2 leading-relaxed">
+              <p className="text-sm text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
                 {result.subtitle}
               </p>
             )}
@@ -524,18 +524,18 @@ export const TabbedSearchResults: React.FC<TabbedSearchResultsProps> = ({
             {resultCounts[tab.key] === 0 ? (
               <EmptyTabState query={query} tabLabel={tab.label} />
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {/* Tab Header */}
-                <div className="flex items-center gap-2 pb-2 border-b">
+                <div className="flex items-center gap-3 pb-3 border-b">
                   <tab.icon className={cn('w-5 h-5', tab.color)} />
                   <h2 className="text-lg font-semibold">{tab.label}</h2>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs ml-auto">
                     {resultCounts[tab.key]} result{resultCounts[tab.key] !== 1 ? 's' : ''}
                   </Badge>
                 </div>
 
                 {/* Results Grid */}
-                <div className="grid gap-4">
+                <div className="grid gap-4 sm:gap-5">
                   {activeTabResults.map(result => (
                     <SearchResultCard
                       key={result.id}

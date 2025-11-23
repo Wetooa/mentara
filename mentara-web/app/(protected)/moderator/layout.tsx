@@ -32,6 +32,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { UserDisplay } from "@/components/common/UserDisplay";
 import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
+import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 
 
 export default function ModeratorLayout({
@@ -42,7 +43,7 @@ export default function ModeratorLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   // Load sidebar state from localStorage
   useEffect(() => {
@@ -52,44 +53,43 @@ export default function ModeratorLayout({
     }
   }, []);
 
-  // Save sidebar state to localStorage
-  const toggleSidebar = () => {
-    const newState = !isSidebarExpanded;
-    setIsSidebarExpanded(newState);
-    localStorage.setItem('moderator-sidebar-expanded', JSON.stringify(newState));
-  };
-
 
   const navItems = [
     {
-      title: "Dashboard",
-      href: "/moderator",
-      icon: <LayoutDashboard className="h-5 w-5" />,
+      name: "Dashboard",
+      path: "/moderator",
+      icon: "/icons/dashboard.svg",
+      id: "dashboard",
     },
     {
-      title: "Content Moderation",
-      href: "/moderator/content",
-      icon: <Shield className="h-5 w-5" />,
+      name: "Content Moderation",
+      path: "/moderator/content",
+      icon: "/icons/community.svg",
+      id: "content",
     },
     {
-      title: "Reports",
-      href: "/moderator/reports",
-      icon: <AlertTriangle className="h-5 w-5" />,
+      name: "Reports",
+      path: "/moderator/reports",
+      icon: "/icons/messages.svg",
+      id: "reports",
     },
     {
-      title: "Users",
-      href: "/moderator/users",
-      icon: <Users className="h-5 w-5" />,
+      name: "Users",
+      path: "/moderator/users",
+      icon: "/icons/therapist.svg",
+      id: "users",
     },
     {
-      title: "Audit Logs",
-      href: "/moderator/audit-logs",
-      icon: <History className="h-5 w-5" />,
+      name: "Audit Logs",
+      path: "/moderator/audit-logs",
+      icon: "/icons/worksheets.svg",
+      id: "audit-logs",
     },
     {
-      title: "Profile",
-      href: "/moderator/profile",
-      icon: <Settings className="h-5 w-5" />,
+      name: "Profile",
+      path: "/moderator/profile",
+      icon: "/icons/sessions.svg",
+      id: "profile",
     },
   ];
 
@@ -99,130 +99,13 @@ export default function ModeratorLayout({
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      {/* Desktop Sidebar Navigation */}
-      <nav className={cn(
-        "hidden md:flex fixed left-0 top-0 z-10 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
-        isSidebarExpanded ? "w-64" : "w-[70px]"
-      )}>
-        {/* Header with Logo and Toggle */}
-        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-          <Link 
-            href="/moderator" 
-            className={cn(
-              "flex items-center transition-all duration-300",
-              isSidebarExpanded ? "" : "justify-center"
-            )}
-          >
-            <Image
-              src="/mentara-icon.png"
-              alt="Mentara Logo"
-              width={32}
-              height={32}
-              priority
-              className="flex-shrink-0"
-            />
-            {isSidebarExpanded && (
-              <span className="ml-3 text-lg font-semibold text-gray-900 transition-all duration-300">
-                Moderator
-              </span>
-            )}
-          </Link>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className={cn(
-              "h-8 w-8 transition-all duration-300",
-              !isSidebarExpanded && "opacity-0 hover:opacity-100"
-            )}
-          >
-            {isSidebarExpanded ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-
-        {/* Navigation Items */}
-        <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "relative group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 ease-in-out",
-                  isActive
-                    ? "bg-orange-50 text-orange-600 shadow-sm"
-                    : "text-gray-700 hover:bg-orange-50/50 hover:text-orange-600",
-                  !isSidebarExpanded && "justify-center px-2"
-                )}
-                title={!isSidebarExpanded ? item.title : undefined}
-              >
-                {/* Left accent indicator */}
-                <div
-                  className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-orange-600 rounded-r-full transition-all duration-300 ease-in-out",
-                    isActive
-                      ? "h-8 opacity-100"
-                      : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
-                  )}
-                />
-                
-                {/* Discord-style bevel background */}
-                <div
-                  className={cn(
-                    "absolute inset-0 transition-all duration-400 ease-in-out",
-                    isActive
-                      ? "bg-orange-50 rounded-xl scale-100"
-                      : "bg-transparent rounded-full scale-75 group-hover:bg-orange-50/50 group-hover:rounded-xl group-hover:scale-100"
-                  )}
-                />
-
-                <div className="relative z-10 flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "transition-all duration-300",
-                      isActive
-                        ? "text-orange-600 scale-110"
-                        : "text-gray-500 group-hover:text-orange-600 group-hover:scale-110"
-                    )}
-                  >
-                    {item.icon}
-                  </div>
-                  
-                  {isSidebarExpanded && (
-                    <span
-                      className={cn(
-                        "transition-all duration-300",
-                        isActive
-                          ? "text-orange-600"
-                          : "text-gray-700 group-hover:text-orange-600"
-                      )}
-                    >
-                      {item.title}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-        
-        {/* Footer */}
-        <div className="border-t border-gray-200 p-4">
-          {isSidebarExpanded ? (
-            <p className="text-xs text-gray-500 text-center">© 2025 Mentara Moderator</p>
-          ) : (
-            <div className="flex justify-center">
-              <div className="h-2 w-2 rounded-full bg-orange-300" />
-            </div>
-          )}
-        </div>
-      </nav>
+      <UnifiedSidebar
+        navItems={navItems}
+        role="moderator"
+        defaultExpanded={true}
+        activeColor="orange"
+        onToggle={setIsSidebarExpanded}
+      />
 
       {/* Mobile Navigation Overlay */}
       {isMobileMenuOpen && (
@@ -254,11 +137,11 @@ export default function ModeratorLayout({
             <div className="flex-1 px-4 py-6">
               <div className="space-y-2">
                 {navItems.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
                   return (
                     <Link
-                      key={item.href}
-                      href={item.href}
+                      key={item.id}
+                      href={item.path}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={cn(
                         "relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300",
@@ -267,16 +150,18 @@ export default function ModeratorLayout({
                           : "text-gray-700 hover:bg-orange-50/50 hover:text-orange-600"
                       )}
                     >
-                      <div
+                      <Image
+                        src={item.icon}
+                        alt={item.name}
+                        width={20}
+                        height={20}
                         className={cn(
                           "transition-all duration-300",
                           isActive
-                            ? "text-orange-600 scale-110"
-                            : "text-gray-500 group-hover:text-orange-600 group-hover:scale-105"
+                            ? "scale-110"
+                            : "group-hover:scale-105"
                         )}
-                      >
-                        {item.icon}
-                      </div>
+                      />
                       <span
                         className={cn(
                           "font-medium transition-all duration-300",
@@ -285,7 +170,7 @@ export default function ModeratorLayout({
                             : "text-gray-700 group-hover:text-orange-600"
                         )}
                       >
-                        {item.title}
+                        {item.name}
                       </span>
                     </Link>
                   );
@@ -313,14 +198,12 @@ export default function ModeratorLayout({
         isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
       )}>
         {/* Top Header - Responsive */}
-        <header className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm" 
-          style={{
-            width: isSidebarExpanded 
-              ? 'calc(100% - 256px)' 
-              : 'calc(100% - 70px)',
-            ...(window.innerWidth < 768 && { width: '100%' })
-          }}
-        >
+        <header className={cn(
+          "fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm transition-all duration-300",
+          "md:w-[calc(100%-256px)]",
+          !isSidebarExpanded && "md:w-[calc(100%-70px)]",
+          "w-full"
+        )}>
           {/* Mobile menu button and title */}
           <div className="flex items-center gap-3 md:hidden">
             <Button
@@ -338,8 +221,8 @@ export default function ModeratorLayout({
           <div className="hidden md:block">
             <h1 className="text-lg font-semibold text-gray-900">
               {navItems.find(item => 
-                pathname === item.href || pathname.startsWith(`${item.href}/`)
-              )?.title || "Dashboard"}
+                pathname === item.path || pathname.startsWith(`${item.path}/`)
+              )?.name || "Dashboard"}
             </h1>
           </div>
 
@@ -371,8 +254,10 @@ export default function ModeratorLayout({
                   <Button variant="ghost" className="relative group p-0">
                     <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-orange-100 to-orange-200 ring-2 ring-border/50 group-hover:ring-orange-300 transition-all duration-300 shadow-sm group-hover:shadow-md">
                       <Avatar className="h-full w-full">
-                        <AvatarImage src={moderator.avatarUrl} alt={moderator.name} className="transition-transform duration-300 group-hover:scale-110" />
-                        <AvatarFallback className="bg-orange-100 text-orange-700">{moderator.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={user?.avatarUrl} alt={user?.firstName || "Moderator"} className="transition-transform duration-300 group-hover:scale-110" />
+                        <AvatarFallback className="bg-orange-100 text-orange-700">
+                          {user?.firstName?.charAt(0) || user?.lastName?.charAt(0) || "M"}
+                        </AvatarFallback>
                       </Avatar>
                     </div>
                     {/* Online status indicator */}
@@ -410,12 +295,56 @@ export default function ModeratorLayout({
         </header>
 
         {/* Main Content - Responsive padding */}
-        <main className="flex-1 w-full h-full pt-16 overflow-y-auto bg-gray-50">
+        <main className="flex-1 w-full h-full pt-16 pb-16 md:pb-0 overflow-y-auto bg-gray-50">
           <div className="p-4 md:p-6">{children}</div>
         </main>
 
         {/* Video Call Notifications - Fixed position in upper right */}
         <IncomingCallNotificationContainer />
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 shadow-lg">
+          <div className="flex items-center justify-around py-2">
+            {navItems.slice(0, 5).map((item) => {
+              const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.path}
+                  className={cn(
+                    "relative group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0",
+                    isActive
+                      ? "text-orange-600"
+                      : "text-gray-600 hover:text-orange-600"
+                  )}
+                >
+                  <Image
+                    src={item.icon}
+                    alt={item.name}
+                    width={20}
+                    height={20}
+                    className={cn(
+                      "transition-all duration-300",
+                      isActive
+                        ? "scale-110"
+                        : "group-hover:scale-105"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300",
+                      isActive
+                        ? "text-orange-600 font-medium"
+                        : "text-gray-600 group-hover:text-orange-600"
+                    )}
+                  >
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   );

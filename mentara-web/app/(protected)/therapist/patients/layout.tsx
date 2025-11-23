@@ -28,6 +28,7 @@ import { useApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export default function PatientsLayout({
   children,
@@ -45,7 +46,7 @@ export default function PatientsLayout({
     refetch: refetchPatients,
   } = usePatientsList();
 
-  console.log("My Patients Data:", myPatients);
+  logger.debug("My Patients Data:", myPatients);
 
   const {
     data: patientRequests,
@@ -54,7 +55,7 @@ export default function PatientsLayout({
     refetch: refetchRequests,
   } = usePatientsRequests();
 
-  console.log("Patient Requests Data:", patientRequests);
+  logger.debug("Patient Requests Data:", patientRequests);
 
   // Mutations
   const acceptRequest = useAcceptPatientRequest();

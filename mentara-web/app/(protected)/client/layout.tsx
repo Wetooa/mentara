@@ -1,17 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getProfileUrl } from "@/lib/utils";
-import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
-import { LayoutOmniSearchBar } from "@/components/search";
+import { getProfileUrl, cn } from "@/lib/utils";
 import { DashboardPageMetadata } from "@/components/metadata/SimplePageMetadata";
 import { UserDisplay } from "@/components/common/UserDisplay";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
+
+// Lazy load heavy layout components
+const NotificationDropdown = dynamic(() => import("@/components/notifications/NotificationDropdown").then(mod => ({ default: mod.NotificationDropdown })), {
+  ssr: false,
+  loading: () => <div className="w-10 h-10 rounded-xl" />
+});
+
+const IncomingCallNotificationContainer = dynamic(() => import("@/components/video-calls/IncomingCallNotification").then(mod => ({ default: mod.IncomingCallNotificationContainer })), {
+  ssr: false,
+  loading: () => null
+});
+
+const LayoutOmniSearchBar = dynamic(() => import("@/components/search").then(mod => ({ default: mod.LayoutOmniSearchBar })), {
+  ssr: false,
+  loading: () => <div className="h-10 w-full rounded-xl bg-muted animate-pulse" />
+});
+
+// Lazy load heavy floating tools component
+const FloatingToolsButton = dynamic(() => import("@/components/microservices/FloatingToolsButton").then(mod => ({ default: mod.FloatingToolsButton })), {
+  ssr: false,
+  loading: () => null // No loading indicator for floating button
+});
 
 export default function MainLayout({
   children,
@@ -22,6 +44,7 @@ export default function MainLayout({
   const router = useRouter();
   const { logout, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -78,71 +101,13 @@ export default function MainLayout({
       <DashboardPageMetadata role="client" />
 
       <div className="flex h-screen w-full bg-white">
-        <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
-          <Link href="/client" className="mb-8 px-2">
-            <Image
-              src="/icons/mentara/mentara-icon.png"
-              alt="Mentara Logo"
-              width={50}
-              height={50}
-              priority
-              className="hover:scale-110 transition-transform duration-300"
-            />
-          </Link>
-          <div className="flex flex-1 flex-col items-center gap-6">
-            {navItems.map((item) => {
-              const isActive = pathname === item.path;
-              return (
-                <Link
-                  key={item.id}
-                  href={item.path}
-                  className={`relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out ${
-                    isActive
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-primary"
-                  }`}
-                >
-                  <div
-                    className={`absolute inset-0 transition-all duration-400 ease-in-out ${
-                      isActive
-                        ? "bg-primary/15 rounded-2xl scale-100"
-                        : "bg-transparent rounded-full scale-75 group-hover:bg-primary/10 group-hover:rounded-2xl group-hover:scale-100"
-                    }`}
-                  />
-                  <div
-                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-primary rounded-r-full transition-all duration-300 ease-in-out ${
-                      isActive
-                        ? "h-8 opacity-100"
-                        : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
-                    }`}
-                  />
-                  <div className="relative z-10 flex flex-col items-center justify-center">
-                    <Image
-                      src={item.icon}
-                      alt={item.name}
-                      width={24}
-                      height={24}
-                      className={`transition-all duration-300 ${
-                        isActive
-                          ? "text-primary scale-110"
-                          : "text-muted-foreground group-hover:text-primary group-hover:scale-110"
-                      }`}
-                    />
-                    <span
-                      className={`mt-1 text-center text-[9px] font-medium transition-all duration-300 ${
-                        isActive
-                          ? "text-primary opacity-100"
-                          : "text-muted-foreground opacity-75 group-hover:text-primary group-hover:opacity-100"
-                      }`}
-                    >
-                      {item.name}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+        <UnifiedSidebar
+          navItems={navItems}
+          role="client"
+          defaultExpanded={false}
+          activeColor="primary"
+          onToggle={setIsSidebarExpanded}
+        />
 
         {/* Mobile Navigation Overlay */}
         {isMobileMenuOpen && (
@@ -183,17 +148,18 @@ export default function MainLayout({
                             : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
                         }`}
                       >
-                        <Image
-                          src={item.icon}
-                          alt={item.name}
-                          width={20}
-                          height={20}
-                          className={`transition-all duration-300 ${
-                            isActive
-                              ? "text-primary scale-110"
-                              : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
-                          }`}
-                        />
+                    <Image
+                      src={item.icon}
+                      alt={item.name}
+                      width={20}
+                      height={20}
+                      loading="lazy"
+                      className={`transition-all duration-300 ${
+                        isActive
+                          ? "text-primary scale-110"
+                          : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
+                      }`}
+                    />
                         <span
                           className={`font-medium transition-all duration-300 ${
                             isActive
@@ -222,8 +188,18 @@ export default function MainLayout({
           </div>
         )}
 
-        <div className="flex flex-1 flex-col w-full h-full md:pl-[70px]">
-          <header className="fixed top-0 right-0 z-20 flex h-[60px] w-full md:w-[calc(100%-70px)] items-center justify-between border-b border-gray-200 bg-white px-4">
+        <div
+          className={cn(
+            "flex flex-1 flex-col w-full h-full transition-all duration-300",
+            isSidebarExpanded ? "md:pl-64" : "md:pl-[70px]"
+          )}
+        >
+          <header
+            className={cn(
+              "fixed top-0 right-0 z-20 flex h-[60px] w-full items-center justify-between border-b border-gray-200 bg-white px-4 transition-all duration-300",
+              isSidebarExpanded ? "md:w-[calc(100%-256px)]" : "md:w-[calc(100%-70px)]"
+            )}
+          >
             <div className="flex items-center gap-3 md:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
@@ -237,6 +213,7 @@ export default function MainLayout({
                 width={100}
                 height={24}
                 priority
+                loading="eager"
               />
             </div>
             <div className="relative mx-4 hidden flex-1 md:block">
@@ -266,19 +243,18 @@ export default function MainLayout({
                   onClick={handleAvatarClick}
                   title="View Profile"
                 >
-                  <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
-                    <Image
-                      src={user?.avatarUrl || "/icons/avatar-placeholder.svg"}
+                  <Avatar className="h-9 w-9 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
+                    <AvatarImage 
+                      src={user?.avatarUrl} 
                       alt="User Avatar"
-                      width={36}
-                      height={36}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
-                      }}
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
                     />
-                  </div>
+                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-semibold text-sm">
+                      {user?.firstName && user?.lastName
+                        ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+                        : user?.firstName?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm" />
                 </button>
                 <button
@@ -310,6 +286,11 @@ export default function MainLayout({
           {/* Video Call Notifications - Fixed position in upper right */}
           <IncomingCallNotificationContainer />
 
+          {/* Floating Tools Button - Available on most pages except dashboard */}
+          {pathname !== "/client" && pathname !== "/client/" ? (
+            <FloatingToolsButton />
+          ) : null}
+
           {/* Mobile Bottom Navigation */}
           <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200">
             <div className="flex items-center justify-around py-2">
@@ -330,6 +311,7 @@ export default function MainLayout({
                       alt={item.name}
                       width={20}
                       height={20}
+                      loading="lazy"
                       className={`transition-all duration-300 ${
                         isActive
                           ? "text-primary scale-110"

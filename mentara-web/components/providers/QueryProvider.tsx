@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryConfig } from "@/lib/config/api";
 import { MentaraApiError } from "@/lib/api/errorHandler";
+import { logger } from "@/lib/logger";
 
 // Enhanced QueryClient configuration with performance monitoring
 const createQueryClient = () => {
@@ -55,17 +56,17 @@ const createQueryClient = () => {
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
       },
     },
-    // Performance monitoring in development
+    // Performance monitoring in development only
     ...(process.env.NODE_ENV === "development" && {
       logger: {
         log: (message: string) => {
-          console.log(`[React Query] ${message}`);
+          logger.debug(`[React Query] ${message}`);
         },
         warn: (message: string) => {
-          console.warn(`[React Query] ${message}`);
+          logger.warn(`[React Query] ${message}`);
         },
         error: (message: string) => {
-          console.error(`[React Query] ${message}`);
+          logger.error(`[React Query] ${message}`);
         },
       },
     }),

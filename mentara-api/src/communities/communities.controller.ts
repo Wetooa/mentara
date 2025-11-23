@@ -54,8 +54,7 @@ export class CommunitiesController {
   ) { }
 
   @Get()
-  // TODO: CONFUSING - Missing @Roles decorator - should this endpoint require authentication only or specific roles?
-  // All authenticated users can currently access this endpoint, verify if this is intended behavior
+  @Roles('client', 'therapist', 'moderator', 'admin')
   async findAll(): Promise<CommunityResponse[]> {
     try {
       return await this.communitiesService.findAll();
@@ -233,11 +232,23 @@ export class CommunitiesController {
   }
 
   @Get('user/:userId')
-  // TODO: SECURITY CONCERN - Missing @Roles decorator allows any authenticated user to view another user's community memberships
-  // This could be a privacy issue - consider adding role restrictions or user ownership validation
+  @Roles('client', 'therapist', 'moderator', 'admin')
   async findByUserId(
     @Param('userId') userId: string,
+    @CurrentUserId() currentUserId: string,
   ): Promise<CommunityResponse[]> {
+    // Security: Users can only view their own community memberships unless they are admin/moderator
+    if (currentUserId !== userId) {
+      // Check if current user is admin or moderator (they can view any user's communities)
+      const currentUser = await this.prisma.user.findUnique({
+        where: { id: currentUserId },
+        select: { role: true },
+      });
+      
+      if (currentUser?.role !== 'admin' && currentUser?.role !== 'moderator') {
+        throw new NotFoundException('Community memberships not found');
+      }
+    }
     try {
       return await this.communitiesService.findByUserId(userId);
     } catch (error) {

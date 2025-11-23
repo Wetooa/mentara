@@ -4,11 +4,13 @@ import { useParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePostDetail } from "@/hooks/community";
 import { PostDetail } from "@/components/community/PostDetail";
 import { MentaraApiError } from "@/lib/api/errorHandler";
+import { PageBreadcrumbs } from "@/components/navigation/PageBreadcrumbs";
+import { BackButton } from "@/components/navigation/BackButton";
 
 function PostDetailContent() {
   const params = useParams();
@@ -49,16 +51,16 @@ function PostDetailContent() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
+          {/* Breadcrumbs */}
+          <PageBreadcrumbs />
+          
           {/* Back Navigation */}
           <div className="mb-6">
-            <Button
+            <BackButton
+              label="Back to Community"
+              href="/client/community"
               variant="ghost"
-              onClick={handleBackToCommunity}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Community
-            </Button>
+            />
           </div>
 
           {/* Error Display */}
@@ -89,7 +91,30 @@ function PostDetailContent() {
     return <PostDetailLoading />;
   }
 
-  return <PostDetail post={post} onEdit={handleEdit} onDelete={handleDelete} />;
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Breadcrumbs */}
+        <PageBreadcrumbs
+          context={{
+            postTitle: post.title || "Post",
+          }}
+        />
+        
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton
+            label="Back to Community"
+            href="/client/community"
+            variant="ghost"
+          />
+        </div>
+        
+        {/* Post Detail */}
+        <PostDetail post={post} onEdit={handleEdit} onDelete={handleDelete} />
+      </div>
+    </div>
+  );
 }
 
 function PostDetailLoading() {

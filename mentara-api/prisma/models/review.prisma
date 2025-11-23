@@ -19,4 +19,6 @@ model Review {
   @@index([clientId])
   @@index([rating])
   @@index([createdAt])
+  @@index([therapistId, rating])
+  @@index([therapistId, createdAt])
 }

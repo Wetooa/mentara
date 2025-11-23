@@ -20,6 +20,8 @@ model Post {
   @@index([roomId, createdAt])
   @@index([userId, createdAt])
   @@index([createdAt])
+  @@index([title])
+  @@index([roomId, userId, createdAt])
 }
 
 model Comment {

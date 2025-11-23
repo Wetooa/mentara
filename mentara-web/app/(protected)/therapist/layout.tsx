@@ -1,20 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   Menu,
   X,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutOmniSearchBar } from "@/components/search";
-import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
+import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
+
+// Lazy load heavy layout components
+const LayoutOmniSearchBar = dynamic(() => import("@/components/search").then(mod => ({ default: mod.LayoutOmniSearchBar })), {
+  ssr: false,
+  loading: () => <div className="h-10 w-full rounded-xl bg-muted animate-pulse" />
+});
+
+const NotificationDropdown = dynamic(() => import("@/components/notifications/NotificationDropdown").then(mod => ({ default: mod.NotificationDropdown })), {
+  ssr: false,
+  loading: () => <div className="w-10 h-10 rounded-xl" />
+});
+
+const IncomingCallNotificationContainer = dynamic(() => import("@/components/video-calls/IncomingCallNotification").then(mod => ({ default: mod.IncomingCallNotificationContainer })), {
+  ssr: false,
+  loading: () => null
+});
 import { Button } from "@/components/ui/button";
 import { cn, getProfileUrl } from "@/lib/utils";
+
+// Lazy load heavy floating tools component
+const FloatingToolsButton = dynamic(() => import("@/components/microservices/FloatingToolsButton").then(mod => ({ default: mod.FloatingToolsButton })), {
+  ssr: false,
+  loading: () => null // No loading indicator for floating button
+});
 
 export default function TherapistLayout({
   children,
@@ -24,6 +45,7 @@ export default function TherapistLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuth();
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   // Handle logout
   const handleLogout = () => {
@@ -83,77 +105,13 @@ export default function TherapistLayout({
 
   return (
     <div className="flex h-screen w-full bg-white">
-      {/* Desktop Sidebar Navigation */}
-      <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
-        <Link href="/therapist" className="mb-8 px-2">
-          <Image
-            src="/icons/mentara/mentara-icon.png"
-            alt="Mentara Logo"
-            width={50}
-            height={50}
-            priority
-            className="hover:scale-110 transition-transform duration-300"
-          />
-        </Link>
-        <div className="flex flex-1 flex-col items-center gap-6">
-          {navItems.map((item) => {
-            const isActive = pathname === item.path;
-            return (
-              <Link
-                key={item.id}
-                href={item.path}
-                className={cn(
-                  "relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out",
-                  isActive
-                    ? "text-secondary"
-                    : "text-muted-foreground hover:text-secondary"
-                )}
-              >
-                <div
-                  className={cn(
-                    "absolute inset-0 transition-all duration-400 ease-in-out",
-                    isActive
-                      ? "bg-secondary/10 rounded-2xl scale-100"
-                      : "bg-transparent rounded-full scale-75 group-hover:bg-secondary/5 group-hover:rounded-2xl group-hover:scale-100"
-                  )}
-                />
-                <div
-                  className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-secondary rounded-r-full transition-all duration-300 ease-in-out",
-                    isActive
-                      ? "h-8 opacity-100"
-                      : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
-                  )}
-                />
-                <div className="relative z-10 flex flex-col items-center justify-center">
-                  <Image
-                    src={item.icon}
-                    alt={item.name}
-                    width={24}
-                    height={24}
-                    className={cn(
-                      "transition-all duration-300",
-                      isActive
-                        ? "scale-110"
-                        : "group-hover:scale-110"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "mt-1 text-center text-[9px] font-medium transition-all duration-300",
-                      isActive
-                        ? "text-secondary opacity-100"
-                        : "text-muted-foreground opacity-75 group-hover:text-secondary group-hover:opacity-100"
-                    )}
-                  >
-                    {item.name}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      <UnifiedSidebar
+        navItems={navItems}
+        role="therapist"
+        defaultExpanded={false}
+        activeColor="secondary"
+        onToggle={setIsSidebarExpanded}
+      />
 
       {/* Mobile Navigation Overlay */}
       {isMobileMenuOpen && (
@@ -171,6 +129,7 @@ export default function TherapistLayout({
                   width={32}
                   height={32}
                   priority
+                  loading="eager"
                 />
                 <span className="text-lg font-semibold text-gray-900">
                   Therapist
@@ -202,16 +161,18 @@ export default function TherapistLayout({
                           : "text-gray-700 hover:bg-secondary/5 hover:text-secondary"
                       )}
                     >
-                      <div
+                      <Image
+                        src={item.icon}
+                        alt={item.name}
+                        width={20}
+                        height={20}
                         className={cn(
                           "transition-all duration-300",
                           isActive
-                            ? "text-secondary scale-110"
-                            : "text-gray-500 group-hover:text-secondary group-hover:scale-105"
+                            ? "scale-110"
+                            : "group-hover:scale-105"
                         )}
-                      >
-                        {item.icon}
-                      </div>
+                      />
                       <span
                         className={cn(
                           "font-medium transition-all duration-300",
@@ -241,10 +202,20 @@ export default function TherapistLayout({
         </div>
       )}
 
-      {/* Main Content Area - Fixed 70px padding */}
-      <div className="flex flex-1 flex-col w-full h-screen md:ml-[70px]">
-        {/* Top Header - Fixed width for 70px sidebar */}
-        <header className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm w-full md:w-[calc(100%-70px)]">
+      {/* Main Content Area - Responsive padding */}
+      <div
+        className={cn(
+          "flex flex-1 flex-col w-full h-screen transition-all duration-300",
+          isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
+        )}
+      >
+        {/* Top Header - Responsive width */}
+        <header
+          className={cn(
+            "fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm w-full transition-all duration-300",
+            isSidebarExpanded ? "md:w-[calc(100%-256px)]" : "md:w-[calc(100%-70px)]"
+          )}
+        >
           {/* Mobile menu button and title */}
           <div className="flex items-center gap-3 md:hidden">
             <Button
@@ -357,16 +328,18 @@ export default function TherapistLayout({
                       : "text-gray-600 hover:text-secondary"
                   )}
                 >
-                  <div
+                  <Image
+                    src={item.icon}
+                    alt={item.name}
+                    width={20}
+                    height={20}
                     className={cn(
                       "transition-all duration-300",
                       isActive
-                        ? "text-secondary scale-110"
-                        : "text-gray-600 group-hover:text-secondary group-hover:scale-105"
+                        ? "scale-110"
+                        : "group-hover:scale-105"
                     )}
-                  >
-                    {item.icon}
-                  </div>
+                  />
                   <span
                     className={cn(
                       "text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300",
@@ -383,6 +356,11 @@ export default function TherapistLayout({
           </div>
         </nav>
       </div>
+
+      {/* Floating Tools Button - Available on most pages except dashboard */}
+      {pathname !== "/therapist" && pathname !== "/therapist/" ? (
+        <FloatingToolsButton />
+      ) : null}
     </div>
   );
 }

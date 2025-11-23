@@ -164,17 +164,26 @@ export function PostDetail({
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 ${className}`}>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl space-y-4">
+        {/* Breadcrumbs */}
+        <PageBreadcrumbs
+          dynamicData={
+            post
+              ? {
+                  [post.id]: post.title || "Post",
+                }
+              : {}
+          }
+        />
+
         {/* Back Navigation */}
-        <div className="mb-6">
-          <Button
+        <div>
+          <BackButton
+            label="Back to Community"
+            href="/client/community"
             variant="ghost"
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-primary group"
-          >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Community</span>
-          </Button>
+            className="text-gray-600 hover:text-primary"
+          />
         </div>
 
         {/* Post Content */}

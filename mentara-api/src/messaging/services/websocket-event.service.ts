@@ -67,98 +67,95 @@ export class WebSocketEventService implements OnModuleInit {
     this.eventBus.subscribe(
       'MessageSentEvent',
       async (event: DomainEvent<any>) => {
-        this.logger.log('🚨 [EVENT RECEIVED] MessageSentEvent received in WebSocketEventService!');
-        this.logger.debug('📨 [EVENT DATA]', event.eventData);
-        try {
-          const messageEvent = event as MessageSentEvent;
-          const {
-            conversationId,
-            messageId,
-            senderId,
-            content,
-            messageType,
-            sentAt,
-            recipientIds,
-          } = messageEvent.eventData;
-
-          this.logger.debug('MessageSentEvent received:', {
-            conversationId,
-            messageId,
-            recipientCount: recipientIds?.length || 0,
-          });
-
-          // Broadcast message to conversation participants via WebSocket
-          // Frontend expects MessageEventData format with 'message' property
-          this.logger.log(`🚀 [WEBSOCKET] About to call MessagingGateway.broadcastMessage for conversation ${conversationId}`);
-          this.logger.debug(`🚀 [WEBSOCKET] Gateway exists: ${!!this.messagingGateway}`);
-          
-          this.messagingGateway.broadcastMessage(conversationId, {
-            message: {
-              id: messageId,
+        // Use setImmediate to avoid blocking the event loop
+        setImmediate(async () => {
+          this.logger.log('🚨 [EVENT RECEIVED] MessageSentEvent received in WebSocketEventService!');
+          this.logger.debug('📨 [EVENT DATA]', event.eventData);
+          try {
+            const messageEvent = event as MessageSentEvent;
+            const {
               conversationId,
+              messageId,
               senderId,
               content,
               messageType,
               sentAt,
-              createdAt: sentAt,
-              updatedAt: sentAt,
-              isRead: false,
-              isEdited: false,
-              isDeleted: false,
-              replyToId: messageEvent.eventData.replyToMessageId || null,
-              attachmentUrls: messageEvent.eventData.fileAttachments || [],
-              attachmentNames: [],
-              attachmentSizes: [],
-              editedAt: null,
-              sender: null, // Will be populated by client
-              replyTo: null,
-              reactions: [],
-              readReceipts: [],
-            },
-            eventType: 'message_sent',
-          }, senderId); // Pass senderId to exclude sender from broadcast
-          
-          this.logger.log(`✅ [WEBSOCKET] MessagingGateway.broadcastMessage completed for conversation ${conversationId}`);
+              recipientIds,
+            } = messageEvent.eventData;
 
-          // Send delivery confirmations with safe iteration
-          const safeRecipientIds = this.ensureArray(recipientIds, 'recipientIds');
-          for (const recipientId of safeRecipientIds) {
-            if (recipientId && typeof recipientId === 'string') {
-              try {
-                // Check if server is available before sending delivery confirmations
-                if (this.messagingGateway.server?.sockets) {
-                  this.messagingGateway.server
-                    .to(this.getUserSocketRoom(recipientId))
-                    .emit('message_delivered', {
-                      messageId,
-                      conversationId,
-                      deliveredAt: new Date(),
-                      eventType: 'message_delivered',
-                    });
-                } else {
-                  this.logger.warn(`WebSocket server not ready for delivery confirmation to ${recipientId}`);
-                }
-              } catch (error) {
-                this.logger.error(`Error sending delivery confirmation to ${recipientId}:`, error);
-              }
-            } else {
-              this.logger.warn(`Invalid recipientId in MessageSentEvent: ${recipientId}`, {
-                messageId,
+            this.logger.debug('MessageSentEvent received:', {
+              conversationId,
+              messageId,
+              recipientCount: recipientIds?.length || 0,
+            });
+
+            // Broadcast message to conversation participants via WebSocket
+            // Frontend expects MessageEventData format with 'message' property
+            this.logger.log(`🚀 [WEBSOCKET] About to call MessagingGateway.broadcastMessage for conversation ${conversationId}`);
+            this.logger.debug(`🚀 [WEBSOCKET] Gateway exists: ${!!this.messagingGateway}`);
+            
+            // Use async/await to ensure non-blocking
+            await Promise.resolve();
+            this.messagingGateway.broadcastMessage(conversationId, {
+              message: {
+                id: messageId,
                 conversationId,
-                recipientId,
-                type: typeof recipientId,
-              });
-            }
-          }
+                senderId,
+                content,
+                messageType,
+                sentAt,
+                createdAt: sentAt,
+                updatedAt: sentAt,
+                isRead: false,
+                isEdited: false,
+                isDeleted: false,
+                replyToId: messageEvent.eventData.replyToMessageId || null,
+                attachmentUrls: messageEvent.eventData.fileAttachments || [],
+                attachmentNames: [],
+                attachmentSizes: [],
+                editedAt: null,
+                sender: null, // Will be populated by client
+                replyTo: null,
+                reactions: [],
+                readReceipts: [],
+              },
+              eventType: 'message_sent',
+            }, senderId); // Pass senderId to exclude sender from broadcast
+            
+            this.logger.log(`✅ [WEBSOCKET] MessagingGateway.broadcastMessage completed for conversation ${conversationId}`);
 
-          this.logger.debug(`Broadcasted message sent event: ${messageId} to ${safeRecipientIds.length} recipients`);
-        } catch (error) {
-          this.logger.error('Error handling MessageSentEvent:', {
-            error: error.message,
-            stack: error.stack,
-            eventData: event.eventData,
-          });
-        }
+            // Send delivery confirmations with safe iteration (non-blocking)
+            const safeRecipientIds = this.ensureArray(recipientIds, 'recipientIds');
+            const deliveryPromises = safeRecipientIds
+              .filter((recipientId): recipientId is string => 
+                typeof recipientId === 'string' && recipientId.length > 0
+              )
+              .map(async (recipientId) => {
+                try {
+                  // Check if server is available before sending delivery confirmations
+                  if (this.messagingGateway.server?.sockets) {
+                    this.messagingGateway.server
+                      .to(this.getUserSocketRoom(recipientId))
+                      .emit('message_delivered', {
+                        messageId,
+                        conversationId,
+                        deliveredAt: new Date(),
+                        eventType: 'message_delivered',
+                      });
+                  } else {
+                    this.logger.warn(`WebSocket server not ready for delivery confirmation to ${recipientId}`);
+                  }
+                } catch (error) {
+                  this.logger.error(`Error sending delivery confirmation to ${recipientId}:`, error);
+                }
+              });
+            
+            // Wait for all delivery confirmations in parallel (non-blocking)
+            await Promise.allSettled(deliveryPromises);
+          } catch (error) {
+            this.logger.error('Error processing MessageSentEvent:', error);
+          }
+        });
       },
     );
 

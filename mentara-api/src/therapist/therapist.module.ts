@@ -22,9 +22,10 @@ import { RoleUtils } from 'src/utils/role-utils';
 import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { CommunitiesModule } from '../communities/communities.module';
+import { CacheModule } from '../cache/cache.module';
 
 @Module({
-  imports: [PreAssessmentModule, EmailModule, MessagingModule, CommunitiesModule],
+  imports: [PreAssessmentModule, EmailModule, MessagingModule, CommunitiesModule, CacheModule],
   controllers: [
     TherapistRecommendationController,
     TherapistsController,

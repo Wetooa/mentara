@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useMemo, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { UserDashboardData } from "@/types/api/dashboard";
@@ -22,56 +22,68 @@ interface DashboardHeaderProps {
   onBookSession?: () => void;
 }
 
-export default function DashboardHeader({
+function DashboardHeader({
   user,
   onBookSession,
 }: DashboardHeaderProps) {
   const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
 
-  // Get current time to display appropriate greeting and theme
-  const currentHour = new Date().getHours();
-  let greeting = "Good morning";
-  let timeIcon = <Sun className="h-5 w-5" />;
-  let gradientFrom = "from-amber-500/20";
-  let gradientVia = "via-orange-500/10";
-  let gradientTo = "to-yellow-500/20";
-  let emoji = "☀️";
+  // Memoize greeting and theme based on current hour
+  const { greeting, timeIcon, gradientFrom, gradientVia, gradientTo, emoji } = useMemo(() => {
+    const currentHour = new Date().getHours();
+    if (currentHour >= 12 && currentHour < 18) {
+      return {
+        greeting: "Good afternoon",
+        timeIcon: <Cloud className="h-5 w-5" />,
+        gradientFrom: "from-blue-500/20",
+        gradientVia: "via-cyan-500/10",
+        gradientTo: "to-sky-500/20",
+        emoji: "🌤️"
+      };
+    } else if (currentHour >= 18) {
+      return {
+        greeting: "Good evening",
+        timeIcon: <Moon className="h-5 w-5" />,
+        gradientFrom: "from-indigo-500/20",
+        gradientVia: "via-purple-500/10",
+        gradientTo: "to-violet-500/20",
+        emoji: "🌙"
+      };
+    }
+    return {
+      greeting: "Good morning",
+      timeIcon: <Sun className="h-5 w-5" />,
+      gradientFrom: "from-amber-500/20",
+      gradientVia: "via-orange-500/10",
+      gradientTo: "to-yellow-500/20",
+      emoji: "☀️"
+    };
+  }, []); // Only calculate once per day (or could use date)
 
-  if (currentHour >= 12 && currentHour < 18) {
-    greeting = "Good afternoon";
-    timeIcon = <Cloud className="h-5 w-5" />;
-    gradientFrom = "from-blue-500/20";
-    gradientVia = "via-cyan-500/10";
-    gradientTo = "to-sky-500/20";
-    emoji = "🌤️";
-  } else if (currentHour >= 18) {
-    greeting = "Good evening";
-    timeIcon = <Moon className="h-5 w-5" />;
-    gradientFrom = "from-indigo-500/20";
-    gradientVia = "via-purple-500/10";
-    gradientTo = "to-violet-500/20";
-    emoji = "🌙";
-  }
+  // Memoize today's quote
+  const todaysQuote = useMemo(() => {
+    const motivationalQuotes = [
+      "Every step forward is progress 💪",
+      "You're doing amazing! Keep going ✨",
+      "Your mental health journey matters 🌱",
+      "Small steps lead to big changes 🚀",
+      "You're stronger than you think 💙"
+    ];
+    return motivationalQuotes[new Date().getDay() % motivationalQuotes.length];
+  }, []);
 
   // Mock data - in production, these would come from props or API
   const userStreak = 7; // days
   const wellnessScore = 78; // out of 100
-  const motivationalQuotes = [
-    "Every step forward is progress 💪",
-    "You're doing amazing! Keep going ✨",
-    "Your mental health journey matters 🌱",
-    "Small steps lead to big changes 🚀",
-    "You're stronger than you think 💙"
-  ];
-  const todaysQuote = motivationalQuotes[new Date().getDay() % motivationalQuotes.length];
 
-  const handleBookSession = () => {
+  // Memoize callbacks
+  const handleBookSession = useCallback(() => {
     onBookSession?.();
-  };
+  }, [onBookSession]);
 
-  const handleViewProfile = () => {
+  const handleViewProfile = useCallback(() => {
     setIsProfileSettingsOpen(true);
-  };
+  }, []);
 
   return (
     <motion.div
@@ -113,7 +125,7 @@ export default function DashboardHeader({
               transition={{ type: "spring", stiffness: 300 }}
             >
               <Avatar className="h-20 w-20 border-4 border-background shadow-xl ring-2 ring-primary/20">
-                <AvatarImage src={user.avatar} />
+                <AvatarImage src={user.avatar} loading="lazy" />
                 <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-primary/70 text-white">
                   {user.name.charAt(0)}
                 </AvatarFallback>
@@ -209,3 +221,6 @@ export default function DashboardHeader({
     </motion.div>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export default memo(DashboardHeader);

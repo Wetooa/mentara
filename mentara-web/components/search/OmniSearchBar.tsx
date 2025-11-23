@@ -79,7 +79,7 @@ export const OmniSearchBar: React.FC<OmniSearchBarProps> = ({
 
       searchTimeoutRef.current = setTimeout(() => {
         onSearch(searchQuery, searchFilters);
-      }, 300); // 300ms debounce
+      }, 400); // 400ms debounce for better performance
     },
     [onSearch]
   );

@@ -354,19 +354,20 @@ export function WorksheetManagementPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Enhanced Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3 text-gray-900">
-            <div className="p-2 bg-secondary rounded-lg">
-              <FileText className="h-7 w-7 text-secondary-foreground" />
-            </div>
-            Worksheet Management
-          </h1>
-          <p className="text-gray-600 mt-2 text-lg">
-            Create, assign, and track worksheets for your clients
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="max-w-7xl mx-auto p-6 lg:p-8 space-y-6">
+        {/* Enhanced Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3 text-gray-900">
+              <div className="p-2 bg-secondary rounded-lg shadow-sm">
+                <FileText className="h-7 w-7 text-secondary-foreground" />
+              </div>
+              Worksheet Management
+            </h1>
+            <p className="text-gray-600 mt-2 text-lg">
+              Create, assign, and track worksheets for your clients
+            </p>
           <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -898,6 +899,7 @@ export function WorksheetManagementPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
 
       {/* Edit Worksheet Dialog */}
       <Dialog

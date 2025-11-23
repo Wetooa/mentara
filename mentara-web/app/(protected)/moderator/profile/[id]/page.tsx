@@ -6,6 +6,7 @@ import {
   SITE_CONFIG 
 } from '@/lib/metadata';
 import { Metadata } from 'next';
+import { ProfilePageWrapper } from '@/components/navigation/ProfilePageWrapper';
 
 interface ModeratorProfilePageProps {
   params: Promise<{ id: string }>;
@@ -49,7 +50,9 @@ export default async function ModeratorProfilePage({ params }: ModeratorProfileP
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ProfilePage userId={id} />
+        <ProfilePageWrapper>
+          <ProfilePage userId={id} />
+        </ProfilePageWrapper>
       </div>
     </div>
   );

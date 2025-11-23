@@ -4,6 +4,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
+import { logger } from "@/lib/logger";
 import type { Meeting } from "@/types/api/meetings";
 
 // Use Meeting type from local API types
@@ -22,30 +23,20 @@ export function useTherapistDashboard() {
     gcTime: GC_TIME.MEDIUM, // 10 minutes
     refetchOnWindowFocus: false, // Don't refetch dashboard on focus
     retry: (failureCount, error: MentaraApiError) => {
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          `🔄 [useTherapistDashboard] Retry attempt ${failureCount + 1} for error:`,
-          error
-        );
-      }
+      logger.debug(
+        `🔄 [useTherapistDashboard] Retry attempt ${failureCount + 1} for error:`,
+        error
+      );
 
       // Don't retry authentication errors
       if (error?.status === 401) {
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `❌ [useTherapistDashboard] Authentication error - no retry`
-          );
-        }
+        logger.debug(`❌ [useTherapistDashboard] Authentication error - no retry`);
         return false;
       }
 
       // Don't retry authorization errors (user doesn't have therapist access)
       if (error?.status === 403) {
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `❌ [useTherapistDashboard] Authorization error - no retry`
-          );
-        }
+        logger.debug(`❌ [useTherapistDashboard] Authorization error - no retry`);
         return false;
       }
 
@@ -54,11 +45,7 @@ export function useTherapistDashboard() {
         error?.status === 404 &&
         error?.message?.includes("Therapist record not found")
       ) {
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `❌ [useTherapistDashboard] Data consistency error - no retry`
-          );
-        }
+        logger.debug(`❌ [useTherapistDashboard] Data consistency error - no retry`);
         return false;
       }
 
@@ -68,21 +55,15 @@ export function useTherapistDashboard() {
         if (error?.status === 429 || error?.status === 408) {
           return failureCount < 2; // Limited retries for rate limiting
         }
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `❌ [useTherapistDashboard] Client error ${error.status} - no retry`
-          );
-        }
+        logger.debug(`❌ [useTherapistDashboard] Client error ${error.status} - no retry`);
         return false;
       }
 
       // Retry server errors (500+) and network errors
       if (error?.status >= 500 || error?.status === 0) {
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `🔄 [useTherapistDashboard] Server/network error - retry ${failureCount + 1}/3`
-          );
-        }
+        logger.debug(
+          `🔄 [useTherapistDashboard] Server/network error - retry ${failureCount + 1}/3`
+        );
         return failureCount < 3;
       }
 
@@ -92,19 +73,17 @@ export function useTherapistDashboard() {
     retryDelay: (attemptIndex) => {
       // Exponential backoff: 1s, 2s, 4s
       const delay = Math.min(1000 * 2 ** attemptIndex, 4000);
-      if (process.env.NODE_ENV === "development") {
-        console.log(`⏱️ [useTherapistDashboard] Retry delay: ${delay}ms`);
-      }
+      logger.debug(`⏱️ [useTherapistDashboard] Retry delay: ${delay}ms`);
       return delay;
     },
     onError: (error: MentaraApiError) => {
-      console.error(
+      logger.error(
         `❌ [useTherapistDashboard] Dashboard fetch failed:`,
         error
       );
 
       // Enhanced error logging for debugging
-      console.error(`❌ [useTherapistDashboard] Error details:`, {
+      logger.error(`❌ [useTherapistDashboard] Error details:`, {
         status: error.status,
         code: error.code,
         message: error.message,
@@ -156,11 +135,7 @@ export function useTherapistDashboard() {
       }
     },
     onSuccess: (data) => {
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          `✅ [useTherapistDashboard] Dashboard data loaded successfully`
-        );
-      }
+      logger.debug(`✅ [useTherapistDashboard] Dashboard data loaded successfully`);
       // Clear any previous error states on successful load
     },
     meta: {

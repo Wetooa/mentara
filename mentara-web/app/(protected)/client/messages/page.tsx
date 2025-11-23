@@ -1,11 +1,26 @@
 "use client";
 
-import React from 'react';
-import { MessengerInterface } from '@/components/messaging/MessengerInterface';
+import React, { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
+import { logger } from '@/lib/logger';
+
+// Lazy load heavy messaging component
+const MessengerInterface = dynamic(() => import('@/components/messaging/MessengerInterface').then(mod => ({ default: mod.MessengerInterface })), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full p-6 flex flex-col">
+      <div className="flex-1 min-h-0 space-y-4">
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    </div>
+  )
+});
 
 export default function ClientMessagesPage() {
   const router = useRouter();
@@ -36,7 +51,7 @@ export default function ClientMessagesPage() {
       router.push(`/client/video-call?recipientId=${otherParticipant.userId}&type=${type}`);
       
     } catch (error) {
-      console.error('Failed to initiate call:', error);
+      logger.error('Failed to initiate call:', error);
       toast.error(`Failed to start ${type} call. Please try again.`);
     }
   };
@@ -49,12 +64,19 @@ export default function ClientMessagesPage() {
   return (
     <div className="h-full w-full p-6 flex flex-col">
       <div className="flex-1 min-h-0">
-        <MessengerInterface
-          onCallInitiate={handleCallInitiate}
-          onVideoMeetingJoin={handleVideoMeetingJoin}
-          className="h-full w-full"
-          targetUserId={targetUserId || undefined}
-        />
+        <Suspense fallback={
+          <div className="space-y-4">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        }>
+          <MessengerInterface
+            onCallInitiate={handleCallInitiate}
+            onVideoMeetingJoin={handleVideoMeetingJoin}
+            className="h-full w-full"
+            targetUserId={targetUserId || undefined}
+          />
+        </Suspense>
       </div>
     </div>
   );

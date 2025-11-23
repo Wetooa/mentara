@@ -1,6 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+
+// Force dynamic rendering to prevent prerender errors
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

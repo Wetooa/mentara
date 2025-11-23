@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +17,15 @@ import {
   MapPin,
   ExternalLink,
 } from "lucide-react";
-import BookingCalendar from "@/components/booking/BookingCalendar";
-import { ClientBookingInterface } from "@/components/client/ClientBookingInterface";
+// Lazy load heavy booking components
+const BookingCalendar = dynamic(() => import("@/components/booking/BookingCalendar").then(mod => ({ default: mod.default })), {
+  ssr: false,
+  loading: () => <Skeleton className="h-96 w-full" />
+});
+
+const ClientBookingInterface = dynamic(() => import("@/components/client/ClientBookingInterface").then(mod => ({ default: mod.default })), {
+  ssr: false
+});
 import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
 import { useAssignedTherapists } from "@/hooks/therapist/useTherapist";
 import { MeetingStatus } from "@/types/booking";
@@ -57,30 +66,32 @@ export default function BookingPage() {
     }
   }, [therapists, therapistsLoading, selectedTherapistId]);
 
-  const handleSlotSelect = (date: string, timeSlot: TimeSlot) => {
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handleSlotSelect = useCallback((date: string, timeSlot: TimeSlot) => {
     setSelectedDate(new Date(date));
     setSelectedTimeSlot(timeSlot);
     setShowBookingModal(true);
-  };
+  }, []);
 
-  const handleBookingSuccess = () => {
+  const handleBookingSuccess = useCallback(() => {
     toast.success("Session booked successfully!");
     setShowBookingModal(false);
     setSelectedTimeSlot(null);
     setSelectedDuration(null);
-  };
+  }, []);
 
-  const handleDurationSelect = (duration: DurationOption) => {
+  const handleDurationSelect = useCallback((duration: DurationOption) => {
     setSelectedDuration(duration);
-  };
+  }, []);
 
-  const handleCancelMeeting = async (meetingId: string) => {
+  const handleCancelMeeting = useCallback(async (meetingId: string) => {
     if (confirm("Are you sure you want to cancel this meeting?")) {
       cancelMeeting(meetingId);
     }
-  };
+  }, [cancelMeeting]);
 
-  const getStatusBadge = (status: MeetingStatus) => {
+  // Memoize utility functions
+  const getStatusBadge = useCallback((status: MeetingStatus) => {
     switch (status) {
       case MeetingStatus.SCHEDULED:
         return <Badge variant="secondary">Scheduled</Badge>;
@@ -95,12 +106,17 @@ export default function BookingPage() {
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
-  };
+  }, []);
 
-  const getMeetingTypeIcon = () => {
+  const getMeetingTypeIcon = useCallback(() => {
     // All meetings are video-only now
     return <Video className="h-4 w-4" />;
-  };
+  }, []);
+
+  const handleCloseBooking = useCallback(() => {
+    setShowBookingModal(false);
+    setSelectedTimeSlot(null);
+  }, []);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -339,7 +355,8 @@ export default function BookingPage() {
         {/* Calendar Section with Duration-First Selection */}
         <div className="lg:col-span-2">
           {selectedTherapistId ? (
-            <BookingCalendar
+            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+              <BookingCalendar
               therapistId={selectedTherapistId}
               onSlotSelect={handleSlotSelect}
               selectedDate={selectedDate}
@@ -347,6 +364,7 @@ export default function BookingPage() {
               selectedDuration={selectedDuration}
               onDurationSelect={handleDurationSelect}
             />
+            </Suspense>
           ) : (
             <Card>
               <CardContent className="p-8">
@@ -368,17 +386,16 @@ export default function BookingPage() {
 
       {/* Booking Interface */}
       {selectedTimeSlot && selectedDate && (
-        <ClientBookingInterface
-          therapistId={selectedTherapistId}
-          selectedSlot={selectedTimeSlot}
-          selectedDate={selectedDate}
-          isOpen={showBookingModal}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedTimeSlot(null);
-          }}
-          onSuccess={handleBookingSuccess}
-        />
+        <Suspense fallback={null}>
+          <ClientBookingInterface
+            therapistId={selectedTherapistId}
+            selectedSlot={selectedTimeSlot}
+            selectedDate={selectedDate}
+            isOpen={showBookingModal}
+            onClose={handleCloseBooking}
+            onSuccess={handleBookingSuccess}
+          />
+        </Suspense>
       )}
     </div>
   );

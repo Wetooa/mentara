@@ -180,6 +180,8 @@ const createQueryKeys = () => {
       ...base.billing,
       subscription: () => [...base.billing.all, 'subscription'] as const,
       invoices: (params?: any) => [...base.billing.all, 'invoices', params] as const,
+      paymentMethods: () => [...base.billing.all, 'payment-methods'] as const,
+      stats: (period?: string) => [...base.billing.all, 'stats', period] as const,
     },
     notifications: {
       ...base.notifications,

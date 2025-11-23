@@ -65,7 +65,13 @@ export class SearchService {
 
       return this.prisma.therapist.findMany({
         where,
-        include: {
+        select: {
+          userId: true,
+          areasOfExpertise: true,
+          languagesOffered: true,
+          province: true,
+          hourlyRate: true,
+          status: true,
           user: {
             select: {
               id: true,

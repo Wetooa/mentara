@@ -1,23 +1,51 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useCallback, Suspense } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   useDashboardData,
   useRecentCommunications,
 } from "@/hooks/dashboard/useClientDashboard";
 import { transformDashboardData } from "@/lib/transformers/dashboardTransformer";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import StatsOverview from "@/components/dashboard/StatsOverview";
-import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
-import WorksheetStatus from "@/components/dashboard/WorksheetStatus";
-import ProgressTracking from "@/components/dashboard/ProgressTracking";
-import AssignedTherapist from "@/components/dashboard/AssignedTherapist";
-import RecentCommunications from "@/components/dashboard/RecentCommunications";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
+
+// Lazy load dashboard components
+const DashboardHeader = dynamic(() => import("@/components/dashboard/DashboardHeader").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-10 w-64" />
+});
+
+const StatsOverview = dynamic(() => import("@/components/dashboard/StatsOverview").then(mod => ({ default: mod.default })), {
+  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    {Array.from({ length: 5 }).map((_, i) => (
+      <Skeleton key={i} className="h-28 rounded-xl" />
+    ))}
+  </div>
+});
+
+const UpcomingSessions = dynamic(() => import("@/components/dashboard/UpcomingSessions").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />
+});
+
+const WorksheetStatus = dynamic(() => import("@/components/dashboard/WorksheetStatus").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />
+});
+
+const ProgressTracking = dynamic(() => import("@/components/dashboard/ProgressTracking").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />
+});
+
+const AssignedTherapist = dynamic(() => import("@/components/dashboard/AssignedTherapist").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />
+});
+
+const RecentCommunications = dynamic(() => import("@/components/dashboard/RecentCommunications").then(mod => ({ default: mod.default })), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />
+});
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -39,13 +67,11 @@ export default function DashboardPage() {
       return null;
     }
 
-    // DEBUG: Log raw API data in development only
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 [Client Dashboard] API Data:", {
-        dashboardApiData: JSON.stringify(dashboardApiData, null, 2),
-        communicationsData: JSON.stringify(communicationsData, null, 2),
-      });
-    }
+    // Log raw API data in development only
+    logger.debug("🔍 [Client Dashboard] API Data:", {
+      dashboardApiData: JSON.stringify(dashboardApiData, null, 2),
+      communicationsData: JSON.stringify(communicationsData, null, 2),
+    });
 
     try {
       const transformedData = transformDashboardData(
@@ -53,17 +79,12 @@ export default function DashboardPage() {
         Array.isArray(communicationsData) ? communicationsData : []
       );
 
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          "✅ [Client Dashboard] Data transformed successfully:",
-          transformedData
-        );
-      }
+      logger.debug("✅ [Client Dashboard] Data transformed successfully:", transformedData);
       return transformedData;
     } catch (error) {
-      console.error("❌ [Client Dashboard] Error transforming data:", error);
+      logger.error("❌ [Client Dashboard] Error transforming data:", error);
       if (error instanceof Error) {
-        console.error("❌ [Client Dashboard] Error stack:", error.stack);
+        logger.error("❌ [Client Dashboard] Error stack:", error.stack);
       }
       throw error; // Re-throw to trigger error boundary
     }
@@ -71,50 +92,51 @@ export default function DashboardPage() {
 
   const isLoading = isDashboardLoading || isCommunicationsLoading;
 
-  const handleMessageTherapist = () => {
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handleMessageTherapist = useCallback(() => {
     router.push("/client/messages");
-  };
+  }, [router]);
 
-  const handleScheduleSession = () => {
+  const handleScheduleSession = useCallback(() => {
     router.push("/client/booking");
-  };
+  }, [router]);
 
-  const handleViewAllMessages = () => {
+  const handleViewAllMessages = useCallback(() => {
     router.push("/client/messages");
-  };
+  }, [router]);
 
-  const handleContactSelect = (contactId: string) => {
+  const handleContactSelect = useCallback((contactId: string) => {
     router.push(`/client/messages?contact=${contactId}`);
-  };
+  }, [router]);
 
-  const handleBookSession = () => {
+  const handleBookSession = useCallback(() => {
     router.push("/client/booking");
-  };
+  }, [router]);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     refetchDashboard();
-  };
+  }, [refetchDashboard]);
 
   // Navigation handlers for clickable dashboard cards
-  const handleUpcomingSessionsClick = () => {
+  const handleUpcomingSessionsClick = useCallback(() => {
     router.push("/client/sessions/upcoming");
-  };
+  }, [router]);
 
-  const handlePendingWorksheetsClick = () => {
+  const handlePendingWorksheetsClick = useCallback(() => {
     router.push("/client/worksheets");
-  };
+  }, [router]);
 
-  const handleCompletedSessionsClick = () => {
+  const handleCompletedSessionsClick = useCallback(() => {
     router.push("/client/sessions/completed");
-  };
+  }, [router]);
 
-  const handleCompletedWorksheetsClick = () => {
+  const handleCompletedWorksheetsClick = useCallback(() => {
     router.push("/client/worksheets?filter=completed");
-  };
+  }, [router]);
 
-  const handleTherapistsClick = () => {
+  const handleTherapistsClick = useCallback(() => {
     router.push("/client/therapist");
-  };
+  }, [router]);
 
   // Show error state
   if (dashboardError && !isLoading) {

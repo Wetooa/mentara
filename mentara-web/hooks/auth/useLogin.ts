@@ -23,13 +23,17 @@ export function useLogin() {
       // Store only token in localStorage (secure)
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
 
-      // Handle immediate post-login redirect - AuthProvider will handle welcome page logic
+      // Keep loading state during redirect to show loading screen
+      // Redirect immediately - AuthProvider will handle welcome page logic
       router.push(`/${response.user.role}`);
+      
+      // Don't clear loading state immediately - let the redirect happen
+      // The loading state will be cleared when the component unmounts or redirect completes
     } catch (error) {
-      throw error;
-    } finally {
       setIsLoading(false);
+      throw error;
     }
+    // Note: Don't clear loading in finally - keep it true during redirect
   };
 
   return {

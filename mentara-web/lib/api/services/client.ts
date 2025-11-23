@@ -17,7 +17,7 @@ export function createClientService(client: AxiosInstance) {
      * GET /client/profile
      */
     async getProfile(): Promise<ClientProfile> {
-      const response = await client.get("client/profile");
+      const response = await client.get("/client/profile");
       return response.data;
     },
 
@@ -36,7 +36,7 @@ export function createClientService(client: AxiosInstance) {
       location?: string;
       emergencyContact?: string;
     }): Promise<ClientProfile> {
-      const response = await client.put("client/profile", data);
+      const response = await client.put("/client/profile", data);
       return response.data;
     },
 
@@ -51,7 +51,7 @@ export function createClientService(client: AxiosInstance) {
       needsTherapistRecommendations: boolean;
     }> {
       const response = await client.get(
-        "client/needs-therapist-recommendations"
+        "/client/needs-therapist-recommendations"
       );
       return response.data;
     },
@@ -62,7 +62,7 @@ export function createClientService(client: AxiosInstance) {
      */
     async markTherapistRecommendationsSeen(): Promise<{ success: boolean }> {
       const response = await client.put(
-        "client/mark-therapist-recommendations-seen"
+        "/client/mark-therapist-recommendations-seen"
       );
       return response.data;
     },
@@ -77,7 +77,7 @@ export function createClientService(client: AxiosInstance) {
     async getAssignedTherapist(): Promise<{
       therapist: TherapistRecommendation | null;
     }> {
-      const response = await client.get("client/therapist");
+      const response = await client.get("/client/therapist");
       return response.data;
     },
 
@@ -88,7 +88,7 @@ export function createClientService(client: AxiosInstance) {
     async assignTherapist(
       therapistId: string
     ): Promise<{ therapist: TherapistRecommendation }> {
-      const response = await client.post("client/therapist", { therapistId });
+      const response = await client.post("/client/therapist", { therapistId });
       return response.data;
     },
 
@@ -97,7 +97,7 @@ export function createClientService(client: AxiosInstance) {
      * DELETE /client/therapist
      */
     async removeTherapist(): Promise<{ success: boolean }> {
-      const response = await client.delete("client/therapist");
+      const response = await client.delete("/client/therapist");
       return response.data;
     },
 
@@ -108,7 +108,7 @@ export function createClientService(client: AxiosInstance) {
     async getAssignedTherapists(): Promise<{
       therapists: TherapistRecommendation[];
     }> {
-      const response = await client.get("client/therapists");
+      const response = await client.get("/client/therapists");
       console.log("Assigned therapists response:", response.data);
       return response.data;
     },
@@ -120,7 +120,7 @@ export function createClientService(client: AxiosInstance) {
     async getPendingTherapistRequests(): Promise<{
       requests: TherapistRecommendation[];
     }> {
-      const response = await client.get("client/therapist/requests");
+      const response = await client.get("/client/therapist/requests");
       console.log("Pending therapist requests response:", response.data);
       return response.data;
     },
@@ -132,7 +132,7 @@ export function createClientService(client: AxiosInstance) {
     async requestTherapist(
       therapistId: string
     ): Promise<{ therapist: TherapistRecommendation }> {
-      const response = await client.post("client/therapist/request", {
+      const response = await client.post("/client/therapist/request", {
         therapistId,
       });
       console.log("Therapist request response:", response.data);
@@ -146,7 +146,7 @@ export function createClientService(client: AxiosInstance) {
     async cancelTherapistRequest(
       therapistId: string
     ): Promise<{ success: boolean }> {
-      const response = await client.delete(`client/therapist/request/${therapistId}`);
+      const response = await client.delete(`/client/therapist/request/${therapistId}`);
       console.log("Cancel therapist request response:", response.data);
       return response.data;
     },

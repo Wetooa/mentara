@@ -35,6 +35,7 @@ export class PostsService {
         content: true,
         attachmentUrls: true,
         attachmentNames: true,
+        attachmentSizes: true,
         createdAt: true,
         updatedAt: true,
         userId: true,

@@ -682,7 +682,7 @@ export function MessengerInterface({
     if (!messageInput.trim() || !selectedConversationId) return;
 
     const content = messageInput.trim();
-    logger.messaging.messageSent("pending", selectedConversationId, content);
+    logger.debug('Message sending (pending):', selectedConversationId, content);
 
     setMessageInput("");
     setReplyToMessage(null);
@@ -698,7 +698,7 @@ export function MessengerInterface({
       await sendMessage(content, {
         replyToMessageId: replyToMessage?.id, // Fixed: use replyToMessageId
       });
-      logger.messaging.messageSent("success", selectedConversationId, content);
+      logger.debug('Message sent (success):', selectedConversationId, content);
     } catch (error) {
       logger.error("MessengerInterface", "Failed to send message", error, {
         conversationId: selectedConversationId,
@@ -849,10 +849,7 @@ export function MessengerInterface({
                         conversation={conversation}
                         isSelected={selectedConversationId === conversation.id}
                         onSelect={() => {
-                          logger.messaging.conversationJoined(
-                            conversation.id,
-                            user?.id
-                          );
+                          logger.debug('Conversation selected:', conversation.id, user?.id);
                           setSelectedConversationId(conversation.id);
                         }}
                         isOnline={isOnline}

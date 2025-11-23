@@ -11,6 +11,7 @@ import { VideoCallInterface } from '@/components/video-calls';
 import { useVideoCall } from '@/hooks/video-calls';
 import { AlertCircle, Phone, VideoOff, ArrowLeft, Users, Clock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 export default function TherapistVideoCallPage() {
   const router = useRouter();
@@ -42,13 +43,13 @@ export default function TherapistVideoCallPage() {
       // Prevent double execution (React Strict Mode or multiple renders)
       const initKey = `${callId || 'no-call'}-${recipientId || 'no-recipient'}`;
       if (initializationAttempted.current === initKey) {
-        console.log('🚫 [TherapistVideoCall] Initialization already attempted for:', initKey);
+        logger.debug('🚫 [TherapistVideoCall] Initialization already attempted for:', initKey);
         return;
       }
       initializationAttempted.current = initKey;
 
       try {
-        console.log('🚀 [TherapistVideoCall] Initializing call:', { 
+        logger.debug('🚀 [TherapistVideoCall] Initializing call:', { 
           callId, 
           recipientId, 
           userId: user?.id,
@@ -59,8 +60,8 @@ export default function TherapistVideoCallPage() {
         setError(null);
 
         if (callId) {
-          console.log('📞 [TherapistVideoCall] Handling existing call ID:', callId);
-          console.log('📞 [TherapistVideoCall] Current call state:', {
+          logger.debug('📞 [TherapistVideoCall] Handling existing call ID:', callId);
+          logger.debug('📞 [TherapistVideoCall] Current call state:', {
             status: callState.status,
             currentCallId: callState.currentCallId,
             remotePeerId: callState.remotePeerId,
@@ -69,18 +70,18 @@ export default function TherapistVideoCallPage() {
           
           // Check if we're already in this call
           if (callState.currentCallId === callId) {
-            console.log('✅ [TherapistVideoCall] Already in call, stopping loading');
+            logger.debug('✅ [TherapistVideoCall] Already in call, stopping loading');
             setIsLoading(false);
             return;
           }
           
           // Accept the incoming call if not already handled
-          console.log('📞 [TherapistVideoCall] Accepting call:', callId);
+          logger.debug('📞 [TherapistVideoCall] Accepting call:', callId);
           acceptCall(callId);
           
           // Wait a bit for WebSocket events to process
           setTimeout(() => {
-            console.log('⏰ [TherapistVideoCall] Post-accept call state:', {
+            logger.debug('⏰ [TherapistVideoCall] Post-accept call state:', {
               status: callState.status,
               currentCallId: callState.currentCallId,
               remotePeerId: callState.remotePeerId
@@ -89,24 +90,24 @@ export default function TherapistVideoCallPage() {
           }, 2000);
           
         } else if (recipientId) {
-          console.log('📞 [TherapistVideoCall] Initiating new call to:', recipientId);
+          logger.debug('📞 [TherapistVideoCall] Initiating new call to:', recipientId);
           // Initiating a new call
           const result = await initiateCall(recipientId);
-          console.log('🎯 [TherapistVideoCall] Call initiation result:', result);
+          logger.debug('🎯 [TherapistVideoCall] Call initiation result:', result);
           if (!result.success) {
-            console.error('❌ [TherapistVideoCall] Call initiation failed:', result.error);
+            logger.error('❌ [TherapistVideoCall] Call initiation failed:', result.error);
             setError(result.error || 'Failed to initiate call');
           } else {
-            console.log('✅ [TherapistVideoCall] Call initiated successfully');
+            logger.debug('✅ [TherapistVideoCall] Call initiated successfully');
           }
           setIsLoading(false);
         } else {
-          console.error('❌ [TherapistVideoCall] Missing parameters');
+          logger.error('❌ [TherapistVideoCall] Missing parameters');
           setError('No call ID or recipient ID provided');
           setIsLoading(false);
         }
       } catch (err) {
-        console.error('❌ [TherapistVideoCall] Error in initializeCall:', err);
+        logger.error('❌ [TherapistVideoCall] Error in initializeCall:', err);
         setError('Failed to initialize video call');
         setIsLoading(false);
       }
@@ -117,7 +118,7 @@ export default function TherapistVideoCallPage() {
 
   // Monitor call state changes
   useEffect(() => {
-    console.log('🔄 [TherapistVideoCall] Call state changed:', {
+    logger.debug('🔄 [TherapistVideoCall] Call state changed:', {
       status: callState.status,
       currentCallId: callState.currentCallId,
       remotePeerId: callState.remotePeerId,
@@ -129,13 +130,13 @@ export default function TherapistVideoCallPage() {
 
     // If we have matching call IDs and we're in an active state, stop loading
     if (callId && callState.currentCallId === callId && callState.status !== 'idle') {
-      console.log('✅ [TherapistVideoCall] Call states synchronized, stopping loading');
+      logger.debug('✅ [TherapistVideoCall] Call states synchronized, stopping loading');
       setIsLoading(false);
     }
 
     // If we have an error in call state, show it
     if (callState.error && !error) {
-      console.error('❌ [TherapistVideoCall] Call state error:', callState.error);
+      logger.error('❌ [TherapistVideoCall] Call state error:', callState.error);
       setError(callState.error);
       setIsLoading(false);
     }
