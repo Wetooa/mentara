@@ -57,8 +57,11 @@ model User {
   @@index([role])
   @@index([isActive])
   @@index([role, isActive])
+  @@index([role, isActive, createdAt])
+  @@index([email, isActive])
   @@index([createdAt])
   @@index([emailVerified])
+  @@index([lastLoginAt])
 }
 
 model Client {

@@ -1,6 +1,44 @@
 // Default animation duration in seconds
 export const DEFAULT_DURATION = 0.2;
 
+/**
+ * Check if user prefers reduced motion
+ * Respects the prefers-reduced-motion media query
+ */
+export function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * Get animation duration based on user preference
+ * Returns 0 if user prefers reduced motion, otherwise returns the provided duration
+ */
+export function getAnimationDuration(duration: number = DEFAULT_DURATION): number {
+  return prefersReducedMotion() ? 0 : duration;
+}
+
+/**
+ * Get animation variants that respect reduced motion preference
+ * Returns simplified animations when user prefers reduced motion
+ */
+export function getRespectfulAnimation(variants: {
+  initial?: any;
+  animate?: any;
+  exit?: any;
+  transition?: any;
+}) {
+  if (prefersReducedMotion()) {
+    return {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0 },
+    };
+  }
+  return variants;
+}
+
 export const fade = {
   in: {
     opacity: 1,

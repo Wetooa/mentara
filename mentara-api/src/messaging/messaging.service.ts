@@ -865,6 +865,117 @@ export class MessagingService {
     );
   }
 
+  /**
+   * Batch mark multiple messages as read
+   * Optimized for marking many messages at once
+   */
+  async markMessagesAsReadBatch(
+    userId: string,
+    messageIds: string[],
+    conversationId: string,
+  ) {
+    if (messageIds.length === 0) {
+      return { success: true, marked: 0 };
+    }
+
+    // Verify user is participant in conversation
+    await this.verifyParticipant(userId, conversationId);
+
+    // Get messages to verify they exist and filter out own messages
+    const messages = await this.prisma.message.findMany({
+      where: {
+        id: { in: messageIds },
+        conversationId,
+        senderId: { not: userId }, // Exclude own messages
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const validMessageIds = messages.map((m) => m.id);
+
+    if (validMessageIds.length === 0) {
+      return { success: true, marked: 0 };
+    }
+
+    // Use createMany with skipDuplicates for efficient batch insertion
+    const readReceipts = validMessageIds.map((messageId) => ({
+      messageId,
+      userId,
+      readAt: new Date(),
+    }));
+
+    try {
+      await this.prisma.messageReadReceipt.createMany({
+        data: readReceipts,
+        skipDuplicates: true,
+      });
+
+      // Update existing read receipts that weren't created (already existed)
+      await Promise.all(
+        validMessageIds.map((messageId) =>
+          this.prisma.messageReadReceipt.updateMany({
+            where: {
+              messageId,
+              userId,
+            },
+            data: {
+              readAt: new Date(),
+            },
+          }),
+        ),
+      );
+    } catch (error) {
+      // If createMany fails, fall back to individual upserts
+      this.logger.warn('Batch read receipt creation failed, falling back to individual upserts');
+      await Promise.all(
+        validMessageIds.map((messageId) =>
+          this.prisma.messageReadReceipt.upsert({
+            where: {
+              messageId_userId: {
+                messageId,
+                userId,
+              },
+            },
+            create: {
+              messageId,
+              userId,
+            },
+            update: {
+              readAt: new Date(),
+            },
+          }),
+        ),
+      );
+    }
+
+    // Update conversation participant's lastReadAt once
+    await this.prisma.conversationParticipant.updateMany({
+      where: {
+        conversationId,
+        userId,
+      },
+      data: {
+        lastReadAt: new Date(),
+      },
+    });
+
+    // Emit batch read event
+    await this.eventBus.emit(
+      new MessageReadEvent({
+        messageId: validMessageIds[validMessageIds.length - 1], // Use last message ID
+        readBy: userId,
+        readAt: new Date(),
+        conversationId,
+        messagesSinceLastRead: validMessageIds.length,
+      }),
+    );
+
+    return { success: true, marked: validMessageIds.length };
+  }
+
   // Message Reactions
   async addMessageReaction(userId: string, messageId: string, emoji: string) {
     const message = await this.prisma.message.findUnique({

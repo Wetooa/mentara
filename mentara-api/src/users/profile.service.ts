@@ -71,45 +71,109 @@ export class ProfileService {
     profileUserId: string,
     currentUserId: string,
   ): Promise<PublicProfileResponse> {
-    // Get the target user with their relationships
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: profileUserId,
-        isActive: true, // Only show active users
-      },
-      include: {
-        therapist: true,
-        memberships: {
-          include: {
-            community: true,
+    // Flatten the query: Get user first with minimal includes
+    const [user, currentUserCommunities] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: {
+          id: profileUserId,
+          isActive: true, // Only show active users
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          avatarUrl: true,
+          bio: true,
+          role: true,
+          createdAt: true,
+          therapist: {
+            select: {
+              id: true,
+              specialties: true,
+              hourlyRate: true,
+              status: true,
+            },
           },
         },
-        posts: {
-          include: {
-            room: {
-              include: {
-                roomGroup: {
-                  include: {
-                    community: true,
+      }),
+      this.prisma.membership.findMany({
+        where: { userId: currentUserId },
+        select: { communityId: true },
+      }),
+    ]);
+
+    if (!user) {
+      throw new NotFoundException('User profile not found');
+    }
+
+    // Get memberships separately
+    const memberships = await this.prisma.membership.findMany({
+      where: { userId: profileUserId },
+      select: {
+        community: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+
+    // Get recent posts separately with minimal includes
+    const recentPosts = await this.prisma.post.findMany({
+      where: { userId: profileUserId },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        createdAt: true,
+        room: {
+          select: {
+            id: true,
+            name: true,
+            roomGroup: {
+              select: {
+                community: {
+                  select: {
+                    id: true,
+                    name: true,
+                    slug: true,
                   },
                 },
               },
             },
           },
-          orderBy: {
-            createdAt: 'desc',
-          },
-          take: 10, // Recent posts only
         },
-        comments: {
-          include: {
-            post: {
-              include: {
-                room: {
-                  include: {
-                    roomGroup: {
-                      include: {
-                        community: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+
+    // Get recent comments separately
+    const recentComments = await this.prisma.comment.findMany({
+      where: { userId: profileUserId },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        post: {
+          select: {
+            id: true,
+            title: true,
+            room: {
+              select: {
+                id: true,
+                name: true,
+                roomGroup: {
+                  select: {
+                    community: {
+                      select: {
+                        id: true,
+                        name: true,
+                        slug: true,
                       },
                     },
                   },
@@ -117,22 +181,10 @@ export class ProfileService {
               },
             },
           },
-          orderBy: {
-            createdAt: 'desc',
-          },
-          take: 10, // Recent comments only
         },
       },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User profile not found');
-    }
-
-    // Get current user's communities for filtering
-    const currentUserCommunities = await this.prisma.membership.findMany({
-      where: { userId: currentUserId },
-      select: { communityId: true },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
     });
 
     const currentUserCommunityIds = new Set(
@@ -140,22 +192,22 @@ export class ProfileService {
     );
 
     // Get mutual communities
-    const mutualCommunities = user.memberships
+    const mutualCommunities = memberships
       .filter((membership) =>
-        currentUserCommunityIds.has(membership.communityId),
+        currentUserCommunityIds.has(membership.community.id),
       )
       .map((membership) => ({
         id: membership.community.id,
         name: membership.community.name,
         slug: membership.community.slug,
-        imageUrl: membership.community.imageUrl,
+        imageUrl: membership.community.avatarUrl || undefined,
       }));
 
     // Filter and transform posts and comments
     const recentActivity: PublicProfileResponse['recentActivity'] = [];
 
     // Add posts to activity
-    user.posts.forEach((post) => {
+    recentPosts.forEach((post) => {
       if (post.room?.roomGroup?.community) {
         const isFromSharedCommunity = currentUserCommunityIds.has(
           post.room.roomGroup.community.id,
@@ -179,7 +231,7 @@ export class ProfileService {
     });
 
     // Add comments to activity
-    user.comments.forEach((comment) => {
+    recentComments.forEach((comment) => {
       if (comment.post.room?.roomGroup?.community) {
         const isFromSharedCommunity = currentUserCommunityIds.has(
           comment.post.room.roomGroup.community.id,
@@ -211,26 +263,55 @@ export class ProfileService {
     // Check connection status if current user is a client and profile user is a therapist
     let connectionStatus: 'connected' | 'pending' | null = null;
     if (user.role === 'therapist' && currentUserId !== profileUserId) {
-      // Check if there's a ClientTherapist relationship
-      const clientTherapistConnection = await this.prisma.clientTherapist.findUnique({
-        where: {
-          clientId_therapistId: {
-            clientId: currentUserId,
-            therapistId: profileUserId,
-          },
-        },
+      // Get current user to check their role
+      const currentUser = await this.prisma.user.findUnique({
+        where: { id: currentUserId },
+        select: { role: true },
       });
 
-      if (clientTherapistConnection) {
-        connectionStatus = clientTherapistConnection.status === 'active' ? 'connected' : 'pending';
+      if (currentUser?.role === 'client') {
+        // Get the therapist record to find the therapistId
+        const therapist = await this.prisma.therapist.findUnique({
+          where: { userId: profileUserId },
+          select: { id: true },
+        });
+
+        if (therapist) {
+          // Check if there's a ClientTherapist relationship
+          const client = await this.prisma.client.findUnique({
+            where: { userId: currentUserId },
+            select: { id: true },
+          });
+
+          if (client) {
+            const clientTherapistConnection = await this.prisma.clientTherapist.findUnique({
+              where: {
+                clientId_therapistId: {
+                  clientId: client.id,
+                  therapistId: therapist.id,
+                },
+              },
+            });
+
+            if (clientTherapistConnection) {
+              connectionStatus = clientTherapistConnection.status === 'active' ? 'connected' : 'pending';
+            }
+          }
+        }
       }
     }
 
+    // Get accurate counts
+    const [postsCount, commentsCount] = await Promise.all([
+      this.prisma.post.count({ where: { userId: profileUserId } }),
+      this.prisma.comment.count({ where: { userId: profileUserId } }),
+    ]);
+
     // Calculate stats
     const stats = {
-      postsCount: user.posts.length,
-      commentsCount: user.comments.length,
-      communitiesCount: user.memberships.length,
+      postsCount,
+      commentsCount,
+      communitiesCount: memberships.length,
       sharedCommunitiesCount: mutualCommunities.length,
     };
 

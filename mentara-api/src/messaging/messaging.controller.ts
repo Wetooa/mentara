@@ -310,6 +310,20 @@ export class MessagingController {
     return this.messagingService.markMessageAsRead(userId, messageId);
   }
 
+  @Post('conversations/:conversationId/messages/read-batch')
+  @HttpCode(HttpStatus.OK)
+  async markMessagesAsReadBatch(
+    @CurrentUserId() userId: string,
+    @Param('conversationId') conversationId: string,
+    @Body() body: { messageIds: string[] },
+  ) {
+    return this.messagingService.markMessagesAsReadBatch(
+      userId,
+      body.messageIds,
+      conversationId,
+    );
+  }
+
   // Message reactions
   @Post('messages/:messageId/reactions')
   @HttpCode(HttpStatus.CREATED)

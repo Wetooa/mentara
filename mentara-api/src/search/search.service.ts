@@ -18,9 +18,19 @@ export class SearchService {
       rating?: number;
       gender?: string;
       languages?: string[];
-      availability?: any;
+      availability?: {
+        dayOfWeek?: number;
+        startTime?: string;
+        endTime?: string;
+        timezone?: string;
+      };
       verifiedOnly?: boolean;
       priceRange?: { min?: number; max?: number };
+      dateRange?: { start?: Date; end?: Date };
+      sortBy?: 'rating' | 'price' | 'experience' | 'name' | 'relevance';
+      sortOrder?: 'asc' | 'desc';
+      limit?: number;
+      offset?: number;
     },
   ) {
     try {
@@ -50,16 +60,71 @@ export class SearchService {
 
       if (filters) {
         if (filters.province) {
-          where.province = filters.province;
+          where.province = { equals: filters.province, mode: 'insensitive' };
         }
         if (filters.expertise && filters.expertise.length > 0) {
-          where.expertise = { hasSome: filters.expertise };
+          where.areasOfExpertise = { hasSome: filters.expertise };
         }
-        if (filters.maxHourlyRate) {
+        if (filters.specialties && filters.specialties.length > 0) {
+          where.areasOfExpertise = { hasSome: filters.specialties };
+        }
+        if (filters.priceRange) {
+          where.hourlyRate = {};
+          if (filters.priceRange.min !== undefined) {
+            where.hourlyRate.gte = filters.priceRange.min;
+          }
+          if (filters.priceRange.max !== undefined) {
+            where.hourlyRate.lte = filters.priceRange.max;
+          }
+        } else if (filters.maxHourlyRate) {
           where.hourlyRate = { lte: filters.maxHourlyRate };
         }
         if (filters.minExperience) {
           where.yearsOfExperience = { gte: filters.minExperience };
+        }
+        if (filters.languages && filters.languages.length > 0) {
+          where.languagesOffered = { hasSome: filters.languages };
+        }
+        if (filters.verifiedOnly) {
+          where.user = { ...where.user, emailVerified: true };
+        }
+        if (filters.availability) {
+          // Filter by availability - check TherapistAvailability
+          where.availabilities = {
+            some: {
+              ...(filters.availability.dayOfWeek !== undefined && {
+                dayOfWeek: filters.availability.dayOfWeek,
+              }),
+              ...(filters.availability.startTime && {
+                startTime: { lte: filters.availability.startTime },
+              }),
+              ...(filters.availability.endTime && {
+                endTime: { gte: filters.availability.endTime },
+              }),
+            },
+          };
+        }
+      }
+
+      // Build orderBy clause
+      let orderBy: any = { createdAt: 'desc' };
+      if (filters?.sortBy) {
+        switch (filters.sortBy) {
+          case 'rating':
+            orderBy = { reviews: { _count: 'desc' } };
+            break;
+          case 'price':
+            orderBy = { hourlyRate: filters.sortOrder || 'asc' };
+            break;
+          case 'experience':
+            orderBy = { yearsOfExperience: filters.sortOrder || 'desc' };
+            break;
+          case 'name':
+            orderBy = { user: { firstName: filters.sortOrder || 'asc' } };
+            break;
+          case 'relevance':
+          default:
+            orderBy = { createdAt: 'desc' };
         }
       }
 
@@ -72,6 +137,7 @@ export class SearchService {
           province: true,
           hourlyRate: true,
           status: true,
+          yearsOfExperience: true,
           user: {
             select: {
               id: true,
@@ -79,11 +145,18 @@ export class SearchService {
               lastName: true,
               avatarUrl: true,
               bio: true,
+              emailVerified: true,
+            },
+          },
+          _count: {
+            select: {
+              reviews: true,
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
-        take: 20,
+        orderBy,
+        take: filters?.limit || 20,
+        skip: filters?.offset || 0,
       });
     } catch (error) {
       throw new InternalServerErrorException(

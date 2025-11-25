@@ -4,6 +4,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   UseGuards,
   HttpException,
   HttpStatus,
@@ -32,13 +33,15 @@ export class AdminAccountController {
   async findAll(
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
   ): Promise<AdminResponseDto[]> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving all admins`);
-      return await this.adminService.findAll();
+      return await this.adminService.findAll(limit, offset);
     } catch (error) {
       this.logger.error('Failed to retrieve admins:', error);
       throw new HttpException(

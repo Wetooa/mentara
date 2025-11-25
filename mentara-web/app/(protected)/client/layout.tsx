@@ -12,6 +12,7 @@ import { DashboardPageMetadata } from "@/components/metadata/SimplePageMetadata"
 import { UserDisplay } from "@/components/common/UserDisplay";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
+import { getSidebarStorageKey, getStorageItem } from "@/lib/config/storage";
 
 // Lazy load heavy layout components
 const NotificationDropdown = dynamic(() => import("@/components/notifications/NotificationDropdown").then(mod => ({ default: mod.NotificationDropdown })), {
@@ -35,6 +36,12 @@ const FloatingToolsButton = dynamic(() => import("@/components/microservices/Flo
   loading: () => null // No loading indicator for floating button
 });
 
+// Lazy load floating messages component
+const FloatingMessagesButton = dynamic(() => import("@/components/messaging/FloatingMessagesButton").then(mod => ({ default: mod.FloatingMessagesButton })), {
+  ssr: false,
+  loading: () => null // No loading indicator for floating button
+});
+
 export default function MainLayout({
   children,
 }: Readonly<{
@@ -44,7 +51,11 @@ export default function MainLayout({
   const router = useRouter();
   const { logout, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  
+  // Load sidebar state synchronously to match sidebar's initial state
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
+    return getStorageItem(getSidebarStorageKey('client'), false);
+  });
 
   const handleLogout = () => {
     logout();
@@ -111,12 +122,23 @@ export default function MainLayout({
 
         {/* Mobile Navigation Overlay */}
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 md:hidden">
+          <div 
+            id="mobile-menu"
+            className="fixed inset-0 z-50 md:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation menu"
+          >
             <div
               className="fixed inset-0 bg-black/50"
               onClick={() => setIsMobileMenuOpen(false)}
+              aria-hidden="true"
             />
-            <nav className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg flex flex-col">
+            <nav 
+              className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg flex flex-col"
+              role="navigation"
+              aria-label="Main navigation"
+            >
               <div className="flex items-center justify-between p-4 border-b">
                 <Image
                   src="/mentara-landscape.png"
@@ -127,7 +149,8 @@ export default function MainLayout({
                 />
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 text-gray-500 hover:text-gray-700"
+                  className="min-h-[44px] min-w-[44px] p-2 text-gray-500 hover:text-gray-700 active:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close mobile menu"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -196,14 +219,19 @@ export default function MainLayout({
         >
           <header
             className={cn(
-              "fixed top-0 right-0 z-20 flex h-[60px] w-full items-center justify-between border-b border-gray-200 bg-white px-4 transition-all duration-300",
-              isSidebarExpanded ? "md:w-[calc(100%-256px)]" : "md:w-[calc(100%-70px)]"
+              "fixed top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 transition-all duration-300",
+              isSidebarExpanded 
+                ? "md:left-64 md:right-0 md:w-auto" 
+                : "md:left-[70px] md:right-0 md:w-auto"
             )}
           >
             <div className="flex items-center gap-3 md:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2 text-gray-700 hover:text-gray-900"
+                className="min-h-[44px] min-w-[44px] p-2 text-gray-700 hover:text-gray-900 active:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Toggle mobile menu"
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-menu"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -214,9 +242,10 @@ export default function MainLayout({
                 height={24}
                 priority
                 loading="eager"
+                className="h-6"
               />
             </div>
-            <div className="relative mx-4 hidden flex-1 md:block">
+            <div className="relative mx-4 hidden flex-1 md:flex md:items-center">
               <LayoutOmniSearchBar
                 placeholder="Search therapists, posts, communities..."
                 className="w-full"
@@ -277,7 +306,7 @@ export default function MainLayout({
           </div>
 
           {/* Main Content - Responsive padding */}
-          <main className="flex-1 w-full h-full pt-[60px] md:pt-[60px] pb-16 md:pb-0 bg-gray-100">
+          <main id="main-content" className="flex-1 w-full h-full pt-[60px] md:pt-[60px] pb-16 md:pb-0 bg-gray-100" tabIndex={-1}>
             <div className="md:hidden h-[50px]" />{" "}
             {/* Extra space for mobile search */}
             {children}
@@ -291,8 +320,15 @@ export default function MainLayout({
             <FloatingToolsButton />
           ) : null}
 
+          {/* Floating Messages Button - Available on all pages */}
+          <FloatingMessagesButton />
+
           {/* Mobile Bottom Navigation */}
-          <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200">
+          <nav 
+            className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 safe-area-inset-bottom"
+            role="navigation"
+            aria-label="Mobile navigation"
+          >
             <div className="flex items-center justify-around py-2">
               {navItems.slice(0, 5).map((item) => {
                 const isActive = pathname === item.path;
@@ -300,11 +336,13 @@ export default function MainLayout({
                   <Link
                     key={item.id}
                     href={item.path}
-                    className={`relative group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0 ${
+                    className={`relative group flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl transition-all duration-300 ${
                       isActive
                         ? "text-primary"
-                        : "text-muted-foreground hover:text-primary"
+                        : "text-muted-foreground active:text-primary active:bg-primary/10"
                     }`}
+                    aria-label={item.name}
+                    aria-current={isActive ? "page" : undefined}
                   >
                     <Image
                       src={item.icon}

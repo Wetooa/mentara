@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
   HttpException,
   HttpStatus,
   UseGuards,
@@ -36,9 +37,13 @@ export class CommentsController {
   ) {}
 
   @Get()
-  async findAll(@CurrentUserId() id: string): Promise<Comment[]> {
+  async findAll(
+    @CurrentUserId() id: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ): Promise<Comment[]> {
     try {
-      return await this.commentsService.findAll(id);
+      return await this.commentsService.findAll(id, limit, offset);
     } catch (error) {
       throw new HttpException(
         `Failed to fetch comments: ${error instanceof Error ? error.message : 'Unknown error'}`,

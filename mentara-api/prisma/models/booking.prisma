@@ -24,6 +24,8 @@ model Meeting {
   @@index([endTime])
   @@index([status])
   @@index([therapistId, startTime, status])
+  @@index([therapistId, status, startTime])
+  @@index([clientId, status, startTime])
   @@index([therapistId, startTime, endTime])
   @@index([clientId, startTime, endTime])
 }

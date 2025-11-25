@@ -1,9 +1,10 @@
-import { Controller, Get, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, UseGuards, Query, UseInterceptors } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { RoleBasedAccessGuard } from '../auth/core/guards/role-based-access.guard';
 import { TherapistDashboardAccessGuard } from '../auth/core/guards/therapist-dashboard-access.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
+import { CacheInterceptor } from '../common/interceptors/cache.interceptor';
 import {
   ClientOnly,
   TherapistOnly,
@@ -18,12 +19,14 @@ export class DashboardController {
 
   @Get('client')
   @ClientOnly()
+  @UseInterceptors(CacheInterceptor)
   getClientDashboard(@CurrentUserId() userId: string) {
     return this.dashboardService.getClientDashboardData(userId);
   }
 
   @Get('therapist')
   @UseGuards(JwtAuthGuard, TherapistDashboardAccessGuard)
+  @UseInterceptors(CacheInterceptor)
   getTherapistDashboard(@CurrentUserId() userId: string) {
     return this.dashboardService.getTherapistDashboardData(userId);
   }

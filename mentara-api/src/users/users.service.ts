@@ -80,20 +80,25 @@ export class UsersService {
     }
   }
 
-  async findByRole(role: string): Promise<User[]> {
+  async findByRole(role: string, limit = 100, offset = 0): Promise<User[]> {
     return await this.prisma.user.findMany({
       where: {
         role,
         isActive: true, // Only return active users
       },
+      take: limit,
+      skip: offset,
+      orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findAllIncludeInactive(): Promise<User[]> {
+  async findAllIncludeInactive(limit = 100, offset = 0): Promise<User[]> {
     // For administrative purposes - include inactive users
     try {
       return await this.prisma.user.findMany({
         orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
       });
     } catch (error) {
       throw new InternalServerErrorException(

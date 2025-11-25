@@ -9,10 +9,12 @@ export class AdminService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<AdminResponseDto[]> {
+  async findAll(limit = 100, offset = 0): Promise<AdminResponseDto[]> {
     try {
       const admins = await this.prisma.admin.findMany({
         orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
       });
 
       return admins.map((admin) => ({

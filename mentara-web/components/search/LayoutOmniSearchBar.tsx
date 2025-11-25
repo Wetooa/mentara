@@ -137,7 +137,7 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
             // Therapist search returns userId (therapist's userId) or user.id
             const therapistId = result.userId || result.user?.id || result.id;
             if (therapistId) {
-              router.push(`/client/therapist/${therapistId}`);
+              router.push(`/client/profile/${therapistId}`);
             } else {
               logger.error("LayoutOmniSearchBar", "Therapist ID not found", { result });
             }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -8,6 +8,7 @@ import { useApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { logger } from '@/lib/logger';
+import { useMessagingStore } from '@/store/messaging';
 
 // Lazy load heavy messaging component
 const MessengerInterface = dynamic(() => import('@/components/messaging/MessengerInterface').then(mod => ({ default: mod.MessengerInterface })), {
@@ -25,9 +26,20 @@ const MessengerInterface = dynamic(() => import('@/components/messaging/Messenge
 export default function ClientMessagesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const targetUserId = searchParams.get('userId');
   const api = useApi();
   const { user } = useAuth();
+  const { targetUserId: storeTargetUserId, setTargetUserId } = useMessagingStore();
+  
+  // Handle URL params (for backward compatibility)
+  const urlTargetUserId = searchParams.get('userId') || searchParams.get('contact');
+  const targetUserId = storeTargetUserId || urlTargetUserId || undefined;
+  
+  // Clear targetUserId from store after using it
+  useEffect(() => {
+    if (storeTargetUserId) {
+      setTargetUserId(null);
+    }
+  }, [storeTargetUserId, setTargetUserId]);
 
   const handleCallInitiate = async (conversationId: string, type: 'audio' | 'video') => {
     try {

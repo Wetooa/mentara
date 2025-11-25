@@ -8,6 +8,7 @@ import {
   Param,
   Put,
   Post,
+  Query,
   UseGuards,
   UseInterceptors,
   UploadedFiles,
@@ -50,13 +51,15 @@ export class UsersController {
   async findAll(
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
   ): Promise<UserDto[]> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving all users`);
-      const users = await this.usersService.findAll();
+      const users = await this.usersService.findAll(limit, offset);
       return UserResponseDto.fromPrismaUsers(users);
     } catch (error) {
       this.logger.error('Failed to fetch users:', error);
@@ -71,6 +74,8 @@ export class UsersController {
   async findAllIncludeInactive(
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
   ): Promise<UserDto[]> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
@@ -79,7 +84,7 @@ export class UsersController {
       this.logger.log(
         `Admin ${currentUserId} retrieving all users including inactive`,
       );
-      const users = await this.usersService.findAllIncludeInactive();
+      const users = await this.usersService.findAllIncludeInactive(limit, offset);
       return UserResponseDto.fromPrismaUsers(users);
     } catch (error) {
       this.logger.error('Failed to fetch all users:', error);

@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
+import { useMessagingStore } from "@/store/messaging";
 
 // Lazy load dashboard components
 const DashboardHeader = dynamic(() => import("@/components/dashboard/DashboardHeader").then(mod => ({ default: mod.default })), {
@@ -106,7 +107,9 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleContactSelect = useCallback((contactId: string) => {
-    router.push(`/client/messages?contact=${contactId}`);
+    // Set the target user ID in store for starting/finding conversation
+    useMessagingStore.getState().setTargetUserId(contactId);
+    router.push("/client/messages");
   }, [router]);
 
   const handleBookSession = useCallback(() => {

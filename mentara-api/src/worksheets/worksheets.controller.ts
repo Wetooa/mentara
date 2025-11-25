@@ -49,6 +49,7 @@ export class WorksheetsController {
       query.therapistId,
       status,
       query.limit,
+      query.offset,
     );
   }
 

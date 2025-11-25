@@ -79,11 +79,11 @@ export function FloatingToolsButton() {
 
   return (
     <>
-      {/* Floating Button - Responsive positioning */}
+      {/* Floating Button - Responsive positioning - Higher to avoid messages overlap */}
       <motion.div
         initial={false}
         animate={{ scale: isOpen ? 0.9 : 1 }}
-        className="fixed bottom-24 right-4 z-50 md:bottom-8 md:right-8"
+        className="fixed bottom-40 right-4 z-40 md:bottom-8 md:right-8"
       >
         <Button
           onClick={() => setIsOpen(!isOpen)}
@@ -130,26 +130,26 @@ export function FloatingToolsButton() {
             </SheetHeader>
           </div>
 
-          <div className="px-4 sm:px-6 py-6 space-y-4">
+          <div className="px-4 sm:px-6 py-4 space-y-3">
             {!selectedTool ? (
               <>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs text-gray-500 mb-2">
                   Choose a tool to get started:
                 </p>
                 
                 {/* Crisis Support - Prominent First Option */}
                 <Card
-                  className="cursor-pointer hover:border-red-500/50 transition-all hover:shadow-lg border-2 border-red-500/30 bg-gradient-to-br from-red-50/50 to-red-100/30"
+                  className="cursor-pointer hover:border-red-500/50 transition-all hover:shadow-md border border-red-500/30 bg-gradient-to-br from-red-50/50 to-red-100/30"
                   onClick={() => setShowCrisisSupport(true)}
                 >
-                  <CardHeader className="pb-4 p-5">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-xl text-red-600 flex-shrink-0">
-                        <AlertTriangle className="h-5 w-5" />
+                  <CardHeader className="pb-3 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-lg text-red-600 flex-shrink-0">
+                        <AlertTriangle className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg font-semibold text-red-700">One Tap Crisis Support</CardTitle>
-                        <CardDescription className="text-sm mt-1.5 leading-relaxed text-red-600/80">
+                        <CardTitle className="text-base font-semibold text-red-700">One Tap Crisis Support</CardTitle>
+                        <CardDescription className="text-xs mt-1 leading-relaxed text-red-600/80">
                           Immediate help and resources when you need them most
                         </CardDescription>
                       </div>
@@ -157,21 +157,21 @@ export function FloatingToolsButton() {
                   </CardHeader>
                 </Card>
 
-                <div className="grid gap-4">
+                <div className="grid gap-3">
                   {tools.map((tool) => (
                     <Card
                       key={tool.id}
-                      className="cursor-pointer hover:border-primary/50 transition-all hover:shadow-lg border-2"
+                      className="cursor-pointer hover:border-primary/50 transition-all hover:shadow-md border"
                       onClick={() => setSelectedTool(tool.id)}
                     >
-                      <CardHeader className="pb-4 p-5">
-                        <div className="flex items-center gap-4">
-                          <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl text-primary flex-shrink-0">
+                      <CardHeader className="pb-3 p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg text-primary flex-shrink-0">
                             {tool.icon}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <CardTitle className="text-lg font-semibold">{tool.name}</CardTitle>
-                            <CardDescription className="text-sm mt-1.5 leading-relaxed">
+                            <CardTitle className="text-base font-semibold">{tool.name}</CardTitle>
+                            <CardDescription className="text-xs mt-1 leading-relaxed">
                               {tool.description}
                             </CardDescription>
                           </div>

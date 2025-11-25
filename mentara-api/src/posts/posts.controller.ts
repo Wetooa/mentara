@@ -165,9 +165,13 @@ export class PostsController {
   }
 
   @Get('user/:userId')
-  async findByUserId(@Param('userId') userId: string): Promise<PostEntity[]> {
+  async findByUserId(
+    @Param('userId') userId: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ): Promise<PostEntity[]> {
     try {
-      return await this.postsService.findByUserId(userId);
+      return await this.postsService.findByUserId(userId, limit, offset);
     } catch (error) {
       throw new HttpException(
         `Failed to fetch posts for user: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -181,9 +185,11 @@ export class PostsController {
   async findByRoomId(
     @Param('roomId') roomId: string,
     @CurrentUserId() userId: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
   ): Promise<PostEntity[]> {
     try {
-      return await this.postsService.findByRoomId(roomId, userId);
+      return await this.postsService.findByRoomId(roomId, userId, limit, offset);
     } catch (error) {
       throw new HttpException(
         `Failed to fetch posts for community: ${error instanceof Error ? error.message : 'Unknown error'}`,

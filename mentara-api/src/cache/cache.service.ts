@@ -68,12 +68,48 @@ export class CacheService {
 
   /**
    * Invalidate cache by pattern (requires Redis)
+   * For in-memory cache, this will attempt to match keys
    */
   async invalidatePattern(pattern: string): Promise<void> {
     try {
-      // This requires Redis-specific implementation
-      // For now, we'll log a warning if pattern invalidation is needed
-      this.logger.warn(`Pattern invalidation requested for ${pattern}, but not implemented in in-memory cache`);
+      const store = (this.cacheManager as any).store;
+      
+      // If using Redis store, use Redis pattern matching
+      if (store && store.client) {
+        // Redis implementation using SCAN for better performance than KEYS
+        const client = store.client;
+        const keys: string[] = [];
+        let cursor = '0';
+        
+        do {
+          const result = await client.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+          cursor = result[0];
+          keys.push(...result[1]);
+        } while (cursor !== '0');
+        
+        if (keys.length > 0) {
+          // Delete keys in batches to avoid blocking
+          const batchSize = 100;
+          for (let i = 0; i < keys.length; i += batchSize) {
+            const batch = keys.slice(i, i + batchSize);
+            await Promise.all(batch.map((key: string) => this.del(key)));
+          }
+          this.logger.log(`✅ Invalidated ${keys.length} Redis cache keys matching pattern: ${pattern}`);
+        } else {
+          this.logger.debug(`No keys found matching pattern: ${pattern}`);
+        }
+      } else {
+        // For in-memory cache, try to match keys if store supports it
+        if (store && typeof store.keys === 'function') {
+          const keys = await store.keys();
+          const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+          const matchingKeys = keys.filter((key: string) => regex.test(key));
+          await Promise.all(matchingKeys.map((key: string) => this.del(key)));
+          this.logger.log(`Invalidated ${matchingKeys.length} cache keys matching pattern: ${pattern}`);
+        } else {
+          this.logger.warn(`Pattern invalidation requested for ${pattern}, but store doesn't support key enumeration`);
+        }
+      }
     } catch (error) {
       this.logger.error(`Error invalidating cache pattern ${pattern}:`, error);
     }

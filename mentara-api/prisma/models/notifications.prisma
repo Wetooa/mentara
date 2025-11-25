@@ -19,6 +19,7 @@ model Notification {
   @@index([priority])
   @@index([createdAt])
   @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, type, createdAt(sort: Desc)])
 }
 
 enum NotificationType {

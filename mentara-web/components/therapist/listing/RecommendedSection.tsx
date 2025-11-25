@@ -313,7 +313,7 @@ export default function RecommendedSection() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
 
                 {/* Foreground content */}
-                <CardContent className="p-4 relative z-20 flex flex-col items-center justify-end h-full text-white mt-auto">
+                <CardContent className="p-4 pt-0 relative z-20 flex flex-col items-center justify-end h-full text-white mt-auto">
                   <div className="w-full">
                     <div className="flex gap-2 flex-wrap mb-3">
                       {therapist.specialties

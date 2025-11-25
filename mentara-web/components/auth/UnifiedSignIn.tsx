@@ -61,7 +61,7 @@ export function UnifiedSignIn() {
           description: "Taking you to your dashboard",
         });
       } catch (err: any) {
-        console.error("Login error:", err);
+        // Error is handled by mapLoginError and toast notifications below
         
         // Map error to user-friendly message
         const errorResult = mapLoginError(err);

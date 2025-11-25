@@ -262,7 +262,7 @@ export default function AdminLayout({
         </header>
 
         {/* Main Content - Responsive padding */}
-        <main className="flex-1 w-full h-full pt-16 pb-16 md:pb-0 overflow-y-auto bg-gray-50">
+        <main id="main-content" className="flex-1 w-full h-full pt-16 pb-16 md:pb-0 overflow-y-auto bg-gray-50" tabIndex={-1}>
           <div className="p-4 md:p-6">{children}</div>
         </main>
 

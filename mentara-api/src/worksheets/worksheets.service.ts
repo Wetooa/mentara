@@ -24,6 +24,7 @@ export class WorksheetsService {
     therapistId?: string,
     status?: string,
     limit?: number,
+    offset?: number,
   ): Promise<{ worksheets: any[]; total: number; hasMore: boolean }> {
     const where = {};
 
@@ -62,12 +63,14 @@ export class WorksheetsService {
     // Get total count for pagination
     const total = await this.prisma.worksheet.count({ where });
 
-    // Apply limit if specified
-    const take = limit ? Number(limit) : undefined;
+    // Apply pagination
+    const take = limit ? Number(limit) : 50; // Default limit
+    const skip = offset ? Number(offset) : 0;
 
     const worksheets = await this.prisma.worksheet.findMany({
       where,
       take,
+      skip,
       include: {
         client: {
           include: {

@@ -29,6 +29,7 @@ import {
 import { useUserSearch } from "./hooks/useUserSearch";
 import { useRecentSearches } from "./hooks/useRecentSearches";
 import { RecentSearches } from "./RecentSearches";
+import { logger } from "@/lib/logger";
 // import { ConnectionStatus, useGlobalConnectionStatus } from '@/components/realtime/ConnectionStatus';
 
 export interface User {
@@ -120,7 +121,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
           const results = await searchUsers(searchQuery, role);
           setSuggestions(results || []);
         } catch (error) {
-          console.error("Search error:", error);
+          logger.error("Search error:", error);
           setSuggestions([]);
         } finally {
           setIsLoading(false);

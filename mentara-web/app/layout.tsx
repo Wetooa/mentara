@@ -6,6 +6,7 @@ import QueryProvider from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LoadingBarProvider } from "@/components/providers/LoadingBarProvider";
 import { generatePageMetadata, SITE_CONFIG, generateHomepageStructuredData } from "@/lib/metadata";
+import { SkipLink } from "@/components/common/SkipLink";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
@@ -122,6 +123,7 @@ export default function RootLayout({
       <body
         className={`font-[Futura] antialiased min-h-screen min-w-screen h-screen w-screen`}
       >
+        <SkipLink href="#main-content">Skip to main content</SkipLink>
         <QueryProvider>
           <AuthProvider>
             <ThemeProvider

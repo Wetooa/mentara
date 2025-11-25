@@ -53,7 +53,7 @@ export class CommentsService {
     }
   }
 
-  async findAll(userId?: string): Promise<Comment[]> {
+  async findAll(userId?: string, limit = 50, offset = 0): Promise<Comment[]> {
     try {
       return await this.prisma.comment.findMany({
         include: {
@@ -91,6 +91,7 @@ export class CommentsService {
             orderBy: {
               createdAt: 'asc',
             },
+            take: 10, // Limit nested comments
           },
           hearts: userId
             ? {
@@ -109,6 +110,8 @@ export class CommentsService {
         orderBy: {
           createdAt: 'desc',
         },
+        take: limit,
+        skip: offset,
       });
     } catch (error) {
       if (

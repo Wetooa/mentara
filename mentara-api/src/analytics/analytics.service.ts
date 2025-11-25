@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
   buildDateFilter,
@@ -103,33 +104,64 @@ export class AnalyticsService {
         _count: { role: true },
       });
 
-      // Get monthly user growth using Prisma instead of raw SQL
-      const allUsers = await this.prisma.user.findMany({
-        where: whereDate,
-        select: {
-          createdAt: true,
-          role: true,
-        },
-      });
+      // Use SQL aggregation instead of loading all users into memory
+      // This uses PostgreSQL's date_trunc function for efficient grouping
+      let monthlyGrowthRaw: Array<{
+        month: Date;
+        role: string;
+        count: bigint;
+      }>;
 
-      // Group by month and role
+      if (startDate || endDate) {
+        monthlyGrowthRaw = await this.prisma.$queryRaw<
+          Array<{
+            month: Date;
+            role: string;
+            count: bigint;
+          }>
+        >`
+          SELECT 
+            DATE_TRUNC('month', "createdAt")::date as month,
+            role,
+            COUNT(*)::bigint as count
+          FROM "User"
+          WHERE "createdAt" >= ${startDate || new Date(0)}::timestamp
+            AND "createdAt" <= ${endDate || new Date()}::timestamp
+          GROUP BY DATE_TRUNC('month', "createdAt"), role
+          ORDER BY month DESC, role
+          LIMIT 120
+        `;
+      } else {
+        monthlyGrowthRaw = await this.prisma.$queryRaw<
+          Array<{
+            month: Date;
+            role: string;
+            count: bigint;
+          }>
+        >`
+          SELECT 
+            DATE_TRUNC('month', "createdAt")::date as month,
+            role,
+            COUNT(*)::bigint as count
+          FROM "User"
+          GROUP BY DATE_TRUNC('month', "createdAt"), role
+          ORDER BY month DESC, role
+          LIMIT 120
+        `;
+      }
+
+      // Transform SQL results into the expected format
       const monthlyGrowthMap = new Map<string, Map<string, number>>();
-      allUsers.forEach((user) => {
-        const monthKey = new Date(
-          user.createdAt.getFullYear(),
-          user.createdAt.getMonth(),
-          1,
-        ).toISOString();
-
+      monthlyGrowthRaw.forEach((row) => {
+        const monthKey = new Date(row.month).toISOString();
         if (!monthlyGrowthMap.has(monthKey)) {
           monthlyGrowthMap.set(monthKey, new Map());
         }
-
         const roleMap = monthlyGrowthMap.get(monthKey)!;
-        roleMap.set(user.role, (roleMap.get(user.role) ?? 0) + 1);
+        roleMap.set(row.role, Number(row.count));
       });
 
-      // Convert to array and sort by month (descending)
+      // Convert to array and sort by month (descending), limit to 12 months
       const monthlyGrowth = Array.from(monthlyGrowthMap.entries())
         .map(([month, roleMap]) => ({
           month: new Date(month),

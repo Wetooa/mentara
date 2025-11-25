@@ -265,70 +265,111 @@ export class EnhancedCommunityService {
     userId?: string,
   ): Promise<EnhancedCommunityDetails> {
     try {
-      const community = await this.prisma.community.findUnique({
-        where: { id: communityId },
-        include: {
-          _count: {
-            select: {
-              memberships: true,
-            },
-          },
-          roomGroups: {
-            include: {
-              rooms: {
-                include: {
-                  posts: {
-                    include: {
-                      user: {
-                        select: {
-                          id: true,
-                          firstName: true,
-                          lastName: true,
-                          avatarUrl: true,
-                        },
-                      },
-                      _count: {
-                        select: {
-                          comments: true,
-                          hearts: true,
-                        },
-                      },
-                    },
-                    orderBy: { createdAt: 'desc' },
-                    take: 5,
-                  },
-                },
+      // Flatten the query: Get community first with minimal includes
+      const [community, userMembership] = await Promise.all([
+        this.prisma.community.findUnique({
+          where: { id: communityId },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            slug: true,
+            avatarUrl: true,
+            bannerUrl: true,
+            isPublic: true,
+            createdAt: true,
+            updatedAt: true,
+            _count: {
+              select: {
+                memberships: true,
               },
             },
           },
-          moderatorCommunities: {
-            include: {
-              moderator: {
-                include: {
-                  user: {
-                    select: {
-                      id: true,
-                      firstName: true,
-                      lastName: true,
-                      avatarUrl: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          memberships: userId
-            ? {
-                where: { userId },
-                select: { id: true },
-              }
-            : false,
-        },
-      });
+        }),
+        userId
+          ? this.prisma.membership.findFirst({
+              where: { userId, communityId },
+              select: { id: true },
+            })
+          : Promise.resolve(null),
+      ]);
 
       if (!community) {
         throw new NotFoundException(`Community ${communityId} not found`);
       }
+
+      // Get room groups and rooms separately to avoid deep nesting
+      const roomGroups = await this.prisma.roomGroup.findMany({
+        where: { communityId },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          order: true,
+        },
+      });
+
+      const roomGroupIds = roomGroups.map((rg) => rg.id);
+      const rooms = await this.prisma.room.findMany({
+        where: { roomGroupId: { in: roomGroupIds } },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          roomGroupId: true,
+        },
+      });
+
+      const roomIds = rooms.map((r) => r.id);
+
+      // Get recent posts separately with minimal includes
+      const recentPosts = await this.prisma.post.findMany({
+        where: { roomId: { in: roomIds } },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          createdAt: true,
+          userId: true,
+          roomId: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
+          _count: {
+            select: {
+              comments: true,
+              hearts: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      });
+
+      // Get moderators separately
+      const moderatorCommunities = await this.prisma.moderatorCommunity.findMany({
+        where: { communityId },
+        select: {
+          assignedAt: true,
+          moderator: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+        },
+      });
 
       // Calculate time ranges
       const now = new Date();
@@ -336,9 +377,7 @@ export class EnhancedCommunityService {
       const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       // Get all posts from this community's rooms for statistics
-      const communityRoomIds = community.roomGroups.flatMap((rg) =>
-        rg.rooms.map((r) => r.id),
-      );
+      const communityRoomIds = roomIds;
 
       // Get detailed statistics
       const [
@@ -392,8 +431,7 @@ export class EnhancedCommunityService {
       };
 
       if (userId) {
-        const membership = community.memberships?.[0];
-        if (membership) {
+        if (userMembership) {
           membershipStatus = 'member';
 
           // Check if user can moderate based on global role and community moderator assignment
@@ -411,25 +449,22 @@ export class EnhancedCommunityService {
         }
       }
 
+      // Get total posts count
+      const totalPosts = await this.prisma.post.count({
+        where: { roomId: { in: roomIds } },
+      });
+
       return {
         id: community.id,
         name: community.name,
         slug: community.slug,
         description: community.description,
-        imageUrl: community.imageUrl,
+        imageUrl: community.avatarUrl || undefined,
         createdAt: community.createdAt,
         updatedAt: community.updatedAt,
         memberCount: community._count.memberships,
         stats: {
-          totalPosts: community.roomGroups.reduce(
-            (total, rg) =>
-              total +
-              rg.rooms.reduce(
-                (roomTotal, room) => roomTotal + room.posts.length,
-                0,
-              ),
-            0,
-          ),
+          totalPosts,
           totalComments,
           activeMembers,
           recentActivity: {
@@ -438,8 +473,7 @@ export class EnhancedCommunityService {
             newMembersThisWeek: weeklyMembers,
           },
         },
-        recentPosts: community.roomGroups
-          .flatMap((rg) => rg.rooms.flatMap((room) => room.posts))
+        recentPosts: recentPosts
           .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
           .slice(0, 5)
           .map((post) => ({
@@ -464,7 +498,7 @@ export class EnhancedCommunityService {
             commentCount: post._count.comments,
           })),
         topContributors,
-        moderators: community.moderatorCommunities.map((mc) => ({
+        moderators: moderatorCommunities.map((mc) => ({
           id: mc.moderator.user.id,
           firstName: mc.moderator.user.firstName,
           lastName: mc.moderator.user.lastName,
@@ -525,10 +559,19 @@ export class EnhancedCommunityService {
                         select: { comments: true, hearts: true },
                       },
                     },
+                    take: 10, // Limit posts per room
                   },
                 },
+                take: 10, // Limit rooms per room group
               },
             },
+            take: 5, // Limit room groups per community
+          },
+        },
+        take: 50, // Limit to top 50 communities for trending calculation
+        orderBy: {
+          memberships: {
+            _count: 'desc',
           },
         },
       });
@@ -910,7 +953,7 @@ export class EnhancedCommunityService {
         rg.rooms.map((r) => r.id),
       );
 
-      // Get users with their contribution counts
+      // Get users with their contribution counts (limited to top contributors)
       const contributors = await this.prisma.user.findMany({
         where: {
           memberships: {
@@ -935,6 +978,7 @@ export class EnhancedCommunityService {
             },
           },
         },
+        take: limit || 10, // Limit to top N contributors
         take: limit * 2, // Get more to calculate scores
       });
 

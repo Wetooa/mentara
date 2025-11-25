@@ -1,0 +1,6 @@
+# Redis data
+*.rdb
+*.aof
+dump.rdb
+appendonly.aof
+

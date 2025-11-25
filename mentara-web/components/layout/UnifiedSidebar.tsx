@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getSidebarStorageKey, getStorageItem, setStorageItem } from "@/lib/config/storage";
 
 export interface NavItem {
   name: string;
@@ -40,26 +41,25 @@ export function UnifiedSidebar({
   onToggle,
 }: UnifiedSidebarProps) {
   const pathname = usePathname();
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const key = storageKey || `${role}-sidebar-expanded`;
+  const key = storageKey || getSidebarStorageKey(role);
+  
+  // Load sidebar state synchronously on initial render
+  const [isExpanded, setIsExpanded] = useState(() => {
+    return getStorageItem(key, defaultExpanded);
+  });
 
-  // Load sidebar state from localStorage
+  // Notify parent of initial state on mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(key);
-      if (saved !== null) {
-        setIsExpanded(JSON.parse(saved));
-      }
-    }
-  }, [key]);
+    const initialExpanded = getStorageItem(key, defaultExpanded);
+    onToggle?.(initialExpanded);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Save sidebar state to localStorage
   const toggleSidebar = useCallback(() => {
     const newState = !isExpanded;
     setIsExpanded(newState);
-    if (typeof window !== "undefined") {
-      localStorage.setItem(key, JSON.stringify(newState));
-    }
+    setStorageItem(key, newState);
     onToggle?.(newState);
   }, [isExpanded, key, onToggle]);
 
@@ -125,9 +125,11 @@ export function UnifiedSidebar({
   return (
     <nav
       className={cn(
-        "hidden md:flex fixed left-0 top-0 z-10 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
+        "hidden md:flex fixed left-0 top-0 z-30 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
         isExpanded ? "w-64" : "w-[70px]"
       )}
+      aria-label={`${role} navigation`}
+      role="navigation"
     >
       {/* Header with Logo and Toggle */}
       <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
@@ -137,6 +139,7 @@ export function UnifiedSidebar({
             "flex items-center transition-all duration-300",
             isExpanded ? "" : "justify-center"
           )}
+          aria-label={`${role} dashboard home`}
         >
           <Image
             src={logoPath}
@@ -157,11 +160,11 @@ export function UnifiedSidebar({
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className={cn(
-            "h-8 w-8 transition-all duration-300",
-            !isExpanded && "opacity-0 hover:opacity-100"
-          )}
+          className="h-8 w-8 transition-all duration-300 flex-shrink-0"
           title={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={isExpanded}
+          aria-controls="sidebar-navigation-items"
         >
           {isExpanded ? (
             <ChevronLeft className="h-4 w-4" />
@@ -172,10 +175,19 @@ export function UnifiedSidebar({
       </div>
 
       {/* Navigation Items */}
-      <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
+      <div 
+        id="sidebar-navigation-items"
+        className="flex flex-1 flex-col gap-2 overflow-y-auto p-4"
+        role="list"
+        aria-label="Navigation menu"
+      >
         {navItems.map((item) => {
+          // Special handling for dashboard - only match exact path or /client/
+          // Other routes match if pathname starts with the item path
           const isActive =
-            pathname === item.path || pathname.startsWith(`${item.path}/`);
+            item.path === "/client"
+              ? pathname === "/client" || pathname === "/client/"
+              : pathname === item.path || pathname.startsWith(`${item.path}/`);
 
           return (
             <Link
@@ -189,6 +201,9 @@ export function UnifiedSidebar({
                 !isExpanded && "justify-center px-2"
               )}
               title={!isExpanded ? item.name : undefined}
+              aria-label={item.name}
+              aria-current={isActive ? "page" : undefined}
+              role="listitem"
             >
               {/* Left accent indicator */}
               <div

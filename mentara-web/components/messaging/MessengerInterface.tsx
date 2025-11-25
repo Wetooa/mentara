@@ -36,13 +36,22 @@ import {
   Copy,
   Forward,
   Flag,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMessaging } from "@/hooks/messaging/useMessaging";
 import { useStartConversation } from "@/hooks/messaging/useStartConversation";
 import { logger } from "@/lib/logger";
+import { useMessagingStore } from "@/store/messaging";
 import { ConnectionStatus } from "@/components/messaging/ConnectionStatus";
 import { useAuth } from "@/contexts/AuthContext";
+import { CrisisSupportButton } from "@/components/messaging/CrisisSupportButton";
+import { MoodSelector, getMoodEmoji, type Mood } from "@/components/messaging/MoodSelector";
+import { useMoodTracking } from "@/hooks/messaging/useMoodTracking";
+import { QuickResponses } from "@/components/messaging/QuickResponses";
+import { SessionWorksheetActions } from "@/components/messaging/SessionWorksheetActions";
+import { WellnessQuickAccess } from "@/components/messaging/WellnessQuickAccess";
+import { useFileUpload } from "@/hooks/messaging/useFileUpload";
 import { getInitials } from "@/lib/utils/common";
 import { toast } from "sonner";
 import { differenceInMinutes, format, isToday, isYesterday } from "date-fns";
@@ -56,6 +65,7 @@ import type {
   MessagingConversation,
 } from "@/lib/api/services/messaging";
 import { User } from "../search";
+import { EmptyState } from "@/components/common/EmptyState";
 
 interface MessengerInterfaceProps {
   className?: string;
@@ -101,7 +111,7 @@ interface MessageBubbleProps {
   onReport: () => void;
 }
 
-const MessageBubble = ({
+const MessageBubble = React.memo(({
   message,
   isOwn,
   showAvatar,
@@ -148,6 +158,8 @@ const MessageBubble = ({
         "flex w-full group mb-1",
         isOwn ? "justify-end" : "justify-start"
       )}
+      role="article"
+      aria-label={`Message from ${isOwn ? 'you' : message.sender?.firstName || 'user'}`}
     >
       {/* Avatar for other person's messages - only show on first message of group */}
       {!isOwn && (
@@ -290,6 +302,7 @@ const MessageBubble = ({
                   key={emoji}
                   onClick={() => onReact(emoji)}
                   className="hover:scale-110 transition-transform text-sm p-1 rounded-full hover:bg-gray-100"
+                  aria-label={`React with ${emoji}`}
                 >
                   {emoji}
                 </button>
@@ -321,7 +334,12 @@ const MessageBubble = ({
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0"
+              aria-label="Message options"
+            >
               <MoreVertical className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
@@ -361,7 +379,9 @@ const MessageBubble = ({
       </div>
     </div>
   );
-};
+});
+
+MessageBubble.displayName = "MessageBubble";
 
 interface ConversationItemProps {
   conversation: MessagingConversation;
@@ -372,7 +392,7 @@ interface ConversationItemProps {
   user: User;
 }
 
-const ConversationItem = ({
+const ConversationItem = React.memo(({
   conversation,
   isSelected,
   onSelect,
@@ -380,6 +400,8 @@ const ConversationItem = ({
   isTyping,
   user,
 }: ConversationItemProps) => {
+  if (!user) return null;
+  
   const otherParticipant = getOtherParticipant(conversation, user.id); // Assuming direct conversation
   const displayName = otherParticipant
     ? `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
@@ -394,6 +416,16 @@ const ConversationItem = ({
           ? "bg-primary/10 border-l-4 border-l-primary"
           : "hover:bg-gray-50"
       )}
+      role="button"
+      tabIndex={0}
+      aria-label={`Conversation with ${displayName}${conversation.unreadCount && conversation.unreadCount > 0 ? `, ${conversation.unreadCount} unread message${conversation.unreadCount > 1 ? 's' : ''}` : ''}`}
+      aria-pressed={isSelected}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
     >
       <div className="relative">
         <Avatar className="h-12 w-12">
@@ -407,23 +439,25 @@ const ConversationItem = ({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-sm truncate">{displayName}</h4>
+        <div className="flex items-center gap-2 min-w-0">
+          <h4 className="font-medium text-sm truncate min-w-0" style={{ maxWidth: 'calc(100% - 80px)' }}>
+            {displayName}
+          </h4>
           {conversation.lastMessage && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground flex-shrink-0 whitespace-nowrap ml-auto">
               {formatMessageTime(conversation.lastMessage.createdAt)}
             </span>
           )}
         </div>
 
-        <div className="flex items-center justify-between mt-1">
-          <p className="text-sm text-muted-foreground truncate flex-1 min-w-0">
+        <div className="flex items-center gap-2 mt-1 min-w-0">
+          <p className="text-sm text-muted-foreground truncate min-w-0" style={{ maxWidth: conversation.unreadCount && conversation.unreadCount > 0 ? 'calc(100% - 50px)' : '100%' }}>
             {isTyping ? (
               <span className="text-primary italic">typing...</span>
             ) : conversation.lastMessage ? (
               <>
                 <span className="font-medium">
-                  {conversation.lastMessage.senderId === user.id
+                  {user && conversation.lastMessage.senderId === user.id
                     ? "You"
                     : otherParticipant?.user.firstName || ""}
                 </span>
@@ -439,7 +473,7 @@ const ConversationItem = ({
           {conversation.unreadCount && conversation.unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="text-xs h-5 min-w-5 px-1.5 flex-shrink-0 ml-2"
+              className="text-xs h-5 min-w-5 px-1.5 flex-shrink-0 whitespace-nowrap ml-auto"
             >
               {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
             </Badge>
@@ -448,13 +482,15 @@ const ConversationItem = ({
       </div>
     </div>
   );
-};
+});
+
+ConversationItem.displayName = "ConversationItem";
 
 interface TypingIndicatorProps {
   users: string[];
 }
 
-const TypingIndicator = ({ users }: TypingIndicatorProps) => {
+const TypingIndicator = React.memo(({ users }: TypingIndicatorProps) => {
   if (users.length === 0) return null;
 
   return (
@@ -480,7 +516,9 @@ const TypingIndicator = ({ users }: TypingIndicatorProps) => {
       </span>
     </div>
   );
-};
+});
+
+TypingIndicator.displayName = "TypingIndicator";
 
 export function MessengerInterface({
   className,
@@ -488,10 +526,19 @@ export function MessengerInterface({
   targetUserId,
 }: MessengerInterfaceProps) {
   const { user } = useAuth();
-
-  const [selectedConversationId, setSelectedConversationId] = useState<
-    string | null
-  >(null);
+  
+  // Use messaging store for selected conversation
+  const { 
+    selectedConversationId, 
+    setSelectedConversation 
+  } = useMessagingStore();
+  
+  // Mood tracking
+  const { currentMood, setMood, getMoodForConversation } = useMoodTracking();
+  const conversationMood = selectedConversationId 
+    ? getMoodForConversation(selectedConversationId)
+    : currentMood;
+  
   const [messageInput, setMessageInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [replyToMessage, setReplyToMessage] = useState<MessagingMessage | null>(
@@ -542,7 +589,7 @@ export function MessengerInterface({
           "🔗 [DEEP LINK] Found existing conversation:",
           existingConversation.id
         );
-        setSelectedConversationId(existingConversation.id);
+        setSelectedConversation(existingConversation.id);
       } else {
         console.log(
           "🔗 [DEEP LINK] Creating new conversation with user:",
@@ -554,7 +601,7 @@ export function MessengerInterface({
               "🔗 [DEEP LINK] Conversation created/found:",
               conversation.id
             );
-            setSelectedConversationId(conversation.id);
+            setSelectedConversation(conversation.id);
           },
           onError: (error) => {
             console.error(
@@ -597,6 +644,30 @@ export function MessengerInterface({
     }
   }, [conversations, isLoadingConversations, conversationsError, user]);
 
+  // Auto-select first conversation if none is selected and conversations are loaded
+  useEffect(() => {
+    if (
+      !selectedConversationId &&
+      conversations.length > 0 &&
+      !isLoadingConversations &&
+      !targetUserId // Don't auto-select if we're waiting for a target user
+    ) {
+      const firstConversation = conversations[0];
+      if (firstConversation) {
+        setSelectedConversation(firstConversation.id);
+      }
+    }
+  }, [
+    selectedConversationId,
+    conversations,
+    isLoadingConversations,
+    targetUserId,
+    setSelectedConversation,
+  ]);
+
+  // File upload hook
+  const { upload: uploadFileToStorage, isUploading: isUploadingFile, uploadProgress } = useFileUpload("message-attachments");
+  
   // Get selected conversation messages
   const {
     messages,
@@ -609,7 +680,6 @@ export function MessengerInterface({
     sendMessage,
     addReaction,
     sendTypingIndicator,
-    uploadFile,
     reconnectWebSocket,
   } = useMessaging({
     conversationId: selectedConversationId || undefined,
@@ -720,18 +790,27 @@ export function MessengerInterface({
     if (!file || !selectedConversationId) return;
 
     try {
-      const uploadedFile = await uploadFile(file);
+      const uploadedFile = await uploadFileToStorage(file, {
+        path: `messages/${selectedConversationId}/${Date.now()}-${file.name}`,
+      });
+      
       await sendMessage(`Shared a file: ${file.name}`, {
         attachments: [uploadedFile],
       });
-      toast.success("File sent successfully");
-    } catch {
-      toast.error("Failed to upload file");
+      
+      // Reset file input
+      if (e.target) {
+        e.target.value = "";
+      }
+    } catch (error) {
+      logger.error("MessengerInterface", "File upload failed", error);
+      toast.error("Failed to upload file. Please try again.");
     }
   };
 
   const filteredConversations = conversations.filter((conv) => {
     if (!searchTerm) return true;
+    if (!user) return false;
     const otherParticipant = getOtherParticipant(conv, user.id);
     const displayName = otherParticipant
       ? `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
@@ -742,7 +821,9 @@ export function MessengerInterface({
   const selectedConversation = conversations.find(
     (c) => c.id === selectedConversationId
   );
-  const otherParticipant = getOtherParticipant(selectedConversation!, user.id);
+  const otherParticipant = selectedConversation && user 
+    ? getOtherParticipant(selectedConversation, user.id)
+    : null;
   const displayName = otherParticipant
     ? `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
     : "";
@@ -769,11 +850,15 @@ export function MessengerInterface({
           className="min-w-[280px] overflow-hidden"
         >
           {/* Sidebar - Conversations List */}
-          <div className="w-full h-full border-r border-gray-200 flex flex-col overflow-hidden">
+          <div 
+            className="w-full h-full border-r border-gray-200 flex flex-col overflow-hidden"
+            role="complementary"
+            aria-label="Conversations list"
+          >
             {/* Header */}
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold">Messages</h2>
+                <h2 className="text-lg font-semibold" id="conversations-heading">Messages</h2>
                 <div className="flex items-center gap-2">
                   {/* Enhanced connection status */}
                   <ConnectionStatus
@@ -794,18 +879,25 @@ export function MessengerInterface({
 
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <Input
                   placeholder="Search conversations..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
+                  aria-label="Search conversations"
+                  aria-describedby="conversations-heading"
                 />
               </div>
             </div>
 
             {/* Conversations List */}
-            <ScrollArea className="flex-1">
+            <ScrollArea 
+              className="flex-1"
+              role="list"
+              aria-label="Conversations"
+              aria-labelledby="conversations-heading"
+            >
               {isLoadingConversations ? (
                 <div className="p-4 space-y-3">
                   {[...Array(5)].map((_, i) => (
@@ -823,14 +915,22 @@ export function MessengerInterface({
                   Failed to load conversations
                 </div>
               ) : filteredConversations.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  {searchTerm
-                    ? "No conversations found"
-                    : "No conversations yet"}
+                <div className="p-4">
+                  <EmptyState
+                    icon={MessageSquare}
+                    title={searchTerm ? "No conversations found" : "No conversations yet"}
+                    description={
+                      searchTerm
+                        ? "Try adjusting your search terms"
+                        : "Start a conversation to get started"
+                    }
+                  />
                 </div>
               ) : (
-                <div className="p-2 space-y-1">
+                <div className="p-2 space-y-1" role="list">
                   {filteredConversations.map((conversation) => {
+                    if (!user) return null;
+                    
                     const otherParticipant = getOtherParticipant(
                       conversation,
                       user.id
@@ -850,7 +950,7 @@ export function MessengerInterface({
                         isSelected={selectedConversationId === conversation.id}
                         onSelect={() => {
                           logger.debug('Conversation selected:', conversation.id, user?.id);
-                          setSelectedConversationId(conversation.id);
+                          setSelectedConversation(conversation.id);
                         }}
                         isOnline={isOnline}
                         isTyping={isTypingInConv}
@@ -871,16 +971,27 @@ export function MessengerInterface({
             {selectedConversationId ? (
               <>
                 {/* Chat Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white flex-shrink-0">
+                <div 
+                  className="flex items-center justify-between p-4 border-b border-gray-200 bg-white flex-shrink-0"
+                  role="banner"
+                  aria-label={`Chat with ${displayName}`}
+                >
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={otherParticipant?.user.avatarUrl} />
+                    <Avatar className="h-10 w-10" aria-hidden="true">
+                      <AvatarImage src={otherParticipant?.user.avatarUrl} alt={`${displayName}'s avatar`} />
                       <AvatarFallback>
                         {getInitials(displayName)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold text-sm">{displayName}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-sm" id="chat-participant-name">{displayName}</h3>
+                        {conversationMood && (
+                          <span className="text-lg" title={`Feeling: ${conversationMood}`}>
+                            {getMoodEmoji(conversationMood)}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {onlineUsers.has(otherParticipant?.userId || "") ? (
                           <span className="text-green-600 flex items-center gap-1">
@@ -916,7 +1027,13 @@ export function MessengerInterface({
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div 
+                  className="flex-1 flex flex-col min-h-0 overflow-hidden"
+                  role="log"
+                  aria-label={`Messages with ${displayName}`}
+                  aria-live="polite"
+                  aria-atomic="false"
+                >
                   <ScrollArea className="flex-1 h-0 p-4">
                     <div className="min-h-full flex flex-col">
                       {isLoadingMessages ? (
@@ -928,15 +1045,12 @@ export function MessengerInterface({
                           Failed to load messages
                         </div>
                       ) : messages.length === 0 ? (
-                        <div className="flex items-center justify-center flex-1 min-h-[200px] text-muted-foreground">
-                          <div className="text-center">
-                            <h4 className="font-medium mb-1">
-                              No messages yet
-                            </h4>
-                            <p className="text-sm">
-                              Start the conversation with {displayName}
-                            </p>
-                          </div>
+                        <div className="flex items-center justify-center flex-1 min-h-[200px]">
+                          <EmptyState
+                            icon={MessageSquare}
+                            title="No messages yet"
+                            description={`Start the conversation with ${displayName}`}
+                          />
                         </div>
                       ) : (
                         <div className="space-y-1 flex-1">
@@ -1046,6 +1160,7 @@ export function MessengerInterface({
                         variant="ghost"
                         size="sm"
                         onClick={() => setReplyToMessage(null)}
+                        aria-label="Cancel reply"
                       >
                         ×
                       </Button>
@@ -1055,6 +1170,48 @@ export function MessengerInterface({
                   {/* Message Input Area */}
                   <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
                     <div className="flex items-end gap-2">
+                      {/* Mood Selector */}
+                      <MoodSelector
+                        currentMood={conversationMood}
+                        onMoodSelect={(mood) => {
+                          setMood(mood, selectedConversationId || undefined);
+                          // Optionally send mood as message
+                          if (mood) {
+                            const moodEmoji = getMoodEmoji(mood);
+                            setMessageInput(`${moodEmoji} Feeling ${mood} today`);
+                          }
+                        }}
+                        size="sm"
+                      />
+
+                      {/* Wellness Quick Access */}
+                      <WellnessQuickAccess
+                        onToolSelect={(toolId) => {
+                          // This could trigger the wellness tools popup
+                          // For now, just add a message about using the tool
+                          setMessageInput(`I'm using the ${toolId} tool to help me feel better.`);
+                        }}
+                      />
+
+                      {/* Quick Responses (for therapists) */}
+                      {user?.role === "therapist" && (
+                        <QuickResponses
+                          onSelectResponse={(response, useTagalog) => {
+                            const text = useTagalog ? response.tagalog : response.english;
+                            setMessageInput(text);
+                          }}
+                        />
+                      )}
+
+                      {/* Crisis Support Button */}
+                      <CrisisSupportButton
+                        onSendCrisisMessage={(message, priority) => {
+                          setMessageInput(message);
+                          // Send with priority metadata
+                          handleSendMessage();
+                        }}
+                      />
+
                       {/* File Upload */}
                       <TooltipProvider>
                         <Tooltip>
@@ -1075,7 +1232,14 @@ export function MessengerInterface({
                                 type="file"
                                 className="hidden"
                                 onChange={handleFileUpload}
+                                disabled={isUploadingFile}
+                                aria-label="Upload file attachment"
                               />
+                              {isUploadingFile && (
+                                <span className="ml-2 text-xs text-muted-foreground">
+                                  {uploadProgress}%
+                                </span>
+                              )}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>Attach file</TooltipContent>
@@ -1095,6 +1259,8 @@ export function MessengerInterface({
                           onKeyPress={handleKeyPress}
                           disabled={isSendingMessage}
                           className="resize-none"
+                          aria-label={`Message input for ${displayName}`}
+                          aria-describedby="message-input-help"
                         />
                       </div>
 
@@ -1103,13 +1269,19 @@ export function MessengerInterface({
                         onClick={handleSendMessage}
                         disabled={!messageInput.trim() || isSendingMessage}
                         className="flex-shrink-0 bg-primary hover:bg-primary/90"
+                        aria-label={isSendingMessage ? "Sending message" : "Send message"}
+                        aria-describedby="message-input-help"
                       >
                         {isSendingMessage ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground" aria-hidden="true"></div>
                         ) : (
-                          <Send className="h-4 w-4" />
+                          <Send className="h-4 w-4" aria-hidden="true" />
                         )}
                       </Button>
+                    </div>
+                    {/* Screen reader help text */}
+                    <div id="message-input-help" className="sr-only">
+                      Type your message and press Enter to send, or click the send button. Press Shift+Enter for a new line.
                     </div>
                   </div>
                 </div>

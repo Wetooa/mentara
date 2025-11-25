@@ -18,6 +18,8 @@ import {
   Plus,
   AlertCircle
 } from 'lucide-react';
+import { ErrorState } from '@/components/common/ErrorState';
+import { EmptyState } from '@/components/common/EmptyState';
 import { useInView } from 'react-intersection-observer';
 import { toast } from 'sonner';
 import {
@@ -190,19 +192,14 @@ export function PostList({
 
   if (error) {
     return (
-      <Card className={className}>
-        <CardContent className="p-8 text-center">
-          <AlertCircle className="h-12 w-12 mx-auto text-red-500 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Error Loading Posts</h3>
-          <p className="text-muted-foreground mb-4">
-            Unable to load posts. Please try again.
-          </p>
-          <Button onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </CardContent>
-      </Card>
+      <ErrorState
+        title="Error Loading Posts"
+        message="Unable to load posts. Please try again."
+        error={error}
+        onRetry={handleRefresh}
+        showHomeButton={false}
+        className={className}
+      />
     );
   }
 
@@ -316,24 +313,23 @@ export function PostList({
           </div>
         ) : allPosts.length === 0 ? (
           // Empty state
-          <Card>
-            <CardContent className="p-8 text-center">
-              <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Posts Yet</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchQuery 
-                  ? 'No posts match your search criteria.' 
-                  : 'Be the first to create a post in this community!'
-                }
-              </p>
-              {!searchQuery && onCreatePost && (
-                <Button onClick={onCreatePost}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create First Post
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={MessageCircle}
+            title="No Posts Yet"
+            description={
+              searchQuery 
+                ? 'No posts match your search criteria.' 
+                : 'Be the first to create a post in this community!'
+            }
+            action={
+              !searchQuery && onCreatePost
+                ? {
+                    label: "Create First Post",
+                    onClick: onCreatePost,
+                  }
+                : undefined
+            }
+          />
         ) : (
           <>
             {/* Posts will be rendered here using PostItem component */}

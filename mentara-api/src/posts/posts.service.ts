@@ -263,7 +263,7 @@ export class PostsService {
     });
   }
 
-  async findByUserId(userId: string): Promise<Post[]> {
+  async findByUserId(userId: string, limit = 20, offset = 0): Promise<Post[]> {
     return this.prisma.post.findMany({
       where: {
         userId: userId,
@@ -293,10 +293,12 @@ export class PostsService {
       orderBy: {
         createdAt: 'desc',
       },
+      take: limit,
+      skip: offset,
     });
   }
 
-  async findByRoomId(roomId: string, userId?: string): Promise<Post[]> {
+  async findByRoomId(roomId: string, userId?: string, limit = 20, offset = 0): Promise<Post[]> {
     return this.prisma.post.findMany({
       where: {
         roomId,
@@ -369,6 +371,8 @@ export class PostsService {
       orderBy: {
         createdAt: 'desc',
       },
+      take: limit,
+      skip: offset,
     });
   }
 

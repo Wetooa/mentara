@@ -13,6 +13,10 @@ import { AlertCircle, RefreshCw, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { ErrorState } from "@/components/common/ErrorState";
+import { EmptyState } from "@/components/common/EmptyState";
+import { SkeletonTherapistCard } from "@/components/common/Skeleton";
+import { logger } from "@/lib/logger";
 
 // TherapistListing is now self-contained with no props needed
 
@@ -144,7 +148,7 @@ export default function TherapistListing() {
       setRetryCount((prev) => prev + 1);
       toast.success("Successfully reconnected!");
     } catch (retryError) {
-      console.error("Smart retry failed:", retryError);
+      logger.error("Smart retry failed:", retryError);
       if (retryCount < 2) {
         toast.error(`Retry ${retryCount + 1} failed. Trying again...`);
         setTimeout(() => handleSmartRetry(), 2000); // Exponential backoff
@@ -161,10 +165,13 @@ export default function TherapistListing() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <TherapistCardSkeleton key={index} />
-        ))}
+      <div className="space-y-8">
+        <h1 className="text-2xl font-bold">My Therapists</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <SkeletonTherapistCard key={index} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -200,130 +207,47 @@ export default function TherapistListing() {
 
   // Enhanced API error state with smart retry
   if (error) {
+    const errorMessage = error instanceof Error
+      ? error.message.includes("network") || error.message.includes("fetch")
+        ? "It looks like there's a connection issue. Please check your internet connection."
+        : "We're having trouble loading therapist data right now."
+      : "Something went wrong while loading therapists.";
+    
     return (
-      <div className="max-w-2xl mx-auto">
-        <Alert className="border-red-200 bg-red-50/50 backdrop-blur-sm">
-          <div className="flex items-start gap-4">
-            <div className="bg-red-100 p-2 rounded-full">
-              <AlertCircle className="h-5 w-5 text-red-600" />
-            </div>
-            <div className="flex-1">
-              <div className="font-semibold text-red-900 mb-1">
-                Unable to Load Therapists
-              </div>
-              <div className="text-red-700 mb-3">
-                {error instanceof Error
-                  ? error.message.includes("network") ||
-                    error.message.includes("fetch")
-                    ? "It looks like there's a connection issue. Please check your internet connection."
-                    : "We're having trouble loading therapist data right now."
-                  : "Something went wrong while loading therapists."}
-              </div>
-
-              {/* Retry suggestions */}
-              <div className="bg-white/60 rounded-lg p-3 mb-4">
-                <div className="text-sm font-medium text-gray-900 mb-2">
-                  Try these steps:
-                </div>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                    Check your internet connection
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                    Try refreshing the page
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                    Clear your browser cache
-                  </li>
-                </ul>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={handleSmartRetry}
-                  disabled={isRetrying}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  {isRetrying ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Retrying... ({retryCount + 1}/3)
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Smart Retry
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => window.location.reload()}
-                  className="border-red-200 text-red-700 hover:bg-red-50"
-                >
-                  Refresh Page
-                </Button>
-              </div>
-
-              {retryCount > 0 && (
-                <div className="text-xs text-gray-500 mt-2">
-                  Retry attempts: {retryCount}/3
-                </div>
-              )}
-            </div>
-          </div>
-        </Alert>
-      </div>
+      <ErrorState
+        title="Unable to Load Therapists"
+        message={errorMessage}
+        error={error}
+        onRetry={handleSmartRetry}
+        showHomeButton={false}
+      />
     );
   }
 
   // Empty state
   if (therapists.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-500 mb-4">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          No therapists found
-        </h3>
-        <p className="text-gray-500 mb-4">
-          {searchQuery || selectedFilter !== "All"
+      <EmptyState
+        icon={Search}
+        title="No therapists found"
+        description={
+          searchQuery || selectedFilter !== "All"
             ? "Try adjusting your search or filter criteria"
-            : "No therapists are currently available"}
-        </p>
-        {(searchQuery || selectedFilter !== "All") && (
-          <Button
-            variant="outline"
-            onClick={() => {
-              try {
-                window.location.reload();
-              } catch (error) {
-                console.error("Error reloading page:", error);
-                // Fallback: try to navigate to base therapist listing
-                router.push("/client/therapists");
+            : "No therapists are currently available"
+        }
+        action={
+          searchQuery || selectedFilter !== "All"
+            ? {
+                label: "Clear filters",
+                onClick: () => {
+                  setSearchQuery("");
+                  setSelectedFilter("All");
+                  resetFilters();
+                },
               }
-            }}
-          >
-            Clear filters
-          </Button>
-        )}
-      </div>
+            : undefined
+        }
+      />
     );
   }
 
@@ -374,7 +298,7 @@ export default function TherapistListing() {
                     ? `Showing ${startItem}-${endItem} of ${total} filtered therapists (${totalTherapists} total)`
                     : `Showing ${startItem}-${endItem} of ${total} therapists`;
                 } catch (error) {
-                  console.error("Error calculating results count:", error);
+                  logger.error("Error calculating results count:", error);
                   return `Showing results`;
                 }
               })()}
@@ -394,7 +318,7 @@ export default function TherapistListing() {
                   try {
                     // Validate each therapist before rendering
                     if (!therapist?.id) {
-                      console.warn(
+                      logger.warn(
                         "Skipping therapist with missing ID:",
                         therapist
                       );
@@ -405,7 +329,7 @@ export default function TherapistListing() {
                       <TherapistCard key={therapist.id} therapist={therapist} />
                     );
                   } catch (error) {
-                    console.error(
+                    logger.error(
                       "Error rendering therapist card:",
                       error,
                       therapist

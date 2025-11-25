@@ -48,8 +48,8 @@ function ActiveTherapistCard({
       <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col border-2 hover:border-primary/30">
         <CardContent className="p-0 flex flex-col h-full">
           {/* Profile Image Section */}
-          <div className="relative h-48 bg-gradient-to-br from-primary/10 to-secondary/10">
-            <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative h-48 bg-gradient-to-br from-primary/10 to-secondary/10 pt-0">
+            <div className="absolute inset-0 flex items-center justify-center pt-0">
               <motion.div whileHover={{ scale: 1.05 }}>
                 <Avatar className="h-32 w-32 border-4 border-white shadow-xl">
                   <AvatarImage

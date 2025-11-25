@@ -71,6 +71,9 @@ export default function Toast({
         transform transition-all duration-300 ease-in-out
         ${isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
       `}
+      role="alert"
+      aria-live={type === "error" ? "assertive" : "polite"}
+      aria-atomic="true"
     >
       <div
         className={`
@@ -89,6 +92,7 @@ export default function Toast({
             setTimeout(onClose, 300);
           }}
           className="flex-shrink-0 text-gray-400 hover:text-gray-600"
+          aria-label="Close notification"
         >
           <X className="h-4 w-4" />
         </button>

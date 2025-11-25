@@ -7,9 +7,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, parseISO, isToday, addMinutes } from "date-fns";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Skeleton, SkeletonList } from "@/components/common/Skeleton";
 
 interface UpcomingSessionsProps {
   sessions: UserDashboardData["upcomingSessions"];
+  isLoading?: boolean;
 }
 
 // Animation variants
@@ -51,7 +53,7 @@ const sessionCardVariants = {
   },
 };
 
-function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
+function UpcomingSessions({ sessions, isLoading = false }: UpcomingSessionsProps) {
   const router = useRouter();
 
   // Memoize today's sessions filtering
@@ -108,7 +110,18 @@ function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
           </motion.div>
         </div>
         <div className="p-4 sm:p-5 flex-1">
-          {sessions.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-6">
+              <div>
+                <Skeleton variant="text" className="h-6 w-20 mb-3" />
+                <SkeletonList count={2} />
+              </div>
+              <div>
+                <Skeleton variant="text" className="h-6 w-24 mb-3" />
+                <SkeletonList count={3} />
+              </div>
+            </div>
+          ) : sessions.length === 0 ? (
             <motion.div
               className="text-center py-8 text-muted-foreground"
               variants={sectionVariants}
