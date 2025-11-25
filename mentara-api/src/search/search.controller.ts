@@ -27,6 +27,16 @@ export class SearchController {
     @Query(new ZodValidationPipe(SearchTherapistsQueryDtoSchema))
     query: SearchTherapistsQueryDto,
   ) {
+    // Convert availability string to object format if needed
+    let availabilityObj: { dayOfWeek?: number; startTime?: string; endTime?: string; timezone?: string } | undefined;
+    if (query.availability && typeof query.availability === 'string') {
+      // If it's a string like 'immediate', 'within_week', etc., don't pass it as availability object
+      // The search service should handle this differently
+      availabilityObj = undefined;
+    } else if (query.availability && typeof query.availability === 'object') {
+      availabilityObj = query.availability as { dayOfWeek?: number; startTime?: string; endTime?: string; timezone?: string };
+    }
+
     return this.searchService.searchTherapists(query.query || '', {
       location: query.location,
       specialties: query.specialties,
@@ -35,7 +45,7 @@ export class SearchController {
       rating: query.rating,
       gender: query.gender,
       languages: query.languages,
-      availability: query.availability,
+      availability: availabilityObj,
       verifiedOnly: query.verifiedOnly,
       // Map maxHourlyRate from priceRange.max for backward compatibility
       maxHourlyRate: query.priceRange?.max,

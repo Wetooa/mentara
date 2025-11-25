@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../../providers/prisma-client.provider';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import { NotificationPriority, NotificationType } from '@prisma/client';
-import { CacheService } from '../../../cache/cache.service';
+import { CacheService } from '../../cache/cache.service';
 
 export interface NotificationPreferences {
   userId: string;

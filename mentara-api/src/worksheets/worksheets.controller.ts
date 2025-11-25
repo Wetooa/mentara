@@ -36,7 +36,7 @@ export class WorksheetsController {
     @CurrentUserId() userId: string,
     @Query()
     query: PaginationQuery &
-      FilterQuery & { isCompleted?: boolean; limit?: number },
+      FilterQuery & { isCompleted?: boolean; limit?: number; offset?: number },
   ) {
     // Convert isCompleted boolean to status string for service compatibility
     let status: string | undefined = query.status;

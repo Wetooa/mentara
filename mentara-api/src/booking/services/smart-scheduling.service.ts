@@ -98,7 +98,7 @@ export class SmartSchedulingService {
     for (let dayOffset = 1; dayOffset <= lookAheadDays; dayOffset++) {
       const checkDate = new Date(now);
       checkDate.setDate(now.getDate() + dayOffset);
-      const dayOfWeek = checkDate.getDay();
+      const dayOfWeek = checkDate.getDay().toString();
 
       // Find matching availability
       const dayAvailability = availabilities.filter(
@@ -148,7 +148,8 @@ export class SmartSchedulingService {
         }
 
         // Prefer weekdays
-        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        const dayOfWeekNum = parseInt(dayOfWeek, 10);
+        if (dayOfWeekNum >= 1 && dayOfWeekNum <= 5) {
           confidence += 0.1;
         }
 
@@ -161,7 +162,7 @@ export class SmartSchedulingService {
           startTime: slotStart,
           endTime: suggestedEnd,
           confidence,
-          reason: this.generateReason(slotStart, preferenceCount, dayOfWeek),
+          reason: this.generateReason(slotStart, preferenceCount, dayOfWeekNum),
         });
       }
     }

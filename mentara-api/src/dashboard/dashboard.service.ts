@@ -560,8 +560,8 @@ export class DashboardService {
       );
 
       // Cache the result for 5 minutes
-      const cacheKey = this.cache.generateKey('dashboard', 'therapist', userId);
-      await this.cache.set(cacheKey, dashboardData, 300);
+      const therapistCacheKey = this.cache.generateKey('dashboard', 'therapist', userId);
+      await this.cache.set(therapistCacheKey, dashboardData, 300);
 
       return dashboardData;
     } catch (error) {

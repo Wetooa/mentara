@@ -274,9 +274,7 @@ export class EnhancedCommunityService {
             name: true,
             description: true,
             slug: true,
-            avatarUrl: true,
-            bannerUrl: true,
-            isPublic: true,
+            imageUrl: true,
             createdAt: true,
             updatedAt: true,
             _count: {
@@ -304,7 +302,6 @@ export class EnhancedCommunityService {
         select: {
           id: true,
           name: true,
-          description: true,
           order: true,
         },
       });
@@ -315,7 +312,6 @@ export class EnhancedCommunityService {
         select: {
           id: true,
           name: true,
-          description: true,
           roomGroupId: true,
         },
       });
@@ -459,7 +455,7 @@ export class EnhancedCommunityService {
         name: community.name,
         slug: community.slug,
         description: community.description,
-        imageUrl: community.avatarUrl || undefined,
+        imageUrl: community.imageUrl,
         createdAt: community.createdAt,
         updatedAt: community.updatedAt,
         memberCount: community._count.memberships,
@@ -978,7 +974,6 @@ export class EnhancedCommunityService {
             },
           },
         },
-        take: limit || 10, // Limit to top N contributors
         take: limit * 2, // Get more to calculate scores
       });
 

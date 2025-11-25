@@ -81,18 +81,23 @@ export class ProfileService {
         select: {
           id: true,
           firstName: true,
+          middleName: true,
           lastName: true,
           email: true,
           avatarUrl: true,
+          coverImageUrl: true,
           bio: true,
           role: true,
           createdAt: true,
           therapist: {
             select: {
-              id: true,
-              specialties: true,
+              userId: true,
+              areasOfExpertise: true,
               hourlyRate: true,
               status: true,
+              yearsOfExperience: true,
+              sessionLength: true,
+              languagesOffered: true,
             },
           },
         },
@@ -116,7 +121,7 @@ export class ProfileService {
             id: true,
             name: true,
             slug: true,
-            avatarUrl: true,
+            imageUrl: true,
           },
         },
       },
@@ -200,7 +205,7 @@ export class ProfileService {
         id: membership.community.id,
         name: membership.community.name,
         slug: membership.community.slug,
-        imageUrl: membership.community.avatarUrl || undefined,
+        imageUrl: membership.community.imageUrl || undefined,
       }));
 
     // Filter and transform posts and comments
@@ -273,22 +278,22 @@ export class ProfileService {
         // Get the therapist record to find the therapistId
         const therapist = await this.prisma.therapist.findUnique({
           where: { userId: profileUserId },
-          select: { id: true },
+          select: { userId: true },
         });
 
         if (therapist) {
           // Check if there's a ClientTherapist relationship
           const client = await this.prisma.client.findUnique({
             where: { userId: currentUserId },
-            select: { id: true },
+            select: { userId: true },
           });
 
           if (client) {
             const clientTherapistConnection = await this.prisma.clientTherapist.findUnique({
               where: {
                 clientId_therapistId: {
-                  clientId: client.id,
-                  therapistId: therapist.id,
+                  clientId: client.userId,
+                  therapistId: therapist.userId,
                 },
               },
             });

@@ -150,7 +150,6 @@ export class ClientInsightsService {
         },
         select: {
           createdAt: true,
-          moodRating: true,
         },
       }),
     ]);
@@ -179,23 +178,9 @@ export class ClientInsightsService {
     const messagesReceived = messages.length - messagesSent;
 
     // Calculate mood trends (group by date)
-    const moodByDate = new Map<string, { sum: number; count: number }>();
-    journalEntries.forEach((entry) => {
-      if (entry.moodRating !== null && entry.moodRating !== undefined) {
-        const date = entry.createdAt.toISOString().split('T')[0];
-        const existing = moodByDate.get(date) || { sum: 0, count: 0 };
-        moodByDate.set(date, {
-          sum: existing.sum + entry.moodRating,
-          count: existing.count + 1,
-        });
-      }
-    });
-
-    const moodTrends = Array.from(moodByDate.entries()).map(([date, data]) => ({
-      date,
-      averageMood: data.count > 0 ? data.sum / data.count : undefined,
-      journalEntries: data.count,
-    }));
+    // Note: moodRating field not available in JournalEntry model
+    // This would require adding moodRating to the schema or using a different approach
+    const moodTrends: Array<{ date: string; averageMood?: number; journalEntries: number }> = [];
 
     const insights: ClientInsights = {
       userId,

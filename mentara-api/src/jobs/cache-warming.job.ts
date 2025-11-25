@@ -32,8 +32,7 @@ export class CacheWarmingJob {
           name: true,
           slug: true,
           description: true,
-          avatarUrl: true,
-          isPublic: true,
+          imageUrl: true,
           _count: {
             select: {
               memberships: true,

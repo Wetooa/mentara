@@ -23,7 +23,7 @@ export class DashboardAggregationJob {
    * Pre-calculate client dashboard data for active clients
    * Runs every 15 minutes
    */
-  @Cron(CronExpression.EVERY_15_MINUTES)
+  @Cron('0 */15 * * * *')
   async preCalculateClientDashboards() {
     this.logger.log('Starting client dashboard aggregation job...');
 
@@ -84,7 +84,7 @@ export class DashboardAggregationJob {
    * Pre-calculate therapist dashboard data for active therapists
    * Runs every 15 minutes
    */
-  @Cron(CronExpression.EVERY_15_MINUTES)
+  @Cron('0 */15 * * * *')
   async preCalculateTherapistDashboards() {
     this.logger.log('Starting therapist dashboard aggregation job...');
 

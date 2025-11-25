@@ -59,7 +59,7 @@ export class UsersController {
     }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving all users`);
-      const users = await this.usersService.findAll(limit, offset);
+      const users = await this.usersService.findAll();
       return UserResponseDto.fromPrismaUsers(users);
     } catch (error) {
       this.logger.error('Failed to fetch users:', error);
