@@ -151,7 +151,7 @@ function Hero($$renderer, $$props) {
       push_element($$renderer2, "div", 144, 10);
       $$renderer2.push(`<p class="text-sm font-kollektif font-semibold svelte-1q37ri0" style="color: var(--primary);">`);
       push_element($$renderer2, "p", 148, 12);
-      $$renderer2.push(`✨ Join 500+ organizations transforming workplace mental health</p>`);
+      $$renderer2.push(`✨ Join organizations transforming workplace mental health</p>`);
       pop_element();
       $$renderer2.push(`</div>`);
       pop_element();
@@ -281,7 +281,7 @@ function _page($$renderer, $$props) {
       {
         let children = function($$renderer3) {
           validate_snippet_args($$renderer3);
-          $$renderer3.push(`<div class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all" style="background: linear-gradient(135deg, oklch(0.98 0.0464 124.31) 0%, oklch(0.95 0.04 124 / 0.5) 100%); border-color: var(--primary); border-opacity: 0.2;">`);
+          $$renderer3.push(`<div class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all" style="background: linear-gradient(135deg, oklch(from var(--primary) l c h / 0.1) 0%, white 100%); border-color: var(--primary); border-opacity: 0.2;">`);
           push_element($$renderer3, "div", 75, 14);
           $$renderer3.push(`<div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">`);
           push_element($$renderer3, "div", 79, 16);
@@ -319,7 +319,7 @@ function _page($$renderer, $$props) {
       {
         let children = function($$renderer3) {
           validate_snippet_args($$renderer3);
-          $$renderer3.push(`<div class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all" style="background: linear-gradient(135deg, oklch(0.98 0.0464 124.31) 0%, oklch(0.95 0.04 124 / 0.5) 100%); border-color: var(--primary); border-opacity: 0.2;">`);
+          $$renderer3.push(`<div class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all" style="background: linear-gradient(135deg, oklch(from var(--primary) l c h / 0.1) 0%, white 100%); border-color: var(--primary); border-opacity: 0.2;">`);
           push_element($$renderer3, "div", 117, 14);
           $$renderer3.push(`<div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">`);
           push_element($$renderer3, "div", 121, 16);
@@ -335,12 +335,12 @@ function _page($$renderer, $$props) {
           pop_element();
           $$renderer3.push(` <h3 class="text-2xl font-bold font-futura mb-3" style="color: var(--primary);">`);
           push_element($$renderer3, "h3", 139, 16);
-          $$renderer3.push(`Diagnostic Approach</h3>`);
+          $$renderer3.push(`Data-Driven Approach</h3>`);
           pop_element();
           $$renderer3.push(` <p class="font-kollektif leading-relaxed" style="color: var(--secondary);">`);
           push_element($$renderer3, "p", 145, 16);
-          $$renderer3.push(`Make better business decisions with insights from qualitative
-                  and quantitative mental health data.</p>`);
+          $$renderer3.push(`Enabling AI-matching and standardized pre-assessment for
+                  personalized mental health support.</p>`);
           pop_element();
           $$renderer3.push(`</div>`);
           pop_element();
@@ -357,7 +357,7 @@ function _page($$renderer, $$props) {
       {
         let children = function($$renderer3) {
           validate_snippet_args($$renderer3);
-          $$renderer3.push(`<div class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all" style="background: linear-gradient(135deg, oklch(0.98 0.0464 124.31) 0%, oklch(0.95 0.04 124 / 0.5) 100%); border-color: var(--primary); border-opacity: 0.2;">`);
+          $$renderer3.push(`<div class="group p-8 rounded-2xl bg-gradient-to-br border-2 hover:shadow-2xl hover:-translate-y-2 transition-all" style="background: linear-gradient(135deg, oklch(from var(--primary) l c h / 0.1) 0%, white 100%); border-color: var(--primary); border-opacity: 0.2;">`);
           push_element($$renderer3, "div", 159, 14);
           $$renderer3.push(`<div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">`);
           push_element($$renderer3, "div", 163, 16);

@@ -1,4 +1,4 @@
-import { a6 as attr_style, Z as FILENAME, a5 as stringify, $ as prevent_snippet_stringification, a3 as attr_class, a2 as escape_html, a7 as ensure_array_like, a8 as attr, a0 as head } from "../../../chunks/index.js";
+import { a6 as attr_style, Z as FILENAME, a5 as stringify, $ as prevent_snippet_stringification, a7 as attr, a8 as bind_props, a9 as ensure_array_like, a3 as attr_class, a2 as escape_html, a0 as head } from "../../../chunks/index.js";
 import { N as Navbar } from "../../../chunks/Navbar.js";
 import { A as AnimateOnScroll, F as Footer } from "../../../chunks/Footer.js";
 import "../../../chunks/index-client.js";
@@ -423,6 +423,172 @@ function SecuritySection($$renderer, $$props) {
 SecuritySection.render = function() {
   throw new Error("Component.render(...) is no longer valid in Svelte 5. See https://svelte.dev/docs/svelte/v5-migration-guide#Components-are-no-longer-classes for more information");
 };
+ImageLightbox[FILENAME] = "src/lib/components/ImageLightbox.svelte";
+function ImageLightbox($$renderer, $$props) {
+  $$renderer.component(
+    ($$renderer2) => {
+      let { src, alt, isOpen = false } = $$props;
+      if (isOpen) {
+        $$renderer2.push("<!--[-->");
+        $$renderer2.push(`<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" tabindex="-1">`);
+        push_element($$renderer2, "div", 30, 2);
+        $$renderer2.push(`<button class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors" aria-label="Close">`);
+        push_element($$renderer2, "button", 38, 4);
+        $$renderer2.push(`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">`);
+        push_element($$renderer2, "svg", 43, 6);
+        $$renderer2.push(`<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12">`);
+        push_element($$renderer2, "path", 51, 8);
+        $$renderer2.push(`</path>`);
+        pop_element();
+        $$renderer2.push(`</svg>`);
+        pop_element();
+        $$renderer2.push(`</button>`);
+        pop_element();
+        $$renderer2.push(` <img${attr("src", src)}${attr("alt", alt)} class="max-w-[95vw] max-h-[95vh] w-auto h-auto object-contain rounded-lg shadow-2xl"/>`);
+        push_element($$renderer2, "img", 58, 4);
+        pop_element();
+        $$renderer2.push(`</div>`);
+        pop_element();
+      } else {
+        $$renderer2.push("<!--[!-->");
+      }
+      $$renderer2.push(`<!--]-->`);
+      bind_props($$props, { isOpen });
+    },
+    ImageLightbox
+  );
+}
+ImageLightbox.render = function() {
+  throw new Error("Component.render(...) is no longer valid in Svelte 5. See https://svelte.dev/docs/svelte/v5-migration-guide#Components-are-no-longer-classes for more information");
+};
+Carousel[FILENAME] = "src/lib/components/Carousel.svelte";
+function Carousel($$renderer, $$props) {
+  $$renderer.component(
+    ($$renderer2) => {
+      let { images, alts } = $$props;
+      let currentIndex = 0;
+      let lightboxOpen = false;
+      let lightboxSrc = "";
+      let lightboxAlt = "";
+      let $$settled = true;
+      let $$inner_renderer;
+      function $$render_inner($$renderer3) {
+        $$renderer3.push(`<div class="relative rounded-2xl overflow-hidden">`);
+        push_element($$renderer3, "div", 37, 0);
+        $$renderer3.push(`<div class="relative">`);
+        push_element($$renderer3, "div", 39, 2);
+        $$renderer3.push(`<!--[-->`);
+        const each_array = ensure_array_like(images);
+        for (let index = 0, $$length = each_array.length; index < $$length; index++) {
+          let image = each_array[index];
+          $$renderer3.push(`<div${attr_class("transition-opacity duration-500", void 0, {
+            "opacity-100": currentIndex === index,
+            "opacity-0": currentIndex !== index,
+            "absolute": currentIndex !== index,
+            "inset-0": currentIndex !== index,
+            "relative": currentIndex === index
+          })}${attr_style("", { "pointer-events": currentIndex === index ? "auto" : "none" })}>`);
+          push_element($$renderer3, "div", 41, 6);
+          $$renderer3.push(`<div class="relative rounded-2xl shadow-2xl border-2 group overflow-hidden cursor-zoom-in" style="border-color: var(--primary); border-opacity: 0.2;" role="button" tabindex="0">`);
+          push_element($$renderer3, "div", 50, 8);
+          $$renderer3.push(`<img${attr("src", image)}${attr("alt", alts[index])} class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"/>`);
+          push_element($$renderer3, "img", 62, 10);
+          pop_element();
+          $$renderer3.push(` <div class="absolute inset-0 bg-gradient-to-t from-[oklch(0.56_0.1223_127.47)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">`);
+          push_element($$renderer3, "div", 67, 10);
+          $$renderer3.push(`</div>`);
+          pop_element();
+          $$renderer3.push(` <div class="absolute top-4 right-4 bg-white/90 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">`);
+          push_element($$renderer3, "div", 71, 10);
+          $$renderer3.push(`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5" style="color: var(--primary);">`);
+          push_element($$renderer3, "svg", 74, 12);
+          $$renderer3.push(`<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6">`);
+          push_element($$renderer3, "path", 83, 14);
+          $$renderer3.push(`</path>`);
+          pop_element();
+          $$renderer3.push(`</svg>`);
+          pop_element();
+          $$renderer3.push(`</div>`);
+          pop_element();
+          $$renderer3.push(`</div>`);
+          pop_element();
+          $$renderer3.push(`</div>`);
+          pop_element();
+        }
+        $$renderer3.push(`<!--]--></div>`);
+        pop_element();
+        $$renderer3.push(` `);
+        if (images.length > 1) {
+          $$renderer3.push("<!--[-->");
+          $$renderer3.push(`<button class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10" style="color: var(--primary);" aria-label="Previous slide">`);
+          push_element($$renderer3, "button", 98, 4);
+          $$renderer3.push(`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">`);
+          push_element($$renderer3, "svg", 104, 6);
+          $$renderer3.push(`<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5">`);
+          push_element($$renderer3, "path", 112, 8);
+          $$renderer3.push(`</path>`);
+          pop_element();
+          $$renderer3.push(`</svg>`);
+          pop_element();
+          $$renderer3.push(`</button>`);
+          pop_element();
+          $$renderer3.push(` <button class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10" style="color: var(--primary);" aria-label="Next slide">`);
+          push_element($$renderer3, "button", 121, 4);
+          $$renderer3.push(`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">`);
+          push_element($$renderer3, "svg", 127, 6);
+          $$renderer3.push(`<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5">`);
+          push_element($$renderer3, "path", 135, 8);
+          $$renderer3.push(`</path>`);
+          pop_element();
+          $$renderer3.push(`</svg>`);
+          pop_element();
+          $$renderer3.push(`</button>`);
+          pop_element();
+          $$renderer3.push(` <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">`);
+          push_element($$renderer3, "div", 144, 4);
+          $$renderer3.push(`<!--[-->`);
+          const each_array_1 = ensure_array_like(images);
+          for (let index = 0, $$length = each_array_1.length; index < $$length; index++) {
+            each_array_1[index];
+            $$renderer3.push(`<button${attr_class(`h-2 rounded-full transition-all ${stringify(currentIndex === index ? "w-8 bg-white" : "w-2 bg-white/40")}`)}${attr("aria-label", `Go to slide ${index + 1}`)}>`);
+            push_element($$renderer3, "button", 146, 8);
+            $$renderer3.push(`</button>`);
+            pop_element();
+          }
+          $$renderer3.push(`<!--]--></div>`);
+          pop_element();
+        } else {
+          $$renderer3.push("<!--[!-->");
+        }
+        $$renderer3.push(`<!--]--></div>`);
+        pop_element();
+        $$renderer3.push(` `);
+        ImageLightbox($$renderer3, {
+          src: lightboxSrc,
+          alt: lightboxAlt,
+          get isOpen() {
+            return lightboxOpen;
+          },
+          set isOpen($$value) {
+            lightboxOpen = $$value;
+            $$settled = false;
+          }
+        });
+        $$renderer3.push(`<!---->`);
+      }
+      do {
+        $$settled = true;
+        $$inner_renderer = $$renderer2.copy();
+        $$render_inner($$inner_renderer);
+      } while (!$$settled);
+      $$renderer2.subsume($$inner_renderer);
+    },
+    Carousel
+  );
+}
+Carousel.render = function() {
+  throw new Error("Component.render(...) is no longer valid in Svelte 5. See https://svelte.dev/docs/svelte/v5-migration-guide#Components-are-no-longer-classes for more information");
+};
 FeatureShowcase[FILENAME] = "src/lib/components/FeatureShowcase.svelte";
 function FeatureShowcase($$renderer, $$props) {
   $$renderer.component(
@@ -434,46 +600,50 @@ function FeatureShowcase($$renderer, $$props) {
         features,
         imageSrc,
         imageAlt,
+        imageSrcs,
+        imageAlts,
         imagePosition = "right"
       } = $$props;
       const isImageRight = imagePosition === "right";
+      const images = imageSrcs || (imageSrc ? [imageSrc] : []);
+      const alts = imageAlts || (imageAlt ? [imageAlt] : []);
       {
         let children = function($$renderer3) {
           validate_snippet_args($$renderer3);
           $$renderer3.push(`<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">`);
-          push_element($$renderer3, "div", 27, 4);
+          push_element($$renderer3, "div", 36, 4);
           $$renderer3.push(`<div${attr_class("", void 0, { "lg:order-1": isImageRight, "lg:order-2": !isImageRight })}>`);
-          push_element($$renderer3, "div", 29, 6);
+          push_element($$renderer3, "div", 38, 6);
           $$renderer3.push(`<div class="inline-block px-3 py-1 rounded-full mb-4" style="background-color: oklch(0.98 0.0464 124.31);">`);
-          push_element($$renderer3, "div", 30, 8);
+          push_element($$renderer3, "div", 39, 8);
           $$renderer3.push(`<span class="text-xs font-semibold font-kollektif" style="color: var(--primary);">`);
-          push_element($$renderer3, "span", 34, 10);
+          push_element($$renderer3, "span", 43, 10);
           $$renderer3.push(`${escape_html(badge)}</span>`);
           pop_element();
           $$renderer3.push(`</div>`);
           pop_element();
           $$renderer3.push(` <h3 class="text-3xl md:text-4xl font-bold font-futura mb-4" style="color: var(--primary);">`);
-          push_element($$renderer3, "h3", 39, 8);
+          push_element($$renderer3, "h3", 48, 8);
           $$renderer3.push(`${escape_html(title)}</h3>`);
           pop_element();
           $$renderer3.push(` <p class="text-lg text-muted-foreground font-kollektif leading-relaxed mb-6">`);
-          push_element($$renderer3, "p", 45, 8);
+          push_element($$renderer3, "p", 54, 8);
           $$renderer3.push(`${escape_html(description)}</p>`);
           pop_element();
           $$renderer3.push(` <ul class="space-y-3">`);
-          push_element($$renderer3, "ul", 50, 8);
+          push_element($$renderer3, "ul", 59, 8);
           $$renderer3.push(`<!--[-->`);
           const each_array = ensure_array_like(features);
           for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
             let feature = each_array[$$index];
             $$renderer3.push(`<li class="flex items-start">`);
-            push_element($$renderer3, "li", 52, 12);
+            push_element($$renderer3, "li", 61, 12);
             $$renderer3.push(`<span class="mr-2 mt-1" style="color: var(--primary);">`);
-            push_element($$renderer3, "span", 53, 14);
+            push_element($$renderer3, "span", 62, 14);
             $$renderer3.push(`✓</span>`);
             pop_element();
             $$renderer3.push(` <span class="text-muted-foreground font-kollektif">`);
-            push_element($$renderer3, "span", 54, 14);
+            push_element($$renderer3, "span", 63, 14);
             $$renderer3.push(`${escape_html(feature)}</span>`);
             pop_element();
             $$renderer3.push(`</li>`);
@@ -484,19 +654,9 @@ function FeatureShowcase($$renderer, $$props) {
           $$renderer3.push(`</div>`);
           pop_element();
           $$renderer3.push(` <div${attr_class("", void 0, { "lg:order-2": isImageRight, "lg:order-1": !isImageRight })}>`);
-          push_element($$renderer3, "div", 62, 6);
-          $$renderer3.push(`<div class="relative rounded-2xl shadow-2xl border-2 group overflow-hidden" style="border-color: var(--primary); border-opacity: 0.2;">`);
-          push_element($$renderer3, "div", 63, 8);
-          $$renderer3.push(`<img${attr("src", imageSrc)}${attr("alt", imageAlt)} class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"/>`);
-          push_element($$renderer3, "img", 67, 10);
-          pop_element();
-          $$renderer3.push(` <div class="absolute inset-0 bg-gradient-to-t from-[oklch(0.56_0.1223_127.47)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">`);
-          push_element($$renderer3, "div", 72, 10);
-          $$renderer3.push(`</div>`);
-          pop_element();
-          $$renderer3.push(`</div>`);
-          pop_element();
-          $$renderer3.push(`</div>`);
+          push_element($$renderer3, "div", 71, 6);
+          Carousel($$renderer3, { images, alts });
+          $$renderer3.push(`<!----></div>`);
           pop_element();
           $$renderer3.push(`</div>`);
           pop_element();
@@ -542,129 +702,104 @@ function AppScreenshots($$renderer, $$props) {
       $$renderer2.push(`<!----> <div class="space-y-24">`);
       push_element($$renderer2, "div", 28, 4);
       FeatureShowcase($$renderer2, {
-        badge: "Client Portal",
-        title: "Personalized Dashboard",
-        description: "A comprehensive view of your mental health journey. Track appointments, view upcoming sessions, access resources, and monitor your progress all in one place.",
+        badge: "Smart Matching",
+        title: "AI-Powered Matching",
+        description: "Our intelligent system pairs clients with therapists who best fit their needs and personality. Using advanced algorithms, we analyze preferences, specializations, and therapeutic approaches to ensure the perfect match.",
         features: [
-          "Quick access to upcoming therapy sessions",
-          "Mental health resources and worksheets",
-          "Community engagement overview"
+          "Personalized therapist recommendations",
+          "Compatibility scoring based on needs",
+          "Continuous learning for better matches"
         ],
-        imageSrc: "/app-screenshots/client-dashboard.png",
-        imageAlt: "Client Dashboard",
+        imageSrcs: [
+          "/app-screenshots/matching-therapists.png",
+          "/app-screenshots/matching-communities.png"
+        ],
+        imageAlts: [
+          "AI-Powered Therapist Matching",
+          "AI-Powered Community Matching"
+        ],
         imagePosition: "right"
       });
       $$renderer2.push(`<!----> `);
       FeatureShowcase($$renderer2, {
-        badge: "Therapist Discovery",
-        title: "Find Your Perfect Match",
-        description: "Browse through 100+ licensed therapists with detailed profiles, specializations, ratings, and availability. Filter by expertise, language, and approach to find the right fit for you.",
+        badge: "Scheduling",
+        title: "Availability-Based Booking",
+        description: "Simplifies scheduling for both clients and professionals. Therapists can easily set their availability, and clients can book sessions that fit their schedule seamlessly.",
         features: [
-          "Detailed therapist profiles with credentials",
-          "Filter by specialization and availability",
-          "Read reviews and ratings from other clients"
+          "Real-time availability management",
+          "Flexible scheduling options",
+          "Automated booking confirmations"
         ],
-        imageSrc: "/app-screenshots/client-therapists.png",
-        imageAlt: "Find Therapists",
+        imageSrc: "/app-screenshots/therapist-availability.png",
+        imageAlt: "Availability-Based Booking",
         imagePosition: "left"
       });
       $$renderer2.push(`<!----> `);
       FeatureShowcase($$renderer2, {
-        badge: "Session Management",
-        title: "Easy Appointment Booking",
-        description: "Schedule, manage, and track all your therapy sessions in one place. View upcoming appointments, session history, and receive automated reminders.",
+        badge: "Community",
+        title: "Moderated Community Support Space",
+        description: "Provides a safe zone for shared healing and peer encouragement. Connect with others on similar journeys in a professionally moderated environment that prioritizes respect and support.",
         features: [
-          "Real-time availability calendar",
-          "Automated email and SMS reminders",
-          "Integrated payment processing"
+          "Safe and moderated discussions",
+          "Peer support and encouragement",
+          "Community-driven healing"
         ],
-        imageSrc: "/app-screenshots/client-sessions.png",
-        imageAlt: "Session Booking",
+        imageSrc: "/app-screenshots/client-community.png",
+        imageAlt: "Community Support Space",
         imagePosition: "right"
       });
       $$renderer2.push(`<!----> `);
       FeatureShowcase($$renderer2, {
-        badge: "Communication",
-        title: "Secure Messaging",
-        description: "Stay connected with your therapist through secure, encrypted messaging. Share files, ask questions between sessions, and maintain continuity in your care.",
+        badge: "Assessment",
+        title: "Standardized Pre-Assessment Tools",
+        description: "Help therapists understand clients before the first session. Our validated assessment tools provide comprehensive insights into mental health needs, concerns, and goals.",
         features: [
-          "End-to-end encrypted conversations",
-          "File sharing and media support",
-          "Real-time notifications and read receipts"
+          "Validated psychological assessments",
+          "Comprehensive mental health screening",
+          "Results shared with your therapist"
         ],
-        imageSrc: "/app-screenshots/client-messages.png",
-        imageAlt: "Secure Messaging",
-        imagePosition: "left"
-      });
-      $$renderer2.push(`<!----> `);
-      FeatureShowcase($$renderer2, {
-        badge: "AI Assessment",
-        title: "Intelligent Pre-Assessment",
-        description: "Complete comprehensive mental health assessments powered by AI. Get personalized insights and match with the right therapist based on your unique needs and concerns.",
-        features: [
-          "Validated psychological assessment tools",
-          "AI-powered analysis and recommendations",
-          "Progress tracking over time"
+        imageSrcs: [
+          "/app-screenshots/preassessment-checklist.png",
+          "/app-screenshots/preassessment-form.png"
         ],
-        imageSrc: "/app-screenshots/preassessment-forms.png",
-        imageAlt: "Pre-Assessment Forms",
-        imagePosition: "right"
-      });
-      $$renderer2.push(`<!----> `);
-      FeatureShowcase($$renderer2, {
-        badge: "Resources",
-        title: "Interactive Worksheets",
-        description: "Access a library of therapeutic worksheets, exercises, and resources. Work on assignments between sessions and track your personal growth.",
-        features: [
-          "Curated mental health resources",
-          "Progress tracking and completion status",
-          "Share results with your therapist"
-        ],
-        imageSrc: "/app-screenshots/client-worksheets.png",
-        imageAlt: "Interactive Worksheets",
+        imageAlts: ["Pre-Assessment Checklist", "Pre-Assessment Form"],
         imagePosition: "left"
       });
       $$renderer2.push(`<!----> `);
       FeatureShowcase($$renderer2, {
         badge: "Therapist Tools",
-        title: "Therapist Dashboard",
-        description: "Comprehensive practice management tools for therapists. Manage clients, schedule sessions, track earnings, and access patient assessments all in one platform.",
+        title: "Digital Tools for Therapists",
+        description: "Including optional therapy worksheets and progress tracking for clients between sessions. Comprehensive practice management tools that streamline client care and administrative tasks.",
         features: [
-          "Client management and session history",
-          "Revenue tracking and analytics",
-          "AI-powered patient insights"
+          "Client management dashboard",
+          "Therapy worksheets library",
+          "Progress tracking and insights"
         ],
-        imageSrc: "/app-screenshots/therapist-dashboard.png",
-        imageAlt: "Therapist Dashboard",
+        imageSrcs: [
+          "/app-screenshots/therapist-worksheet.png",
+          "/app-screenshots/therapist-dashboard.png",
+          "/app-screenshots/therapist-clients.png"
+        ],
+        imageAlts: [
+          "Therapy Worksheets",
+          "Therapist Dashboard",
+          "Client Management"
+        ],
         imagePosition: "right"
       });
       $$renderer2.push(`<!----> `);
       FeatureShowcase($$renderer2, {
-        badge: "Availability",
-        title: "Smart Scheduling",
-        description: "Therapists can easily manage their availability with our intuitive calendar system. Set recurring schedules, block time off, and handle bookings effortlessly.",
+        badge: "Wellness Programs",
+        title: "Guided Group Programs and Webinars",
+        description: "Focused on stress, resilience, and mental wellness education. Join expert-led sessions designed to build coping skills, foster community, and promote long-term mental health.",
         features: [
-          "Flexible availability management",
-          "Automatic conflict detection",
-          "One-click booking confirmation"
+          "Expert-led group sessions",
+          "Stress management workshops",
+          "Resilience building programs"
         ],
-        imageSrc: "/app-screenshots/therapist-scheduling.png",
-        imageAlt: "Therapist Scheduling",
+        imageSrc: "/app-screenshots/client-community-sessions.png",
+        imageAlt: "Group Programs and Webinars",
         imagePosition: "left"
-      });
-      $$renderer2.push(`<!----> `);
-      FeatureShowcase($$renderer2, {
-        badge: "User Management",
-        title: "Comprehensive Profiles",
-        description: "Complete profile management with personal information, preferences, and mental health history. Keep your information secure and up-to-date.",
-        features: [
-          "Secure data storage and privacy controls",
-          "Customizable preferences and settings",
-          "Mental health history tracking"
-        ],
-        imageSrc: "/app-screenshots/client-profile.png",
-        imageAlt: "Client Profile",
-        imagePosition: "right"
       });
       $$renderer2.push(`<!----></div>`);
       pop_element();
@@ -687,18 +822,18 @@ function TeamSection($$renderer, $$props) {
       push_element($$renderer2, "section", 6, 0);
       ParallaxDots($$renderer2, { variant: "green" });
       $$renderer2.push(`<!----> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">`);
-      push_element($$renderer2, "div", 8, 2);
+      push_element($$renderer2, "div", 11, 2);
       {
         let children = function($$renderer3) {
           validate_snippet_args($$renderer3);
           $$renderer3.push(`<div class="text-center mb-16">`);
-          push_element($$renderer3, "div", 11, 8);
+          push_element($$renderer3, "div", 14, 8);
           $$renderer3.push(`<h2 class="text-3xl md:text-5xl font-bold font-futura mb-4" style="color: var(--primary);">`);
-          push_element($$renderer3, "h2", 12, 10);
+          push_element($$renderer3, "h2", 15, 10);
           $$renderer3.push(`Meet Our Team</h2>`);
           pop_element();
           $$renderer3.push(` <p class="text-lg text-muted-foreground font-kollektif max-w-2xl mx-auto">`);
-          push_element($$renderer3, "p", 18, 10);
+          push_element($$renderer3, "p", 21, 10);
           $$renderer3.push(`The passionate individuals behind Mentara</p>`);
           pop_element();
           $$renderer3.push(`</div>`);
@@ -708,35 +843,35 @@ function TeamSection($$renderer, $$props) {
         AnimateOnScroll($$renderer2, { y: 30, duration: 600, children });
       }
       $$renderer2.push(`<!----> <div class="grid grid-cols-1 md:grid-cols-3 gap-8">`);
-      push_element($$renderer2, "div", 25, 4);
+      push_element($$renderer2, "div", 30, 4);
       {
         let children = function($$renderer3) {
           validate_snippet_args($$renderer3);
           $$renderer3.push(`<div class="text-center group">`);
-          push_element($$renderer3, "div", 29, 10);
+          push_element($$renderer3, "div", 34, 10);
           $$renderer3.push(`<div class="relative mb-6 overflow-hidden rounded-2xl">`);
-          push_element($$renderer3, "div", 30, 12);
+          push_element($$renderer3, "div", 35, 12);
           $$renderer3.push(`<img src="/team/tolentino.jpg" alt="Tristan James C. Tolentino" class="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"/>`);
-          push_element($$renderer3, "img", 31, 14);
+          push_element($$renderer3, "img", 36, 14);
           pop_element();
           $$renderer3.push(` <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">`);
-          push_element($$renderer3, "div", 36, 14);
+          push_element($$renderer3, "div", 41, 14);
           $$renderer3.push(`</div>`);
           pop_element();
           $$renderer3.push(`</div>`);
           pop_element();
           $$renderer3.push(` <h3 class="text-xl font-bold font-futura mb-2" style="color: var(--primary);">`);
-          push_element($$renderer3, "h3", 40, 12);
+          push_element($$renderer3, "h3", 45, 12);
           $$renderer3.push(`Tristan James C. Tolentino</h3>`);
           pop_element();
           $$renderer3.push(` <p class="text-muted-foreground font-kollektif text-sm mb-3">`);
-          push_element($$renderer3, "p", 46, 12);
+          push_element($$renderer3, "p", 51, 12);
           $$renderer3.push(`Co-Founder &amp; External Partnerships Lead</p>`);
           pop_element();
           $$renderer3.push(` <p class="text-xs text-muted-foreground font-kollektif">`);
-          push_element($$renderer3, "p", 49, 12);
-          $$renderer3.push(`Leading strategic partnerships and business development to
-              expand Mentara's reach and impact in mental health care.</p>`);
+          push_element($$renderer3, "p", 54, 12);
+          $$renderer3.push(`Leading strategic partnerships and business development to expand
+              Mentara's reach and impact in mental health care.</p>`);
           pop_element();
           $$renderer3.push(`</div>`);
           pop_element();
@@ -754,28 +889,28 @@ function TeamSection($$renderer, $$props) {
         let children = function($$renderer3) {
           validate_snippet_args($$renderer3);
           $$renderer3.push(`<div class="text-center group">`);
-          push_element($$renderer3, "div", 60, 10);
+          push_element($$renderer3, "div", 65, 10);
           $$renderer3.push(`<div class="relative mb-6 overflow-hidden rounded-2xl">`);
-          push_element($$renderer3, "div", 61, 12);
+          push_element($$renderer3, "div", 66, 12);
           $$renderer3.push(`<img src="/team/sajulga.jpg" alt="Adrian T. Sajulga" class="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"/>`);
-          push_element($$renderer3, "img", 62, 14);
+          push_element($$renderer3, "img", 67, 14);
           pop_element();
           $$renderer3.push(` <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">`);
-          push_element($$renderer3, "div", 67, 14);
+          push_element($$renderer3, "div", 72, 14);
           $$renderer3.push(`</div>`);
           pop_element();
           $$renderer3.push(`</div>`);
           pop_element();
           $$renderer3.push(` <h3 class="text-xl font-bold font-futura mb-2" style="color: var(--primary);">`);
-          push_element($$renderer3, "h3", 71, 12);
+          push_element($$renderer3, "h3", 76, 12);
           $$renderer3.push(`Adrian T. Sajulga</h3>`);
           pop_element();
           $$renderer3.push(` <p class="text-muted-foreground font-kollektif text-sm mb-3">`);
-          push_element($$renderer3, "p", 77, 12);
+          push_element($$renderer3, "p", 82, 12);
           $$renderer3.push(`Co-Founder &amp; Backend Architect</p>`);
           pop_element();
           $$renderer3.push(` <p class="text-xs text-muted-foreground font-kollektif">`);
-          push_element($$renderer3, "p", 80, 12);
+          push_element($$renderer3, "p", 85, 12);
           $$renderer3.push(`Backend specialist focused on building scalable, secure
               infrastructure for mental health services.</p>`);
           pop_element();
@@ -795,28 +930,28 @@ function TeamSection($$renderer, $$props) {
         let children = function($$renderer3) {
           validate_snippet_args($$renderer3);
           $$renderer3.push(`<div class="text-center group">`);
-          push_element($$renderer3, "div", 91, 10);
+          push_element($$renderer3, "div", 96, 10);
           $$renderer3.push(`<div class="relative mb-6 overflow-hidden rounded-2xl">`);
-          push_element($$renderer3, "div", 92, 12);
+          push_element($$renderer3, "div", 97, 12);
           $$renderer3.push(`<img src="/team/segundo.jpg" alt="Julia Laine Segundo" class="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"/>`);
-          push_element($$renderer3, "img", 93, 14);
+          push_element($$renderer3, "img", 98, 14);
           pop_element();
           $$renderer3.push(` <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">`);
-          push_element($$renderer3, "div", 98, 14);
+          push_element($$renderer3, "div", 103, 14);
           $$renderer3.push(`</div>`);
           pop_element();
           $$renderer3.push(`</div>`);
           pop_element();
           $$renderer3.push(` <h3 class="text-xl font-bold font-futura mb-2" style="color: var(--primary);">`);
-          push_element($$renderer3, "h3", 102, 12);
+          push_element($$renderer3, "h3", 107, 12);
           $$renderer3.push(`Julia Laine Segundo</h3>`);
           pop_element();
           $$renderer3.push(` <p class="text-muted-foreground font-kollektif text-sm mb-3">`);
-          push_element($$renderer3, "p", 108, 12);
+          push_element($$renderer3, "p", 113, 12);
           $$renderer3.push(`Co-Founder &amp; AI Engineer</p>`);
           pop_element();
           $$renderer3.push(` <p class="text-xs text-muted-foreground font-kollektif">`);
-          push_element($$renderer3, "p", 111, 12);
+          push_element($$renderer3, "p", 116, 12);
           $$renderer3.push(`Machine learning expert developing AI-powered assessment and
               evaluation systems.</p>`);
           pop_element();

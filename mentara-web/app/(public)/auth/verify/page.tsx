@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+// Force dynamic rendering to avoid static generation issues
+export const dynamic = 'force-dynamic';
+
 export default function VerifyPage() {
   const router = useRouter();
   const { isLoaded, handleOAuthCallback } = useAuth();

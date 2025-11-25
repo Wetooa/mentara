@@ -11,6 +11,7 @@ export {
   useUpdateSubscription,
   useCancelSubscription,
   useReactivateSubscription,
+  useSubscriptionPreview,
   
   // Payment Method Hooks
   usePaymentMethods,

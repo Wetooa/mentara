@@ -7,9 +7,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { AlertTriangle, RefreshCw, ArrowLeft, Mail, FileText } from "lucide-react";
 
-// Force dynamic rendering to prevent prerender errors
-export const dynamic = 'force-dynamic';
-
 type ErrorType = "email_exists" | "validation_error" | "upload_error" | "server_error" | "unknown";
 
 interface ErrorDetails {
@@ -64,13 +61,11 @@ const errorTypes: Record<ErrorType, ErrorDetails> = {
   }
 };
 
-export default function ApplicationErrorPage() {
+function ApplicationErrorContentInner() {
   const [errorType, setErrorType] = useState<ErrorType>("unknown");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const type = (urlParams.get("type") as ErrorType) || "unknown";
@@ -80,10 +75,6 @@ export default function ApplicationErrorPage() {
       setErrorMessage(message);
     }
   }, []);
-
-  if (!mounted) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  }
 
   const errorDetails = errorTypes[errorType];
 
@@ -194,3 +185,6 @@ export default function ApplicationErrorPage() {
     </div>
   );
 }
+
+export default ApplicationErrorContentInner;
+

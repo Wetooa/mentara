@@ -2838,6 +2838,15 @@ function unsubscribe_stores(store_values) {
     store_values[store_name][1]();
   }
 }
+function bind_props(props_parent, props_now) {
+  for (const key in props_now) {
+    const initial_value = props_parent[key];
+    const value = props_now[key];
+    if (initial_value === void 0 && value !== void 0 && Object.getOwnPropertyDescriptor(props_parent, key)?.set) {
+      props_parent[key] = value;
+    }
+  }
+}
 function ensure_array_like(array_like_or_iterator) {
   if (array_like_or_iterator) {
     return array_like_or_iterator.length !== void 0 ? array_like_or_iterator : Array.from(array_like_or_iterator);
@@ -2881,15 +2890,16 @@ export {
   clsx as a4,
   stringify as a5,
   attr_style as a6,
-  ensure_array_like as a7,
-  attr as a8,
-  unsubscribe_stores as a9,
-  store_get as aa,
-  safe_not_equal as ab,
-  ssr_context as ac,
-  set_ssr_context as ad,
-  Renderer as ae,
-  invalid_snippet_arguments as af,
+  attr as a7,
+  bind_props as a8,
+  ensure_array_like as a9,
+  unsubscribe_stores as aa,
+  store_get as ab,
+  safe_not_equal as ac,
+  ssr_context as ad,
+  set_ssr_context as ae,
+  Renderer as af,
+  invalid_snippet_arguments as ag,
   HYDRATION_START as b,
   HYDRATION_START_ELSE as c,
   get as d,

@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering to avoid static generation issues
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -22,6 +25,7 @@ interface Message {
 export default function PreAssessmentChatPage() {
   const router = useRouter();
   const api = useApi();
+  const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -34,6 +38,10 @@ export default function PreAssessmentChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [assessmentComplete, setAssessmentComplete] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -99,7 +107,7 @@ export default function PreAssessmentChatPage() {
         setMessages((prev) => [...prev, finalMessage]);
       }
     } catch (error) {
-      logger.error("Error sending message:", error);
+      console.error("Error sending message:", error);
       toast.error("Failed to send message. Please try again.");
     } finally {
       setIsLoading(false);
@@ -116,6 +124,10 @@ export default function PreAssessmentChatPage() {
   const handleComplete = () => {
     router.push("/pre-assessment/signup?method=chat");
   };
+
+  if (!mounted) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   return (
     <div className="bg-gradient-to-b from-tertiary to-transparent w-full min-h-screen flex flex-col">

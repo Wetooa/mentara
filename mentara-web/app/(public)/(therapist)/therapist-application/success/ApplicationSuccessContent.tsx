@@ -7,25 +7,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle, Clock, Mail, FileText, ArrowLeft } from "lucide-react";
 
-// Force dynamic rendering to prevent prerender errors
-export const dynamic = 'force-dynamic';
-
-export default function ApplicationSuccessPage() {
+function ApplicationSuccessContentInner() {
   const [applicationId, setApplicationId] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get("id");
       setApplicationId(id);
     }
   }, []);
-
-  if (!mounted) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50 flex items-center justify-center p-4">
@@ -162,3 +153,6 @@ export default function ApplicationSuccessPage() {
     </div>
   );
 }
+
+export default ApplicationSuccessContentInner;
+

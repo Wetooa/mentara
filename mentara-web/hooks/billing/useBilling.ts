@@ -517,3 +517,27 @@ export const useBillingSummary = () => {
     ),
   };
 };
+
+// Subscription Preview Hook (for previewing subscription changes)
+export const useSubscriptionPreview = () => {
+  const api = useApi();
+
+  return useBillingMutation(
+    (data: { planId: string; prorationBehavior?: string }) => {
+      // TODO: Implement preview endpoint when available
+      // For now, return a promise that resolves with mock data
+      return Promise.resolve({
+        amount: 0,
+        currency: "usd",
+        proration: 0,
+      });
+    },
+    {
+      errorMessage: "Failed to preview subscription changes",
+      showSuccessToast: false,
+    }
+  );
+};
+
+// Export billingQueryKeys for external use
+export { billingQueryKeys };

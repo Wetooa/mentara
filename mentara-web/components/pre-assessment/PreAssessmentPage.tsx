@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Logo from "@/components/Logo";
@@ -14,20 +14,31 @@ import ChatbotInterface from "@/components/pre-assessment/ChatbotInterface";
 import { Button } from "@/components/ui/button";
 import { fadeDown } from "@/lib/animations";
 import { usePreAssessment } from "@/hooks/pre-assessment/usePreAssessment";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 
-export function PreAssessmentPage() {
-  const pathname = usePathname();
-  // Determine initial mode based on route
+function PreAssessmentPageContentInner() {
+  const [mounted, setMounted] = useState(false);
+  // Use window.location instead of usePathname to avoid SSR issues
   const getInitialMode = (): 'selection' | 'checklist' | 'chatbot' => {
-    if (pathname?.includes('/checklist')) return 'checklist';
-    if (pathname?.includes('/chat')) return 'chatbot';
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      if (pathname.includes('/checklist')) return 'checklist';
+      if (pathname.includes('/chat')) return 'chatbot';
+    }
     return 'selection';
   };
   
-  const [mode, setMode] = useState<'selection' | 'checklist' | 'chatbot'>(getInitialMode());
+  const [mode, setMode] = useState<'selection' | 'checklist' | 'chatbot'>(() => {
+    // Only use pathname on client side
+    if (typeof window === 'undefined') return 'selection';
+    return getInitialMode();
+  });
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const { setQuestionnaires, nextStep } = usePreAssessmentChecklistStore();
   const {
     step,
@@ -88,6 +99,10 @@ export function PreAssessmentPage() {
     }
   };
 
+  if (!mounted) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
   return (
     <div className="bg-gradient-to-b from-tertiary to-transparent w-full h-full">
       <motion.nav
@@ -133,4 +148,12 @@ export function PreAssessmentPage() {
   );
 }
 
-export default PreAssessmentPage;
+function PreAssessmentPageContent() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <PreAssessmentPageContentInner />
+    </Suspense>
+  );
+}
+
+export { PreAssessmentPageContent as default };

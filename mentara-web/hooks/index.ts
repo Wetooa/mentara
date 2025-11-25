@@ -2,8 +2,7 @@
  * Main hooks index - Re-exports all organized hooks
  * 
  * This file maintains backward compatibility while supporting the new
- * organized folder structure for hooks. Uses export * patterns to ensure
- * all named exports are available.
+ * organized folder structure for hooks. Uses explicit exports to avoid conflicts.
  */
 
 // Auth hooks - Export all named exports
@@ -12,17 +11,24 @@ export * from './auth';
 // User hooks - Export all named exports  
 export * from './user';
 
-// Therapist hooks - Export all named exports
+// Therapist hooks - Export all except conflicting ones
 export * from './therapist';
+// Use the version from useTherapist (more complete)
+export { useTherapistProfile } from './therapist/useTherapist';
 
 // Dashboard hooks - Export all named exports
 export * from './dashboard';
 
-// Admin hooks - Export all named exports
+// Admin hooks - Export all, using admin versions for conflicts
 export * from './admin';
+// Explicitly export admin version of conflicting hooks (admin takes precedence)
+export { useUpdateTherapistApplicationStatus } from './admin/useAdmin';
+export { useUpdateModerationReport as useAdminUpdateModerationReport } from './admin/useAdmin';
 
 // Moderator hooks - Export all named exports
 export * from './moderator';
+// Explicitly export moderator version of conflicting hooks (moderator takes precedence for moderation)
+export { useUpdateModerationReport } from './moderator/useModerator';
 
 // Notification hooks - Export all named exports
 export * from './notifications';
@@ -54,5 +60,7 @@ export * from './billing';
 // Profile hooks - Export all named exports
 export * from './profile';
 
-// Utility hooks - Export all named exports
+// Utility hooks - Export all, but resolve useIsMobile conflict
 export * from './utils';
+// Use the useMediaQuery version of useIsMobile (more flexible)
+export { useIsMobile } from './utils/useMediaQuery';

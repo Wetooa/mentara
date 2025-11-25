@@ -1,5 +1,5 @@
 import { n as noop } from "./index-client.js";
-import { ab as safe_not_equal } from "./index.js";
+import { ac as safe_not_equal } from "./index.js";
 const SCHEME = /^[a-z][a-z\d+\-.]+:/i;
 const internal = new URL("sveltekit-internal://");
 function resolve(base, path) {

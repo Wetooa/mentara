@@ -1,4 +1,4 @@
-import { a0 as head, a8 as attr, a2 as escape_html, Z as FILENAME } from "../../../chunks/index.js";
+import { a0 as head, a7 as attr, a2 as escape_html, Z as FILENAME } from "../../../chunks/index.js";
 import { N as Navbar } from "../../../chunks/Navbar.js";
 import { p as push_element, a as pop_element } from "../../../chunks/dev.js";
 _page[FILENAME] = "src/routes/demo/+page.svelte";
@@ -106,7 +106,7 @@ function _page($$renderer, $$props) {
       push_element($$renderer2, "div", 204, 18);
       $$renderer2.push(`<div class="font-semibold font-kollektif">`);
       push_element($$renderer2, "div", 205, 20);
-      $$renderer2.push(`100+ Therapists</div>`);
+      $$renderer2.push(`Growing Therapists</div>`);
       pop_element();
       $$renderer2.push(` <div class="text-sm text-white/80">`);
       push_element($$renderer2, "div", 208, 20);
@@ -154,7 +154,7 @@ function _page($$renderer, $$props) {
       push_element($$renderer2, "div", 248, 18);
       $$renderer2.push(`<div class="font-semibold font-kollektif">`);
       push_element($$renderer2, "div", 249, 20);
-      $$renderer2.push(`Trusted by 500+</div>`);
+      $$renderer2.push(`Growing support</div>`);
       pop_element();
       $$renderer2.push(` <div class="text-sm text-white/80">`);
       push_element($$renderer2, "div", 252, 20);

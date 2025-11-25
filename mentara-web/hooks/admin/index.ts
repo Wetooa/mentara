@@ -1,3 +1,4 @@
+// Export all from useAdmin (conflicts will be resolved by import order)
 export * from './useAdmin';
 export { useAdminUsers } from './useAdminUsers';
 

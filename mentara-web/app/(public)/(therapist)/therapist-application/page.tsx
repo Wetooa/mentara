@@ -1,6 +1,10 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, Suspense } from "react";
+import dynamic from "next/dynamic";
+
+// Force dynamic rendering to avoid static generation issues with useSearchParams
+export const dynamic = 'force-dynamic';
 import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
 
 // UI Components
@@ -15,7 +19,7 @@ import { TherapistApplicationLayout } from "@/components/therapist-application/T
 // Hooks and utilities
 import { useTherapistApplicationForm } from "@/hooks/therapist-application/useTherapistApplicationForm";
 
-export default function SinglePageTherapistApplication() {
+function SinglePageTherapistApplicationContent() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [showRestartModal, setShowRestartModal] = useState(false);
 
@@ -221,5 +225,21 @@ export default function SinglePageTherapistApplication() {
         </div>
       )}
     </TherapistApplicationLayout>
+  );
+}
+
+const SinglePageTherapistApplicationComponent = dynamic(
+  () => Promise.resolve({ default: SinglePageTherapistApplicationContent }),
+  {
+    ssr: false,
+    loading: () => <div className="flex items-center justify-center min-h-screen">Loading...</div>
+  }
+);
+
+export default function SinglePageTherapistApplication() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <SinglePageTherapistApplicationComponent />
+    </Suspense>
   );
 }

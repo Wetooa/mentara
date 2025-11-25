@@ -1,5 +1,9 @@
 "use client";
-import React from "react";
+
+// Force dynamic rendering to prevent prerender errors
+export const dynamic = 'force-dynamic';
+
+import React, { Suspense } from "react";
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -123,7 +127,7 @@ const AnimatedStat = ({ value, label, suffix = "", delay = 0 }: {
   );
 };
 
-export default function AboutPage() {
+function AboutPageContent() {
   const heroRef = useRef(null);
   const storyRef = useRef(null);
   const valuesRef = useRef(null);
@@ -644,5 +648,13 @@ export default function AboutPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function AboutPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AboutPageContent />
+    </Suspense>
   );
 }

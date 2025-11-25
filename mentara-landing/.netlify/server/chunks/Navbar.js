@@ -1,4 +1,4 @@
-import { a1 as getContext, a3 as attr_class, a6 as attr_style, a5 as stringify, a9 as unsubscribe_stores, aa as store_get, Z as FILENAME } from "./index.js";
+import { a1 as getContext, a3 as attr_class, a6 as attr_style, a5 as stringify, aa as unsubscribe_stores, ab as store_get, Z as FILENAME } from "./index.js";
 import "./client.js";
 import { p as push_element, a as pop_element } from "./dev.js";
 const getStores = () => {
