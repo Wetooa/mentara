@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useEffect, useRef } from 'react';
+import React, { ReactNode, useEffect, useRef, Suspense } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import GlobalLoadingBar from '@/components/ui/global-loading-bar';
 import { useGlobalLoadingStore } from '@/store/loading/globalLoadingStore';
@@ -17,11 +17,12 @@ interface LoadingBarProviderProps {
   };
 }
 
-export const LoadingBarProvider: React.FC<LoadingBarProviderProps> = ({
+// Internal component that uses useSearchParams - must be wrapped in Suspense
+function LoadingBarProviderContent({
   children,
   showLoadingBar = true,
   loadingBarProps = {},
-}) => {
+}: LoadingBarProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -196,6 +197,14 @@ export const LoadingBarProvider: React.FC<LoadingBarProviderProps> = ({
       {/* Render children */}
       {children}
     </>
+  );
+}
+
+export const LoadingBarProvider: React.FC<LoadingBarProviderProps> = (props) => {
+  return (
+    <Suspense fallback={props.children}>
+      <LoadingBarProviderContent {...props} />
+    </Suspense>
   );
 };
 

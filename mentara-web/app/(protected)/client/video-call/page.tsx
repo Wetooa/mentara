@@ -34,7 +34,7 @@ const VideoCallInterface = dynamic(() => import('@/components/video-calls').then
   )
 });
 
-export default function ClientVideoCallPage() {
+function ClientVideoCallPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -384,5 +384,29 @@ export default function ClientVideoCallPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function ClientVideoCallPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-full bg-gray-900 flex items-center justify-center">
+        <Card className="w-96 bg-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center space-x-2">
+              <Phone className="h-5 w-5 animate-pulse" />
+              <span>Loading...</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full bg-gray-700" />
+            <Skeleton className="h-4 w-3/4 bg-gray-700" />
+            <Skeleton className="h-10 w-full bg-gray-700" />
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <ClientVideoCallPageContent />
+    </Suspense>
   );
 }

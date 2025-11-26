@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { useVideoCall } from '@/hooks/video-calls';
 import { AlertCircle, Phone, VideoOff, ArrowLeft, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function AdminVideoCallPage() {
+function AdminVideoCallPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -286,5 +286,29 @@ export default function AdminVideoCallPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AdminVideoCallPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-full bg-gray-900 flex items-center justify-center">
+        <Card className="w-96 bg-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center space-x-2">
+              <Phone className="h-5 w-5 animate-pulse text-blue-500" />
+              <span>Loading...</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full bg-gray-700" />
+            <Skeleton className="h-4 w-3/4 bg-gray-700" />
+            <Skeleton className="h-10 w-full bg-gray-700" />
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <AdminVideoCallPageContent />
+    </Suspense>
   );
 }

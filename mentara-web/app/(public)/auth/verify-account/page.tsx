@@ -1,18 +1,10 @@
 "use client";
 
 import { Suspense } from "react";
-import dynamic from "next/dynamic";
+import VerifyAccount from "@/components/auth/VerifyAccount";
 
-// Force dynamic rendering to avoid static generation issues with useSearchParams
+// Force dynamic rendering to avoid static generation issues
 export const dynamic = 'force-dynamic';
-
-const VerifyAccount = dynamic(
-  () => import("@/components/auth/VerifyAccount"),
-  {
-    ssr: false,
-    loading: () => <div className="flex items-center justify-center min-h-screen">Loading...</div>
-  }
-);
 
 export default function VerifyAccountPage() {
   return (

@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useCallback, Suspense } from "react";
-import dynamic from "next/dynamic";
 
-// Force dynamic rendering to avoid static generation issues with useSearchParams
+// Force dynamic rendering to avoid static generation issues
 export const dynamic = 'force-dynamic';
 import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
 
@@ -228,18 +227,10 @@ function SinglePageTherapistApplicationContent() {
   );
 }
 
-const SinglePageTherapistApplicationComponent = dynamic(
-  () => Promise.resolve({ default: SinglePageTherapistApplicationContent }),
-  {
-    ssr: false,
-    loading: () => <div className="flex items-center justify-center min-h-screen">Loading...</div>
-  }
-);
-
 export default function SinglePageTherapistApplication() {
   return (
     <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-      <SinglePageTherapistApplicationComponent />
+      <SinglePageTherapistApplicationContent />
     </Suspense>
   );
 }

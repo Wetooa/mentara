@@ -1,14 +1,15 @@
 "use client";
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { MessengerInterface } from '@/components/messaging/MessengerInterface';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function TherapistMessagesPage() {
+function TherapistMessagesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const targetUserId = searchParams.get('userId');
@@ -83,5 +84,20 @@ export default function TherapistMessagesPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function TherapistMessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-full w-full p-6 flex flex-col">
+        <div className="flex-1 min-h-0 space-y-4">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    }>
+      <TherapistMessagesPageContent />
+    </Suspense>
   );
 }
