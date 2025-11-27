@@ -17,7 +17,7 @@ export interface RLSContext {
  * Apply this in your PrismaService onModuleInit
  */
 export function createRLSMiddleware(getContext: () => RLSContext | null) {
-  return async (params: Prisma.MiddlewareParams, next: any) => {
+  return async (params: any, next: any) => {
     const context = getContext();
 
     // Skip RLS if no context (system operations)
@@ -309,9 +309,3 @@ export async function setPrismaRLSContext(prisma: any, userId: string) {
  *   }
  * }
  */
-
-
-
-
-
-

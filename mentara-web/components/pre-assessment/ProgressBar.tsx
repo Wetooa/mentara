@@ -1,7 +1,7 @@
 import React from "react";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 import { QUESTIONNAIRE_MAP } from "@/constants/questionnaire/questionnaire-mapping";
-import { CheckCircle, Circle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 export default function PreAssessmentProgressBar() {
   const { step, miniStep, questionnaires } = usePreAssessmentChecklistStore();
@@ -115,7 +115,7 @@ export default function PreAssessmentProgressBar() {
                   {isCompleted ? (
                     <CheckCircle className="h-4 w-4" />
                   ) : (
-                    <Circle className="h-3 w-3 fill-current" />
+                    <div className="h-3 w-3 rounded-full bg-current" />
                   )}
                 </div>
                 <span
