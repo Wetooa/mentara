@@ -20,49 +20,58 @@ export default function PreAssessmentInitialCheckList({
 
   return (
     <>
-      <div className="w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
-        <div className="w-full mb-6 text-center">
-          <h4 className="text-lg text-center text-secondary">
+      <div className="w-full p-6 sm:p-8">
+        <div className="w-full mb-8 text-center">
+          <h4 className="text-3xl font-bold text-gray-900 mb-3">
             What can we help you with today?
           </h4>
-          <p className="text-xs text-black/80">Select all that apply</p>
+          <p className="text-base text-gray-600">Select all that apply</p>
         </div>
 
         {/* Scrollable checklist with max height */}
-        <div className="w-full max-h-[400px] overflow-y-auto pr-2">
-          <div className="flex flex-col gap-2">
+        <div className="w-full max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex flex-col gap-3">
             {LIST_OF_QUESTIONNAIRES.map((questionnaire) => {
               const isSelected = isQuestionnaireSelected(questionnaire);
               const handleSelect = () =>
                 handleSelectQuestionnaire(questionnaire);
 
               return (
-                <div
+                <button
                   onClick={handleSelect}
                   key={questionnaire}
                   className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "justify-start px-6 gap-4 bg-white hover:bg-primary/10 hover:border-primary/30",
-                    isSelected && "border-primary bg-primary/5"
+                    "flex items-center justify-start px-6 py-4 gap-4 bg-white hover:bg-primary/5 border-2 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md text-left",
+                    isSelected 
+                      ? "border-primary bg-primary/10 shadow-md" 
+                      : "border-gray-200 hover:border-primary"
                   )}
                 >
-                  <Checkbox onClick={handleSelect} checked={isSelected} />
-                  <label className="cursor-pointer">{questionnaire}</label>
-                </div>
+                  <Checkbox 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelect();
+                    }} 
+                    checked={isSelected}
+                    className="flex-shrink-0"
+                  />
+                  <label className="cursor-pointer text-gray-900 font-medium text-base flex-1">
+                    {questionnaire}
+                  </label>
+                </button>
               );
             })}
           </div>
         </div>
       </div>
 
-      <div className="bg-white px-10 py-3">
+      <div className="bg-gray-50 px-6 sm:px-8 py-4 border-t border-gray-200">
         <Button
-          className="w-full font-bold"
-          variant={"secondary"}
+          className="w-full font-semibold bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-base"
           disabled={isSubmitDisabled}
           onClick={handleNextButtonOnClick}
         >
-          Submit
+          Continue
         </Button>
       </div>
     </>

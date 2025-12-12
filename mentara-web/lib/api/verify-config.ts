@@ -5,7 +5,7 @@
 
 export function verifyApiConfig() {
   const config = {
-    apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api",
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000/api",
     nodeEnv: process.env.NODE_ENV,
     isClient: typeof window !== "undefined",
   };
@@ -14,8 +14,9 @@ export function verifyApiConfig() {
   console.log("Base URL:", config.apiUrl);
   console.log("Environment:", config.nodeEnv);
   console.log("Running on:", config.isClient ? "Client" : "Server");
-  console.log("Expected Backend:", "http://localhost:3001/api");
-  console.log("Match:", config.apiUrl === "http://localhost:3001/api" ? "✅" : "❌");
+  const expectedUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000/api";
+  console.log("Expected Backend:", expectedUrl);
+  console.log("Match:", config.apiUrl === expectedUrl ? "✅" : "❌");
   console.log("========================");
 
   return config;

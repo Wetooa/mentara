@@ -23,7 +23,13 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 // Import will be resolved via service return type
-import type { UpdateClientDto, TherapistRecommendation } from './types';
+import type {
+  UpdateClientDto,
+  TherapistRecommendation,
+  CreateClientPreferencesDto,
+  UpdateClientPreferencesDto,
+  ClientPreferencesDto,
+} from './types';
 
 @ApiTags('clients')
 @ApiBearerAuth('JWT-auth')
@@ -316,6 +322,86 @@ export class ClientController {
         error instanceof Error && error.message.includes('not found')
           ? HttpStatus.NOT_FOUND
           : HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('preferences')
+  @ApiOperation({
+    summary: 'Create client preferences',
+    description: 'Create preferences for the authenticated client',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Preferences created successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Preferences already exist' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createPreferences(
+    @CurrentUserId() id: string,
+    @Body() data: CreateClientPreferencesDto,
+  ): Promise<{ preferences: ClientPreferencesDto }> {
+    try {
+      const preferences = await this.clientService.createPreferences(id, data);
+      return { preferences };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to create preferences: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error && error.message.includes('already exist')
+          ? HttpStatus.BAD_REQUEST
+          : error instanceof Error && error.message.includes('not found')
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Put('preferences')
+  @ApiOperation({
+    summary: 'Update client preferences',
+    description: 'Update preferences for the authenticated client (creates if not exists)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Preferences updated successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async updatePreferences(
+    @CurrentUserId() id: string,
+    @Body() data: UpdateClientPreferencesDto,
+  ): Promise<{ preferences: ClientPreferencesDto }> {
+    try {
+      const preferences = await this.clientService.updatePreferences(id, data);
+      return { preferences };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to update preferences: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('preferences')
+  @ApiOperation({
+    summary: 'Get client preferences',
+    description: 'Retrieve preferences for the authenticated client',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Preferences retrieved successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Preferences not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getPreferences(
+    @CurrentUserId() id: string,
+  ): Promise<{ preferences: ClientPreferencesDto | null }> {
+    try {
+      const preferences = await this.clientService.getPreferences(id);
+      return { preferences };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to get preferences: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

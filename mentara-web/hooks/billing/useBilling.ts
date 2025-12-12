@@ -247,6 +247,24 @@ export const useSetDefaultPaymentMethod = () => {
   );
 };
 
+export const useVerifyInsurance = () => {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  return useBillingMutation(
+    (paymentMethodId: string) => api.billing.verifyInsurance(paymentMethodId),
+    {
+      successMessage: "Insurance verified successfully!",
+      errorMessage: "Failed to verify insurance",
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: billingQueryKeys.paymentMethods(),
+        });
+      },
+    }
+  );
+};
+
 // Invoice Hooks
 export const useInvoices = (options: BillingListOptions = {}) => {
   const api = useApi();

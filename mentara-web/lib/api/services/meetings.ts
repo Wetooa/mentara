@@ -58,8 +58,25 @@ export interface MeetingsQueryOptions {
 /**
  * Meetings API service for managing therapy sessions
  */
+export interface WebRTCConfig {
+  iceServers: Array<{
+    urls: string | string[];
+    username?: string;
+    credential?: string;
+  }>;
+  iceCandidatePoolSize?: number;
+}
+
 export function createMeetingsService(axios: AxiosInstance) {
   return {
+    /**
+     * Get WebRTC configuration (TURN/STUN servers)
+     */
+    async getWebRTCConfig(): Promise<WebRTCConfig> {
+      const { data } = await axios.get("/meetings/webrtc-config");
+      return data;
+    },
+
     /**
      * Get upcoming meetings for the current user
      * @param limit - Maximum number of meetings to fetch
@@ -297,10 +314,12 @@ export function createMeetingsService(axios: AxiosInstance) {
     /**
      * Accept a booking request (therapists only)
      * @param meetingId - The meeting ID to accept
-     * @param meetingUrl - The URL or address for the meeting
+     * @param meetingUrl - Optional URL/address (only required for in-person meetings, auto-generated for video)
      */
-    async acceptMeetingRequest(meetingId: string, meetingUrl: string): Promise<Meeting> {
-      const { data } = await axios.post(`/booking/meetings/${meetingId}/accept`, { meetingUrl });
+    async acceptMeetingRequest(meetingId: string, meetingUrl?: string): Promise<Meeting> {
+      // Backend auto-generates meeting URL for video meetings
+      const body = meetingUrl ? { meetingUrl } : {};
+      const { data } = await axios.put(`/meetings/${meetingId}/accept`, body);
       return data;
     },
 

@@ -33,11 +33,13 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
-  Info
+  Info,
+  Shield
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCreatePaymentMethod, useSetDefaultPaymentMethod } from '@/hooks/billing';
+import { InsurancePaymentForm } from './InsurancePaymentForm';
 
 // Initialize Stripe (you would get this from environment variables)
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -129,7 +131,7 @@ function PaymentMethodFormContent({
 }: PaymentMethodFormProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const [paymentType, setPaymentType] = useState<'card' | 'bank_account'>('card');
+  const [paymentType, setPaymentType] = useState<'card' | 'bank_account' | 'insurance'>('card');
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardComplete, setCardComplete] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
@@ -278,26 +280,40 @@ function PaymentMethodFormContent({
       
       <CardContent className="space-y-6">
         {/* Payment Type Selection */}
-        {allowBankAccount && (
-          <Tabs value={paymentType} onValueChange={(value) => setPaymentType(value as 'card' | 'bank_account')}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="card" className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4" />
-                Credit/Debit Card
-              </TabsTrigger>
+        <Tabs value={paymentType} onValueChange={(value) => setPaymentType(value as 'card' | 'bank_account' | 'insurance')}>
+          <TabsList className={cn(
+            "grid w-full",
+            allowBankAccount ? "grid-cols-3" : "grid-cols-2"
+          )}>
+            <TabsTrigger value="card" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Credit/Debit Card
+            </TabsTrigger>
+            {allowBankAccount && (
               <TabsTrigger value="bank_account" className="flex items-center gap-2">
                 <Building className="h-4 w-4" />
                 Bank Account
               </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        )}
+            )}
+            <TabsTrigger value="insurance" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Insurance
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-        <Form {...billingForm}>
-          <form onSubmit={billingForm.handleSubmit(handleSubmit)} className="space-y-6">
-            {/* Payment Method Input */}
-            <div className="space-y-4">
-              {paymentType === 'card' ? (
+        {paymentType === 'insurance' ? (
+          <InsurancePaymentForm
+            onSuccess={onSuccess}
+            onCancel={onCancel}
+            setAsDefault={setAsDefault}
+          />
+        ) : (
+          <Form {...billingForm}>
+            <form onSubmit={billingForm.handleSubmit(handleSubmit)} className="space-y-6">
+              {/* Payment Method Input */}
+              <div className="space-y-4">
+                {paymentType === 'card' ? (
                 <div className="space-y-2">
                   <FormLabel htmlFor="card-element">Card Information</FormLabel>
                   <div className={cn(
@@ -626,6 +642,7 @@ function PaymentMethodFormContent({
             </div>
           </form>
         </Form>
+        )}
       </CardContent>
     </Card>
   );

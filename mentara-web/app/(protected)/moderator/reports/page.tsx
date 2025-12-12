@@ -43,6 +43,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { logger } from "@/lib/logger";
 
 // Animation variants
 const containerVariants = {
@@ -185,7 +186,7 @@ export default function ModeratorReportsPage() {
   }, []);
 
   const handleReportAction = (reportId: string, action: string) => {
-    console.log(`Performing ${action} on report ${reportId}`);
+    logger.debug(`Performing ${action} on report ${reportId}`);
     // TODO: Implement actual report actions
   };
 
@@ -217,39 +218,42 @@ export default function ModeratorReportsPage() {
       animate="visible"
     >
       {/* Header */}
-      <motion.div 
-        className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0"
-        variants={itemVariants}
-      >
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Content Reports</h1>
-          <p className="text-gray-600">Review and manage reported content and users</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Advanced Filters
-          </Button>
-        </div>
-      </motion.div>
+      <header>
+        <motion.div 
+          className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0"
+          variants={itemVariants}
+        >
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Content Reports</h1>
+            <p className="text-gray-600">Review and manage reported content and users</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" aria-label="Export reports">
+              <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm" aria-label="Show advanced filters">
+              <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
+              Advanced Filters
+            </Button>
+          </div>
+        </motion.div>
+      </header>
 
       {/* Stats Cards */}
-      <motion.div 
+      <section 
         className="grid grid-cols-1 md:grid-cols-5 gap-4"
         variants={itemVariants}
+        aria-label="Report statistics"
       >
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Reports</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-2xl font-bold" aria-label={`Total reports: ${stats.total}`}>{stats.total}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-orange-500" />
+              <AlertTriangle className="h-8 w-8 text-orange-500" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -259,9 +263,9 @@ export default function ModeratorReportsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                <p className="text-2xl font-bold text-yellow-600" aria-label={`Pending reports: ${stats.pending}`}>{stats.pending}</p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-500" />
+              <Clock className="h-8 w-8 text-yellow-500" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -271,9 +275,9 @@ export default function ModeratorReportsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Under Review</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.underReview}</p>
+                <p className="text-2xl font-bold text-blue-600" aria-label={`Reports under review: ${stats.underReview}`}>{stats.underReview}</p>
               </div>
-              <Eye className="h-8 w-8 text-blue-500" />
+              <Eye className="h-8 w-8 text-blue-500" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -283,9 +287,9 @@ export default function ModeratorReportsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Resolved</p>
-                <p className="text-2xl font-bold text-green-600">{stats.resolved}</p>
+                <p className="text-2xl font-bold text-green-600" aria-label={`Resolved reports: ${stats.resolved}`}>{stats.resolved}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+              <CheckCircle className="h-8 w-8 text-green-500" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -295,33 +299,36 @@ export default function ModeratorReportsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">High Priority</p>
-                <p className="text-2xl font-bold text-red-600">{stats.highPriority}</p>
+                <p className="text-2xl font-bold text-red-600" aria-label={`High priority reports: ${stats.highPriority}`}>{stats.highPriority}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-red-500" />
+              <TrendingUp className="h-8 w-8 text-red-500" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </section>
 
       {/* Filters and Search */}
       <motion.div 
         className="flex flex-col space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4"
         variants={itemVariants}
+        role="group"
+        aria-label="Report filters"
       >
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" aria-hidden="true" />
             <Input
               placeholder="Search reports..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              aria-label="Search reports"
             />
           </div>
         </div>
         
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40" aria-label="Filter by status">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -334,7 +341,7 @@ export default function ModeratorReportsPage() {
         </Select>
 
         <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40" aria-label="Filter by priority">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>
@@ -347,7 +354,7 @@ export default function ModeratorReportsPage() {
         </Select>
 
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40" aria-label="Filter by report type">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
@@ -361,11 +368,11 @@ export default function ModeratorReportsPage() {
       {/* Reports Tabs */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">All Reports</TabsTrigger>
-            <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="under_review">Under Review</TabsTrigger>
-            <TabsTrigger value="resolved">Resolved</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4" role="tablist" aria-label="Report status tabs">
+            <TabsTrigger value="all" aria-label="Show all reports">All Reports</TabsTrigger>
+            <TabsTrigger value="pending" aria-label="Show pending reports">Pending</TabsTrigger>
+            <TabsTrigger value="under_review" aria-label="Show reports under review">Under Review</TabsTrigger>
+            <TabsTrigger value="resolved" aria-label="Show resolved reports">Resolved</TabsTrigger>
           </TabsList>
 
           <TabsContent value={activeTab} className="mt-6">
@@ -437,27 +444,27 @@ export default function ModeratorReportsPage() {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
+                              <Button variant="ghost" size="icon" aria-label={`Actions for report ${report.id}`}>
+                                <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleReportAction(report.id, 'view')}>
-                                <Eye className="mr-2 h-4 w-4" />
+                              <DropdownMenuItem onClick={() => handleReportAction(report.id, 'view')} aria-label="View report details">
+                                <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                                 View Details
                               </DropdownMenuItem>
                               {report.status === 'pending' && (
                                 <>
-                                  <DropdownMenuItem onClick={() => handleReportAction(report.id, 'review')}>
-                                    <Clock className="mr-2 h-4 w-4" />
+                                  <DropdownMenuItem onClick={() => handleReportAction(report.id, 'review')} aria-label="Start reviewing this report">
+                                    <Clock className="mr-2 h-4 w-4" aria-hidden="true" />
                                     Start Review
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleReportAction(report.id, 'resolve')}>
-                                    <CheckCircle className="mr-2 h-4 w-4" />
+                                  <DropdownMenuItem onClick={() => handleReportAction(report.id, 'resolve')} aria-label="Resolve this report">
+                                    <CheckCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                                     Resolve
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleReportAction(report.id, 'dismiss')}>
-                                    <XCircle className="mr-2 h-4 w-4" />
+                                  <DropdownMenuItem onClick={() => handleReportAction(report.id, 'dismiss')} aria-label="Dismiss this report">
+                                    <XCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                                     Dismiss
                                   </DropdownMenuItem>
                                 </>

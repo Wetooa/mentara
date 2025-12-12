@@ -211,7 +211,13 @@ export function MeetingDetailsSheet({
 
   const handleOpenMeetingUrl = () => {
     if (meeting?.meetingUrl) {
-      window.open(meeting.meetingUrl, "_blank");
+      // Check if it's an internal meeting URL
+      if (meeting.meetingUrl.includes('/meeting/')) {
+        const meetingId = meeting.id;
+        window.location.href = `/meeting/${meetingId}`;
+      } else {
+        window.open(meeting.meetingUrl, "_blank");
+      }
     }
   };
 

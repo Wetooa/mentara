@@ -127,25 +127,41 @@ export default function SessionDetailsPage({
 
   const handleJoinSession = async () => {
     if (session?.meetingUrl) {
-      try {
-        await navigator.clipboard.writeText(session.meetingUrl);
-        const message = session.meetingUrl.includes("http")
-          ? "Meeting URL copied to clipboard!"
-          : "Meeting location copied to clipboard!";
-        toast.success(message);
-      } catch (err) {
-        logger.error("Failed to copy: ", err);
-        // Fallback for older browsers
-        const textArea = document.createElement("textarea");
-        textArea.value = session.meetingUrl;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        const message = session.meetingUrl.includes("http")
-          ? "Meeting URL copied to clipboard!"
-          : "Meeting location copied to clipboard!";
-        toast.success(message);
+      // Check if it's an internal meeting URL
+      if (session.meetingUrl.includes('/meeting/')) {
+        // Navigate to internal meeting room
+        router.push(`/meeting/${session.id}`);
+      } else if (session.meetingUrl.includes("http")) {
+        // External link - copy to clipboard
+        try {
+          await navigator.clipboard.writeText(session.meetingUrl);
+          toast.success("Meeting URL copied to clipboard!");
+        } catch (err) {
+          logger.error("Failed to copy: ", err);
+          // Fallback for older browsers
+          const textArea = document.createElement("textarea");
+          textArea.value = session.meetingUrl;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textArea);
+          toast.success("Meeting URL copied to clipboard!");
+        }
+      } else {
+        // In-person meeting - copy address
+        try {
+          await navigator.clipboard.writeText(session.meetingUrl);
+          toast.success("Meeting location copied to clipboard!");
+        } catch (err) {
+          logger.error("Failed to copy: ", err);
+          const textArea = document.createElement("textarea");
+          textArea.value = session.meetingUrl;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textArea);
+          toast.success("Meeting location copied to clipboard!");
+        }
       }
     } else {
       toast.error("No meeting information available");
@@ -174,19 +190,19 @@ export default function SessionDetailsPage({
   // Loading state
   if (isLoading) {
     return (
-      <div className="w-full h-full p-6 space-y-8">
+      <div className="w-full h-full p-6 space-y-8" aria-live="polite" aria-busy="true">
         <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-32" />
-          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" aria-label="Loading back button" />
+          <Skeleton className="h-8 w-48" aria-label="Loading page header" />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-32" />
+            <Skeleton className="h-64" aria-label="Loading session details" />
+            <Skeleton className="h-32" aria-label="Loading session information" />
           </div>
           <div className="space-y-6">
-            <Skeleton className="h-48" />
-            <Skeleton className="h-32" />
+            <Skeleton className="h-48" aria-label="Loading therapist information" />
+            <Skeleton className="h-32" aria-label="Loading quick actions" />
           </div>
         </div>
       </div>
@@ -196,20 +212,21 @@ export default function SessionDetailsPage({
   // Error state
   if (error) {
     return (
-      <div className="w-full h-full p-6 space-y-8">
+      <div className="w-full h-full p-6 space-y-8" role="alert" aria-live="assertive">
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
             size="sm"
             onClick={handleBackToSessions}
             className="gap-2"
+            aria-label="Go back to sessions list"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to Sessions
           </Button>
         </div>
         <Alert className="max-w-md mx-auto border-red-200">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle className="h-4 w-4" aria-hidden="true" />
           <AlertDescription className="flex items-center justify-between">
             <span>Failed to load session details</span>
             <Button
@@ -218,9 +235,11 @@ export default function SessionDetailsPage({
               onClick={handleRetry}
               disabled={isRefetching}
               className="ml-4"
+              aria-label="Retry loading session details"
             >
               <RefreshCw
                 className={`h-4 w-4 mr-2 ${isRefetching ? "animate-spin" : ""}`}
+                aria-hidden="true"
               />
               Retry
             </Button>
@@ -232,20 +251,21 @@ export default function SessionDetailsPage({
 
   if (!session) {
     return (
-      <div className="w-full h-full p-6 space-y-8">
+      <div className="w-full h-full p-6 space-y-8" role="alert" aria-live="assertive">
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
             size="sm"
             onClick={handleBackToSessions}
             className="gap-2"
+            aria-label="Go back to sessions list"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to Sessions
           </Button>
         </div>
         <Alert className="max-w-md mx-auto">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle className="h-4 w-4" aria-hidden="true" />
           <AlertDescription>
             Session not found. It may have been deleted or you don&apos;t have
             permission to view it.
@@ -282,28 +302,29 @@ export default function SessionDetailsPage({
       <PageBreadcrumbs context={breadcrumbContext} />
 
       {/* Page Header */}
-      <motion.div
-        className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
-        variants={itemVariants}
-      >
-        <div className="flex items-start gap-4">
-          <BackButton
-            label="Back to Sessions"
-            href="/client/sessions"
-            variant="outline"
-            size="sm"
-            className="mt-1"
-          />
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold tracking-tight">
-                Session Details
-              </h1>
-              <Badge className={statusConfig.color}>
-                <StatusIcon className="h-3 w-3 mr-1" />
-                {statusConfig.label}
-              </Badge>
-            </div>
+      <header>
+        <motion.div
+          className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
+          variants={itemVariants}
+        >
+          <div className="flex items-start gap-4">
+            <BackButton
+              label="Back to Sessions"
+              href="/client/sessions"
+              variant="outline"
+              size="sm"
+              className="mt-1"
+            />
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold tracking-tight">
+                  Session Details
+                </h1>
+                <Badge className={statusConfig.color} aria-label={`Session status: ${statusConfig.label}`}>
+                  <StatusIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                  {statusConfig.label}
+                </Badge>
+              </div>
             <p className="text-muted-foreground">
               {session.dateTime
                 ? `${format(new Date(session.dateTime), "EEEE, MMMM d, yyyy")} at ${format(new Date(session.dateTime), "h:mm a")}`
@@ -313,61 +334,68 @@ export default function SessionDetailsPage({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" role="group" aria-label="Session actions">
           {isUpcoming && (
             <>
-              <Button onClick={handleJoinSession} className="gap-2">
-                {session?.meetingUrl?.includes("http") ? (
+              <Button onClick={handleJoinSession} className="gap-2" aria-label="Join or copy meeting information">
+                {session?.meetingUrl?.includes("/meeting/") ? (
                   <>
-                    <Video className="h-4 w-4" />
+                    <Video className="h-4 w-4" aria-hidden="true" />
+                    Join Meeting
+                  </>
+                ) : session?.meetingUrl?.includes("http") ? (
+                  <>
+                    <Video className="h-4 w-4" aria-hidden="true" />
                     Copy Meeting Link
                   </>
                 ) : (
                   <>
-                    <MapPin className="h-4 w-4" />
+                    <MapPin className="h-4 w-4" aria-hidden="true" />
                     Copy Location
                   </>
                 )}
               </Button>
-              <Button variant="outline" onClick={handleRescheduleSession}>
-                <Edit className="h-4 w-4 mr-2" />
+              <Button variant="outline" onClick={handleRescheduleSession} aria-label="Reschedule this session">
+                <Edit className="h-4 w-4 mr-2" aria-hidden="true" />
                 Reschedule
               </Button>
               <Button
                 variant="outline"
                 onClick={handleCancelSession}
                 className="text-red-600 hover:text-red-700"
+                aria-label="Cancel this session"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                 Cancel
               </Button>
             </>
           )}
           {isInProgress && (
-            <Button onClick={handleJoinSession} className="gap-2">
-              <Video className="h-4 w-4" />
+            <Button onClick={handleJoinSession} className="gap-2" aria-label="Join session in progress">
+              <Video className="h-4 w-4" aria-hidden="true" />
               Join Session
             </Button>
           )}
         </div>
-      </motion.div>
+        </motion.div>
+      </header>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <main className="grid grid-cols-1 lg:grid-cols-3 gap-6" aria-label="Session details content">
         {/* Session Information */}
         <motion.div className="lg:col-span-2 space-y-6" variants={itemVariants}>
           {/* Session Details Card */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Session Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" aria-hidden="true" />
+                  Session Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <Clock className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                   <div>
                     <div className="font-medium">Duration</div>
                     <div className="text-sm text-muted-foreground">
@@ -377,7 +405,7 @@ export default function SessionDetailsPage({
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Video className="h-5 w-5 text-muted-foreground" />
+                  <Video className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                   <div>
                     <div className="font-medium">Type</div>
                     <div className="text-sm text-muted-foreground">
@@ -406,7 +434,18 @@ export default function SessionDetailsPage({
                         <p className="text-sm text-blue-800 break-all">
                           {session.meetingUrl}
                         </p>
-                        {session.meetingUrl.includes("http") && (
+                        {session.meetingUrl.includes("/meeting/") && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/meeting/${session.id}`);
+                            }}
+                            className="text-sm text-blue-600 hover:text-blue-800 underline mt-2 flex items-center gap-1"
+                          >
+                            Join Meeting
+                          </button>
+                        )}
+                        {session.meetingUrl.includes("http") && !session.meetingUrl.includes("/meeting/") && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

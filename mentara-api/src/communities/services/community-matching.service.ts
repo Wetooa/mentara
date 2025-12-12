@@ -368,9 +368,10 @@ export class CommunityMatchingService {
     userId: string,
   ): Promise<UserAssessmentProfile | null> {
     try {
-      // Get user's pre-assessment data
-      const preAssessment = await this.prisma.preAssessment.findUnique({
+      // Get user's latest pre-assessment data
+      const preAssessment = await this.prisma.preAssessment.findFirst({
         where: { clientId: userId },
+        orderBy: { createdAt: 'desc' },
         select: {
           answers: true,
           createdAt: true,

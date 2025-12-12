@@ -6,13 +6,13 @@ import {
   Delete,
   Body,
   Param,
-  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/core/decorators/current-user-id.decorator';
+import { Pagination, PaginationParams } from 'src/common/decorators/pagination.decorator';
 import { JournalService } from './journal.service';
 import type {
   JournalEntryCreateInputDto,
@@ -36,12 +36,9 @@ export class JournalController {
   @Get('entries')
   findAll(
     @CurrentUserId() userId: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Pagination() pagination: PaginationParams,
   ) {
-    const pageNum = page ? parseInt(page, 10) : 1;
-    const limitNum = limit ? parseInt(limit, 10) : 20;
-    return this.journalService.findAll(userId, pageNum, limitNum);
+    return this.journalService.findAll(userId, pagination.page, pagination.limit);
   }
 
   @Get('entries/:id')

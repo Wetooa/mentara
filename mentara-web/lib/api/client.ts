@@ -8,20 +8,34 @@ import { logger } from "@/lib/logger";
 /**
  * API client timeout constant (in milliseconds)
  */
-export const API_TIMEOUT = 10000; // 10 seconds
+export const API_TIMEOUT = 10000; // 10 seconds (default)
+
+/**
+ * Extended timeout for AI/chatbot operations (in milliseconds)
+ * AI API calls can take 30-60 seconds, so we need a longer timeout
+ */
+export const AI_OPERATION_TIMEOUT = 60000; // 60 seconds
 
 /**
  * Create and configure the main API client
  * Enhanced with request tracking and improved error handling
  */
 export function createApiClient(): AxiosInstance {
-  const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
-  
+  // Get API URL from environment variable
+  // Ensure it ends with /api if not already present
+  let baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+
+  // Ensure baseURL ends with /api
+  if (!baseURL.endsWith("/api")) {
+    // If it ends with a slash, just add 'api', otherwise add '/api'
+    baseURL = baseURL.endsWith("/") ? `${baseURL}api` : `${baseURL}/api`;
+  }
+
   // Log API URL in development for debugging
   if (typeof window !== "undefined") {
     logger.debug("[API Client] Base URL:", baseURL);
   }
-  
+
   const client = axios.create({
     baseURL,
     timeout: API_TIMEOUT,

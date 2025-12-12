@@ -141,33 +141,33 @@ export default function AdminDashboardPage() {
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-      <div>
+      <header>
         <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
         <p className="text-sm text-gray-500 mt-1">Welcome to the Mentara admin panel</p>
-      </div>
+      </header>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-label="Dashboard statistics">
         {isLoading ? (
           Array.from({ length: 6 }).map((_, index) => (
             <Card key={index}>
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-20" aria-label="Loading metric" />
                     <Skeleton className="h-8 w-16" />
                     <Skeleton className="h-3 w-24" />
                   </div>
-                  <Skeleton className="h-12 w-12 rounded-md" />
+                  <Skeleton className="h-12 w-12 rounded-md" aria-hidden="true" />
                 </div>
               </CardContent>
             </Card>
           ))
         ) : hasError ? (
-          <Card className="col-span-full">
+          <Card className="col-span-full" role="alert" aria-live="assertive">
             <CardContent className="p-6">
               <div className="flex items-center justify-center text-red-500 space-x-2">
-                <AlertTriangle className="h-5 w-5" />
+                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
                 <p>Failed to load dashboard data. Please try again.</p>
               </div>
             </CardContent>
@@ -196,57 +196,61 @@ export default function AdminDashboardPage() {
             </Card>
           ))
         )}
-      </div>
+      </section>
 
       {/* Quick Actions */}
-      <Card>
+      <Card role="region" aria-labelledby="quick-actions-title">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle id="quick-actions-title">Quick Actions</CardTitle>
           <CardDescription>Common administrative tasks</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <Link 
             href="/admin/users"
             className={buttonVariants({ variant: "outline", className: "justify-start" })}
+            aria-label="Manage users"
           >
-            <Users className="mr-2 h-4 w-4 text-blue-600" />
+            <Users className="mr-2 h-4 w-4 text-blue-600" aria-hidden="true" />
             Manage Users
           </Link>
           <Link 
             href="/admin/therapists"
             className={buttonVariants({ variant: "outline", className: "justify-start" })}
+            aria-label="Review therapist applications"
           >
-            <Shield className="mr-2 h-4 w-4 text-purple-600" />
+            <Shield className="mr-2 h-4 w-4 text-purple-600" aria-hidden="true" />
             Therapist Applications
           </Link>
           <Link 
             href="/admin/analytics"
             className={buttonVariants({ variant: "outline", className: "justify-start" })}
+            aria-label="View analytics"
           >
-            <BarChart3 className="mr-2 h-4 w-4 text-green-600" />
+            <BarChart3 className="mr-2 h-4 w-4 text-green-600" aria-hidden="true" />
             Analytics
           </Link>
           <Link 
             href="/admin/audit-logs"
             className={buttonVariants({ variant: "outline", className: "justify-start" })}
+            aria-label="View audit logs"
           >
-            <FileText className="mr-2 h-4 w-4 text-orange-600" />
+            <FileText className="mr-2 h-4 w-4 text-orange-600" aria-hidden="true" />
             Audit Logs
           </Link>
         </CardContent>
       </Card>
 
       {/* Recent Activity */}
-      <Card>
+      <Card role="region" aria-labelledby="recent-activity-title">
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle id="recent-activity-title">Recent Activity</CardTitle>
           <CardDescription>Latest actions on the platform</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-4" role="list">
             {[1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="flex items-start space-x-4 py-2 border-b border-gray-100 last:border-0">
-                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+              <div key={item} className="flex items-start space-x-4 py-2 border-b border-gray-100 last:border-0" role="listitem">
+                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600" aria-hidden="true">
                   {item % 3 === 0 ? <AlertTriangle className="h-4 w-4" /> : 
                    item % 2 === 0 ? <Users className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
                 </div>
@@ -259,7 +263,7 @@ export default function AdminDashboardPage() {
                     {new Date(Date.now() - item * 3600000).toLocaleString()}
                   </p>
                 </div>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" aria-label={`View details for activity ${item}`}>
                   View
                 </Button>
               </div>

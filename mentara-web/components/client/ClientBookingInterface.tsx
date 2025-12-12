@@ -37,6 +37,7 @@ import {
   MapPin,
   Building,
   Smartphone,
+  Shield,
 } from "lucide-react";
 import { useClientBooking } from "@/hooks/booking";
 import { TimezoneUtils } from "@/lib/utils/timezone";
@@ -585,11 +586,15 @@ export function ClientBookingInterface({
                               bankName?: string;
                               accountLast4?: string;
                               isDefault?: boolean;
+                              insuranceProviderName?: string;
+                              policyNumber?: string;
+                              insuranceVerified?: boolean;
                             }) => (
                               <SelectItem key={method.id} value={method.id}>
                                 <div className="flex items-center gap-2">
                                   {method.type === 'CARD' && <CreditCard className="h-4 w-4" />}
                                   {method.type === 'BANK_ACCOUNT' && <Building className="h-4 w-4" />}
+                                  {method.type === 'INSURANCE' && <Shield className="h-4 w-4" />}
                                   {(method.type === 'GCASH' || method.type === 'MAYA' || method.type === 'DIGITAL_WALLET') && <Smartphone className="h-4 w-4" />}
                                   <span>
                                     {method.nickname || 
@@ -598,6 +603,7 @@ export function ClientBookingInterface({
                                       (method.type === 'GCASH' && `GCash ${method.gcashNumber?.slice(-4)}`) ||
                                       (method.type === 'MAYA' && `Maya ${method.mayaNumber?.slice(-4)}`) ||
                                       (method.type === 'DIGITAL_WALLET' && method.walletProvider) ||
+                                      (method.type === 'INSURANCE' && `${method.insuranceProviderName} ${method.policyNumber ? `(${method.policyNumber.slice(-4)})` : ''}`) ||
                                       'Payment Method'
                                     }
                                     {method.isDefault && (
@@ -606,6 +612,14 @@ export function ClientBookingInterface({
                                         className="ml-2"
                                       >
                                         Default
+                                      </Badge>
+                                    )}
+                                    {method.type === 'INSURANCE' && !method.insuranceVerified && (
+                                      <Badge
+                                        variant="destructive"
+                                        className="ml-2"
+                                      >
+                                        Unverified
                                       </Badge>
                                     )}
                                   </span>
@@ -662,20 +676,81 @@ export function ClientBookingInterface({
                       </div>
                     </div>
 
-                    <div className="border-t pt-3">
-                      <div className="flex items-center justify-between text-lg font-semibold">
-                        <span>Total Amount:</span>
-                        <span className="text-green-600">
-                          $
-                          {selectedDuration
-                            ? (
-                                ((therapist.hourlyRate || 0) *
-                                  selectedDuration.duration) /
-                                60
-                              ).toFixed(2)
-                            : "0.00"}
-                        </span>
-                      </div>
+                    <div className="border-t pt-3 space-y-3">
+                      {(() => {
+                        const totalAmount = selectedDuration
+                          ? ((therapist.hourlyRate || 0) * selectedDuration.duration) / 60
+                          : 0;
+                        const selectedPaymentMethod = paymentMethods.find((pm: any) => pm.id === paymentMethodId);
+                        const isInsurance = selectedPaymentMethod?.type === 'INSURANCE';
+                        const coverageDetails = selectedPaymentMethod?.coverageDetails as {
+                          coverageType?: 'FULL' | 'COPAY' | 'PERCENTAGE';
+                          copayAmount?: number;
+                          coveragePercentage?: number;
+                        } | undefined;
+
+                        let insuranceAmount = 0;
+                        let clientAmount = totalAmount;
+
+                        if (isInsurance && coverageDetails) {
+                          switch (coverageDetails.coverageType) {
+                            case 'FULL':
+                              insuranceAmount = totalAmount;
+                              clientAmount = 0;
+                              break;
+                            case 'COPAY':
+                              clientAmount = coverageDetails.copayAmount || 0;
+                              insuranceAmount = totalAmount - clientAmount;
+                              break;
+                            case 'PERCENTAGE':
+                              const coveragePct = coverageDetails.coveragePercentage || 0;
+                              insuranceAmount = (totalAmount * coveragePct) / 100;
+                              clientAmount = totalAmount - insuranceAmount;
+                              break;
+                          }
+                        }
+
+                        return (
+                          <>
+                            {isInsurance && coverageDetails && (
+                              <div className="space-y-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="flex items-center gap-2 text-sm font-medium text-blue-900">
+                                  <Shield className="h-4 w-4" />
+                                  Insurance Coverage Breakdown
+                                </div>
+                                <div className="space-y-1 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Session Total:</span>
+                                    <span className="font-medium">${totalAmount.toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex justify-between text-blue-700">
+                                    <span>Insurance Covers:</span>
+                                    <span className="font-medium">${insuranceAmount.toFixed(2)}</span>
+                                  </div>
+                                  {clientAmount > 0 && (
+                                    <div className="flex justify-between text-orange-700">
+                                      <span>Your Co-pay:</span>
+                                      <span className="font-medium">${clientAmount.toFixed(2)}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between text-lg font-semibold">
+                              <span>{isInsurance && clientAmount === 0 ? 'Total Amount (Covered by Insurance):' : 'Total Amount:'}</span>
+                              <span className={isInsurance && clientAmount === 0 ? "text-blue-600" : "text-green-600"}>
+                                $
+                                {isInsurance ? clientAmount.toFixed(2) : totalAmount.toFixed(2)}
+                              </span>
+                            </div>
+                            {isInsurance && clientAmount === 0 && (
+                              <p className="text-xs text-muted-foreground text-center">
+                                Your insurance will cover the full session cost
+                              </p>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </CardContent>
                 </Card>

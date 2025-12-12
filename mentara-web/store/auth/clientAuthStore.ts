@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { ClientUser } from "@/lib/api/services/auth";
+import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 export interface ClientAuthState {
   // Auth state
@@ -60,8 +61,8 @@ export const useClientAuthStore = create<ClientAuthState>()(
         set({ accessToken, refreshToken });
         // Also store in localStorage for middleware access
         if (typeof window !== 'undefined') {
-          localStorage.setItem('access_token', accessToken);
-          localStorage.setItem('refresh_token', refreshToken);
+          localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+          localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
         }
       },
 

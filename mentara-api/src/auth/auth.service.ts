@@ -232,7 +232,10 @@ export class AuthService {
         emailVerified: user.emailVerified,
       };
     } catch (error) {
-      console.error('Error checking user existence:', error);
+      this.logger.error(
+        'Error checking user existence',
+        error instanceof Error ? error.stack : String(error),
+      );
       // Return false for any database errors to prevent information leakage
       return { exists: false };
     }

@@ -2,7 +2,8 @@
  * Authentication constants for token storage
  * Centralized to prevent key mismatches between login flow and API client
  */
-export const TOKEN_STORAGE_KEY = 'token';
+export const TOKEN_STORAGE_KEY = 'access_token';
+export const REFRESH_TOKEN_STORAGE_KEY = 'refresh_token';
 
 /**
  * Utility function to safely check if authentication token is available

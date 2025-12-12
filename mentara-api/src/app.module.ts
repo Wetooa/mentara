@@ -42,6 +42,7 @@ import { JwtAuthGuard } from './auth/core/guards/jwt-auth.guard';
 import { SecurityGuard } from './common/guards/security.guard';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
 import { JwtService } from '@nestjs/jwt';
+import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
 
 @Module({
   imports: [
@@ -119,7 +120,7 @@ import { JwtService } from '@nestjs/jwt';
     JwtService,
     {
       provide: APP_INTERCEPTOR,
-      useClass: ResponseInterceptor,
+      useClass: ResponseTransformInterceptor,
     },
     {
       provide: APP_FILTER,

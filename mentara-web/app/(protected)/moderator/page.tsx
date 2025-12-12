@@ -10,18 +10,20 @@ export default function ModeratorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <header>
         <h1 className="text-2xl font-bold text-gray-900">Moderator Dashboard</h1>
         <p className="text-sm text-gray-500 mt-1">
           Monitor platform activity and manage content moderation
         </p>
-      </div>
+      </header>
 
-      <ModerationStats 
-        stats={stats}
-        isLoading={isLoading}
-        onRefresh={refreshDashboard}
-      />
+      <main>
+        <ModerationStats 
+          stats={stats}
+          isLoading={isLoading}
+          onRefresh={refreshDashboard}
+        />
+      </main>
     </div>
   );
 }

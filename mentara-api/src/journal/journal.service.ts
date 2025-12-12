@@ -2,8 +2,10 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
+import { PaginatedResponseDto, createPaginationMeta } from 'src/common/dto/api-response.dto';
 import type {
   JournalEntryCreateInputDto,
   JournalEntryUpdateInputDto,
@@ -11,6 +13,8 @@ import type {
 
 @Injectable()
 export class JournalService {
+  private readonly logger = new Logger(JournalService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(
@@ -31,7 +35,7 @@ export class JournalService {
     userId: string,
     page: number = 1,
     limit: number = 20,
-  ): Promise<{ entries: any[]; total: number; page: number; limit: number; hasMore: boolean }> {
+  ): Promise<PaginatedResponseDto<ReturnType<typeof this.formatEntry>>> {
     const skip = (page - 1) * limit;
 
     const [entries, total] = await Promise.all([
@@ -46,13 +50,10 @@ export class JournalService {
       }),
     ]);
 
-    return {
-      entries: entries.map((entry) => this.formatEntry(entry)),
-      total,
-      page,
-      limit,
-      hasMore: skip + entries.length < total,
-    };
+    const formattedEntries = entries.map((entry) => this.formatEntry(entry));
+    const meta = createPaginationMeta(total, page, limit);
+
+    return PaginatedResponseDto.success(formattedEntries, meta);
   }
 
   async findOne(userId: string, id: string): Promise<any> {
@@ -98,7 +99,13 @@ export class JournalService {
     });
   }
 
-  private formatEntry(entry: any) {
+  private formatEntry(entry: {
+    id: string;
+    userId: string;
+    content: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }) {
     return {
       id: entry.id,
       userId: entry.userId,

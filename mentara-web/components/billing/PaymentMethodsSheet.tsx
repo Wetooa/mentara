@@ -10,6 +10,9 @@ import {
   MoreHorizontal,
   Smartphone,
   ArrowLeft,
+  Shield,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import {
   Sheet,
@@ -43,7 +46,7 @@ interface PaymentMethodsSheetProps {
 
 interface PaymentMethod {
   id: string;
-  type: "CARD" | "BANK_ACCOUNT" | "DIGITAL_WALLET" | "GCASH" | "MAYA";
+  type: "CARD" | "BANK_ACCOUNT" | "DIGITAL_WALLET" | "GCASH" | "MAYA" | "INSURANCE";
   nickname?: string;
   cardLast4?: string;
   cardBrand?: string;
@@ -66,6 +69,18 @@ interface PaymentMethod {
   // Bank account fields
   bankName?: string;
   accountLast4?: string;
+
+  // Insurance fields
+  insuranceProviderName?: string;
+  policyNumber?: string;
+  memberId?: string;
+  groupNumber?: string;
+  insuranceVerified?: boolean;
+  coverageDetails?: {
+    coverageType?: 'FULL' | 'COPAY' | 'PERCENTAGE';
+    copayAmount?: number;
+    coveragePercentage?: number;
+  };
 }
 
 export function PaymentMethodsSheet({
@@ -99,6 +114,8 @@ export function PaymentMethodsSheet({
         return <Smartphone className="h-6 w-6 text-blue-600" />;
       case "MAYA":
         return <Smartphone className="h-6 w-6 text-green-600" />;
+      case "INSURANCE":
+        return <Shield className="h-6 w-6" />;
       default:
         return <CreditCard className="h-6 w-6" />;
     }
@@ -120,6 +137,8 @@ export function PaymentMethodsSheet({
         return `GCash ${method.gcashNumber?.slice(-4) || "****"}`;
       case "MAYA":
         return `Maya ${method.mayaNumber?.slice(-4) || "****"}`;
+      case "INSURANCE":
+        return method.insuranceProviderName || "Insurance";
       default:
         return `****${method.cardLast4}`;
     }
@@ -139,6 +158,17 @@ export function PaymentMethodsSheet({
       case "MAYA":
         const mayaStatus = method.mayaVerified ? "Verified" : "Unverified";
         return `${method.mayaName} • ${mayaStatus}`;
+      case "INSURANCE":
+        const insuranceStatus = method.insuranceVerified ? "Verified" : "Unverified";
+        const policyDisplay = method.policyNumber ? `Policy: ${method.policyNumber.slice(-4)}` : "";
+        const coverageInfo = method.coverageDetails?.coverageType === 'FULL' 
+          ? 'Full Coverage' 
+          : method.coverageDetails?.coverageType === 'COPAY'
+          ? `Co-pay: $${method.coverageDetails.copayAmount}`
+          : method.coverageDetails?.coverageType === 'PERCENTAGE'
+          ? `${method.coverageDetails.coveragePercentage}% Coverage`
+          : '';
+        return `${policyDisplay}${policyDisplay && coverageInfo ? ' • ' : ''}${coverageInfo} • ${insuranceStatus}`;
       default:
         return "Payment Method";
     }
@@ -220,7 +250,7 @@ export function PaymentMethodsSheet({
                               </div>
                               <div className="space-y-1">
                                 <div className="flex items-center gap-3">
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <span className="font-semibold text-gray-900 text-lg">
                                       {getPaymentMethodDisplay(method)}
                                     </span>
@@ -230,6 +260,24 @@ export function PaymentMethodsSheet({
                                         className="bg-emerald-100 text-emerald-700 border-emerald-200 font-medium px-2 py-1 text-xs"
                                       >
                                         Default
+                                      </Badge>
+                                    )}
+                                    {method.type === 'INSURANCE' && method.insuranceVerified && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="bg-green-100 text-green-700 border-green-200 font-medium px-2 py-1 text-xs flex items-center gap-1"
+                                      >
+                                        <CheckCircle className="h-3 w-3" />
+                                        Verified
+                                      </Badge>
+                                    )}
+                                    {method.type === 'INSURANCE' && !method.insuranceVerified && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="bg-yellow-100 text-yellow-700 border-yellow-200 font-medium px-2 py-1 text-xs flex items-center gap-1"
+                                      >
+                                        <XCircle className="h-3 w-3" />
+                                        Unverified
                                       </Badge>
                                     )}
                                   </div>

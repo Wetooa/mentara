@@ -188,57 +188,57 @@ export default function AdminUsersPage() {
     >
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <header>
           <h1 className="text-2xl font-semibold tracking-tight">User Management</h1>
-        </div>
+        </header>
 
         {/* Stats Cards */}
         {userStats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <section className="grid grid-cols-1 md:grid-cols-4 gap-4" aria-label="User statistics">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <UserCheck className="h-4 w-4 text-muted-foreground" />
+                <UserCheck className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{userStats.total}</div>
+                <div className="text-2xl font-bold" aria-label={`Total users: ${userStats.total}`}>{userStats.total}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                <UserCheck className="h-4 w-4 text-green-600" />
+                <UserCheck className="h-4 w-4 text-green-600" aria-hidden="true" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{userStats.active}</div>
+                <div className="text-2xl font-bold" aria-label={`Active users: ${userStats.active}`}>{userStats.active}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Therapists</CardTitle>
-                <Shield className="h-4 w-4 text-blue-600" />
+                <Shield className="h-4 w-4 text-blue-600" aria-hidden="true" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{userStats.therapists}</div>
+                <div className="text-2xl font-bold" aria-label={`Therapists: ${userStats.therapists}`}>{userStats.therapists}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">New This Month</CardTitle>
-                <Calendar className="h-4 w-4 text-purple-600" />
+                <Calendar className="h-4 w-4 text-purple-600" aria-hidden="true" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{userStats.newThisMonth}</div>
+                <div className="text-2xl font-bold" aria-label={`New users this month: ${userStats.newThisMonth}`}>{userStats.newThisMonth}</div>
               </CardContent>
             </Card>
-          </div>
+          </section>
         )}
 
         {/* Filters */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4" role="group" aria-label="User filters">
           <div className="flex items-center gap-2">
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[150px]" aria-label="Filter by user role">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
@@ -251,7 +251,7 @@ export default function AdminUsersPage() {
             </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[150px]" aria-label="Filter by user status">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -264,13 +264,14 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" aria-hidden="true" />
             <Input
               type="search"
               placeholder="Search users..."
               className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search users by name or email"
             />
           </div>
         </div>
@@ -279,14 +280,14 @@ export default function AdminUsersPage() {
         <Card>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="flex justify-center py-8">
+              <div className="flex justify-center py-8" aria-live="polite" aria-busy="true">
                 <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" aria-label="Loading users"></div>
                   <p className="mt-4 text-gray-500">Loading users...</p>
                 </div>
               </div>
             ) : error ? (
-              <div className="py-8 text-center">
+              <div className="py-8 text-center" role="alert" aria-live="assertive">
                 <p className="text-red-500">Failed to load users. Please try again.</p>
               </div>
             ) : (
@@ -337,13 +338,14 @@ export default function AdminUsersPage() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" aria-label={`Actions for ${user.firstName} ${user.lastName}`}>
+                              <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem 
                               onClick={() => window.open(`/admin/users/${user.id}`, '_blank')}
+                              aria-label={`View profile for ${user.firstName} ${user.lastName}`}
                             >
                               View Profile
                             </DropdownMenuItem>
@@ -351,8 +353,9 @@ export default function AdminUsersPage() {
                             {!user.emailVerified && (
                               <DropdownMenuItem 
                                 onClick={() => handleResendVerification(user.id)}
+                                aria-label={`Resend verification email to ${user.email}`}
                               >
-                                <Mail className="h-4 w-4 mr-2" />
+                                <Mail className="h-4 w-4 mr-2" aria-hidden="true" />
                                 Resend Verification
                               </DropdownMenuItem>
                             )}
@@ -363,16 +366,18 @@ export default function AdminUsersPage() {
                               <DropdownMenuItem 
                                 onClick={() => handleUserAction(user, "suspend")}
                                 className="text-red-600"
+                                aria-label={`Suspend user ${user.firstName} ${user.lastName}`}
                               >
-                                <UserX className="h-4 w-4 mr-2" />
+                                <UserX className="h-4 w-4 mr-2" aria-hidden="true" />
                                 Suspend User
                               </DropdownMenuItem>
                             ) : (
                               <DropdownMenuItem 
                                 onClick={() => handleUserAction(user, "activate")}
                                 className="text-green-600"
+                                aria-label={`Activate user ${user.firstName} ${user.lastName}`}
                               >
-                                <UserCheck className="h-4 w-4 mr-2" />
+                                <UserCheck className="h-4 w-4 mr-2" aria-hidden="true" />
                                 Activate User
                               </DropdownMenuItem>
                             )}
@@ -397,14 +402,14 @@ export default function AdminUsersPage() {
 
         {/* Action Confirmation Dialog */}
         <AlertDialog open={showActionDialog} onOpenChange={setShowActionDialog}>
-          <AlertDialogContent>
+          <AlertDialogContent role="dialog" aria-modal="true" aria-labelledby="action-dialog-title" aria-describedby="action-dialog-description">
             <AlertDialogHeader>
-              <AlertDialogTitle>
+              <AlertDialogTitle id="action-dialog-title">
                 {actionType === "suspend" && "Suspend User"}
                 {actionType === "activate" && "Activate User"}
                 {actionType === "delete" && "Delete User"}
               </AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogDescription id="action-dialog-description">
                 {actionType === "suspend" && selectedUser && 
                   `Are you sure you want to suspend ${selectedUser.firstName} ${selectedUser.lastName}? They will not be able to access their account until reactivated.`
                 }
@@ -417,7 +422,7 @@ export default function AdminUsersPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isUpdating}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={isUpdating} aria-label="Cancel action">Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={confirmAction}
                 disabled={isUpdating}
@@ -426,6 +431,7 @@ export default function AdminUsersPage() {
                     ? "bg-red-600 hover:bg-red-700"
                     : "bg-green-600 hover:bg-green-700"
                 }
+                aria-label={actionType === "suspend" ? "Confirm suspend user" : actionType === "activate" ? "Confirm activate user" : "Confirm delete user"}
               >
                 {isUpdating ? "Processing..." : 
                  actionType === "suspend" ? "Suspend" :

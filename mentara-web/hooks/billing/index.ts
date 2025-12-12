@@ -19,6 +19,7 @@ export {
   useAttachPaymentMethod,
   useDetachPaymentMethod,
   useSetDefaultPaymentMethod,
+  useVerifyInsurance,
   
   // Invoice Hooks
   useInvoices,

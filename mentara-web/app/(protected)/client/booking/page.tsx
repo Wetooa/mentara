@@ -119,16 +119,16 @@ export default function BookingPage() {
   }, []);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <main className="container mx-auto p-6 space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <header className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Book a Session</h1>
           <p className="text-muted-foreground">
             Schedule your therapy sessions with your assigned therapists
           </p>
         </div>
-      </div>
+      </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Therapist Selection */}
@@ -169,8 +169,8 @@ export default function BookingPage() {
                   </AlertDescription>
                 </Alert>
               ) : therapists.length === 0 ? (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
+                <Alert role="alert">
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
                   <AlertDescription>
                     No assigned therapists found. Please contact support.
                   </AlertDescription>
@@ -189,10 +189,21 @@ export default function BookingPage() {
                       // Reset selected date when changing therapist to show fresh availability
                       setSelectedDate(undefined);
                     }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Select therapist ${therapist.firstName} ${therapist.lastName}`}
+                    aria-pressed={selectedTherapistId === therapist.id}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedTherapistId(therapist.id);
+                        setSelectedDate(undefined);
+                      }
+                    }}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center" aria-hidden="true">
                           <User className="h-5 w-5 text-blue-600" />
                         </div>
                         <div className="flex-1">
@@ -210,9 +221,9 @@ export default function BookingPage() {
                           )}
                         </div>
                         {selectedTherapistId === therapist.id && (
-                          <div className="text-blue-600">
-                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
-                              ✓
+                          <div className="text-blue-600" aria-label="Selected therapist">
+                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center" aria-hidden="true">
+                              <span aria-hidden="true">✓</span>
                             </div>
                           </div>
                         )}
@@ -368,8 +379,8 @@ export default function BookingPage() {
           ) : (
             <Card>
               <CardContent className="p-8">
-                <div className="text-center text-muted-foreground">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                <div className="text-center text-muted-foreground" role="status" aria-live="polite">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" aria-hidden="true" />
                   <h3 className="text-lg font-medium mb-2">
                     Select a Therapist
                   </h3>

@@ -150,28 +150,30 @@ export default function WorksheetsPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <WorksheetsSidebar
-        activeFilter={activeFilter}
-        setActiveFilter={setActiveFilter}
-        therapistFilter={therapistFilter}
-        setTherapistFilter={setTherapistFilter}
-        worksheetCounts={worksheetCounts}
-      />
+    <main className="flex h-screen overflow-hidden bg-gray-50" aria-label="Worksheets">
+      <nav aria-label="Worksheet filters">
+        <WorksheetsSidebar
+          activeFilter={activeFilter}
+          setActiveFilter={setActiveFilter}
+          therapistFilter={therapistFilter}
+          setTherapistFilter={setTherapistFilter}
+          worksheetCounts={worksheetCounts}
+        />
+      </nav>
 
       <div className="flex-1 overflow-y-auto min-w-0">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="flex items-center justify-center h-full" aria-live="polite" aria-busy="true">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" aria-label="Loading worksheets"></div>
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center h-full text-red-500">
+          <div className="flex flex-col items-center justify-center h-full text-red-500" role="alert" aria-live="assertive">
             <p>{error}</p>
           </div>
         ) : (
           <WorksheetsList tasks={getFilteredTasks()} />
         )}
       </div>
-    </div>
+    </main>
   );
 }

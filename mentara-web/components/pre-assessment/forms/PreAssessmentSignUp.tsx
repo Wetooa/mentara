@@ -122,7 +122,7 @@ export function PreAssessmentSignUp({
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
+            <div className="w-full bg-white p-8">
               {/* Header */}
               <div className="text-center space-y-4 mb-8">
                 <motion.div
@@ -132,7 +132,7 @@ export function PreAssessmentSignUp({
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
-                  className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-primary to-primary/80 flex items-center justify-center text-white shadow-lg"
+                  className="w-16 h-16 mx-auto rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-md"
                 >
                   <User className="h-8 w-8" />
                 </motion.div>
@@ -417,7 +417,7 @@ export function PreAssessmentSignUp({
             </div>
 
             {/* Submit Button Footer */}
-            <div className="bg-white px-10 py-3">
+            <div className="bg-white px-8 py-4 border-t border-gray-200">
               <p className="text-xs text-center text-gray-500 mb-2">
                 By continuing, you agree to our Terms of Service and Privacy
                 Policy

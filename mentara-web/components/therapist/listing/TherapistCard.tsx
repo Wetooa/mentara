@@ -25,9 +25,9 @@ export default function TherapistCard({ therapist }: TherapistCardProps) {
   };
 
   return (
-    <Card className="w-full overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white transition-all duration-200 hover:border-primary/30 group">
-      <CardContent className="p-0">
-        <div className="p-6 flex flex-col h-full">
+    <Card className="w-full h-full overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white border-t-4 border-primary transition-all duration-200 hover:border-primary/30 group flex flex-col">
+      <CardContent className="p-0 flex-1 flex flex-col">
+        <div className="p-6 flex flex-col h-full flex-1">
           {/* Professional Status and Price Section */}
           <div className="flex items-center mb-4 justify-between">
             <div className="flex items-center">
@@ -57,7 +57,7 @@ export default function TherapistCard({ therapist }: TherapistCardProps) {
           </div>
 
           {/* Professional Therapist Info */}
-          <div className="flex flex-col">
+          <div className="flex flex-col flex-1">
             <h3 className="font-bold text-xl text-gray-900 mb-1 leading-tight">
               {therapist.name}
             </h3>

@@ -52,15 +52,23 @@ export class OnboardingService {
         include: {
           client: {
             include: {
-              preAssessment: true,
+              preAssessments: {
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+              },
             },
           },
-          memberships: true,
+          memberships: {
+            select: {
+              communityId: true,
+              joinedAt: true,
+            },
+          },
           therapist: true,
           admin: true,
           moderator: true,
         },
-      });
+      }) as any;
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -123,11 +131,11 @@ export class OnboardingService {
       }
 
       case 'pre_assessment': {
-        const hasPreAssessment = user.client?.preAssessment;
+        const latestPreAssessment = user.client?.preAssessments?.[0] || null;
         return {
-          completed: !!hasPreAssessment,
-          completedAt: hasPreAssessment
-            ? user.client.preAssessment.createdAt
+          completed: !!latestPreAssessment,
+          completedAt: latestPreAssessment
+            ? latestPreAssessment.createdAt
             : undefined,
         };
       }
@@ -264,10 +272,18 @@ export class OnboardingService {
         include: {
           client: {
             include: {
-              preAssessment: true,
+              preAssessments: {
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+              },
             },
           },
-          memberships: true,
+          memberships: {
+            select: {
+              communityId: true,
+              joinedAt: true,
+            },
+          },
           therapist: true,
           admin: true,
           moderator: true,
@@ -315,6 +331,54 @@ export class OnboardingService {
       };
     } catch (error) {
       this.logger.error('Failed to get onboarding insights:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Save additional personal information for client
+   */
+  async saveAdditionalInfo(
+    userId: string,
+    info: {
+      birthdate: Date;
+      city: string;
+      country: string;
+    },
+  ): Promise<void> {
+    try {
+      // Verify user exists and is a client
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: { client: true },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (!user.client) {
+        throw new NotFoundException('Client profile not found');
+      }
+
+      // Update client with additional info
+      await this.prisma.client.update({
+        where: { userId },
+        data: {
+          birthdate: info.birthdate,
+          city: info.city,
+          country: info.country,
+        },
+      });
+
+      this.logger.log(
+        `Additional info saved for user ${userId}: ${info.city}, ${info.country}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to save additional info for user ${userId}:`,
+        error,
+      );
       throw error;
     }
   }

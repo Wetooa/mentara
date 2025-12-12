@@ -1,5 +1,5 @@
 import SimplePeer from 'simple-peer';
-import { WEBRTC_CONFIG, MEDIA_CONSTRAINTS, SCREEN_SHARE_CONSTRAINTS, CONNECTION_TIMEOUTS, MOBILE_CONSTRAINTS } from './webrtc-config';
+import { getWebRTCConfig, getWebRTCConfigSync, MEDIA_CONSTRAINTS, SCREEN_SHARE_CONSTRAINTS, CONNECTION_TIMEOUTS, MOBILE_CONSTRAINTS } from './webrtc-config';
 import { MediaRecorderService } from './media-recorder-service';
 
 export interface PeerConnection {
@@ -29,6 +29,8 @@ export class WebRTCService {
   private events: Partial<WebRTCEvents> = {};
   private mediaRecorder: MediaRecorderService;
   private isMobile: boolean;
+  private webrtcConfig: any = null;
+  private meetingId: string | null = null;
 
   constructor(events: Partial<WebRTCEvents> = {}) {
     this.events = events;
@@ -38,6 +40,28 @@ export class WebRTCService {
       onError: (error) => this.events.onRecordingError?.(error),
     });
     this.isMobile = this.detectMobile();
+    // Initialize with sync config, will be updated async
+    this.webrtcConfig = getWebRTCConfigSync();
+    // Fetch latest config from backend
+    this.initializeConfig();
+  }
+
+  /**
+   * Initialize WebRTC configuration from backend
+   */
+  private async initializeConfig(): Promise<void> {
+    try {
+      this.webrtcConfig = await getWebRTCConfig();
+    } catch (error) {
+      console.warn('Failed to fetch WebRTC config, using defaults:', error);
+    }
+  }
+
+  /**
+   * Set meeting ID for meeting room mode
+   */
+  setMeetingId(meetingId: string): void {
+    this.meetingId = meetingId;
   }
 
   private detectMobile(): boolean {
@@ -124,15 +148,20 @@ export class WebRTCService {
   /**
    * Create peer connection
    */
-  createPeerConnection(userId: string, isInitiator: boolean): void {
+  async createPeerConnection(userId: string, isInitiator: boolean): Promise<void> {
     if (this.peers.has(userId)) {
       this.destroyPeerConnection(userId);
+    }
+
+    // Ensure config is loaded
+    if (!this.webrtcConfig) {
+      await this.initializeConfig();
     }
 
     const peer = new SimplePeer({
       initiator: isInitiator,
       trickle: true,
-      config: WEBRTC_CONFIG,
+      config: this.webrtcConfig,
       stream: this.localStream || undefined,
     });
 
@@ -154,6 +183,20 @@ export class WebRTCService {
         this.handleConnectionTimeout(userId);
       }
     }, CONNECTION_TIMEOUTS.CONNECTION_TIMEOUT);
+  }
+
+  /**
+   * Create peer connections for all participants in a meeting room
+   */
+  async createMeetingRoomConnections(participantIds: string[], isHost: boolean): Promise<void> {
+    // Create connections to all other participants
+    for (const participantId of participantIds) {
+      if (!this.peers.has(participantId)) {
+        // First participant to join is the initiator
+        const isInitiator = isHost && this.peers.size === 0;
+        await this.createPeerConnection(participantId, isInitiator);
+      }
+    }
   }
 
   /**
@@ -333,6 +376,14 @@ export class WebRTCService {
   }
 
   /**
+   * Reconnect to a peer (useful for dropped connections)
+   */
+  async reconnectPeer(userId: string, isInitiator: boolean): Promise<void> {
+    this.destroyPeerConnection(userId);
+    await this.createPeerConnection(userId, isInitiator);
+  }
+
+  /**
    * Cleanup all connections and resources
    */
   destroy(): void {
@@ -359,6 +410,7 @@ export class WebRTCService {
     }
 
     this.peers.clear();
+    this.meetingId = null;
   }
 
   /**

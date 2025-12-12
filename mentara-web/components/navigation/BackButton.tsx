@@ -128,13 +128,15 @@ export function BackButton({
       variant={variant}
       size={size}
       onClick={handleBack}
-      className={cn("flex items-center gap-2", className)}
+      className={cn("flex items-center gap-2 touch-manipulation", className)}
       title={showKeyboardHint ? `${label} (Backspace)` : label}
+      aria-label={`${label} to previous page`}
     >
-      <ArrowLeft className="h-4 w-4" />
-      {label}
+      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+      <span className="hidden sm:inline">{label}</span>
+      <span className="sm:hidden">Back</span>
       {showKeyboardHint && (
-        <span className="ml-2 text-xs text-muted-foreground opacity-70">
+        <span className="ml-2 text-xs text-muted-foreground opacity-70 hidden md:inline">
           (Backspace)
         </span>
       )}

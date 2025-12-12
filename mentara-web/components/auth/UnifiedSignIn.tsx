@@ -274,16 +274,28 @@ export function UnifiedSignIn() {
               Reset it here
             </Button>
           </p>
-          <p className="text-sm text-muted-foreground">
-            New to Mentara?{" "}
-            <Button
-              variant="link"
-              className="p-0 h-auto text-sm font-medium"
-              onClick={() => router.push("/pre-assessment")}
-            >
-              Start your assessment
-            </Button>
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              New to Mentara?{" "}
+              <Button
+                variant="link"
+                className="p-0 h-auto text-sm font-medium"
+                onClick={() => router.push("/pre-assessment")}
+              >
+                Start your assessment
+              </Button>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Or{" "}
+              <Button
+                variant="link"
+                className="p-0 h-auto text-sm font-medium"
+                onClick={() => router.push("/auth/sign-up/skip-assessment")}
+              >
+                sign up without assessment
+              </Button>
+            </p>
+          </div>
         </div>
       </CardContent>
       </Card>

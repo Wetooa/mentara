@@ -297,7 +297,7 @@ class ConnectionHealthMonitor {
       const start = performance.now();
       
       // Try to fetch a small resource to measure latency - use the public health endpoint
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000/api';
       const response = await fetch(`${apiUrl}/health`, {
         method: 'HEAD',
         cache: 'no-cache',
@@ -311,7 +311,7 @@ class ConnectionHealthMonitor {
       // Network error - try a simple fetch to the API base
       try {
         const start2 = performance.now();
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000/api';
         await fetch(apiUrl, { 
           method: 'HEAD', 
           cache: 'no-cache',

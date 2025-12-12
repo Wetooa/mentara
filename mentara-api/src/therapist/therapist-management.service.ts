@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { Prisma } from '@prisma/client';
@@ -26,16 +27,18 @@ interface TherapistUpdateDto {
   isActive?: boolean;
   mobile?: string;
   province?: string;
-  hourlyRate?: any;
+  hourlyRate?: Decimal | number;
   areasOfExpertise?: string[];
   languagesOffered?: string[];
   preferredSessionLength?: number[];
   // Allow any other properties
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 @Injectable()
 export class TherapistManagementService {
+  private readonly logger = new Logger(TherapistManagementService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   private calculateYearsOfExperience(startDate: Date): number {
@@ -51,7 +54,7 @@ export class TherapistManagementService {
     return years;
   }
 
-  async getTherapistProfile(userId: string): Promise<any> {
+  async getTherapistProfile(userId: string): Promise<unknown> {
     try {
       const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId },
@@ -68,7 +71,7 @@ export class TherapistManagementService {
         // Map database fields to frontend-expected fields
         specialties: therapist.areasOfExpertise || [],
         treatmentSuccessRates:
-          (therapist.treatmentSuccessRates as Record<string, any>) || {},
+          (therapist.treatmentSuccessRates as Record<string, unknown>) || {},
         hourlyRate: therapist.hourlyRate,
       };
     } catch (error) {
@@ -85,10 +88,10 @@ export class TherapistManagementService {
   async updateTherapistProfile(
     userId: string,
     data: TherapistUpdateDto,
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       // Update therapist profile data
-      const therapistData: any = {};
+      const therapistData: Record<string, unknown> = {};
       if (data.mobile !== undefined) therapistData.mobile = data.mobile;
       if (data.province !== undefined) therapistData.province = data.province;
       if (data.providerType !== undefined)
@@ -167,9 +170,9 @@ export class TherapistManagementService {
         hourlyRate: updatedTherapist.hourlyRate,
       };
     } catch (error) {
-      console.error(
-        'Error updating therapist profile:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error updating therapist profile for userId: ${userId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw new InternalServerErrorException(
         'Failed to update therapist profile',
@@ -177,7 +180,7 @@ export class TherapistManagementService {
     }
   }
 
-  async getAssignedPatients(therapistId: string): Promise<any[]> {
+  async getAssignedPatients(therapistId: string): Promise<unknown[]> {
     try {
       const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId: therapistId },
@@ -199,9 +202,9 @@ export class TherapistManagementService {
         assignedAt: ct.assignedAt,
       }));
     } catch (error) {
-      console.error(
-        'Error retrieving assigned patients:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error retrieving assigned patients for therapistId: ${therapistId}`,
+        error instanceof Error ? error.stack : String(error),
       );
 
       throw new InternalServerErrorException(
@@ -210,7 +213,7 @@ export class TherapistManagementService {
     }
   }
 
-  async getPendingRequests(therapistId: string): Promise<any[]> {
+  async getPendingRequests(therapistId: string): Promise<unknown[]> {
     try {
       const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId: therapistId },
@@ -233,9 +236,9 @@ export class TherapistManagementService {
         requestedAt: ct.assignedAt,
       }));
     } catch (error) {
-      console.error(
-        'Error retrieving pending requests:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error retrieving pending requests for therapistId: ${therapistId}`,
+        error instanceof Error ? error.stack : String(error),
       );
 
       throw new InternalServerErrorException(
@@ -266,9 +269,9 @@ export class TherapistManagementService {
         data: { status: 'active' },
       });
     } catch (error) {
-      console.error(
-        'Error accepting patient request:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error accepting patient request for therapistId: ${therapistId}, clientId: ${clientId}`,
+        error instanceof Error ? error.stack : String(error),
       );
 
       if (error instanceof NotFoundException) {
@@ -302,9 +305,9 @@ export class TherapistManagementService {
         where: { id: relationship.id },
       });
     } catch (error) {
-      console.error(
-        'Error denying patient request:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error denying patient request for therapistId: ${therapistId}, clientId: ${clientId}`,
+        error instanceof Error ? error.stack : String(error),
       );
 
       if (error instanceof NotFoundException) {
@@ -334,9 +337,9 @@ export class TherapistManagementService {
         data: { status: 'inactive' },
       });
     } catch (error) {
-      console.error(
-        'Error removing patient:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error removing patient for therapistId: ${therapistId}, clientId: ${clientId}`,
+        error instanceof Error ? error.stack : String(error),
       );
 
       if (error instanceof NotFoundException) {
@@ -347,7 +350,7 @@ export class TherapistManagementService {
     }
   }
 
-  async getAllClients(therapistId: string): Promise<any[]> {
+  async getAllClients(therapistId: string): Promise<unknown[]> {
     try {
       // Find all clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
@@ -359,15 +362,15 @@ export class TherapistManagementService {
         ...ct.client,
       }));
     } catch (error) {
-      console.error(
-        'Error retrieving all clients:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error retrieving all clients for therapistId: ${therapistId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw new InternalServerErrorException('Failed to retrieve all clients');
     }
   }
 
-  async getClientById(therapistId: string, clientId: string): Promise<any> {
+  async getClientById(therapistId: string, clientId: string): Promise<unknown> {
     try {
       // Find the specific client assigned to this therapist
       const assignedClient = await this.prisma.clientTherapist.findFirst({
@@ -380,15 +383,15 @@ export class TherapistManagementService {
 
       return assignedClient.client;
     } catch (error) {
-      console.error(
-        'Error retrieving client by ID:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error retrieving client by ID for therapistId: ${therapistId}, clientId: ${clientId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw new InternalServerErrorException('Failed to retrieve client by ID');
     }
   }
 
-  async getProfile(therapistId: string): Promise<any> {
+  async getProfile(therapistId: string): Promise<unknown> {
     try {
       const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId: therapistId },
@@ -401,13 +404,13 @@ export class TherapistManagementService {
         // Map database fields to frontend-expected fields
         specialties: therapist.areasOfExpertise || [],
         treatmentSuccessRates:
-          (therapist.treatmentSuccessRates as Record<string, any>) || {},
+          (therapist.treatmentSuccessRates as Record<string, unknown>) || {},
         hourlyRate: therapist.hourlyRate,
       };
     } catch (error) {
-      console.error(
-        'Error retrieving therapist profile:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error retrieving therapist profile for therapistId: ${therapistId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw new InternalServerErrorException(
         'Failed to retrieve therapist profile',
@@ -436,9 +439,9 @@ export class TherapistManagementService {
         hourlyRate: updatedTherapist.hourlyRate,
       };
     } catch (error) {
-      console.error(
-        'Error updating therapist profile:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error updating therapist profile for therapistId: ${therapistId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw new InternalServerErrorException(
         'Failed to update therapist profile',
@@ -446,12 +449,9 @@ export class TherapistManagementService {
     }
   }
 
-  async getMatchedClients(therapistId: string): Promise<any> {
+  async getMatchedClients(therapistId: string): Promise<unknown> {
     try {
-      console.log(
-        '🔍 [DEBUG] getMatchedClients called with therapistId:',
-        therapistId,
-      );
+      this.logger.debug(`getMatchedClients called with therapistId: ${therapistId}`);
 
       // First, verify the therapist exists
       const therapist = await this.prisma.therapist.findUnique({
@@ -462,15 +462,16 @@ export class TherapistManagementService {
         },
       });
 
-      console.log(
-        '🔍 [DEBUG] Therapist found:',
-        therapist
-          ? `${therapist.user.firstName} ${therapist.user.lastName} (ID: ${therapist.userId})`
-          : 'NOT FOUND',
+      this.logger.debug(
+        `Therapist found: ${
+          therapist
+            ? `${therapist.user.firstName} ${therapist.user.lastName} (ID: ${therapist.userId})`
+            : 'NOT FOUND'
+        }`,
       );
 
       if (!therapist) {
-        console.error('❌ [ERROR] Therapist not found with ID:', therapistId);
+        this.logger.error(`Therapist not found with ID: ${therapistId}`);
         throw new NotFoundException(
           `Therapist with ID ${therapistId} not found`,
         );
@@ -488,7 +489,9 @@ export class TherapistManagementService {
           client: {
             include: {
               user: true,
-              preAssessment: {
+              preAssessments: {
+                orderBy: { createdAt: 'desc' },
+                take: 1,
                 select: {
                   id: true,
                   createdAt: true,
@@ -501,19 +504,17 @@ export class TherapistManagementService {
         orderBy: { assignedAt: 'desc' },
       });
 
-      console.log(
-        '🔍 [DEBUG] ClientTherapist records found:',
-        allMatches.length,
-      );
-      console.log(
-        '🔍 [DEBUG] Raw matches:',
-        allMatches.map((m) => ({
-          id: m.id,
-          clientId: m.clientId,
-          therapistId: m.therapistId,
-          assignedAt: m.assignedAt,
-          status: m.status,
-        })),
+      this.logger.debug(`ClientTherapist records found: ${allMatches.length}`);
+      this.logger.debug(
+        `Raw matches: ${JSON.stringify(
+          allMatches.map((m) => ({
+            id: m.id,
+            clientId: m.clientId,
+            therapistId: m.therapistId,
+            assignedAt: m.assignedAt,
+            status: m.status,
+          })),
+        )}`,
       );
 
       // Separate recent matches (last 30 days) from older ones
@@ -526,7 +527,23 @@ export class TherapistManagementService {
       );
 
       // Format the response with additional metadata
-      const formatClientMatch = (relationship: any) => {
+      const formatClientMatch = (relationship: {
+        id: string;
+        assignedAt: Date;
+        client: {
+          userId: string;
+          user: {
+            firstName: string;
+            lastName: string;
+            email: string;
+            profilePicture: string | null;
+            createdAt: Date;
+          };
+          preAssessment: {
+            createdAt: Date;
+          } | null;
+        };
+      }) => {
         const latestAssessment = relationship.client.preAssessment;
         return {
           relationshipId: relationship.id,
@@ -575,9 +592,9 @@ export class TherapistManagementService {
         },
       };
     } catch (error) {
-      console.error(
-        'Error retrieving matched clients:',
-        error instanceof Error ? error.message : error,
+      this.logger.error(
+        `Error retrieving matched clients for therapistId: ${therapistId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw new InternalServerErrorException(
         'Failed to retrieve matched clients',

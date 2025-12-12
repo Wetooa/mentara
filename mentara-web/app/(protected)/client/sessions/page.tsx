@@ -13,6 +13,8 @@ import { Calendar, Clock, CheckCircle, XCircle, Plus, CreditCard, LayoutGrid, Li
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meeting } from "@/lib/api/services/meetings";
 import { logger } from "@/lib/logger";
+// Removed framer-motion animation to avoid JSX parser issues
+// Animation can be re-added later if needed
 
 // Lazy load heavy session components
 const SessionsList = dynamic(() => import("@/components/sessions").then(mod => ({ default: mod.SessionsList })), {
@@ -32,12 +34,6 @@ const PaymentMethodsSheet = dynamic(() => import("@/components/billing").then(mo
 const SessionsCalendarView = dynamic(() => import("@/components/sessions/SessionsCalendarView").then(mod => ({ default: mod.SessionsCalendarView })), {
   ssr: false,
   loading: () => <Skeleton className="h-96 w-full" />
-});
-
-// Lazy load framer-motion
-const MotionDiv = dynamic(() => import("framer-motion").then(mod => mod.motion.div), {
-  ssr: false,
-  loading: () => <div className="w-full h-full p-4 sm:p-6 space-y-6" />
 });
 
 // Memoize utility functions
@@ -154,15 +150,14 @@ export default function SessionsPage() {
   ], []);
 
   return (
-    <MotionDiv
+    <div
       className="w-full h-full p-4 sm:p-6 space-y-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      role="main"
+      aria-label="Sessions management page"
     >
       {/* Compact Header with Stats */}
-      <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+      <Suspense fallback={<Skeleton className="h-24 w-full" aria-label="Loading sessions header" />}>
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">My Sessions</h1>
             <p className="text-sm text-muted-foreground">
@@ -171,14 +166,16 @@ export default function SessionsPage() {
           </div>
           <div className="flex items-center gap-2">
             {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg" role="group" aria-label="View mode selector">
               <Button
                 variant={viewMode === 'split' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('split')}
                 className="gap-2"
+                aria-label="Split view mode"
+                aria-pressed={viewMode === 'split'}
               >
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Split</span>
               </Button>
               <Button
@@ -186,17 +183,19 @@ export default function SessionsPage() {
                 size="sm"
                 onClick={() => setViewMode('list')}
                 className="gap-2"
+                aria-label="List view mode"
+                aria-pressed={viewMode === 'list'}
               >
-                <List className="h-4 w-4" />
+                <List className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">List</span>
               </Button>
             </div>
-            <Button onClick={handleScheduleSession} className="gap-2">
-              <Plus className="h-4 w-4" />
+            <Button onClick={handleScheduleSession} className="gap-2" aria-label="Schedule a new session">
+              <Plus className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Schedule</span>
             </Button>
           </div>
-        </div>
+        </header>
 
         {/* Compact Session Statistics */}
         <SessionStats showTrends={false} />
@@ -218,8 +217,9 @@ export default function SessionsPage() {
                 variant="outline" 
                 className="w-full justify-start gap-3 h-11 hover:bg-primary/10 hover:border-primary/30 hover:text-primary group"
                 onClick={handleScheduleSession}
+                aria-label="Book a new therapy session"
               >
-                <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors" aria-hidden="true">
                   <Plus className="h-4 w-4 text-primary" />
                 </div>
                 <div className="text-left flex-1">
@@ -286,16 +286,17 @@ export default function SessionsPage() {
       </div>
 
       {/* Sessions Content - Split Panel or List View */}
-      <div>
+      <section aria-label="Sessions list">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 lg:w-fit lg:grid-cols-4 bg-gray-100">
+          <TabsList className="grid w-full grid-cols-4 lg:w-fit lg:grid-cols-4 bg-gray-100" role="tablist" aria-label="Session filter tabs">
             {tabs.map((tab) => (
               <TabsTrigger 
                 key={tab.id} 
                 value={tab.id}
                 className="flex items-center gap-2 transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                aria-label={`Filter sessions by ${tab.label.toLowerCase()}`}
               >
-                {tab.icon}
+                <span aria-hidden="true">{tab.icon}</span>
                 <span className="hidden sm:inline">{tab.label}</span>
               </TabsTrigger>
             ))}
@@ -433,7 +434,7 @@ export default function SessionsPage() {
             </TabsContent>
           ))}
         </Tabs>
-      </div>
+      </section>
 
       {/* Payment Methods Sheet */}
       <Suspense fallback={null}>
@@ -442,6 +443,6 @@ export default function SessionsPage() {
           onOpenChange={setPaymentMethodsOpen}
         />
       </Suspense>
-    </MotionDiv>
+    </div>
   );
 }

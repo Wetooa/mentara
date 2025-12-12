@@ -23,74 +23,47 @@ import { logger } from "@/lib/logger";
 // Enhanced modern loading skeleton component
 function TherapistCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 overflow-hidden relative">
-      {/* Animated shimmer overlay */}
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
-
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse">
       {/* Status and Price Section */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center">
-          <div className="w-2 h-2 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full mr-1.5 animate-pulse"></div>
-          <div className="h-3 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-12 animate-pulse"></div>
-        </div>
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="h-6 w-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"></div>
-          <div className="h-3 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-20 animate-pulse"></div>
+          <div className="w-2 h-2 bg-gray-200 rounded-full"></div>
+          <div className="h-3 bg-gray-200 rounded w-16"></div>
         </div>
+        <div className="h-4 bg-gray-200 rounded w-20"></div>
       </div>
 
-      {/* Therapist Name and Title */}
-      <div className="space-y-2 mb-2">
-        <div className="h-5 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-4/5 animate-pulse"></div>
-        <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-3/5 animate-pulse"></div>
-      </div>
+      {/* Therapist Name */}
+      <div className="h-5 bg-gray-200 rounded w-3/4 mb-3"></div>
 
       {/* Star Rating */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-4">
         <div className="flex gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="w-4 h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"
-            ></div>
+            <div key={i} className="w-4 h-4 bg-gray-200 rounded"></div>
           ))}
         </div>
-        <div className="h-3 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-16 animate-pulse"></div>
+        <div className="h-3 bg-gray-200 rounded w-12"></div>
       </div>
 
       {/* Specialties */}
-      <div className="flex flex-wrap gap-2 mb-3">
-        <div className="h-6 bg-gradient-to-r from-primary/20 to-primary/30 rounded-full w-20 animate-pulse"></div>
-        <div className="h-6 bg-gradient-to-r from-primary/20 to-primary/30 rounded-full w-16 animate-pulse"></div>
-        <div className="h-6 bg-gradient-to-r from-primary/20 to-primary/30 rounded-full w-24 animate-pulse"></div>
-      </div>
-
-      {/* Available Time */}
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-3.5 h-3.5 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"></div>
-        <div className="h-3 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-32 animate-pulse"></div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <div className="h-6 bg-gray-100 rounded-full w-20"></div>
+        <div className="h-6 bg-gray-100 rounded-full w-16"></div>
+        <div className="h-6 bg-gray-100 rounded-full w-24"></div>
       </div>
 
       {/* Bio */}
-      <div className="space-y-1 mb-4">
-        <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded animate-pulse"></div>
-        <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-4/5 animate-pulse"></div>
+      <div className="space-y-2 mb-4">
+        <div className="h-3 bg-gray-100 rounded w-full"></div>
+        <div className="h-3 bg-gray-100 rounded w-5/6"></div>
       </div>
 
       {/* Action Buttons */}
       <div className="flex gap-2">
-        <div className="flex-1 h-9 bg-gradient-to-r from-primary/20 to-primary/30 rounded border animate-pulse"></div>
-        <div className="flex-1 h-9 bg-gradient-to-r from-gray-100 to-gray-200 rounded border animate-pulse"></div>
+        <div className="flex-1 h-9 bg-gray-100 rounded"></div>
+        <div className="flex-1 h-9 bg-gray-100 rounded"></div>
       </div>
-
-      {/* Custom shimmer animation styles */}
-      <style jsx>{`
-        @keyframes shimmer {
-          100% {
-            transform: translateX(100%);
-          }
-        }
-      `}</style>
     </div>
   );
 }
@@ -166,9 +139,8 @@ export default function TherapistListing() {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <h1 className="text-2xl font-bold">My Therapists</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {Array.from({ length: 6 }).map((_, index) => (
             <SkeletonTherapistCard key={index} />
           ))}
         </div>
@@ -254,16 +226,13 @@ export default function TherapistListing() {
   return (
     <>
       <div className="space-y-8">
-        {/* Page Header */}
-        <h1 className="text-2xl font-bold">My Therapists</h1>
-
-        {/* Search Bar */}
+        {/* Search Bar - Modern Design */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
             type="text"
             placeholder="Search therapists by name or specialty..."
-            className="pl-10 pr-4"
+            className="pl-12 pr-4 h-12 text-base border-2 focus:border-primary transition-colors"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -274,13 +243,13 @@ export default function TherapistListing() {
           filters={filters}
           onChange={updateFilters}
           onFiltersChange={setHasActiveFilters}
-          className="mb-6"
+          className="mb-8"
         />
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Results count with safe calculations */}
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
+          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+            <div className="text-base font-medium text-gray-700">
               {(() => {
                 try {
                   const startItem = Math.max(
@@ -304,14 +273,14 @@ export default function TherapistListing() {
               })()}
             </div>
             {totalPages > 1 && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 font-medium">
                 Page {currentPage || 1} of {totalPages || 1}
               </div>
             )}
           </div>
 
-          {/* Therapist grid with error boundary protection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Therapist grid with error boundary protection - More spacious */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
             {Array.isArray(therapists) ? (
               therapists
                 .map((therapist) => {

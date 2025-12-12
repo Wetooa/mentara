@@ -58,31 +58,37 @@ export function PageBreadcrumbs({
   }
 
   return (
-    <Breadcrumb className={cn("mb-4", className)}>
-      <BreadcrumbList>
-        {displayBreadcrumbs.map((crumb, index) => {
-          const isLast = index === displayBreadcrumbs.length - 1;
+    <nav aria-label="Breadcrumb navigation" className={cn("mb-4", className)}>
+      <Breadcrumb>
+        <BreadcrumbList>
+          {displayBreadcrumbs.map((crumb, index) => {
+            const isLast = index === displayBreadcrumbs.length - 1;
 
-          return (
-            <React.Fragment key={crumb.href}>
-              <BreadcrumbItem>
-                {isLast ? (
-                  <BreadcrumbPage className="max-w-[200px] truncate">
-                    {crumb.label}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link href={crumb.href} className="max-w-[200px] truncate">
+            return (
+              <React.Fragment key={crumb.href}>
+                <BreadcrumbItem>
+                  {isLast ? (
+                    <BreadcrumbPage className="max-w-[200px] md:max-w-none truncate" aria-current="page">
                       {crumb.label}
-                    </Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-              {!isLast && <BreadcrumbSeparator />}
-            </React.Fragment>
-          );
-        })}
-      </BreadcrumbList>
-    </Breadcrumb>
+                    </BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink asChild>
+                      <Link 
+                        href={crumb.href} 
+                        className="max-w-[200px] md:max-w-none truncate min-h-[44px] md:min-h-0 flex items-center touch-manipulation"
+                        aria-label={`Navigate to ${crumb.label}`}
+                      >
+                        {crumb.label}
+                      </Link>
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+                {!isLast && <BreadcrumbSeparator aria-hidden="true" />}
+              </React.Fragment>
+            );
+          })}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </nav>
   );
 }

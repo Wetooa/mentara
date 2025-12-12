@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from 'src/providers/prisma-client.provider';
@@ -119,6 +120,8 @@ export const AllowResourceOwner = (resourceIdParam: string = 'id') =>
 
 @Injectable()
 export class RoleBasedAccessGuard implements CanActivate {
+  private readonly logger = new Logger(RoleBasedAccessGuard.name);
+
   constructor(
     private reflector: Reflector,
     private prisma: PrismaService,
@@ -276,7 +279,7 @@ export class RoleBasedAccessGuard implements CanActivate {
       return !!relationship;
     } catch (error) {
       // Log error and deny access on database errors for security
-      console.error('Error validating therapist-client relationship:', error);
+      this.logger.error('Error validating therapist-client relationship:', error);
       return false;
     }
   }

@@ -122,7 +122,7 @@ export function UpcomingSessionsToday({
       
       toast.success("Meeting started successfully");
     } catch (error) {
-      console.error("Failed to start meeting:", error);
+      logger.error("Failed to start meeting:", error);
       toast.error("Failed to start meeting");
     } finally {
       setStartingMeeting(null);
@@ -141,7 +141,7 @@ export function UpcomingSessionsToday({
         }
       }
     } catch (error) {
-      console.error("Failed to join video call:", error);
+      logger.error("Failed to join video call:", error);
       toast.error("Failed to join video call");
     }
   };
@@ -156,7 +156,7 @@ export function UpcomingSessionsToday({
       
       toast.success("Meeting cancelled successfully");
     } catch (error) {
-      console.error("Failed to cancel meeting:", error);
+      logger.error("Failed to cancel meeting:", error);
       toast.error("Failed to cancel meeting");
     } finally {
       setCancellingMeeting(null);

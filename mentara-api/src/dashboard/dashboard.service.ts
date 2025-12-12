@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MessagingService } from '../messaging/messaging.service';
@@ -9,6 +10,8 @@ import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class DashboardService {
+  private readonly logger = new Logger(DashboardService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly messagingService: MessagingService,
@@ -55,7 +58,10 @@ export class DashboardService {
               },
             },
           },
-          preAssessment: true,
+          preAssessments: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
         },
       });
 
@@ -139,7 +145,7 @@ export class DashboardService {
         pendingWorksheets: client.worksheets,
         assignedTherapists: client.assignedTherapists.map((ct) => ct.therapist),
         recentActivity: recentPosts,
-        hasPreAssessment: !!client.preAssessment,
+        hasPreAssessment: !!(client.preAssessments && client.preAssessments.length > 0),
       };
 
       // Cache the result for 5 minutes
@@ -157,9 +163,7 @@ export class DashboardService {
   }
 
   async getTherapistDashboardData(userId: string) {
-    console.log(
-      `🔍 [DashboardService] Getting therapist dashboard data for userId: ${userId}`,
-    );
+    this.logger.debug(`Getting therapist dashboard data for userId: ${userId}`);
 
     try {
       // Check cache first
@@ -184,17 +188,17 @@ export class DashboardService {
       });
 
       if (!user) {
-        console.error(`❌ [DashboardService] User not found: ${userId}`);
+        this.logger.error(`User not found: ${userId}`);
         throw new NotFoundException(`User not found: ${userId}`);
       }
 
-      console.log(
-        `📋 [DashboardService] User found: ${user.email} (${user.firstName} ${user.lastName}), role: ${user.role}, active: ${user.isActive}`,
+      this.logger.debug(
+        `User found: ${user.email} (${user.firstName} ${user.lastName}), role: ${user.role}, active: ${user.isActive}`,
       );
 
       if (user.role !== 'therapist') {
-        console.error(
-          `❌ [DashboardService] User ${user.email} has role '${user.role}', expected 'therapist'`,
+        this.logger.error(
+          `User ${user.email} has role '${user.role}', expected 'therapist'`,
         );
         throw new NotFoundException(
           `User ${user.email} does not have therapist role. Current role: ${user.role}`,
@@ -202,14 +206,12 @@ export class DashboardService {
       }
 
       if (!user.isActive) {
-        console.error(`❌ [DashboardService] User ${user.email} is not active`);
+        this.logger.error(`User ${user.email} is not active`);
         throw new NotFoundException(`User ${user.email} is not active`);
       }
 
       // Now attempt to find the therapist record
-      console.log(
-        `🔍 [DashboardService] Looking for Therapist record for userId: ${userId}`,
-      );
+      this.logger.debug(`Looking for Therapist record for userId: ${userId}`);
 
       const therapist = await this.prisma.therapist.findUnique({
         where: { userId },
@@ -253,17 +255,17 @@ export class DashboardService {
       });
 
       if (!therapist) {
-        console.error(
-          `❌ [DashboardService] Therapist record not found for user: ${user.email} (${userId})`,
+        this.logger.error(
+          `Therapist record not found for user: ${user.email} (${userId})`,
         );
-        console.error(
-          `❌ [DashboardService] User has role 'therapist' but missing Therapist table record`,
+        this.logger.error(
+          `User has role 'therapist' but missing Therapist table record`,
         );
 
         // Additional diagnostic information
         const allTherapistRecords = await this.prisma.therapist.count();
-        console.log(
-          `📊 [DashboardService] Total Therapist records in database: ${allTherapistRecords}`,
+        this.logger.debug(
+          `Total Therapist records in database: ${allTherapistRecords}`,
         );
 
         throw new NotFoundException(
@@ -273,8 +275,8 @@ export class DashboardService {
         );
       }
 
-      console.log(
-        `✅ [DashboardService] Therapist record found: ${therapist.user.email}, status: ${therapist.status}`,
+      this.logger.debug(
+        `Therapist record found: ${therapist.user.email}, status: ${therapist.status}`,
       );
 
       // PERFORMANCE FIX: Run count queries in parallel instead of sequentially
@@ -490,8 +492,8 @@ export class DashboardService {
         take: 5,
       });
 
-      console.log(
-        `📊 [DashboardService] Dashboard stats for ${therapist.user.email}: clients=${totalClientsCount}, completed_meetings=${completedMeetingsCount}`,
+      this.logger.debug(
+        `Dashboard stats for ${therapist.user.email}: clients=${totalClientsCount}, completed_meetings=${completedMeetingsCount}`,
       );
 
       const dashboardData = {
@@ -555,8 +557,8 @@ export class DashboardService {
         },
       };
 
-      console.log(
-        `✅ [DashboardService] Successfully retrieved dashboard data for ${therapist.user.email}`,
+      this.logger.debug(
+        `Successfully retrieved dashboard data for ${therapist.user.email}`,
       );
 
       // Cache the result for 5 minutes
@@ -570,9 +572,9 @@ export class DashboardService {
         throw error;
       }
 
-      console.error(
-        `❌ [DashboardService] Unexpected error getting therapist dashboard data for userId ${userId}:`,
-        error,
+      this.logger.error(
+        `Unexpected error getting therapist dashboard data for userId ${userId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw new InternalServerErrorException(
         `Failed to get therapist dashboard data for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
@@ -866,7 +868,7 @@ export class DashboardService {
       });
 
       const topClients = Object.values(clientSessions)
-        .sort((a: any, b: any) => b.sessions - a.sessions)
+        .sort((a: { sessions: number }, b: { sessions: number }) => b.sessions - a.sessions)
         .slice(0, 10);
 
       // Session completion rate
@@ -977,7 +979,7 @@ export class DashboardService {
             revenue: Math.round(revenue as number),
           }),
         ),
-        topClients: topClients.map((client: any) => ({
+        topClients: topClients.map((client: { revenue: number; sessions: number; name: string }) => ({
           ...client,
           revenue: Math.round(client.revenue),
         })),

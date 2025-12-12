@@ -1,15 +1,34 @@
 model PreAssessment {
-  id             String    @id @default(uuid())
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  clientId       String    @unique
-  answers        Json // Flat array of 201 numeric responses
-  scores         Json
-  severityLevels Json
-  aiEstimate     Json
-  isProcessed    Boolean   @default(false)
-  processedAt    DateTime?
-  client         Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  id                     String              @id @default(uuid())
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  clientId               String
+  answers                Json // Flat array of 201 numeric responses
+  scores                 Json
+  severityLevels         Json
+  aiEstimate             Json
+  isProcessed            Boolean             @default(false)
+  processedAt            DateTime?
+  assessmentMethod       PreAssessmentMethod @default(CHECKLIST)
+  chatbotSessionId       String?             @unique
+  conversationInsights   Json? // Extracted insights from chatbot conversation
+  // Enhanced data collection fields
+  pastTherapyExperiences Json? // Array of past therapy experiences with details
+  medicationHistory      Json? // Current medications and history
+  accessibilityNeeds     Json? // Accessibility requirements
+  culturalConsiderations Json? // Cultural, religious, or identity considerations
+  familySupportSystem    Json? // Family and support system information
+  crisisSupportNeeds     Json? // Crisis support and safety planning needs
+  client                 Client              @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  chatbotSession         ChatbotSession?     @relation(fields: [chatbotSessionId], references: [id], onDelete: SetNull)
 
   @@index([clientId])
+  @@index([chatbotSessionId])
+  @@index([assessmentMethod])
+}
+
+enum PreAssessmentMethod {
+  CHECKLIST
+  CHATBOT
+  HYBRID
 }

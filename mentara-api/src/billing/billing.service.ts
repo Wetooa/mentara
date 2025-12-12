@@ -73,6 +73,17 @@ export class BillingService {
     mayaName?: string;
     mayaEmail?: string;
     
+    // Insurance fields
+    insuranceProviderName?: string;
+    policyNumber?: string;
+    memberId?: string;
+    groupNumber?: string;
+    coverageDetails?: {
+      coverageType?: 'FULL' | 'COPAY' | 'PERCENTAGE';
+      copayAmount?: number;
+      coveragePercentage?: number;
+    };
+    
     // Address
     billingAddress?: any;
     
@@ -138,6 +149,14 @@ export class BillingService {
         mayaName: data.mayaName,
         mayaEmail: data.mayaEmail,
         mayaVerified: data.mayaNumber ? false : undefined, // Default unverified for new Maya
+        
+        // Insurance fields
+        insuranceProviderName: data.insuranceProviderName,
+        policyNumber: data.policyNumber,
+        memberId: data.memberId,
+        groupNumber: data.groupNumber,
+        insuranceVerified: data.type === 'INSURANCE' || (data.type as any) === PaymentMethodType.INSURANCE ? false : undefined, // Default unverified for new insurance
+        coverageDetails: data.coverageDetails as any,
         
         // Address
         billingAddress: data.billingAddress,
@@ -239,6 +258,82 @@ export class BillingService {
     });
 
     return { success: true };
+  }
+
+  /**
+   * Verify insurance payment method (mock verification)
+   */
+  async verifyInsurance(paymentMethodId: string) {
+    const paymentMethod = await this.prisma.paymentMethod.findUnique({
+      where: { id: paymentMethodId },
+    });
+
+    if (!paymentMethod) {
+      throw new NotFoundException(`Payment method ${paymentMethodId} not found`);
+    }
+
+    if (paymentMethod.type !== 'INSURANCE' && (paymentMethod.type as any) !== PaymentMethodType.INSURANCE) {
+      throw new BadRequestException('Payment method is not an insurance type');
+    }
+
+    // Mock verification logic
+    const mockProviders = [
+      'BlueCross',
+      'Blue Shield',
+      'Aetna',
+      'Cigna',
+      'UnitedHealth',
+      'Humana',
+      'Kaiser Permanente',
+      'Anthem',
+      'Medicare',
+      'Medicaid',
+    ];
+
+    let isVerified = false;
+    const verificationErrors: string[] = [];
+
+    // Validate provider name
+    const insuranceProviderName = (paymentMethod as any).insuranceProviderName;
+    if (!insuranceProviderName) {
+      verificationErrors.push('Insurance provider name is required');
+    } else if (!mockProviders.some(provider => 
+      insuranceProviderName.toLowerCase().includes(provider.toLowerCase())
+    )) {
+      verificationErrors.push('Insurance provider not recognized');
+    }
+
+    // Validate policy number (8-12 alphanumeric characters)
+    const policyNumber = (paymentMethod as any).policyNumber;
+    if (!policyNumber) {
+      verificationErrors.push('Policy number is required');
+    } else {
+      const policyNumberRegex = /^[A-Za-z0-9]{8,12}$/;
+      if (!policyNumberRegex.test(policyNumber)) {
+        verificationErrors.push('Policy number must be 8-12 alphanumeric characters');
+      }
+    }
+
+    // If all validations pass, mark as verified
+    if (verificationErrors.length === 0) {
+      isVerified = true;
+    }
+
+    const updatedPaymentMethod = await this.prisma.paymentMethod.update({
+      where: { id: paymentMethodId },
+      data: {
+        insuranceVerified: isVerified,
+      } as any, // Type assertion for insuranceVerified field
+    });
+
+    this.logger.log(
+      `Insurance verification ${isVerified ? 'succeeded' : 'failed'} for payment method ${paymentMethodId}`
+    );
+
+    return {
+      ...updatedPaymentMethod,
+      verificationErrors: verificationErrors.length > 0 ? verificationErrors : undefined,
+    };
   }
 
   /**
@@ -352,6 +447,63 @@ export class BillingService {
       throw new BadRequestException('Invalid payment method');
     }
 
+    // Handle insurance payment with coverage calculation
+    let paymentAmount = data.amount;
+    let insuranceAmount = 0;
+    let clientAmount = 0;
+    let coverageBreakdown: any = null;
+
+    if (paymentMethod.type === 'INSURANCE' || (paymentMethod.type as any) === PaymentMethodType.INSURANCE) {
+      // Check if insurance is verified
+      const insuranceVerified = (paymentMethod as any).insuranceVerified;
+      if (!insuranceVerified) {
+        throw new BadRequestException('Insurance payment method must be verified before use');
+      }
+
+      // Get coverage details
+      const coverageDetails = (paymentMethod as any).coverageDetails as {
+        coverageType?: 'FULL' | 'COPAY' | 'PERCENTAGE';
+        copayAmount?: number;
+        coveragePercentage?: number;
+      } | null;
+
+      if (!coverageDetails || !coverageDetails.coverageType) {
+        throw new BadRequestException('Insurance coverage details are required');
+      }
+
+      // Calculate coverage based on type
+      switch (coverageDetails.coverageType) {
+        case 'FULL':
+          insuranceAmount = paymentAmount;
+          clientAmount = 0;
+          break;
+        case 'COPAY':
+          clientAmount = coverageDetails.copayAmount || 0;
+          insuranceAmount = paymentAmount - clientAmount;
+          break;
+        case 'PERCENTAGE':
+          const coveragePct = coverageDetails.coveragePercentage || 0;
+          insuranceAmount = (paymentAmount * coveragePct) / 100;
+          clientAmount = paymentAmount - insuranceAmount;
+          break;
+        default:
+          throw new BadRequestException('Invalid coverage type');
+      }
+
+      coverageBreakdown = {
+        totalAmount: paymentAmount,
+        insuranceAmount,
+        clientAmount,
+        coverageType: coverageDetails.coverageType,
+        coveragePercentage: coverageDetails.coveragePercentage,
+        copayAmount: coverageDetails.copayAmount,
+      };
+
+      this.logger.log(
+        `Insurance payment breakdown: Total=${paymentAmount}, Insurance=${insuranceAmount}, Client=${clientAmount}`
+      );
+    }
+
     // Create payment record with mock processing
     const paymentData: any = {
       amount: data.amount,
@@ -392,8 +544,14 @@ export class BillingService {
       },
     });
 
+    // Add coverage breakdown to payment response if insurance
+    const paymentResponse: any = payment;
+    if (coverageBreakdown) {
+      paymentResponse.coverageBreakdown = coverageBreakdown;
+    }
+
     this.logger.log(`Mock payment processed successfully: ${payment.id}`);
-    return payment;
+    return paymentResponse;
   }
 
   /**

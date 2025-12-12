@@ -34,3 +34,47 @@ export interface ClientProfileDto {
   createdAt: string;
   updatedAt: string;
 }
+
+// Client preferences DTOs
+export interface CreateClientPreferencesDto {
+  genderPreference?: string;
+  agePreference?: string;
+  languagePreferences?: string[];
+  treatmentApproaches?: string[];
+  sessionFormat?: string;
+  sessionFrequency?: string;
+  budgetRange?: string;
+  locationPreference?: string;
+  availabilityPreference?: string[];
+  specialConsiderations?: string;
+}
+
+export interface UpdateClientPreferencesDto {
+  genderPreference?: string;
+  agePreference?: string;
+  languagePreferences?: string[];
+  treatmentApproaches?: string[];
+  sessionFormat?: string;
+  sessionFrequency?: string;
+  budgetRange?: string;
+  locationPreference?: string;
+  availabilityPreference?: string[];
+  specialConsiderations?: string;
+}
+
+export interface ClientPreferencesDto {
+  id: string;
+  clientId: string;
+  genderPreference?: string;
+  agePreference?: string;
+  languagePreferences: string[];
+  treatmentApproaches: string[];
+  sessionFormat?: string;
+  sessionFrequency?: string;
+  budgetRange?: string;
+  locationPreference?: string;
+  availabilityPreference: string[];
+  specialConsiderations?: string;
+  createdAt: string;
+  updatedAt: string;
+}

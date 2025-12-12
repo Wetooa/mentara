@@ -1,0 +1,21 @@
+model TherapistPerformance {
+  id                      String    @id @default(uuid())
+  therapistId             String    @unique
+  averageResponseTime     Int? // Average response time in minutes
+  clientRetentionRate     Float     @default(0.0) // 0-1, clients who continue after first session
+  noShowRate              Float     @default(0.0) // 0-1, no-shows/total scheduled
+  cancellationRate        Float     @default(0.0) // 0-1, cancellations/total scheduled
+  averageSessionDuration  Float     @default(0.0) // Average session duration in minutes
+  clientProgressRate      Float     @default(0.0) // 0-1, average progress across clients
+  workloadCapacity        Float     @default(0.0) // 0-1, current clients/max capacity
+  availabilityUtilization Float     @default(0.0) // 0-1, booked hours/available hours
+  lastCalculatedAt        DateTime  @default(now())
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  therapist               Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@index([therapistId])
+  @@index([clientRetentionRate])
+  @@index([workloadCapacity])
+  @@index([availabilityUtilization])
+}

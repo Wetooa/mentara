@@ -13,6 +13,9 @@ import type {
   UpdateClientDto,
   TherapistRecommendation,
   ClientProfileDto,
+  CreateClientPreferencesDto,
+  UpdateClientPreferencesDto,
+  ClientPreferencesDto,
 } from './types';
 
 @Injectable()
@@ -526,6 +529,172 @@ export class ClientService {
       );
       throw new InternalServerErrorException('An unexpected error occurred');
     }
+  }
+
+  async createPreferences(
+    userId: string,
+    data: CreateClientPreferencesDto,
+  ): Promise<ClientPreferencesDto> {
+    try {
+      // Check if client exists
+      const client = await this.prisma.client.findUnique({
+        where: { userId },
+      });
+
+      if (!client) {
+        throw new NotFoundException('Client not found');
+      }
+
+      // Check if preferences already exist
+      const existing = await this.prisma.clientPreferences.findUnique({
+        where: { clientId: userId },
+      });
+
+      if (existing) {
+        throw new BadRequestException('Preferences already exist. Use update instead.');
+      }
+
+      const preferences = await this.prisma.clientPreferences.create({
+        data: {
+          clientId: userId,
+          genderPreference: data.genderPreference,
+          agePreference: data.agePreference,
+          languagePreferences: data.languagePreferences || [],
+          treatmentApproaches: data.treatmentApproaches || [],
+          sessionFormat: data.sessionFormat,
+          sessionFrequency: data.sessionFrequency,
+          budgetRange: data.budgetRange,
+          locationPreference: data.locationPreference,
+          availabilityPreference: data.availabilityPreference || [],
+          specialConsiderations: data.specialConsiderations,
+        },
+      });
+
+      return this.transformPreferencesToDTO(preferences);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      this.logger.error(
+        `Error creating preferences for userId ${userId}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to create client preferences',
+      );
+    }
+  }
+
+  async updatePreferences(
+    userId: string,
+    data: UpdateClientPreferencesDto,
+  ): Promise<ClientPreferencesDto> {
+    try {
+      // Check if preferences exist, create if not
+      const existing = await this.prisma.clientPreferences.findUnique({
+        where: { clientId: userId },
+      });
+
+      let preferences;
+      if (existing) {
+        preferences = await this.prisma.clientPreferences.update({
+          where: { clientId: userId },
+          data: {
+            genderPreference: data.genderPreference,
+            agePreference: data.agePreference,
+            languagePreferences: data.languagePreferences,
+            treatmentApproaches: data.treatmentApproaches,
+            sessionFormat: data.sessionFormat,
+            sessionFrequency: data.sessionFrequency,
+            budgetRange: data.budgetRange,
+            locationPreference: data.locationPreference,
+            availabilityPreference: data.availabilityPreference,
+            specialConsiderations: data.specialConsiderations,
+          },
+        });
+      } else {
+        // Create if doesn't exist
+        preferences = await this.prisma.clientPreferences.create({
+          data: {
+            clientId: userId,
+            genderPreference: data.genderPreference,
+            agePreference: data.agePreference,
+            languagePreferences: data.languagePreferences || [],
+            treatmentApproaches: data.treatmentApproaches || [],
+            sessionFormat: data.sessionFormat,
+            sessionFrequency: data.sessionFrequency,
+            budgetRange: data.budgetRange,
+            locationPreference: data.locationPreference,
+            availabilityPreference: data.availabilityPreference || [],
+            specialConsiderations: data.specialConsiderations,
+          },
+        });
+      }
+
+      return this.transformPreferencesToDTO(preferences);
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException('Client preferences not found');
+        }
+        this.logger.error(
+          `Database error in updatePreferences: ${error.code} - ${error.message}`,
+        );
+        throw new InternalServerErrorException(
+          'Failed to update client preferences',
+        );
+      }
+
+      this.logger.error(
+        `Error updating preferences for userId ${userId}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to update client preferences',
+      );
+    }
+  }
+
+  async getPreferences(userId: string): Promise<ClientPreferencesDto | null> {
+    try {
+      const preferences = await this.prisma.clientPreferences.findUnique({
+        where: { clientId: userId },
+      });
+
+      if (!preferences) {
+        return null;
+      }
+
+      return this.transformPreferencesToDTO(preferences);
+    } catch (error) {
+      this.logger.error(
+        `Error getting preferences for userId ${userId}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to get client preferences',
+      );
+    }
+  }
+
+  private transformPreferencesToDTO(preferences: any): ClientPreferencesDto {
+    return {
+      id: preferences.id,
+      clientId: preferences.clientId,
+      genderPreference: preferences.genderPreference,
+      agePreference: preferences.agePreference,
+      languagePreferences: preferences.languagePreferences || [],
+      treatmentApproaches: preferences.treatmentApproaches || [],
+      sessionFormat: preferences.sessionFormat,
+      sessionFrequency: preferences.sessionFrequency,
+      budgetRange: preferences.budgetRange,
+      locationPreference: preferences.locationPreference,
+      availabilityPreference: preferences.availabilityPreference || [],
+      specialConsiderations: preferences.specialConsiderations,
+      createdAt: preferences.createdAt.toISOString(),
+      updatedAt: preferences.updatedAt.toISOString(),
+    };
   }
 
   private transformPrismaUserToDTO(user: any): ClientProfileDto {

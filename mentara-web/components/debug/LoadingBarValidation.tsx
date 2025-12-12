@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 export const LoadingBarValidation = () => {
   const router = useRouter();
   const { isLoading: authLoading, isAuthenticated, userRole } = useAuth();
-  const debugger = useLoadingDebugger();
+  const loadingDebugger = useLoadingDebugger();
   const [testResults, setTestResults] = useState<any[]>([]);
 
   // Don't render in production
@@ -35,13 +35,13 @@ export const LoadingBarValidation = () => {
 
     // Test 1: Basic Auth Loading
     console.log('Test 1: Auth Loading...');
-    const authTest = debugger.testAuthLoading(2000);
+    const authTest = loadingDebugger.testAuthLoading(2000);
     results.push({ test: 'Auth Loading', status: 'running', duration: '2s' });
 
     // Test 2: Navigation Loading  
     setTimeout(() => {
       console.log('Test 2: Navigation Loading...');
-      const navTest = debugger.testNavigationLoading(1500);
+      const navTest = loadingDebugger.testNavigationLoading(1500);
       results.push({ test: 'Navigation Loading', status: 'running', duration: '1.5s' });
       setTestResults([...results]);
     }, 2500);
@@ -49,7 +49,7 @@ export const LoadingBarValidation = () => {
     // Test 3: Multiple Operations
     setTimeout(() => {
       console.log('Test 3: Multiple Concurrent Operations...');
-      const multiTest = debugger.testMultipleOperations();
+      const multiTest = loadingDebugger.testMultipleOperations();
       results.push({ test: 'Multiple Operations', status: 'running', duration: '3s' });
       setTestResults([...results]);
     }, 4500);
@@ -57,7 +57,7 @@ export const LoadingBarValidation = () => {
     // Test 4: Error Scenario
     setTimeout(() => {
       console.log('Test 4: Error Scenario...');
-      const errorTest = debugger.testErrorLoading();
+      const errorTest = loadingDebugger.testErrorLoading();
       results.push({ test: 'Error Loading', status: 'running', duration: '2s' });
       setTestResults([...results]);
     }, 7000);

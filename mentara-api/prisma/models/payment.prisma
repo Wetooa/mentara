@@ -68,6 +68,14 @@ model PaymentMethod {
   mayaVerified Boolean? // Verification status
   mayaEmail    String? // Associated email
 
+  // Insurance fields
+  insuranceProviderName String? // Insurance provider name (e.g., BlueCross, Aetna)
+  policyNumber          String? // Insurance policy number
+  memberId              String? // Member ID
+  groupNumber           String? // Group number (optional)
+  insuranceVerified     Boolean? @default(false) // Verification status
+  coverageDetails       Json? // Stores co-pay amount, coverage percentage, coverage type, etc.
+
   // Address (stored as JSON)
   billingAddress Json?
 
@@ -94,4 +102,5 @@ enum PaymentMethodType {
   DIGITAL_WALLET
   GCASH
   MAYA
+  INSURANCE
 }

@@ -35,6 +35,7 @@ export interface OptionalEnvVars {
   ALLOWED_ORIGINS?: string;
   SAMBANOVA_API_KEY?: string;
   SAMBANOVA_BASE_URL?: string;
+  SAMBANOVA_MODEL?: string;
   TEST_DATABASE_URL?: string;
 }
 
@@ -226,6 +227,31 @@ export function logEnvironmentInfo(): void {
     `🤖 AI Service: ${process.env.AI_SERVICE_URL || 'Not configured'}`,
   );
   logger.log(
+    `🤖 SambaNova API: ${process.env.SAMBANOVA_API_KEY ? 'Configured' : 'Not configured'}`,
+  );
+  if (process.env.SAMBANOVA_API_KEY) {
+    const modelName = process.env.SAMBANOVA_MODEL || 'Meta-Llama-3.1-8B-Instruct (default)';
+    logger.log(`🤖 SambaNova Model: ${modelName}`);
+    
+    // Warn if using a potentially problematic model
+    if (modelName.toLowerCase().includes('allam')) {
+      logger.warn(
+        '⚠️ Warning: ALLaM models are designed for Arabic and may not work well for English conversations',
+      );
+      logger.warn(
+        '⚠️ Consider setting SAMBANOVA_MODEL to: Meta-Llama-3.1-8B-Instruct, Meta-Llama-3.1-70B-Instruct, or Meta-Llama-3.2-1B-Instruct',
+      );
+    }
+  }
+  logger.log(
     `☁️ Supabase Storage: ${process.env.SUPABASE_URL ? 'Configured' : 'Not configured'}`,
   );
+  logger.log(
+    `🤖 SambaNova API: ${process.env.SAMBANOVA_API_KEY ? 'Configured' : 'Not configured'}`,
+  );
+  if (process.env.SAMBANOVA_API_KEY) {
+    logger.log(
+      `   Base URL: ${process.env.SAMBANOVA_BASE_URL || 'https://api.sambanova.ai/v1'}`,
+    );
+  }
 }

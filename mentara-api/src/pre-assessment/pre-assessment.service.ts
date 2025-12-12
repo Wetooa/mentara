@@ -255,15 +255,7 @@ export class PreAssessmentService {
         throw new NotFoundException('Client profile not found');
       }
 
-      // Check for existing pre-assessment
-      const existingAssessment = await this.prisma.preAssessment.findUnique({
-        where: { clientId: userId },
-      });
-      if (existingAssessment) {
-        throw new BadRequestException(
-          'Pre-assessment already exists for this user',
-        );
-      }
+      // Allow multiple assessments - no uniqueness check needed
 
       // Validate flat answers array
       this.validateFlatAnswers(data.answers);
@@ -307,16 +299,21 @@ export class PreAssessmentService {
       }
 
       // Create pre-assessment with validated data
+      const createData: any = {
+        clientId: userId,
+        answers: data.answers, // Flat array of 201 numeric responses
+        scores, // Assessment scale scores
+        severityLevels, // Severity classifications
+        aiEstimate, // AI analysis results
+        isProcessed: true, // Mark as processed
+        processedAt: new Date(), // Set processing timestamp
+        ...(data.assessmentMethod && { assessmentMethod: data.assessmentMethod }),
+        ...(data.chatbotSessionId && { chatbotSessionId: data.chatbotSessionId }),
+        ...(data.conversationInsights && { conversationInsights: data.conversationInsights }),
+      };
+      
       const preAssessment = await this.prisma.preAssessment.create({
-        data: {
-          clientId: userId,
-          answers: data.answers, // Flat array of 201 numeric responses
-          scores, // Assessment scale scores
-          severityLevels, // Severity classifications
-          aiEstimate, // AI analysis results
-          isProcessed: true, // Mark as processed
-          processedAt: new Date(), // Set processing timestamp
-        },
+        data: createData,
       });
 
       this.logger.log(`Pre-assessment completed for user ${userId}`);
@@ -381,17 +378,19 @@ export class PreAssessmentService {
       throw error;
     }
     if (error instanceof Error) {
-      console.error(message, error.message);
+      this.logger.error(message, error.stack);
       throw new InternalServerErrorException(error.message);
     }
-    console.error(message, error);
+    this.logger.error(message, String(error));
     throw new InternalServerErrorException(message);
   }
 
   async getPreAssessmentByUserId(userId: string): Promise<PreAssessment> {
     try {
-      const preAssessment = await this.prisma.preAssessment.findUnique({
+      // Get the latest assessment for the user
+      const preAssessment = await this.prisma.preAssessment.findFirst({
         where: { clientId: userId },
+        orderBy: { createdAt: 'desc' },
       });
 
       if (!preAssessment) {
@@ -404,11 +403,41 @@ export class PreAssessmentService {
     }
   }
 
+  async getAllPreAssessmentsByUserId(userId: string): Promise<PreAssessment[]> {
+    try {
+      const assessments = await this.prisma.preAssessment.findMany({
+        where: { clientId: userId },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return assessments;
+    } catch (error: unknown) {
+      this.handleError(error, 'Error retrieving pre-assessment history');
+      return [];
+    }
+  }
+
+  async getLatestPreAssessmentByUserId(userId: string): Promise<PreAssessment | null> {
+    try {
+      const preAssessment = await this.prisma.preAssessment.findFirst({
+        where: { clientId: userId },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return preAssessment;
+    } catch (error: unknown) {
+      this.logger.error('Error retrieving latest pre-assessment:', error);
+      return null;
+    }
+  }
+
   async getPreAssessmentByClientId(clientId: string): Promise<PreAssessment> {
     try {
-      const preAssessment = await this.prisma.preAssessment.findUnique({
+      // Get the latest assessment for the client
+      const preAssessment = await this.prisma.preAssessment.findFirst({
         where: { clientId: clientId },
         include: { client: { include: { user: true } } },
+        orderBy: { createdAt: 'desc' },
       });
 
       if (!preAssessment) {
@@ -449,9 +478,10 @@ export class PreAssessmentService {
         throw new NotFoundException('Client not found');
       }
 
-      // Get existing pre-assessment to preserve current data
-      const existingAssessment = await this.prisma.preAssessment.findUnique({
+      // Get latest existing pre-assessment to preserve current data
+      const existingAssessment = await this.prisma.preAssessment.findFirst({
         where: { clientId: userId },
+        orderBy: { createdAt: 'desc' },
       });
 
       if (!existingAssessment) {
@@ -504,9 +534,9 @@ export class PreAssessmentService {
         }
       }
 
-      // Update pre-assessment with new data
+      // Update the latest pre-assessment with new data
       const preAssessment = await this.prisma.preAssessment.update({
-        where: { clientId: userId },
+        where: { id: existingAssessment.id },
         data: {
           answers: data.answers || (existingAssessment.answers as number[]),
           scores,
@@ -523,7 +553,9 @@ export class PreAssessmentService {
 
   async deletePreAssessment(userId: string): Promise<null> {
     try {
-      await this.prisma.preAssessment.delete({
+      // Delete all pre-assessments for the user (or just the latest one if we want to keep history)
+      // For now, delete all to match the old behavior
+      await this.prisma.preAssessment.deleteMany({
         where: { clientId: userId },
       });
       return null;

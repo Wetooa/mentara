@@ -408,23 +408,213 @@ export class MeetingsGateway
     @MessageBody()
     data: {
       meetingId: string;
-      targetUserId: string;
+      targetUserId?: string;
       signal: any;
       type: 'offer' | 'answer' | 'ice-candidate';
     },
   ) {
     const userId = this.socketToUser.get(client.id);
-    if (!userId) return;
+    if (!userId) {
+      client.emit('webrtc-error', { error: 'Unauthorized' });
+      return;
+    }
+
+    const meetingRoom = this.meetings.get(data.meetingId);
+    if (!meetingRoom || !meetingRoom.participants.has(userId)) {
+      client.emit('webrtc-error', { error: 'Not in meeting room' });
+      return;
+    }
+
+    // If targetUserId is specified, send to specific user (peer-to-peer)
+    if (data.targetUserId) {
+      const targetSocketId = this.userToSocket.get(data.targetUserId);
+      if (!targetSocketId) {
+        client.emit('webrtc-error', { error: 'Target user not connected' });
+        return;
+      }
+
+      // Verify target is in the same meeting
+      if (!meetingRoom.participants.has(data.targetUserId)) {
+        client.emit('webrtc-error', { error: 'Target user not in meeting' });
+        return;
+      }
+
+      // Forward WebRTC signal to target user
+      this.server.to(targetSocketId).emit('webrtc-signal', {
+        meetingId: data.meetingId,
+        fromUserId: userId,
+        signal: data.signal,
+        type: data.type,
+      });
+
+      this.logger.debug(
+        `WebRTC ${data.type} signal sent from ${userId} to ${data.targetUserId} in meeting ${data.meetingId}`,
+      );
+    } else {
+      // Broadcast to all other participants in the meeting room
+      const otherParticipants = Array.from(meetingRoom.participants.keys()).filter(
+        (id) => id !== userId,
+      );
+
+      for (const participantId of otherParticipants) {
+        const participantSocketId = this.userToSocket.get(participantId);
+        if (participantSocketId) {
+          this.server.to(participantSocketId).emit('webrtc-signal', {
+            meetingId: data.meetingId,
+            fromUserId: userId,
+            signal: data.signal,
+            type: data.type,
+          });
+        }
+      }
+
+      this.logger.debug(
+        `WebRTC ${data.type} signal broadcasted from ${userId} to ${otherParticipants.length} participants in meeting ${data.meetingId}`,
+      );
+    }
+  }
+
+  /**
+   * Handle WebRTC offer for meeting room
+   */
+  @SubscribeMessage('webrtc-offer')
+  async handleWebRTCOffer(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      meetingId: string;
+      targetUserId?: string;
+      offer: RTCSessionDescriptionInit;
+    },
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return { error: 'Unauthorized' };
+
+    const meetingRoom = this.meetings.get(data.meetingId);
+    if (!meetingRoom || !meetingRoom.participants.has(userId)) {
+      return { error: 'Not in meeting room' };
+    }
+
+    // If targetUserId specified, send to specific user
+    if (data.targetUserId) {
+      const targetSocketId = this.userToSocket.get(data.targetUserId);
+      if (!targetSocketId || !meetingRoom.participants.has(data.targetUserId)) {
+        return { error: 'Target user not available' };
+      }
+
+      this.server.to(targetSocketId).emit('webrtc-offer', {
+        meetingId: data.meetingId,
+        fromUserId: userId,
+        offer: data.offer,
+      });
+    } else {
+      // Broadcast to all other participants
+      const otherParticipants = Array.from(meetingRoom.participants.keys()).filter(
+        (id) => id !== userId,
+      );
+
+      for (const participantId of otherParticipants) {
+        const participantSocketId = this.userToSocket.get(participantId);
+        if (participantSocketId) {
+          this.server.to(participantSocketId).emit('webrtc-offer', {
+            meetingId: data.meetingId,
+            fromUserId: userId,
+            offer: data.offer,
+          });
+        }
+      }
+    }
+
+    return { success: true };
+  }
+
+  /**
+   * Handle WebRTC answer for meeting room
+   */
+  @SubscribeMessage('webrtc-answer')
+  async handleWebRTCAnswer(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      meetingId: string;
+      targetUserId: string;
+      answer: RTCSessionDescriptionInit;
+    },
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return { error: 'Unauthorized' };
+
+    const meetingRoom = this.meetings.get(data.meetingId);
+    if (!meetingRoom || !meetingRoom.participants.has(userId)) {
+      return { error: 'Not in meeting room' };
+    }
 
     const targetSocketId = this.userToSocket.get(data.targetUserId);
-    if (!targetSocketId) return;
+    if (!targetSocketId || !meetingRoom.participants.has(data.targetUserId)) {
+      return { error: 'Target user not available' };
+    }
 
-    // Forward WebRTC signal to target user
-    this.server.to(targetSocketId).emit('webrtc-signal', {
+    this.server.to(targetSocketId).emit('webrtc-answer', {
+      meetingId: data.meetingId,
       fromUserId: userId,
-      signal: data.signal,
-      type: data.type,
+      answer: data.answer,
     });
+
+    return { success: true };
+  }
+
+  /**
+   * Handle WebRTC ICE candidate for meeting room
+   */
+  @SubscribeMessage('webrtc-ice-candidate')
+  async handleWebRTCIceCandidate(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      meetingId: string;
+      targetUserId?: string;
+      candidate: RTCIceCandidateInit;
+    },
+  ) {
+    const userId = this.socketToUser.get(client.id);
+    if (!userId) return { error: 'Unauthorized' };
+
+    const meetingRoom = this.meetings.get(data.meetingId);
+    if (!meetingRoom || !meetingRoom.participants.has(userId)) {
+      return { error: 'Not in meeting room' };
+    }
+
+    // If targetUserId specified, send to specific user
+    if (data.targetUserId) {
+      const targetSocketId = this.userToSocket.get(data.targetUserId);
+      if (!targetSocketId || !meetingRoom.participants.has(data.targetUserId)) {
+        return { error: 'Target user not available' };
+      }
+
+      this.server.to(targetSocketId).emit('webrtc-ice-candidate', {
+        meetingId: data.meetingId,
+        fromUserId: userId,
+        candidate: data.candidate,
+      });
+    } else {
+      // Broadcast to all other participants
+      const otherParticipants = Array.from(meetingRoom.participants.keys()).filter(
+        (id) => id !== userId,
+      );
+
+      for (const participantId of otherParticipants) {
+        const participantSocketId = this.userToSocket.get(participantId);
+        if (participantSocketId) {
+          this.server.to(participantSocketId).emit('webrtc-ice-candidate', {
+            meetingId: data.meetingId,
+            fromUserId: userId,
+            candidate: data.candidate,
+          });
+        }
+      }
+    }
+
+    return { success: true };
   }
 
   private async endMeeting(meetingId: string) {

@@ -60,6 +60,7 @@ model Therapist {
   therapistAvailabilities            TherapistAvailability[]
   worksheets                         Worksheet[]
   GroupSessionTherapistInvitation    GroupSessionTherapistInvitation[]
+  performance                        TherapistPerformance?
 
   @@index([userId])
   @@index([status])

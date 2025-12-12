@@ -146,18 +146,19 @@ export default function TherapistSchedulePage() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
         {/* Enhanced Page Header */}
-        <motion.div
-          variants={headerVariants}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-        >
-          <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-secondary to-secondary/70 bg-clip-text text-transparent">
-              Schedule Management
-            </h1>
-            <p className="text-gray-600 text-base sm:text-lg">
-              Comprehensive practice management and session coordination
-            </p>
-          </div>
+        <header>
+          <motion.div
+            variants={headerVariants}
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          >
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-secondary to-secondary/70 bg-clip-text text-transparent">
+                Schedule Management
+              </h1>
+              <p className="text-gray-600 text-base sm:text-lg">
+                Comprehensive practice management and session coordination
+              </p>
+            </div>
           <div className="flex items-center gap-3">
             {bookingRequests?.length > 0 && (
               <motion.div
@@ -173,7 +174,8 @@ export default function TherapistSchedulePage() {
               </motion.div>
             )}
           </div>
-        </motion.div>
+          </motion.div>
+        </header>
 
         {/* Enhanced Tab Navigation */}
         <Tabs
@@ -181,17 +183,19 @@ export default function TherapistSchedulePage() {
           onValueChange={handleTabChange}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-5 h-14 p-1 bg-white/80 backdrop-blur border shadow-sm">
+          <TabsList className="grid w-full grid-cols-5 h-14 p-1 bg-white/80 backdrop-blur border shadow-sm" role="tablist" aria-label="Schedule management tabs">
             <TabsTrigger
               value="overview"
               className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
+              aria-label="Overview tab"
             >
-              <Clock className="h-4 w-4" />
+              <Clock className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Overview</span>
-              {getTabBadgeCount("overview") > 0 && (
+              {getTabBadgeCount("overview") && getTabBadgeCount("overview")! > 0 && (
                 <Badge
                   variant="secondary"
                   className="ml-1 h-5 min-w-5 text-xs bg-secondary-foreground/20"
+                  aria-label={`${getTabBadgeCount("overview")} items`}
                 >
                   {getTabBadgeCount("overview")}
                 </Badge>
@@ -200,20 +204,23 @@ export default function TherapistSchedulePage() {
             <TabsTrigger
               value="schedule"
               className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
+              aria-label="Schedule tab"
             >
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Schedule</span>
             </TabsTrigger>
             <TabsTrigger
               value="requests"
               className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
+              aria-label="Booking requests tab"
             >
-              <Inbox className="h-4 w-4" />
+              <Inbox className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Requests</span>
-              {getTabBadgeCount("requests") > 0 && (
+              {getTabBadgeCount("requests") && getTabBadgeCount("requests")! > 0 && (
                 <Badge
                   variant="destructive"
                   className="ml-1 h-5 min-w-5 text-xs"
+                  aria-label={`${getTabBadgeCount("requests")} pending requests`}
                 >
                   {getTabBadgeCount("requests")}
                 </Badge>
@@ -222,15 +229,17 @@ export default function TherapistSchedulePage() {
             <TabsTrigger
               value="analytics"
               className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
+              aria-label="Analytics tab"
             >
-              <BarChart3 className="h-4 w-4" />
+              <BarChart3 className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
             <TabsTrigger
               value="availability"
               className="flex items-center gap-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all duration-200"
+              aria-label="Availability management tab"
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Availability</span>
             </TabsTrigger>
           </TabsList>

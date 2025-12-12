@@ -4,7 +4,7 @@ import { AxiosInstance } from "axios";
 export interface PaymentMethod {
   id: string;
   userId: string;
-  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA';
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA' | 'INSURANCE';
   nickname?: string;
   isDefault: boolean;
   isActive: boolean;
@@ -43,6 +43,18 @@ export interface PaymentMethod {
   mayaVerified?: boolean;
   mayaEmail?: string;
   
+  // Insurance fields
+  insuranceProviderName?: string;
+  policyNumber?: string;
+  memberId?: string;
+  groupNumber?: string;
+  insuranceVerified?: boolean;
+  coverageDetails?: {
+    coverageType?: 'FULL' | 'COPAY' | 'PERCENTAGE';
+    copayAmount?: number;
+    coveragePercentage?: number;
+  };
+  
   // Address
   billingAddress?: any;
   
@@ -55,7 +67,7 @@ export interface PaymentMethod {
 }
 
 export interface CreatePaymentMethodRequest {
-  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA';
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA' | 'INSURANCE';
   nickname?: string;
   
   // Card-specific fields
@@ -86,6 +98,17 @@ export interface CreatePaymentMethodRequest {
   mayaNumber?: string;
   mayaName?: string;
   mayaEmail?: string;
+  
+  // Insurance fields
+  insuranceProviderName?: string;
+  policyNumber?: string;
+  memberId?: string;
+  groupNumber?: string;
+  coverageDetails?: {
+    coverageType?: 'FULL' | 'COPAY' | 'PERCENTAGE';
+    copayAmount?: number;
+    coveragePercentage?: number;
+  };
   
   // Address
   billingAddress?: any;
@@ -186,6 +209,15 @@ export function createBillingService(axios: AxiosInstance) {
      */
     async detachPaymentMethod(paymentMethodId: string): Promise<void> {
       await axios.delete(`/billing/payment-methods/${paymentMethodId}`);
+    },
+
+    /**
+     * Verify insurance payment method
+     * POST /billing/payment-methods/:id/verify
+     */
+    async verifyInsurance(paymentMethodId: string): Promise<PaymentMethod> {
+      const response = await axios.post(`/billing/payment-methods/${paymentMethodId}/verify`);
+      return response.data;
     },
 
     /**

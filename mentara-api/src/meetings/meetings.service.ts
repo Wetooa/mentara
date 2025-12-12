@@ -243,18 +243,12 @@ export class MeetingsService {
   }
 
   /**
-   * Generate meeting room URL/token (for integration with video platforms)
+   * Generate meeting room URL/token (for WebRTC integration)
    */
   async generateMeetingRoom(meetingId: string, userId: string) {
     await this.getMeetingById(meetingId, userId);
 
-    // In a real implementation, this would integrate with video platforms like:
-    // - Zoom SDK
-    // - WebRTC/Jitsi
-    // - Twilio Video
-    // - Agora
-
-    const roomUrl = `${process.env.FRONTEND_URL}/meeting/${meetingId}`;
+    const roomUrl = this.generateMeetingUrl(meetingId);
     const roomToken = this.generateRoomToken(meetingId, userId, 'host');
 
     // Update meeting with room URL
@@ -269,6 +263,43 @@ export class MeetingsService {
       meetingId,
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     };
+  }
+
+  /**
+   * Generate WebRTC meeting URL
+   */
+  private generateMeetingUrl(meetingId: string): string {
+    const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3000';
+    return `${frontendUrl}/meeting/${meetingId}`;
+  }
+
+  /**
+   * Automatically generate and store meeting URL if not already set
+   */
+  async ensureMeetingUrl(meetingId: string): Promise<string> {
+    const meeting = await this.prisma.meeting.findUnique({
+      where: { id: meetingId },
+      select: { meetingUrl: true },
+    });
+
+    if (!meeting) {
+      throw new NotFoundException('Meeting not found');
+    }
+
+    // If meeting URL already exists, return it
+    if (meeting.meetingUrl) {
+      return meeting.meetingUrl;
+    }
+
+    // Generate and store new meeting URL
+    const meetingUrl = this.generateMeetingUrl(meetingId);
+    await this.prisma.meeting.update({
+      where: { id: meetingId },
+      data: { meetingUrl },
+    });
+
+    this.logger.log(`Generated meeting URL for meeting ${meetingId}`);
+    return meetingUrl;
   }
 
   /**
@@ -453,14 +484,17 @@ export class MeetingsService {
       );
     }
 
+    // Ensure meeting URL is generated
+    const meetingUrl = await this.ensureMeetingUrl(meetingId);
+
     // Update meeting status to IN_PROGRESS
     await this.prisma.meeting.update({
       where: { id: meetingId },
       data: { status: 'IN_PROGRESS' },
     });
 
-    // Generate video room data (in production, integrate with actual video service like Twilio/Zoom)
-    const roomId = `room_${meetingId}_${Date.now()}`;
+    // Generate video room data for WebRTC
+    const roomId = `room_${meetingId}`;
     const accessToken = this.generateRoomToken(meetingId, userId, 'host');
     const participantToken = this.generateRoomToken(
       meetingId,
@@ -471,8 +505,8 @@ export class MeetingsService {
     const videoRoomResponse: VideoRoomResponse = {
       roomId,
       meetingId,
-      joinUrl: `https://video.mentara.app/room/${roomId}`,
-      roomUrl: `https://video.mentara.app/room/${roomId}`, // Replace with actual video service URL
+      joinUrl: meetingUrl,
+      roomUrl: meetingUrl,
       accessToken,
       participantToken,
       roomConfig: {
@@ -700,11 +734,24 @@ export class MeetingsService {
   ) {
     const meeting = await this.getMeetingById(meetingId, userId);
 
+    const status = updateStatusDto.status.toUpperCase() as any;
+    
+    // Automatically generate meeting URL when status changes to CONFIRMED or IN_PROGRESS
+    const shouldGenerateUrl = (status === 'CONFIRMED' || status === 'IN_PROGRESS') && 
+                              !meeting.meetingUrl;
+
+    const updateData: any = {
+      status,
+    };
+
+    if (shouldGenerateUrl) {
+      updateData.meetingUrl = this.generateMeetingUrl(meetingId);
+      this.logger.log(`Auto-generated meeting URL for meeting ${meetingId} on status change to ${status}`);
+    }
+
     const updatedMeeting = await this.prisma.meeting.update({
       where: { id: meetingId },
-      data: {
-        status: updateStatusDto.status.toUpperCase() as any,
-      },
+      data: updateData,
     });
 
     // Emit appropriate events based on status
@@ -1112,11 +1159,15 @@ export class MeetingsService {
       );
     }
 
+    // Generate meeting URL if not already set
+    const meetingUrl = meeting.meetingUrl || this.generateMeetingUrl(meetingId);
+
     // Update meeting status to CONFIRMED
     const updatedMeeting = await this.prisma.meeting.update({
       where: { id: meetingId },
       data: {
         status: 'CONFIRMED',
+        meetingUrl,
       },
       include: {
         client: {

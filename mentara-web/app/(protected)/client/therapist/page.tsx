@@ -18,12 +18,14 @@ const TherapistDashboard = dynamic(() => import("@/components/therapist/dashboar
 export default function TherapistPage() {
   return (
     <Suspense fallback={
-      <div className="space-y-6 p-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-6 p-6" aria-live="polite" aria-busy="true">
+        <Skeleton className="h-10 w-64" aria-label="Loading therapist page header" />
+        <Skeleton className="h-64 w-full" aria-label="Loading therapist content" />
       </div>
     }>
-      <TherapistDashboard />
+      <main>
+        <TherapistDashboard />
+      </main>
     </Suspense>
   );
 }

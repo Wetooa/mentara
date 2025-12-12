@@ -164,11 +164,12 @@ export function CommentItem({
   }
 
   return (
-    <div className={`relative ${className}`}>
-      {/* Thread lines for depth visualization */}
-      {depth > 0 && getIndentLines()}
-      
-      <div className={`bg-card rounded-lg border p-3 ${depth > 0 ? `ml-${Math.min(depth * 4, 16)}` : ''}`}>
+    <>
+      <div className={`relative ${className}`}>
+        {/* Thread lines for depth visualization */}
+        {depth > 0 && getIndentLines()}
+        
+        <div className={`bg-card rounded-lg border p-3 ${depth > 0 ? `ml-${Math.min(depth * 4, 16)}` : ''}`}>
         {/* Comment Header */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -499,17 +500,18 @@ export function CommentItem({
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
-    
-    {/* Report Modal */}
-    <ReportModal
-      isOpen={isReportModalOpen}
-      onClose={() => setIsReportModalOpen(false)}
-      onSubmit={handleReport}
-      type="comment"
-      contentPreview={comment.content}
-      isLoading={reportComment.isPending}
-    />
+      
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onSubmit={handleReport}
+        type="comment"
+        contentPreview={comment.content}
+        isLoading={reportComment.isPending}
+      />
+    </>
   );
 }

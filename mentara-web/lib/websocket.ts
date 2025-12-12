@@ -42,7 +42,7 @@ const getSocketUrl = (): string => {
   
   return process.env.NODE_ENV === 'production' 
     ? 'https://api.mentara.com' 
-    : 'http://localhost:3001';
+    : 'http://localhost:10000';
 };
 
 const SOCKET_URL = getSocketUrl();

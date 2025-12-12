@@ -5,6 +5,7 @@ import { ModerationQueue } from "@/components/moderator";
 import { useModeratorContentQueue } from "@/hooks/moderator/useModeratorContentQueue";
 import { useModeratorContentStore, useModeratorUIStore } from "@/store/moderator";
 import type { Post, Comment } from "@/types/api";
+import { logger } from "@/lib/logger";
 
 // Local types that match the actual API response structure
 interface ModerationPost {
@@ -63,7 +64,7 @@ export default function ModeratorContentPage() {
 
   const handlePreview = (item: ModerationContent) => {
     // Handle content preview - could open a modal or navigate to detail view
-    console.log('Preview content:', item);
+    logger.debug('Preview content:', item);
   };
 
   const handleAction = (item: ModerationContent, action: 'approve' | 'reject' | 'remove') => {
@@ -77,14 +78,15 @@ export default function ModeratorContentPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <header>
         <h1 className="text-2xl font-bold text-gray-900">Content Moderation</h1>
         <p className="text-sm text-gray-500 mt-1">
           Review and moderate flagged content from the community
         </p>
-      </div>
+      </header>
 
-      <ModerationQueue
+      <main>
+        <ModerationQueue
         content={content as unknown as (Post | Comment)[]}
         total={total}
         isLoading={isLoading}
@@ -94,6 +96,7 @@ export default function ModeratorContentPage() {
         onPreview={handlePreview as unknown as (item: Post | Comment) => void}
         onAction={handleAction as unknown as (item: Post | Comment, action: 'approve' | 'reject' | 'remove') => void}
       />
+      </main>
 
       {/* Action dialogs would be handled here using the UI store state */}
     </div>

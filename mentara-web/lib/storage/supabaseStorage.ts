@@ -53,7 +53,11 @@ async function getSupabaseConfig(): Promise<SupabaseStorageConfig> {
   
   // Fallback: Get from backend API endpoint
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000";
+    let apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000/api";
+    // Ensure it ends with /api
+    if (!apiUrl.endsWith('/api')) {
+      apiUrl = apiUrl.endsWith('/') ? `${apiUrl}api` : `${apiUrl}/api`;
+    }
     const response = await fetch(`${apiUrl}/config/supabase`, {
       credentials: "include",
     });

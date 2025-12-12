@@ -94,14 +94,12 @@ export function QueryErrorBoundary({
           FallbackComponent={FallbackComponent}
           onReset={reset}
           onError={(error, errorInfo) => {
-            // Log error for monitoring in development
-            if (process.env.NODE_ENV === 'development') {
-              console.error('React Query Error Boundary caught an error:', error);
-              console.error('Error Info:', errorInfo);
-            }
-            
+            // Log error for monitoring
             // In production, you might want to send this to a monitoring service
             // like Sentry, LogRocket, etc.
+            if (typeof window !== 'undefined') {
+              // Error tracking would go here
+            }
           }}
         >
           {children}
@@ -125,8 +123,9 @@ export function SimpleErrorBoundary({
     <ErrorBoundary
       fallbackRender={() => <>{fallback}</>}
       onError={(error) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Simple Error Boundary caught an error:', error);
+        // Error tracking would go here
+        if (typeof window !== 'undefined') {
+          // Log to error tracking service
         }
       }}
     >

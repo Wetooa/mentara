@@ -89,9 +89,9 @@ export default function PreAssessmentProgressBar() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 sm:p-8 bg-primary/5 border-b border-gray-200" role="progressbar" aria-valuenow={Math.round(progressPercent)} aria-valuemin={0} aria-valuemax={100} aria-label={`Assessment progress: ${Math.round(progressPercent)}% complete`}>
       {/* Major Sections Progress - Smaller */}
-      <div className="mb-2 flex items-center justify-between relative">
+      <div className="mb-2 flex items-center justify-between relative" role="list" aria-label="Assessment sections">
         {majorSections.map((section, index) => {
           const isCompleted = isSectionCompleted(section.stepNum);
           const isActive = isSectionActive(section.stepNum);
@@ -100,7 +100,7 @@ export default function PreAssessmentProgressBar() {
 
           return (
             <React.Fragment key={section.label}>
-              <div className="flex flex-col items-center relative z-10">
+              <div className="flex flex-col items-center relative z-10" role="listitem">
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                     isCompleted
@@ -111,11 +111,12 @@ export default function PreAssessmentProgressBar() {
                           ? "bg-primary/20 text-primary ring-2 ring-primary/50"
                           : "bg-gray-200 text-gray-400"
                   }`}
+                  aria-label={`${section.label} section: ${isCompleted ? 'completed' : isActive ? 'in progress' : 'not started'}`}
                 >
                   {isCompleted ? (
-                    <CheckCircle className="h-4 w-4" />
+                    <CheckCircle className="h-4 w-4" aria-hidden="true" />
                   ) : (
-                    <Circle className="h-3 w-3 fill-current" />
+                    <Circle className="h-3 w-3 fill-current" aria-hidden="true" />
                   )}
                 </div>
                 <span
@@ -146,11 +147,12 @@ export default function PreAssessmentProgressBar() {
 
       {/* Detailed Progress Bar with Proportional Separators */}
       <div className="mt-4">
-        <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progressPercent)} aria-valuemin={0} aria-valuemax={100}>
           {/* Progress fill */}
           <div
             className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 transition-all duration-300 shadow-sm"
             style={{ width: `${progressPercent}%` }}
+            aria-hidden="true"
           />
 
           {/* MAJOR checkpoint separators (bold dark green lines) */}
@@ -177,25 +179,29 @@ export default function PreAssessmentProgressBar() {
                 QUESTIONNAIRE_MAP[questionnaires[i]]?.questions.length || 0;
             }
 
-            return Array.from({ length: questionsInThisQuestionnaire }).map(
-              (_, qIndex) => {
-                if (qIndex === 0) return null; // Skip first question separator
+            return (
+              <React.Fragment key={`questionnaire-${qName}-${qIdx}`}>
+                {Array.from({ length: questionsInThisQuestionnaire }).map(
+                  (_, qIndex) => {
+                    if (qIndex === 0) return null; // Skip first question separator
 
-                const totalQuestionsSoFar = questionsBefore + qIndex;
-                const progressInAssessment =
-                  totalQuestionsSoFar / (totalQuestions || 1);
-                const positionPercent =
-                  checklistEnd +
-                  progressInAssessment * (assessmentEnd - checklistEnd);
+                    const totalQuestionsSoFar = questionsBefore + qIndex;
+                    const progressInAssessment =
+                      totalQuestionsSoFar / (totalQuestions || 1);
+                    const positionPercent =
+                      checklistEnd +
+                      progressInAssessment * (assessmentEnd - checklistEnd);
 
-                return (
-                  <div
-                    key={`q-${qName}-${qIndex}`}
-                    className="absolute top-0 h-full w-px bg-primary/20"
-                    style={{ left: `${positionPercent}%` }}
-                  />
-                );
-              }
+                    return (
+                      <div
+                        key={`q-${qName}-${qIndex}`}
+                        className="absolute top-0 h-full w-px bg-primary/20"
+                        style={{ left: `${positionPercent}%` }}
+                      />
+                    );
+                  }
+                )}
+              </React.Fragment>
             );
           })}
 
@@ -210,7 +216,8 @@ export default function PreAssessmentProgressBar() {
         </div>
 
         <div className="mt-2 text-center">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-600" aria-live="polite" aria-atomic="true">
+            <span className="sr-only">Progress: </span>
             {Math.round(progressPercent)}% Complete
             {step > 0 && step <= questionnaires.length && (
               <span className="ml-2">

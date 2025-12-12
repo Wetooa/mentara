@@ -10,10 +10,12 @@ import {
 import { transformDashboardData } from "@/lib/transformers/dashboardTransformer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, ClipboardList, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
 import { useMessagingStore } from "@/store/messaging";
+import { useHasPreAssessment } from "@/hooks/pre-assessment/usePreAssessmentData";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Lazy load dashboard components
 const DashboardHeader = dynamic(() => import("@/components/dashboard/DashboardHeader").then(mod => ({ default: mod.default })), {
@@ -61,6 +63,9 @@ export default function DashboardPage() {
 
   const { data: communicationsData, isLoading: isCommunicationsLoading } =
     useRecentCommunications();
+
+  // Check if user has completed pre-assessment
+  const { hasAssessment, isLoading: isPreAssessmentLoading } = useHasPreAssessment();
 
   // Transform backend data to frontend format
   const dashboardData = useMemo(() => {
@@ -144,9 +149,9 @@ export default function DashboardPage() {
   // Show error state
   if (dashboardError && !isLoading) {
     return (
-      <div className="w-full h-full p-6 space-y-8">
+      <div className="w-full h-full p-6 space-y-8" role="alert" aria-live="assertive">
         <Alert className="max-w-md mx-auto">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle className="h-4 w-4" aria-hidden="true" />
           <AlertDescription className="flex items-center justify-between">
             <span>Failed to load dashboard data</span>
             <Button
@@ -154,8 +159,9 @@ export default function DashboardPage() {
               size="sm"
               onClick={handleRetry}
               className="ml-4"
+              aria-label="Retry loading dashboard"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
               Retry
             </Button>
           </AlertDescription>
@@ -167,10 +173,10 @@ export default function DashboardPage() {
   // Show loading state for first load or when no data
   if (isLoading || !dashboardData) {
     return (
-      <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50" aria-live="polite" aria-busy="true">
         <div className="w-full h-full p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-[1600px] mx-auto">
           {/* Loading Header */}
-          <div className="space-y-3">
+          <div className="space-y-3" aria-label="Loading dashboard header">
             <Skeleton className="h-10 w-64" />
             <Skeleton className="h-6 w-96" />
           </div>
@@ -208,19 +214,16 @@ export default function DashboardPage() {
     );
   }
 
-  // Ensure we have dashboard data before rendering
-  if (!dashboardData) {
-    return null;
-  }
-
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="w-full h-full p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-[1600px] mx-auto">
         {/* Page Header */}
-        <DashboardHeader
-          user={dashboardData.user}
-          onBookSession={handleBookSession}
-        />
+        <header>
+          <DashboardHeader
+            user={dashboardData.user}
+            onBookSession={handleBookSession}
+          />
+        </header>
 
         {/* Stats Overview */}
         <StatsOverview
@@ -232,8 +235,37 @@ export default function DashboardPage() {
           onTherapistsClick={handleTherapistsClick}
         />
 
+        {/* Pre-Assessment Prompt - Show if user hasn't completed assessment */}
+        {!isPreAssessmentLoading && !hasAssessment && (
+          <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10" role="region" aria-labelledby="assessment-prompt-title">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg" aria-hidden="true">
+                  <ClipboardList className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle id="assessment-prompt-title">Complete Your Mental Health Assessment</CardTitle>
+                  <CardDescription>
+                    Take a few minutes to complete our assessment. This helps us match you with the right therapist and provide personalized recommendations.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => router.push("/pre-assessment")}
+                className="w-full sm:w-auto"
+                aria-label="Start mental health assessment"
+              >
+                Start Assessment
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Dashboard Content - Compact 2-row layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min">
+        <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min" aria-label="Dashboard content">
           {/* Row 1: Sessions, Worksheets, Therapist (3 cards) */}
           <div className="md:col-span-1 lg:col-span-2">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
@@ -264,7 +296,7 @@ export default function DashboardPage() {
           <div className="md:col-span-1 lg:col-span-3">
             <ProgressTracking progress={dashboardData.progress} />
           </div>
-        </div>
+        </main>
 
         {/* Bottom Spacing */}
         <div className="h-8" />

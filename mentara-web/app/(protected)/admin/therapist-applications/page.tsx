@@ -13,8 +13,8 @@ export default function TherapistApplicationsRedirectPage() {
   }, [router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-      <Loader2 className="h-8 w-8 animate-spin" />
+    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4" aria-live="polite" aria-busy="true">
+      <Loader2 className="h-8 w-8 animate-spin" aria-label="Redirecting" />
       <p className="text-gray-600">Redirecting to Therapist Management...</p>
     </div>
   );

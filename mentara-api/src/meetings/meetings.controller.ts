@@ -15,6 +15,7 @@ import {
 import { MeetingsService } from './meetings.service';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
+import { WebRTCConfigService } from '../config/webrtc.config';
 // TODO: Add validation schemas when needed
 import type {
   CreateVideoRoomDto,
@@ -29,9 +30,18 @@ import type {
 @Controller('meetings')
 @UseGuards(JwtAuthGuard)
 export class MeetingsController {
-  constructor(private readonly meetingsService: MeetingsService) {}
+  constructor(
+    private readonly meetingsService: MeetingsService,
+    private readonly webrtcConfigService: WebRTCConfigService,
+  ) {}
 
   // Specific routes must come before parameterized routes
+  @Get('webrtc-config')
+  @HttpCode(HttpStatus.OK)
+  getWebRTCConfig() {
+    return this.webrtcConfigService.getWebRTCConfig();
+  }
+
   @Get('upcoming')
   async getUpcomingMeetings(
     @CurrentUserId() userId: string,

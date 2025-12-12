@@ -14,7 +14,7 @@ import { EventBusService } from '../common/events/event-bus.service';
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: {
-        expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+        expiresIn: parseInt(process.env.JWT_EXPIRES_IN || '3600', 10), // 1 hour in seconds
       },
     }),
   ],

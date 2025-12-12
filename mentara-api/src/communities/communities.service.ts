@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoomGroup, Room } from '@prisma/client';
@@ -35,6 +36,8 @@ export interface CommunityWithRoomGroupsResponse extends CommunityResponse {
 
 @Injectable()
 export class CommunitiesService {
+  private readonly logger = new Logger(CommunitiesService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findAllWithStructure(): Promise<CommunityWithRoomGroupsResponse[]> {
@@ -530,7 +533,9 @@ export class CommunitiesService {
     const user = await this.prisma.client.findUnique({
       where: { userId },
       include: {
-        preAssessment: {
+        preAssessments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
           select: {
             severityLevels: true,
             aiEstimate: true,
@@ -541,9 +546,10 @@ export class CommunitiesService {
     });
 
     // If user has processed preassessment data, use it for personalized recommendations
-    if (user?.preAssessment?.severityLevels) {
+    const latestPreAssessment = user?.preAssessments?.[0] || null;
+    if (latestPreAssessment?.severityLevels) {
       try {
-        const severityLevels = user.preAssessment.severityLevels as Record<string, string>;
+        const severityLevels = latestPreAssessment.severityLevels as Record<string, string>;
         
         // Map severity levels to community slugs for targeted recommendations
         const recommendedSlugs = this.mapSeverityLevelsToCommunities(severityLevels);
@@ -571,7 +577,10 @@ export class CommunitiesService {
           }
         }
       } catch (error) {
-        console.warn(`Failed to process preassessment data for user ${userId}:`, error);
+        this.logger.warn(
+          `Failed to process preassessment data for user ${userId}`,
+          error instanceof Error ? error.stack : String(error),
+        );
         // Fall through to basic recommendations
       }
     }

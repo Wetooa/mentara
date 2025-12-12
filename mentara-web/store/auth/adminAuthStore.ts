@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 import { AdminUser } from "@/lib/api/services/auth";
 import type { AuditLog } from "@/types/api/audit-logs";
 
@@ -84,8 +85,8 @@ export const useAdminAuthStore = create<AdminAuthState>()(
         set({ accessToken, refreshToken });
         // Store in localStorage for middleware access
         if (typeof window !== 'undefined') {
-          localStorage.setItem('access_token', accessToken);
-          localStorage.setItem('refresh_token', refreshToken);
+          localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+          localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
         }
       },
 

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Users, Search, Heart, Calendar } from "lucide-react";
+import { Users, Search, Heart, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import MyTherapistSection from "./MyTherapistSection";
 import FindTherapistSection from "./FindTherapistSection";
 import PendingRequestsSection from "@/components/client/therapist/PendingRequestsSection";
@@ -10,14 +11,30 @@ import { TherapistListingErrorWrapper } from "@/components/common/TherapistListi
 
 export default function TherapistDashboard() {
   const [activeTab, setActiveTab] = useState("my-therapist");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Default collapsed on mobile, expanded on desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarCollapsed(true);
+      } else {
+        setSidebarCollapsed(false);
+      }
+    };
+    
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-gray-50 via-white to-primary/5 min-h-screen">
+    <div className="w-full h-full bg-white min-h-screen">
       {/* Modern Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg ring-2 ring-primary/20">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-md">
               <Users className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
@@ -33,11 +50,28 @@ export default function TherapistDashboard() {
       </div>
 
       {/* Main Content Area with Side Panel Layout */}
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 p-4 sm:p-6">
-        {/* Side Navigation Panel - responsive */}
-        <div className="w-full lg:w-72 flex-shrink-0 order-1 lg:order-1">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm p-4 lg:sticky lg:top-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Sections</h2>
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 p-4 sm:p-6 relative">
+        {/* Side Navigation Panel - collapsible */}
+        <div
+          className={`${
+            sidebarCollapsed
+              ? "w-0 lg:w-0 opacity-0 lg:opacity-0 overflow-hidden"
+              : "w-full lg:w-64 opacity-100 lg:opacity-100"
+          } flex-shrink-0 order-1 lg:order-1 transition-all duration-300`}
+        >
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 lg:sticky lg:top-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Sections</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden h-8 w-8"
+                onClick={() => setSidebarCollapsed(true)}
+                aria-label="Collapse sidebar"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
             
             {/* Side Panel Navigation */}
             <nav className="flex flex-row lg:flex-col gap-2">
@@ -68,6 +102,19 @@ export default function TherapistDashboard() {
           </div>
         </div>
 
+        {/* Toggle Button - shown when sidebar is collapsed */}
+        {sidebarCollapsed && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute left-4 top-4 lg:top-6 z-20 bg-white shadow-md hover:bg-gray-50"
+            onClick={() => setSidebarCollapsed(false)}
+            aria-label="Expand sidebar"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
+
         {/* Main Content Area */}
         <div className="flex-1 min-w-0 order-2 lg:order-2">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -85,8 +132,8 @@ export default function TherapistDashboard() {
               </TherapistListingErrorWrapper>
 
               {/* Compact Pending Requests Section */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-primary/5 to-secondary/5 px-4 sm:px-6 py-3 border-b border-gray-200/50">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-primary/5 px-4 sm:px-6 py-3 border-b border-gray-200">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center">
                       <Calendar className="h-4 w-4 text-primary" />

@@ -18,7 +18,7 @@ import { LoadingType } from '@/store/loading/types';
  * ```
  */
 export const LoadingBarDebugger = () => {
-  const debugger = useLoadingDebugger();
+  const loadingDebugger = useLoadingDebugger();
   const [currentState, setCurrentState] = useState<any>(null);
 
   // Don't render in production
@@ -27,38 +27,38 @@ export const LoadingBarDebugger = () => {
   }
 
   const refreshState = () => {
-    setCurrentState(debugger.getCurrentState());
+    setCurrentState(loadingDebugger.getCurrentState());
   };
 
   const testOperations = [
     {
       label: 'Test Auth Loading',
       description: 'Simulates authentication check',
-      action: () => debugger.testAuthLoading(),
+      action: () => loadingDebugger.testAuthLoading(),
       variant: 'default' as const,
     },
     {
       label: 'Test Navigation Loading',
       description: 'Simulates page navigation',
-      action: () => debugger.testNavigationLoading(),
+      action: () => loadingDebugger.testNavigationLoading(),
       variant: 'secondary' as const,
     },
     {
       label: 'Test API Loading',
       description: 'Simulates API request',
-      action: () => debugger.testApiLoading(),
+      action: () => loadingDebugger.testApiLoading(),
       variant: 'outline' as const,
     },
     {
       label: 'Test Multiple Operations',
       description: 'Multiple concurrent operations',
-      action: () => debugger.testMultipleOperations(),
+      action: () => loadingDebugger.testMultipleOperations(),
       variant: 'default' as const,
     },
     {
       label: 'Test Error Scenario',
       description: 'Simulates loading error',
-      action: () => debugger.testErrorLoading(),
+      action: () => loadingDebugger.testErrorLoading(),
       variant: 'destructive' as const,
     },
   ];
@@ -128,7 +128,7 @@ export const LoadingBarDebugger = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => debugger.logCurrentState()}
+            onClick={() => loadingDebugger.logCurrentState()}
             className="text-xs flex-1"
           >
             Log to Console
@@ -136,7 +136,7 @@ export const LoadingBarDebugger = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={debugger.clearAllOperations}
+            onClick={loadingDebugger.clearAllOperations}
             className="text-xs flex-1"
           >
             Clear All

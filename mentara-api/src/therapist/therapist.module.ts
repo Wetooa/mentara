@@ -13,7 +13,16 @@ import { TherapistListController } from './controllers/therapist-list.controller
 import { TherapistListService } from './services/therapist-list.service';
 import { WorksheetsService } from '../worksheets/worksheets.service';
 import { AdvancedMatchingService } from './services/advanced-matching.service';
-import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
+import { IntelligentMatchingService } from './matching/intelligent-matching.service';
+import { MatchingOrchestratorService } from './matching/matching-orchestrator.service';
+import { ConversationAnalysisService } from './matching/analysis/conversation-analysis.service';
+import { CompatibilityAnalysisService } from './matching/analysis/compatibility-analysis.service';
+import { ClientEngagementAnalysisService } from './matching/analysis/client-engagement-analysis.service';
+import { TherapistPerformanceAnalysisService } from './matching/analysis/therapist-performance-analysis.service';
+import { ReviewSentimentAnalysisService } from './matching/analysis/review-sentiment-analysis.service';
+import { EngagementMatchingService } from './matching/scoring/engagement-matching.service';
+import { PerformanceMatchingService } from './matching/scoring/performance-matching.service';
+import { PreferenceMatchingService } from './matching/scoring/preference-matching.service';
 import { EmailModule } from '../email/email.module';
 import { NotificationsService } from '../notifications/notifications.service';
 import { MessagingService } from '../messaging/messaging.service';
@@ -41,7 +50,16 @@ import { CacheModule } from '../cache/cache.module';
     TherapistListService,
     WorksheetsService,
     AdvancedMatchingService,
+    IntelligentMatchingService,
+    MatchingOrchestratorService,
+    ConversationAnalysisService,
     CompatibilityAnalysisService,
+    ClientEngagementAnalysisService,
+    TherapistPerformanceAnalysisService,
+    ReviewSentimentAnalysisService,
+    EngagementMatchingService,
+    PerformanceMatchingService,
+    PreferenceMatchingService,
     NotificationsService,
     MessagingService,
     PrismaService,
@@ -49,7 +67,18 @@ import { CacheModule } from '../cache/cache.module';
   ],
   exports: [
     TherapistManagementService,
-
+    TherapistRecommendationService,
+    AdvancedMatchingService,
+    IntelligentMatchingService,
+    MatchingOrchestratorService,
+    ConversationAnalysisService,
+    CompatibilityAnalysisService,
+    ClientEngagementAnalysisService,
+    TherapistPerformanceAnalysisService,
+    ReviewSentimentAnalysisService,
+    EngagementMatchingService,
+    PerformanceMatchingService,
+    PreferenceMatchingService,
   ],
 })
 export class TherapistModule {}

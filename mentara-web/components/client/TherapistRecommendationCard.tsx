@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { MatchExplanation } from "@/components/therapist/MatchExplanation";
 
 import {
   Star,
@@ -248,60 +249,13 @@ export function TherapistRecommendationCard({
         )}
 
         {/* Professional Match Explanation */}
-        {showMatchExplanation && therapist.matchExplanation && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
-            <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-blue-800">
-              <Info className="h-4 w-4 text-blue-600" />
-              Why this match?
-            </h4>
-            <div className="space-y-2 text-sm">
-              {therapist.matchExplanation.reasons?.map((reason, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-2 bg-white rounded-lg border border-blue-100"
-                >
-                  <CheckCircle className="h-4 w-4 mt-0.5 text-blue-600 flex-shrink-0" />
-                  <span className="text-blue-800 font-medium">{reason}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Professional Match Score Breakdown */}
-            {/* <div className="mt-4 pt-4 border-t border-blue-200">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-white rounded-lg border border-blue-100">
-                  <div className="font-bold text-blue-800 text-xs mb-2">Compatibility</div>
-                  <Progress 
-                    value={therapist.matchExplanation.compatibility || 0} 
-                    className="h-2 bg-gray-200 mb-2" 
-                  />
-                  <span className="text-blue-600 font-bold text-xs">
-                    {therapist.matchExplanation.compatibility || 0}%
-                  </span>
-                </div>
-                <div className="text-center p-3 bg-white rounded-lg border border-blue-100">
-                  <div className="font-bold text-blue-800 text-xs mb-2">Availability</div>
-                  <Progress 
-                    value={therapist.matchExplanation.availability || 0} 
-                    className="h-2 bg-gray-200 mb-2" 
-                  />
-                  <span className="text-blue-600 font-bold text-xs">
-                    {therapist.matchExplanation.availability || 0}%
-                  </span>
-                </div>
-                <div className="text-center p-3 bg-white rounded-lg border border-blue-100">
-                  <div className="font-bold text-blue-800 text-xs mb-2">Experience</div>
-                  <Progress 
-                    value={therapist.matchExplanation.experience || 0} 
-                    className="h-2 bg-gray-200 mb-2" 
-                  />
-                  <span className="text-blue-600 font-bold text-xs">
-                    {therapist.matchExplanation.experience || 0}%
-                  </span>
-                </div>
-              </div>
-            </div> */}
-          </div>
+        {showMatchExplanation && (
+          <MatchExplanation
+            matchScore={matchScore}
+            scoreBreakdown={therapist.scoreBreakdown}
+            matchExplanation={therapist.matchExplanation}
+            conversationMatch={therapist.conversationMatch}
+          />
         )}
 
         {/* Professional Action Area */}

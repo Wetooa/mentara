@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useApi } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { createSocket } from '@/lib/websocket';
 import { toast } from 'sonner';
+import { WebRTCService } from '@/lib/webrtc/webrtc-service';
 
 interface ParticipantInfo {
   userId: string;
@@ -48,7 +50,9 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
   });
 
   const api = useApi();
+  const { user } = useAuth();
   const meetingSocketRef = useRef<any>(null);
+  const webrtcServiceRef = useRef<WebRTCService | null>(null);
 
   // Initialize meeting WebSocket connection
   useEffect(() => {
@@ -65,7 +69,7 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
       setIsConnected(false);
     });
 
-    meetingSocket.on('meeting-joined', (data: {
+    meetingSocket.on('meeting-joined', async (data: {
       meetingId: string;
       meeting: MeetingInfo;
       participants: ParticipantInfo[];
@@ -74,16 +78,72 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
       setMeetingInfo(data.meeting);
       setParticipants(data.participants);
       setIsHost(data.isHost);
+      
+      // Initialize WebRTC service for meeting room
+      if (!webrtcServiceRef.current) {
+        webrtcServiceRef.current = new WebRTCService({
+          onSignalData: (userId: string, signalData: any) => {
+            // Send WebRTC signal through meeting gateway
+            if (meetingSocketRef.current) {
+              meetingSocketRef.current.emit('webrtc-signal', {
+                meetingId,
+                targetUserId: userId,
+                signal: signalData,
+                type: signalData.type || 'offer',
+              });
+            }
+          },
+          onPeerConnected: (userId: string, stream: MediaStream) => {
+            toast.success(`Connected to ${userId}`);
+          },
+          onPeerDisconnected: (userId: string) => {
+            toast.info(`Disconnected from ${userId}`);
+          },
+          onError: (userId: string, error: Error) => {
+            toast.error(`WebRTC error with ${userId}: ${error.message}`);
+          },
+        });
+        webrtcServiceRef.current.setMeetingId(meetingId);
+      }
+
+      // Create peer connections for existing participants
+      const otherParticipantIds = data.participants
+        .map(p => p.userId)
+        .filter(id => id !== user?.id);
+      
+      if (otherParticipantIds.length > 0 && webrtcServiceRef.current) {
+        await webrtcServiceRef.current.createMeetingRoomConnections(
+          otherParticipantIds,
+          data.isHost
+        );
+      }
+
       toast.success('Joined meeting successfully');
     });
 
-    meetingSocket.on('participant-joined', (data: { participant: ParticipantInfo }) => {
+    meetingSocket.on('participant-joined', async (data: { participant: ParticipantInfo }) => {
       setParticipants(prev => [...prev, data.participant]);
+      
+      // Create peer connection for new participant
+      if (webrtcServiceRef.current && user?.id) {
+        const isInitiator = isHost;
+        await webrtcServiceRef.current.createPeerConnection(
+          data.participant.userId,
+          isInitiator
+        );
+      }
+      
       toast.info(`${data.participant.role} joined the meeting`);
     });
 
     meetingSocket.on('participant-left', (data: { userId: string }) => {
       setParticipants(prev => prev.filter(p => p.userId !== data.userId));
+      
+      // Destroy peer connection for left participant
+      if (webrtcServiceRef.current) {
+        webrtcServiceRef.current.destroyPeerConnection(data.userId);
+      }
+      
       toast.info('Participant left the meeting');
     });
 
@@ -125,13 +185,51 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
       onError?.(data.error);
     });
 
+    // WebRTC signaling handlers
     meetingSocket.on('webrtc-signal', (data: {
+      meetingId: string;
       fromUserId: string;
       signal: any;
       type: 'offer' | 'answer' | 'ice-candidate';
     }) => {
-      // Handle WebRTC signaling for video/audio
-      handleWebRTCSignal(data);
+      if (webrtcServiceRef.current) {
+        webrtcServiceRef.current.handleSignal(data.fromUserId, data.signal);
+      }
+    });
+
+    meetingSocket.on('webrtc-offer', (data: {
+      meetingId: string;
+      fromUserId: string;
+      offer: RTCSessionDescriptionInit;
+    }) => {
+      if (webrtcServiceRef.current) {
+        webrtcServiceRef.current.handleSignal(data.fromUserId, data.offer);
+      }
+    });
+
+    meetingSocket.on('webrtc-answer', (data: {
+      meetingId: string;
+      fromUserId: string;
+      answer: RTCSessionDescriptionInit;
+    }) => {
+      if (webrtcServiceRef.current) {
+        webrtcServiceRef.current.handleSignal(data.fromUserId, data.answer);
+      }
+    });
+
+    meetingSocket.on('webrtc-ice-candidate', (data: {
+      meetingId: string;
+      fromUserId: string;
+      candidate: RTCIceCandidateInit;
+    }) => {
+      if (webrtcServiceRef.current) {
+        webrtcServiceRef.current.handleSignal(data.fromUserId, data.candidate);
+      }
+    });
+
+    meetingSocket.on('webrtc-error', (data: { error: string }) => {
+      toast.error(`WebRTC error: ${data.error}`);
+      onError?.(data.error);
     });
 
     return () => {
@@ -139,8 +237,14 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
         meetingSocket.disconnect();
       }
       meetingSocketRef.current = null;
+      
+      // Cleanup WebRTC service
+      if (webrtcServiceRef.current) {
+        webrtcServiceRef.current.destroy();
+        webrtcServiceRef.current = null;
+      }
     };
-  }, [meetingId, onMeetingEnd, onError]);
+  }, [meetingId, onMeetingEnd, onError, user?.id, isHost]);
 
   // Join meeting room
   const joinMeeting = useCallback((mediaPreferences?: { video: boolean; audio: boolean }) => {
@@ -225,24 +329,30 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
   }, [meetingId, isHost]);
 
   // WebRTC signaling
-  const sendWebRTCSignal = useCallback((targetUserId: string, signal: any, type: 'offer' | 'answer' | 'ice-candidate') => {
+  const sendWebRTCSignal = useCallback((targetUserId: string | undefined, signal: any, type: 'offer' | 'answer' | 'ice-candidate') => {
     if (!meetingSocketRef.current) return;
 
-    meetingSocketRef.current.emit('webrtc-signal', {
-      meetingId,
-      targetUserId,
-      signal,
-      type,
-    });
+    if (targetUserId) {
+      // Send to specific user
+      meetingSocketRef.current.emit('webrtc-signal', {
+        meetingId,
+        targetUserId,
+        signal,
+        type,
+      });
+    } else {
+      // Broadcast to all participants
+      meetingSocketRef.current.emit('webrtc-signal', {
+        meetingId,
+        signal,
+        type,
+      });
+    }
   }, [meetingId]);
 
-  const handleWebRTCSignal = useCallback((data: {
-    fromUserId: string;
-    signal: any;
-    type: 'offer' | 'answer' | 'ice-candidate';
-  }) => {
-    // This would be handled by WebRTC implementation
-    // WebRTC signal processing logic would go here
+  // Get WebRTC service instance
+  const getWebRTCService = useCallback(() => {
+    return webrtcServiceRef.current;
   }, []);
 
   // Get meeting room URL
@@ -279,6 +389,7 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
     
     // WebRTC
     sendWebRTCSignal,
+    getWebRTCService,
     getMeetingRoomUrl,
 
     // Derived state

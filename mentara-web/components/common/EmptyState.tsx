@@ -36,18 +36,20 @@ export function EmptyState({
         "flex flex-col items-center justify-center py-12 px-4 text-center",
         className
       )}
+      role="status"
+      aria-live="polite"
     >
       {illustration ? (
-        <div className="mb-6">{illustration}</div>
+        <div className="mb-6" aria-hidden="true">{illustration}</div>
       ) : Icon ? (
-        <div className="mb-4 p-4 rounded-full bg-muted">
-          <Icon className="h-8 w-8 text-muted-foreground" />
+        <div className="mb-4 p-4 rounded-full bg-muted" aria-hidden="true">
+          <Icon className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground" />
         </div>
       ) : null}
 
-      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+      <h3 className="text-lg md:text-xl font-semibold text-foreground mb-2">{title}</h3>
       {description && (
-        <p className="text-sm text-muted-foreground max-w-md mb-6">
+        <p className="text-sm md:text-base text-muted-foreground max-w-md mb-6">
           {description}
         </p>
       )}
@@ -55,7 +57,12 @@ export function EmptyState({
       {(action || secondaryAction) && (
         <div className="flex gap-3 flex-wrap justify-center">
           {action && (
-            <Button onClick={action.onClick} size="sm">
+            <Button 
+              onClick={action.onClick} 
+              size="sm"
+              className="min-h-[44px] md:min-h-0 touch-manipulation"
+              aria-label={action.label}
+            >
               {action.label}
             </Button>
           )}
@@ -64,6 +71,8 @@ export function EmptyState({
               onClick={secondaryAction.onClick}
               variant="outline"
               size="sm"
+              className="min-h-[44px] md:min-h-0 touch-manipulation"
+              aria-label={secondaryAction.label}
             >
               {secondaryAction.label}
             </Button>

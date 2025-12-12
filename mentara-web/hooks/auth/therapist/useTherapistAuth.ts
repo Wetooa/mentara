@@ -10,6 +10,7 @@ import type {
   LoginDto as TherapistLoginDto, 
   TherapistAuthResponse
 } from "@/lib/api";
+import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 // Local type definitions for therapist auth
 interface TherapistUser {
@@ -84,8 +85,8 @@ export function useTherapistAuth(): UseTherapistAuthReturn {
     mutationFn: (credentials: TherapistLoginDto) => api.auth.therapist.login(credentials),
     onSuccess: (data) => {
       // Store tokens
-      localStorage.setItem("access_token", data.accessToken);
-      localStorage.setItem("refresh_token", data.refreshToken);
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
       
       // Update query cache
       queryClient.setQueryData(["auth", "therapist", "current-user"], data.user);
@@ -252,7 +253,7 @@ export function useTherapistAuth(): UseTherapistAuthReturn {
 
   const refreshToken = useCallback(async () => {
     try {
-      const refreshTokenValue = localStorage.getItem("refresh_token");
+      const refreshTokenValue = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
       if (!refreshTokenValue) {
         throw new Error("No refresh token found");
       }
@@ -260,8 +261,8 @@ export function useTherapistAuth(): UseTherapistAuthReturn {
       const response = await api.auth.therapist.refreshToken(refreshTokenValue);
       
       // Update tokens
-      localStorage.setItem("access_token", response.accessToken);
-      localStorage.setItem("refresh_token", response.refreshToken);
+      localStorage.setItem(TOKEN_STORAGE_KEY, response.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, response.refreshToken);
       
       // Refetch user data
       queryClient.invalidateQueries({ queryKey: ["auth", "therapist", "current-user"] });

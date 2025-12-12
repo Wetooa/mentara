@@ -16,7 +16,7 @@ export function ApiConfigDebug() {
   useEffect(() => {
     const checkConfig = async () => {
       const baseURL = apiClient.defaults.baseURL || "unknown";
-      const expected = "http://localhost:3001/api";
+      const expected = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000/api";
       const match = baseURL === expected;
 
       // Test backend connection

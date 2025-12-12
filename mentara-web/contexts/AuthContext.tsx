@@ -15,6 +15,14 @@ import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
+import { logger } from "@/lib/logger";
+
+// Load auth debug utilities in development
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  import('@/lib/debug/auth-debug').catch(() => {
+    // Silently fail if debug utilities can't be loaded
+  });
+}
 
 // Types
 export type UserRole = "client" | "therapist" | "moderator" | "admin";
@@ -46,6 +54,7 @@ const publicRoutes = [
   "/auth/sign-in",
   "/auth/verify",
   "/auth/verify-account",
+  "/auth/sign-up/skip-assessment",
 
   "/about",
   "/community",
@@ -53,6 +62,8 @@ const publicRoutes = [
 
   "/therapist-application",
   "/pre-assessment",
+  // Debug routes (only accessible in development)
+  ...(process.env.NODE_ENV === 'development' ? ['/debug'] : []),
 ];
 
 const roleBasePaths: Record<UserRole, string> = {
@@ -162,24 +173,31 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer (formerly cacheTime)
     refetchOnWindowFocus: false, // Don't refetch on window focus to prevent lag
     refetchOnMount: false, // Use cached data if available
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // Don't retry on 401/403 errors (auth failures)
-      if (error?.response?.status === 401 || error?.response?.status === 403) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError?.response?.status === 401 || axiosError?.response?.status === 403) {
         return false;
       }
       return failureCount < 3;
     },
   });
 
-  const userRole = (authData as any)?.role as UserRole | null;
-  const userId = (authData as any)?.userId || null;
+  const userRole = (authData?.role as UserRole | undefined) ?? null;
+  const userId = authData?.userId ?? null;
 
   // Prefetch profile data when auth data is available (only on protected routes)
   useEffect(() => {
     if (isClient && userId && userRole && hasToken === true && shouldCheckAuth && !isLoading) {
       const prefetchProfile = async () => {
         try {
-          let profileResponse: any;
+          let profileResponse: {
+            user?: { firstName?: string; lastName?: string; avatarUrl?: string | null };
+            firstName?: string;
+            lastName?: string;
+            avatarUrl?: string | null;
+            hasSeenTherapistRecommendations?: boolean;
+          };
           switch (userRole) {
             case "client":
               profileResponse = await api.auth.client.getProfile();
@@ -226,7 +244,13 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         throw new Error("User role not available");
       }
 
-      let profileResponse: any;
+      let profileResponse: {
+        user?: { firstName?: string; lastName?: string; avatarUrl?: string | null };
+        firstName?: string;
+        lastName?: string;
+        avatarUrl?: string | null;
+        hasSeenTherapistRecommendations?: boolean;
+      };
 
       // Call the appropriate role-specific profile endpoint
       switch (userRole) {
@@ -264,7 +288,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
     refetchOnWindowFocus: false, // Don't refetch on window focus
     refetchOnMount: false, // Use cached data if available
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // Don't retry on 401/403 errors (auth failures)
       if (error?.response?.status === 401 || error?.response?.status === 403) {
         return false;
@@ -310,9 +334,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
           authLoadingRef.current = true;
           startAuthLoading();
 
-          if (process.env.NODE_ENV === "development") {
-            console.log("🔐 Auth loading started - checking user role");
-          }
+          logger.debug("Auth loading started - checking user role");
 
           // Simulate realistic progress during auth check
           let progress = 0;
@@ -336,16 +358,12 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
 
           if (error) {
             errorAuthLoading("Authentication failed");
-            if (process.env.NODE_ENV === "development") {
-              console.error("❌ Auth loading failed:", error);
-            }
+            logger.error("Auth loading failed:", error);
           } else {
             updateAuthProgress(100);
             setTimeout(() => {
               completeAuthLoading();
-              if (process.env.NODE_ENV === "development") {
-                console.log("✅ Auth loading completed - user role verified");
-              }
+              logger.debug("Auth loading completed - user role verified");
             }, 100);
           }
         }
@@ -418,7 +436,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
 
     // Handle authentication errors (after async check completes)
     if (error && shouldCheckAuth && !isLoading) {
-      console.error("Authentication error:", error);
+      logger.error("Authentication error:", error);
       toast({
         title: "Authentication Required",
         description: "Please sign in to continue.",
@@ -433,7 +451,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     if (isPublic) {
       // Public route handling
       if (isAuthenticated) {
-        // Authenticated user trying to access public auth routes
+        // Authenticated user trying to access public auth routes - redirect to dashboard
+        // (They're already signed in, no need for sign-in/sign-up pages)
         if (pathname.startsWith("/auth/")) {
           const dashboardPath = getUserDashboardPath(userRole!);
           router.push(dashboardPath);

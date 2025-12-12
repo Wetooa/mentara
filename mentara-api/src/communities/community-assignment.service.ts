@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { ILLNESS_COMMUNITIES } from '../config/community-configs';
 
@@ -12,6 +12,8 @@ interface SeverityLevels {
 
 @Injectable()
 export class CommunityAssignmentService {
+  private readonly logger = new Logger(CommunityAssignmentService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   /**
@@ -68,7 +70,7 @@ export class CommunityAssignmentService {
    * Auto-assign communities to a user based on their pre-assessment results
    */
   async assignCommunitiesToUser(userId: string): Promise<string[]> {
-    console.log(`🔄 Auto-assigning communities for user: ${userId}`);
+    this.logger.debug(`Auto-assigning communities for user: ${userId}`);
 
     // Get user's pre-assessment data
     const userAssessment = await this.prisma.preAssessment.findFirst({
@@ -79,14 +81,14 @@ export class CommunityAssignmentService {
     });
 
     if (!userAssessment) {
-      console.log(`⚠️  No pre-assessment found for user: ${userId}`);
+      this.logger.debug(`No pre-assessment found for user: ${userId}`);
       return [];
     }
 
     // Extract scores and severity levels from answers JSON
-    const assessmentData = userAssessment.answers as any;
+    const assessmentData = userAssessment.answers as Record<string, unknown>;
     if (!assessmentData || typeof assessmentData !== 'object') {
-      console.log(`⚠️  Invalid assessment data for user: ${userId}`);
+      this.logger.debug(`Invalid assessment data for user: ${userId}`);
       return [];
     }
 
@@ -94,7 +96,7 @@ export class CommunityAssignmentService {
     const severityLevels = assessmentData.severityLevels as SeverityLevels;
 
     if (!scores || !severityLevels) {
-      console.log(`⚠️  Missing scores or severity levels for user: ${userId}`);
+      this.logger.debug(`Missing scores or severity levels for user: ${userId}`);
       return [];
     }
     const assignedCommunities: string[] = [];
@@ -115,7 +117,7 @@ export class CommunityAssignmentService {
       });
 
       if (!community) {
-        console.log(`⚠️  Community not found for slug: ${communitySlug}`);
+        this.logger.warn(`Community not found for slug: ${communitySlug}`);
         continue;
       }
 
@@ -130,7 +132,7 @@ export class CommunityAssignmentService {
       });
 
       if (existingMembership) {
-        console.log(`⏭️  User already member of: ${community.name}`);
+        this.logger.debug(`User already member of: ${community.name}`);
         continue;
       }
 
@@ -145,13 +147,13 @@ export class CommunityAssignmentService {
         });
 
         assignedCommunities.push(community.name);
-        console.log(
-          `✅ Assigned user to community: ${community.name} (${severity} ${questionnaire})`,
+        this.logger.debug(
+          `Assigned user to community: ${community.name} (${severity} ${questionnaire})`,
         );
       } catch (error) {
-        console.error(
-          `❌ Failed to assign community ${community.name}:`,
-          error,
+        this.logger.error(
+          `Failed to assign community ${community.name} to user ${userId}`,
+          error instanceof Error ? error.stack : String(error),
         );
       }
     }
@@ -159,8 +161,8 @@ export class CommunityAssignmentService {
     // Always assign to general support communities
     await this.assignGeneralSupportCommunities(userId);
 
-    console.log(
-      `🎯 Auto-assignment complete. Assigned ${assignedCommunities.length} communities.`,
+    this.logger.debug(
+      `Auto-assignment complete. Assigned ${assignedCommunities.length} communities.`,
     );
     return assignedCommunities;
   }
@@ -198,11 +200,11 @@ export class CommunityAssignmentService {
             joinedAt: new Date(),
           },
         });
-        console.log(`✅ Assigned user to general community: ${community.name}`);
+        this.logger.debug(`Assigned user to general community: ${community.name}`);
       } catch (error) {
-        console.error(
-          `❌ Failed to assign general community ${community.name}:`,
-          error,
+        this.logger.error(
+          `Failed to assign general community ${community.name} to user ${userId}`,
+          error instanceof Error ? error.stack : String(error),
         );
       }
     }
@@ -224,7 +226,7 @@ export class CommunityAssignmentService {
     }
 
     // Extract scores and severity levels from answers JSON
-    const assessmentData = userAssessment.answers as any;
+    const assessmentData = userAssessment.answers as Record<string, unknown>;
     if (!assessmentData || typeof assessmentData !== 'object') {
       return [];
     }
@@ -266,7 +268,10 @@ export class CommunityAssignmentService {
       try {
         results[userId] = await this.assignCommunitiesToUser(userId);
       } catch (error) {
-        console.error(`Error assigning communities to user ${userId}:`, error);
+        this.logger.error(
+          `Error assigning communities to user ${userId}`,
+          error instanceof Error ? error.stack : String(error),
+        );
         results[userId] = [];
       }
     }

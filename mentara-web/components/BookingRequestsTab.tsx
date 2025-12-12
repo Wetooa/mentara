@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useBookingRequests } from "@/hooks/booking/useBooking";
 import { Meeting } from "@/lib/api/services/meetings";
+import { logger } from "@/lib/logger";
 
 interface BookingRequestsTabProps {
   className?: string;
@@ -56,6 +57,10 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
   const [acceptingRequestId, setAcceptingRequestId] = React.useState<string | null>(null);
   const [meetingUrl, setMeetingUrl] = React.useState("");
   const [showAcceptDialog, setShowAcceptDialog] = React.useState(false);
+  
+  // Only require meeting URL for in-person meetings
+  const requiresMeetingUrl = acceptingRequestId && 
+    bookingRequests.find(r => r.id === acceptingRequestId)?.meetingType === 'in-person';
 
   const formatTime = (dateString: string) => {
     try {
@@ -93,15 +98,18 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
   };
 
   const handleConfirmAccept = async () => {
-    if (!acceptingRequestId || !meetingUrl.trim()) return;
+    if (!acceptingRequestId) return;
+    
+    // Only require meeting URL for in-person meetings
+    if (requiresMeetingUrl && !meetingUrl.trim()) return;
     
     try {
-      await acceptRequest(acceptingRequestId, meetingUrl.trim());
+      await acceptRequest(acceptingRequestId, requiresMeetingUrl ? meetingUrl.trim() : undefined);
       setShowAcceptDialog(false);
       setAcceptingRequestId(null);
       setMeetingUrl("");
     } catch (error) {
-      console.error('Failed to accept booking request:', error);
+      logger.error('Failed to accept booking request:', error);
     }
   };
 
@@ -111,7 +119,7 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
       setDenyReason("");
       setSelectedRequestId(null);
     } catch (error) {
-      console.error('Failed to deny booking request:', error);
+      logger.error('Failed to deny booking request:', error);
     }
   };
 
@@ -383,33 +391,25 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
               </div>
             )}
             
-            <div>
-              <Label htmlFor="meetingUrl" className="flex items-center gap-2">
-                {acceptingRequestId && bookingRequests.find(r => r.id === acceptingRequestId)?.meetingType === 'in-person' ? (
-                  <>
-                    <MapPin className="h-4 w-4" />
-                    Meeting Address
-                  </>
-                ) : (
-                  <>
-                    <Video className="h-4 w-4" />
-                    Meeting URL/Link
-                  </>
-                )}
-              </Label>
-              <Textarea
-                id="meetingUrl"
-                placeholder={
-                  acceptingRequestId && bookingRequests.find(r => r.id === acceptingRequestId)?.meetingType === 'in-person'
-                    ? "Enter the meeting address (e.g., 123 Main St, Suite 200, City, State)"
-                    : "Enter the video meeting URL (e.g., https://zoom.us/j/123456789)"
-                }
-                value={meetingUrl}
-                onChange={(e) => setMeetingUrl(e.target.value)}
-                className="mt-2"
-                rows={3}
-              />
-            </div>
+            {requiresMeetingUrl && (
+              <div>
+                <Label htmlFor="meetingUrl" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Meeting Address
+                </Label>
+                <Textarea
+                  id="meetingUrl"
+                  placeholder="Enter the meeting address (e.g., 123 Main St, Suite 200, City, State)"
+                  value={meetingUrl}
+                  onChange={(e) => setMeetingUrl(e.target.value)}
+                  className="mt-2"
+                  rows={3}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  For video meetings, the meeting link will be automatically generated.
+                </p>
+              </div>
+            )}
           </div>
 
           <AlertDialogFooter>
@@ -424,7 +424,7 @@ export function BookingRequestsTab({ className }: BookingRequestsTabProps) {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmAccept}
-              disabled={!meetingUrl.trim() || isAccepting}
+              disabled={(requiresMeetingUrl && !meetingUrl.trim()) || isAccepting}
               className="bg-green-600 hover:bg-green-700"
             >
               {isAccepting ? (

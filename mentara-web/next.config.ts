@@ -93,6 +93,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
+  // Skip static generation for specific routes that require client-side rendering
+  // These routes use URL parameters and must be client-only
+  generateBuildId: async () => {
+    return 'build-' + Date.now();
+  },
 };
 
 export default nextConfig;

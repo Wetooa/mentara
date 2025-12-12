@@ -16,7 +16,8 @@ interface ModeratorProfilePageProps {
 async function getUserProfile(id: string): Promise<UserProfile | null> {
   try {
     // Call the API to get user profile data
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/users/${id}`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000/api';
+    const response = await fetch(`${apiUrl}/users/${id}`, {
       headers: {
         'Content-Type': 'application/json',
       },

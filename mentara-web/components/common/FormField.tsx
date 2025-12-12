@@ -34,30 +34,41 @@ export function FormField({
   const descriptionId = description ? `${fieldId}-description` : undefined;
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-2", className)} role="group">
       <label
         htmlFor={fieldId}
         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
       >
         {label}
-        {required && <span className="text-destructive ml-1">*</span>}
+        {required && (
+          <span className="text-destructive ml-1" aria-label="required">
+            *
+          </span>
+        )}
       </label>
       {description && (
         <p
           id={descriptionId}
           className="text-sm text-muted-foreground"
+          aria-live="polite"
         >
           {description}
         </p>
       )}
       <div className="relative">
-        {children}
+        {React.isValidElement(children) && React.cloneElement(children as React.ReactElement, {
+          id: fieldId,
+          'aria-describedby': error ? errorId : descriptionId,
+          'aria-invalid': !!error,
+          'aria-required': required,
+        })}
         {error && (
           <div
             id={errorId}
             className="flex items-center gap-1 mt-1 text-sm text-destructive"
             role="alert"
-            aria-live="polite"
+            aria-live="assertive"
+            aria-atomic="true"
           >
             <AlertCircle className="h-4 w-4" aria-hidden="true" />
             <span>{error}</span>
@@ -68,6 +79,7 @@ export function FormField({
             className="flex items-center gap-1 mt-1 text-sm text-green-600"
             role="status"
             aria-live="polite"
+            aria-atomic="true"
           >
             <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             <span className="sr-only">Field is valid</span>

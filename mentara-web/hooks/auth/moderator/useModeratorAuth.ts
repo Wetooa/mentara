@@ -9,6 +9,7 @@ import { useApi } from "@/lib/api";
 import type { 
   LoginDto as ModeratorLoginDto, 
 } from "@/lib/api";
+import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 // Local type definitions for moderator auth
 interface ModeratorUser {
@@ -62,8 +63,8 @@ export function useModeratorAuth(): UseModeratorAuthReturn {
   const loginMutation = useMutation({
     mutationFn: (credentials: ModeratorLoginDto) => api.auth.moderator.login(credentials),
     onSuccess: (data) => {
-      localStorage.setItem("access_token", data.accessToken);
-      localStorage.setItem("refresh_token", data.refreshToken);
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
       queryClient.setQueryData(["auth", "moderator", "current-user"], data.user);
       setError(null);
       toast.success("Moderator access granted");
@@ -141,12 +142,12 @@ export function useModeratorAuth(): UseModeratorAuthReturn {
 
   const refreshToken = useCallback(async () => {
     try {
-      const refreshTokenValue = localStorage.getItem("refresh_token");
+      const refreshTokenValue = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
       if (!refreshTokenValue) throw new Error("No refresh token found");
 
       const response = await api.auth.moderator.refreshToken(refreshTokenValue);
-      localStorage.setItem("access_token", response.accessToken);
-      localStorage.setItem("refresh_token", response.refreshToken);
+      localStorage.setItem(TOKEN_STORAGE_KEY, response.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, response.refreshToken);
       queryClient.invalidateQueries({ queryKey: ["auth", "moderator", "current-user"] });
     } catch (err) {
       await logout();

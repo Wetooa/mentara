@@ -17,7 +17,10 @@ import {
   ClientForMatching,
   TherapistForMatching,
 } from './services/advanced-matching.service';
-import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
+import { IntelligentMatchingService, IntelligentTherapistScore } from './matching/intelligent-matching.service';
+import { MatchingOrchestratorService, OrchestratedMatchResult } from './matching/matching-orchestrator.service';
+import { ConversationAnalysisService, ConversationAnalysisResult } from './matching/analysis/conversation-analysis.service';
+import { CompatibilityAnalysisService } from './matching/analysis/compatibility-analysis.service';
 import { PreAssessmentService } from '../pre-assessment/pre-assessment.service';
 
 // Define the type for therapist with included relations
@@ -33,6 +36,9 @@ export class TherapistRecommendationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly advancedMatching: AdvancedMatchingService,
+    private readonly intelligentMatching: IntelligentMatchingService,
+    private readonly matchingOrchestrator: MatchingOrchestratorService,
+    private readonly conversationAnalysis: ConversationAnalysisService,
     private readonly compatibilityAnalysis: CompatibilityAnalysisService,
     private readonly preAssessmentService: PreAssessmentService,
   ) { }
@@ -71,18 +77,32 @@ export class TherapistRecommendationService {
       const user = await this.prisma.client.findUnique({
         where: { userId: request.userId },
         include: {
-          preAssessment: true,
-          user: true,
+          preAssessments: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+            },
+          },
         },
-      });
+      }) as any;
 
       if (!user) {
         this.logger.warn(`User not found: ${request.userId}`);
         throw new NotFoundException('User not found');
       }
 
+      // Get the latest pre-assessment
+      const latestPreAssessment = user.preAssessments?.[0] || null;
+
       // Handle users without pre-assessment more gracefully
-      if (!user.preAssessment) {
+      if (!latestPreAssessment) {
         this.logger.warn(
           `No pre-assessment found for user: ${request.userId}, using basic recommendations`,
         );
@@ -110,11 +130,11 @@ export class TherapistRecommendationService {
       }
 
       // Extract user conditions and AI evaluation data
-      const userConditions = this.extractUserConditions(user.preAssessment);
-      const aiEvaluation = this.extractAiEvaluation(user.preAssessment);
+      const userConditions = this.extractUserConditions(latestPreAssessment);
+      const aiEvaluation = this.extractAiEvaluation(latestPreAssessment);
 
       // Extract severity levels from the database field (not from answers)
-      const severityLevels = user.preAssessment.severityLevels as Record<
+      const severityLevels = latestPreAssessment.severityLevels as Record<
         string,
         string
       >;
@@ -168,33 +188,39 @@ export class TherapistRecommendationService {
           },
         });
 
-      // Use advanced matching algorithm with proper error handling and logging
-      const therapistScores: TherapistScore[] = [];
-      let advancedMatchingFailures = 0;
+      // Build matching context
+      const clientForMatching: ClientForMatching = {
+        ...user,
+        preAssessment: latestPreAssessment,
+        user: user.user,
+      };
+
+      const matchingContext = await this.matchingOrchestrator.buildMatchingContext(
+        request.userId,
+      );
+      matchingContext.client = clientForMatching;
+
+      // Use intelligent matching orchestration
+      const therapistScores: OrchestratedMatchResult[] = [];
+      let matchingFailures = 0;
 
       for (const therapist of therapists) {
         try {
-          // Cast user to proper type now that we've validated all required fields exist
-          const clientForMatching: ClientForMatching = {
-            ...user,
-            preAssessment: user.preAssessment,
-            user: user.user,
-          };
-
           const therapistForMatching: TherapistForMatching = {
             ...therapist,
             user: therapist.user,
             reviews: therapist.reviews || [],
           };
 
-          const score = await this.advancedMatching.calculateAdvancedMatch(
-            clientForMatching,
+          // Use orchestrator for comprehensive matching
+          const score = await this.matchingOrchestrator.orchestrateMatch(
+            matchingContext,
             therapistForMatching,
           );
 
           therapistScores.push(score);
         } catch (error) {
-          advancedMatchingFailures++;
+          matchingFailures++;
 
           // Log detailed error information for debugging
           this.logger.error(
@@ -269,7 +295,7 @@ export class TherapistRecommendationService {
 
       // Log summary of matching performance
       this.logger.log(
-        `Matching completed for user ${request.userId}: ${therapistScores.length} successful matches, ${advancedMatchingFailures} fallbacks`,
+        `Matching completed for user ${request.userId}: ${therapistScores.length} successful matches, ${matchingFailures} failures`,
       );
 
       // Sort by total score descending
@@ -290,6 +316,61 @@ export class TherapistRecommendationService {
           scoreBreakdown: score.breakdown,
           matchExplanation: score.matchExplanation,
         };
+
+        // Add conversation insights if available (from intelligent matching)
+        if (score.intelligentFactors) {
+          therapistData.conversationMatch = {
+            factors: score.intelligentFactors,
+            explanation: score.conversationExplanation,
+          };
+        }
+
+        // Add new matching factors if available
+        if (score.engagementMatch) {
+          therapistData.engagementMatch = {
+            score: score.engagementMatch.overallScore,
+            breakdown: {
+              engagementCompatibility: score.engagementMatch.engagementCompatibility,
+              retentionMatch: score.engagementMatch.retentionMatch,
+              sessionTimeMatch: score.engagementMatch.sessionTimeMatch,
+            },
+            explanation: score.engagementMatch.explanation,
+          };
+        }
+
+        if (score.performanceMatch) {
+          therapistData.performanceMatch = {
+            score: score.performanceMatch.overallScore,
+            breakdown: {
+              successRateMatch: score.performanceMatch.successRateMatch,
+              workloadMatch: score.performanceMatch.workloadMatch,
+              availabilityMatch: score.performanceMatch.availabilityMatch,
+              communicationStyleMatch: score.performanceMatch.communicationStyleMatch,
+            },
+            explanation: score.performanceMatch.explanation,
+          };
+        }
+
+        if (score.preferenceMatch) {
+          therapistData.preferenceMatch = {
+            score: score.preferenceMatch.overallScore,
+            breakdown: {
+              genderMatch: score.preferenceMatch.genderMatch,
+              ageMatch: score.preferenceMatch.ageMatch,
+              languageMatch: score.preferenceMatch.languageMatch,
+              approachMatch: score.preferenceMatch.approachMatch,
+              sessionFormatMatch: score.preferenceMatch.sessionFormatMatch,
+              budgetMatch: score.preferenceMatch.budgetMatch,
+              locationMatch: score.preferenceMatch.locationMatch,
+            },
+            explanation: score.preferenceMatch.explanation,
+          };
+        }
+
+        // Use comprehensive score if available
+        if (score.comprehensiveScore !== undefined) {
+          therapistData.matchScore = score.comprehensiveScore;
+        }
 
         // Add clinical insights if available
         if (clinicalAnalysis) {
@@ -315,6 +396,16 @@ export class TherapistRecommendationService {
 
         return therapistData;
       });
+
+      // Get conversation analysis for matching insights
+      let conversationAnalysis: ConversationAnalysisResult | null = null;
+      try {
+        conversationAnalysis = await this.conversationAnalysis.analyzeConversationForMatching(
+          request.userId,
+        );
+      } catch (error) {
+        this.logger.warn('Failed to get conversation analysis:', error);
+      }
 
       // Determine primary and secondary conditions (enhanced if clinical analysis available)
       const primaryConditions = clinicalAnalysis
@@ -348,6 +439,14 @@ export class TherapistRecommendationService {
               clinicalAnalysis.treatmentPlan.therapistCriteria
                 .preferredApproaches,
           }),
+          ...(conversationAnalysis ? {
+            conversationInsights: {
+              mentionedConditions: conversationAnalysis.mentionedConditions,
+              therapyPreferences: conversationAnalysis.therapyPreferences,
+              urgencyLevel: conversationAnalysis.urgencyIndicators.level,
+              treatmentGoals: conversationAnalysis.treatmentGoals,
+            },
+          } : {}),
         },
         clinicalInsights: clinicalAnalysis
           ? {
@@ -588,10 +687,21 @@ export class TherapistRecommendationService {
     const client = await this.prisma.client.findUnique({
       where: { userId: clientId },
       include: {
-        preAssessment: true,
-        user: true,
+        preAssessments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+          },
+        },
       },
-    });
+    }) as any;
 
     const therapist: TherapistWithRelations | null =
       await this.prisma.therapist.findUnique({
@@ -610,12 +720,19 @@ export class TherapistRecommendationService {
       throw new NotFoundException('Client or therapist not found');
     }
 
-    if (!client.preAssessment) {
+    const latestPreAssessment = client.preAssessments?.[0] || null;
+    if (!latestPreAssessment) {
       throw new NotFoundException('No pre-assessment found for client');
     }
 
+    // Create a client object with preAssessment for compatibility analysis
+    const clientWithPreAssessment = {
+      ...client,
+      preAssessment: latestPreAssessment,
+    };
+    
     const compatibility = await this.compatibilityAnalysis.analyzeCompatibility(
-      client as any, // Safe because we verified preAssessment exists above
+      clientWithPreAssessment as any,
       therapist,
     );
 

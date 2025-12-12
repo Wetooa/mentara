@@ -36,8 +36,46 @@ export function setupRequestInterceptors(client: AxiosInstance): void {
       // Get token from localStorage (client-side only)
       if (typeof window !== "undefined") {
         const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+        
+        // Comprehensive token logging in development
+        if (process.env.NODE_ENV === "development") {
+          if (token) {
+            logger.debug(`[API Request] Token found (length: ${token.length}, preview: ${token.substring(0, 20)}...)`);
+          } else {
+            logger.warn(`[API Request] No token found in localStorage under key: ${TOKEN_STORAGE_KEY}`);
+            // Check for token under alternative keys
+            const altKeys = ['token', 'accessToken', 'authToken'];
+            for (const key of altKeys) {
+              const altToken = localStorage.getItem(key);
+              if (altToken) {
+                logger.warn(`[API Request] Found token under alternative key '${key}'. Consider migrating.`);
+              }
+            }
+          }
+        }
+        
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          // Sanitize token (remove any quotes or whitespace)
+          const sanitizedToken = token.trim().replace(/^["']|["']$/g, '');
+          
+          // Validate token format (basic JWT check - should have 3 parts separated by dots)
+          const tokenParts = sanitizedToken.split('.');
+          if (tokenParts.length === 3) {
+            config.headers.Authorization = `Bearer ${sanitizedToken}`;
+            
+            if (process.env.NODE_ENV === "development") {
+              logger.debug(`[API Request] Authorization header set for ${config.method?.toUpperCase()} ${config.url}`);
+            }
+          } else {
+            logger.error(`[API Request] Invalid token format (expected JWT with 3 parts, got ${tokenParts.length} parts)`);
+            // Still try to send it, but log the issue
+            config.headers.Authorization = `Bearer ${sanitizedToken}`;
+          }
+        } else {
+          // Log warning if token is missing for protected routes
+          if (config.url && !config.url.includes('/auth/')) {
+            logger.warn(`[API Request] No token found for ${config.method?.toUpperCase()} ${config.url} - request may fail with 401`);
+          }
         }
 
         // Track request in development mode
@@ -127,10 +165,23 @@ export function setupResponseInterceptors(client: AxiosInstance): void {
         const tracking = activeRequests.get(requestId);
         if (tracking) {
           const duration = Date.now() - tracking.timestamp;
-          logger.error(
-            `[API Error] ${tracking.method} ${tracking.url} - ${error.response?.status || "Network Error"} (${duration}ms)`,
-            { requestId, error: error.message }
-          );
+          const status = error.response?.status;
+          
+          // Only log full error details for server errors (5xx)
+          // Client errors (4xx) are expected user errors - log minimally to avoid console spam
+          if (status && status >= 500) {
+            // Server errors - log as error
+            logger.error(
+              `[API Error] ${tracking.method} ${tracking.url} - ${status} (${duration}ms)`,
+              { requestId, error: error.message }
+            );
+          } else if (process.env.NODE_ENV === "development") {
+            // Client errors - only log in development, and use debug level
+            logger.debug(
+              `[API Client Error] ${tracking.method} ${tracking.url} - ${status || "Network Error"} (${duration}ms): ${error.message}`
+            );
+          }
+          
           if (process.env.NODE_ENV === "development") {
             activeRequests.delete(requestId);
           }
@@ -175,29 +226,58 @@ export function setupResponseInterceptors(client: AxiosInstance): void {
 
         return Promise.reject(apiError);
       } else if (error.request) {
-        // Request made but no response received (network error)
+        // Request made but no response received (network error or timeout)
         const baseURL = error.config?.baseURL || "unknown";
         const url = error.config?.url || "unknown";
         const fullUrl = `${baseURL}${url}`;
+        const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+        const timeout = error.config?.timeout || 10000;
+        const requestId = error.config?.metadata?.requestId;
         
-        logger.error("[API] Network error - No response received:", {
+        // Enhanced error logging
+        const errorDetails = {
+          errorType: isTimeout ? 'TIMEOUT' : 'NETWORK_ERROR',
           baseURL,
           url,
           fullUrl,
           message: error.message,
           code: error.code,
-        });
+          timeout: isTimeout ? `${timeout}ms` : undefined,
+          requestId,
+          timestamp: new Date().toISOString(),
+        };
+        
+        logger.error(`[API] ${isTimeout ? 'Timeout' : 'Network error'} - No response received:`, errorDetails);
+        
+        // Create more helpful error message
+        let errorMessage: string;
+        if (isTimeout) {
+          errorMessage = `Request timeout: The server took longer than ${timeout / 1000}s to respond. This may indicate:
+- The backend is processing a complex request (e.g., AI generation)
+- The backend is overloaded
+- Network connectivity issues
+
+Please try again. If the issue persists, check if the backend is running at ${baseURL}`;
+        } else {
+          errorMessage = `Network error: Unable to connect to server at ${fullUrl}. 
+
+Possible causes:
+- Backend server is not running
+- Network connectivity issues
+- CORS configuration problems
+- Firewall blocking the connection
+
+Please check:
+1. Is the backend running? (Check ${baseURL}/health)
+2. Is the backend URL correct? (Current: ${baseURL})
+3. Are there any network/firewall restrictions?`;
+        }
         
         const networkError = new MentaraApiError(
-          `Network error: Unable to connect to server at ${fullUrl}. Please check that the backend is running and accessible.`,
+          errorMessage,
           0,
-          "NETWORK_ERROR",
-          { 
-            url: fullUrl,
-            baseURL,
-            message: error.message,
-            code: error.code,
-          }
+          isTimeout ? "TIMEOUT_ERROR" : "NETWORK_ERROR",
+          errorDetails
         );
         return Promise.reject(networkError);
       } else {

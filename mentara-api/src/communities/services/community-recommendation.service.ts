@@ -49,21 +49,27 @@ export class CommunityRecommendationService {
         include: {
           client: {
             include: {
-              preAssessment: true,
+              preAssessments: {
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+              },
             },
           },
           memberships: {
             select: { communityId: true },
           },
         },
-      });
+      }) as any; // Type assertion needed due to Prisma type generation timing
 
       if (!user || !user.client) {
         throw new NotFoundException(`User ${userId} not found or not a client`);
       }
 
+      // Get the latest pre-assessment
+      const latestPreAssessment = user.client.preAssessments?.[0] || null;
+
       // Check if user has completed preassessment
-      if (!user.client.preAssessment) {
+      if (!latestPreAssessment) {
         this.logger.warn(`No preassessment found for user ${userId}`);
         return this.getFallbackRecommendations(userId);
       }
@@ -71,7 +77,7 @@ export class CommunityRecommendationService {
       // Get AI disorder predictions from preassessment data
       let disorderPredictions: Record<string, boolean> = {};
       try {
-        const assessmentAnswers = user.client.preAssessment.answers as any;
+        const assessmentAnswers = latestPreAssessment.answers as any;
         if (
           assessmentAnswers &&
           Array.isArray(assessmentAnswers) &&
@@ -98,7 +104,7 @@ export class CommunityRecommendationService {
           `Failed to get AI predictions for user ${userId}:`,
           error,
         );
-        const assessmentAnswers = user.client.preAssessment.answers as any;
+        const assessmentAnswers = latestPreAssessment.answers as any;
         return this.getFallbackRecommendations(userId, assessmentAnswers);
       }
 
@@ -113,7 +119,7 @@ export class CommunityRecommendationService {
         this.logger.log(
           `No AI-based recommendations for user ${userId}, using fallback`,
         );
-        const assessmentAnswers = user.client.preAssessment.answers as any;
+        const assessmentAnswers = latestPreAssessment.answers as any;
         return this.getFallbackRecommendations(userId, assessmentAnswers);
       }
 

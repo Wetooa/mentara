@@ -56,11 +56,19 @@ export class ClientAuthService {
         },
       });
 
+      // If no pre-assessment is provided, auto-mark recommendations as seen
+      // (since recommendations require pre-assessment data)
+      const hasPreAssessment = !!(
+        registerDto.preassessmentAnswers &&
+        registerDto.preassessmentAnswers.length > 0
+      );
+      const shouldMarkRecommendationsSeen = !hasPreAssessment;
+
       const client = await tx.client.create({
         data: {
           userId: user.id,
           hasSeenTherapistRecommendations:
-            registerDto.hasSeenTherapistRecommendations || false,
+            registerDto.hasSeenTherapistRecommendations || shouldMarkRecommendationsSeen,
         },
       });
 
@@ -247,37 +255,53 @@ export class ClientAuthService {
       throw new UnauthorizedException('Client not found');
     }
 
+    // Check if user has completed pre-assessment
+    const latestAssessment = await this.prisma.preAssessment.findFirst({
+      where: { clientId: userId },
+      orderBy: { createdAt: 'desc' },
+    });
+    const hasPreAssessment = !!latestAssessment;
+    const assessmentCompleted = hasPreAssessment;
+
     // Return in the expected OnboardingStatusResponse format
     const profileCompleted = !!(
       user.firstName &&
       user.lastName &&
       user.birthDate
     );
-    const assessmentCompleted = false; // TODO: implement assessment completion check
     const completedSteps: string[] = [];
 
     if (profileCompleted) completedSteps.push('profile');
-    if (user.client.hasSeenTherapistRecommendations)
-      completedSteps.push('recommendations');
+    
+    // If user has no pre-assessment, auto-mark recommendations as seen (skip that step)
+    // If user has pre-assessment, check if they've seen recommendations
+    const hasSeenRecommendations = !hasPreAssessment || user.client.hasSeenTherapistRecommendations;
+    
+    if (hasSeenRecommendations) completedSteps.push('recommendations');
     if (assessmentCompleted) completedSteps.push('assessment');
+
+    // Determine next step
+    let nextStep: string | undefined;
+    if (!profileCompleted) {
+      nextStep = 'profile';
+    } else if (!hasSeenRecommendations) {
+      // Only show recommendations if user has pre-assessment
+      nextStep = hasPreAssessment ? 'recommendations' : undefined;
+    } else if (!assessmentCompleted) {
+      nextStep = 'assessment';
+    }
 
     return {
       isFirstSignIn: !user.lastLoginAt,
-      hasSeenRecommendations: user.client.hasSeenTherapistRecommendations,
+      hasSeenRecommendations,
       profileCompleted,
       assessmentCompleted,
       isOnboardingComplete:
         profileCompleted &&
-        user.client.hasSeenTherapistRecommendations &&
+        hasSeenRecommendations &&
         assessmentCompleted,
       completedSteps,
-      nextStep: !profileCompleted
-        ? 'profile'
-        : !user.client.hasSeenTherapistRecommendations
-          ? 'recommendations'
-          : !assessmentCompleted
-            ? 'assessment'
-            : undefined,
+      nextStep,
     };
   }
 

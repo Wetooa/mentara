@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MeetingStatus } from '@prisma/client';
 import { ACTIVE_MEETING_STATUSES_ARRAY } from './constants/meeting-status.constants';
+import { PaginatedResponseDto, createPaginationMeta } from '../common/dto/api-response.dto';
 import type {
   MeetingCreateDto,
   MeetingUpdateDto,
@@ -158,6 +159,23 @@ export class BookingService {
           tx,
         );
 
+        // Generate meeting URL for video meetings (WebRTC)
+        if (meeting.meetingType === 'video') {
+          const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3000';
+          const meetingUrl = `${frontendUrl}/meeting/${meeting.id}`;
+          
+          // Update meeting with generated URL
+          await tx.meeting.update({
+            where: { id: meeting.id },
+            data: { meetingUrl },
+          });
+          
+          // Update the meeting object for response
+          meeting.meetingUrl = meetingUrl;
+          
+          this.logger.log(`Generated WebRTC meeting URL for meeting ${meeting.id}`);
+        }
+
         // Publish appointment booked event
         await this.eventBus.emit(
           new AppointmentBookedEvent({
@@ -200,7 +218,7 @@ export class BookingService {
     },
   ) {
     try {
-      const where: any =
+      const where: Record<string, unknown> =
         role === 'therapist' ? { therapistId: userId } : { clientId: userId };
 
       // Handle status filtering
@@ -211,39 +229,54 @@ export class BookingService {
         where.status = { in: statusValues };
       }
 
-      const meetings = await this.prisma.meeting.findMany({
-        where,
-        include: {
-          client: {
-            select: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+      const limit = queryOptions?.limit || 20;
+      const offset = queryOptions?.offset || 0;
+
+      const [meetings, total] = await Promise.all([
+        this.prisma.meeting.findMany({
+          where,
+          include: {
+            client: {
+              select: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+            therapist: {
+              select: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
                 },
               },
             },
           },
-          therapist: {
-            select: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true,
-                },
-              },
-            },
-          },
-        },
-        orderBy: { startTime: 'desc' },
-        take: queryOptions?.limit,
-        skip: queryOptions?.offset,
-      });
+          orderBy: { startTime: 'desc' },
+          take: limit,
+          skip: offset,
+        }),
+        this.prisma.meeting.count({ where }),
+      ]);
 
       // Transform the response to match frontend expectations
-      return MeetingResponseTransformer.transformMany(meetings);
+      const transformedMeetings = MeetingResponseTransformer.transformMany(meetings);
+      
+      // Return paginated response if limit/offset provided
+      if (queryOptions?.limit !== undefined || queryOptions?.offset !== undefined) {
+        const page = Math.floor(offset / limit) + 1;
+        const meta = createPaginationMeta(total, page, limit);
+        return PaginatedResponseDto.success(transformedMeetings, meta);
+      }
+
+      return transformedMeetings;
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),

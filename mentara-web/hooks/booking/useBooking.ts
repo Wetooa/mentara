@@ -135,7 +135,7 @@ export function useBooking() {
 
   // Accept meeting request mutation
   const acceptMeetingRequestMutation = useMutation({
-    mutationFn: ({ meetingId, meetingUrl }: { meetingId: string; meetingUrl: string }) => 
+    mutationFn: ({ meetingId, meetingUrl }: { meetingId: string; meetingUrl?: string }) => 
       api.meetings.acceptMeetingRequest(meetingId, meetingUrl),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
@@ -223,7 +223,7 @@ export function useBooking() {
       updateMeetingMutation.mutate({ meetingId, updates }),
     
     // New meeting status transition methods
-    acceptMeetingRequest: (meetingId: string, meetingUrl: string) =>
+    acceptMeetingRequest: (meetingId: string, meetingUrl?: string) =>
       acceptMeetingRequestMutation.mutate({ meetingId, meetingUrl }),
     startMeeting: (meetingId: string) => startMeetingMutation.mutate(meetingId),
     completeMeeting: (meetingId: string, notes?: string) =>
@@ -314,7 +314,7 @@ export function useBookingRequests(limit?: number) {
 
   // Accept booking request mutation
   const acceptRequestMutation = useMutation({
-    mutationFn: ({ meetingId, meetingUrl }: { meetingId: string; meetingUrl: string }) => 
+    mutationFn: ({ meetingId, meetingUrl }: { meetingId: string; meetingUrl?: string }) => 
       api.meetings.acceptMeetingRequest(meetingId, meetingUrl),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meetings', 'booking-requests'] });
@@ -351,7 +351,7 @@ export function useBookingRequests(limit?: number) {
     isLoading,
     error,
     refetch,
-    acceptRequest: (meetingId: string, meetingUrl: string) => 
+    acceptRequest: (meetingId: string, meetingUrl?: string) => 
       acceptRequestMutation.mutate({ meetingId, meetingUrl }),
     denyRequest: (meetingId: string, reason?: string) => 
       denyRequestMutation.mutate({ meetingId, reason }),

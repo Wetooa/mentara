@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
-import Logo from "@/components/Logo";
 import PreAssessmentInitialCheckList from "@/components/pre-assessment/forms/ChecklistForm";
 import QuestionnaireForm from "@/components/pre-assessment/forms/QuestionnaireForm";
 import PreAssessmentSignUp from "@/components/pre-assessment/forms/PreAssessmentSignUp";
@@ -11,33 +9,34 @@ import VerifyAccount from "@/components/auth/VerifyAccount";
 import PreAssessmentProgressBar from "@/components/pre-assessment/ProgressBar";
 import ModeSelectionForm from "@/components/pre-assessment/forms/ModeSelectionForm";
 import ChatbotInterface from "@/components/pre-assessment/ChatbotInterface";
-import { Button } from "@/components/ui/button";
 import { fadeDown } from "@/lib/animations";
 import { usePreAssessment } from "@/hooks/pre-assessment/usePreAssessment";
-import { useRouter } from "next/navigation";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 function PreAssessmentPageContentInner() {
   const [mounted, setMounted] = useState(false);
+  
   // Use window.location instead of usePathname to avoid SSR issues
-  const getInitialMode = (): 'selection' | 'checklist' | 'chatbot' => {
+  const getInitialMode = (): 'selection' | 'checklist' => {
     if (typeof window !== 'undefined') {
       const pathname = window.location.pathname;
       if (pathname.includes('/checklist')) return 'checklist';
-      if (pathname.includes('/chat')) return 'chatbot';
     }
     return 'selection';
   };
   
-  const [mode, setMode] = useState<'selection' | 'checklist' | 'chatbot'>(() => {
-    // Only use pathname on client side
-    if (typeof window === 'undefined') return 'selection';
-    return getInitialMode();
-  });
+  const [mode, setMode] = useState<'selection' | 'checklist' | 'chatbot' | 'registration'>('selection');
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
+    // Set mode only after mount
+    if (typeof window !== 'undefined') {
+      setMode(getInitialMode());
+    }
   }, []);
   const { setQuestionnaires, nextStep } = usePreAssessmentChecklistStore();
   const {
@@ -53,12 +52,9 @@ function PreAssessmentPageContentInner() {
     setMode(selectedMode);
   };
 
-  const handleChatbotComplete = (results: {
-    scores: Record<string, { score: number; severity: string }>;
-    severityLevels: Record<string, string>;
-  }) => {
-    // Redirect to results or dashboard
-    router.push('/dashboard');
+  const handleChatbotComplete = () => {
+    // After chatbot assessment is complete, redirect to therapist page or dashboard
+    router.push('/client/therapist');
   };
 
   const handleChatbotCancel = () => {
@@ -79,6 +75,11 @@ function PreAssessmentPageContentInner() {
           onCancel={handleChatbotCancel}
         />
       );
+    }
+
+    // Registration mode (after checklist completion)
+    if (mode === 'registration') {
+      return <PreAssessmentSignUp />;
     }
 
     // Checklist mode - show questionnaire selection first (step 0), then questionnaires
@@ -104,37 +105,14 @@ function PreAssessmentPageContentInner() {
   }
 
   return (
-    <div className="bg-gradient-to-b from-tertiary to-transparent w-full h-full">
-      <motion.nav
-        variants={fadeDown}
-        className="flex items-center justify-between p-4 fixed w-full z-10 bg-gradient-to-b from-tertiary/10 via-transparent to-transparent"
-      >
-        <Button
-          disabled={mode === 'selection' || (mode === 'checklist' && isPrevDisabled)}
-          onClick={() => {
-            if (mode === 'chatbot') {
-              setMode('selection');
-            } else {
-              handlePrevButtonOnClick();
-            }
-          }}
-          className="rounded-full aspect-square font-bold flex-shrink-0"
-        >
-          <ArrowLeft />
-        </Button>
-
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-          <Logo />
+    <div className="w-full">
+      {mode === 'chatbot' ? (
+        // Chatbot takes full width and doesn't need the card wrapper
+        <div className="w-full h-full">
+          {getCurrentForm()}
         </div>
-
-        <div className="w-10" /> {/* Spacer to balance the back button */}
-      </motion.nav>
-
-      <main className="flex flex-col items-center justify-center h-full">
-        <motion.div
-          variants={fadeDown}
-          className="bg-primary-foreground rounded-3xl shadow-lg overflow-hidden max-w-[400px] w-full"
-        >
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg w-full mx-auto overflow-visible">
           {mode === 'checklist' && <PreAssessmentProgressBar />}
 
           <div className="w-full">
@@ -142,8 +120,8 @@ function PreAssessmentPageContentInner() {
               {getCurrentForm()}
             </motion.div>
           </div>
-        </motion.div>
-      </main>
+        </div>
+      )}
     </div>
   );
 }

@@ -120,15 +120,17 @@ function SinglePageTherapistApplicationContent() {
                     type="submit"
                     variant="secondary"
                     disabled={isSubmitting || overallProgress < 100}
-                    className="px-8 py-4 rounded-xl font-semibold text-lg focus:outline-none focus:ring-4 focus:ring-secondary/30 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                    className="px-8 py-4 rounded-xl font-semibold text-lg focus:outline-none focus:ring-4 focus:ring-secondary/30 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 min-h-[44px] touch-manipulation"
+                    aria-label={overallProgress < 100 ? `Submit application (${overallProgress}% complete)` : "Submit application"}
+                    aria-disabled={isSubmitting || overallProgress < 100}
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Submitting Application...
+                        <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                        <span>Submitting Application...</span>
                       </>
                     ) : (
-                      <>Submit Application</>
+                      <span>Submit Application</span>
                     )}
                   </Button>
                 </div>
@@ -181,14 +183,20 @@ function SinglePageTherapistApplicationContent() {
 
       {/* Restart Form Confirmation Modal */}
       {showRestartModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="restart-modal-title"
+          aria-describedby="restart-modal-description"
+        >
           <div className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-md w-full">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center" aria-hidden="true">
                 <AlertCircle className="w-5 h-5 text-red-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 id="restart-modal-title" className="text-lg font-semibold text-gray-900">
                   Restart Form
                 </h3>
                 <p className="text-sm text-gray-600">
@@ -197,7 +205,7 @@ function SinglePageTherapistApplicationContent() {
               </div>
             </div>
 
-            <p className="text-gray-700 mb-6">
+            <p id="restart-modal-description" className="text-gray-700 mb-6">
               Are you sure you want to restart the form? All your current
               progress will be lost permanently.
             </p>
@@ -208,6 +216,7 @@ function SinglePageTherapistApplicationContent() {
                 variant="outline"
                 onClick={() => setShowRestartModal(false)}
                 className="min-h-[44px] px-4 py-2 touch-manipulation"
+                aria-label="Cancel restart form"
               >
                 Cancel
               </Button>
@@ -216,6 +225,7 @@ function SinglePageTherapistApplicationContent() {
                 variant="destructive"
                 onClick={handleRestartForm}
                 className="min-h-[44px] px-4 py-2 touch-manipulation"
+                aria-label="Confirm restart form"
               >
                 Yes, Restart Form
               </Button>
@@ -229,7 +239,11 @@ function SinglePageTherapistApplicationContent() {
 
 export default function SinglePageTherapistApplication() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen" aria-live="polite" aria-busy="true">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" aria-label="Loading therapist application"></div>
+      </div>
+    }>
       <SinglePageTherapistApplicationContent />
     </Suspense>
   );

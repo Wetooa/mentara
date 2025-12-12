@@ -111,9 +111,9 @@ export default function TherapistDashboardPage() {
   // Enhanced error state with retry functionality
   if (error && !isLoading) {
     return (
-      <div className="w-full h-full p-6 space-y-8">
+      <div className="w-full h-full p-6 space-y-8" role="alert" aria-live="assertive">
         <Alert className="max-w-md mx-auto border-secondary/30 bg-secondary/10">
-          <AlertCircle className="h-4 w-4 text-secondary" />
+          <AlertCircle className="h-4 w-4 text-secondary" aria-hidden="true" />
           <AlertDescription className="flex items-center justify-between text-gray-900">
             <span>Failed to load dashboard data</span>
             <Button
@@ -121,8 +121,9 @@ export default function TherapistDashboardPage() {
               size="sm"
               onClick={handleRetry}
               className="ml-4 border-secondary/30 text-secondary hover:bg-secondary/20"
+              aria-label="Retry loading dashboard"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
               Retry
             </Button>
           </AlertDescription>
@@ -134,13 +135,13 @@ export default function TherapistDashboardPage() {
   // Enhanced loading state with skeleton components
   if (isLoading || !data) {
     return (
-      <div className="w-full min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
+      <div className="w-full min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8" aria-live="polite" aria-busy="true">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Loading Header */}
-          <div className="space-y-3">
+          <header className="space-y-3" aria-label="Loading therapist dashboard">
             <Skeleton className="h-10 w-64" />
             <Skeleton className="h-6 w-96" />
-          </div>
+          </header>
 
           {/* Loading Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -177,7 +178,8 @@ export default function TherapistDashboardPage() {
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="w-full h-full p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-[1600px] mx-auto">
         {/* Page Header - Similar to Client */}
-        <TherapistDashboardHeader
+        <header>
+          <TherapistDashboardHeader
           therapist={{
             firstName: therapist?.firstName || "Therapist",
             lastName: therapist?.lastName || "",
@@ -186,6 +188,7 @@ export default function TherapistDashboardPage() {
           }}
           onViewSchedule={handleScheduleClick}
         />
+        </header>
 
         {/* Stats Overview */}
         <DashboardStats
@@ -208,7 +211,7 @@ export default function TherapistDashboardPage() {
         />
 
         {/* Main Dashboard Content - Optimized layout with 2:1 ratio */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min">
+        <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min" aria-label="Therapist dashboard content">
           {/* Row 1: Client Matches (4 cols - 2x larger than This Week), Today's Schedule (2 cols) */}
           <div className="md:col-span-2 lg:col-span-4">
             <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
@@ -363,13 +366,29 @@ export default function TherapistDashboardPage() {
                   </div>
                 ) : recentChats.length > 0 ? (
                   <div className="space-y-3">
-                    {recentChats.slice(0, 4).map((chat: any) => (
+                    {recentChats.slice(0, 4).map((chat: {
+                      id: string;
+                      name: string;
+                      avatar?: string;
+                      lastMessage?: string;
+                      time?: string;
+                      unread?: number;
+                    }) => (
                       <MotionDivWrapper
                         key={chat.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="flex items-center gap-3 p-3 bg-secondary/5 rounded-lg border border-secondary/10 hover:border-secondary/30 hover:shadow-sm transition-all cursor-pointer"
                         onClick={() => handleChatClick(chat.id)}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Open chat with ${chat.name}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleChatClick(chat.id);
+                          }
+                        }}
                       >
                         <Avatar className="h-10 w-10 ring-2 ring-secondary/20">
                           <AvatarImage src={chat.avatar} />

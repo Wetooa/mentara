@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock, User, Video, Phone, MapPin, ExternalLink } from "lucide-react";
 import { format, parseISO, isToday, isTomorrow, isYesterday } from "date-fns";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import type { Meeting } from "@/lib/api/services/meetings";
 
 interface SessionCardProps {
@@ -101,6 +102,7 @@ export function SessionCard({
   showClientInfo = false,
   variant = 'default'
 }: SessionCardProps) {
+  const router = useRouter();
   const therapistName = session.therapist 
     ? `${session.therapist.user.firstName} ${session.therapist.user.lastName}`
     : 'Unknown Therapist';
@@ -108,6 +110,10 @@ export function SessionCard({
   const clientName = session.client
     ? `${session.client.user.firstName} ${session.client.user.lastName}`
     : 'Unknown Client';
+
+  // Check if meeting URL is internal (WebRTC meeting room)
+  const isInternalMeetingUrl = session.meetingUrl?.includes('/meeting/');
+  const isInPersonMeeting = session.meetingUrl && !isInternalMeetingUrl && !session.meetingUrl.includes('http');
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -222,19 +228,39 @@ export function SessionCard({
           {session.meetingUrl && (
             <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 mb-4">
               <div className="flex items-start gap-2">
-                {session.meetingUrl.includes('http') ? (
+                {isInternalMeetingUrl ? (
                   <Video className="h-4 w-4 text-blue-600 mt-0.5" />
-                ) : (
+                ) : isInPersonMeeting ? (
                   <MapPin className="h-4 w-4 text-blue-600 mt-0.5" />
+                ) : (
+                  <Video className="h-4 w-4 text-blue-600 mt-0.5" />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-blue-900 mb-1">
-                    {session.meetingUrl.includes('http') ? 'Video Meeting Link' : 'Meeting Location'}
+                    {isInternalMeetingUrl ? 'Video Meeting' : isInPersonMeeting ? 'Meeting Location' : 'Video Meeting Link'}
                   </p>
-                  <p className="text-xs text-blue-800 break-all">
-                    {session.meetingUrl}
-                  </p>
-                  {session.meetingUrl.includes('http') && (
+                  {isInPersonMeeting ? (
+                    <p className="text-xs text-blue-800 break-all">
+                      {session.meetingUrl}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-blue-800 break-all">
+                      {isInternalMeetingUrl ? 'Join meeting room' : session.meetingUrl}
+                    </p>
+                  )}
+                  {isInternalMeetingUrl && canJoin && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const meetingId = session.id;
+                        router.push(`/meeting/${meetingId}`);
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 flex items-center gap-1"
+                    >
+                      Join Meeting
+                    </button>
+                  )}
+                  {!isInternalMeetingUrl && session.meetingUrl.includes('http') && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -243,7 +269,7 @@ export function SessionCard({
                       className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 flex items-center gap-1"
                     >
                       <ExternalLink className="h-3 w-3" />
-                      Join Meeting
+                      Open Meeting
                     </button>
                   )}
                 </div>

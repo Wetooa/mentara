@@ -155,7 +155,7 @@ export function TherapistApiDebug() {
           <div>
             <Label>API Configuration</Label>
             <div className="text-sm text-muted-foreground mt-1">
-              <div>Base URL: {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}</div>
+              <div>Base URL: {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000/api'}</div>
               <div>Expected endpoint: GET /therapists/{'{id}'}</div>
               <div>Auth required: Yes (Bearer token)</div>
             </div>

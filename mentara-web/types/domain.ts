@@ -51,7 +51,7 @@ export interface TherapistDashboardResponseDto {
 
 // Billing types
 export interface CreatePaymentMethodDto {
-  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA';
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA' | 'INSURANCE';
   nickname?: string;
   
   // Card fields
@@ -81,6 +81,17 @@ export interface CreatePaymentMethodDto {
   mayaNumber?: string;
   mayaName?: string;
   mayaEmail?: string;
+  
+  // Insurance fields
+  insuranceProviderName?: string;
+  policyNumber?: string;
+  memberId?: string;
+  groupNumber?: string;
+  coverageDetails?: {
+    coverageType?: 'FULL' | 'COPAY' | 'PERCENTAGE';
+    copayAmount?: number;
+    coveragePercentage?: number;
+  };
   
   // Address
   billingAddress?: any;

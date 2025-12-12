@@ -150,6 +150,95 @@ export function createClientService(client: AxiosInstance) {
       console.log("Cancel therapist request response:", response.data);
       return response.data;
     },
+
+    // ================================
+    // PREFERENCES OPERATIONS
+    // ================================
+    /**
+     * Create client preferences
+     * POST /client/preferences
+     */
+    async createPreferences(data: {
+      genderPreference?: string;
+      agePreference?: string;
+      languagePreferences?: string[];
+      treatmentApproaches?: string[];
+      sessionFormat?: string;
+      sessionFrequency?: string;
+      budgetRange?: string;
+      locationPreference?: string;
+      availabilityPreference?: string[];
+      specialConsiderations?: string;
+    }): Promise<{ preferences: any }> {
+      const response = await client.post("/client/preferences", data);
+      return response.data;
+    },
+
+    /**
+     * Update client preferences
+     * PUT /client/preferences
+     */
+    async updatePreferences(data: {
+      genderPreference?: string;
+      agePreference?: string;
+      languagePreferences?: string[];
+      treatmentApproaches?: string[];
+      sessionFormat?: string;
+      sessionFrequency?: string;
+      budgetRange?: string;
+      locationPreference?: string;
+      availabilityPreference?: string[];
+      specialConsiderations?: string;
+    }): Promise<{ preferences: any }> {
+      const response = await client.put("/client/preferences", data);
+      return response.data;
+    },
+
+    /**
+     * Get client preferences
+     * GET /client/preferences
+     */
+    async getPreferences(): Promise<{ preferences: any | null }> {
+      const response = await client.get("/client/preferences");
+      return response.data;
+    },
+
+    /**
+     * Complete onboarding (creates/updates preferences)
+     * This is a convenience method that saves preferences from onboarding
+     */
+    async completeOnboarding(data: {
+      profile?: any;
+      goals?: any;
+      preferences?: {
+        genderPreference?: string;
+        agePreference?: string;
+        languagePreferences?: string[];
+        treatmentApproaches?: string[];
+        sessionFormat?: string;
+        sessionFrequency?: string;
+        budgetRange?: string;
+        locationPreference?: string;
+        availabilityPreference?: string[];
+        specialConsiderations?: string;
+      };
+    }): Promise<{ success: boolean }> {
+      // Save preferences if provided
+      if (data.preferences) {
+        try {
+          await client.put("/client/preferences", data.preferences);
+        } catch (error) {
+          // If preferences don't exist, create them
+          try {
+            await client.post("/client/preferences", data.preferences);
+          } catch (createError) {
+            console.error("Failed to save preferences:", createError);
+            throw createError;
+          }
+        }
+      }
+      return { success: true };
+    },
   };
 }
 

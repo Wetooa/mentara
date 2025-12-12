@@ -15,9 +15,10 @@ export interface RLSContext {
 /**
  * Create RLS middleware for Prisma Client
  * Apply this in your PrismaService onModuleInit
+ * Note: Prisma v6 deprecated middlewares in favor of Client Extensions
  */
 export function createRLSMiddleware(getContext: () => RLSContext | null) {
-  return async (params: Prisma.MiddlewareParams, next: any) => {
+  return async (params: any, next: any) => {
     const context = getContext();
 
     // Skip RLS if no context (system operations)

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { TherapistUser } from "@/lib/api/services/auth";
 import type { Meeting } from "@/types/api/meetings";
+import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 export interface TherapistAuthState {
   // Auth state
@@ -82,8 +83,8 @@ export const useTherapistAuthStore = create<TherapistAuthState>()(
         set({ accessToken, refreshToken });
         // Store in localStorage for middleware access
         if (typeof window !== 'undefined') {
-          localStorage.setItem('access_token', accessToken);
-          localStorage.setItem('refresh_token', refreshToken);
+          localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+          localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
         }
       },
 

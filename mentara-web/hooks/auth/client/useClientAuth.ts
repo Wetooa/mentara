@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { useApi } from "@/lib/api";
+import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 import type { 
   LoginDto as ClientLoginDto, 
   ClientAuthResponse
@@ -73,8 +74,8 @@ export function useClientAuth(): UseClientAuthReturn {
     mutationFn: (credentials: ClientLoginDto) => api.auth.client.login(credentials),
     onSuccess: (data) => {
       // Store tokens
-      localStorage.setItem("access_token", data.accessToken);
-      localStorage.setItem("refresh_token", data.refreshToken);
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
       
       // Update query cache
       queryClient.setQueryData(["auth", "client", "current-user"], data.user);
@@ -183,7 +184,7 @@ export function useClientAuth(): UseClientAuthReturn {
 
   const refreshToken = useCallback(async () => {
     try {
-      const refreshTokenValue = localStorage.getItem("refresh_token");
+      const refreshTokenValue = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
       if (!refreshTokenValue) {
         throw new Error("No refresh token found");
       }
@@ -191,8 +192,8 @@ export function useClientAuth(): UseClientAuthReturn {
       const response = await api.auth.client.refreshToken(refreshTokenValue);
       
       // Update tokens
-      localStorage.setItem("access_token", response.accessToken);
-      localStorage.setItem("refresh_token", response.refreshToken);
+      localStorage.setItem(TOKEN_STORAGE_KEY, response.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, response.refreshToken);
       
       // Refetch user data
       queryClient.invalidateQueries({ queryKey: ["auth", "client", "current-user"] });

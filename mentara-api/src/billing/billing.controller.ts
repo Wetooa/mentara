@@ -42,6 +42,7 @@ export class BillingController {
   ) {
     return this.billingService.createPaymentMethod({
       ...body,
+      type: body.type as any, // Type assertion to handle DTO string union to Prisma enum
       userId,
     });
   }
@@ -62,6 +63,11 @@ export class BillingController {
   @Delete('payment-methods/:id')
   deletePaymentMethod(@Param('id') id: string) {
     return this.billingService.deletePaymentMethod(id);
+  }
+
+  @Post('payment-methods/:id/verify')
+  verifyInsurance(@Param('id') id: string) {
+    return this.billingService.verifyInsurance(id);
   }
 
   // ===== PAYMENT PROCESSING =====

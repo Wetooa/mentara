@@ -1,0 +1,19 @@
+model ClientPreferences {
+  id                     String   @id @default(uuid())
+  clientId               String   @unique
+  genderPreference       String? // "no-preference" | "male" | "female" | "non-binary"
+  agePreference          String? // "no-preference" | "younger" | "similar" | "older"
+  languagePreferences    String[] @default([])
+  treatmentApproaches    String[] @default([])
+  sessionFormat          String? // "in-person" | "video" | "phone" | "no-preference"
+  sessionFrequency       String? // "weekly" | "bi-weekly" | "monthly" | "as-needed"
+  budgetRange            String? // "under-100" | "100-150" | "150-200" | "200-plus" | "insurance"
+  locationPreference     String?
+  availabilityPreference String[] @default([]) // ["morning", "afternoon", "evening", "weekends", "weekdays"]
+  specialConsiderations  String? // Text field for accessibility, cultural needs, etc.
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  client                 Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+
+  @@index([clientId])
+}

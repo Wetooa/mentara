@@ -13,6 +13,7 @@ import {
   HttpCode,
   HttpStatus,
   HttpException,
+  Logger,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { MessagingService } from './messaging.service';
@@ -35,6 +36,8 @@ import type {
 @Controller('messaging')
 @UseGuards(JwtAuthGuard)
 export class MessagingController {
+  private readonly logger = new Logger(MessagingController.name);
+
   constructor(
     private readonly messagingService: MessagingService,
     private readonly supabaseStorageService: SupabaseStorageService,
@@ -72,11 +75,8 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Query() params: ConversationListParams,
   ) {
-    console.log(
-      '🚀 [MESSAGING CONTROLLER] getUserConversations endpoint called',
-    );
-    console.log('👤 [USER ID]', userId);
-    console.log('📊 [QUERY PARAMS]', params);
+    this.logger.debug(`getUserConversations endpoint called for userId: ${userId}`);
+    this.logger.debug(`Query params: ${JSON.stringify(params)}`);
 
     try {
       const result = await this.messagingService.getUserConversations(
@@ -85,27 +85,24 @@ export class MessagingController {
         params.limit ?? 20,
       );
 
-      console.log(
-        '✅ [CONTROLLER RESPONSE] Returning',
-        result.length,
-        'conversations',
-      );
-      console.log(
-        '📝 [RESPONSE SUMMARY]:',
-        result.map((conv) => ({
-          id: conv.id,
-          type: conv.type,
-          title: conv.title,
-          participantCount: conv.participants?.length ?? 0,
-          hasLastMessage: !!conv.lastMessage,
-        })),
+      this.logger.debug(`Returning ${result.length} conversations`);
+      this.logger.debug(
+        `Response summary: ${JSON.stringify(
+          result.map((conv) => ({
+            id: conv.id,
+            type: conv.type,
+            title: conv.title,
+            participantCount: conv.participants?.length ?? 0,
+            hasLastMessage: !!conv.lastMessage,
+          })),
+        )}`,
       );
 
       return result;
     } catch (error) {
-      console.error(
-        '❌ [CONTROLLER ERROR] getUserConversations failed:',
-        error,
+      this.logger.error(
+        `getUserConversations failed for userId ${userId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw error;
     }
@@ -116,11 +113,7 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Query('limit') limit?: string,
   ) {
-    console.log(
-      '📞 [MESSAGING CONTROLLER] getRecentCommunications endpoint called',
-    );
-    console.log('👤 [USER ID]', userId);
-    console.log('📊 [LIMIT]', limit);
+    this.logger.debug(`getRecentCommunications endpoint called for userId: ${userId}, limit: ${limit}`);
 
     try {
       const limitNum = limit ? Number(limit) : 5;
@@ -129,27 +122,24 @@ export class MessagingController {
         limitNum,
       );
 
-      console.log(
-        '✅ [CONTROLLER RESPONSE] Returning',
-        result.length,
-        'recent communications',
-      );
-      console.log(
-        '📱 [RESPONSE SUMMARY]:',
-        result.map((comm) => ({
-          id: comm?.id,
-          name: comm?.name,
-          role: comm?.role,
-          hasLastMessage: !!comm?.lastMessage,
-          unreadCount: comm?.unreadCount,
-        })),
+      this.logger.debug(`Returning ${result.length} recent communications`);
+      this.logger.debug(
+        `Response summary: ${JSON.stringify(
+          result.map((comm) => ({
+            id: comm?.id,
+            name: comm?.name,
+            role: comm?.role,
+            hasLastMessage: !!comm?.lastMessage,
+            unreadCount: comm?.unreadCount,
+          })),
+        )}`,
       );
 
       return result;
     } catch (error) {
-      console.error(
-        '❌ [CONTROLLER ERROR] getRecentCommunications failed:',
-        error,
+      this.logger.error(
+        `getRecentCommunications failed for userId ${userId}`,
+        error instanceof Error ? error.stack : String(error),
       );
       throw error;
     }
@@ -160,11 +150,7 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Param('conversationId') conversationId: string,
   ) {
-    console.log(
-      '🔍 [MESSAGING CONTROLLER] getConversationById endpoint called',
-    );
-    console.log('👤 [USER ID]', userId);
-    console.log('💬 [CONVERSATION ID]', conversationId);
+    this.logger.debug(`getConversationById endpoint called for userId: ${userId}, conversationId: ${conversationId}`);
 
     try {
       const result = await this.messagingService.getConversationById(
@@ -172,17 +158,22 @@ export class MessagingController {
         conversationId,
       );
 
-      console.log('✅ [CONTROLLER RESPONSE] Returning conversation details');
-      console.log('📝 [RESPONSE SUMMARY]:', {
-        id: result.id,
-        type: result.type,
-        title: result.title,
-        participantCount: result.participants?.length || 0,
-      });
+      this.logger.debug('Returning conversation details');
+      this.logger.debug(
+        `Response summary: ${JSON.stringify({
+          id: result.id,
+          type: result.type,
+          title: result.title,
+          participantCount: result.participants?.length || 0,
+        })}`,
+      );
 
       return result;
     } catch (error) {
-      console.error('❌ [CONTROLLER ERROR] getConversationById failed:', error);
+      this.logger.error(
+        `getConversationById failed for userId ${userId}, conversationId ${conversationId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
       throw error;
     }
   }
@@ -213,18 +204,18 @@ export class MessagingController {
     @Body() sendMessageDto: SendMessageDto,
     @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ) {
-    console.log('📤 [MESSAGE CONTROLLER] Send message request received');
-    console.log('👤 [SENDER]', userId);
-    console.log('💬 [CONVERSATION]', conversationId);
-    console.log('📝 [MESSAGE DATA]', {
-      content:
-        sendMessageDto.content?.substring(0, 50) +
-        (sendMessageDto.content?.length > 50 ? '...' : ''),
-      type: sendMessageDto.type,
-      hasReplyTo: !!sendMessageDto.replyToMessageId,
-      hasAttachments: files?.length > 0,
-    });
-    console.log('📎 [FILES]', files?.length || 0, 'files uploaded');
+    this.logger.debug(`Send message request received from userId: ${userId}, conversationId: ${conversationId}`);
+    this.logger.debug(
+      `Message data: ${JSON.stringify({
+        content:
+          sendMessageDto.content?.substring(0, 50) +
+          (sendMessageDto.content?.length > 50 ? '...' : ''),
+        type: sendMessageDto.type,
+        hasReplyTo: !!sendMessageDto.replyToMessageId,
+        hasAttachments: files?.length > 0,
+      })}`,
+    );
+    this.logger.debug(`Files uploaded: ${files?.length || 0}`);
     // Validate and upload files if provided
     const fileResults: FileUploadResult[] = [];
     if (files && files.length > 0) {
@@ -247,7 +238,7 @@ export class MessagingController {
     }
 
     try {
-      console.log('🔄 [MESSAGE CONTROLLER] Calling messaging service...');
+      this.logger.debug('Calling messaging service to send message...');
       const result = await this.messagingService.sendMessage(
         userId,
         conversationId,
@@ -257,23 +248,26 @@ export class MessagingController {
         files.map((f) => f.size),
       );
 
-      console.log('✅ [MESSAGE CONTROLLER] Message sent successfully');
-      console.log('📨 [MESSAGE RESULT]', {
-        messageId: result.id,
-        conversationId: result.conversationId,
-        senderId: result.senderId,
-        content:
-          result.content?.substring(0, 50) +
-          (result.content?.length > 50 ? '...' : ''),
-        timestamp: result.createdAt,
-      });
-      console.log(
-        '🚀 [MESSAGE CONTROLLER] Message should now be broadcasting to participants...',
+      this.logger.debug('Message sent successfully');
+      this.logger.debug(
+        `Message result: ${JSON.stringify({
+          messageId: result.id,
+          conversationId: result.conversationId,
+          senderId: result.senderId,
+          content:
+            result.content?.substring(0, 50) +
+            (result.content?.length > 50 ? '...' : ''),
+          timestamp: result.createdAt,
+        })}`,
       );
+      this.logger.debug('Message should now be broadcasting to participants');
 
       return result;
     } catch (error) {
-      console.error('❌ [MESSAGE CONTROLLER] Send message failed:', error);
+      this.logger.error(
+        `Send message failed for userId ${userId}, conversationId ${conversationId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
       throw error;
     }
   }

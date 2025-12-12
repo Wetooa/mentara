@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/lib/api";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 import { answersToAnswerMatrix } from "@/lib/questionnaire";
+import { extractErrorMessage } from "@/lib/api/errorHandler";
 
 /**
  * Client registration form data structure
@@ -180,16 +181,20 @@ export function useClientRegistration(
         : "Registration successful! Please check your email for the verification code.";
 
       toast.success(successMessage);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setRegistrationStatus("error");
-      const errorMessage =
-        error?.response?.data?.message ||
-        "Registration failed. Please try again.";
-      toast.error(errorMessage);
+      
+      // Extract user-friendly error message
+      const errorMessage = extractErrorMessage(error) || "Registration failed. Please try again.";
+      
+      // Show user-friendly error message in toast
+      toast.error("Registration failed", {
+        description: errorMessage,
+      });
 
-      // Log error for debugging in development
+      // Only log error message (not full error object) in development to avoid console spam
       if (process.env.NODE_ENV === "development") {
-        console.error("Registration error:", error);
+        console.debug("[Registration] Error:", errorMessage);
       }
     } finally {
       setIsLoading(false);
@@ -220,15 +225,17 @@ export function useClientRegistration(
       } else {
         toast.error(result.message || "Verification failed. Please try again.");
       }
-    } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        "Verification failed. Please try again.";
-      toast.error(errorMessage);
+    } catch (error: unknown) {
+      // Extract user-friendly error message
+      const errorMessage = extractErrorMessage(error) || "Verification failed. Please try again.";
+      
+      toast.error("Verification failed", {
+        description: errorMessage,
+      });
 
-      // Log error for debugging in development
+      // Only log error message in development
       if (process.env.NODE_ENV === "development") {
-        console.error("Verification error:", error);
+        console.debug("[Verification] Error:", errorMessage);
       }
     } finally {
       setIsVerifying(false);
@@ -253,16 +260,18 @@ export function useClientRegistration(
       } else {
         throw new Error(result.message);
       }
-    } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to resend verification code.";
-      toast.error(errorMessage, { id: "resend-otp" });
+    } catch (error: unknown) {
+      // Extract user-friendly error message
+      const errorMessage = extractErrorMessage(error) || "Failed to resend verification code.";
+      
+      toast.error("Failed to resend code", {
+        description: errorMessage,
+        id: "resend-otp",
+      });
 
-      // Log error for debugging in development
+      // Only log error message in development
       if (process.env.NODE_ENV === "development") {
-        console.error("Resend OTP error:", error);
+        console.debug("[Resend OTP] Error:", errorMessage);
       }
     }
   };

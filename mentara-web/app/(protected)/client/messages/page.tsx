@@ -74,12 +74,12 @@ export default function ClientMessagesPage() {
   };
 
   return (
-    <div className="h-full w-full p-6 flex flex-col">
+    <main className="h-full w-full p-6 flex flex-col" aria-label="Messages">
       <div className="flex-1 min-h-0">
         <Suspense fallback={
-          <div className="space-y-4">
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-64 w-full" />
+          <div className="space-y-4" aria-live="polite" aria-busy="true">
+            <Skeleton className="h-16 w-full" aria-label="Loading messages header" />
+            <Skeleton className="h-64 w-full" aria-label="Loading messages content" />
           </div>
         }>
           <MessengerInterface
@@ -90,6 +90,6 @@ export default function ClientMessagesPage() {
           />
         </Suspense>
       </div>
-    </div>
+    </main>
   );
 }

@@ -220,6 +220,35 @@ These environment variables enhance functionality but are not required for basic
 - **Description**: SMTP authentication password
 - **Security**: Use app-specific passwords for Gmail and similar services
 
+### AI Services
+
+#### `SAMBANOVA_API_KEY`
+- **Type**: String
+- **Minimum Length**: 20 characters
+- **Example**: `7cd0...e3ad`
+- **Description**: SambaNova Cloud API key for AI-powered chatbot functionality
+- **Source**: SambaNova Cloud Dashboard
+- **Notes**: Required for pre-assessment chatbot feature
+
+#### `SAMBANOVA_BASE_URL`
+- **Type**: String (HTTPS URL)
+- **Default**: `https://api.sambanova.ai/v1`
+- **Example**: `https://api.sambanova.ai/v1`
+- **Description**: SambaNova API base URL
+- **Notes**: Usually the default value is correct
+
+#### `SAMBANOVA_MODEL`
+- **Type**: String
+- **Default**: `Meta-Llama-3.1-8B-Instruct`
+- **Example**: `Meta-Llama-3.1-8B-Instruct`, `Meta-Llama-3.1-70B-Instruct`, `Meta-Llama-3.2-1B-Instruct`
+- **Description**: SambaNova model to use for chat completions
+- **Recommended Models**:
+  - `Meta-Llama-3.1-8B-Instruct` - Balanced performance (default)
+  - `Meta-Llama-3.1-70B-Instruct` - Higher quality, slower
+  - `Meta-Llama-3.2-1B-Instruct` - Faster, lower cost
+  - `Meta-Llama-3.2-3B-Instruct` - Good balance
+- **Notes**: Model availability depends on your API key access level. Avoid using Arabic-specific models like ALLaM for English conversations.
+
 ## Development Environment Setup
 
 ### Minimal Development Setup

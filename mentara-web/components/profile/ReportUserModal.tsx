@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useReportUser } from "@/hooks/profile/useProfile";
 import { UserReportDto } from "@/lib/api/services/profile";
+import { logger } from "@/lib/logger";
 import {
   Dialog,
   DialogContent,
@@ -93,7 +94,7 @@ export function ReportUserModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const reportUserMutation = useReportUser();
 
-  console.log(
+  logger.debug(
     "ReportUserModal rendered with userId:",
     userId,
     "userName:",
@@ -116,7 +117,7 @@ export function ReportUserModal({
 
     setIsSubmitting(true);
 
-    console.log("Submitting report with data:", data, userId);
+    logger.debug("Submitting report with data:", data, userId);
     try {
       await reportUserMutation.mutateAsync({
         userId,
@@ -130,7 +131,7 @@ export function ReportUserModal({
       handleClose();
     } catch (error) {
       // Error handling is done in the mutation hook via toast
-      console.error("Failed to submit report:", error);
+      logger.error("Failed to submit report:", error);
     } finally {
       setIsSubmitting(false);
     }
