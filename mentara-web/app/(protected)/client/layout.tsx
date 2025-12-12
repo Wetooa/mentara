@@ -15,32 +15,64 @@ import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 import { getSidebarStorageKey, getStorageItem } from "@/lib/config/storage";
 
 // Lazy load heavy layout components
-const NotificationDropdown = dynamic(() => import("@/components/notifications/NotificationDropdown").then(mod => ({ default: mod.NotificationDropdown })), {
-  ssr: false,
-  loading: () => <div className="w-10 h-10 rounded-xl" />
-});
+const NotificationDropdown = dynamic(
+  () =>
+    import("@/components/notifications/NotificationDropdown").then((mod) => ({
+      default: mod.NotificationDropdown,
+    })),
+  {
+    ssr: false,
+    loading: () => <div className="w-10 h-10 rounded-xl" />,
+  }
+);
 
-const IncomingCallNotificationContainer = dynamic(() => import("@/components/video-calls/IncomingCallNotification").then(mod => ({ default: mod.IncomingCallNotificationContainer })), {
-  ssr: false,
-  loading: () => null
-});
+const IncomingCallNotificationContainer = dynamic(
+  () =>
+    import("@/components/video-calls/IncomingCallNotification").then((mod) => ({
+      default: mod.IncomingCallNotificationContainer,
+    })),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
 
-const LayoutOmniSearchBar = dynamic(() => import("@/components/search").then(mod => ({ default: mod.LayoutOmniSearchBar })), {
-  ssr: false,
-  loading: () => <div className="h-10 w-full rounded-xl bg-muted animate-pulse" />
-});
+const LayoutOmniSearchBar = dynamic(
+  () =>
+    import("@/components/search").then((mod) => ({
+      default: mod.LayoutOmniSearchBar,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-10 w-full rounded-xl bg-muted animate-pulse" />
+    ),
+  }
+);
 
 // Lazy load heavy floating tools component
-const FloatingToolsButton = dynamic(() => import("@/components/microservices/FloatingToolsButton").then(mod => ({ default: mod.FloatingToolsButton })), {
-  ssr: false,
-  loading: () => null // No loading indicator for floating button
-});
+const FloatingToolsButton = dynamic(
+  () =>
+    import("@/components/microservices/FloatingToolsButton").then((mod) => ({
+      default: mod.FloatingToolsButton,
+    })),
+  {
+    ssr: false,
+    loading: () => null, // No loading indicator for floating button
+  }
+);
 
 // Lazy load floating messages component
-const FloatingMessagesButton = dynamic(() => import("@/components/messaging/FloatingMessagesButton").then(mod => ({ default: mod.FloatingMessagesButton })), {
-  ssr: false,
-  loading: () => null // No loading indicator for floating button
-});
+const FloatingMessagesButton = dynamic(
+  () =>
+    import("@/components/messaging/FloatingMessagesButton").then((mod) => ({
+      default: mod.FloatingMessagesButton,
+    })),
+  {
+    ssr: false,
+    loading: () => null, // No loading indicator for floating button
+  }
+);
 
 export default function MainLayout({
   children,
@@ -51,10 +83,10 @@ export default function MainLayout({
   const router = useRouter();
   const { logout, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   // Load sidebar state synchronously to match sidebar's initial state
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
-    return getStorageItem(getSidebarStorageKey('client'), false);
+    return getStorageItem(getSidebarStorageKey("client"), false);
   });
 
   const handleLogout = () => {
@@ -122,7 +154,7 @@ export default function MainLayout({
 
         {/* Mobile Navigation Overlay */}
         {isMobileMenuOpen && (
-          <div 
+          <div
             id="mobile-menu"
             className="fixed inset-0 z-50 md:hidden"
             role="dialog"
@@ -134,7 +166,7 @@ export default function MainLayout({
               onClick={() => setIsMobileMenuOpen(false)}
               aria-hidden="true"
             />
-            <nav 
+            <nav
               className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg flex flex-col"
               role="navigation"
               aria-label="Main navigation"
@@ -171,18 +203,18 @@ export default function MainLayout({
                             : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
                         }`}
                       >
-                    <Image
-                      src={item.icon}
-                      alt={item.name}
-                      width={20}
-                      height={20}
-                      loading="lazy"
-                      className={`transition-all duration-300 ${
-                        isActive
-                          ? "text-primary scale-110"
-                          : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
-                      }`}
-                    />
+                        <Image
+                          src={item.icon}
+                          alt={item.name}
+                          width={20}
+                          height={20}
+                          loading="lazy"
+                          className={`transition-all duration-300 ${
+                            isActive
+                              ? "text-primary scale-110"
+                              : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
+                          }`}
+                        />
                         <span
                           className={`font-medium transition-all duration-300 ${
                             isActive
@@ -219,11 +251,12 @@ export default function MainLayout({
         >
           <header
             className={cn(
-              "fixed top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 transition-all duration-300",
-              isSidebarExpanded 
-                ? "md:left-64 md:right-0 md:w-auto" 
+              "fixed top-0 left-0 right-0 w-full z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 transition-all duration-300",
+              isSidebarExpanded
+                ? "md:left-64 md:right-0 md:w-auto"
                 : "md:left-[70px] md:right-0 md:w-auto"
             )}
+            style={{ top: "env(safe-area-inset-top, 0px)" }}
           >
             <div className="flex items-center gap-3 md:hidden">
               <button
@@ -273,15 +306,15 @@ export default function MainLayout({
                   title="View Profile"
                 >
                   <Avatar className="h-9 w-9 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
-                    <AvatarImage 
-                      src={user?.avatarUrl} 
+                    <AvatarImage
+                      src={user?.avatarUrl}
                       alt="User Avatar"
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
                     />
                     <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-semibold text-sm">
                       {user?.firstName && user?.lastName
                         ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-                        : user?.firstName?.charAt(0).toUpperCase() || 'U'}
+                        : user?.firstName?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm" />
@@ -306,7 +339,11 @@ export default function MainLayout({
           </div>
 
           {/* Main Content - Responsive padding */}
-          <main id="main-content" className="flex-1 w-full h-full pt-[60px] md:pt-[60px] pb-16 md:pb-0 bg-gray-100" tabIndex={-1}>
+          <main
+            id="main-content"
+            className="flex-1 w-full h-full pt-[60px] md:pt-[60px] pb-16 md:pb-0 bg-gray-100"
+            tabIndex={-1}
+          >
             <div className="md:hidden h-[50px]" />{" "}
             {/* Extra space for mobile search */}
             {children}
@@ -324,7 +361,7 @@ export default function MainLayout({
           <FloatingMessagesButton />
 
           {/* Mobile Bottom Navigation */}
-          <nav 
+          <nav
             className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 safe-area-inset-bottom"
             role="navigation"
             aria-label="Mobile navigation"
