@@ -204,15 +204,15 @@ export default function ClientWelcomePage() {
 
   if (recommendationsLoading || currentStep === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20">
+      <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-green-100/20">
         <div className="container mx-auto py-12 space-y-12">
           {/* Enhanced Loading Header */}
           <div className="text-center space-y-8">
             <div className="flex justify-center">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-20 blur-xl animate-pulse"></div>
-                <div className="relative bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 rounded-full border border-blue-200/50 backdrop-blur-sm shadow-lg">
-                  <Sparkles className="h-10 w-10 text-blue-600 animate-spin" />
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-700 rounded-full opacity-20 blur-xl animate-pulse"></div>
+                <div className="relative bg-gradient-to-br from-green-500/10 to-green-700/10 p-6 rounded-full border border-green-200/50 backdrop-blur-sm shadow-lg">
+                  <Sparkles className="h-10 w-10 text-green-600 animate-spin" />
                 </div>
               </div>
             </div>
@@ -220,27 +220,27 @@ export default function ClientWelcomePage() {
             <div className="space-y-4">
               <Skeleton className="h-12 w-80 mx-auto bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
               <Skeleton className="h-6 w-96 mx-auto bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
-              <p className="text-blue-600 font-medium animate-pulse">
+              <p className="text-green-600 font-medium animate-pulse">
                 Discovering your perfect therapist matches...
               </p>
             </div>
 
             {/* Enhanced Loading Progress */}
             <div className="max-w-lg mx-auto">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-100/50 shadow-lg">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-green-100/50 shadow-lg">
                 <div className="flex justify-between text-sm font-medium text-gray-700 mb-3">
                   <span className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4 text-blue-600 animate-spin" />
+                    <RefreshCw className="h-4 w-4 text-green-600 animate-spin" />
                     Processing your preferences
                   </span>
-                  <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold animate-pulse">
+                  <span className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-semibold animate-pulse">
                     Please wait...
                   </span>
                 </div>
                 <div className="relative">
                   <div className="h-3 bg-gray-100/80 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"
+                      className="h-full bg-gradient-to-r from-green-500 to-green-700 rounded-full animate-pulse"
                       style={{ width: "60%" }}
                     ></div>
                   </div>
@@ -564,33 +564,33 @@ export default function ClientWelcomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20">
-      <div className="container mx-auto py-12 space-y-12">
+    <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-green-100/20">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-12">
         {/* Enhanced Welcome Header */}
-        <div className="text-center space-y-8">
+        <div className="text-center space-y-6 sm:space-y-8">
           <div className="flex justify-center">
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-20 blur-xl group-hover:opacity-30 transition-all duration-500"></div>
-              <div className="relative bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 rounded-full border border-blue-200/50 backdrop-blur-sm shadow-lg">
-                <Sparkles className="h-10 w-10 text-blue-600" />
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-700 rounded-full opacity-20 blur-xl group-hover:opacity-30 transition-all duration-500"></div>
+              <div className="relative bg-gradient-to-br from-green-500/10 to-green-700/10 p-5 sm:p-6 rounded-full border border-green-200/50 backdrop-blur-sm shadow-lg">
+                <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
               </div>
-              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-green-400 to-emerald-500 h-8 w-8 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                <CheckCircle className="h-5 w-5 text-white" />
+              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-green-400 to-green-700 h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="inline-block">
-              <h1 className="text-5xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-green-600 via-green-700 to-green-800 bg-clip-text text-transparent mb-3 sm:mb-4 leading-tight">
                 Welcome to Mentara!
               </h1>
-              <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+              <div className="h-1 w-24 sm:w-32 bg-gradient-to-r from-green-500 to-green-700 mx-auto rounded-full"></div>
             </div>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
+            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium px-1">
               Based on your personalized assessment, we&apos;ve discovered
               therapists who are
-              <span className="text-blue-600 font-semibold">
+              <span className="text-green-600 font-semibold">
                 {" "}
                 perfectly matched
               </span>{" "}
@@ -601,28 +601,28 @@ export default function ClientWelcomePage() {
 
           {/* Enhanced Progress Indicator */}
           <div className="max-w-lg mx-auto">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-100/50 shadow-lg">
-              <div className="flex justify-between text-sm font-medium text-gray-700 mb-3">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-green-100/50 shadow-lg">
+              <div className="flex justify-between text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
                 <span className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-blue-600" />
+                  <Users className="h-4 w-4 text-green-600" />
                   Therapists Selected
                 </span>
-                <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                <span className="bg-green-50 text-green-700 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold">
                   {selectedTherapists.length}/{maxSelections}
                 </span>
               </div>
               <div className="relative">
                 <Progress
                   value={selectionProgress}
-                  className="h-3 bg-gray-100/80 rounded-full"
+                  className="h-2.5 sm:h-3 bg-gray-100/80 rounded-full"
                 />
                 <div
-                  className="absolute top-0 left-0 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500 ease-out shadow-sm"
+                  className="absolute top-0 left-0 h-2.5 sm:h-3 bg-gradient-to-r from-green-500 to-green-700 rounded-full transition-all duration-500 ease-out shadow-sm"
                   style={{ width: `${selectionProgress}%` }}
                 />
               </div>
               {selectionProgress > 0 && (
-                <p className="text-xs text-center mt-2 text-gray-500">
+                <p className="text-[11px] sm:text-xs text-center mt-1.5 sm:mt-2 text-gray-500">
                   Great progress!{" "}
                   {selectedTherapists.length > 0 &&
                     `${Math.round(selectionProgress)}% complete`}

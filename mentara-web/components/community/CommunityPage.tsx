@@ -12,6 +12,7 @@ import {
   Users,
   PenSquare,
   Lock,
+  X,
 } from "lucide-react";
 import {
   ResizableHandle,
@@ -191,24 +192,38 @@ export default function CommunityPage({ role }: CommunityPageProps) {
     <main className="w-full h-full">
       {/* Mobile overlay for sidebar */}
       <div className="lg:hidden">
-        {(selectedCommunityId || isSidebarOpen) && (
+        {isSidebarOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <div
               className="fixed inset-0 bg-black/50"
               onClick={() => {
-                handleCommunitySelect("");
                 setIsSidebarOpen(false);
               }}
             />
             <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
+              {/* Close button (mobile) */}
+              <div className="absolute top-3 right-3 z-10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="rounded-full hover:bg-muted"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
               <CommunitySidebar
                 selectedCommunityId={selectedCommunityId}
                 selectedRoomId={selectedRoomId}
                 onCommunitySelect={(communityId) => {
+                  // Keep sidebar open after selecting a community so user can choose a room
                   handleCommunitySelect(communityId);
+                }}
+                onRoomSelect={(roomId, communityId) => {
+                  handleRoomSelect(roomId, communityId);
+                  // Close after room selection for cleaner UX
                   setIsSidebarOpen(false);
                 }}
-                onRoomSelect={handleRoomSelect}
               />
             </div>
           </div>
@@ -569,7 +584,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                                   <li>✓ Be respectful and supportive</li>
                                   <li>✓ Share authentically and honestly</li>
                                   <li>
-                                    ✓ Respect others' privacy and experiences
+                                    ✓ Respect others&#39; privacy and experiences
                                   </li>
                                 </ul>
                               </div>
@@ -653,11 +668,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
               variant="outline"
               size="sm"
               onClick={() => {
-                if (selectedCommunityId) {
-                  handleCommunitySelect(selectedCommunityId);
-                } else {
-                  setIsSidebarOpen(true);
-                }
+                setIsSidebarOpen(true);
               }}
             >
               <Hash className="h-4 w-4 mr-1" />

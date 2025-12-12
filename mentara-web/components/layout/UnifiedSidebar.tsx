@@ -7,7 +7,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getSidebarStorageKey, getStorageItem, setStorageItem } from "@/lib/config/storage";
+import {
+  getSidebarStorageKey,
+  getStorageItem,
+  setStorageItem,
+} from "@/lib/config/storage";
 
 export interface NavItem {
   name: string;
@@ -27,9 +31,6 @@ export interface UnifiedSidebarProps {
   onToggle?: (expanded: boolean) => void;
 }
 
-const SIDEBAR_WIDTH_EXPANDED = 256; // 64 * 4 = 256px
-const SIDEBAR_WIDTH_COLLAPSED = 70;
-
 export function UnifiedSidebar({
   navItems,
   role,
@@ -42,7 +43,7 @@ export function UnifiedSidebar({
 }: UnifiedSidebarProps) {
   const pathname = usePathname();
   const key = storageKey || getSidebarStorageKey(role);
-  
+
   // Load sidebar state synchronously on initial render
   const [isExpanded, setIsExpanded] = useState(() => {
     return getStorageItem(key, defaultExpanded);
@@ -175,7 +176,7 @@ export function UnifiedSidebar({
       </div>
 
       {/* Navigation Items */}
-      <div 
+      <div
         id="sidebar-navigation-items"
         className="flex flex-1 flex-col gap-2 overflow-y-auto p-4"
         role="list"
@@ -285,4 +286,3 @@ export function UnifiedSidebar({
 }
 
 export default UnifiedSidebar;
-
