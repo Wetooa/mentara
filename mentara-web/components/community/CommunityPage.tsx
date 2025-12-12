@@ -584,7 +584,8 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                                   <li>✓ Be respectful and supportive</li>
                                   <li>✓ Share authentically and honestly</li>
                                   <li>
-                                    ✓ Respect others&#39; privacy and experiences
+                                    ✓ Respect others&#39; privacy and
+                                    experiences
                                   </li>
                                 </ul>
                               </div>
