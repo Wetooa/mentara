@@ -10,7 +10,7 @@ export interface ValidationResult<T> {
   success: boolean;
   data?: T;
   errors?: Array<{
-    path: (string | number)[];
+    path: PropertyKey[];
     message: string;
     code: string;
   }>;
@@ -19,42 +19,42 @@ export interface ValidationResult<T> {
 // Generic validation function
 export function validateSchema<T>(
   schema: z.ZodSchema<T>,
-  data: unknown
+  data: unknown,
 ): ValidationResult<T> {
   const result = schema.safeParse(data);
-  
+
   if (result.success) {
     return {
       success: true,
-      data: result.data
+      data: result.data,
     };
   }
-  
+
   return {
     success: false,
-    errors: result.error.errors.map(error => ({
+    errors: result.error.issues.map((error) => ({
       path: error.path,
       message: error.message,
-      code: error.code
-    }))
+      code: error.code,
+    })),
   };
 }
 
 // Format validation errors for display
 export function formatValidationErrors(
   errors?: Array<{
-    path: (string | number)[];
+    path: PropertyKey[];
     message: string;
     code: string;
-  }>
+  }>,
 ): string {
   if (!errors || errors.length === 0) {
     return 'Validation failed';
   }
 
   return errors
-    .map(error => {
-      const path = error.path.join('.');
+    .map((error) => {
+      const path = error.path.map((p) => String(p)).join('.');
       return path ? `${path}: ${error.message}` : error.message;
     })
     .join(', ');
@@ -66,10 +66,12 @@ export function hasValidationErrors<T>(result: ValidationResult<T>): boolean {
 }
 
 // Get first validation error message
-export function getFirstValidationError<T>(result: ValidationResult<T>): string | undefined {
+export function getFirstValidationError<T>(
+  result: ValidationResult<T>,
+): string | undefined {
   if (!result.errors || result.errors.length === 0) {
     return undefined;
   }
-  
+
   return result.errors[0].message;
 }
