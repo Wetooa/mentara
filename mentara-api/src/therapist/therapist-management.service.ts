@@ -536,15 +536,15 @@ export class TherapistManagementService {
             firstName: string;
             lastName: string;
             email: string;
-            profilePicture: string | null;
+            avatarUrl: string | null;
             createdAt: Date;
           };
-          preAssessment: {
+          preAssessments: Array<{
             createdAt: Date;
-          } | null;
+          }>;
         };
       }) => {
-        const latestAssessment = relationship.client.preAssessment;
+        const latestAssessment = relationship.client.preAssessments[0] || null;
         return {
           relationshipId: relationship.id,
           client: {
@@ -552,7 +552,7 @@ export class TherapistManagementService {
             firstName: relationship.client.user.firstName,
             lastName: relationship.client.user.lastName,
             email: relationship.client.user.email,
-            profilePicture: relationship.client.user.profilePicture,
+            profilePicture: relationship.client.user.avatarUrl,
             joinedAt: relationship.client.user.createdAt,
           },
           matchInfo: {

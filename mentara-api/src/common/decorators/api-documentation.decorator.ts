@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody, type ApiResponseOptions, type ApiBodyOptions } from '@nestjs/swagger';
 
 /**
  * Helper decorator for comprehensive API documentation
@@ -21,13 +21,14 @@ export function ApiDocumentation(options: {
 
   if (options.responses) {
     options.responses.forEach((response) => {
-      decorators.push(
-        ApiResponse({
-          status: response.status,
-          description: response.description,
-          type: response.type,
-        }),
-      );
+      const responseOptions: ApiResponseOptions = {
+        status: response.status,
+        description: response.description,
+      };
+      if (response.type) {
+        (responseOptions as { type?: unknown }).type = response.type;
+      }
+      decorators.push(ApiResponse(responseOptions as ApiResponseOptions));
     });
   }
 
@@ -57,12 +58,13 @@ export function ApiDocumentation(options: {
   }
 
   if (options.body) {
-    decorators.push(
-      ApiBody({
-        description: options.body.description,
-        type: options.body.type as unknown,
-      }),
-    );
+    const bodyOptions: ApiBodyOptions = {
+      description: options.body.description,
+    };
+    if (options.body.type) {
+      (bodyOptions as { type?: unknown }).type = options.body.type;
+    }
+    decorators.push(ApiBody(bodyOptions as ApiBodyOptions));
   }
 
   return applyDecorators(...decorators);

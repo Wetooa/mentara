@@ -11,11 +11,11 @@ export class QueryOptimizationHelper {
    */
   static createOptimizedInclude<T extends Record<string, unknown>>(
     relations: (keyof T)[],
-  ): Prisma.Args<T, 'findMany'>['include'] {
+  ): Record<string, boolean> {
     return relations.reduce((acc, relation) => {
       acc[relation as string] = true;
       return acc;
-    }, {} as Record<string, boolean>) as Prisma.Args<T, 'findMany'>['include'];
+    }, {} as Record<string, boolean>);
   }
 
   /**
@@ -24,11 +24,11 @@ export class QueryOptimizationHelper {
    */
   static createSelect<T extends Record<string, unknown>>(
     fields: (keyof T)[],
-  ): Prisma.Args<T, 'findMany'>['select'] {
+  ): Record<string, boolean> {
     return fields.reduce((acc, field) => {
       acc[field as string] = true;
       return acc;
-    }, {} as Record<string, boolean>) as Prisma.Args<T, 'findMany'>['select'];
+    }, {} as Record<string, boolean>);
   }
 
   /**

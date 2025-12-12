@@ -32,11 +32,12 @@ export class ResponseTransformInterceptor implements NestInterceptor {
         }
 
         // Handle array responses (could be paginated)
-        if (Array.isArray(data) && 'meta' in data) {
-          const { meta, ...items } = data as unknown as { meta: unknown; [key: string]: unknown };
+        // Note: This is a rare case, typically paginated responses come with data and meta separately
+        if (data && typeof data === 'object' && 'meta' in data && Array.isArray((data as { data?: unknown[] }).data)) {
+          const dataObj = data as { data: unknown[]; meta: { total: number; page: number; limit: number } };
           return PaginatedResponseDto.success(
-            items as unknown[],
-            meta as { total: number; page: number; limit: number }
+            dataObj.data,
+            createPaginationMeta(dataObj.meta.total, dataObj.meta.page, dataObj.meta.limit)
           );
         }
 
