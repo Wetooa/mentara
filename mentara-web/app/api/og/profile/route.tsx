@@ -4,7 +4,6 @@ import { SITE_CONFIG } from '@/lib/metadata';
 
 // Skip API routes during static export
 export const dynamic = 'force-static';
-export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   try {

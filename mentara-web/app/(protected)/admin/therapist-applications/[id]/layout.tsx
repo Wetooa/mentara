@@ -1,3 +1,4 @@
+import React from 'react';
 // Server component layout for static export
 export function generateStaticParams() {
   return [];
