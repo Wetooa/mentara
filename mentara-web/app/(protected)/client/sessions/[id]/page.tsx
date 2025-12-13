@@ -615,7 +615,7 @@ export default function SessionDetailsPage({
             </CardContent>
           </Card>
         </motion.div>
-      </div>
+      </main>
     </motion.div>
   );
 }

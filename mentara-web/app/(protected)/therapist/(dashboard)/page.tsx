@@ -467,7 +467,7 @@ export default function TherapistDashboardPage() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </main>
 
         {/* Bottom Spacing */}
         <div className="h-8" />

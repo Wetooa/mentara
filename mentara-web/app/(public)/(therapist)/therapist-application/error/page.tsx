@@ -2,10 +2,6 @@
 
 import dynamic from "next/dynamic";
 
-// Force dynamic rendering to prevent prerender errors
-export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
-
 // Dynamically import the client component with no SSR
 const ErrorPageContent = dynamic(
   () => import("./ErrorPageContent"),

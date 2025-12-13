@@ -408,6 +408,6 @@ export default function BookingPage() {
           />
         </Suspense>
       )}
-    </div>
+    </main>
   );
 }

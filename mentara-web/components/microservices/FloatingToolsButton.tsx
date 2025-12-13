@@ -8,7 +8,7 @@ import {
   BookOpen,
   Heart,
   X,
-  ChevronUp,
+  ChevronLeft,
   Sparkles,
   Pause,
   Play,
@@ -26,6 +26,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
@@ -39,6 +41,11 @@ interface Tool {
   icon: React.ReactNode;
   description: string;
   component: React.ReactNode;
+  gradient?: string;
+  iconBg?: string;
+  iconColor?: string;
+  borderColor?: string;
+  hoverBorder?: string;
 }
 
 export function FloatingToolsButton() {
@@ -53,6 +60,11 @@ export function FloatingToolsButton() {
       icon: <Wind className="h-5 w-5" />,
       description: "Guided breathing exercises to help you relax and reduce anxiety",
       component: <BreathingExerciseTool />,
+      gradient: "from-blue-50 to-cyan-50",
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+      borderColor: "border-blue-200",
+      hoverBorder: "hover:border-blue-400",
     },
     {
       id: "meditation",
@@ -60,6 +72,11 @@ export function FloatingToolsButton() {
       icon: <Heart className="h-5 w-5" />,
       description: "Quick meditation sessions for mindfulness and stress relief",
       component: <MeditationTool />,
+      gradient: "from-purple-50 to-pink-50",
+      iconBg: "bg-purple-100",
+      iconColor: "text-purple-600",
+      borderColor: "border-purple-200",
+      hoverBorder: "hover:border-purple-400",
     },
     {
       id: "music",
@@ -67,6 +84,11 @@ export function FloatingToolsButton() {
       icon: <Music className="h-5 w-5" />,
       description: "Soothing sounds and music to help you find peace",
       component: <MusicTool />,
+      gradient: "from-emerald-50 to-teal-50",
+      iconBg: "bg-emerald-100",
+      iconColor: "text-emerald-600",
+      borderColor: "border-emerald-200",
+      hoverBorder: "hover:border-emerald-400",
     },
     {
       id: "journal",
@@ -74,6 +96,11 @@ export function FloatingToolsButton() {
       icon: <BookOpen className="h-5 w-5" />,
       description: "Write down your thoughts and feelings",
       component: <JournalTool />,
+      gradient: "from-amber-50 to-orange-50",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
+      borderColor: "border-amber-200",
+      hoverBorder: "hover:border-amber-400",
     },
   ];
 
@@ -117,84 +144,167 @@ export function FloatingToolsButton() {
 
       {/* Tools Sheet */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto p-0">
-          <div className="px-4 sm:px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
+        <SheetContent 
+          side="right" 
+          className="w-full sm:max-w-md overflow-y-auto p-0 flex flex-col"
+          aria-label="Wellness tools panel"
+        >
+          {/* Enhanced Header Section */}
+          <div className="px-4 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5 border-b bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-sm">
             <SheetHeader>
-              <SheetTitle className="flex items-center gap-2 text-xl">
-                <Sparkles className="h-5 w-5 text-primary" />
+              <SheetTitle className="flex items-center gap-2 sm:gap-3 text-xl sm:text-2xl font-bold">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                </motion.div>
                 Wellness Tools
               </SheetTitle>
-              <SheetDescription>
+              <SheetDescription className="text-xs sm:text-sm mt-1 sm:mt-2 text-muted-foreground">
                 Quick access to tools that can help you feel better right now
               </SheetDescription>
             </SheetHeader>
           </div>
 
-          <div className="px-4 sm:px-6 py-4 space-y-3">
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-3 sm:space-y-4">
             {!selectedTool ? (
               <>
-                <p className="text-xs text-gray-500 mb-2">
-                  Choose a tool to get started:
-                </p>
-                
                 {/* Crisis Support - Prominent First Option */}
-                <Card
-                  className="cursor-pointer hover:border-red-500/50 transition-all hover:shadow-md border border-red-500/30 bg-gradient-to-br from-red-50/50 to-red-100/30"
-                  onClick={() => setShowCrisisSupport(true)}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <CardHeader className="pb-3 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-lg text-red-600 flex-shrink-0">
-                        <AlertTriangle className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base font-semibold text-red-700">One Tap Crisis Support</CardTitle>
-                        <CardDescription className="text-xs mt-1 leading-relaxed text-red-600/80">
-                          Immediate help and resources when you need them most
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <div className="grid gap-3">
-                  {tools.map((tool) => (
-                    <Card
-                      key={tool.id}
-                      className="cursor-pointer hover:border-primary/50 transition-all hover:shadow-md border"
-                      onClick={() => setSelectedTool(tool.id)}
-                    >
-                      <CardHeader className="pb-3 p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg text-primary flex-shrink-0">
-                            {tool.icon}
+                  <Card
+                    className={cn(
+                      "cursor-pointer transition-all duration-300 border-2",
+                      "bg-gradient-to-br from-red-50 via-red-50/80 to-red-100/50",
+                      "border-red-400/50 hover:border-red-500",
+                      "hover:shadow-lg hover:shadow-red-200/50",
+                      "hover:scale-[1.02] active:scale-[0.98]",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2",
+                      "min-h-[72px] touch-manipulation"
+                    )}
+                    onClick={() => setShowCrisisSupport(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setShowCrisisSupport(true);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="One Tap Crisis Support - Immediate help and resources"
+                  >
+                    <CardHeader className="pb-3 p-4 sm:p-5">
+                      <div className="flex items-start gap-4">
+                        <motion.div
+                          className={cn(
+                            "p-3 bg-gradient-to-br from-red-500/30 to-red-600/20 rounded-xl",
+                            "text-red-600 flex-shrink-0 shadow-sm"
+                          )}
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
+                        >
+                          <AlertTriangle className="h-6 w-6" />
+                        </motion.div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <CardTitle className="text-lg font-bold text-red-700">
+                              One Tap Crisis Support
+                            </CardTitle>
+                            <Badge variant="destructive" className="text-xs">
+                              Emergency
+                            </Badge>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-base font-semibold">{tool.name}</CardTitle>
-                            <CardDescription className="text-xs mt-1 leading-relaxed">
-                              {tool.description}
-                            </CardDescription>
+                          <CardDescription className="text-sm leading-relaxed text-red-600/90">
+                            Immediate help and resources when you need them most
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </motion.div>
+
+                {/* Visual Separator */}
+                <Separator className="my-4" />
+
+                {/* Tools Grid - Compact Design */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {tools.map((tool, index) => (
+                    <motion.div
+                      key={tool.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                      <button
+                        className={cn(
+                          "w-full cursor-pointer transition-all duration-200 border rounded-lg",
+                          `bg-gradient-to-br ${tool.gradient}`,
+                          `border ${tool.borderColor}`,
+                          `hover:border-2 ${tool.hoverBorder}`,
+                          "hover:shadow-md hover:shadow-black/5",
+                          "active:scale-[0.98]",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                          "touch-manipulation text-left"
+                        )}
+                        onClick={() => setSelectedTool(tool.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedTool(tool.id);
+                          }
+                        }}
+                        aria-label={`${tool.name} - ${tool.description}`}
+                      >
+                        <div className="p-3 sm:p-3.5">
+                          <div className="flex items-center gap-2.5">
+                            <div className={cn(
+                              "p-2 rounded-lg flex-shrink-0",
+                              tool.iconBg,
+                              tool.iconColor
+                            )}>
+                              {tool.icon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-semibold text-foreground mb-0.5 line-clamp-1">
+                                {tool.name}
+                              </div>
+                              <div className="text-xs text-muted-foreground line-clamp-1">
+                                {tool.description}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </CardHeader>
-                    </Card>
+                      </button>
+                    </motion.div>
                   ))}
                 </div>
               </>
             ) : (
-              <div className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-4"
+              >
                 <Button
                   variant="ghost"
                   onClick={() => setSelectedTool(null)}
-                  className="mb-2 -ml-2 hover:bg-primary/10"
+                  className="mb-2 -ml-2 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-[44px] touch-manipulation"
+                  aria-label="Back to wellness tools"
                 >
-                  <ChevronUp className="h-4 w-4 mr-2 rotate-90" />
+                  <ChevronLeft className="h-4 w-4 mr-2" />
                   Back to Tools
                 </Button>
                 <div className="pt-2">
                   {tools.find((t) => t.id === selectedTool)?.component}
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
         </SheetContent>
@@ -311,7 +421,7 @@ function BreathingExerciseTool() {
       <CardContent className="space-y-6 p-6 pt-2">
         <div className="flex items-center justify-center h-72 bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-6">
           <motion.div
-            key={`${phase}-${countdown}`}
+            key={phase}
             className={cn(
               "w-40 h-40 rounded-full flex items-center justify-center text-white font-semibold shadow-xl",
               cycle[phase].color

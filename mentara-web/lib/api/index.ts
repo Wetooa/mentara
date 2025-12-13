@@ -146,5 +146,3 @@ export function useApi() {
 export type {
   AdminAuthResponse, ClientAuthResponse, ClientUser, EmailResponse, LoginDto, RegisterAdminDto, RegisterClientDto, RegisterModeratorDto, ResendOtpDto, SendOtpDto, SuccessMessageResponse, TherapistAuthResponse, VerifyOtpDto
 } from "@/types/auth";
-
-export type { ApiError, ApiResponse } from "@/types/api";
