@@ -1,11 +1,6 @@
 "use client";
 
-// Force dynamic rendering to avoid static generation issues
-export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
-
-import React, { useState, useRef, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, ArrowLeft, Loader2, MessageSquare, Sparkles, Bot, User, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
