@@ -2,11 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { use } from "react";
-
-// Required for static export
-export function generateStaticParams() {
-  return [];
-}
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

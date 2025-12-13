@@ -4,11 +4,6 @@ import { useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-// Required for static export
-export function generateStaticParams() {
-  return [];
-}
-
 export default function TherapistApplicationDetailRedirectPage(props: {
   params: Promise<{ id: string }>;
 }) {

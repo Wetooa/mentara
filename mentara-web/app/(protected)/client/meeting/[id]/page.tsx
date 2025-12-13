@@ -2,11 +2,6 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-
-// Required for static export
-export function generateStaticParams() {
-  return [];
-}
 import { MeetingRoom } from '@/components/meeting/MeetingRoom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

@@ -5,11 +5,6 @@ import { useEffect, use } from 'react';
 import { PageBreadcrumbs } from '@/components/navigation/PageBreadcrumbs';
 import { BackButton } from '@/components/navigation/BackButton';
 
-// Required for static export
-export function generateStaticParams() {
-  return [];
-}
-
 interface TherapistProfilePageProps {
   params: Promise<{ id: string }>;
 }

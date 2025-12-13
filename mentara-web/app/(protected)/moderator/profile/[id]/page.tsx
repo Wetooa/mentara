@@ -8,7 +8,7 @@ import {
 import { Metadata } from 'next';
 import { ProfilePageWrapper } from '@/components/navigation/ProfilePageWrapper';
 
-// Required for static export
+// Required for static export - this is a server component so it's OK here
 export function generateStaticParams() {
   return [];
 }
