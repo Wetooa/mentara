@@ -2,6 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
+// Required for static export
+export function generateStaticParams() {
+  return [];
+}
 import TherapistTaskDetailPage from "@/components/worksheets/TherapistTaskDetailPage";
 import { Task } from "@/components/worksheets/types";
 import { useApi } from "@/lib/api";

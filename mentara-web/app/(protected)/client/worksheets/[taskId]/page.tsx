@@ -2,6 +2,11 @@
 
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+
+// Required for static export
+export function generateStaticParams() {
+  return [];
+}
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,

@@ -2,6 +2,11 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
+
+// Required for static export
+export function generateStaticParams() {
+  return [];
+}
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";

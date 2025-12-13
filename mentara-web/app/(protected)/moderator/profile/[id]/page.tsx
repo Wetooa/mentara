@@ -8,6 +8,11 @@ import {
 import { Metadata } from 'next';
 import { ProfilePageWrapper } from '@/components/navigation/ProfilePageWrapper';
 
+// Required for static export
+export function generateStaticParams() {
+  return [];
+}
+
 interface ModeratorProfilePageProps {
   params: Promise<{ id: string }>;
 }
