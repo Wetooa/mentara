@@ -1,0 +1,4 @@
+# Ignore all export files but keep directory structure
+exports/*
+!exports/.gitkeep
+

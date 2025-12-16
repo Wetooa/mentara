@@ -1,8 +1,5 @@
 "use client";
 
-// Force dynamic rendering to prevent prerender errors
-export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 import React, { Suspense } from "react";
 import { useRouter } from "next/navigation";

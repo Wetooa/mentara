@@ -14,17 +14,19 @@ Mentara Client is a production-ready Next.js application providing:
 ## 🚀 Architecture
 
 ### Technology Stack
-- **Framework**: Next.js 15.2.4 with App Router and TypeScript
+- **Framework**: Next.js 16.0.10
+- **UI Library**: React 19.2.3
+- **Language**: TypeScript 5.8.3
 - **Styling**: Tailwind CSS 4.x with shadcn/ui components
-- **State Management**: Zustand (client state) + React Query v5 (server state)
+- **State Management**: Zustand 5.0.3 (client state) + React Query 5.81.2 (server state)
 - **Authentication**: JWT-based local authentication with role-based access
-- **Real-time Communication**: Socket.io WebSockets + WebRTC for video
-- **File Storage**: Supabase Storage integration
+- **Real-time Communication**: Socket.io Client 4.8.1 (WebSockets) + Simple Peer 9.11.1 (WebRTC)
+- **File Storage**: Supabase Storage integration (@supabase/supabase-js 2.49.4)
 - **Payment Processing**: Stripe API integration
-- **HTTP Client**: Axios with interceptors for auth and error handling
-- **Forms & Validation**: React Hook Form with Zod schemas
+- **HTTP Client**: Axios 1.10.0 with interceptors for auth and error handling
+- **Forms & Validation**: React Hook Form 7.60.0 with Zod 4.0.5 schemas
 - **UI Components**: Radix UI primitives with shadcn/ui design system
-- **Testing**: Jest (unit) + Playwright (e2e)
+- **Testing**: Jest 30.0.3 (unit) + Playwright 1.53.2 (e2e)
 
 ## 🔧 Development Setup
 
@@ -53,7 +55,114 @@ cp .env.example .env.local
 npm run dev     # Start with hot reload
 ```
 
-The application will be available at `http://localhost:3000`
+The application will be available at `http://localhost:10001` (or `http://localhost:3000` depending on configuration)
+
+## 🧪 Test Credentials
+
+All test accounts use the password: **`password123`**
+
+### Client Accounts
+- **Email**: `client1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `client2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `client3@mentaratest.dev` | **Password**: `password123`
+
+### Therapist Accounts
+- **Email**: `therapist1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `therapist2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `therapist3@mentaratest.dev` | **Password**: `password123`
+
+### Admin Accounts
+- **Email**: `admin1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `admin2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `admin3@mentaratest.dev` | **Password**: `password123`
+
+### Moderator Accounts
+- **Email**: `moderator1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `moderator2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `moderator3@mentaratest.dev` | **Password**: `password123`
+
+**Note**: These are development/test accounts only. Do not use in production.
+
+## 🚀 Deployment
+
+### Production Build
+
+```bash
+npm run build        # Build for production
+npm run start        # Start production server
+```
+
+### Environment Variables
+
+Create `.env.production` or set environment variables:
+
+```bash
+# API Configuration
+NEXT_PUBLIC_API_URL=https://api.mentara.com
+NEXT_PUBLIC_WS_URL=wss://api.mentara.com
+
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Application
+NEXT_PUBLIC_APP_URL=https://mentara.com
+NODE_ENV=production
+```
+
+### Docker Deployment
+
+```bash
+# Build image
+docker build -t mentara-web .
+
+# Run container
+docker run -p 10001:3000 --env-file .env.production mentara-web
+```
+
+Or using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+### Platform-Specific Deployment
+
+#### Vercel (Recommended for Next.js)
+1. Connect GitHub repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Set build command: `npm run build`
+4. Set output directory: `.next`
+5. Deploy automatically on push to main branch
+
+#### Netlify
+1. Connect repository to Netlify
+2. Set build command: `npm run build`
+3. Set publish directory: `out` (if using static export)
+4. Configure environment variables
+5. Enable continuous deployment
+
+#### Self-Hosted
+```bash
+# Build the application
+npm run build
+
+# Start with PM2
+npm install -g pm2
+pm2 start npm --name "mentara-web" -- start
+pm2 save
+pm2 startup
+```
+
+### Static Export (Optional)
+
+For static site generation:
+
+```bash
+# Update next.config.ts to enable static export
+npm run build
+# Output will be in 'out' directory
+```
 
 ## 🧪 Testing
 

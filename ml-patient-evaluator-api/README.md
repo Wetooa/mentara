@@ -10,8 +10,11 @@ This service processes 201-item mental health questionnaire responses and predic
 
 ### Technology Stack
 
-- **Framework**: Flask (Python 3.11)
-- **ML**: PyTorch
+- **Framework**: Flask 3.1.1
+- **Language**: Python 3.11+
+- **ML Framework**: PyTorch 2.7.1
+- **Scientific Computing**: NumPy 2.2.6
+- **Testing**: pytest 8.0.0, pytest-flask 1.3.0
 - **Containerization**: Docker + docker-compose per service
 - **Monitoring**: Health/metrics endpoints
 
@@ -56,6 +59,103 @@ python api.py  # http://localhost:10002
 # Or via Docker
 docker compose up --build
 ```
+
+## 🚀 Deployment
+
+### Production Run
+
+```bash
+# Using Gunicorn (recommended for production)
+pip install gunicorn
+gunicorn -w 4 -b 0.0.0.0:10002 api:app
+
+# Or using uWSGI
+pip install uwsgi
+uwsgi --http :10002 --wsgi-file api.py --callable app --processes 4
+```
+
+### Environment Variables
+
+Create `.env` file or set environment variables:
+
+```bash
+FLASK_ENV=production
+PORT=10002
+MODEL_PATH=models/mental_model_config2.pt
+LOG_LEVEL=INFO
+```
+
+### Docker Deployment
+
+```bash
+# Build image
+docker build -t ml-patient-evaluator-api .
+
+# Run container
+docker run -p 10002:10002 \
+  -e FLASK_ENV=production \
+  -v $(pwd)/models:/app/models \
+  ml-patient-evaluator-api
+```
+
+Or using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+### Platform-Specific Deployment
+
+#### Railway
+1. Connect GitHub repository
+2. Set build command: `pip install -r requirements.txt`
+3. Set start command: `gunicorn -w 4 -b 0.0.0.0:$PORT api:app`
+4. Configure environment variables
+5. Ensure model file is included in repository or mounted as volume
+
+#### Render
+1. Connect repository
+2. Set build command: `pip install -r requirements.txt`
+3. Set start command: `gunicorn -w 4 -b 0.0.0.0:$PORT api:app`
+4. Configure environment variables
+5. Deploy
+
+#### AWS/GCP
+- Use Docker containers with ECS/Cloud Run
+- Mount model file from S3/Cloud Storage
+- Configure health checks on `/health` endpoint
+- Set up auto-scaling based on request volume
+
+#### Self-Hosted (Systemd)
+```bash
+# Create systemd service file
+sudo nano /etc/systemd/system/ml-patient-evaluator.service
+
+# Service file content:
+[Unit]
+Description=ML Patient Evaluator API
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/path/to/ml-patient-evaluator-api
+Environment="PATH=/path/to/venv/bin"
+ExecStart=/path/to/venv/bin/gunicorn -w 4 -b 0.0.0.0:10002 api:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+# Enable and start service
+sudo systemctl enable ml-patient-evaluator
+sudo systemctl start ml-patient-evaluator
+```
+
+### Health Check
+
+The service provides health check endpoints:
+- **GET** `/health` - Returns service and model status
+- **GET** `/metrics` - Returns performance metrics
 
 ## 🧪 Postman Collections
 

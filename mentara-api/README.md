@@ -14,13 +14,17 @@ Mentara is a full-stack mental health platform connecting patients with therapis
 ## 🚀 Architecture
 
 ### Technology Stack
-- **Framework**: NestJS 11.x with TypeScript
-- **Database**: PostgreSQL via Supabase with Prisma ORM
-- **Authentication**: JWT with OAuth (Google, Microsoft)
-- **Real-time**: Socket.io WebSocket integration
-- **File Storage**: Supabase Storage + AWS S3
-- **Caching**: Redis for session management
-- **Testing**: Jest with comprehensive test coverage
+- **Framework**: NestJS 11.0.1
+- **Language**: TypeScript 5.7.3
+- **Database ORM**: Prisma 6.19.0
+- **Database**: PostgreSQL (via Supabase)
+- **Authentication**: JWT (Passport.js 0.7.0, @nestjs/jwt 11.0.0)
+- **Real-time**: Socket.io 4.8.1
+- **File Storage**: Supabase Storage, Multer 1.4.5
+- **Caching**: Redis 5.10.0
+- **Validation**: class-validator 0.14.2, Zod 4.1.13
+- **Payment**: Stripe 18.3.0
+- **Testing**: Jest 29.7.0
 
 ### Core Components
 ```
@@ -97,6 +101,110 @@ npm run db:seed       # Seed with initial data
 npm run start:dev     # Start with hot reload
 ```
 
+## 🚀 Deployment
+
+### Production Build
+
+```bash
+npm run build         # Build for production
+npm run start:prod    # Start production server
+```
+
+### Environment Variables
+
+Ensure `.env` contains all required variables:
+
+```bash
+# Database
+DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+DIRECT_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+
+# Authentication
+JWT_SECRET=your-secret-key-here
+JWT_EXPIRES_IN=7d
+JWT_REFRESH_SECRET=your-refresh-secret-here
+JWT_REFRESH_EXPIRES_IN=30d
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Server
+PORT=10000
+NODE_ENV=production
+
+# Supabase Storage
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-key
+SUPABASE_BUCKET=your-bucket-name
+
+# Email (optional)
+EMAIL_SERVICE_API_KEY=your-email-service-key
+
+# Stripe (optional)
+STRIPE_SECRET_KEY=your-stripe-secret-key
+```
+
+### Database Migrations
+
+**Important**: Run migrations before starting the production server:
+
+```bash
+npm run db:migrate    # Run migrations
+npm run db:generate   # Generate Prisma client
+```
+
+### Docker Deployment
+
+```bash
+# Build image
+docker build -t mentara-api .
+
+# Run container
+docker run -p 10000:10000 --env-file .env mentara-api
+```
+
+Or using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+### Platform-Specific Deployment
+
+#### Railway
+1. Connect GitHub repository
+2. Set environment variables in Railway dashboard
+3. Set build command: `npm install && npm run build`
+4. Set start command: `npm run start:prod`
+5. Deploy automatically on push
+
+#### Render
+1. Connect repository
+2. Set build command: `npm install && npm run build`
+3. Set start command: `npm run start:prod`
+4. Configure environment variables
+5. Enable auto-deploy
+
+#### AWS/GCP
+- Use Docker containers with ECS/Cloud Run
+- Configure environment variables in platform settings
+- Set up health checks on `/health` endpoint
+- Configure load balancer for multiple instances
+
+#### Self-Hosted (PM2)
+```bash
+npm install -g pm2
+npm run build
+pm2 start dist/src/main.js --name mentara-api
+pm2 save
+pm2 startup
+```
+
+### Health Check
+
+The API provides a health check endpoint:
+- **GET** `/health` - Returns API status
+
 ## 🧪 Testing
 
 ### Unit Tests
@@ -132,6 +240,32 @@ Uses JWT-based local authentication with role-based access control:
 - **Password Reset**: Secure password reset with time-limited tokens
 - **Session Management**: Multiple device support with individual session control
 - **Security Monitoring**: Failed login attempt tracking and account lockout protection
+
+## 🧪 Test Credentials
+
+All test accounts use the password: **`password123`**
+
+### Client Accounts
+- **Email**: `client1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `client2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `client3@mentaratest.dev` | **Password**: `password123`
+
+### Therapist Accounts
+- **Email**: `therapist1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `therapist2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `therapist3@mentaratest.dev` | **Password**: `password123`
+
+### Admin Accounts
+- **Email**: `admin1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `admin2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `admin3@mentaratest.dev` | **Password**: `password123`
+
+### Moderator Accounts
+- **Email**: `moderator1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `moderator2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `moderator3@mentaratest.dev` | **Password**: `password123`
+
+**Note**: These are development/test accounts only. Do not use in production.
 
 ## 📡 API Documentation
 

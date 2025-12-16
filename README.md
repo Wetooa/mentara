@@ -1,7 +1,7 @@
 # Mentara - AI-Powered Mental Health Platform
 
 ![Mentara Logo](https://img.shields.io/badge/Mentara-Mental%20Health%20Platform-blue)
-![Development Status](https://img.shields.io/badge/Status-Active%20Development-green)
+![Development Status](https://img.shields.io/badge/Status-Production%20Ready-green)
 ![Architecture](https://img.shields.io/badge/Architecture-Microservices-purple)
 
 ## 🎯 Project Overview
@@ -18,26 +18,257 @@ Mentara is a comprehensive mental health platform that connects patients with th
 - 📊 Comprehensive analytics and reporting
 - 🏥 HIPAA-compliant data handling
 
+## 🛠️ Tech Stack
+
+### Frontend (mentara-web)
+- **Framework**: Next.js 16.0.10
+- **UI Library**: React 19.2.3
+- **Language**: TypeScript 5.8.3
+- **Styling**: Tailwind CSS 4.x
+- **State Management**: Zustand 5.0.3, React Query 5.81.2
+- **Forms**: React Hook Form 7.60.0, Zod 4.0.5
+- **UI Components**: shadcn/ui (Radix UI primitives)
+- **Real-time**: Socket.io Client 4.8.1
+- **Video**: Simple Peer 9.11.1 (WebRTC)
+
+### Backend (mentara-api)
+- **Framework**: NestJS 11.0.1
+- **Language**: TypeScript 5.7.3
+- **Database ORM**: Prisma 6.19.0
+- **Database**: PostgreSQL (via Supabase)
+- **Authentication**: JWT (Passport.js 0.7.0)
+- **Real-time**: Socket.io 4.8.1
+- **File Upload**: Multer 1.4.5
+- **Validation**: class-validator 0.14.2, Zod 4.1.13
+- **Caching**: Redis 5.10.0
+- **Payment**: Stripe 18.3.0
+
+### AI Service (ml-patient-evaluator-api)
+- **Framework**: Flask 3.1.1
+- **Language**: Python 3.11+
+- **ML Framework**: PyTorch 2.7.1
+- **Scientific Computing**: NumPy 2.2.6
+- **Testing**: pytest 8.0.0
+
+### Infrastructure
+- **Database**: Supabase PostgreSQL
+- **File Storage**: Supabase Storage
+- **Caching**: Redis
+- **Containerization**: Docker & Docker Compose
+
 ## 🚀 Quick Start (Development)
 
-Run services locally (no Docker in dev):
+### Prerequisites
 
+- Node.js 18+ and npm/bun
+- Python 3.11+ with pip
+- Docker and Docker Compose (optional)
+- PostgreSQL client tools (for database exports)
+- Supabase account (for database)
+
+### Installation
+
+1. **Clone the repository**
 ```bash
-# Backend API (port 10000)
-cd mentara-api && npm install && npm run start:dev
-
-# Web (port 10001)
-cd ../mentara-web && npm install && npm run dev
-
-# AI Patient Evaluation (port 10002)
-cd ../ai-patient-evaluation && pip install -r requirements.txt && python api.py
+git clone <repository-url>
+cd mentara
 ```
 
-**Common Issues:**
+2. **Install dependencies**
 
-- `Cannot find module 'nest'` → Run `npm install` in mentara-api first
-- `Cannot find module 'mentara-commons'` → Build mentara-commons first
-- Environment validation errors → Configure .env file with required variables
+```bash
+# Backend API
+cd mentara-api
+npm install
+
+# Frontend
+cd ../mentara-web
+npm install
+
+# AI Service
+cd ../ml-patient-evaluator-api
+pip install -r requirements.txt
+```
+
+3. **Configure environment variables**
+
+```bash
+# Backend - Copy and configure .env
+cd mentara-api
+cp .env.example .env
+# Edit .env with your Supabase credentials
+
+# Frontend - Copy and configure .env.local
+cd ../mentara-web
+cp .env.example .env.local
+# Edit .env.local with API endpoints
+```
+
+4. **Setup database**
+
+```bash
+cd mentara-api
+npm run db:generate  # Generate Prisma client
+npm run db:migrate   # Run migrations
+npm run db:seed      # Seed with test data
+```
+
+5. **Start development servers**
+
+```bash
+# Terminal 1: Backend API (port 10000)
+cd mentara-api
+npm run start:dev
+
+# Terminal 2: Frontend (port 10001)
+cd mentara-web
+npm run dev
+
+# Terminal 3: AI Service (port 10002)
+cd ml-patient-evaluator-api
+python api.py
+```
+
+### Service Endpoints
+
+- **Web Frontend**: http://localhost:10001
+- **Backend API**: http://localhost:10000
+- **AI Patient Evaluation**: http://localhost:10002
+
+## 🧪 Test Credentials
+
+All test accounts use the password: **`password123`**
+
+### Client Accounts
+- **Email**: `client1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `client2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `client3@mentaratest.dev` | **Password**: `password123`
+
+### Therapist Accounts
+- **Email**: `therapist1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `therapist2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `therapist3@mentaratest.dev` | **Password**: `password123`
+
+### Admin Accounts
+- **Email**: `admin1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `admin2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `admin3@mentaratest.dev` | **Password**: `password123`
+
+### Moderator Accounts
+- **Email**: `moderator1@mentaratest.dev` | **Password**: `password123`
+- **Email**: `moderator2@mentaratest.dev` | **Password**: `password123`
+- **Email**: `moderator3@mentaratest.dev` | **Password**: `password123`
+
+**Note**: These are development/test accounts only. Do not use in production.
+
+## 📦 Deployment
+
+### Frontend Deployment (mentara-web)
+
+#### Production Build
+
+```bash
+cd mentara-web
+npm run build
+npm run start
+```
+
+#### Environment Variables
+
+Create `.env.production` or set environment variables:
+
+```bash
+NEXT_PUBLIC_API_URL=https://api.mentara.com
+NEXT_PUBLIC_WS_URL=wss://api.mentara.com
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+#### Docker Deployment
+
+```bash
+cd mentara-web
+docker build -t mentara-web .
+docker run -p 10001:3000 --env-file .env.production mentara-web
+```
+
+#### Platform-Specific Deployment
+
+- **Vercel**: Connect GitHub repository, configure environment variables, deploy
+- **Netlify**: Connect repository, set build command `npm run build`, publish directory `out`
+- **Docker**: Use provided Dockerfile and docker-compose.yml
+
+### Backend Deployment (mentara-api)
+
+#### Production Build
+
+```bash
+cd mentara-api
+npm run build
+npm run start:prod
+```
+
+#### Environment Variables
+
+Ensure `.env` contains:
+
+```bash
+DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+DIRECT_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+JWT_SECRET=your-jwt-secret
+JWT_EXPIRES_IN=7d
+REDIS_URL=redis://localhost:6379
+PORT=10000
+NODE_ENV=production
+```
+
+#### Docker Deployment
+
+```bash
+cd mentara-api
+docker build -t mentara-api .
+docker run -p 10000:10000 --env-file .env mentara-api
+```
+
+#### Database Migrations
+
+```bash
+cd mentara-api
+npm run db:migrate  # Run migrations before starting server
+```
+
+#### Platform-Specific Deployment
+
+- **Railway**: Connect repository, set environment variables, auto-deploy
+- **Render**: Connect repository, set build/start commands, configure environment
+- **AWS/GCP**: Use Docker containers with ECS/Cloud Run
+- **Self-hosted**: Use Docker Compose or PM2 for process management
+
+### AI Service Deployment (ml-patient-evaluator-api)
+
+#### Production Run
+
+```bash
+cd ml-patient-evaluator-api
+pip install -r requirements.txt
+gunicorn -w 4 -b 0.0.0.0:10002 api:app
+```
+
+#### Docker Deployment
+
+```bash
+cd ml-patient-evaluator-api
+docker build -t ml-patient-evaluator-api .
+docker run -p 10002:10002 ml-patient-evaluator-api
+```
+
+#### Environment Variables
+
+```bash
+FLASK_ENV=production
+PORT=10002
+MODEL_PATH=models/mental_model_config2.pt
+```
 
 ## 🏗️ Architecture
 
@@ -49,25 +280,16 @@ mentara/
 │   ├── docker-compose.yml   # Service-specific Docker setup
 │   ├── Dockerfile          # Container build configuration
 │   └── README.md          # Backend service documentation
-├── mentara-web/             # Next.js 15.2.4 Web Frontend (TypeScript)
+├── mentara-web/             # Next.js 16.0.10 Web Frontend (TypeScript)
 │   ├── docker-compose.yml   # Service-specific Docker setup
 │   ├── Dockerfile          # Container build configuration
 │   └── README.md          # Frontend service documentation
-├── ai-patient-evaluation/   # Flask ML Service (Python/PyTorch)
+├── ml-patient-evaluator-api/ # Flask ML Service (Python/PyTorch)
 │   ├── docker-compose.yml   # Service-specific Docker setup
 │   ├── Dockerfile          # Container build configuration
 │   └── README.md          # AI evaluation service documentation
 └── README.md              # Project overview and setup guide
 ```
-
-### Independent Service Deployment
-
-Each service operates independently with:
-
-- **Individual Docker environments** - Service-specific containers and dependencies
-- **Isolated configuration** - Service-level environment variables and settings
-- **Independent scaling** - Services can be scaled individually based on demand
-- **Dedicated documentation** - Complete setup and usage guides per service
 
 ### Database & Infrastructure
 
@@ -77,359 +299,95 @@ Each service operates independently with:
 - **Authentication**: JWT-based local authentication system
 - **Real-time**: WebSocket integration for messaging and live features
 
-## 🤖 AI Development Team Structure
+## 📊 Database Export
 
-This project is being developed by a coordinated team of 4 AI agents, each with specialized responsibilities and clear areas of ownership.
+For software engineering project requirements, the database can be exported locally.
 
-### 👑 Manager Agent (Lead Coordinator & Research Specialist)
-
-**Primary Responsibilities:**
-
-- Overall project coordination and sprint planning
-- Task delegation and workload distribution
-- Architecture decisions and technical direction
-- Code review oversight and quality assurance
-- Integration testing and deployment coordination
-- Cross-team communication and conflict resolution
-- Progress tracking and milestone management
-- Documentation maintenance and updates
-
-**🔬 Enhanced Research & Testing Leadership:**
-
-- **Research Coordinator**: Lead research initiatives using MCP tools (Context7, Brave-search, Sequential-thinking)
-- **Testing Strategy Architect**: Design and coordinate comprehensive testing approaches across all agents
-- **Cross-Agent Testing Support**: Provide testing consultation and implementation assistance
-- **Knowledge Synthesis**: Aggregate research findings and best practices for team-wide application
-- **Quality Gate Enforcement**: Ensure all testing standards and coverage requirements are met
-
-**Domains:**
-
-- Project management and planning
-- System architecture decisions
-- DevOps and deployment strategies
-- Quality assurance and testing oversight
-- Team coordination and communication
-- **Research leadership and coordination**
-- **Cross-functional testing strategy and support**
-
----
-
-### 🎨 Frontend Agent (UI/UX Specialist)
-
-**Primary Responsibilities:**
-
-- Next.js 15.2.4 application development
-- React component architecture and design systems
-- State management with Zustand and React Query
-- UI/UX implementation with Tailwind CSS and shadcn/ui
-- Authentication flow with JWT-based local authentication
-- Responsive design and accessibility
-- Performance optimization for client-side rendering
-
-**Domains:**
-
-- `mentara-web/` directory ownership
-- All React components and pages
-- Client-side routing and navigation
-- Form handling and validation
-- Frontend testing and optimization
-- User experience and interface design
-
-**Key Technologies:**
-
-- Next.js 15.2.4, TypeScript, Tailwind CSS
-- React Query v5, Zustand, React Hook Form
-- JWT Authentication, shadcn/ui, Framer Motion
-
----
-
-### ⚙️ Backend Agent (API Specialist)
-
-**Primary Responsibilities:**
-
-- NestJS API development and architecture
-- Database schema design with Prisma ORM
-- Authentication and authorization systems
-- RESTful API endpoints and business logic
-- Real-time features with Socket.io
-- Database migrations and data management
-- Security implementations and best practices
-
-**Domains:**
-
-- `mentara-api/` directory ownership
-- All NestJS modules and controllers
-- Prisma schema and database operations
-- API security and authentication
-- Server-side business logic
-- Database optimization and queries
-
-**Key Technologies:**
-
-- NestJS 11.x, TypeScript, Prisma ORM
-- PostgreSQL, Socket.io, JWT Authentication
-- JWT Authentication, Multer File Handling
-
----
-
-### 🧠 AI/DevOps Agent (ML & Infrastructure Specialist)
-
-**Primary Responsibilities:**
-
-- Python Flask ML service development
-- PyTorch model optimization and training
-- Mental health assessment algorithms
-- CI/CD pipeline setup and maintenance
-- Testing automation and quality assurance
-- Performance monitoring and optimization
-- Infrastructure management and scaling
-
-**🔧 Backend Support Protocol:**
-When primary AI/ML tasks are complete, provide overflow support to Backend Agent:
-
-- API testing infrastructure and automation
-- Database performance optimization and monitoring
-- Security testing implementation and validation
-- Load testing setup and execution
-- Backend deployment pipeline enhancement
-- Performance bottleneck analysis and resolution
-
-**Domains:**
-
-- `ai-patient-evaluation/` directory ownership
-- Machine learning model development
-- DevOps and deployment pipelines
-- Automated testing frameworks
-- Performance monitoring tools
-- Infrastructure as code
-- **Backend Agent overflow support and assistance**
-
-**Key Technologies:**
-
-- Flask, Python, PyTorch, NumPy
-- Docker, CI/CD, Testing Frameworks
-- Performance Monitoring, Infrastructure Tools
-
-## 🤝 Collaboration Protocols
-
-### Daily Workflow
-
-1. **Morning Sync**: Manager Agent reviews overnight progress and assigns daily tasks
-2. **Focused Development**: Each agent works on their domain-specific tasks
-3. **Integration Points**: Agents coordinate when working on cross-domain features
-4. **Evening Review**: Manager Agent reviews completed work and plans next day
-
-### Communication Guidelines
-
-- **Direct Coordination**: Agents communicate directly when working on interconnected features
-- **Manager Escalation**: Complex architectural decisions or conflicts go through Manager Agent
-- **Research Coordination**: Manager Agent leads research initiatives and shares findings with all agents
-- **Testing Consultation**: All agents can request testing strategy support from Manager Agent
-- **Documentation**: All significant changes must be documented in relevant files
-- **Code Reviews**: Cross-agent code reviews for critical system integrations
-
-### Enhanced Handoff Procedures
-
-- **Frontend ↔ Backend**: API contracts and data models must be agreed upon
-- **Backend ↔ AI Service**: ML model integration points require coordination
-- **All ↔ DevOps**: Deployment and testing procedures must be validated
-- **Manager → All Agents**: Research findings and testing strategies shared
-- **AI/DevOps → Backend**: Overflow support when primary tasks complete
-
-### Research & Testing Coordination Matrix
-
-```
-Manager Agent (Research Lead)
-├── Research Coordination → All Agents
-├── Testing Strategy → All Agents
-├── Quality Gates → All Agents
-└── Knowledge Synthesis → Team-wide
-
-AI/DevOps Agent (Overflow Support)
-├── Primary: ML & Infrastructure
-└── Secondary: Backend Agent Support
-    ├── API Testing Infrastructure
-    ├── Database Performance
-    ├── Security Testing
-    └── Load Testing
-```
-
-## 📋 Current Sprint Objectives
-
-### ✅ **COMPLETED: Clerk to Local Auth Migration**
-
-- [x] **Backend Agent**: Implemented JWT authentication system, migrated 30+ controllers, updated WebSocket auth
-- [x] **Frontend Agent**: Replaced ClerkProvider with JWT auth, updated all auth hooks, migrated middleware
-- [x] **AI/DevOps Agent**: Created comprehensive testing infrastructure, security validation, rollback procedures
-- [x] **Manager**: Coordinated WebSocket integration, ensured security standards, updated documentation
-
-### 🛡️ **NEW: AI-Powered Content Moderation System**
-
-- [ ] **AI/DevOps Agent**: Build ai-content-moderation service, integrate Ollama mxbai-embed-large, fine-tune on toxic datasets
-- [ ] **Backend Agent**: Integrate moderation API with posts/comments, create moderator review queue
-- [ ] **Frontend Agent**: Build moderator dashboard, user appeals system, content status indicators
-- [ ] **Manager**: Define moderation policies, coordinate testing, ensure mental health platform safety
-
-### 🎯 **Ongoing Platform Features**
-
-- [x] Real-time messaging system (WebSocket implementation complete)
-- [x] Video session capabilities (WebRTC integration operational)
-- [ ] Enhanced community safety with AI moderation
-- [ ] Secure local authentication system
-- [ ] Comprehensive testing and monitoring
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm/bun
-- Python 3.9+ with pip
-- Docker and Docker Compose (recommended)
-- Make utility
-- Supabase account (database as a service)
-
-### Quick Start (Recommended)
+### Export Database
 
 ```bash
-# First-time setup - installs dependencies and configures environment
-./run.sh setup
-
-# Start all services in development mode
-./run.sh start
-# or with Make: make dev
-
-# Check service health
-./run.sh status
-# or with Make: make status
+./scripts/export-database.sh
 ```
 
-### Manual Setup (Alternative)
+This script exports the Supabase database as:
+- **SQL dump**: Complete database schema and data
+- **CSV files**: One file per table for data analysis
 
-```bash
-# Setup each service individually
-make setup-dev
+Exports are stored in `database/exports/` with timestamps.
 
-# Start services manually
-make dev-local        # Start without Docker
-# or
-make start            # Start with Docker Compose
+**Requirements:**
+- PostgreSQL client tools (`pg_dump`, `psql`)
+- `DATABASE_URL` configured in `mentara-api/.env`
 
-# Individual service management
-./run.sh api          # Start only backend API
-./run.sh client       # Start only frontend
-./run.sh ai-eval      # Start only AI evaluation
-./run.sh ai-mod       # Start only AI moderation
-```
-
-### Service Endpoints
-
-- **Web**: http://localhost:10001
-- **Backend API**: http://localhost:10000
-- **AI Patient Evaluation**: http://localhost:10002
-
-## 📚 Documentation
-
-- **[PROJECT_DOCS_INDEX.md](./PROJECT_DOCS_INDEX.md)** - 📚 Complete navigation guide to all organized documentation
-- **[TEAM_MANAGEMENT_ROLES.md](./TEAM_MANAGEMENT_ROLES.md)** - 4-agent team structure, roles, and coordination framework
-- **[CLAUDE.md](./CLAUDE.md)** - Comprehensive development guidelines and conventions
-
-### 📁 Organized Documentation
-
-All project documentation has been organized into [`project-docs/`](./project-docs/) with logical categorization:
-
-- **Team Coordination** - Active management and progress tracking
-- **Agent Directives** - Specific tasks and instructions for each agent
-- **Technical Docs** - Architecture, deployment, and integration guides
-- **Reports & Analysis** - Audits, assessments, and technical analysis
-- **Policies** - Security, moderation, and operational guidelines
-- **Development** - Progress tracking and testing resources
-- **Archive** - Historical documents and completed phases
+See [database/README.md](database/README.md) for detailed instructions.
 
 ## 🔧 Development Commands
 
-Use service-local commands (examples):
+### Backend (mentara-api)
 
 ```bash
-# Backend (mentara-api/)
 cd mentara-api
 npm run start:dev    # Start development server
-npm run test         # Run tests
-npm run db:migrate   # Database migrations
-npm run db:seed      # Seed database
-
-# Web (mentara-web/)
-cd ../mentara-web
-npm run dev          # Start development server
-npm run build        # Production build
-npm run lint         # ESLint checking
-
-# AI (ai-patient-evaluation/)
-cd ../ai-patient-evaluation
-python api.py        # Start Flask server
-pytest               # Run tests
+npm run build       # Build for production
+npm run start:prod  # Start production server
+npm run test        # Run tests
+npm run db:migrate  # Run database migrations
+npm run db:seed     # Seed database with test data
 ```
 
-### Individual Service Commands
-
-Each service has its own Makefile with service-specific commands:
+### Frontend (mentara-web)
 
 ```bash
-# Backend (mentara-api/)
-cd mentara-api
-make dev             # Start development server
-make test            # Run tests
-make db-migrate      # Database migrations
-make db-seed         # Seed database
-
-# Web (mentara-web/)
 cd mentara-web
-make dev             # Start development server
-make build           # Production build
-make lint            # ESLint checking
-
-# AI Services (ai-patient-evaluation/, ai-content-moderation/)
-cd ai-patient-evaluation  # or ai-content-moderation
-make dev             # Start Flask server
-make test            # Run service tests
-make setup           # Setup models and dependencies
+npm run dev         # Start development server
+npm run build       # Production build
+npm run start       # Start production server
+npm run lint        # Run ESLint
+npm run test        # Run tests
 ```
 
-## 🎯 Success Metrics
+### AI Service (ml-patient-evaluator-api)
 
-### Code Quality
+```bash
+cd ml-patient-evaluator-api
+python api.py       # Start Flask server
+pytest             # Run tests
+```
 
-- All TypeScript strict mode compliance
-- 90%+ test coverage on critical paths
-- Zero security vulnerabilities
-- Performance benchmarks met
+## 📚 Documentation
 
-### Team Efficiency
+- **[Software Requirements Specification](docs/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)** - Complete system requirements
+- **[Software Design Description](docs/SOFTWARE_DESIGN_DESCRIPTION.md)** - System architecture and design
+- **[Software Project Management Plan](docs/SOFTWARE_PROJECT_MANAGEMENT_PLAN.md)** - Project planning and management
+- **[Software Test Document](docs/SOFTWARE_TEST_DOCUMENT.md)** - Testing strategy and procedures
+- **[Supabase Deployment Guide](docs/SUPABASE_DEPLOYMENT_GUIDE.md)** - Database deployment instructions
+- **[WebRTC Deployment](docs/WEBRTC_DEPLOYMENT.md)** - Video call setup guide
+- **[Research Paper](docs/research-paper/)** - Academic research documentation
 
-- Daily standup completion rate
-- Cross-agent collaboration frequency
-- Issue resolution time
-- Documentation completeness
+### Service-Specific Documentation
 
-### Product Delivery
-
-- Feature completion against timeline
-- User acceptance criteria met
-- Performance requirements satisfied
-- Security standards compliance
+- [Backend API Documentation](mentara-api/README.md)
+- [Frontend Documentation](mentara-web/README.md)
+- [AI Service Documentation](ml-patient-evaluator-api/README.md)
 
 ## 🔒 Security & Privacy
 
 - HIPAA compliance considerations for health data
 - End-to-end encryption for sensitive communications
+- JWT-based authentication with secure token rotation
+- Role-based access control (Client, Therapist, Moderator, Admin)
 - Regular security audits and vulnerability assessments
 - Privacy-by-design architecture principles
 
 ## 📞 Support & Contact
 
-**Team Lead**: Manager Agent
-**Technical Issues**: Escalate through Manager Agent
-**Architecture Questions**: Consult CLAUDE.md and architecture.md
+**Project Team:**
+- Tristan James Tolentino
+- Adrian T. Sajulga
+- Julia Laine Segundo
+
+**Contact Email**: derpykidyt@gmail.com
 
 ---
 
-_This README is maintained by the Manager Agent and updated regularly to reflect current project status and team structure._
+_This README is maintained and updated regularly to reflect current project status and deployment procedures._

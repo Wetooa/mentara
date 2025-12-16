@@ -326,7 +326,7 @@ export class PreAssessmentChatbotService {
           enhancedHistory,
           {
             temperature: 0.7,
-            max_tokens: 500,
+            max_tokens: 4000,
           },
         );
         this.logger.log(`✅ Received AI Response (first 200 chars): ${aiResponse.substring(0, 200)}...`);

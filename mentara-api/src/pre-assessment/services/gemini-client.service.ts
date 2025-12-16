@@ -225,7 +225,7 @@ export class GeminiClientService {
       ...(systemInstruction && { systemInstruction }),
       generationConfig: {
         temperature: options?.temperature ?? 0.7,
-        maxOutputTokens: options?.max_tokens ?? 1000,
+        maxOutputTokens: options?.max_tokens ?? 2000,
       },
     };
 
@@ -289,6 +289,16 @@ export class GeminiClientService {
 
       // Extract content
       let content = validation.content!;
+      
+      // Check if response was truncated due to token limit
+      if (validation.finishReason === 'MAX_TOKENS') {
+        this.logger.warn(
+          `⚠️ Gemini API response was truncated (finishReason: MAX_TOKENS). ` +
+          `Generated ${response.data.usageMetadata?.candidatesTokenCount || 'unknown'} tokens. ` +
+          `Consider increasing max_tokens parameter.`,
+        );
+      }
+      
       this.logger.log(
         `Gemini API response received (tokens: ${response.data.usageMetadata?.totalTokenCount || 'unknown'})`,
       );
@@ -405,7 +415,7 @@ export class GeminiClientService {
    */
   private validateGeminiResponse(
     response: { data: GeminiGenerateContentResponse },
-  ): { isValid: boolean; error?: string; content?: string } {
+  ): { isValid: boolean; error?: string; content?: string; finishReason?: string } {
     if (!response.data) {
       return { isValid: false, error: 'Response data is missing' };
     }
@@ -424,7 +434,7 @@ export class GeminiClientService {
       return { isValid: false, error: 'No text content in candidate parts' };
     }
 
-    return { isValid: true, content: textPart.text };
+    return { isValid: true, content: textPart.text, finishReason: candidate.finishReason };
   }
 
   /**
