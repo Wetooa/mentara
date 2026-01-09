@@ -99,11 +99,18 @@ export function useRemovePatient() {
       api.therapists.patients.removePatient(patientId),
     onSuccess: () => {
       // Invalidate both lists to refresh data
-      queryClient.invalidateQueries({ queryKey: ["clients", "assigned"] });
-      queryClient.invalidateQueries({ queryKey: ["clients", "requests"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapists.patients.list() });
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.therapists.patients.list(), "requests"] });
+      toast.success("Disconnected from client successfully");
     },
     onError: (error: MentaraApiError) => {
-      console.error("Failed to remove patient:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to disconnect from client";
+      toast.error("Disconnect Failed", {
+        description: errorMessage,
+      });
     },
   });
 }
@@ -117,7 +124,7 @@ export function usePatientData(patientId: string | null) {
   return useQuery({
     queryKey: [...queryKeys.therapists.patients.list(), "detail", patientId || ""],
     queryFn: () => api.therapists.patients.getById(patientId!),
-    select: (response) => response.data || null,
+    select: (response) => response || null,
     enabled: !!patientId,
     staleTime: STALE_TIME.LONG, // 10 minutes
     gcTime: GC_TIME.VERY_LONG, // 30 minutes
@@ -134,7 +141,7 @@ export function usePatientSessions(patientId: string | null) {
   return useQuery({
     queryKey: [...queryKeys.therapists.patients.list(), "sessions", patientId || ""],
     queryFn: () => api.therapists.patients.getSessions(patientId!),
-    select: (response) => response.data || [],
+    select: (response) => Array.isArray(response) ? response : (response?.data || []),
     enabled: !!patientId,
     staleTime: STALE_TIME.MEDIUM, // 5 minutes
     gcTime: GC_TIME.MEDIUM, // 10 minutes
@@ -151,7 +158,7 @@ export function usePatientWorksheets(patientId: string | null) {
   return useQuery({
     queryKey: [...queryKeys.therapists.patients.list(), "detail", patientId || "", "worksheets"],
     queryFn: () => api.therapists.patients.getWorksheets(patientId!),
-    select: (response) => response.data || [],
+    select: (response) => Array.isArray(response) ? response : (response?.data || []),
     enabled: !!patientId,
     staleTime: STALE_TIME.SHORT, // 3 minutes (uses SHORT for frequent changes)
     gcTime: GC_TIME.MEDIUM, // 10 minutes

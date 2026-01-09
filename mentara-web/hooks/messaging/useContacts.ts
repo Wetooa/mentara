@@ -43,7 +43,7 @@ export function useContacts() {
     error: queryError,
     refetch: loadContacts
   } = useQuery({
-    queryKey: queryKeys.messaging.contacts(),
+    queryKey: queryKeys.messaging.contacts(user?.id || ''),
     queryFn: async () => {
       if (!user?.id) throw new Error('User not authenticated');
       
@@ -89,8 +89,10 @@ export function useContacts() {
     },
     onSuccess: () => {
       // Invalidate and refetch contacts
-      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.contacts() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.conversations() });
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.messaging.contacts(user.id) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.messaging.conversations(user.id) });
+      }
     },
   });
 
@@ -101,12 +103,14 @@ export function useContacts() {
     },
     onSuccess: (_, contactId) => {
       // Optimistically update the cache
-      queryClient.setQueryData(queryKeys.messaging.contacts(), (oldContacts: Contact[] = []) => 
-        oldContacts.filter(c => c.id !== contactId)
-      );
-      
-      // Also invalidate related queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.conversations() });
+      if (user?.id) {
+        queryClient.setQueryData(queryKeys.messaging.contacts(user.id), (oldContacts: Contact[] = []) => 
+          oldContacts.filter(c => c.id !== contactId)
+        );
+        
+        // Also invalidate related queries
+        queryClient.invalidateQueries({ queryKey: queryKeys.messaging.conversations(user.id) });
+      }
     },
   });
 

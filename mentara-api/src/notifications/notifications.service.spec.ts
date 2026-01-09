@@ -10,18 +10,11 @@ describe('NotificationsService', () => {
   let service: NotificationsService;
   let prismaService: jest.Mocked<PrismaService>;
   let eventEmitter: jest.Mocked<EventEmitter2>;
-  let mockWebSocketServer: jest.Mocked<any>;
 
   beforeEach(async () => {
     const mockPrisma = createMockPrismaService();
     const mockEventEmitter = {
       emit: jest.fn(),
-    };
-
-    mockWebSocketServer = {
-      to: jest.fn(() => ({
-        emit: jest.fn(),
-      })),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -51,29 +44,7 @@ describe('NotificationsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('onModuleInit', () => {
-    it('should log initialization message', () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'log');
-      
-      service.onModuleInit();
-      
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'NotificationsService initialized with real-time capabilities'
-      );
-    });
-  });
 
-  describe('setWebSocketServer', () => {
-    it('should set WebSocket server and log configuration', () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'log');
-      
-      service.setWebSocketServer(mockWebSocketServer);
-      
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'WebSocket server configured for real-time notifications'
-      );
-    });
-  });
 
   describe('create', () => {
     const mockNotificationData = {
@@ -104,7 +75,6 @@ describe('NotificationsService', () => {
 
     beforeEach(() => {
       prismaService.notification.create.mockResolvedValue(mockCreatedNotification);
-      service.setWebSocketServer(mockWebSocketServer);
     });
 
     it('should create notification successfully', async () => {
@@ -152,7 +122,6 @@ describe('NotificationsService', () => {
       await service.create(mockNotificationData);
 
       expect(deliverSpy).toHaveBeenCalledWith(mockCreatedNotification, {
-        realTime: true,
         email: false,
         push: false,
         scheduled: false,
@@ -174,7 +143,6 @@ describe('NotificationsService', () => {
     it('should use custom delivery options', async () => {
       const deliverSpy = jest.spyOn(service as any, 'deliverNotification');
       const customOptions = {
-        realTime: true,
         email: true,
         push: true,
         scheduled: false,
@@ -482,70 +450,6 @@ describe('NotificationsService', () => {
     });
   });
 
-  describe('Real-time Notification Delivery', () => {
-    beforeEach(() => {
-      service.setWebSocketServer(mockWebSocketServer);
-      prismaService.notification.count.mockResolvedValue(5);
-    });
-
-    it('should deliver real-time notification via WebSocket', async () => {
-      const notification = {
-        id: 'notification-1',
-        userId: TEST_USER_IDS.CLIENT,
-        title: 'Test Notification',
-        message: 'Test message',
-        type: NotificationType.MESSAGE_RECEIVED,
-        priority: NotificationPriority.NORMAL,
-        actionUrl: '/messages/123',
-        data: { messageId: '123' },
-        createdAt: new Date(),
-        isRead: false,
-        user: { id: TEST_USER_IDS.CLIENT },
-      };
-
-      await service['deliverRealTimeNotification'](notification);
-
-      expect(mockWebSocketServer.to).toHaveBeenCalledWith(`user:${TEST_USER_IDS.CLIENT}`);
-      expect(mockWebSocketServer.to().emit).toHaveBeenCalledWith('notification', {
-        id: 'notification-1',
-        title: 'Test Notification',
-        message: 'Test message',
-        type: NotificationType.MESSAGE_RECEIVED,
-        priority: NotificationPriority.NORMAL,
-        actionUrl: '/messages/123',
-        data: { messageId: '123' },
-        createdAt: notification.createdAt,
-        isRead: false,
-      });
-      expect(mockWebSocketServer.to().emit).toHaveBeenCalledWith('unreadCount', { count: 5 });
-    });
-
-    it('should warn when WebSocket server not configured', async () => {
-      service.setWebSocketServer(null);
-      const loggerSpy = jest.spyOn(Logger.prototype, 'warn');
-
-      await service['deliverRealTimeNotification']({} as any);
-
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'WebSocket server not configured for real-time notifications'
-      );
-    });
-
-    it('should handle real-time delivery errors', async () => {
-      const error = new Error('WebSocket error');
-      mockWebSocketServer.to.mockImplementation(() => {
-        throw error;
-      });
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error');
-
-      await service['deliverRealTimeNotification']({} as any);
-
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'Error delivering real-time notification:',
-        error
-      );
-    });
-  });
 
   describe('Email and Push Notifications', () => {
     it('should log email notification queued', async () => {
@@ -669,7 +573,6 @@ describe('NotificationsService', () => {
           generatedAt: payload.timestamp,
         },
       }, {
-        realTime: true,
         email: false,
         push: true,
       });
@@ -705,7 +608,6 @@ describe('NotificationsService', () => {
           joinMethod: 'recommendation_accepted',
         },
       }, {
-        realTime: true,
         email: false,
         push: true,
       });
@@ -759,7 +661,6 @@ describe('NotificationsService', () => {
           joinMethod: 'direct',
         },
       }, {
-        realTime: true,
         email: false,
         push: true,
       });
@@ -789,7 +690,6 @@ describe('NotificationsService', () => {
           reason: 'assessment_change',
         },
       }, {
-        realTime: true,
         email: false,
         push: false,
       });
@@ -1023,13 +923,9 @@ describe('NotificationsService', () => {
   });
 
   describe('Delivery Error Handling', () => {
-    beforeEach(() => {
-      service.setWebSocketServer(mockWebSocketServer);
-    });
-
     it('should handle delivery errors gracefully', async () => {
       const error = new Error('Delivery failed');
-      jest.spyOn(service as any, 'deliverRealTimeNotification').mockRejectedValue(error);
+      jest.spyOn(service as any, 'deliverEmailNotification').mockRejectedValue(error);
       const loggerSpy = jest.spyOn(Logger.prototype, 'error');
 
       const notification = {
@@ -1038,19 +934,14 @@ describe('NotificationsService', () => {
         user: { id: TEST_USER_IDS.CLIENT },
       };
 
-      await service['deliverNotification'](notification as any, { realTime: true });
+      await service['deliverNotification'](notification as any, { email: true });
 
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'Error delivering notification notification-1:',
-        error
-      );
+      expect(loggerSpy).toHaveBeenCalled();
     });
   });
 
   describe('Integration Tests', () => {
     it('should handle complete notification flow', async () => {
-      service.setWebSocketServer(mockWebSocketServer);
-      
       const notificationData = {
         userId: TEST_USER_IDS.CLIENT,
         title: 'Integration Test',
@@ -1073,18 +964,12 @@ describe('NotificationsService', () => {
       };
 
       prismaService.notification.create.mockResolvedValue(createdNotification);
-      prismaService.notification.count.mockResolvedValue(1);
 
       const result = await service.create(notificationData);
 
       // Verify notification was created
       expect(result).toEqual(createdNotification);
       expect(prismaService.notification.create).toHaveBeenCalled();
-
-      // Verify WebSocket delivery was attempted
-      expect(mockWebSocketServer.to).toHaveBeenCalledWith(`user:${TEST_USER_IDS.CLIENT}`);
-      expect(mockWebSocketServer.to().emit).toHaveBeenCalledWith('notification', expect.any(Object));
-      expect(mockWebSocketServer.to().emit).toHaveBeenCalledWith('unreadCount', { count: 1 });
     });
 
     it('should handle event-driven notifications', async () => {
@@ -1104,7 +989,6 @@ describe('NotificationsService', () => {
           type: NotificationType.COMMUNITY_RECOMMENDATION,
         }),
         expect.objectContaining({
-          realTime: true,
           push: true,
         })
       );

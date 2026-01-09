@@ -298,7 +298,13 @@ export class PreAssessmentService {
         // Continue without AI estimate - don't fail the entire assessment
       }
 
-      // Create pre-assessment with validated data
+      // Check if pre-assessment already exists for this client
+      // If it exists, update it; otherwise create a new one
+      const existingAssessment = await this.prisma.preAssessment.findFirst({
+        where: { clientId: userId },
+        orderBy: { createdAt: 'desc' },
+      });
+
       const createData: any = {
         clientId: userId,
         answers: data.answers, // Flat array of 201 numeric responses
@@ -311,10 +317,21 @@ export class PreAssessmentService {
         ...(data.chatbotSessionId && { chatbotSessionId: data.chatbotSessionId }),
         ...(data.conversationInsights && { conversationInsights: data.conversationInsights }),
       };
-      
-      const preAssessment = await this.prisma.preAssessment.create({
-        data: createData,
-      });
+
+      let preAssessment: PreAssessment;
+      if (existingAssessment) {
+        // Update existing pre-assessment
+        this.logger.log(`Updating existing pre-assessment for user ${userId}`);
+        preAssessment = await this.prisma.preAssessment.update({
+          where: { id: existingAssessment.id },
+          data: createData,
+        });
+      } else {
+        // Create new pre-assessment
+        preAssessment = await this.prisma.preAssessment.create({
+          data: createData,
+        });
+      }
 
       this.logger.log(`Pre-assessment completed for user ${userId}`);
 

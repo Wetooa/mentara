@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -30,6 +30,9 @@ export default function ClientMessagesPage() {
   const { user } = useAuth();
   const { targetUserId: storeTargetUserId, setTargetUserId } = useMessagingStore();
   
+  // Track if we've processed the contact param to avoid re-processing
+  const hasProcessedContact = useRef(false);
+  
   // Handle URL params (for backward compatibility)
   const urlTargetUserId = searchParams.get('userId') || searchParams.get('contact');
   const targetUserId = storeTargetUserId || urlTargetUserId || undefined;
@@ -40,6 +43,29 @@ export default function ClientMessagesPage() {
       setTargetUserId(null);
     }
   }, [storeTargetUserId, setTargetUserId]);
+
+  // Remove contact query param after processing
+  useEffect(() => {
+    const contactParam = searchParams.get('contact') || searchParams.get('userId');
+    
+    if (contactParam && !hasProcessedContact.current) {
+      hasProcessedContact.current = true;
+      
+      // Wait for conversation to be set up (handled by MessengerInterface)
+      // Then remove query param after a delay to ensure conversation is created
+      const timer = setTimeout(() => {
+        // Remove query params from URL
+        const newUrl = window.location.pathname;
+        router.replace(newUrl, { scroll: false });
+        logger.debug('Removed contact query param from URL after processing');
+      }, 2500); // Give time for conversation setup (2.5 seconds)
+      
+      return () => clearTimeout(timer);
+    } else if (!contactParam) {
+      // Reset the flag when there's no contact param
+      hasProcessedContact.current = false;
+    }
+  }, [searchParams, router]);
 
   const handleCallInitiate = async (conversationId: string, type: 'audio' | 'video') => {
     try {

@@ -3,6 +3,7 @@ import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import type { ClientDashboardResponseDto } from "@/types/api/dashboard";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Hook for fetching client-specific dashboard data
@@ -95,9 +96,10 @@ export function useDashboardData() {
  */
 export function useRecentCommunications() {
   const api = useApi();
+  const { user } = useAuth();
 
   return useQuery({
-    queryKey: queryKeys.messaging.recent(5),
+    queryKey: queryKeys.messaging.recent(user?.id || '', 5),
     queryFn: () => api.messaging?.getRecentCommunications?.(5) || Promise.resolve([]),
     staleTime: STALE_TIME.SHORT, // 2 minutes
     gcTime: GC_TIME.SHORT, // 5 minutes

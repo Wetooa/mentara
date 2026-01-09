@@ -285,10 +285,21 @@ export default function SessionDetailsPage({
     session.status === "CANCELLED" || session.status === "NO_SHOW";
 
   // Generate breadcrumb context
-  const breadcrumbContext = session?.dateTime
-    ? {
-        sessionTitle: format(new Date(session.dateTime), "MMM d, yyyy - Session"),
-      }
+  const sessionDate = session?.dateTime || session?.startTime;
+  const breadcrumbContext = sessionDate
+    ? (() => {
+        try {
+          const date = new Date(sessionDate);
+          if (isNaN(date.getTime())) {
+            return undefined;
+          }
+          return {
+            sessionTitle: format(date, "MMM d, yyyy 'at' h:mm a"),
+          };
+        } catch {
+          return undefined;
+        }
+      })()
     : undefined;
 
   return (
@@ -326,9 +337,17 @@ export default function SessionDetailsPage({
                 </Badge>
               </div>
             <p className="text-muted-foreground">
-              {session.dateTime
-                ? `${format(new Date(session.dateTime), "EEEE, MMMM d, yyyy")} at ${format(new Date(session.dateTime), "h:mm a")}`
-                : "Date not available"}
+              {(() => {
+                const dateValue = session.dateTime || session.startTime;
+                if (!dateValue) return "Date not available";
+                try {
+                  const date = new Date(dateValue);
+                  if (isNaN(date.getTime())) return "Invalid date";
+                  return `${format(date, "EEEE, MMMM d, yyyy")} at ${format(date, "h:mm a")}`;
+                } catch {
+                  return "Date not available";
+                }
+              })()}
             </p>
           </div>
         </div>

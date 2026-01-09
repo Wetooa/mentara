@@ -52,12 +52,18 @@ export function useMessagingWebSocket() {
   }, []);
 
   const joinConversation = useCallback((conversationId: string) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebSocket.ts:54',message:'joinConversation called',data:{conversationId,isConnected:connectionState.isConnected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     console.log('🚪 [WEBSOCKET DEBUG] Joining conversation room:', conversationId);
     console.log('🚪 [WEBSOCKET DEBUG] Connection state:', connectionState);
     emitEvent('join_conversation', { conversationId });
     
     // Listen for join confirmation
     const unsubscribe = onEvent('conversation_joined', (data) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebSocket.ts:60',message:'conversation_joined event received',data:{conversationId:data?.conversationId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       console.log('✅ [WEBSOCKET DEBUG] Successfully joined conversation room:', data);
       unsubscribe();
     });
@@ -72,10 +78,37 @@ export function useMessagingWebSocket() {
   }, []);
 
   const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebSocket.ts:74',message:'subscribeToMessages called - registering callback',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     return onEvent('new_message', (data: { message: Message }) => {
+      // #region agent log
+      const dataKeys = data ? Object.keys(data) : [];
+      const hasMessage = !!data?.message;
+      const messageId = data?.message?.id;
+      const conversationId = data?.message?.conversationId;
+      const rawDataString = JSON.stringify(data)?.substring(0, 300);
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebSocket.ts:84',message:'new_message event received in subscribeToMessages - EVENT RECEIVED!',data:{hasData:!!data,hasMessage,messageId,conversationId,dataKeys,rawDataString},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'J'})}).catch(()=>{});
+      // #endregion
       console.log('🔍 [WEBSOCKET DEBUG] Raw new_message event received:', data);
       console.log('🔍 [WEBSOCKET DEBUG] Message data:', data.message);
+      console.log('🔍 [WEBSOCKET DEBUG] Data structure:', { hasMessage: !!data?.message, keys: Object.keys(data || {}) });
+      
+      if (!data?.message) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebSocket.ts:92',message:'ERROR: new_message event missing message property',data:{dataKeys,rawData:rawDataString},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'J'})}).catch(()=>{});
+        // #endregion
+        console.error('❌ [WEBSOCKET DEBUG] new_message event missing message property!', data);
+        return;
+      }
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebSocket.ts:98',message:'Calling callback with message',data:{messageId:data.message.id,conversationId:data.message.conversationId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'J'})}).catch(()=>{});
+      // #endregion
       callback(data.message);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebSocket.ts:101',message:'Callback executed in subscribeToMessages',data:{messageId:data?.message?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'J'})}).catch(()=>{});
+      // #endregion
     });
   }, []);
 

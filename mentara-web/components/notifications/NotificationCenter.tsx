@@ -95,18 +95,16 @@ export function NotificationCenter({
     unreadCount,
     isLoading,
     error,
-    connectionState,
+    pollingStatus,
     markAsRead,
     markAllAsRead,
     deleteNotification,
     isMarkingAsRead,
     isMarkingAllAsRead,
     isDeleting,
-    reconnectWebSocket,
+    refetch,
     getHighPriorityNotifications,
-    refetch
   } = useNotifications({ 
-    enableRealtime: true, 
     enableToasts: false // Disable toasts in the center
   });
 
@@ -234,12 +232,14 @@ export function NotificationCenter({
           </CardTitle>
           
           <div className="flex items-center gap-2">
-            {/* Connection status indicators */}
+            {/* Polling status indicators */}
             <div className="flex items-center gap-1">
-              {connectionState?.isConnected ? (
-                <Wifi className="h-4 w-4 text-green-500" title="Real-time connected" />
+              {pollingStatus?.isPolling ? (
+                <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" title="Polling for updates" />
+              ) : pollingStatus?.lastPollTime ? (
+                <Clock className="h-4 w-4 text-green-500" title={`Last updated: ${Math.floor((Date.now() - pollingStatus.lastPollTime.getTime()) / 1000)}s ago`} />
               ) : (
-                <WifiOff className="h-4 w-4 text-red-500" title="Real-time disconnected" />
+                <Clock className="h-4 w-4 text-gray-400" title="Polling every 10s" />
               )}
               
               {pushSupported && pushSubscribed && (
@@ -264,14 +264,8 @@ export function NotificationCenter({
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={refetch}>
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Refresh
+                  Refresh Now
                 </DropdownMenuItem>
-                {!connectionState?.isConnected && (
-                  <DropdownMenuItem onClick={reconnectWebSocket}>
-                    <Wifi className="h-4 w-4 mr-2" />
-                    Reconnect
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={testNotification}>
                   <Bell className="h-4 w-4 mr-2" />
@@ -703,37 +697,35 @@ export function NotificationCenter({
                   )}
                 </div>
 
-                {/* Real-time Connection Status */}
+                {/* Polling Status */}
                 <Separator />
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Connection Status</h3>
+                  <h3 className="text-lg font-medium">Update Status</h3>
                   
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {connectionState?.isConnected ? (
-                          <Wifi className="h-4 w-4 text-green-500" />
+                        {pollingStatus?.isPolling ? (
+                          <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />
                         ) : (
-                          <WifiOff className="h-4 w-4 text-red-500" />
+                          <Clock className="h-4 w-4 text-green-500" />
                         )}
-                        <span>Real-time Notifications</span>
+                        <span>Notification Polling</span>
                       </div>
-                      <Badge variant={connectionState?.isConnected ? 'default' : 'destructive'}>
-                        {connectionState?.isConnected ? 'Connected' : 'Disconnected'}
+                      <Badge variant={pollingStatus?.isPolling ? 'default' : 'secondary'}>
+                        {pollingStatus?.isPolling ? 'Polling...' : 'Polling every 10s'}
                       </Badge>
                     </div>
 
-                    {connectionState?.error && (
-                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-800">{connectionState.error}</p>
-                        <Button 
-                          onClick={reconnectWebSocket}
-                          size="sm"
-                          className="mt-2"
-                        >
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Reconnect
-                        </Button>
+                    {pollingStatus?.lastPollTime && (
+                      <div className="text-sm text-muted-foreground">
+                        Last updated: {Math.floor((Date.now() - pollingStatus.lastPollTime.getTime()) / 1000)} seconds ago
+                      </div>
+                    )}
+
+                    {pollingStatus?.nextPollTime && !pollingStatus.isPolling && (
+                      <div className="text-sm text-muted-foreground">
+                        Next update in: {Math.ceil((pollingStatus.nextPollTime.getTime() - Date.now()) / 1000)} seconds
                       </div>
                     )}
 

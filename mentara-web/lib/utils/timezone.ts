@@ -78,6 +78,17 @@ export function canBookInAdvanceUTC(
 }
 
 /**
+ * Get the minimum advance booking date (date that meets the minimum advance booking requirement)
+ * Default: 0.5 hours from now (matching backend slot-generator.service.ts minAdvanceBooking)
+ */
+export function getMinimumAdvanceBookingDate(
+  minAdvanceHours: number = 0.5
+): Date {
+  const now = new Date();
+  return new Date(now.getTime() + minAdvanceHours * 60 * 60 * 1000);
+}
+
+/**
  * Format time for display (using user's local timezone for display)
  */
 export function formatForDisplay(date: Date | string): string {
@@ -102,4 +113,5 @@ export const TimezoneUtils = {
   getCurrent: getCurrentUTCTime,
   isPast: isPastUTC,
   canBook: canBookInAdvanceUTC,
+  getMinimumAdvanceBookingDate: getMinimumAdvanceBookingDate,
 };

@@ -238,6 +238,37 @@ export class ClientController {
     }
   }
 
+  @Delete('therapist/:therapistId')
+  @ApiOperation({
+    summary: 'Disconnect from specific therapist',
+    description: 'Disconnect from a specific therapist by setting the relationship status to inactive',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Disconnected successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request - Relationship not active' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Client or relationship not found' })
+  async disconnectTherapist(
+    @CurrentUserId() id: string,
+    @Param('therapistId') therapistId: string,
+  ): Promise<{ success: boolean }> {
+    try {
+      await this.clientService.disconnectTherapist(id, therapistId);
+      return { success: true };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to disconnect therapist: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error && error.message.includes('not found')
+          ? HttpStatus.NOT_FOUND
+          : error instanceof Error && error.message.includes('not active')
+          ? HttpStatus.BAD_REQUEST
+          : HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Get('therapist/requests')
   @ApiOperation({
     summary: 'Get pending therapist requests',

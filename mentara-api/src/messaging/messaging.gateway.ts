@@ -16,19 +16,6 @@ import { WebSocketEventService } from './services/websocket-event.service';
 
 import { WebSocketAuthMiddleware } from './services/websocket-auth.service';
 
-interface ConnectedUser {
-  userId: string;
-  socketId: string;
-  connectedAt: Date;
-  rooms: Set<string>;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-  };
-}
 
 interface NotificationData {
   title: string;
@@ -96,9 +83,8 @@ export class MessagingGateway
   server!: Server;
 
   private readonly logger = new Logger(MessagingGateway.name);
-  private connectedUsers = new Map<string, ConnectedUser>();
-  private userToSocket = new Map<string, string>();
-  private socketToUser = new Map<string, string>();
+  // Simplified: single one-way mapping from socket ID to user ID
+  private socketToUserId = new Map<string, string>();
   
   // Video call state management
   private activeCalls = new Map<string, VideoCallSession>();
@@ -128,42 +114,40 @@ export class MessagingGateway
       const user = (client as any).user;
 
       if (!userId || !user) {
-        this.logger.error(
-          `Socket ${client.id} reached handleConnection without proper auth data`,
-        );
+        this.logger.error(`Socket ${client.id} reached handleConnection without proper auth data`);
         client.disconnect();
         return;
       }
 
-      // Log connection recovery status
-      if ((client as any).recovered) {
-        this.logger.log(`User ${userId} connected with state recovery`);
+      this.logger.log(`User ${userId} connecting with socket ${client.id}`);
+
+      // Disconnect any existing socket for this user
+      const existingSocketId = Array.from(this.socketToUserId.entries())
+        .find(([_, uid]) => uid === userId)?.[0];
+      
+      if (existingSocketId) {
+        this.logger.log(`Disconnecting existing socket ${existingSocketId} for user ${userId}`);
+        const existingSocket = this.server.sockets.sockets.get(existingSocketId);
+        if (existingSocket && existingSocket.connected) {
+          existingSocket.emit('connection_replaced', {
+            message: 'Connection replaced by new session',
+            timestamp: new Date(),
+          });
+          existingSocket.disconnect(true);
+        }
+        this.socketToUserId.delete(existingSocketId);
       }
 
-      // Improved connection management - handle existing connections gracefully
-      await this.handleExistingConnection(userId);
-
-      // Set up new connection
-      const connectedUser: ConnectedUser = {
-        userId,
-        socketId: client.id,
-        connectedAt: new Date(),
-        rooms: new Set(),
-        user,
-      };
-
-      this.connectedUsers.set(userId, connectedUser);
-      this.userToSocket.set(userId, client.id);
-      this.socketToUser.set(client.id, userId);
+      // Register new connection
+      this.socketToUserId.set(client.id, userId);
 
       // Subscribe user to their personal notification room
       const personalRoom = this.getUserRoom(userId);
       await client.join(personalRoom);
-      connectedUser.rooms.add(personalRoom);
 
       this.logger.log(`User ${userId} connected to messaging gateway`);
 
-      // Send connection confirmation with enhanced data
+      // Send connection confirmation
       client.emit('connected', {
         userId,
         timestamp: new Date(),
@@ -177,150 +161,63 @@ export class MessagingGateway
         },
       });
     } catch (error) {
-      this.logger.error('Connection failed:', error);
+      this.logger.error(`Connection failed for socket ${client.id}:`, error);
       client.disconnect();
     }
   }
 
   async handleDisconnect(client: Socket) {
-    const userId = this.socketToUser.get(client.id);
-    if (!userId) return;
+    const userId = this.socketToUserId.get(client.id);
+    if (!userId) {
+      this.logger.warn(`Socket ${client.id} disconnected but was not in socketToUserId map`);
+      return;
+    }
 
-    this.cleanupUserConnection(userId);
+    // Clean up mapping
+    this.socketToUserId.delete(client.id);
+    
+    // Clean up video calls
     this.cleanupUserVideoCalls(userId);
+    
     this.logger.log(`User ${userId} disconnected from messaging gateway`);
   }
 
   /**
-   * Gracefully handle existing connections without causing flicker
-   */
-  private async handleExistingConnection(userId: string): Promise<void> {
-    const existingConnection = this.connectedUsers.get(userId);
-    if (!existingConnection) return;
-
-    this.logger.log(`Handling existing connection for user ${userId}`);
-
-    // Clean up existing connection data without disconnecting the socket
-    // Let the old socket naturally disconnect to avoid connection flicker
-    this.connectedUsers.delete(userId);
-
-    const oldSocketId = this.userToSocket.get(userId);
-    if (oldSocketId) {
-      this.userToSocket.delete(userId);
-      this.socketToUser.delete(oldSocketId);
-
-      // Optionally notify the old socket about replacement
-      const oldSocket = this.server.sockets.sockets.get(oldSocketId);
-      if (oldSocket) {
-        oldSocket.emit('connection_replaced', {
-          message: 'Connection replaced by new session',
-          timestamp: new Date(),
-        });
-      }
-    }
-  }
-
-  private cleanupUserConnection(userId: string) {
-    try {
-      const connectedUser = this.connectedUsers.get(userId);
-      if (connectedUser) {
-        // Simplified cleanup - let Socket.IO handle room cleanup automatically
-        this.connectedUsers.delete(userId);
-      }
-
-      const socketId = this.userToSocket.get(userId);
-      if (socketId) {
-        this.userToSocket.delete(userId);
-        this.socketToUser.delete(socketId);
-      }
-    } catch (error) {
-      this.logger.error(`Error during cleanup for user ${userId}:`, error);
-    }
-  }
-
-  /**
    * Broadcast message to conversation participants
+   * Simplified version using Socket.IO room-based broadcasting
    */
   broadcastMessage(conversationId: string, messageData: any, senderId?: string): void {
     try {
-      const room = this.getConversationRoom(conversationId);
-      this.logger.log(`🚀 [BROADCAST] Broadcasting message to conversation room: ${room}`);
-      this.logger.debug(`📨 [BROADCAST] Message data:`, {
-        messageId: messageData?.message?.id,
-        senderId: messageData?.message?.senderId,
-        content: messageData?.message?.content?.substring(0, 50),
-        eventType: 'new_message'
-      });
-
-      // Check if server and adapter are available before accessing rooms
       if (!this.server) {
-        this.logger.error(`❌ [BROADCAST] WebSocket server not available`);
+        this.logger.error('WebSocket server not available');
         return;
       }
 
-      if (!this.server.sockets) {
-        this.logger.error(`❌ [BROADCAST] WebSocket sockets not available`);
-        return;
-      }
+      const room = this.getConversationRoom(conversationId);
+      const payload = {
+        ...messageData,
+        eventType: 'new_message',
+        timestamp: new Date(),
+      };
 
-      // Get connected sockets in this room for debugging (with safe access)
-      const socketsInRoom = this.server.sockets.adapter?.rooms?.get(room);
-      this.logger.log(`👥 [BROADCAST] Sockets in room ${room}: ${socketsInRoom?.size || 0}`);
-
-      // Check if there are any sockets to broadcast to
-      if (!socketsInRoom || socketsInRoom.size === 0) {
-        this.logger.warn(`⚠️ [BROADCAST] No sockets connected to room ${room}`);
-      }
-
-      // Broadcast to all participants except the sender
+      // If senderId is provided, exclude sender from broadcast
       if (senderId) {
-        // Get sender's socket ID to exclude them from broadcast
-        const senderSocketId = this.userToSocket.get(senderId);
+        const senderSocketId = Array.from(this.socketToUserId.entries())
+          .find(([_, uid]) => uid === senderId)?.[0];
+        
         if (senderSocketId) {
-          // Broadcast to room but exclude sender
-          const senderSocket = this.server.sockets.sockets.get(senderSocketId);
-          if (senderSocket) {
-            senderSocket.to(room).emit('new_message', {
-              ...messageData,
-              eventType: 'new_message',
-              timestamp: new Date(),
-            });
-            this.logger.log(`🚫 [BROADCAST] Excluded sender ${senderId} (socket: ${senderSocketId}) from broadcast`);
-          } else {
-            // Fallback: sender socket not found, broadcast to all
-            this.server.to(room).emit('new_message', {
-              ...messageData,
-              eventType: 'new_message',
-              timestamp: new Date(),
-            });
-            this.logger.warn(`⚠️ [BROADCAST] Sender socket not found, broadcasting to all in room ${room}`);
-          }
-        } else {
-          // Fallback: sender not connected, broadcast to all
-          this.server.to(room).emit('new_message', {
-            ...messageData,
-            eventType: 'new_message',
-            timestamp: new Date(),
-          });
-          this.logger.warn(`⚠️ [BROADCAST] Sender not connected, broadcasting to all in room ${room}`);
+          // Use Socket.IO's .except() method to exclude sender from broadcast
+          this.server.to(room).except(senderSocketId).emit('new_message', payload);
+          this.logger.debug(`Broadcasted message to room ${room} (excluding sender ${senderId})`);
+          return;
         }
-      } else {
-        // No sender specified, broadcast to all (backward compatibility)
-        this.server.to(room).emit('new_message', {
-          ...messageData,
-          eventType: 'new_message',
-          timestamp: new Date(),
-        });
-        this.logger.log(`📢 [BROADCAST] Broadcasting to all participants (no sender specified)`);
       }
-      
-      this.logger.log(`✅ [BROADCAST] Message broadcasted successfully to room: ${room}`);
+
+      // Fallback: broadcast to all in room (sender not connected or not specified)
+      this.server.to(room).emit('new_message', payload);
+      this.logger.debug(`Broadcasted message to room ${room} (all participants)`);
     } catch (error) {
-      this.logger.error(`💥 [BROADCAST] Error broadcasting message:`, {
-        error: error.message,
-        conversationId,
-        messageData: messageData?.message?.id
-      });
+      this.logger.error(`Error broadcasting message:`, error);
     }
   }
 
@@ -374,30 +271,23 @@ export class MessagingGateway
     userId: string,
     conversationId: string,
   ): void {
-    const socketId = this.userToSocket.get(userId);
-    if (!socketId) {
-      this.logger.warn(`❌ [ROOM JOIN] No socket found for user ${userId}`);
+    if (!this.server) {
+      this.logger.error('WebSocket server not available');
       return;
     }
 
-    if (!this.server) {
-      this.logger.error(`❌ [ROOM JOIN] WebSocket server not available`);
+    // Find socket ID for this user
+    const socketId = Array.from(this.socketToUserId.entries())
+      .find(([_, uid]) => uid === userId)?.[0];
+    
+    if (!socketId) {
+      this.logger.warn(`No socket found for user ${userId} - user may not be connected`);
       return;
     }
 
     const conversationRoom = this.getConversationRoom(conversationId);
     this.server.in(socketId).socketsJoin(conversationRoom);
-
-    const connectedUser = this.connectedUsers.get(userId);
-    if (connectedUser) {
-      connectedUser.rooms.add(conversationRoom);
-    }
-
-    // Log room membership after joining (with safe access)
-    const socketsInRoom = this.server.sockets?.adapter?.rooms?.get(conversationRoom);
-    this.logger.log(
-      `✅ [ROOM JOIN] User ${userId} (socket: ${socketId}) joined room: ${conversationRoom}. Total in room: ${socketsInRoom?.size || 0}`,
-    );
+    this.logger.debug(`User ${userId} (socket: ${socketId}) joined room: ${conversationRoom}`);
   }
 
   /**
@@ -409,8 +299,8 @@ export class MessagingGateway
     eventSubscriptions: number;
   } {
     return {
-      totalConnections: this.server.sockets.sockets.size,
-      uniqueUsers: this.connectedUsers.size,
+      totalConnections: this.socketToUserId.size,
+      uniqueUsers: new Set(this.socketToUserId.values()).size,
       eventSubscriptions: 10,
     };
   }
@@ -424,17 +314,38 @@ export class MessagingGateway
     return `conv_${conversationId}`;
   }
 
+  // Helper to get socket ID from user ID
+  private getSocketIdForUser(userId: string): string | undefined {
+    return Array.from(this.socketToUserId.entries())
+      .find(([_, uid]) => uid === userId)?.[0];
+  }
+
   // Event handlers for client-side events
   @SubscribeMessage('join_conversation')
   async joinConversation(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string },
   ) {
-    const userId = this.socketToUser.get(client.id);
-    if (!userId) return;
+    const userId = this.socketToUserId.get(client.id);
+    
+    if (!userId) {
+      // Try to get userId from socket (from auth middleware)
+      const directUserId = (client as any).userId;
+      if (directUserId) {
+        // Register it if not already registered
+        this.socketToUserId.set(client.id, directUserId);
+        this.subscribeUserToConversationRoom(directUserId, data.conversationId);
+        client.emit('conversation_joined', {
+          conversationId: data.conversationId,
+          timestamp: new Date(),
+        });
+        return;
+      }
+      this.logger.warn(`No user ID found for socket ${client.id}, aborting join`);
+      return;
+    }
 
     this.subscribeUserToConversationRoom(userId, data.conversationId);
-
     client.emit('conversation_joined', {
       conversationId: data.conversationId,
       timestamp: new Date(),
@@ -446,16 +357,11 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string },
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const conversationRoom = this.getConversationRoom(data.conversationId);
     client.leave(conversationRoom);
-
-    const connectedUser = this.connectedUsers.get(userId);
-    if (connectedUser) {
-      connectedUser.rooms.delete(conversationRoom);
-    }
 
     client.emit('conversation_left', {
       conversationId: data.conversationId,
@@ -468,7 +374,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string },
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const conversationRoom = this.getConversationRoom(data.conversationId);
@@ -485,7 +391,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string },
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const conversationRoom = this.getConversationRoom(data.conversationId);
@@ -517,7 +423,7 @@ export class MessagingGateway
       replyToMessageId?: string;
     },
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) {
       return { success: false, error: 'User not authenticated' };
     }
@@ -565,7 +471,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { messageId: string; type: 'delivered' | 'read' },
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     try {
@@ -597,7 +503,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { recipientId: string },
   ) {
-    const callerId = this.socketToUser.get(client.id);
+    const callerId = this.socketToUserId.get(client.id);
     if (!callerId) {
       return { success: false, error: 'User not authenticated' };
     }
@@ -611,8 +517,9 @@ export class MessagingGateway
     const { recipientId } = data;
     
     // Check if recipient is connected
-    const recipientSocket = this.userToSocket.get(recipientId);
-    if (!recipientSocket) {
+    const recipientSocketId = Array.from(this.socketToUserId.entries())
+      .find(([_, uid]) => uid === recipientId)?.[0];
+    if (!recipientSocketId) {
       return { success: false, error: 'Recipient is not online' };
     }
 
@@ -644,19 +551,12 @@ export class MessagingGateway
 
     // Send incoming call notification to recipient
     const recipientUserRoom = this.getUserRoom(recipientId);
-    const callerUser = this.connectedUsers.get(callerId)?.user;
+    const callerUser = (client as any).user;
     
-    this.logger.log(`📞 [VIDEO CALL] Sending incoming call notification:`);
-    this.logger.log(`   - Recipient ID: ${recipientId}`);
-    this.logger.log(`   - Recipient Room: ${recipientUserRoom}`);
-    this.logger.log(`   - Caller: ${callerUser ? `${callerUser.firstName} ${callerUser.lastName}` : 'Unknown User'}`);
-    this.logger.log(`   - Call ID: ${callId}`);
-    this.logger.log(`   - Connected Users Count: ${this.connectedUsers.size}`);
-    this.logger.log(`   - User-to-Socket Map Size: ${this.userToSocket.size}`);
-    this.logger.log(`   - Socket-to-User Map Size: ${this.socketToUser.size}`);
-    
-    // Double-check recipient is still connected (we already checked above, but being extra safe)
-    if (!this.userToSocket.get(recipientId)) {
+    // Double-check recipient is still connected
+    const recipientStillConnected = Array.from(this.socketToUserId.entries())
+      .some(([_, uid]) => uid === recipientId);
+    if (!recipientStillConnected) {
       this.logger.warn(`⚠️ [VIDEO CALL] Recipient ${recipientId} disconnected before call notification could be sent`);
       return {
         success: false,
@@ -697,7 +597,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { callId: string; accept: boolean },
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const { callId, accept } = data;
@@ -716,26 +616,26 @@ export class MessagingGateway
       this.userCallStatus.set(callSession.recipientId, 'in_call');
 
       // Notify caller that call was accepted
-      const callerSocket = this.userToSocket.get(callSession.callerId);
-      if (callerSocket) {
-        this.server.to(callerSocket).emit('video_call_accepted', {
+      const callerSocketId = this.getSocketIdForUser(callSession.callerId);
+      if (callerSocketId) {
+        this.server.to(callerSocketId).emit('video_call_accepted', {
           callId,
           timestamp: new Date(),
         });
       }
 
       // Emit to both users to start WebRTC signaling
-      const recipientSocket = this.userToSocket.get(callSession.recipientId);
-      if (recipientSocket) {
-        this.server.to(recipientSocket).emit('start_webrtc_connection', {
+      const recipientSocketId = this.getSocketIdForUser(callSession.recipientId);
+      if (recipientSocketId) {
+        this.server.to(recipientSocketId).emit('start_webrtc_connection', {
           callId,
           isInitiator: false,
           timestamp: new Date(),
         });
       }
       
-      if (callerSocket) {
-        this.server.to(callerSocket).emit('start_webrtc_connection', {
+      if (callerSocketId) {
+        this.server.to(callerSocketId).emit('start_webrtc_connection', {
           callId,
           isInitiator: true,
           timestamp: new Date(),
@@ -748,9 +648,9 @@ export class MessagingGateway
       this.endVideoCall(callId, 'declined');
       
       // Notify caller that call was declined
-      const callerSocket = this.userToSocket.get(callSession.callerId);
-      if (callerSocket) {
-        this.server.to(callerSocket).emit('video_call_declined', {
+      const callerSocketId = this.getSocketIdForUser(callSession.callerId);
+      if (callerSocketId) {
+        this.server.to(callerSocketId).emit('video_call_declined', {
           callId,
           timestamp: new Date(),
         });
@@ -765,7 +665,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { callId: string },
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const { callId } = data;
@@ -779,7 +679,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: VideoCallOffer,
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const { callId, toUserId, signal } = data;
@@ -791,9 +691,9 @@ export class MessagingGateway
     }
 
     // Forward the offer to the recipient
-    const recipientSocket = this.userToSocket.get(toUserId);
-    if (recipientSocket) {
-      this.server.to(recipientSocket).emit('video_call_offer', {
+    const recipientSocketId = this.getSocketIdForUser(toUserId);
+    if (recipientSocketId) {
+      this.server.to(recipientSocketId).emit('video_call_offer', {
         callId,
         fromUserId: userId,
         signal,
@@ -809,7 +709,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: VideoCallAnswer,
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const { callId, toUserId, signal } = data;
@@ -821,9 +721,9 @@ export class MessagingGateway
     }
 
     // Forward the answer to the caller
-    const callerSocket = this.userToSocket.get(toUserId);
-    if (callerSocket) {
-      this.server.to(callerSocket).emit('video_call_answer', {
+    const callerSocketId = this.getSocketIdForUser(toUserId);
+    if (callerSocketId) {
+      this.server.to(callerSocketId).emit('video_call_answer', {
         callId,
         fromUserId: userId,
         signal,
@@ -839,7 +739,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: VideoCallIceCandidate,
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const { callId, toUserId, candidate } = data;
@@ -850,9 +750,9 @@ export class MessagingGateway
     }
 
     // Forward the ICE candidate to the other peer
-    const peerSocket = this.userToSocket.get(toUserId);
-    if (peerSocket) {
-      this.server.to(peerSocket).emit('video_call_ice_candidate', {
+    const peerSocketId = this.getSocketIdForUser(toUserId);
+    if (peerSocketId) {
+      this.server.to(peerSocketId).emit('video_call_ice_candidate', {
         callId,
         fromUserId: userId,
         candidate,
@@ -868,7 +768,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { callId: string },
   ) {
-    const userId = this.socketToUser.get(client.id);
+    const userId = this.socketToUserId.get(client.id);
     if (!userId) return;
 
     const { callId } = data;
@@ -893,8 +793,8 @@ export class MessagingGateway
     this.userCallStatus.set(callSession.recipientId, 'idle');
 
     // Notify both users that the call has ended
-    const callerSocket = this.userToSocket.get(callSession.callerId);
-    const recipientSocket = this.userToSocket.get(callSession.recipientId);
+    const callerSocketId = this.getSocketIdForUser(callSession.callerId);
+    const recipientSocketId = this.getSocketIdForUser(callSession.recipientId);
 
     const endEventData = {
       callId,
@@ -902,11 +802,11 @@ export class MessagingGateway
       timestamp: new Date(),
     };
 
-    if (callerSocket) {
-      this.server.to(callerSocket).emit('video_call_ended', endEventData);
+    if (callerSocketId) {
+      this.server.to(callerSocketId).emit('video_call_ended', endEventData);
     }
-    if (recipientSocket) {
-      this.server.to(recipientSocket).emit('video_call_ended', endEventData);
+    if (recipientSocketId) {
+      this.server.to(recipientSocketId).emit('video_call_ended', endEventData);
     }
 
     // Clean up call session after a short delay to allow for cleanup

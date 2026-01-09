@@ -103,6 +103,56 @@ export class MeetingsService {
   }
 
   /**
+   * Derive meeting status based on startTime and current time
+   * Automatically marks past WAITING/SCHEDULED meetings as CANCELLED
+   */
+  private deriveMeetingStatus(meeting: any): string {
+    const currentStatus = meeting.status;
+    
+    // Only auto-update WAITING or SCHEDULED status
+    if (currentStatus !== 'WAITING' && currentStatus !== 'SCHEDULED') {
+      return currentStatus;
+    }
+
+    const now = new Date();
+    const startTime = new Date(meeting.startTime);
+    const durationMs = (meeting.duration || 60) * 60 * 1000; // Convert minutes to milliseconds
+    const endTime = new Date(startTime.getTime() + durationMs);
+
+    // If the meeting end time has passed, mark it as CANCELLED
+    if (endTime < now) {
+      this.logger.debug(
+        `Auto-deriving status for meeting ${meeting.id}: ${currentStatus} -> CANCELLED (meeting ended at ${endTime.toISOString()})`,
+      );
+      
+      // Optionally update database in background (non-blocking)
+      this.updatePastMeetingStatus(meeting.id, 'CANCELLED').catch(err => {
+        this.logger.warn(`Failed to update meeting ${meeting.id} status in database:`, err);
+      });
+
+      return 'CANCELLED';
+    }
+
+    return currentStatus;
+  }
+
+  /**
+   * Update meeting status in database (non-blocking background update)
+   */
+  private async updatePastMeetingStatus(meetingId: string, newStatus: string): Promise<void> {
+    try {
+      await this.prisma.meeting.update({
+        where: { id: meetingId },
+        data: { status: newStatus as any },
+      });
+      this.logger.log(`Updated meeting ${meetingId} status to ${newStatus} in database`);
+    } catch (error) {
+      // Silently fail - this is a background operation
+      this.logger.debug(`Could not update meeting ${meetingId} status:`, error);
+    }
+  }
+
+  /**
    * Transform a single meeting to match frontend interface expectations
    */
   private transformSingleMeeting(meeting: any) {
@@ -128,6 +178,9 @@ export class MeetingsService {
       `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`.trim() : 
       undefined;
 
+    // Derive status based on current time
+    const derivedStatus = this.deriveMeetingStatus(meeting);
+
     return {
       id: meeting.id,
       title: meeting.title,
@@ -136,7 +189,7 @@ export class MeetingsService {
       endTime: meeting.endTime,
       dateTime: meeting.startTime, // Alias for startTime
       duration: meeting.duration,
-      status: meeting.status,
+      status: derivedStatus,
       meetingType: meeting.meetingType,
       type: meeting.meetingType, // Alias for meetingType
       meetingUrl: meeting.meetingUrl,
@@ -1343,20 +1396,25 @@ export class MeetingsService {
    * Helper method to transform meetings data
    */
   private transformMeetings(meetings: any[]) {
-    return meetings.map((meeting) => ({
-      id: meeting.id,
-      title: meeting.title,
-      description: meeting.description,
-      status: meeting.status,
-      startTime: meeting.startTime,
-      endTime: meeting.endTime,
-      duration: meeting.duration,
-      meetingType: meeting.meetingType,
-      meetingUrl: meeting.meetingUrl,
-      client: meeting.client,
-      therapist: meeting.therapist,
-      createdAt: meeting.createdAt,
-      updatedAt: meeting.updatedAt,
-    }));
+    return meetings.map((meeting) => {
+      // Derive status based on current time
+      const derivedStatus = this.deriveMeetingStatus(meeting);
+      
+      return {
+        id: meeting.id,
+        title: meeting.title,
+        description: meeting.description,
+        status: derivedStatus,
+        startTime: meeting.startTime,
+        endTime: meeting.endTime,
+        duration: meeting.duration,
+        meetingType: meeting.meetingType,
+        meetingUrl: meeting.meetingUrl,
+        client: meeting.client,
+        therapist: meeting.therapist,
+        createdAt: meeting.createdAt,
+        updatedAt: meeting.updatedAt,
+      };
+    });
   }
 }

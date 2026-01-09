@@ -2,14 +2,9 @@ import {
   Injectable,
   NotFoundException,
   Logger,
-  OnModuleInit,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Server } from 'socket.io';
-import { MessagingGateway } from '../messaging/messaging.gateway';
 import {
   Notification,
   NotificationType,
@@ -21,14 +16,7 @@ import {
   CommentAddedEvent,
 } from '../common/events/social-events';
 
-interface WebSocketServer {
-  to(room: string): {
-    emit(event: string, data: any): void;
-  };
-}
-
 interface NotificationDeliveryOptions {
-  realTime?: boolean;
   email?: boolean;
   push?: boolean;
   scheduled?: boolean;
@@ -45,38 +33,13 @@ interface NotificationTemplate {
 }
 
 @Injectable()
-export class NotificationsService implements OnModuleInit {
+export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
-  private webSocketServer: WebSocketServer | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
-    @Inject(forwardRef(() => MessagingGateway))
-    private readonly messagingGateway: MessagingGateway,
   ) {}
-
-  onModuleInit() {
-    // Configure WebSocket server for real-time notifications
-    // Use a slight delay to ensure MessagingGateway is fully initialized
-    setTimeout(() => {
-      this.setWebSocketServer(this.messagingGateway.server);
-    }, 1000);
-
-    this.logger.log(
-      '🔔 [NOTIFICATIONS] NotificationsService initialized with real-time capabilities',
-    );
-  }
-
-  /**
-   * Set WebSocket server instance for real-time notifications
-   */
-  setWebSocketServer(server: WebSocketServer) {
-    this.webSocketServer = server;
-    this.logger.log('🔌 [NOTIFICATIONS] WebSocket server configured for real-time notifications');
-    this.logger.log('🔌 [NOTIFICATIONS] Server instance type:', typeof server);
-    this.logger.log('🔌 [NOTIFICATIONS] Server methods available:', Object.getOwnPropertyNames(server));
-  }
 
   async create(
     data: {
@@ -90,11 +53,7 @@ export class NotificationsService implements OnModuleInit {
     },
     deliveryOptions?: NotificationDeliveryOptions,
   ): Promise<Notification> {
-    this.logger.log('🚀 [NOTIFICATIONS] Creating new notification...');
-    this.logger.log('🚀 [NOTIFICATIONS] Target user:', data.userId);
-    this.logger.log('🚀 [NOTIFICATIONS] Type:', data.type);
-    this.logger.log('🚀 [NOTIFICATIONS] Priority:', data.priority || NotificationPriority.NORMAL);
-    this.logger.log('🚀 [NOTIFICATIONS] Title:', data.title);
+    // Notification logs removed to reduce noise
 
     const notification = await this.prisma.notification.create({
       data: {
@@ -113,25 +72,18 @@ export class NotificationsService implements OnModuleInit {
       },
     });
 
-    this.logger.log('✅ [NOTIFICATIONS] Notification created successfully in database');
-    this.logger.log('✅ [NOTIFICATIONS] Notification ID:', notification.id);
+    // Notification logs removed to reduce noise
 
     // Default delivery options
     const options = {
-      realTime: true,
       email: false,
       push: false,
       scheduled: false,
       ...deliveryOptions,
     };
 
-    this.logger.log('📋 [NOTIFICATIONS] Final delivery options:', options);
-
     // Deliver notification immediately since scheduling is not supported
-    this.logger.log('🎯 [NOTIFICATIONS] Starting delivery pipeline...');
     await this.deliverNotification(notification, options);
-
-    this.logger.log('🎉 [NOTIFICATIONS] Notification creation and delivery process completed');
     return notification;
   }
 
@@ -284,89 +236,50 @@ export class NotificationsService implements OnModuleInit {
     notification: Notification & { user: any },
     options: NotificationDeliveryOptions,
   ): Promise<void> {
-    this.logger.log('🎯 [NOTIFICATIONS] Starting notification delivery pipeline...');
-    this.logger.log('🎯 [NOTIFICATIONS] Notification ID:', notification.id);
-    this.logger.log('🎯 [NOTIFICATIONS] Delivery options:', options);
-    this.logger.log('🎯 [NOTIFICATIONS] User ID:', notification.userId);
-    this.logger.log('🎯 [NOTIFICATIONS] Notification type:', notification.type);
+    // Notification logs removed to reduce noise
 
     try {
       let deliveryAttempts = 0;
       let successfulDeliveries = 0;
       const errors: string[] = [];
 
-      // Real-time WebSocket delivery with enhanced error handling
-      if (options.realTime) {
-        this.logger.log('🌐 [NOTIFICATIONS] Attempting real-time WebSocket delivery...');
-        deliveryAttempts++;
-        
-        try {
-          if (this.webSocketServer) {
-            await this.deliverRealTimeNotification(notification);
-            successfulDeliveries++;
-            this.logger.log('✅ [NOTIFICATIONS] Real-time delivery completed successfully');
-          } else {
-            const errorMsg = 'WebSocket server not available';
-            this.logger.warn(`⚠️ [NOTIFICATIONS] Real-time delivery failed: ${errorMsg}`);
-            errors.push(`Real-time: ${errorMsg}`);
-          }
-        } catch (realTimeError) {
-          const errorMsg = realTimeError instanceof Error ? realTimeError.message : 'Unknown real-time delivery error';
-          this.logger.error(`❌ [NOTIFICATIONS] Real-time delivery failed: ${errorMsg}`);
-          errors.push(`Real-time: ${errorMsg}`);
-          
-          // Continue with other delivery methods as fallback
-        }
-      } else {
-        this.logger.log('⏭️ [NOTIFICATIONS] Real-time delivery disabled in options');
-      }
-
       // Email delivery (if configured)
       if (options.email) {
-        this.logger.log('📧 [NOTIFICATIONS] Attempting email delivery...');
+        // Notification logs removed to reduce noise
         deliveryAttempts++;
         
         try {
           await this.deliverEmailNotification(notification);
           successfulDeliveries++;
-          this.logger.log('✅ [NOTIFICATIONS] Email delivery completed');
+          // Notification logs removed to reduce noise
         } catch (emailError) {
           const errorMsg = emailError instanceof Error ? emailError.message : 'Unknown email delivery error';
           this.logger.error(`❌ [NOTIFICATIONS] Email delivery failed: ${errorMsg}`);
           errors.push(`Email: ${errorMsg}`);
         }
       } else {
-        this.logger.log('⏭️ [NOTIFICATIONS] Email delivery disabled in options');
+        // Notification logs removed to reduce noise
       }
 
       // Push notification delivery (if configured)
       if (options.push) {
-        this.logger.log('📱 [NOTIFICATIONS] Attempting push notification delivery...');
+        // Notification logs removed to reduce noise
         deliveryAttempts++;
         
         try {
           await this.deliverPushNotification(notification);
           successfulDeliveries++;
-          this.logger.log('✅ [NOTIFICATIONS] Push notification delivery completed');
+          // Notification logs removed to reduce noise
         } catch (pushError) {
           const errorMsg = pushError instanceof Error ? pushError.message : 'Unknown push delivery error';
           this.logger.error(`❌ [NOTIFICATIONS] Push delivery failed: ${errorMsg}`);
           errors.push(`Push: ${errorMsg}`);
         }
       } else {
-        this.logger.log('⏭️ [NOTIFICATIONS] Push notification delivery disabled in options');
+        // Notification logs removed to reduce noise
       }
 
-      this.logger.log('🏁 [NOTIFICATIONS] Delivery pipeline completed');
-      this.logger.log('📊 [NOTIFICATIONS] Delivery summary:', {
-        notificationId: notification.id,
-        userId: notification.userId,
-        deliveryAttempts,
-        successfulDeliveries,
-        failedDeliveries: deliveryAttempts - successfulDeliveries,
-        deliveryRate: deliveryAttempts > 0 ? `${Math.round((successfulDeliveries / deliveryAttempts) * 100)}%` : '0%',
-        errors: errors.length > 0 ? errors : 'none'
-      });
+      // Notification logs removed to reduce noise
 
       // Log warning if no deliveries succeeded but attempts were made
       if (deliveryAttempts > 0 && successfulDeliveries === 0) {
@@ -379,7 +292,7 @@ export class NotificationsService implements OnModuleInit {
 
       // Log success if at least one delivery method worked
       if (successfulDeliveries > 0) {
-        this.logger.log(`🎉 [NOTIFICATIONS] Notification delivered successfully via ${successfulDeliveries}/${deliveryAttempts} method(s)`);
+        // Notification logs removed to reduce noise
       }
 
     } catch (error) {
@@ -397,109 +310,6 @@ export class NotificationsService implements OnModuleInit {
 
       // Don't re-throw the error to prevent notification creation from failing
       // The notification is already saved to the database and can be retrieved via REST API
-    }
-  }
-
-  /**
-   * Deliver real-time notification via WebSocket
-   */
-  private async deliverRealTimeNotification(
-    notification: Notification & { user: any },
-  ): Promise<void> {
-    this.logger.log('📨 [NOTIFICATIONS] Starting real-time notification delivery...');
-    this.logger.log('📨 [NOTIFICATIONS] Notification ID:', notification.id);
-    this.logger.log('📨 [NOTIFICATIONS] Target User ID:', notification.userId);
-    this.logger.log('📨 [NOTIFICATIONS] WebSocket server available:', !!this.webSocketServer);
-
-    if (!this.webSocketServer) {
-      this.logger.error(
-        '❌ [NOTIFICATIONS] WebSocket server not configured for real-time notifications',
-      );
-      this.logger.error('❌ [NOTIFICATIONS] Real-time delivery FAILED - server unavailable');
-      throw new Error('WebSocket server not available for real-time notification delivery');
-    }
-
-    try {
-      // Use standardized room format from ConnectionManagerService
-      const userRoom = `user_${notification.userId}`;
-      this.logger.log('📍 [NOTIFICATIONS] Target room (corrected format):', userRoom);
-
-      // Prepare notification payload
-      const notificationPayload = {
-        id: notification.id,
-        title: notification.title,
-        message: notification.message,
-        type: notification.type,
-        priority: notification.priority,
-        actionUrl: notification.actionUrl,
-        data: notification.data,
-        createdAt: notification.createdAt,
-        isRead: false,
-      };
-
-      this.logger.log('📦 [NOTIFICATIONS] Notification payload prepared:', {
-        id: notificationPayload.id,
-        title: notificationPayload.title,
-        type: notificationPayload.type,
-        priority: notificationPayload.priority,
-      });
-
-      // Check if server has the 'to' method before attempting to use it
-      if (typeof this.webSocketServer.to !== 'function') {
-        throw new Error('WebSocket server does not have the expected "to" method');
-      }
-
-      // Send to user's personal room
-      this.logger.log('🚀 [NOTIFICATIONS] Emitting notification event to room:', userRoom);
-      this.webSocketServer
-        .to(userRoom)
-        .emit('notification', notificationPayload);
-
-      this.logger.log('✅ [NOTIFICATIONS] Notification event emitted successfully');
-
-      // Send unread count update with enhanced error handling
-      this.logger.log('🔢 [NOTIFICATIONS] Fetching unread count for user:', notification.userId);
-      
-      try {
-        const unreadCount = await this.getUnreadCount(notification.userId);
-        
-        const unreadCountPayload = {
-          count: unreadCount,
-        };
-
-        this.logger.log('🔢 [NOTIFICATIONS] Unread count:', unreadCount);
-        this.logger.log('🚀 [NOTIFICATIONS] Emitting unreadCount event to room:', userRoom);
-        
-        this.webSocketServer
-          .to(userRoom)
-          .emit('unreadCount', unreadCountPayload);
-
-        this.logger.log('✅ [NOTIFICATIONS] Unread count event emitted successfully');
-      } catch (unreadCountError) {
-        this.logger.error('⚠️ [NOTIFICATIONS] Failed to fetch/send unread count, but notification was sent:', unreadCountError);
-        // Don't throw here as the main notification was sent successfully
-      }
-
-      this.logger.log(
-        `🎉 [NOTIFICATIONS] Real-time notification delivered successfully to user ${notification.userId}`,
-      );
-
-      // Return success indicator
-      return Promise.resolve();
-
-    } catch (error) {
-      this.logger.error('💥 [NOTIFICATIONS] Error delivering real-time notification:', error);
-      this.logger.error('💥 [NOTIFICATIONS] Error details:', {
-        message: error.message,
-        stack: error.stack,
-        notificationId: notification.id,
-        userId: notification.userId,
-        webSocketServerType: typeof this.webSocketServer,
-        webSocketServerMethods: this.webSocketServer ? Object.getOwnPropertyNames(this.webSocketServer) : 'null',
-      });
-
-      // Re-throw the error so the delivery pipeline can handle fallbacks
-      throw new Error(`Real-time notification delivery failed: ${error.message}`);
     }
   }
 
@@ -589,7 +399,6 @@ export class NotificationsService implements OnModuleInit {
     // Deliver notifications in parallel (but limit concurrency to avoid overwhelming the system)
     const deliveryPromises = createdNotifications.map((notification) =>
       this.deliverNotification(notification, {
-        realTime: true,
         email: false,
         push: false,
         scheduled: false,
@@ -672,7 +481,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: false,
           push: true,
         },
@@ -719,7 +527,6 @@ export class NotificationsService implements OnModuleInit {
             },
           },
           {
-            realTime: true,
             email: false,
             push: true,
           },
@@ -773,7 +580,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: false,
           push: true,
         },
@@ -811,7 +617,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: false,
           push: false,
         },
@@ -873,7 +678,6 @@ export class NotificationsService implements OnModuleInit {
             },
           },
           {
-            realTime: true,
             email: false,
             push: true,
           },
@@ -952,7 +756,6 @@ export class NotificationsService implements OnModuleInit {
         }));
 
       await this.createBatch(notifications, {
-        realTime: true,
         email: false,
         push: false,
       });
@@ -1076,7 +879,6 @@ export class NotificationsService implements OnModuleInit {
 
       if (notifications.length > 0) {
         await this.createBatch(notifications, {
-          realTime: true,
           email: false,
           push: true,
         });
@@ -1522,7 +1324,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: true,
           push: true,
         },
@@ -1546,7 +1347,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: true,
           push: true,
         },
@@ -1610,7 +1410,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: true,
           push: true,
         },
@@ -1634,7 +1433,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: false,
           push: false,
         },
@@ -1697,7 +1495,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: true,
           push: true,
         },
@@ -1719,7 +1516,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: false,
           push: false,
         },
@@ -1773,7 +1569,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: false,
           push: true,
         },
@@ -1798,7 +1593,6 @@ export class NotificationsService implements OnModuleInit {
           },
         },
         {
-          realTime: true,
           email: false,
           push: false,
         },

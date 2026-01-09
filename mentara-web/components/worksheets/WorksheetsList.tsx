@@ -7,40 +7,98 @@ import { motion } from "framer-motion";
 
 interface WorksheetsListProps {
   tasks: Task[];
+  filterKey?: string; // Optional key to force re-animation when filter changes
 }
 
-export default function WorksheetsList({ tasks }: WorksheetsListProps) {
+export default function WorksheetsList({ tasks, filterKey }: WorksheetsListProps) {
   const router = useRouter();
+
+  // Log what we receive
+  React.useEffect(() => {
+    console.log("[WorksheetsList] Received tasks:", {
+      count: tasks.length,
+      taskIds: tasks.map((t) => t.id),
+      taskStatuses: tasks.map((t) => t.status),
+      taskDates: tasks.map((t) => t.date),
+    });
+  }, [tasks]);
 
   // Group tasks by date
   const groupTasksByDate = () => {
     const groups: { [key: string]: Task[] } = {};
 
     tasks.forEach((task) => {
-      if (!groups[task.date]) {
-        groups[task.date] = [];
+      // Handle null/undefined dates
+      const dateKey = task.date || "no-date";
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
       }
-      groups[task.date].push(task);
+      groups[dateKey].push(task);
     });
 
-    // Sort dates in descending order (newest first)
-    return Object.keys(groups)
+    console.log("[WorksheetsList] Grouped tasks:", {
+      groupKeys: Object.keys(groups),
+      groupCounts: Object.keys(groups).map(key => ({ key, count: groups[key].length })),
+    });
+
+    // Sort dates in descending order (newest first), but handle "no-date" separately
+    const dateKeys = Object.keys(groups).filter(key => key !== "no-date");
+    const noDateKey = Object.keys(groups).find(key => key === "no-date");
+    
+    const sortedGroups = dateKeys
       .sort()
       .reverse()
-      .map((date) => ({
-        date,
-        formattedDate: formatDate(date),
-        tasks: groups[date],
-      }));
+      .map((date) => {
+        // Validate date before formatting
+        const formattedDate = date === "no-date" || !date ? "No Date" : formatDate(date);
+        return {
+          date,
+          formattedDate,
+          tasks: groups[date],
+        };
+      });
+
+    // Add no-date group at the end if it exists
+    if (noDateKey) {
+      sortedGroups.push({
+        date: "no-date",
+        formattedDate: "No Date",
+        tasks: groups[noDateKey],
+      });
+    }
+
+    console.log("[WorksheetsList] Final groups:", {
+      count: sortedGroups.length,
+      groups: sortedGroups.map(g => ({ date: g.date, taskCount: g.tasks.length })),
+    });
+
+    return sortedGroups;
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const month = date.toLocaleString("default", { month: "short" });
-    const day = date.getDate();
-    const dayOfWeek = date.toLocaleString("default", { weekday: "long" });
+    // Handle invalid dates
+    if (!dateStr || dateStr === "no-date" || dateStr === "No Date") {
+      return "No Date";
+    }
 
-    return `${month} ${day}${getDaySuffix(day)} ${dayOfWeek}`;
+    try {
+      const date = new Date(dateStr);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn("[WorksheetsList] Invalid date string:", dateStr);
+        return "Invalid Date";
+      }
+
+      const month = date.toLocaleString("default", { month: "short" });
+      const day = date.getDate();
+      const dayOfWeek = date.toLocaleString("default", { weekday: "long" });
+
+      return `${month} ${day}${getDaySuffix(day)} ${dayOfWeek}`;
+    } catch (error) {
+      console.error("[WorksheetsList] Error formatting date:", dateStr, error);
+      return "Invalid Date";
+    }
   };
 
   const getDaySuffix = (day: number) => {
@@ -90,13 +148,14 @@ export default function WorksheetsList({ tasks }: WorksheetsListProps) {
     <div className="flex-1 overflow-y-auto p-6 lg:p-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 h-full">
       {taskGroups.length > 0 ? (
         <motion.div
+          key={filterKey || "default"}
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="max-w-5xl mx-auto"
         >
           {taskGroups.map((group, groupIndex) => (
-            <motion.div key={group.date} variants={groupVariants} className="mb-8">
+            <motion.div key={`${filterKey || "default"}-${group.date}`} variants={groupVariants} className="mb-8">
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-1 w-1 rounded-full bg-primary"></div>
                 <h3 className="text-lg font-bold text-gray-900">

@@ -14,6 +14,9 @@ export class EventBusService implements IEventBus {
 
   async emit<T = any>(event: DomainEvent<T>): Promise<void> {
     try {
+      this.logger.log(`🚀 [EVENT BUS] ========== EMIT CALLED ==========`);
+      this.logger.log(`🚀 [EVENT BUS] Event type: ${event.eventType}`);
+      this.logger.log(`🚀 [EVENT BUS] Event ID: ${event.eventId}`);
       this.logger.debug(`Emitting event: ${event.eventType}`, {
         eventId: event.eventId,
         aggregateId: event.aggregateId,
@@ -23,20 +26,44 @@ export class EventBusService implements IEventBus {
 
       // Check if there are listeners for this event
       const listenerCount = this.eventEmitter.listenerCount(event.eventType);
-      this.logger.debug(`📡 [EVENT DELIVERY] Event ${event.eventType} has ${listenerCount} listeners`);
+      this.logger.log(`📡 [EVENT DELIVERY] Event ${event.eventType} has ${listenerCount} listeners`);
       
       if (listenerCount === 0) {
-        this.logger.warn(`⚠️ [EVENT DELIVERY] No listeners registered for event: ${event.eventType}`);
+        this.logger.error(`❌ [EVENT DELIVERY] No listeners registered for event: ${event.eventType}`);
+        this.logger.error(`❌ [EVENT DELIVERY] This event will NOT be handled!`);
+        const availableEvents = Array.from(this.eventEmitter.eventNames());
+        this.logger.error(`❌ [EVENT DELIVERY] Available event types with listeners: ${availableEvents.length > 0 ? availableEvents.join(', ') : 'NONE'}`);
       }
 
       // Special logging for MessageSentEvent
       if (event.eventType === 'MessageSentEvent') {
+        this.logger.log(`🚨 [MESSAGE EVENT] ========== Emitting MessageSentEvent ==========`);
         this.logger.log(`🚨 [MESSAGE EVENT] Emitting MessageSentEvent to ${listenerCount} listeners`);
+        this.logger.log(`🚨 [MESSAGE EVENT] Event ID: ${event.eventId}`);
+        this.logger.log(`🚨 [MESSAGE EVENT] Conversation ID: ${(event.eventData as any)?.conversationId || 'NOT FOUND'}`);
+        this.logger.log(`🚨 [MESSAGE EVENT] Message ID: ${(event.eventData as any)?.messageId || 'NOT FOUND'}`);
         this.logger.debug(`🚨 [MESSAGE EVENT] Event data:`, event.eventData);
       }
 
       // Emit the specific event type ONLY
-      await this.eventEmitter.emitAsync(event.eventType, event);
+      this.logger.log(`📤 [EVENT BUS] About to call eventEmitter.emitAsync('${event.eventType}', event)`);
+      
+      // Log all registered listeners before emitting
+      if (event.eventType === 'MessageSentEvent') {
+        const listeners = this.eventEmitter.listeners(event.eventType);
+        this.logger.log(`📋 [EVENT BUS] Registered listeners for MessageSentEvent: ${listeners.length}`);
+        listeners.forEach((listener, index) => {
+          this.logger.log(`📋 [EVENT BUS] Listener ${index + 1}: ${listener.name || 'anonymous'} (type: ${typeof listener})`);
+        });
+      }
+      
+      const emitResult = await this.eventEmitter.emitAsync(event.eventType, event);
+      this.logger.log(`📤 [EVENT BUS] emitAsync completed. Result: ${Array.isArray(emitResult) ? emitResult.length + ' handlers executed' : 'unknown'}`);
+      
+      // Log which handlers actually executed
+      if (event.eventType === 'MessageSentEvent' && Array.isArray(emitResult)) {
+        this.logger.log(`📋 [EVENT BUS] Handler execution results: ${emitResult.map((r, i) => `Handler ${i + 1}: ${r === undefined ? 'undefined' : typeof r}`).join(', ')}`);
+      }
 
       // REMOVED: Wildcard emissions causing event routing chaos
       // These were causing MessageSentEvent to trigger ALL event handlers
@@ -48,6 +75,10 @@ export class EventBusService implements IEventBus {
       // Special confirmation for MessageSentEvent
       if (event.eventType === 'MessageSentEvent') {
         this.logger.log(`✅ [MESSAGE EVENT] MessageSentEvent emission completed`);
+        this.logger.log(`✅ [MESSAGE EVENT] Handlers executed: ${Array.isArray(emitResult) ? emitResult.length : 'unknown'}`);
+        if (Array.isArray(emitResult) && emitResult.length === 0) {
+          this.logger.error(`❌ [MESSAGE EVENT] NO HANDLERS EXECUTED! This means the subscription isn't working!`);
+        }
       }
     } catch (error) {
       this.logger.error(`Failed to emit event: ${event.eventType}`, {
@@ -72,21 +103,28 @@ export class EventBusService implements IEventBus {
     // Special logging for MessageSentEvent subscription
     if (eventType === 'MessageSentEvent') {
       this.logger.log(`🔔 [EVENT SUBSCRIPTION] MessageSentEvent handler registered! Handler: ${handler.name || 'anonymous'}`);
+      this.logger.log(`🔔 [EVENT SUBSCRIPTION] Total listeners for MessageSentEvent BEFORE registration: ${this.eventEmitter.listenerCount(eventType)}`);
     }
 
     const wrappedHandler = async (event: DomainEvent<T>) => {
       try {
+        // Special logging for MessageSentEvent handling - BEFORE handler execution
+        if (event.eventType === 'MessageSentEvent') {
+          this.logger.log(`🎯 [EVENT BUS WRAPPER] MessageSentEvent being handled by ${handler.name || 'anonymous'}`);
+          this.logger.log(`🎯 [EVENT BUS WRAPPER] About to call handler function...`);
+        }
+        
         this.logger.debug(`Handling event: ${event.eventType}`, {
           eventId: event.eventId,
           handlerName: handler.name,
         });
 
-        // Special logging for MessageSentEvent handling
-        if (event.eventType === 'MessageSentEvent') {
-          this.logger.log(`🎯 [EVENT HANDLER] MessageSentEvent being handled by ${handler.name || 'anonymous'}`);
-        }
-
         await handler(event);
+        
+        // Special logging for MessageSentEvent handling - AFTER handler execution
+        if (event.eventType === 'MessageSentEvent') {
+          this.logger.log(`✅ [EVENT BUS WRAPPER] Handler ${handler.name || 'anonymous'} completed successfully`);
+        }
 
         this.logger.debug(`Event handled successfully: ${event.eventType}`, {
           eventId: event.eventId,
@@ -124,6 +162,19 @@ export class EventBusService implements IEventBus {
           );
         });
       });
+    }
+    
+    // Special logging for MessageSentEvent subscription - AFTER registration
+    if (eventType === 'MessageSentEvent') {
+      const listenerCountAfter = this.eventEmitter.listenerCount(eventType);
+      this.logger.log(`🔔 [EVENT SUBSCRIPTION] Total listeners for MessageSentEvent AFTER registration: ${listenerCountAfter}`);
+      if (listenerCountAfter === 0) {
+        this.logger.error(`❌ [EVENT SUBSCRIPTION] CRITICAL: Listener was NOT added to EventEmitter2!`);
+        this.logger.error(`❌ [EVENT SUBSCRIPTION] EventEmitter2.on() was called but listenerCount is still 0!`);
+        this.logger.error(`❌ [EVENT SUBSCRIPTION] This means the subscription is NOT working!`);
+      } else {
+        this.logger.log(`✅ [EVENT SUBSCRIPTION] Listener successfully registered! Total: ${listenerCountAfter}`);
+      }
     }
   }
 

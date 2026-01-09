@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -215,26 +215,35 @@ export function CrisisSupportModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <AlertTriangle className="h-6 w-6 text-red-500" />
-            Crisis Support Resources
-          </DialogTitle>
-          <DialogDescription>
-            You&apos;re not alone. Help is available 24/7. If you&apos;re in immediate danger, please call emergency services.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 flex flex-col overflow-hidden">
+        {/* Sticky Header Section */}
+        <div className="flex-shrink-0 border-b bg-white">
+          <DialogHeader className="px-6 pt-6 pb-4">
+            <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
+              <AlertTriangle className="h-7 w-7 text-red-500" />
+              Crisis Support Resources
+            </DialogTitle>
+            <DialogDescription className="text-base mt-2">
+              You&apos;re not alone. Help is available 24/7. If you&apos;re in immediate danger, please call emergency services.
+            </DialogDescription>
+          </DialogHeader>
 
-        <Alert className="border-red-200 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            <strong>Emergency:</strong> If you are in immediate danger or having thoughts of suicide, 
-            call 911 (US) or your local emergency number immediately.
-          </AlertDescription>
-        </Alert>
+          <div className="px-6">
+            <Alert className="mb-4 border-2 border-red-500 bg-gradient-to-r from-red-50 to-red-100">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
+            <AlertDescription className="text-red-900 font-semibold">
+              <strong>Emergency:</strong> If you are in immediate danger or having thoughts of suicide, 
+              call 911 (US) or your local emergency number immediately.
+            </AlertDescription>
+          </Alert>
+          </div>
+        </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {/* Scrollable Content Section */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+          <div className="px-6 pb-6">
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="immediate">Immediate Help</TabsTrigger>
             <TabsTrigger value="resources">Resources</TabsTrigger>
@@ -254,43 +263,69 @@ export function CrisisSupportModal({
                   >
                     <Card 
                       className={cn(
-                        "cursor-pointer transition-all hover:shadow-md border-l-4",
+                        "cursor-pointer transition-all hover:shadow-lg border-l-4 min-h-[100px] w-full",
+                        "hover:scale-[1.01] active:scale-[0.99]",
                         getUrgencyColor(resource.type)
                       )}
                       onClick={() => handleResourceClick(resource)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleResourceClick(resource);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Contact ${resource.name}`}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-full bg-white">
+                      <CardContent className="p-5">
+                        <div className="flex items-center justify-between gap-4 min-w-0">
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            <div className="p-3 rounded-xl bg-white shadow-sm flex-shrink-0">
                               {getResourceIcon(resource.type)}
                             </div>
-                            <div>
-                              <h4 className="font-semibold">{resource.name}</h4>
-                              <p className="text-sm text-muted-foreground">
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <h4 className="font-bold text-base mb-1 truncate">{resource.name}</h4>
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                                 {resource.description}
                               </p>
-                              <div className="flex items-center gap-2 mt-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 {resource.phone && (
-                                  <Badge variant="outline" className="text-xs">
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-8 text-xs font-semibold bg-primary hover:bg-primary/90"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(`tel:${resource.phone}`, "_self");
+                                    }}
+                                  >
                                     <Phone className="h-3 w-3 mr-1" />
                                     {resource.phone}
-                                  </Badge>
+                                  </Button>
                                 )}
                                 {resource.textNumber && (
-                                  <Badge variant="outline" className="text-xs">
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-8 text-xs font-semibold bg-blue-600 hover:bg-blue-700"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(`sms:${resource.textNumber}?body=HOME`, "_self");
+                                    }}
+                                  >
                                     <Smartphone className="h-3 w-3 mr-1" />
                                     Text {resource.textNumber}
-                                  </Badge>
+                                  </Button>
                                 )}
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs h-6">
                                   <Clock className="h-3 w-3 mr-1" />
                                   {resource.availability}
                                 </Badge>
                               </div>
                             </div>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                         </div>
                       </CardContent>
                     </Card>
@@ -299,37 +334,51 @@ export function CrisisSupportModal({
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="space-y-3">
-              <h3 className="font-semibold">Quick Actions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Quick Actions - Redesigned with cleaner card-based layout */}
+            <Card className="border-primary/20 shadow-sm">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle>One-Tap Quick Actions</CardTitle>
+                    <CardDescription>
+                      Immediate access to crisis support resources
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
                 <Button
                   variant="outline"
-                  className="h-auto p-4 justify-start"
+                  className="w-full justify-start gap-3 h-11 hover:bg-red-50 hover:border-red-200 hover:text-red-700 group"
                   onClick={() => window.open("tel:988", "_self")}
                 >
-                  <div className="text-left">
-                    <div className="font-semibold">Call 988</div>
-                    <div className="text-sm text-muted-foreground">
-                      Suicide & Crisis Lifeline
-                    </div>
+                  <div className="p-1.5 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
+                    <Phone className="h-4 w-4 text-red-600" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="font-semibold text-sm">Call 988</div>
+                    <div className="text-xs text-muted-foreground">Suicide & Crisis Lifeline</div>
                   </div>
                 </Button>
                 
                 <Button
                   variant="outline"
-                  className="h-auto p-4 justify-start"
-                  onClick={() => window.open("sms:741741", "_self")}
+                  className="w-full justify-start gap-3 h-11 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 group"
+                  onClick={() => window.open("sms:741741?body=HOME", "_self")}
                 >
-                  <div className="text-left">
-                    <div className="font-semibold">Text HOME to 741741</div>
-                    <div className="text-sm text-muted-foreground">
-                      Crisis Text Line
-                    </div>
+                  <div className="p-1.5 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <Smartphone className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="font-semibold text-sm">Text HOME to 741741</div>
+                    <div className="text-xs text-muted-foreground">Crisis Text Line</div>
                   </div>
                 </Button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="resources" className="space-y-4">
@@ -473,15 +522,18 @@ export function CrisisSupportModal({
           </TabsContent>
         </Tabs>
 
-        <Separator />
+          </div>
 
-        <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Remember: Crisis support is always available. You don&apos;t have to face this alone.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            If you&apos;re experiencing a mental health emergency, please contact emergency services immediately.
-          </p>
+          <Separator className="mx-6 my-4" />
+
+          <div className="px-6 pb-6 text-center space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">
+              Remember: Crisis support is always available. You don&apos;t have to face this alone.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              If you&apos;re experiencing a mental health emergency, please contact emergency services immediately.
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

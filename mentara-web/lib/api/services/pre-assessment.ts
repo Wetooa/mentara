@@ -182,12 +182,12 @@ export function createPreAssessmentService(client: AxiosInstance) {
       });
       
       try {
-        // Use extended timeout for AI operations (60 seconds)
+        // Use extended timeout for AI operations (180 seconds for Ollama)
         const response = await client.post("/pre-assessment/chatbot/message", {
           sessionId,
           message,
         }, {
-          timeout: 60000, // 60 seconds for AI operations
+          timeout: 180000, // 180 seconds (3 minutes) for AI operations - increased for Ollama
         });
         
         const duration = Date.now() - startTime;
@@ -209,7 +209,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
         console.error('[API] ❌ Failed to send chatbot message:', {
           errorType: isTimeout ? 'TIMEOUT' : isNetworkError ? 'NETWORK_ERROR' : 'API_ERROR',
           duration: `${duration}ms`,
-          timeout: isTimeout ? 'Request exceeded 60s timeout' : undefined,
+          timeout: isTimeout ? 'Request exceeded 180s timeout' : undefined,
           status: error.response?.status,
           statusText: error.response?.statusText,
           message: error.message,
@@ -224,7 +224,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
         // Re-throw with more context
         if (isTimeout) {
           const timeoutError = new Error(
-            `Request timeout: The AI response took longer than 60 seconds. This may indicate the backend is processing a complex request. Please try again.`
+            `Request timeout: The AI response took longer than 3 minutes. This may indicate the backend is processing a complex request. Please try again.`
           );
           (timeoutError as any).code = 'TIMEOUT';
           (timeoutError as any).originalError = error;
@@ -274,7 +274,8 @@ export function createPreAssessmentService(client: AxiosInstance) {
     async completeChatbotSession(sessionId: string): Promise<{
       scores: Record<string, { score: number; severity: string }>;
       severityLevels: Record<string, string>;
-      preAssessment: PreAssessment;
+      answers?: number[]; // Converted answers array for registration
+      preAssessment?: PreAssessment;
     }> {
       const response = await client.post("/pre-assessment/chatbot/complete", {
         sessionId,
@@ -352,6 +353,21 @@ export function createPreAssessmentService(client: AxiosInstance) {
       urgencyLevel: 'low' | 'medium' | 'high' | 'critical';
     }> {
       const response = await client.post("/pre-assessment/chatbot/suggest-questionnaires", {
+        sessionId,
+      });
+      return response.data;
+    },
+
+    /**
+     * Link an anonymous chatbot session to the authenticated user
+     * POST /pre-assessment/chatbot/link-session
+     */
+    async linkAnonymousSession(sessionId: string): Promise<{
+      scores: Record<string, { score: number; severity: string }>;
+      severityLevels: Record<string, string>;
+      preAssessment: PreAssessment;
+    }> {
+      const response = await client.post("/pre-assessment/chatbot/link-session", {
         sessionId,
       });
       return response.data;

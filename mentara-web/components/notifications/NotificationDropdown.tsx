@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,6 +130,7 @@ export function NotificationDropdown({
     isMarkingAsRead,
     isMarkingAllAsRead,
     isDeleting,
+    refetch,
   } = useNotifications({ 
     limit: maxNotifications,
     enableToasts: false, // We'll handle toasts manually to avoid duplicates
@@ -159,13 +160,19 @@ export function NotificationDropdown({
   };
 
   const handleRefresh = () => {
-    // Refresh notifications via HTTP instead of WebSocket reconnect
-    window.location.reload();
+    // Refresh notifications via HTTP polling
+    refetch();
     toast.info("Refreshing notifications...");
   };
 
   const displayNotifications = notifications.slice(0, maxNotifications);
   const hasUnread = unreadCount > 0;
+  
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'NotificationDropdown.tsx:169',message:'NotificationDropdown render state',data:{unreadCount,hasUnread,notificationsCount:notifications.length,unreadInList:notifications.filter(n=>!n.isRead).length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+  }, [unreadCount, hasUnread, notifications]);
+  // #endregion
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>

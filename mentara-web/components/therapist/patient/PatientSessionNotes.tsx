@@ -23,8 +23,9 @@ export default function PatientSessionNotes({
   sessions,
   patientId,
 }: PatientSessionNotesProps) {
+  const safeSessions = sessions || [];
   const [expandedSession, setExpandedSession] = useState<string | null>(
-    sessions.length > 0 ? sessions[0].id : null
+    safeSessions.length > 0 ? safeSessions[0].id : null
   );
   const [isTreatmentNotesModalOpen, setIsTreatmentNotesModalOpen] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
@@ -86,7 +87,7 @@ export default function PatientSessionNotes({
       </div>
 
       {/* Sessions List */}
-      {sessions.map((session) => (
+      {safeSessions.map((session) => (
         <div key={session.id} className="border rounded-lg overflow-hidden">
           <div
             className="flex items-center justify-between bg-white p-4 cursor-pointer hover:bg-gray-50"
@@ -200,7 +201,7 @@ export default function PatientSessionNotes({
       ))}
 
       {/* Empty State */}
-      {sessions.length === 0 && (
+      {safeSessions.length === 0 && (
         <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
           <div className="flex flex-col items-center space-y-3">
             <div className="rounded-full bg-gray-100 p-3">

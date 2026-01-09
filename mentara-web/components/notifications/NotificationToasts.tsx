@@ -137,7 +137,6 @@ export function NotificationToasts({
 }: NotificationToastsProps) {
   const router = useRouter();
   const { notifications } = useNotifications({
-    enableRealtime: true,
     enableToasts: false, // We handle toasts manually here
   });
 

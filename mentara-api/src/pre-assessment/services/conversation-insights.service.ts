@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClientService } from './gemini-client.service';
+import { AiProviderFactory } from './ai-provider.factory';
 
 export interface ConversationInsights {
   sentiment: {
@@ -34,7 +34,7 @@ export class ConversationInsightsService {
   private readonly logger = new Logger(ConversationInsightsService.name);
 
   constructor(
-    private readonly geminiClient: GeminiClientService,
+    private readonly aiProvider: AiProviderFactory,
   ) {}
 
   /**
@@ -103,7 +103,7 @@ export class ConversationInsightsService {
 Only include fields that are clearly present in the conversation. Return valid JSON only.`;
 
     try {
-      // Gemini API uses systemInstruction for system messages, so we combine them
+      // Build enhanced history with system instruction
       const enhancedHistory: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
       let systemMessageFound = false;
       
@@ -135,7 +135,7 @@ Only include fields that are clearly present in the conversation. Return valid J
       }
       
       try {
-        const response = await this.geminiClient.chatCompletion(
+        const response = await this.aiProvider.chatCompletion(
           enhancedHistory,
           {
             temperature: 0.2, // Low temperature for consistent extraction

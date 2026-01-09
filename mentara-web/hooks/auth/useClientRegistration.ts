@@ -149,17 +149,40 @@ export function useClientRegistration(
     setRegistrationStatus("registering");
 
     try {
-      // Prepare preassessment answers if available
-      const preassessmentAnswers =
-        answers.length > 0
-          ? answersToAnswerMatrix(questionnaires, answers)
-          : undefined;
+      // Check for chatbot pre-assessment results in localStorage
+      let preassessmentAnswers: number[] | undefined = undefined;
+      let chatbotSessionId: string | undefined = undefined;
+      
+      try {
+        const chatbotResultsStr = localStorage.getItem('preassessment_chatbot_results');
+        if (chatbotResultsStr) {
+          const chatbotResults = JSON.parse(chatbotResultsStr);
+          chatbotSessionId = chatbotResults.sessionId;
+          
+          // Use the converted answers array if available (stored when completing session)
+          if (chatbotResults.answers && Array.isArray(chatbotResults.answers)) {
+            preassessmentAnswers = chatbotResults.answers;
+            console.log('[Registration] Using chatbot pre-assessment answers from localStorage:', preassessmentAnswers.length, 'answers');
+          } else {
+            console.warn('[Registration] Chatbot results found but no answers array. Session ID:', chatbotSessionId);
+          }
+        }
+      } catch (localStorageError) {
+        console.warn('[Registration] Error reading chatbot results from localStorage:', localStorageError);
+      }
+      
+      // If no chatbot results, check checklist store
+      if (!preassessmentAnswers) {
+        preassessmentAnswers =
+          answers.length > 0
+            ? answersToAnswerMatrix(questionnaires, answers)
+            : undefined;
+      }
 
       console.log("Pre-assessment answers:", preassessmentAnswers);
-
       console.log("Registration answers:", answers);
-
       console.log("Registration data:", data);
+      console.log("Chatbot session ID:", chatbotSessionId);
 
       // Call real backend registration API - this will automatically send OTP
       const result = await api.auth.client.register({
@@ -175,8 +198,17 @@ export function useClientRegistration(
       setRegistrationData(data);
       setCurrentStep("verification");
 
+      // Clear chatbot results from localStorage after successful registration
+      // The session will be linked after email verification and login
+      if (chatbotSessionId) {
+        // Keep sessionId in registrationData for later linking
+        (data as any).chatbotSessionId = chatbotSessionId;
+        localStorage.removeItem('preassessment_chatbot_results');
+        console.log('[Registration] Cleared chatbot results from localStorage. Session will be linked after verification.');
+      }
+
       // Show appropriate success message based on whether preassessment data was included
-      const successMessage = preassessmentAnswers
+      const successMessage = preassessmentAnswers || chatbotSessionId
         ? "Registration and pre-assessment completed! Please check your email for the verification code."
         : "Registration successful! Please check your email for the verification code.";
 

@@ -54,6 +54,7 @@ const publicRoutes = [
   "/auth/sign-in",
   "/auth/verify",
   "/auth/verify-account",
+  "/auth/sign-up",
   "/auth/sign-up/skip-assessment",
 
   "/about",
@@ -403,9 +404,20 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   // Logout function
   const logout = () => {
     // Clear React Query cache to prevent stale authentication data
+    // Specifically clear messaging queries to prevent cross-user contamination
+    queryClient.removeQueries({ queryKey: ['messaging'] });
     queryClient.clear();
 
     if (isClient) {
+      // Disconnect WebSocket before clearing token
+      try {
+        const { disconnectWebSocket } = require('@/lib/websocket');
+        disconnectWebSocket();
+      } catch (error) {
+        // Silently fail if WebSocket module can't be loaded
+        logger.debug('Could not disconnect WebSocket on logout:', error);
+      }
+      
       localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
     setHasToken(false);
@@ -416,6 +428,29 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const refreshProfile = () => {
     refetchProfile();
   };
+
+  // Clear messaging cache when user changes to prevent cross-user contamination
+  useEffect(() => {
+    if (!isClient) return;
+    
+    // Clear messaging queries when user changes or logs out
+    // This prevents User A's data from appearing for User B
+    const currentUserId = user?.id;
+    if (currentUserId) {
+      // User is logged in - ensure only their queries are cached
+      // Queries are already scoped by userId in query keys, but clear any orphaned queries
+      const previousUserId = (window as any).__lastMessagingUserId;
+      if (previousUserId && previousUserId !== currentUserId) {
+        // User changed - clear all messaging queries
+        queryClient.removeQueries({ queryKey: ['messaging'] });
+      }
+      (window as any).__lastMessagingUserId = currentUserId;
+    } else {
+      // User logged out - clear all messaging queries
+      queryClient.removeQueries({ queryKey: ['messaging'] });
+      delete (window as any).__lastMessagingUserId;
+    }
+  }, [user?.id, isClient, queryClient]);
 
   // Handle route protection and redirection
   // Optimized: Allow navigation first, verify auth in background
@@ -453,7 +488,20 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       if (isAuthenticated) {
         // Authenticated user trying to access public auth routes - redirect to dashboard
         // (They're already signed in, no need for sign-in/sign-up pages)
+        // EXCEPTION: Allow /auth/register or /auth/sign-up when coming from pre-assessment flow
         if (pathname.startsWith("/auth/")) {
+          // Check if coming from pre-assessment (has method=chat or sessionId query params)
+          if (typeof window !== 'undefined' && (pathname === "/auth/register" || pathname === "/auth/sign-up")) {
+            const searchParams = new URLSearchParams(window.location.search);
+            const isFromPreAssessment = (searchParams.has('method') && searchParams.get('method') === 'chat') || searchParams.has('sessionId');
+            
+            // Allow access to register/sign-up page when coming from pre-assessment
+            if (isFromPreAssessment) {
+              // Allow access - user may want to create new account after anonymous pre-assessment
+              return;
+            }
+          }
+          
           const dashboardPath = getUserDashboardPath(userRole!);
           router.push(dashboardPath);
           return;

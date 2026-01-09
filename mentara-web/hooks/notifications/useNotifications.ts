@@ -1,12 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
-import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
+import { STALE_TIME, GC_TIME, REFETCH_INTERVAL } from "@/lib/constants/react-query";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNotificationsWebSocket } from "./useNotificationsWebSocket";
 
 interface Notification {
   id: string;
@@ -24,7 +23,7 @@ interface Notification {
 
 /**
  * Enhanced hook for managing user notifications
- * Combines HTTP API with real-time WebSocket notifications
+ * Uses HTTP polling every 10 seconds for updates
  */
 export function useNotifications(
   params: {
@@ -32,7 +31,6 @@ export function useNotifications(
     offset?: number;
     isRead?: boolean;
     enableToasts?: boolean;
-    enableRealTime?: boolean;
   } = {}
 ) {
   const api = useApi();
@@ -42,35 +40,75 @@ export function useNotifications(
   // Configuration with defaults
   const config = {
     enableToasts: true,
-    enableRealTime: true,
     ...params,
   };
 
-  // Real-time WebSocket integration
-  const webSocketState = useNotificationsWebSocket({
-    onNewNotification: useCallback((notification) => {
-      console.log('🔔 [useNotifications] Received real-time notification:', notification);
+  // Track previous notification IDs to detect new ones
+  const previousNotificationIdsRef = useRef<Set<string>>(new Set());
+  const [lastPollTime, setLastPollTime] = useState<Date | null>(null);
 
-      // Add new notification to the cache optimistically
-      queryClient.setQueryData(
-        queryKeys.notifications.list(params),
-        (oldData: Notification[] | undefined) => {
-          if (!oldData) return [notification];
-          // Add to beginning of array (most recent first)
-          return [notification, ...oldData];
-        }
-      );
+  // Get notifications with polling
+  const {
+    data: notifications,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: queryKeys.notifications.list(params),
+    queryFn: () => {
+      return api.notifications.getMy(params);
+    },
+    staleTime: STALE_TIME.SHORT, // 2 minutes
+    gcTime: GC_TIME.MEDIUM, // 10 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for notifications
+    refetchInterval: REFETCH_INTERVAL.NOTIFICATIONS, // Poll every 10 seconds
+    refetchIntervalInBackground: true, // Continue polling in background
+  });
+  
+  // Get unread count with polling
+  const { data: unreadCount, isLoading: isLoadingUnreadCount } = useQuery({
+    queryKey: queryKeys.notifications.unreadCount(),
+    queryFn: () => {
+      return api.notifications.getUnreadCount();
+    },
+    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
+    gcTime: GC_TIME.SHORT, // 5 minutes
+    refetchOnWindowFocus: true, // Refetch on focus for unread count
+    refetchInterval: REFETCH_INTERVAL.NOTIFICATIONS, // Poll every 10 seconds
+    refetchIntervalInBackground: true, // Continue polling in background
+  });
 
-      // Update unread count optimistically
-      queryClient.setQueryData(
-        queryKeys.notifications.unreadCount(),
-        (oldData: { count: number } | undefined) => ({
-          count: (oldData?.count || 0) + 1,
-        })
-      );
+  // Detect new notifications when polling data changes and show toasts
+  useEffect(() => {
+    if (!notifications || notifications.length === 0) {
+      // Initialize previous IDs on first load
+      if (notifications) {
+        previousNotificationIdsRef.current = new Set(notifications.map(n => n.id));
+      }
+      return;
+    }
 
-      // Show toast notification if enabled
-      if (config.enableToasts && config.enableRealTime) {
+    const currentIds = new Set(notifications.map(n => n.id));
+    const previousIds = previousNotificationIdsRef.current;
+    
+    // Find new notifications (in current but not in previous)
+    const newNotifications = notifications.filter(n => {
+      const isNew = !previousIds.has(n.id);
+      // Also check if notification was created within the last 10 seconds
+      // This prevents showing old notifications on initial load
+      if (isNew) {
+        const createdAt = new Date(n.createdAt).getTime();
+        const now = Date.now();
+        const timeDiff = now - createdAt;
+        return timeDiff < 10000; // Within 10 seconds
+      }
+      return false;
+    });
+
+    // Show toasts for new notifications
+    if (newNotifications.length > 0 && config.enableToasts) {
+      newNotifications.forEach(notification => {
         const toastConfig = {
           description: notification.message,
           action: notification.actionUrl ? {
@@ -91,77 +129,13 @@ export function useNotifications(
           default:
             toast.info(notification.title, toastConfig);
         }
-      }
-    }, [queryClient, params, config.enableToasts, config.enableRealTime]),
+      });
+    }
 
-    onUnreadCountUpdate: useCallback((data) => {
-      console.log('🔢 [useNotifications] Real-time unread count update:', data.count);
-
-      // Update unread count in cache
-      queryClient.setQueryData(
-        ["notifications", "unreadCount"],
-        { count: data.count }
-      );
-    }, [queryClient]),
-
-    onError: useCallback((error) => {
-      console.error('❌ [useNotifications] WebSocket error:', error);
-
-      if (config.enableToasts) {
-        // More user-friendly error messages based on error type
-        const isTransportError = typeof error === 'string' && error.includes('Transport error');
-        const isConnectionError = typeof error === 'string' && error.includes('Failed to connect');
-        
-        if (isTransportError) {
-          toast.error("Connection Issue", {
-            description: "Network connectivity problem. Retrying automatically...",
-            action: {
-              label: "Retry Now",
-              onClick: () => {
-                console.log('🔄 Manual retry requested by user');
-                window.location.reload();
-              },
-            },
-          });
-        } else if (isConnectionError) {
-          toast.error("Service Unavailable", {
-            description: "Notification service is temporarily unavailable.",
-            action: {
-              label: "Refresh",
-              onClick: () => window.location.reload(),
-            },
-          });
-        } else {
-          toast.error("Notification connection issue", {
-            description: "Using fallback mode. Some notifications may be delayed.",
-          });
-        }
-      }
-    }, [config.enableToasts]),
-  });
-
-  // Get notifications
-  const {
-    data: notifications,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: queryKeys.notifications.list(params),
-    queryFn: () => api.notifications.getMy(params),
-    staleTime: STALE_TIME.SHORT, // 2 minutes
-    gcTime: GC_TIME.MEDIUM, // 10 minutes
-    refetchOnWindowFocus: true, // Refetch on focus for notifications
-  });
-
-  // Get unread count
-  const { data: unreadCount } = useQuery({
-    queryKey: queryKeys.notifications.unreadCount(),
-    queryFn: () => api.notifications.getUnreadCount(),
-    staleTime: STALE_TIME.VERY_SHORT, // 30 seconds
-    gcTime: GC_TIME.SHORT, // 5 minutes
-    refetchOnWindowFocus: true, // Refetch on focus for unread count
-  });
+    // Update previous IDs
+    previousNotificationIdsRef.current = currentIds;
+    setLastPollTime(new Date());
+  }, [notifications, config.enableToasts]);
 
   // Mark as read mutation
   const markAsReadMutation = useMutation({
@@ -230,6 +204,11 @@ export function useNotifications(
     [queryClient, params, markAsReadMutation]
   );
 
+  // Calculate next poll time
+  const nextPollTime = lastPollTime 
+    ? new Date(lastPollTime.getTime() + REFETCH_INTERVAL.NOTIFICATIONS)
+    : null;
+
   return {
     // Core API
     notifications: notifications || [],
@@ -244,28 +223,23 @@ export function useNotifications(
     isMarkingAllAsRead: markAllAsReadMutation.isPending,
     isDeleting: deleteNotificationMutation.isPending,
 
-    // Connection state (expected by NotificationCenter)
-    connectionState: {
-      isConnected: webSocketState.isConnected,
-      isConnecting: webSocketState.isConnecting,
-      error: webSocketState.error || null,
+    // Polling status (replaces connectionState)
+    pollingStatus: {
+      isPolling: isFetching,
+      lastPollTime,
+      nextPollTime,
     },
-    reconnectWebSocket: webSocketState.connect,
 
-    // Real-time WebSocket state (backward compatibility)
-    realTime: {
-      isConnected: webSocketState.isConnected,
-      isConnecting: webSocketState.isConnecting,
-      error: webSocketState.error,
-      canReceiveNotifications: webSocketState.canReceiveNotifications,
-      lastNotification: webSocketState.lastNotification,
-      connect: webSocketState.connect,
-      disconnect: webSocketState.disconnect,
+    // Backward compatibility: connectionState (for components that still expect it)
+    connectionState: {
+      isConnected: true, // Always "connected" with polling
+      isConnecting: isFetching,
+      error: null,
     },
+    reconnectWebSocket: refetch, // Map reconnect to refetch for backward compatibility
 
     // Configuration
     enableToasts: config.enableToasts,
-    enableRealTime: config.enableRealTime,
 
     // Utility functions
     getNotificationsByCategory: (category: string) =>

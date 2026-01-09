@@ -227,15 +227,15 @@ const createQueryKeys = () => {
     },
     messaging: {
       ...base.messaging,
-      contacts: () => [...base.messaging.all, 'contacts'] as const,
-      conversation: (id: string) => [...base.messaging.all, 'conversation', id] as const,
-      conversations: () => [...base.messaging.conversations] as const,
-      messages: (conversationId: string) => [...base.messaging.all, 'messages', conversationId] as const,
-      search: (query: string, conversationId?: string) => 
-        [...base.messaging.all, 'search', query, conversationId] as const,
-      blockedUsers: () => [...base.messaging.all, 'blocked'] as const,
-      startConversation: (targetUserId: string) => [...base.messaging.all, 'startConversation', targetUserId] as const,
-      recent: (limit?: number) => [...base.messaging.all, 'recent', limit] as const,
+      contacts: (userId: string) => [...base.messaging.all, 'contacts', userId] as const,
+      conversation: (userId: string, id: string) => [...base.messaging.all, 'conversation', userId, id] as const,
+      conversations: (userId: string) => [...base.messaging.conversations, userId] as const,
+      messages: (userId: string, conversationId: string) => [...base.messaging.all, 'messages', userId, conversationId] as const,
+      search: (userId: string, query: string, conversationId?: string) => 
+        [...base.messaging.all, 'search', userId, query, conversationId] as const,
+      blockedUsers: (userId: string) => [...base.messaging.all, 'blocked', userId] as const,
+      startConversation: (userId: string, targetUserId: string) => [...base.messaging.all, 'startConversation', userId, targetUserId] as const,
+      recent: (userId: string, limit?: number) => [...base.messaging.all, 'recent', userId, limit] as const,
     },
     worksheets: {
       ...base.worksheets,

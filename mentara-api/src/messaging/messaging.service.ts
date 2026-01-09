@@ -96,7 +96,88 @@ export class MessagingService {
         participantIds[0],
       );
       if (existingConversation) {
-        return existingConversation;
+        // Check if current user is a participant - if not, add them (data integrity fix)
+        const isCurrentUserParticipant = existingConversation.participants?.some(
+          (p: any) => p.userId === userId && p.isActive
+        );
+        
+        if (!isCurrentUserParticipant) {
+          // Add current user as participant (fix data integrity issue)
+          await this.prisma.conversationParticipant.upsert({
+            where: {
+              conversationId_userId: {
+                conversationId: existingConversation.id,
+                userId: userId,
+              },
+            },
+            create: {
+              conversationId: existingConversation.id,
+              userId: userId,
+              role: ParticipantRole.ADMIN,
+              isActive: true,
+            },
+            update: {
+              isActive: true,
+              role: ParticipantRole.ADMIN,
+            },
+          });
+          
+          // Refetch conversation with updated participants
+          const updatedConversation = await this.prisma.conversation.findUnique({
+            where: { id: existingConversation.id },
+            include: {
+              participants: {
+                where: { isActive: true },
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      firstName: true,
+                      lastName: true,
+                      avatarUrl: true,
+                      role: true,
+                    },
+                  },
+                },
+              },
+              messages: {
+                take: 1,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                  sender: {
+                    select: {
+                      id: true,
+                      firstName: true,
+                      lastName: true,
+                      avatarUrl: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+          
+          if (updatedConversation) {
+            const { messages, ...rest } = updatedConversation;
+            const transformedConversation = {
+              ...rest,
+              lastMessage: messages && messages.length > 0 ? messages[0] : null,
+              unreadCount: 0,
+            };
+            
+            return transformedConversation;
+          }
+        }
+        
+        // Transform existing conversation to match frontend expectations
+        const { messages, ...rest } = existingConversation;
+        const transformedConversation = {
+          ...rest,
+          lastMessage: messages && messages.length > 0 ? messages[0] : null,
+          unreadCount: 0, // We'd need to calculate this, but for now set to 0
+        };
+        
+        return transformedConversation;
       }
     }
 
@@ -162,7 +243,15 @@ export class MessagingService {
       }),
     );
 
-    return conversation;
+    // Transform conversation to match frontend expectations (same format as getUserConversations)
+    const { messages, ...rest } = conversation;
+    const transformedConversation = {
+      ...rest,
+      lastMessage: messages.length > 0 ? messages[0] : null,
+      unreadCount: 0, // New conversation has no unread messages
+    };
+
+    return transformedConversation;
   }
 
   async getUserConversations(userId: string, page = 1, limit = 20) {
@@ -218,6 +307,7 @@ export class MessagingService {
               messages: {
                 where: {
                   isDeleted: false,
+                  senderId: { not: userId }, // Exclude user's own messages
                   readReceipts: {
                     none: { userId },
                   },
@@ -331,6 +421,7 @@ export class MessagingService {
               messages: {
                 where: {
                   isDeleted: false,
+                  senderId: { not: userId }, // Exclude user's own messages
                   readReceipts: {
                     none: { userId },
                   },
@@ -658,8 +749,16 @@ export class MessagingService {
         message.attachmentUrls.length > 0 ? message.attachmentUrls : undefined,
     });
 
+    this.logger.log(`📤 [MESSAGE SERVICE] About to emit MessageSentEvent for message ${message.id}`);
+    this.logger.log(`📤 [MESSAGE SERVICE] Event type: ${messageEvent.eventType}`);
+    this.logger.log(`📤 [MESSAGE SERVICE] Event type check: ${messageEvent.eventType === 'MessageSentEvent' ? 'MATCHES' : 'DOES NOT MATCH'}`);
+    this.logger.log(`📤 [MESSAGE SERVICE] Conversation ID: ${conversationId}`);
+    this.logger.log(`📤 [MESSAGE SERVICE] Message ID: ${message.id}`);
+    this.logger.log(`📤 [MESSAGE SERVICE] Sender ID: ${userId}`);
+    this.logger.log(`📤 [MESSAGE SERVICE] Calling eventBus.emit()...`);
     await this.eventBus.emit(messageEvent);
-    this.logger.debug(`MessageSentEvent emitted for message ${message.id}`);
+    this.logger.log(`✅ [MESSAGE SERVICE] eventBus.emit() completed for message ${message.id}`);
+    this.logger.log(`✅ [MESSAGE SERVICE] MessageSentEvent emitted for message ${message.id}`);
 
     // Return message as-is (no encryption)
     return message;
@@ -1074,7 +1173,7 @@ export class MessagingService {
 
   // Helper Methods
   private async findDirectConversation(user1Id: string, user2Id: string) {
-    return this.prisma.conversation.findFirst({
+    const result = await this.prisma.conversation.findFirst({
       where: {
         type: ConversationType.DIRECT,
         participants: {
@@ -1097,8 +1196,24 @@ export class MessagingService {
             },
           },
         },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
       },
     });
+    
+    return result;
   }
 
   private async verifyParticipant(userId: string, conversationId: string) {

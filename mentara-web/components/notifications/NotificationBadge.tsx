@@ -3,7 +3,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bell, BellRing, Wifi, WifiOff } from "lucide-react";
+import { Bell, BellRing } from "lucide-react";
 import { useNotifications } from "@/hooks/notifications/useNotifications";
 import { cn } from "@/lib/utils";
 
@@ -24,13 +24,11 @@ export function NotificationBadge({
   onClick,
   disabled = false,
 }: NotificationBadgeProps) {
-  const { unreadCount, connectionState } = useNotifications({
-    enableRealtime: true,
+  const { unreadCount } = useNotifications({
     enableToasts: false,
   });
 
   const hasUnread = unreadCount > 0;
-  const isConnected = connectionState.isConnected;
 
   const sizeClasses = {
     sm: "h-4 w-4",
@@ -104,26 +102,14 @@ export function NotificationBadge({
         </Badge>
       )}
 
-      {/* Connection Status Indicator */}
+      {/* Connection Status Indicator - Always shows active for polling */}
       {showConnectionStatus && (
         <div className="absolute -bottom-1 -right-1">
-          {isConnected ? (
-            <Wifi className="h-3 w-3 text-green-500" title="Connected" />
-          ) : (
-            <WifiOff className="h-3 w-3 text-red-500" title="Disconnected" />
-          )}
+          <div
+            className="h-2 w-2 rounded-full border border-white bg-green-500"
+            title="Polling active (updates every 10s)"
+          />
         </div>
-      )}
-
-      {/* Connection Status Indicator (Alternative - Dot) */}
-      {showConnectionStatus && (
-        <div
-          className={cn(
-            "absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-white",
-            isConnected ? "bg-green-500" : "bg-red-500"
-          )}
-          title={isConnected ? "Real-time notifications active" : "Notifications offline"}
-        />
       )}
     </Component>
   );
@@ -143,8 +129,7 @@ export function SmartNotificationBadge({
   className = "",
   onClick,
 }: SmartNotificationBadgeProps) {
-  const { unreadCount, connectionState } = useNotifications({
-    enableRealtime: true,
+  const { unreadCount } = useNotifications({
     enableToasts: false,
   });
 
@@ -165,7 +150,7 @@ export function SmartNotificationBadge({
     return (
       <NotificationBadge
         variant="both"
-        showConnectionStatus={!connectionState.isConnected}
+        showConnectionStatus={false}
         className={className}
         onClick={onClick}
       />
@@ -176,7 +161,7 @@ export function SmartNotificationBadge({
   return (
     <NotificationBadge
       variant="both"
-      showConnectionStatus={!connectionState.isConnected}
+      showConnectionStatus={false}
       className={cn("relative", className)}
       onClick={onClick}
     />
@@ -189,18 +174,17 @@ interface NotificationStatusIndicatorProps {
 }
 
 /**
- * Simple connection status indicator for notifications
+ * Simple polling status indicator for notifications
  */
 export function NotificationStatusIndicator({
   className = "",
   showText = false,
 }: NotificationStatusIndicatorProps) {
-  const { connectionState } = useNotifications({
-    enableRealtime: true,
+  const { pollingStatus } = useNotifications({
     enableToasts: false,
   });
 
-  const { isConnected, isReconnecting, error } = connectionState;
+  const isPolling = pollingStatus?.isPolling ?? false;
 
   if (showText) {
     return (
@@ -208,15 +192,12 @@ export function NotificationStatusIndicator({
         <div
           className={cn(
             "h-2 w-2 rounded-full",
-            isConnected ? "bg-green-500" : isReconnecting ? "bg-yellow-500" : "bg-red-500"
+            isPolling ? "bg-blue-500 animate-pulse" : "bg-green-500"
           )}
         />
         <span className="text-muted-foreground">
-          {isConnected ? "Live" : isReconnecting ? "Connecting..." : "Offline"}
+          {isPolling ? "Polling..." : "Polling every 10s"}
         </span>
-        {error && (
-          <span className="text-red-500 text-xs">({error})</span>
-        )}
       </div>
     );
   }
@@ -225,16 +206,10 @@ export function NotificationStatusIndicator({
     <div
       className={cn(
         "h-2 w-2 rounded-full",
-        isConnected ? "bg-green-500" : isReconnecting ? "bg-yellow-500 animate-pulse" : "bg-red-500",
+        isPolling ? "bg-blue-500 animate-pulse" : "bg-green-500",
         className
       )}
-      title={
-        isConnected
-          ? "Real-time notifications active"
-          : isReconnecting
-            ? "Connecting to notifications..."
-            : `Notifications offline${error ? `: ${error}` : ""}`
-      }
+      title="Polling active (updates every 10s)"
     />
   );
 }

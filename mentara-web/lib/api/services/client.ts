@@ -151,6 +151,17 @@ export function createClientService(client: AxiosInstance) {
       return response.data;
     },
 
+    /**
+     * Disconnect from a specific therapist
+     * DELETE /client/therapist/:therapistId
+     */
+    async disconnectTherapist(
+      therapistId: string
+    ): Promise<{ success: boolean }> {
+      const response = await client.delete(`/client/therapist/${therapistId}`);
+      return response.data;
+    },
+
     // ================================
     // PREFERENCES OPERATIONS
     // ================================

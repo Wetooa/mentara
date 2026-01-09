@@ -12,9 +12,6 @@ const nextConfig: NextConfig = {
   // Disable prerendering - force client-side rendering
   trailingSlash: false,
 
-  // Static export for Netlify deployment
-  output: "export",
-
   // Image optimization settings
   images: {
     // Enable Next.js image optimization
@@ -56,7 +53,7 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
-    // Required for static export - images won't be optimized
+    // Images won't be optimized (can be enabled later if needed)
     unoptimized: true,
   },
 

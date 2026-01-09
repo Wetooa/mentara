@@ -17,15 +17,53 @@ import {
   MapPin,
   ExternalLink,
 } from "lucide-react";
-// Lazy load heavy booking components
-const BookingCalendar = dynamic(() => import("@/components/booking/BookingCalendar").then(mod => ({ default: mod.default })), {
-  ssr: false,
-  loading: () => <Skeleton className="h-96 w-full" />
-});
+// Lazy load heavy booking components with safe import handling
+const BookingCalendar = dynamic(
+  () =>
+    import("@/components/booking/BookingCalendar")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.BookingCalendar) return { default: mod.BookingCalendar };
+        throw new Error("BookingCalendar export not found");
+      })
+      .catch((error) => {
+        console.error("[Booking] Failed to load BookingCalendar:", error);
+        return { default: () => <Skeleton className="h-96 w-full" /> };
+      }),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-96 w-full" />,
+  }
+);
 
-const ClientBookingInterface = dynamic(() => import("@/components/client/ClientBookingInterface").then(mod => ({ default: mod.default })), {
-  ssr: false
-});
+const ClientBookingInterface = dynamic(
+  () =>
+    import("@/components/client/ClientBookingInterface")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.ClientBookingInterface) return { default: mod.ClientBookingInterface };
+        throw new Error("ClientBookingInterface export not found");
+      })
+      .catch((error) => {
+        console.error("[Booking] Failed to load ClientBookingInterface:", error);
+        return {
+          default: () => (
+            <div className="p-4">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Failed to load booking interface. Please refresh the page.
+                </AlertDescription>
+              </Alert>
+            </div>
+          ),
+        };
+      }),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-96 w-full" />,
+  }
+);
 import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
 import { useAssignedTherapists } from "@/hooks/therapist/useTherapist";
 import { MeetingStatus } from "@/types/booking";

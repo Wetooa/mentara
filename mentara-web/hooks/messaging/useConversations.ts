@@ -11,10 +11,10 @@ import { MessageResponseDto, SendMessageDto } from '@/types/api/messaging';
 import type { MessageAttachment } from '@/types/api/messaging';
 
 // Transform API message to UI format for backward compatibility
-const transformMessageToUIFormat = (message: MessageResponseDto): Message => {
+const transformMessageToUIFormat = (message: MessageResponseDto, currentUserId?: string): Message => {
   return {
     id: message.id,
-    sender: message.authorId === 'current-user' ? 'me' : 'them', // This will need proper user ID comparison
+    sender: message.authorId === currentUserId ? 'me' : 'them', // Compare against actual current user ID
     text: message.content,
     time: new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     status: message.status === 'read' ? 'read' : message.status === 'delivered' ? 'delivered' : 'sent',
@@ -51,14 +51,14 @@ export function useConversations() {
   // Get conversations with messages
   const getConversationQuery = (conversationId: string) =>
     useQuery({
-      queryKey: queryKeys.messaging.conversation(conversationId),
+      queryKey: queryKeys.messaging.conversation(user?.id || '', conversationId),
       queryFn: async () => {
         const [conversation, messages] = await Promise.all([
           api.messaging.getConversation(conversationId),
           api.messaging.getMessages(conversationId, { limit: 50 })
         ]);
 
-        const transformedMessages = messages.map(transformMessageToUIFormat);
+        const transformedMessages = messages.map(msg => transformMessageToUIFormat(msg, user?.id));
         
         return {
           id: conversationId,
@@ -99,12 +99,13 @@ export function useConversations() {
     },
     onSuccess: (newMessage, { conversationId }) => {
       // Optimistically update the conversation cache
+      if (!user?.id) return;
       queryClient.setQueryData(
-        queryKeys.messaging.conversation(conversationId),
+        queryKeys.messaging.conversation(user.id, conversationId),
         (oldConversation: Conversation | undefined) => {
           if (!oldConversation) return oldConversation;
 
-          const transformedMessage = transformMessageToUIFormat(newMessage);
+          const transformedMessage = transformMessageToUIFormat(newMessage, user?.id);
           return {
             ...oldConversation,
             messages: [...oldConversation.messages, transformedMessage],
@@ -114,7 +115,9 @@ export function useConversations() {
       );
 
       // Also invalidate contacts to update last message
-      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.contacts() });
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.messaging.contacts(user.id) });
+      }
     },
   });
 
@@ -231,15 +234,16 @@ export function useConversations() {
     setSelectedContactId(contactId);
     
     // Prefetch conversation data
+    if (!user?.id) return;
     queryClient.prefetchQuery({
-      queryKey: queryKeys.messaging.conversation(contactId),
+      queryKey: queryKeys.messaging.conversation(user.id, contactId),
       queryFn: async () => {
         const [conversation, messages] = await Promise.all([
           api.messaging.getConversation(contactId),
           api.messaging.getMessages(contactId, { limit: 50 })
         ]);
 
-        const transformedMessages = messages.map(transformMessageToUIFormat);
+        const transformedMessages = messages.map(msg => transformMessageToUIFormat(msg, user?.id));
         
         return {
           id: contactId,
@@ -251,7 +255,7 @@ export function useConversations() {
         } as Conversation;
       },
     });
-  }, [api.messaging, queryClient]);
+  }, [api.messaging, queryClient, user?.id]);
 
   const sendMessage = useCallback(async (text: string, attachments?: MessageAttachment[]) => {
     if (!selectedContactId) throw new Error('No conversation selected');
@@ -277,8 +281,8 @@ export function useConversations() {
 
   const searchMessages = useCallback(async (query: string): Promise<Message[]> => {
     const results = await searchMessagesMutation.mutateAsync(query);
-    return results.map(transformMessageToUIFormat);
-  }, [searchMessagesMutation]);
+    return results.map(msg => transformMessageToUIFormat(msg, user?.id));
+  }, [searchMessagesMutation, user?.id]);
 
   return {
     conversations,

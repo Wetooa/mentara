@@ -484,15 +484,17 @@ export class PreAssessmentController {
     }
   }
 
+  @Public()
   @Post('chatbot/complete')
   @HttpCode(HttpStatus.OK)
   async completeChatbotSession(
     @Body() body: { sessionId: string },
-    @CurrentUserId() userId: string,
+    @CurrentUserId() userId?: string,
   ): Promise<{
     scores: Record<string, { score: number; severity: string }>;
     severityLevels: Record<string, string>;
-    preAssessment: PreAssessment;
+    answers?: number[]; // Converted answers array for registration
+    preAssessment?: PreAssessment;
   }> {
     try {
       const result = await this.chatbotService.completeSession(
@@ -517,43 +519,67 @@ export class PreAssessmentController {
         throw new NotFoundException('Session not found in database');
       }
 
-      // Convert collected answers to flat array format
+      // Only create PreAssessment for authenticated users with Client profiles
+      let preAssessment: PreAssessment | undefined;
+      if (userId) {
+        // Verify user has Client profile before creating PreAssessment
+        const client = await prisma.client.findUnique({
+          where: { userId },
+          select: { userId: true },
+        });
+
+        if (client) {
+          // User has client profile - safe to create PreAssessment
+          // Convert collected answers to flat array format
+          const structuredAnswers = (dbSession.structuredAnswers as Record<string, number>) || {};
+          const answers = this.chatbotService.convertAnswersToArray(
+            session.collectedAnswers,
+            structuredAnswers,
+          );
+
+          // Save results to database with chatbot session link
+          preAssessment = await this.preAssessmentService.createPreAssessment(
+            userId,
+            {
+              answers,
+              scores: Object.fromEntries(
+                Object.entries(result.scores).map(([key, value]) => [
+                  key,
+                  value.score,
+                ]),
+              ),
+              severityLevels: result.severityLevels,
+              assessmentMethod: 'CHATBOT',
+              chatbotSessionId: dbSession.id,
+              conversationInsights: dbSession.conversationInsights,
+            },
+          );
+        } else {
+          // User authenticated but no client profile - skip PreAssessment creation
+          // This can happen if:
+          // - User is a therapist/admin trying to test the chatbot
+          // - User account exists but client profile not yet created
+          // - Anonymous session (userId might be set from session but user not registered)
+          this.logger.warn(
+            `User ${userId} has no client profile, skipping PreAssessment creation. Session ${body.sessionId} will be linked later during registration.`,
+          );
+        }
+      }
+
+      // Convert answers to flat array format for anonymous sessions (needed for registration)
+      // This is needed even if we don't create PreAssessment yet (for anonymous users)
       const structuredAnswers = (dbSession.structuredAnswers as Record<string, number>) || {};
       const answers = this.chatbotService.convertAnswersToArray(
         session.collectedAnswers,
         structuredAnswers,
       );
 
-      // Save results to database with chatbot session link
-      const preAssessment = await this.preAssessmentService.createPreAssessment(
-        userId,
-        {
-          answers,
-          scores: Object.fromEntries(
-            Object.entries(result.scores).map(([key, value]) => [
-              key,
-              value.score,
-            ]),
-          ),
-          severityLevels: result.severityLevels,
-          assessmentMethod: 'CHATBOT',
-          chatbotSessionId: dbSession.id,
-          conversationInsights: dbSession.conversationInsights,
-        },
-      );
-
-      // Update chatbot session to link to pre-assessment
-      await prisma.chatbotSession.update({
-        where: { id: dbSession.id },
-        data: {
-          isComplete: true,
-          completedAt: new Date(),
-        },
-      });
-
+      // Session is already marked as complete by completeSession service method
+      // Return results (preAssessment is optional for anonymous sessions)
       return {
         ...result,
-        preAssessment,
+        answers, // Always include converted answers array for registration
+        ...(preAssessment && { preAssessment }),
       };
     } catch (error) {
       throw new InternalServerErrorException(

@@ -115,7 +115,7 @@ export default function CommunitySidebar({
   // Loading state
   if (membershipsLoading || communitiesLoading) {
     return (
-      <div className="w-full h-full p-4 bg-community-warm/20 border border-community-calm/30 backdrop-blur-sm min-w-[200px]">
+      <div className="w-full h-full p-4 bg-community-warm/20 border border-community-calm/30 backdrop-blur-sm min-w-0">
         <div className="space-y-4">
           {/* Header skeleton */}
           <div className="flex items-center justify-between">
@@ -160,7 +160,7 @@ export default function CommunitySidebar({
   // Error state
   if (membershipsError || !communitiesData) {
     return (
-      <div className="w-full h-full p-4 bg-community-warm/20 border border-community-calm/30 backdrop-blur-sm min-w-[200px]">
+      <div className="w-full h-full p-4 bg-community-warm/20 border border-community-calm/30 backdrop-blur-sm min-w-0">
         <div className="text-center space-y-4">
           <div className="flex flex-col items-center space-y-2">
             <div className="p-3 rounded-full bg-community-heart/20">
@@ -194,7 +194,7 @@ export default function CommunitySidebar({
   // No communities state
   if (!communitiesData || communitiesData.length === 0) {
     return (
-      <div className="w-full h-full p-4 bg-community-warm/20 border border-community-calm/30 backdrop-blur-sm min-w-[200px]">
+      <div className="w-full h-full p-4 bg-community-warm/20 border border-community-calm/30 backdrop-blur-sm min-w-0">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-semibold text-sm text-community-calm-foreground">Your Communities</h2>
           <Badge variant="secondary" className="text-xs bg-community-calm/20 text-community-calm-foreground border-community-calm/30">
@@ -243,7 +243,7 @@ export default function CommunitySidebar({
   }
 
   return (
-    <div className="w-full h-full p-4 bg-community-warm/20 border border-community-calm/30 backdrop-blur-sm overflow-y-auto shadow-lg shadow-community-calm/10 mentara-scrollbar min-w-[200px]">
+    <div className="w-full h-full p-4 bg-community-warm/20 border border-community-calm/30 backdrop-blur-sm overflow-y-auto shadow-lg shadow-community-calm/10 mentara-scrollbar min-w-0">
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-semibold text-sm text-community-calm-foreground">Your Communities</h2>
         <Badge 
@@ -268,15 +268,15 @@ export default function CommunitySidebar({
                 handleCommunityToggle(community.id);
               }}
             >
-              <div className="flex items-center gap-3 text-left w-full">
+              <div className="flex items-center gap-3 text-left w-full min-w-0">
                 <div className={cn(
                   "w-3 h-3 rounded-full shrink-0 transition-colors duration-200",
                   selectedCommunityId === community.id 
                     ? "bg-primary animate-pulse" 
                     : "bg-primary/60 group-hover:bg-primary"
                 )} />
-                <span className="truncate font-semibold">{community.name}</span>
-                <div className="ml-auto text-xs text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity">
+                <span className="truncate font-semibold min-w-0 flex-1">{community.name}</span>
+                <div className="ml-auto text-xs text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity shrink-0">
                   {community.roomGroups?.reduce((total, group) => total + group.rooms.length, 0) || 0}
                 </div>
               </div>
@@ -292,15 +292,15 @@ export default function CommunitySidebar({
                       <div key={roomGroup.id} className="space-y-2">
                         <button
                           onClick={() => handleRoomGroupToggle(roomGroup.id)}
-                          className="w-full text-left group flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-1.5 bg-muted/50 rounded-lg border border-border hover:bg-muted hover:text-foreground transition-colors duration-200 no-underline-hover"
+                          className="w-full text-left group flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-1.5 bg-muted/50 rounded-lg border border-border hover:bg-muted hover:text-foreground transition-colors duration-200 no-underline-hover min-w-0"
                         >
                           {isCollapsed ? (
-                            <ChevronRight className="h-3 w-3 transition-colors" />
+                            <ChevronRight className="h-3 w-3 transition-colors shrink-0" />
                           ) : (
-                            <ChevronDown className="h-3 w-3 transition-colors" />
+                            <ChevronDown className="h-3 w-3 transition-colors shrink-0" />
                           )}
-                          {roomGroup.name}
-                          <span className="ml-auto text-xs opacity-60">
+                          <span className="truncate min-w-0 flex-1">{roomGroup.name}</span>
+                          <span className="ml-auto text-xs opacity-60 shrink-0">
                             {roomGroup.rooms.length}
                           </span>
                         </button>
@@ -318,7 +318,7 @@ export default function CommunitySidebar({
                                 key={room.id}
                                 onClick={() => handleRoomClick(room, community.id)}
                                 className={cn(
-                                  "group w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 text-left no-underline-hover relative",
+                                  "group w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 text-left no-underline-hover relative min-w-0",
                                   isSelected 
                                     ? "bg-primary/15 text-primary shadow-md shadow-primary/10 border border-primary/40 font-semibold" 
                                     : "hover:bg-muted/70 border border-transparent text-foreground font-medium",
@@ -337,9 +337,9 @@ export default function CommunitySidebar({
                                 )}>
                                   {canPost ? <Hash className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
                                 </div>
-                                <span className="truncate">{room.name}</span>
+                                <span className="truncate min-w-0 flex-1">{room.name}</span>
                                 {isSelected && (
-                                  <div className="ml-auto w-2 h-2 bg-primary rounded-full animate-pulse" />
+                                  <div className="ml-auto w-2 h-2 bg-primary rounded-full animate-pulse shrink-0" />
                                 )}
                               </button>
                             );

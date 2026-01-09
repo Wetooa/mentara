@@ -24,7 +24,7 @@ export function MessageChatArea({
   enableRealtime = true,
   onCallInitiate,
 }: MessageChatAreaProps) {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const api = useApi();
   
   // Use the modern messaging hook
@@ -47,7 +47,7 @@ export function MessageChatArea({
     isLoading: isLoadingContact,
     error: contactError,
   } = useQuery({
-    queryKey: queryKeys.messaging.contacts(),
+    queryKey: queryKeys.messaging.contacts(user?.id || ''),
     queryFn: () => api.messaging.getContacts(),
     enabled: !!accessToken && !!contactId,
     staleTime: 1000 * 60 * 5, // 5 minutes

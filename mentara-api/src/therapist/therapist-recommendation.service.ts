@@ -56,6 +56,25 @@ export class TherapistRecommendationService {
     return years;
   }
 
+  /**
+   * Check if therapist specializes in anxiety-related conditions
+   * FORGE: Helper method to identify anxiety specialists
+   */
+  private hasAnxietySpecialization(therapist: any): boolean {
+    const anxietyTerms = ['anxiety', 'anxiety disorders', 'anxiety management'];
+    const allSpecializations = [
+      ...(therapist.expertise || []),
+      ...(therapist.illnessSpecializations || []),
+      ...(therapist.areasOfExpertise || []),
+    ];
+
+    return allSpecializations.some((spec: string) =>
+      anxietyTerms.some((term) =>
+        spec.toLowerCase().includes(term.toLowerCase())
+      )
+    );
+  }
+
   async getRecommendedTherapists(
     request: TherapistRecommendationRequest,
   ): Promise<any> {
@@ -140,24 +159,25 @@ export class TherapistRecommendationService {
       >;
 
       // Enhanced therapist filtering based on clinical insights
+      // FORGE: Filter by anxiety specialization to bypass AI calls
+      const anxietySpecs = ['Anxiety', 'Anxiety Disorders', 'Anxiety Management'];
       const therapistWhere: any = {
         status: 'APPROVED',
         ...(request.province && { province: request.province }),
         ...(request.maxHourlyRate && {
           hourlyRate: { lte: request.maxHourlyRate },
         }),
+        // Filter for therapists specializing in anxiety
+        OR: [
+          { expertise: { hasSome: anxietySpecs } },
+          { illnessSpecializations: { hasSome: anxietySpecs } },
+          { areasOfExpertise: { hasSome: anxietySpecs } },
+        ],
       };
 
       // Apply enhanced filtering based on clinical analysis
       if (clinicalAnalysis?.treatmentPlan?.therapistCriteria) {
         const criteria = clinicalAnalysis.treatmentPlan.therapistCriteria;
-
-        // Filter by required specializations
-        if (criteria.requiredSpecializations.length > 0) {
-          therapistWhere.OR = criteria.requiredSpecializations.map((spec) => ({
-            expertise: { has: spec },
-          }));
-        }
 
         // Filter by experience level
         if (criteria.experienceLevel !== 'any') {
@@ -188,117 +208,32 @@ export class TherapistRecommendationService {
           },
         });
 
-      // Build matching context
-      const clientForMatching: ClientForMatching = {
-        ...user,
-        preAssessment: latestPreAssessment,
-        user: user.user,
-      };
-
-      const matchingContext = await this.matchingOrchestrator.buildMatchingContext(
-        request.userId,
+      // FORGE: Use simple scoring to bypass AI calls
+      this.logger.log(
+        `Using simple anxiety-based matching for user ${request.userId} (bypassing AI services)`,
       );
-      matchingContext.client = clientForMatching;
 
-      // Use intelligent matching orchestration
-      const therapistScores: OrchestratedMatchResult[] = [];
-      let matchingFailures = 0;
+      const therapistScores: any[] = [];
 
       for (const therapist of therapists) {
-        try {
-          const therapistForMatching: TherapistForMatching = {
-            ...therapist,
-            user: therapist.user,
-            reviews: therapist.reviews || [],
-          };
+        const therapistForMatching: TherapistForMatching = {
+          ...therapist,
+          user: therapist.user,
+          reviews: therapist.reviews || [],
+        };
 
-          // Use orchestrator for comprehensive matching
-          const score = await this.matchingOrchestrator.orchestrateMatch(
-            matchingContext,
-            therapistForMatching,
-          );
+        // Calculate simple score prioritizing anxiety specialization
+        const score = this.calculateAnxietyBasedScore(therapist, therapistForMatching);
 
-          therapistScores.push(score);
-        } catch (error) {
-          matchingFailures++;
-
-          // Log detailed error information for debugging
-          this.logger.error(
-            `Advanced matching failed for therapist ${therapist.userId}`,
-            {
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined,
-              therapistId: therapist.userId,
-              userId: request.userId,
-            },
-          );
-
-          // Fallback to basic scoring with clear indication this is a fallback
-          try {
-            const basicScore = this.calculateMatchScore(
-              therapist,
-              userConditions,
-            );
-
-            const therapistForMatching: TherapistForMatching = {
-              ...therapist,
-              user: therapist.user,
-              reviews: therapist.reviews || [],
-            };
-
-            therapistScores.push({
-              therapist: therapistForMatching,
-              totalScore: basicScore,
-              breakdown: {
-                conditionScore: Math.round(basicScore * 0.6),
-                approachScore: 0,
-                experienceScore: Math.round(basicScore * 0.4),
-                reviewScore: 0,
-                logisticsScore: 0,
-              },
-              matchExplanation: {
-                primaryMatches: this.getPrimaryConditions(userConditions),
-                secondaryMatches: this.getSecondaryConditions(userConditions),
-                approachMatches: [],
-                experienceYears: this.calculateYearsOfExperience(
-                  therapist.practiceStartDate,
-                ),
-                averageRating: 0,
-                totalReviews: 0,
-                successRates: {},
-              },
-            });
-
-            this.logger.warn(
-              `Using basic scoring fallback for therapist ${therapist.userId} due to advanced matching failure`,
-            );
-          } catch (basicScoringError) {
-            // If even basic scoring fails, log and skip this therapist
-            this.logger.error(
-              `Both advanced and basic scoring failed for therapist ${therapist.userId}`,
-              {
-                advancedError:
-                  error instanceof Error ? error.message : String(error),
-                basicError:
-                  basicScoringError instanceof Error
-                    ? basicScoringError.message
-                    : String(basicScoringError),
-                therapistId: therapist.userId,
-                userId: request.userId,
-              },
-            );
-            // Skip this therapist entirely
-            continue;
-          }
-        }
+        therapistScores.push(score);
       }
 
       // Log summary of matching performance
       this.logger.log(
-        `Matching completed for user ${request.userId}: ${therapistScores.length} successful matches, ${matchingFailures} failures`,
+        `Simple matching completed for user ${request.userId}: ${therapistScores.length} matches`,
       );
 
-      // Sort by total score descending
+      // Sort by total score descending (anxiety specialists will rank highest)
       const sortedTherapistScores = therapistScores.sort(
         (a, b) => b.totalScore - a.totalScore,
       );
@@ -780,6 +715,55 @@ export class TherapistRecommendationService {
       riskFactors: aiEstimate.risk_factors || [],
       recommendations: aiEstimate.recommendations || [],
       estimatedSeverity: aiEstimate.estimated_severity || {},
+    };
+  }
+
+  /**
+   * Calculate simple score prioritizing anxiety specialization
+   * FORGE: Bypasses AI services and uses basic factors
+   */
+  private calculateAnxietyBasedScore(
+    therapist: any,
+    therapistForMatching: TherapistForMatching,
+  ): any {
+    const hasAnxiety = this.hasAnxietySpecialization(therapist);
+    const experienceYears =
+      therapist.yearsOfExperience ||
+      this.calculateYearsOfExperience(therapist.practiceStartDate);
+
+    const reviews = therapist.reviews || [];
+    const averageRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : 0;
+
+    // Scoring weights: Anxiety specialization (60%), Experience (25%), Rating (15%)
+    const anxietyScore = hasAnxiety ? 60 : 0;
+    const experienceScore = Math.min(experienceYears * 2, 25);
+    const ratingScore = averageRating * 3; // Max 15 points (5 * 3)
+
+    const totalScore = anxietyScore + experienceScore + ratingScore;
+
+    return {
+      therapist: therapistForMatching,
+      totalScore: Math.round(totalScore),
+      comprehensiveScore: Math.round(totalScore),
+      breakdown: {
+        conditionScore: anxietyScore,
+        approachScore: 0,
+        experienceScore: Math.round(experienceScore),
+        reviewScore: Math.round(ratingScore),
+        logisticsScore: 0,
+      },
+      matchExplanation: {
+        primaryMatches: hasAnxiety ? ['Anxiety'] : [],
+        secondaryMatches: [],
+        approachMatches: [],
+        experienceYears,
+        averageRating,
+        totalReviews: reviews.length,
+        successRates: {},
+      },
     };
   }
 

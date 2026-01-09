@@ -4,6 +4,9 @@ import { PreAssessmentController } from './pre-assessment.controller';
 import { PreAssessmentService } from './pre-assessment.service';
 import { AiServiceClient } from './services/ai-service.client';
 import { GeminiClientService } from './services/gemini-client.service';
+import { OllamaClientService } from './services/ollama-client.service';
+import { SambaNovaClientService } from './services/sambanova-client.service';
+import { AiProviderFactory } from './services/ai-provider.factory';
 import { PreAssessmentChatbotService } from './services/pre-assessment-chatbot.service';
 import { QuestionnaireSelectorService } from './services/questionnaire-selector.service';
 import { QuestionnaireFormGeneratorService } from './services/questionnaire-form-generator.service';
@@ -20,6 +23,9 @@ import { TherapeuticRecommendationsService } from './analysis/therapeutic-recomm
     PreAssessmentService,
     AiServiceClient,
     GeminiClientService,
+    OllamaClientService,
+    SambaNovaClientService,
+    AiProviderFactory,
     PreAssessmentChatbotService,
     QuestionnaireSelectorService,
     QuestionnaireFormGeneratorService,
@@ -33,6 +39,9 @@ import { TherapeuticRecommendationsService } from './analysis/therapeutic-recomm
     PreAssessmentService,
     AiServiceClient,
     GeminiClientService,
+    OllamaClientService,
+    SambaNovaClientService,
+    AiProviderFactory,
     PreAssessmentChatbotService,
     QuestionnaireSelectorService,
     QuestionnaireFormGeneratorService,

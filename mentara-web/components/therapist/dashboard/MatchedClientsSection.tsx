@@ -16,11 +16,13 @@ import {
   RefreshCw,
   TrendingUp,
   Activity,
+  ArrowRight,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { QuickAssignButton } from "../worksheets/WorksheetAssignmentDialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface MatchedClient {
   relationshipId: string;
@@ -144,11 +146,14 @@ export function MatchedClientsSection() {
     );
   }
 
-  const matchedData = data as MatchedClientsData;
-  const { recentMatches, allMatches, summary } = matchedData || {
-    recentMatches: [],
-    allMatches: [],
-    summary: { totalRecentMatches: 0, totalAllMatches: 0, totalMatches: 0 },
+  const matchedData = data as MatchedClientsData | undefined;
+  const { recentMatches = [], allMatches = [], summary } = matchedData || {};
+  
+  // Provide safe defaults for summary
+  const safeSummary = summary || {
+    totalRecentMatches: 0,
+    totalAllMatches: 0,
+    totalMatches: 0,
   };
 
   const handleViewAllMatches = () => {
@@ -164,106 +169,137 @@ export function MatchedClientsSection() {
 
   return (
     <div className="space-y-6">
-      {/* Enhanced Summary Cards with professional healthcare theme */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="bg-white border-2 hover:border-secondary/30 hover:shadow-lg transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-secondary p-3 rounded-xl shadow-sm">
-                <UserCheck className="h-5 w-5 text-secondary-foreground" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700">
-                  Recent Matches
-                </p>
-                <p className="text-xs text-gray-500 mb-1">Last 30 days</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {summary.totalRecentMatches}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-2 hover:border-secondary/30 hover:shadow-lg transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-secondary/80 p-3 rounded-xl shadow-sm">
-                <Users className="h-5 w-5 text-secondary-foreground" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700">
-                  Total Clients
-                </p>
-                <p className="text-xs text-gray-500 mb-1">All time</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {summary.totalMatches}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-2 hover:border-secondary/30 hover:shadow-lg transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-secondary/60 p-3 rounded-xl shadow-sm">
-                <Activity className="h-5 w-5 text-secondary-foreground" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700">Active Rate</p>
-                <p className="text-xs text-gray-500 mb-1">Client engagement</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {summary.totalMatches > 0
-                    ? Math.round(
-                        (summary.totalRecentMatches / summary.totalMatches) *
-                          100
-                      )
-                    : 0}
-                  %
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Enhanced Recent Matches Section */}
-      {recentMatches.length > 0 && (
-        <Card className="bg-white border-gray-200">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-secondary p-2 rounded-lg">
-                  <UserCheck className="h-5 w-5 text-secondary-foreground" />
+      {/* Enhanced Summary Cards with gradients and animations */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        <motion.div
+          whileHover={{ scale: 1.02, y: -4 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20 hover:shadow-lg transition-all duration-300 h-full">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-secondary/10 rounded-xl group-hover:bg-secondary/20 transition-colors">
+                  <UserCheck className="h-5 w-5 text-secondary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Recent Client Matches
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    New connections from the last 30 days
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Recent Matches
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">Last 30 days</p>
+                  <p className="text-2xl font-bold text-secondary">
+                    {safeSummary.totalRecentMatches}
                   </p>
                 </div>
               </div>
-              <Badge
-                variant="secondary"
-                className="bg-secondary/10 text-secondary border-secondary/30"
-              >
-                {recentMatches.length} new
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-4">
-            {recentMatches.slice(0, 4).map((match) => (
-              <div
-                key={match.relationshipId}
-                className={cn(
-                  "group flex items-center justify-between p-4 rounded-xl border transition-all duration-300",
-                  "bg-white hover:bg-gradient-to-r hover:from-secondary/5 hover:to-white",
-                  "border-slate-200 hover:border-secondary/30 hover:shadow-md"
-                )}
-              >
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          whileHover={{ scale: 1.02, y: -4 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20 hover:shadow-lg transition-all duration-300 h-full">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-secondary/10 rounded-xl group-hover:bg-secondary/20 transition-colors">
+                  <Users className="h-5 w-5 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Clients
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">All time</p>
+                  <p className="text-2xl font-bold text-secondary">
+                    {safeSummary.totalMatches}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          whileHover={{ scale: 1.02, y: -4 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20 hover:shadow-lg transition-all duration-300 h-full">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-secondary/10 rounded-xl group-hover:bg-secondary/20 transition-colors">
+                  <Activity className="h-5 w-5 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Active Rate</p>
+                  <p className="text-xs text-muted-foreground mb-1">Client engagement</p>
+                  <p className="text-2xl font-bold text-secondary">
+                    {safeSummary.totalMatches > 0
+                      ? Math.round(
+                          (safeSummary.totalRecentMatches / safeSummary.totalMatches) *
+                            100
+                        )
+                      : 0}
+                    %
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+
+      {/* Enhanced Recent Matches Section */}
+      {recentMatches.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="shadow-sm hover:shadow-md transition-shadow overflow-hidden border-border/50">
+            <div className="bg-gradient-to-br from-secondary/10 via-secondary/5 to-secondary/5 px-4 sm:px-5 py-4 border-b border-border/50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="h-5 w-5 text-secondary" />
+                  <h2 className="text-lg font-bold">Recent Client Matches</h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="secondary"
+                    className="bg-secondary/10 text-secondary border-secondary/30"
+                  >
+                    {recentMatches.length} new
+                  </Badge>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-secondary hover:text-secondary/80 hover:bg-secondary/10 gap-1"
+                      onClick={handleViewAllMatches}
+                    >
+                      View All <ArrowRight size={16} />
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+            <CardContent className="p-4 sm:p-5 space-y-4">
+              {recentMatches.slice(0, 4).map((match, index) => (
+                <motion.div
+                  key={match.relationshipId}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02, x: 4 }}
+                  className={cn(
+                    "group flex items-center justify-between p-4 rounded-xl border transition-all duration-300 cursor-pointer",
+                    "bg-white hover:bg-gradient-to-r hover:from-secondary/5 hover:to-white",
+                    "border-slate-200 hover:border-secondary/30 hover:shadow-md"
+                  )}
+                >
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <Avatar className="h-12 w-12 ring-2 ring-secondary/20 group-hover:ring-secondary/40 transition-all">
@@ -333,14 +369,15 @@ export function MatchedClientsSection() {
                     Schedule
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
       {/* Enhanced Empty State */}
-      {summary.totalMatches === 0 && (
+      {safeSummary.totalMatches === 0 && (
         <Card className="bg-white border-gray-200">
           <CardContent className="p-12 text-center">
             <div className="bg-gradient-to-br from-secondary/20 to-secondary/10 p-6 rounded-2xl w-fit mx-auto mb-6 shadow-sm">

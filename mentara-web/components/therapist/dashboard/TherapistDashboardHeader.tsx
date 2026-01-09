@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useMemo, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,9 @@ import {
   Moon, 
   Cloud,
   TrendingUp,
-  Briefcase
+  Briefcase,
+  Heart,
+  Sparkles
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getInitials } from "@/lib/utils/common";
@@ -25,152 +27,230 @@ interface TherapistDashboardHeaderProps {
     specializations?: string[];
   };
   onViewSchedule?: () => void;
+  stats?: {
+    activePatients?: number;
+    todayAppointments?: number;
+    practiceGrowth?: number;
+  };
 }
 
-export default function TherapistDashboardHeader({
+function TherapistDashboardHeader({
   therapist,
   onViewSchedule,
+  stats,
 }: TherapistDashboardHeaderProps) {
-  // Get current time to display appropriate greeting and theme
-  const currentHour = new Date().getHours();
-  let greeting = "Good morning";
-  let timeIcon = <Sun className="h-5 w-5" />;
-  let gradientFrom = "from-amber-500/20";
-  let gradientVia = "via-orange-500/10";
-  let gradientTo = "to-yellow-500/20";
-  let emoji = "☀️";
+  // Memoize greeting and theme based on current hour
+  const { greeting, timeIcon, gradientFrom, gradientVia, gradientTo, emoji } = useMemo(() => {
+    const currentHour = new Date().getHours();
+    if (currentHour >= 12 && currentHour < 18) {
+      return {
+        greeting: "Good afternoon",
+        timeIcon: <Cloud className="h-5 w-5" />,
+        gradientFrom: "from-secondary/20",
+        gradientVia: "via-secondary/10",
+        gradientTo: "to-secondary/5",
+        emoji: "🌤️"
+      };
+    } else if (currentHour >= 18) {
+      return {
+        greeting: "Good evening",
+        timeIcon: <Moon className="h-5 w-5" />,
+        gradientFrom: "from-secondary/30",
+        gradientVia: "via-secondary/15",
+        gradientTo: "to-secondary/5",
+        emoji: "🌙"
+      };
+    }
+    return {
+      greeting: "Good morning",
+      timeIcon: <Sun className="h-5 w-5" />,
+      gradientFrom: "from-secondary/20",
+      gradientVia: "via-secondary/10",
+      gradientTo: "to-secondary/5",
+      emoji: "☀️"
+    };
+  }, []);
 
-  if (currentHour >= 12 && currentHour < 18) {
-    greeting = "Good afternoon";
-    timeIcon = <Cloud className="h-5 w-5" />;
-    gradientFrom = "from-secondary/20";
-    gradientVia = "via-secondary/10";
-    gradientTo = "to-secondary/5";
-    emoji = "🌤️";
-  } else if (currentHour >= 18) {
-    greeting = "Good evening";
-    timeIcon = <Moon className="h-5 w-5" />;
-    gradientFrom = "from-gray-700/20";
-    gradientVia = "via-gray-600/10";
-    gradientTo = "to-gray-500/20";
-    emoji = "🌙";
-  }
+  // Memoize today's inspirational quote for therapists
+  const todaysQuote = useMemo(() => {
+    const inspirationalQuotes = [
+      "Making a difference, one session at a time 💙",
+      "Your expertise transforms lives every day ✨",
+      "Empowering others through compassionate care 🌱",
+      "Every conversation is a step toward healing 🚀",
+      "Your dedication creates lasting positive change 💪"
+    ];
+    return inspirationalQuotes[new Date().getDay() % inspirationalQuotes.length];
+  }, []);
 
-  const therapistName = `Dr. ${therapist.firstName} ${therapist.lastName}`;
+  const therapistName = `${therapist.firstName} ${therapist.lastName}`;
   const initials = getInitials(therapist.firstName, therapist.lastName);
+
+  // Memoize callbacks
+  const handleViewSchedule = useCallback(() => {
+    onViewSchedule?.();
+  }, [onViewSchedule]);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradientFrom} ${gradientVia} ${gradientTo} border border-secondary/20 shadow-lg`}
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradientFrom} ${gradientVia} ${gradientTo} border border-border/50 shadow-lg`}
     >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      
-      <div className="relative p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          {/* User Info Section */}
-          <div className="flex items-start gap-4 sm:gap-6">
-            {/* Avatar with Ring */}
+      {/* Decorative background pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 20px 20px, currentColor 1px, transparent 1px)`,
+          backgroundSize: '40px 40px'
+        }} />
+      </div>
+
+      {/* Floating decoration elements */}
+      <motion.div
+        className="absolute top-4 right-4 text-6xl opacity-10"
+        animate={{ 
+          rotate: [0, 10, 0],
+          scale: [1, 1.1, 1]
+        }}
+        transition={{ 
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        {emoji}
+      </motion.div>
+
+      <div className="relative p-6 md:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          {/* Left Section - Therapist Info */}
+          <div className="flex items-start gap-4 flex-1">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400 }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
               <div className="relative">
-                <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-white shadow-xl ring-2 ring-secondary/20">
-                  <AvatarImage src={therapist.avatarUrl} className="object-cover" />
-                  <AvatarFallback className="bg-gradient-to-br from-secondary to-secondary/80 text-secondary-foreground text-2xl font-bold">
+                <Avatar className="h-20 w-20 border-4 border-background shadow-xl ring-2 ring-secondary/20">
+                  <AvatarImage src={therapist.avatarUrl} loading="lazy" />
+                  <AvatarFallback className="text-2xl bg-gradient-to-br from-secondary to-secondary/70 text-secondary-foreground">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 {/* Professional Badge */}
                 <div className="absolute -bottom-2 -right-2">
-                  <Badge className="bg-green-500 text-white border-2 border-white shadow-md">
+                  <Badge className="bg-green-500 text-white border-2 border-background shadow-md">
                     <div className="w-2 h-2 bg-white rounded-full mr-1.5 animate-pulse"></div>
                     Active
                   </Badge>
                 </div>
               </div>
             </motion.div>
-
-            {/* Greeting and Info */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-2xl">{emoji}</span>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {greeting}, {therapist.firstName}!
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                {timeIcon}
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                  {greeting}, {therapist.firstName}
                 </h1>
               </div>
               
-              <p className="text-gray-600 text-base mb-3">
-                Welcome to your practice dashboard
+              <p className="text-muted-foreground text-base mb-3">
+                {todaysQuote}
               </p>
 
-              {/* Specializations */}
-              {therapist.specializations && therapist.specializations.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {therapist.specializations.slice(0, 3).map((spec, idx) => (
+              {/* Quick Stats Badges */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                {stats?.activePatients !== undefined && (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="cursor-pointer"
+                  >
                     <Badge 
-                      key={idx} 
                       variant="secondary" 
-                      className="bg-secondary/10 text-secondary border-secondary/30 text-xs"
+                      className="px-3 py-1.5 bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/30 hover:from-secondary/20 hover:to-secondary/10 transition-all"
                     >
-                      {spec}
+                      <Users className="h-3.5 w-3.5 mr-1 text-secondary" />
+                      <span className="font-semibold text-secondary">{stats.activePatients} active patients</span>
                     </Badge>
-                  ))}
-                  {therapist.specializations.length > 3 && (
-                    <Badge variant="secondary" className="bg-gray-100 text-gray-600 text-xs">
-                      +{therapist.specializations.length - 3} more
+                  </motion.div>
+                )}
+
+                {stats?.todayAppointments !== undefined && (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="cursor-pointer"
+                  >
+                    <Badge 
+                      variant="secondary" 
+                      className="px-3 py-1.5 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-200 hover:from-blue-500/20 hover:to-cyan-500/20 transition-all"
+                    >
+                      <Calendar className="h-3.5 w-3.5 mr-1 text-blue-600" />
+                      <span className="font-semibold text-blue-700">{stats.todayAppointments} today</span>
                     </Badge>
-                  )}
-                </div>
-              )}
+                  </motion.div>
+                )}
+
+                {stats?.practiceGrowth !== undefined && (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="cursor-pointer"
+                  >
+                    <Badge 
+                      variant="secondary" 
+                      className="px-3 py-1.5 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-200 hover:from-green-500/20 hover:to-emerald-500/20 transition-all"
+                    >
+                      <TrendingUp className="h-3.5 w-3.5 mr-1 text-green-600" />
+                      <span className="font-semibold text-green-700">+{stats.practiceGrowth}% growth</span>
+                    </Badge>
+                  </motion.div>
+                )}
+
+                {therapist.specializations && therapist.specializations.length > 0 && (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="cursor-pointer"
+                  >
+                    <Badge 
+                      variant="secondary" 
+                      className="px-3 py-1.5 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-200 hover:from-purple-500/20 hover:to-pink-500/20 transition-all"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-1 text-purple-600" />
+                      <span className="font-semibold text-purple-700">{therapist.specializations.length} specializations</span>
+                    </Badge>
+                  </motion.div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex flex-col gap-3 sm:items-end">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
+          {/* Right Section - Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 lg:flex-col lg:w-auto">
+            <motion.button
+              whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleViewSchedule}
+              className="px-6 py-3.5 bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground rounded-xl hover:from-secondary/90 hover:to-secondary/80 transition-all shadow-lg hover:shadow-xl font-semibold flex items-center justify-center gap-2 group"
             >
-              <Button 
-                size="lg" 
-                onClick={onViewSchedule}
-                className="w-full sm:w-auto bg-secondary hover:bg-secondary/90 shadow-md hover:shadow-lg transition-all"
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                View Schedule
-              </Button>
-            </motion.div>
-
-            {/* Practice Stats Summary */}
-            <div className="flex gap-4 sm:gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-secondary/10 rounded-lg">
-                  <Users className="h-4 w-4 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Practice</p>
-                  <p className="font-semibold text-gray-900">Growing</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-secondary/10 rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Today</p>
-                  <p className="font-semibold text-gray-900">On Track</p>
-                </div>
-              </div>
-            </div>
+              <Calendar className="h-5 w-5 group-hover:rotate-12 transition-transform" />
+              View Schedule
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-6 py-3.5 bg-background/80 backdrop-blur-sm border-2 border-border hover:border-secondary/50 text-foreground rounded-xl hover:bg-background transition-all font-semibold flex items-center justify-center gap-2 group shadow-sm"
+            >
+              <MessageSquare className="h-5 w-5 group-hover:rotate-12 transition-transform" />
+              Messages
+            </motion.button>
           </div>
         </div>
       </div>
     </motion.div>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export default memo(TherapistDashboardHeader);
 

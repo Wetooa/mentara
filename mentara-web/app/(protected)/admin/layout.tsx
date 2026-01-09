@@ -9,11 +9,24 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
 import Image from "next/image";
 import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
+
+// Lazy load heavy floating tools component
+const FloatingToolsButton = dynamic(
+  () =>
+    import("@/components/microservices/FloatingToolsButton").then((mod) => ({
+      default: mod.FloatingToolsButton,
+    })),
+  {
+    ssr: false,
+    loading: () => null, // No loading indicator for floating button
+  }
+);
 
 export default function AdminLayout({
   children,
@@ -268,6 +281,9 @@ export default function AdminLayout({
 
         {/* Video Call Notifications - Fixed position in upper right */}
         <IncomingCallNotificationContainer />
+
+        {/* Floating Tools Button - Available on all pages */}
+        <FloatingToolsButton />
 
         {/* Mobile Bottom Navigation */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 shadow-lg">

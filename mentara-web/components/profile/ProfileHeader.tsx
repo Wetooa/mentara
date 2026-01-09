@@ -56,7 +56,7 @@ export function ProfileHeader({
   return (
     <Card className="overflow-hidden">
       {/* Cover Image */}
-      <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
+      <div className="relative h-48 bg-gray-100">
         {user.coverImageUrl && (
           <img
             src={user.coverImageUrl}
@@ -65,7 +65,7 @@ export function ProfileHeader({
           />
         )}
         {!user.coverImageUrl && (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/80 to-purple-600/80" />
+          <div className="absolute inset-0 bg-gray-100" />
         )}
       </div>
 

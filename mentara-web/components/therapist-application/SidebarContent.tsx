@@ -1,12 +1,12 @@
 "use client";
 
 import React, { memo } from "react";
-import Image from "next/image";
 import { CheckCircle, ChevronDown, ChevronRight, X } from "lucide-react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { MentaraLogo } from "@/components/common/MentaraLogo";
 
 interface Section {
   id: string;
@@ -48,11 +48,12 @@ export const SidebarContent = memo(function SidebarContent({
   return (
     <>
       <div className="mb-8">
-        <Image
-          src="/icons/mentara/mentara-landscape.png"
-          alt="Mentara logo"
+        <MentaraLogo
+          href="/about"
+          variant="landscape"
           width={250}
           height={100}
+          showGradient={true}
         />
       </div>
 

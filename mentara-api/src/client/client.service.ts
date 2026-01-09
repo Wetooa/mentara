@@ -330,6 +330,78 @@ export class ClientService {
     });
   }
 
+  async disconnectTherapist(
+    userId: string,
+    therapistId: string,
+  ): Promise<void> {
+    try {
+      // Check if client exists
+      const client = await this.prisma.client.findUnique({
+        where: { userId },
+      });
+      if (!client) {
+        this.logger.warn(`Client not found for disconnect, userId: ${userId}`);
+        throw new NotFoundException('Client not found');
+      }
+
+      // Find the specific relationship
+      const relationship = await this.prisma.clientTherapist.findUnique({
+        where: {
+          clientId_therapistId: {
+            clientId: userId,
+            therapistId: therapistId,
+          },
+        },
+      });
+
+      if (!relationship) {
+        this.logger.warn(
+          `Relationship not found for client ${userId} and therapist ${therapistId}`,
+        );
+        throw new NotFoundException(
+          'Therapist relationship not found',
+        );
+      }
+
+      if (relationship.status !== 'active') {
+        throw new BadRequestException(
+          'Therapist relationship is not active',
+        );
+      }
+
+      // Set relationship status to inactive (soft delete)
+      await this.prisma.clientTherapist.update({
+        where: { id: relationship.id },
+        data: { status: 'inactive' },
+      });
+
+      this.logger.log(
+        `Successfully disconnected client ${userId} from therapist ${therapistId}`,
+      );
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        this.logger.error(
+          `Database error in disconnectTherapist: ${error.code} - ${error.message}`,
+        );
+        throw new InternalServerErrorException(
+          'Failed to disconnect therapist',
+        );
+      }
+
+      this.logger.error(
+        `Unexpected error in disconnectTherapist: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
+  }
+
   async getPendingTherapistRequests(
     userId: string,
   ): Promise<TherapistRecommendation[]> {

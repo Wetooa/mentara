@@ -237,7 +237,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
             defaultSize={20}
             minSize={15}
             maxSize={35}
-            className="min-w-[240px]"
+            className="min-w-[180px]"
           >
             <CommunitySidebar
               selectedCommunityId={selectedCommunityId}

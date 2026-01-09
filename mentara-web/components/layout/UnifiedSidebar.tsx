@@ -183,11 +183,13 @@ export function UnifiedSidebar({
         aria-label="Navigation menu"
       >
         {navItems.map((item) => {
-          // Special handling for dashboard - only match exact path or /client/
+          // Special handling for dashboard - only match exact path or /client/ or /therapist/
           // Other routes match if pathname starts with the item path
           const isActive =
             item.path === "/client"
               ? pathname === "/client" || pathname === "/client/"
+              : item.path === "/therapist"
+              ? pathname === "/therapist" || pathname === "/therapist/"
               : pathname === item.path || pathname.startsWith(`${item.path}/`);
 
           return (

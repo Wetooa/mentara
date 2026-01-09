@@ -18,6 +18,16 @@ import {
   UserMinus,
 } from "lucide-react";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   usePatientsList,
   usePatientsRequests,
   useAcceptPatientRequest,
@@ -130,6 +140,9 @@ export default function PatientsLayout({
 
   // Client Card Components - Redesigned
   const MyPatientCard = ({ patient }: { patient: any }) => {
+    const [showDisconnectDialog, setShowDisconnectDialog] = React.useState(false);
+    const removePatientMutation = useRemovePatient();
+    
     const isActive = pathname.includes(`/patients/${patient.userId}`);
     const patientName = `${patient.user?.firstName || ""} ${patient.user?.lastName || ""}`;
     const daysSinceAssigned = Math.floor(
@@ -140,15 +153,24 @@ export default function PatientsLayout({
       ? new Date(patient.user.lastLoginAt)
       : null;
 
+    const handleDisconnect = () => {
+      removePatientMutation.mutate(patient.userId, {
+        onSuccess: () => {
+          setShowDisconnectDialog(false);
+        },
+      });
+    };
+
     return (
-      <Link href={`/therapist/patients/${patient.userId}`}>
-        <div
-          className={`group p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-            isActive
-              ? "bg-secondary/10 border-secondary shadow-md"
-              : "bg-white border-gray-200 hover:border-secondary/30 hover:shadow-lg"
-          }`}
-        >
+      <>
+        <Link href={`/therapist/patients/${patient.userId}`}>
+          <div
+            className={`group p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
+              isActive
+                ? "bg-secondary/10 border-secondary shadow-md"
+                : "bg-white border-gray-200 hover:border-secondary/30 hover:shadow-lg"
+            }`}
+          >
           {/* Header with Avatar */}
           <div className="flex items-start gap-4 mb-4">
             <div className="relative">
@@ -221,34 +243,72 @@ export default function PatientsLayout({
           )}
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(`/therapist/messages?contact=${patient.userId}`);
+                }}
+              >
+                <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+                Message
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(`/therapist/schedule?client=${patient.userId}`);
+                }}
+              >
+                <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                Schedule
+              </Button>
+            </div>
             <Button
               size="sm"
-              variant="outline"
-              className="text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
+              variant="destructive"
+              className="w-full text-xs"
               onClick={(e) => {
                 e.preventDefault();
-                router.push(`/therapist/messages?contact=${patient.userId}`);
+                setShowDisconnectDialog(true);
               }}
+              disabled={removePatientMutation.isPending}
             >
-              <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
-              Message
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-xs hover:bg-secondary/10 hover:border-secondary/30 hover:text-secondary"
-              onClick={(e) => {
-                e.preventDefault();
-                router.push(`/therapist/schedule?client=${patient.userId}`);
-              }}
-            >
-              <Calendar className="w-3.5 h-3.5 mr-1.5" />
-              Schedule
+              <UserX className="w-3.5 h-3.5 mr-1.5" />
+              {removePatientMutation.isPending ? "Disconnecting..." : "Disconnect"}
             </Button>
           </div>
         </div>
       </Link>
+
+      {/* Disconnect Confirmation Dialog */}
+      <AlertDialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect from Client?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to disconnect from {patientName}? This action will end your therapeutic relationship. You can reconnect later if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removePatientMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDisconnect}
+              disabled={removePatientMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {removePatientMutation.isPending ? "Disconnecting..." : "Disconnect"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
     );
   };
 

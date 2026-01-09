@@ -147,8 +147,10 @@ export default function TherapistLayout({
               <div className="space-y-2">
                 {navItems.map((item) => {
                   const isActive =
-                    pathname === item.path ||
-                    pathname.startsWith(`${item.path}/`);
+                    item.path === "/therapist"
+                      ? pathname === "/therapist" || pathname === "/therapist/"
+                      : pathname === item.path ||
+                        pathname.startsWith(`${item.path}/`);
                   return (
                     <Link
                       key={item.id}
@@ -316,7 +318,9 @@ export default function TherapistLayout({
           <div className="flex items-center justify-around py-2">
             {navItems.slice(0, 5).map((item) => {
               const isActive =
-                pathname === item.path || pathname.startsWith(`${item.path}/`);
+                item.path === "/therapist"
+                  ? pathname === "/therapist" || pathname === "/therapist/"
+                  : pathname === item.path || pathname.startsWith(`${item.path}/`);
               return (
                 <Link
                   key={item.id}
@@ -357,10 +361,8 @@ export default function TherapistLayout({
         </nav>
       </div>
 
-      {/* Floating Tools Button - Available on most pages except dashboard */}
-      {pathname !== "/therapist" && pathname !== "/therapist/" ? (
-        <FloatingToolsButton />
-      ) : null}
+      {/* Floating Tools Button - Available on all pages */}
+      <FloatingToolsButton />
     </div>
   );
 }

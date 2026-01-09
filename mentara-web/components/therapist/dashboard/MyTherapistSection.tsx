@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,10 +14,22 @@ import {
   Clock,
   Users,
   Search,
+  UserX,
+  X,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { THERAPIST_HOVER, THERAPIST_TAP } from "@/lib/animations";
 import { useRouter } from "next/navigation";
-import { useMyTherapists } from "@/hooks/therapist/useMyTherapists";
+import { useMyTherapists, useDisconnectTherapist } from "@/hooks/therapist/useMyTherapists";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TherapistRecommendation } from "@/types/api/therapist";
 
@@ -26,6 +38,9 @@ export interface ActiveTherapistCardProps {
   onViewProfile: (therapistId: string) => void;
   onMessage: (therapistId: string) => void;
   onSchedule: (therapistId: string) => void;
+  onDisconnect?: (therapistId: string) => void;
+  isDisconnecting?: boolean;
+  className?: string;
 }
 
 function ActiveTherapistCard({
@@ -33,10 +48,22 @@ function ActiveTherapistCard({
   onViewProfile,
   onMessage,
   onSchedule,
+  onDisconnect,
+  isDisconnecting = false,
+  className = "",
 }: ActiveTherapistCardProps) {
+  const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
+  
   // Generate therapist name and initials
   const therapistName = `Dr. ${therapist.firstName} ${therapist.lastName}`;
   const initials = `${therapist.firstName.charAt(0)}${therapist.lastName.charAt(0)}`;
+
+  const handleDisconnect = () => {
+    if (onDisconnect) {
+      onDisconnect(therapist.id);
+      setShowDisconnectDialog(false);
+    }
+  };
 
   return (
     <motion.div
@@ -77,7 +104,7 @@ function ActiveTherapistCard({
           </div>
 
           {/* Info Section */}
-          <div className="p-6 flex-1 flex flex-col">
+          <div className={`px-6 pb-6 flex-1 flex flex-col ${className}`}>
             {/* Name and Title */}
             <div className="mb-4">
               <h3 className="text-xl font-bold text-gray-900 mb-1">
@@ -156,7 +183,7 @@ function ActiveTherapistCard({
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule Session
               </Button>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <Button
                   variant="outline"
                   onClick={() => onMessage(therapist.id)}
@@ -173,11 +200,44 @@ function ActiveTherapistCard({
                   <User className="h-4 w-4 mr-2" />
                   Profile
                 </Button>
+                {onDisconnect && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => setShowDisconnectDialog(true)}
+                    className="bg-destructive/70 hover:bg-destructive/50"
+                    disabled={isDisconnecting}
+                    aria-label={isDisconnecting ? "Disconnecting..." : "Disconnect"}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Disconnect Confirmation Dialog */}
+      <AlertDialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect from Therapist?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to disconnect from {therapistName}? This action will end your therapeutic relationship. You can reconnect later if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDisconnecting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDisconnect}
+              disabled={isDisconnecting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDisconnecting ? "Disconnecting..." : "Disconnect"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }
@@ -294,6 +354,7 @@ function LoadingSkeleton() {
 export default function MyTherapistSection() {
   const router = useRouter();
   const { data: therapists, isLoading, error } = useMyTherapists();
+  const { disconnectTherapist, isLoading: isDisconnecting } = useDisconnectTherapist();
 
   const handleViewProfile = (therapistId: string) => {
     router.push(`/client/profile/${therapistId}`);
@@ -305,6 +366,10 @@ export default function MyTherapistSection() {
 
   const handleSchedule = (therapistId: string) => {
     router.push(`/client/booking?therapist=${encodeURIComponent(therapistId)}`);
+  };
+
+  const handleDisconnect = (therapistId: string) => {
+    disconnectTherapist(therapistId);
   };
 
   if (isLoading) {
@@ -384,6 +449,8 @@ export default function MyTherapistSection() {
                 onViewProfile={handleViewProfile}
                 onMessage={handleMessage}
                 onSchedule={handleSchedule}
+                onDisconnect={handleDisconnect}
+                isDisconnecting={isDisconnecting}
               />
             </motion.div>
           ))}

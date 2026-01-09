@@ -14,6 +14,7 @@ import { CheckCircle, Circle, Shield, FileText, Users, Clock, Save, Loader2 } fr
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 import Image from "next/image";
+import { MentaraLogo } from "@/components/common/MentaraLogo";
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
 import { useRouter } from "next/navigation";
@@ -311,11 +312,12 @@ export default function MentaraApplication() {
       {/* Left sidebar */}
       <div className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm">
         <div className="mb-8">
-          <Image
-            src="/icons/mentara/mentara-landscape.png"
-            alt="Mentara logo"
+          <MentaraLogo
+            href="/about"
+            variant="landscape"
             width={250}
             height={100}
+            showGradient={true}
           />
         </div>
         <div className="mt-4 mb-8">

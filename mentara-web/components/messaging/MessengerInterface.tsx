@@ -48,6 +48,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CrisisSupportButton } from "@/components/messaging/CrisisSupportButton";
 import { MoodSelector, getMoodEmoji, type Mood } from "@/components/messaging/MoodSelector";
 import { useMoodTracking } from "@/hooks/messaging/useMoodTracking";
+import { useApi } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
 import { QuickResponses } from "@/components/messaging/QuickResponses";
 import { SessionWorksheetActions } from "@/components/messaging/SessionWorksheetActions";
 import { WellnessQuickAccess } from "@/components/messaging/WellnessQuickAccess";
@@ -418,7 +421,7 @@ const ConversationItem = React.memo(({
       )}
       role="button"
       tabIndex={0}
-      aria-label={`Conversation with ${displayName}${conversation.unreadCount && conversation.unreadCount > 0 ? `, ${conversation.unreadCount} unread message${conversation.unreadCount > 1 ? 's' : ''}` : ''}`}
+      aria-label={`Conversation with ${displayName}${(conversation.unreadCount ?? 0) > 0 ? `, ${conversation.unreadCount} unread message${conversation.unreadCount! > 1 ? 's' : ''}` : ''}`}
       aria-pressed={isSelected}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -451,7 +454,7 @@ const ConversationItem = React.memo(({
         </div>
 
         <div className="flex items-center gap-2 mt-1 min-w-0">
-          <p className="text-sm text-muted-foreground truncate min-w-0" style={{ maxWidth: conversation.unreadCount && conversation.unreadCount > 0 ? 'calc(100% - 50px)' : '100%' }}>
+          <p className="text-sm text-muted-foreground truncate min-w-0" style={{ maxWidth: (conversation.unreadCount ?? 0) > 0 ? 'calc(100% - 50px)' : '100%' }}>
             {isTyping ? (
               <span className="text-primary italic">typing...</span>
             ) : conversation.lastMessage ? (
@@ -470,12 +473,12 @@ const ConversationItem = React.memo(({
               "No messages yet"
             )}
           </p>
-          {conversation.unreadCount && conversation.unreadCount > 0 && (
+          {(conversation.unreadCount ?? 0) > 0 && (
             <Badge
               variant="destructive"
               className="text-xs h-5 min-w-5 px-1.5 flex-shrink-0 whitespace-nowrap ml-auto"
             >
-              {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
+              {conversation.unreadCount! > 99 ? "99+" : conversation.unreadCount}
             </Badge>
           )}
         </div>
@@ -526,6 +529,8 @@ export function MessengerInterface({
   targetUserId,
 }: MessengerInterfaceProps) {
   const { user } = useAuth();
+  const api = useApi();
+  const queryClient = useQueryClient();
   
   // Use messaging store for selected conversation
   const { 
@@ -552,6 +557,8 @@ export function MessengerInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Track conversations being created to prevent validation from clearing them
+  const pendingConversationIdRef = useRef<string | null>(null);
 
   // Get conversations list
   const { conversations, isLoadingConversations, conversationsError } =
@@ -569,14 +576,8 @@ export function MessengerInterface({
     if (
       targetUserId &&
       conversations.length > 0 &&
-      !selectedConversationId &&
       !isStarting
     ) {
-      console.log(
-        "🔗 [DEEP LINK] Starting conversation with targetUserId:",
-        targetUserId
-      );
-
       // Check if conversation already exists
       const existingConversation = conversations.find(
         (conv) =>
@@ -584,33 +585,169 @@ export function MessengerInterface({
           conv.participants.some((p) => p.userId === targetUserId)
       );
 
-      if (existingConversation) {
+      // Check if the currently selected conversation matches the targetUserId
+      const selectedConversationMatches = selectedConversationId
+        ? existingConversation?.id === selectedConversationId
+        : false;
+
+      // Only proceed if we don't have a selected conversation that matches targetUserId
+      if (!selectedConversationMatches) {
         console.log(
-          "🔗 [DEEP LINK] Found existing conversation:",
-          existingConversation.id
-        );
-        setSelectedConversation(existingConversation.id);
-      } else {
-        console.log(
-          "🔗 [DEEP LINK] Creating new conversation with user:",
+          "🔗 [DEEP LINK] Starting conversation with targetUserId:",
           targetUserId
         );
-        startConversation(targetUserId, {
-          onSuccess: (conversation) => {
-            console.log(
-              "🔗 [DEEP LINK] Conversation created/found:",
-              conversation.id
-            );
-            setSelectedConversation(conversation.id);
-          },
-          onError: (error) => {
-            console.error(
-              "🔗 [DEEP LINK] Failed to start conversation:",
-              error
-            );
-            toast.error("Failed to start conversation");
-          },
-        });
+
+        // Clear any existing invalid selection first to prevent sending to wrong conversation
+        if (selectedConversationId && !conversations.some(conv => conv.id === selectedConversationId)) {
+          console.warn(
+            "⚠️ [DEEP LINK] Clearing invalid selected conversation before starting new one:",
+            selectedConversationId
+          );
+          setSelectedConversation(null);
+        }
+
+        if (existingConversation) {
+          console.log(
+            "🔗 [DEEP LINK] Found existing conversation:",
+            existingConversation.id
+          );
+          setSelectedConversation(existingConversation.id);
+        } else {
+          console.log(
+            "🔗 [DEEP LINK] Creating new conversation with user:",
+            targetUserId
+          );
+          // Create conversation directly via API and handle result
+          // Store the targetUserId in a local variable to check against in the promise handlers
+          const currentTargetUserId = targetUserId;
+          api.messaging.startDirectConversation(currentTargetUserId)
+            .then(async (conversation) => {
+              // Only set the conversation if we're still targeting the same user
+              // This prevents race conditions if targetUserId changes before the promise resolves
+              console.log(
+                "🔗 [DEEP LINK] Conversation created/found:",
+                conversation.id
+              );
+              
+              // Validate that the user is actually a participant before proceeding
+              const isParticipant = conversation.participants.some(
+                (p) => p.userId === user?.id
+              );
+              
+              if (!isParticipant) {
+                console.error(
+                  "🔗 [DEEP LINK] User is not a participant in the created conversation"
+                );
+                toast.error("Failed to join conversation. Please try again.");
+                pendingConversationIdRef.current = null;
+                return;
+              }
+              
+              // Update the conversations cache with the new conversation (optimistic update)
+              // Don't invalidate immediately - this causes the conversation to disappear
+              // because a refetch might happen before the backend transaction is fully committed.
+              // The cache update is sufficient, and React Query will naturally refetch when appropriate
+              // (e.g., on window focus, after staleTime expires, etc.)
+              if (!user?.id) return;
+              queryClient.setQueryData<MessagingConversation[]>(
+                queryKeys.messaging.conversations(user.id),
+                (old) => {
+                  if (!old) return [conversation];
+                  
+                  // Check if conversation already exists in cache
+                  const existingIndex = old.findIndex(
+                    (conv) => conv.id === conversation.id
+                  );
+                  
+                  if (existingIndex >= 0) {
+                    // Update existing conversation
+                    const updated = [...old];
+                    updated[existingIndex] = conversation;
+                    return updated;
+                  } else {
+                    // Add new conversation to the beginning
+                    return [conversation, ...old];
+                  }
+                }
+              );
+              
+              // Track this conversation as pending to prevent validation from clearing it
+              // This prevents race conditions where validation runs before the conversations array updates
+              pendingConversationIdRef.current = conversation.id;
+              
+              // Wait for the conversation to appear in the conversations list before selecting
+              // This ensures the backend transaction is fully committed
+              const maxWaitTime = 3000; // 3 seconds max wait
+              const checkInterval = 100; // Check every 100ms
+              let waited = 0;
+              
+              const waitForConversation = () => {
+                return new Promise<void>((resolve) => {
+                  const checkConversation = () => {
+                    // Check if conversation exists in the query cache
+                    if (!user?.id) return;
+                    const cachedConversations = queryClient.getQueryData<MessagingConversation[]>(
+                      queryKeys.messaging.conversations(user.id)
+                    );
+                    const conversationExists = cachedConversations?.some(
+                      (conv) => conv.id === conversation.id
+                    );
+                    
+                    if (conversationExists || waited >= maxWaitTime) {
+                      if (conversationExists) {
+                        console.log(
+                          "🔗 [DEEP LINK] Conversation confirmed in cache:",
+                          conversation.id
+                        );
+                      } else {
+                        console.warn(
+                          "🔗 [DEEP LINK] Timeout waiting for conversation in cache, proceeding anyway:",
+                          conversation.id
+                        );
+                      }
+                      resolve();
+                    } else {
+                      waited += checkInterval;
+                      setTimeout(checkConversation, checkInterval);
+                    }
+                  };
+                  checkConversation();
+                });
+              };
+              
+              // Wait for conversation to appear, then select it
+              await waitForConversation();
+              
+              // Add a small delay to ensure backend transaction is fully committed
+              // This helps prevent "not a participant" errors when fetching messages
+              await new Promise((resolve) => setTimeout(resolve, 500));
+              
+              // IMPORTANT: Set the selected conversation after waiting
+              // This ensures the backend transaction is committed before fetching messages
+              console.log(
+                "🔗 [DEEP LINK] Setting selected conversation after validation:",
+                conversation.id
+              );
+              setSelectedConversation(conversation.id);
+              
+              // Clear the pending flag after a short delay to allow the conversations array to update
+              // The validation effect will see the conversation in the array by then
+              setTimeout(() => {
+                if (pendingConversationIdRef.current === conversation.id) {
+                  pendingConversationIdRef.current = null;
+                }
+              }, 1000);
+            })
+            .catch((error) => {
+              console.error(
+                "🔗 [DEEP LINK] Failed to start conversation:",
+                error
+              );
+              // Clear pending flag on error
+              pendingConversationIdRef.current = null;
+              toast.error("Failed to start conversation");
+            });
+        }
       }
     }
   }, [
@@ -618,7 +755,9 @@ export function MessengerInterface({
     conversations,
     selectedConversationId,
     isStarting,
-    startConversation,
+    api.messaging,
+    setSelectedConversation,
+    queryClient,
   ]);
 
   // Enhanced logging for conversations data
@@ -644,17 +783,62 @@ export function MessengerInterface({
     }
   }, [conversations, isLoadingConversations, conversationsError, user]);
 
-  // Auto-select first conversation if none is selected and conversations are loaded
+  // Validate selected conversation ID and auto-select first conversation if needed
+  // This runs whenever conversations load to ensure the selected ID is always valid
   useEffect(() => {
-    if (
-      !selectedConversationId &&
-      conversations.length > 0 &&
-      !isLoadingConversations &&
-      !targetUserId // Don't auto-select if we're waiting for a target user
-    ) {
-      const firstConversation = conversations[0];
-      if (firstConversation) {
-        setSelectedConversation(firstConversation.id);
+    if (conversations.length > 0 && !isLoadingConversations) {
+      // Always validate the selected conversation ID when conversations are loaded
+      // This ensures stale/invalid IDs are cleared immediately to prevent 403 errors
+      if (selectedConversationId) {
+        // Skip validation if this is a pending conversation being created
+        // This prevents race conditions where validation runs before the conversations array updates
+        if (pendingConversationIdRef.current === selectedConversationId) {
+          console.log(
+            "⏳ [MESSAGING] Skipping validation for pending conversation:",
+            selectedConversationId
+          );
+          return;
+        }
+        
+        // Skip validation if we're currently processing a targetUserId
+        // This prevents clearing the selection during conversation creation
+        if (targetUserId) {
+          console.log(
+            "⏳ [MESSAGING] Skipping validation while processing targetUserId:",
+            targetUserId
+          );
+          return;
+        }
+        
+        const isValidConversation = conversations.some(
+          (conv) => conv.id === selectedConversationId
+        );
+        if (!isValidConversation) {
+          // Selected conversation is no longer valid (user not a participant, deleted, etc.)
+          // Clear the invalid selection immediately to prevent sending messages to wrong conversation
+          console.warn(
+            "⚠️ [MESSAGING] Selected conversation ID is invalid, clearing selection:",
+            selectedConversationId,
+            "Available conversations:",
+            conversations.map(c => c.id)
+          );
+          setSelectedConversation(null);
+          // Don't auto-select here - let the logic below handle it if needed
+        }
+      }
+      
+      // Auto-select first conversation if none is selected (but not if we're waiting for targetUserId)
+      // Only auto-select if we're not currently processing a targetUserId (which will set its own selection)
+      const currentSelectedId = selectedConversationId;
+      if (!currentSelectedId && !targetUserId && conversations.length > 0) {
+        const firstConversation = conversations[0];
+        if (firstConversation) {
+          console.log(
+            "🔄 [MESSAGING] Auto-selecting first conversation:",
+            firstConversation.id
+          );
+          setSelectedConversation(firstConversation.id);
+        }
       }
     }
   }, [
@@ -664,6 +848,23 @@ export function MessengerInterface({
     targetUserId,
     setSelectedConversation,
   ]);
+
+  // Clear pending conversation ref when the conversation appears in the conversations array
+  useEffect(() => {
+    if (pendingConversationIdRef.current && conversations.length > 0) {
+      const pendingId = pendingConversationIdRef.current;
+      const conversationExists = conversations.some(
+        (conv) => conv.id === pendingId
+      );
+      if (conversationExists) {
+        console.log(
+          "✅ [MESSAGING] Pending conversation now in list, clearing pending flag:",
+          pendingId
+        );
+        pendingConversationIdRef.current = null;
+      }
+    }
+  }, [conversations]);
 
   // File upload hook
   const { upload: uploadFileToStorage, isUploading: isUploadingFile, uploadProgress } = useFileUpload("message-attachments");
@@ -750,6 +951,21 @@ export function MessengerInterface({
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedConversationId) return;
+
+    // Validate that the selected conversation is still valid before sending
+    const isValidConversation = conversations.some(
+      (conv) => conv.id === selectedConversationId
+    );
+    if (!isValidConversation) {
+      console.error(
+        "❌ [MESSAGING] Cannot send message - selected conversation is invalid:",
+        selectedConversationId
+      );
+      toast.error("Cannot send message - conversation no longer available");
+      // Clear the invalid selection
+      setSelectedConversation(null);
+      return;
+    }
 
     const content = messageInput.trim();
     logger.debug('Message sending (pending):', selectedConversationId, content);

@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    this.logger.debug(`Validating JWT payload for user: ${payload.sub}, role: ${payload.role}`);
+    // Debug log removed to reduce noise
     
     // Check if payload has required fields
     if (!payload.sub || !payload.email || !payload.role) {
@@ -73,7 +73,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token email mismatch - please re-authenticate');
     }
 
-    this.logger.debug(`JWT validation successful for user: ${user.id} (${user.email})`);
+    // Debug log removed to reduce noise
     
     return {
       userId: user.id,

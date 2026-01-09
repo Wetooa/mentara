@@ -165,27 +165,6 @@ export function PostDetail({
   return (
     <div className={`min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 ${className}`}>
       <div className="container mx-auto px-4 py-8 max-w-4xl space-y-4">
-        {/* Breadcrumbs */}
-        <PageBreadcrumbs
-          dynamicData={
-            post
-              ? {
-                  [post.id]: post.title || "Post",
-                }
-              : {}
-          }
-        />
-
-        {/* Back Navigation */}
-        <div>
-          <BackButton
-            label="Back to Community"
-            href="/client/community"
-            variant="ghost"
-            className="text-gray-600 hover:text-primary"
-          />
-        </div>
-
         {/* Post Content */}
         <Card className="mb-6 shadow-lg border-border/50 overflow-hidden">
           {/* Decorative top bar */}

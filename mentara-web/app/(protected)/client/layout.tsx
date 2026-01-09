@@ -341,7 +341,7 @@ export default function MainLayout({
           {/* Main Content - Responsive padding */}
           <main
             id="main-content"
-            className="flex-1 w-full h-full pt-[60px] md:pt-[60px] pb-16 md:pb-0 bg-gray-100"
+            className="flex-1 w-full min-h-screen pt-[60px] md:pt-[60px] pb-16 md:pb-0"
             tabIndex={-1}
           >
             <div className="md:hidden h-[50px]" />{" "}
@@ -352,10 +352,8 @@ export default function MainLayout({
           {/* Video Call Notifications - Fixed position in upper right */}
           <IncomingCallNotificationContainer />
 
-          {/* Floating Tools Button - Available on most pages except dashboard */}
-          {pathname !== "/client" && pathname !== "/client/" ? (
-            <FloatingToolsButton />
-          ) : null}
+          {/* Floating Tools Button - Available on all pages */}
+          <FloatingToolsButton />
 
           {/* Floating Messages Button - Available on all pages */}
           <FloatingMessagesButton />

@@ -1,81 +1,162 @@
 "use client";
 
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Calendar, Star, Heart, Clock, Zap } from "lucide-react";
+import { MessageCircle, Calendar, Heart, Clock, Zap } from "lucide-react";
 import { motion } from "framer-motion";
-
-interface Therapist {
-  id: string;
-  userId: string;
-  user: {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-    imageUrl?: string;
-  };
-  specializations?: string[];
-  hourlyRate?: number;
-  status: string;
-}
+import { formatDistanceToNow, format, isToday, isTomorrow, parseISO } from "date-fns";
+import { useMyTherapists } from "@/hooks/therapist/useMyTherapists";
+import { useRecentCommunications } from "@/hooks/dashboard/useClientDashboard";
+import { useUpcomingSessions } from "@/hooks/sessions/useSessions";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { TherapistRecommendation } from "@/types/api/therapist";
 
 interface AssignedTherapistProps {
-  assignedTherapists?: Therapist[];
-  isLoading?: boolean;
   onMessageTherapist?: () => void;
   onScheduleSession?: () => void;
 }
 
 export default function AssignedTherapist({
-  assignedTherapists = [],
-  isLoading = false,
   onMessageTherapist,
   onScheduleSession,
 }: AssignedTherapistProps) {
-  // Get the primary therapist (first one if multiple)
-  const therapist =
-    assignedTherapists.length > 0 ? assignedTherapists[0] : null;
+  const router = useRouter();
+  const { data: therapists, isLoading: isLoadingTherapists } = useMyTherapists();
+  const { data: recentCommunications = [] } = useRecentCommunications();
+  const { data: upcomingSessionsData, isLoading: isLoadingSessions } = useUpcomingSessions(20);
+  const upcomingSessions = upcomingSessionsData?.meetings || [];
 
-  // Mock data - in production would come from API
-  const lastInteraction = "2 hours ago";
-  const nextSession = "Tomorrow at 2:00 PM";
-  const connectionStrength = 85; // out of 100
-  const isOnline = true;
+  // Map therapists with their last message and next session
+  const therapistsWithData = useMemo(() => {
+    if (!therapists || therapists.length === 0) return [];
+
+    return therapists.map((therapist) => {
+      // Find last message with this therapist
+      // Check both direct ID match and participant match
+      const conversation = recentCommunications.find((comm: any) => {
+        // Direct ID match
+        if (comm.id === therapist.id) return true;
+        // Check if therapist is a participant
+        if (comm.participants?.some((p: any) => p.userId === therapist.id)) return true;
+        // Check if user field matches
+        if (comm.user?.id === therapist.id) return true;
+        return false;
+      });
+      
+      // Extract timestamp from various possible structures
+      const lastMessageTime = 
+        conversation?.lastMessage?.timestamp || 
+        conversation?.lastMessage?.createdAt ||
+        conversation?.lastMessage?.time ||
+        conversation?.timestamp ||
+        conversation?.time ||
+        conversation?.lastMessageAt ||
+        conversation?.updatedAt;
+
+      // Find next session with this therapist
+      const nextSession = upcomingSessions.find(
+        (session: any) => 
+          session.therapistId === therapist.id ||
+          session.therapist?.userId === therapist.id
+      );
+
+      return {
+        therapist,
+        lastMessageTime,
+        nextSession,
+      };
+    });
+  }, [therapists, recentCommunications, upcomingSessions]);
+
+  // Format relative time for last chat
+  const formatLastChat = (timestamp?: string): string => {
+    if (!timestamp) return "No messages yet";
+    
+    try {
+      const date = typeof timestamp === 'string' ? parseISO(timestamp) : new Date(timestamp);
+      if (isNaN(date.getTime())) return "No messages yet";
+      
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch {
+      return "No messages yet";
+    }
+  };
+
+  // Format next session time
+  const formatNextSession = (session: any): string => {
+    if (!session?.startTime && !session?.dateTime) return "No upcoming session";
+    
+    try {
+      const dateStr = session.startTime || session.dateTime;
+      const date = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
+      if (isNaN(date.getTime())) return "No upcoming session";
+
+      if (isToday(date)) {
+        return `Today at ${format(date, 'h:mm a')}`;
+      } else if (isTomorrow(date)) {
+        return `Tomorrow at ${format(date, 'h:mm a')}`;
+      } else {
+        return format(date, 'MMM d, h:mm a');
+      }
+    } catch {
+      return "No upcoming session";
+    }
+  };
+
+  const handleMessage = (therapistId: string) => {
+    if (onMessageTherapist) {
+      onMessageTherapist();
+    } else {
+      router.push(`/client/messages?contact=${encodeURIComponent(therapistId)}`);
+    }
+  };
+
+  const handleSchedule = (therapistId: string) => {
+    if (onScheduleSession) {
+      onScheduleSession();
+    } else {
+      router.push(`/client/booking?therapist=${encodeURIComponent(therapistId)}`);
+    }
+  };
+
+  const isLoading = isLoadingTherapists || isLoadingSessions;
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
-            Your Therapist
+            <Heart className="h-5 w-5 text-primary" />
+            Your Therapist{therapists && therapists.length > 1 ? "s" : ""}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-pulse space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
-                <div className="space-y-1">
-                  <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                  <div className="h-3 w-32 bg-gray-200 rounded"></div>
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (!therapist) {
+  if (!therapists || therapists.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
+            <Heart className="h-5 w-5 text-primary" />
             Your Therapist
           </CardTitle>
         </CardHeader>
@@ -85,7 +166,11 @@ export default function AssignedTherapist({
               <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No therapist assigned yet</p>
             </div>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => router.push("/client/therapists")}
+            >
               Find a Therapist
             </Button>
           </div>
@@ -93,11 +178,6 @@ export default function AssignedTherapist({
       </Card>
     );
   }
-
-  const firstName = therapist.user.firstName || "";
-  const lastName = therapist.user.lastName || "";
-  const fullName = `${firstName} ${lastName}`.trim() || "Therapist";
-  const initials = `${firstName[0] || "T"}${lastName[0] || "H"}`;
 
   return (
     <motion.div
@@ -111,158 +191,145 @@ export default function AssignedTherapist({
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2 text-lg font-semibold">
               <Heart className="h-5 w-5 text-primary" />
-              Your Therapist
+              Your Therapist{therapists.length > 1 ? "s" : ""}
             </span>
-            {isOnline && (
-              <Badge
-                variant="secondary"
-                className="bg-green-100 text-green-700 border-green-200"
-              >
-                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse mr-1.5" />
-                Online
-              </Badge>
-            )}
+            <Badge variant="secondary" className="text-xs">
+              {therapists.length} active
+            </Badge>
           </div>
         </div>
         <CardContent className="p-5 flex-1">
-          <div className="space-y-5">
-            {/* Therapist Info with enhanced design */}
-            <div className="flex items-start gap-4">
-              <motion.div
-                className="relative"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-md">
-                  <AvatarImage src={therapist.user.imageUrl} alt={fullName} />
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-white text-lg">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                {therapist.status === "approved" && (
-                  <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                    <Star className="h-3 w-3 text-white fill-white" />
-                  </div>
-                )}
-              </motion.div>
+          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+            {therapistsWithData.map(({ therapist, lastMessageTime, nextSession }, index) => {
+              const firstName = therapist.firstName || "";
+              const lastName = therapist.lastName || "";
+              const fullName = `${firstName} ${lastName}`.trim() || "Therapist";
+              const initials = `${firstName[0] || "T"}${lastName[0] || "H"}`;
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-base truncate">{fullName}</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Licensed Therapist
-                </p>
-
-                {/* Connection strength indicator */}
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              return (
+                <motion.div
+                  key={therapist.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="pb-4 border-b last:border-b-0 last:pb-0"
+                >
+                  <div className="space-y-4">
+                    {/* Therapist Info */}
+                    <div className="flex items-start gap-4">
                       <motion.div
-                        className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${connectionStrength}%` }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                      />
+                        className="relative"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-md">
+                          <AvatarImage src={therapist.profileImage} alt={fullName} />
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-white text-lg">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
+                      </motion.div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-base truncate">{fullName}</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {therapist.title || "Licensed Therapist"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Quick Info Cards */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Clock className="h-3.5 w-3.5 text-blue-600" />
+                          <span className="text-xs font-medium text-blue-900">
+                            Last Chat
+                          </span>
+                        </div>
+                        <p className="text-xs text-blue-700 font-semibold">
+                          {formatLastChat(lastMessageTime)}
+                        </p>
+                      </div>
+
+                      <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Zap className="h-3.5 w-3.5 text-purple-600" />
+                          <span className="text-xs font-medium text-purple-900">
+                            Next Session
+                          </span>
+                        </div>
+                        <p className="text-xs text-purple-700 font-semibold">
+                          {formatNextSession(nextSession)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Specializations */}
+                    {therapist.specialties && therapist.specialties.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold mb-2 text-muted-foreground">
+                          Areas of Expertise
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {therapist.specialties
+                            .slice(0, 3)
+                            .map((spec, idx) => (
+                              <Badge
+                                key={idx}
+                                variant="outline"
+                                className="text-xs bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 hover:from-primary/10 hover:to-primary/20 transition-all"
+                              >
+                                {spec}
+                              </Badge>
+                            ))}
+                          {therapist.specialties.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{therapist.specialties.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2">
+                      <motion.div
+                        className="flex-1"
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        <Button
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-sm group"
+                          onClick={() => handleMessage(therapist.id)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1.5 group-hover:scale-110 transition-transform" />
+                          Message
+                        </Button>
+                      </motion.div>
+                      <motion.div
+                        className="flex-1"
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full border-2 hover:border-primary/50 hover:bg-primary/5 group"
+                          onClick={() => handleSchedule(therapist.id)}
+                        >
+                          <Calendar className="h-4 w-4 mr-1.5 group-hover:scale-110 transition-transform" />
+                          Book
+                        </Button>
+                      </motion.div>
                     </div>
                   </div>
-                  <span className="text-xs font-medium text-primary">
-                    {connectionStrength}%
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Connection strength
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Info Cards */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                <div className="flex items-center gap-2 mb-1">
-                  <Clock className="h-3.5 w-3.5 text-blue-600" />
-                  <span className="text-xs font-medium text-blue-900">
-                    Last Chat
-                  </span>
-                </div>
-                <p className="text-xs text-blue-700 font-semibold">
-                  {lastInteraction}
-                </p>
-              </div>
-
-              <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
-                <div className="flex items-center gap-2 mb-1">
-                  <Zap className="h-3.5 w-3.5 text-purple-600" />
-                  <span className="text-xs font-medium text-purple-900">
-                    Next Session
-                  </span>
-                </div>
-                <p className="text-xs text-purple-700 font-semibold">
-                  {nextSession}
-                </p>
-              </div>
-            </div>
-
-            {/* Specializations with better styling */}
-            {therapist.specializations &&
-              therapist.specializations.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold mb-2 text-muted-foreground">
-                    Areas of Expertise
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {therapist.specializations
-                      .slice(0, 3)
-                      .map((spec, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="text-xs bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 hover:from-primary/10 hover:to-primary/20 transition-all"
-                        >
-                          {spec}
-                        </Badge>
-                      ))}
-                    {therapist.specializations.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{therapist.specializations.length - 3} more
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-
-            {/* Enhanced Actions */}
-            <div className="flex gap-2 pt-2">
-              <motion.div
-                className="flex-1"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <Button
-                  size="sm"
-                  className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-sm group"
-                  onClick={onMessageTherapist}
-                >
-                  <MessageCircle className="h-4 w-4 mr-1.5 group-hover:scale-110 transition-transform" />
-                  Message
-                </Button>
-              </motion.div>
-              <motion.div
-                className="flex-1"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full border-2 hover:border-primary/50 hover:bg-primary/5 group"
-                  onClick={onScheduleSession}
-                >
-                  <Calendar className="h-4 w-4 mr-1.5 group-hover:scale-110 transition-transform" />
-                  Book
-                </Button>
-              </motion.div>
-            </div>
+                </motion.div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

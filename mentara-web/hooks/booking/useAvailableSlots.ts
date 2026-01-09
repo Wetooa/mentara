@@ -43,20 +43,20 @@ export function useAvailableSlots(therapistId: string, date: string) {
         );
         return result;
       } catch (error: unknown) {
-        console.error(`[useAvailableSlots] Error fetching slots:`, error);
         // Add more context to error messages
         const err = error as {
           response?: { status: number; data?: { message?: string } };
           message?: string;
         };
 
+        // Handle validation errors (400 status) - don't log as errors
         if (
           err.response?.status === 400 &&
           err.response?.data?.message?.includes("advance")
         ) {
-          throw new Error(
-            "Bookings must be made at least 24 hours (1 day) in advance"
-          );
+          // Extract the actual hours from the error message if available
+          const advanceMessage = err.response.data.message;
+          throw new Error(advanceMessage);
         } else if (err.response?.status === 404) {
           throw new Error(
             `No availability found for this therapist on ${date}. The therapist may not have set their availability for this day.`
@@ -64,11 +64,12 @@ export function useAvailableSlots(therapistId: string, date: string) {
         } else if (err.response?.status === 401) {
           throw new Error("Authentication required - please sign in again");
         } else {
+          // Only log actual system errors (not validation errors)
           const errorMessage =
             err.response?.data?.message ||
             err.message ||
             "Failed to load available slots";
-          console.error(`[useAvailableSlots] Full error details:`, {
+          console.error(`[useAvailableSlots] Error fetching slots:`, {
             status: err.response?.status,
             data: err.response?.data,
             message: err.message,

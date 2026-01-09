@@ -137,19 +137,18 @@ export class CompatibilityAnalysisService {
   ): number {
     let score = 70; // Start with neutral score
 
-    // Access severityLevels from the answers JSON field
-    const answers = assessment.answers as any;
-    const severityLevels = answers?.severityLevels as Record<string, string>;
+    // Safely extract severityLevels from assessment
+    const severityLevels = this.getSeverityLevels(assessment);
 
     // Analyze based on mental health conditions and preferred communication style
     const hasAnxiety =
-      severityLevels['anxiety'] &&
+      severityLevels?.['anxiety'] &&
       this.getSeverityWeight(severityLevels['anxiety']) >= 3;
     const hasDepression =
-      severityLevels['depression'] &&
+      severityLevels?.['depression'] &&
       this.getSeverityWeight(severityLevels['depression']) >= 3;
     const hasPTSD =
-      severityLevels['ptsd'] &&
+      severityLevels?.['ptsd'] &&
       this.getSeverityWeight(severityLevels['ptsd']) >= 3;
 
     const preferredStyle =
@@ -229,12 +228,11 @@ export class CompatibilityAnalysisService {
   ): number {
     let score = 70; // Start with neutral score
 
-    // Access severityLevels from the answers JSON field
-    const answers = assessment.answers as any;
-    const severityLevels = answers?.severityLevels as Record<string, string>;
+    // Safely extract severityLevels from assessment
+    const severityLevels = this.getSeverityLevels(assessment);
 
     // Analyze introversion/extraversion needs
-    const socialAnxiety = severityLevels['social_anxiety']
+    const socialAnxiety = severityLevels?.['social_anxiety']
       ? this.getSeverityWeight(severityLevels['social_anxiety'])
       : 0;
 
@@ -251,10 +249,10 @@ export class CompatibilityAnalysisService {
 
     // Analyze need for structure vs flexibility
     const hasOCD =
-      severityLevels['ocd'] &&
+      severityLevels?.['ocd'] &&
       this.getSeverityWeight(severityLevels['ocd']) >= 3;
     const hasADHD =
-      severityLevels['adhd'] &&
+      severityLevels?.['adhd'] &&
       this.getSeverityWeight(severityLevels['adhd']) >= 3;
 
     if (hasOCD) {
@@ -610,6 +608,27 @@ export class CompatibilityAnalysisService {
     return { strengths, concerns, recommendations };
   }
 
+
+  /**
+   * Safely extract severityLevels from PreAssessment.
+   * Tries the direct field first (correct location), then falls back to nested in answers (backward compatibility).
+   * Returns empty object if neither exists.
+   */
+  private getSeverityLevels(assessment: PreAssessment): Record<string, string> {
+    // Try direct field first (correct location)
+    if (assessment.severityLevels) {
+      return assessment.severityLevels as Record<string, string>;
+    }
+
+    // Fallback to nested in answers (backward compatibility)
+    const answers = assessment.answers as any;
+    if (answers?.severityLevels) {
+      return answers.severityLevels as Record<string, string>;
+    }
+
+    // Return empty object as safe default
+    return {};
+  }
 
   private getSeverityWeight(severity: string): number {
     const severityWeights: Record<string, number> = {

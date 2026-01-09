@@ -17,38 +17,139 @@ import { useMessagingStore } from "@/store/messaging";
 import { useHasPreAssessment } from "@/hooks/pre-assessment/usePreAssessmentData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Lazy load dashboard components
-const DashboardHeader = dynamic(() => import("@/components/dashboard/DashboardHeader").then(mod => ({ default: mod.default })), {
-  loading: () => <Skeleton className="h-10 w-64" />
-});
+// Lazy load dashboard components with safe import handling
+const DashboardHeader = dynamic(
+  () =>
+    import("@/components/dashboard/DashboardHeader")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.DashboardHeader) return { default: mod.DashboardHeader };
+        throw new Error("DashboardHeader export not found");
+      })
+      .catch((error) => {
+        console.error("[Dashboard] Failed to load DashboardHeader:", error);
+        return { default: () => <Skeleton className="h-10 w-64" /> };
+      }),
+  {
+    loading: () => <Skeleton className="h-10 w-64" />,
+  }
+);
 
-const StatsOverview = dynamic(() => import("@/components/dashboard/StatsOverview").then(mod => ({ default: mod.default })), {
-  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-    {Array.from({ length: 5 }).map((_, i) => (
-      <Skeleton key={i} className="h-28 rounded-xl" />
-    ))}
-  </div>
-});
+const StatsOverview = dynamic(
+  () =>
+    import("@/components/dashboard/StatsOverview")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.StatsOverview) return { default: mod.StatsOverview };
+        throw new Error("StatsOverview export not found");
+      })
+      .catch((error) => {
+        console.error("[Dashboard] Failed to load StatsOverview:", error);
+        return {
+          default: () => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-28 rounded-xl" />
+              ))}
+            </div>
+          ),
+        };
+      }),
+  {
+    loading: () => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-28 rounded-xl" />
+        ))}
+      </div>
+    ),
+  }
+);
 
-const UpcomingSessions = dynamic(() => import("@/components/dashboard/UpcomingSessions").then(mod => ({ default: mod.default })), {
-  loading: () => <Skeleton className="h-80 rounded-xl" />
-});
+const UpcomingSessions = dynamic(
+  () =>
+    import("@/components/dashboard/UpcomingSessions")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.UpcomingSessions) return { default: mod.UpcomingSessions };
+        throw new Error("UpcomingSessions export not found");
+      })
+      .catch((error) => {
+        console.error("[Dashboard] Failed to load UpcomingSessions:", error);
+        return { default: () => <Skeleton className="h-80 rounded-xl" /> };
+      }),
+  {
+    loading: () => <Skeleton className="h-80 rounded-xl" />,
+  }
+);
 
-const WorksheetStatus = dynamic(() => import("@/components/dashboard/WorksheetStatus").then(mod => ({ default: mod.default })), {
-  loading: () => <Skeleton className="h-80 rounded-xl" />
-});
+const WorksheetStatus = dynamic(
+  () =>
+    import("@/components/dashboard/WorksheetStatus")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.WorksheetStatus) return { default: mod.WorksheetStatus };
+        throw new Error("WorksheetStatus export not found");
+      })
+      .catch((error) => {
+        console.error("[Dashboard] Failed to load WorksheetStatus:", error);
+        return { default: () => <Skeleton className="h-80 rounded-xl" /> };
+      }),
+  {
+    loading: () => <Skeleton className="h-80 rounded-xl" />,
+  }
+);
 
-const ProgressTracking = dynamic(() => import("@/components/dashboard/ProgressTracking").then(mod => ({ default: mod.default })), {
-  loading: () => <Skeleton className="h-64 rounded-xl" />
-});
+const ProgressTracking = dynamic(
+  () =>
+    import("@/components/dashboard/ProgressTracking")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.ProgressTracking) return { default: mod.ProgressTracking };
+        throw new Error("ProgressTracking export not found");
+      })
+      .catch((error) => {
+        console.error("[Dashboard] Failed to load ProgressTracking:", error);
+        return { default: () => <Skeleton className="h-64 rounded-xl" /> };
+      }),
+  {
+    loading: () => <Skeleton className="h-64 rounded-xl" />,
+  }
+);
 
-const AssignedTherapist = dynamic(() => import("@/components/dashboard/AssignedTherapist").then(mod => ({ default: mod.default })), {
-  loading: () => <Skeleton className="h-80 rounded-xl" />
-});
+const AssignedTherapist = dynamic(
+  () =>
+    import("@/components/dashboard/AssignedTherapist")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.AssignedTherapist) return { default: mod.AssignedTherapist };
+        throw new Error("AssignedTherapist export not found");
+      })
+      .catch((error) => {
+        console.error("[Dashboard] Failed to load AssignedTherapist:", error);
+        return { default: () => <Skeleton className="h-80 rounded-xl" /> };
+      }),
+  {
+    loading: () => <Skeleton className="h-80 rounded-xl" />,
+  }
+);
 
-const RecentCommunications = dynamic(() => import("@/components/dashboard/RecentCommunications").then(mod => ({ default: mod.default })), {
-  loading: () => <Skeleton className="h-64 rounded-xl" />
-});
+const RecentCommunications = dynamic(
+  () =>
+    import("@/components/dashboard/RecentCommunications")
+      .then((mod) => {
+        if (mod.default) return { default: mod.default };
+        if (mod.RecentCommunications) return { default: mod.RecentCommunications };
+        throw new Error("RecentCommunications export not found");
+      })
+      .catch((error) => {
+        console.error("[Dashboard] Failed to load RecentCommunications:", error);
+        return { default: () => <Skeleton className="h-64 rounded-xl" /> };
+      }),
+  {
+    loading: () => <Skeleton className="h-64 rounded-xl" />,
+  }
+);
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -277,8 +378,6 @@ export default function DashboardPage() {
 
           <div className="md:col-span-2 lg:col-span-2">
             <AssignedTherapist
-              assignedTherapists={dashboardApiData?.assignedTherapists || []}
-              isLoading={isDashboardLoading}
               onMessageTherapist={handleMessageTherapist}
               onScheduleSession={handleScheduleSession}
             />

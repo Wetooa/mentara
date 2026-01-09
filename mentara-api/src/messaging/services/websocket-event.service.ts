@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/co
 import { EventBusService } from '../../common/events/event-bus.service';
 import { MessagingGateway } from '../messaging.gateway';
 import { DomainEvent } from '../../common/events/interfaces/domain-event.interface';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import {
   MessageSentEvent,
   MessageReadEvent,
@@ -31,6 +32,7 @@ export class WebSocketEventService implements OnModuleInit {
     private readonly eventBus: EventBusService,
     @Inject(forwardRef(() => MessagingGateway))
     private readonly messagingGateway: MessagingGateway,
+    private readonly prisma: PrismaService,
   ) {}
 
   onModuleInit() {
@@ -61,15 +63,28 @@ export class WebSocketEventService implements OnModuleInit {
 
   private subscribeToMessagingEvents(): void {
     this.logger.log('🔧 [EVENT SUBSCRIPTION] Subscribing to messaging events...');
+    this.logger.log('🔧 [EVENT SUBSCRIPTION] EventBus exists: ' + !!this.eventBus);
+    this.logger.log('🔧 [EVENT SUBSCRIPTION] MessagingGateway exists: ' + !!this.messagingGateway);
     
     // Message sent event - broadcast to conversation participants
     this.logger.log('📡 [EVENT SUBSCRIPTION] Registering MessageSentEvent handler...');
-    this.eventBus.subscribe(
-      'MessageSentEvent',
-      async (event: DomainEvent<any>) => {
+    this.logger.log('📡 [EVENT SUBSCRIPTION] About to call eventBus.subscribe("MessageSentEvent", handler)');
+    
+    try {
+      const subscriptionResult = this.eventBus.subscribe(
+        'MessageSentEvent',
+        async (event: DomainEvent<any>) => {
+        this.logger.log('🎯 [EVENT HANDLER] ========== MessageSentEvent HANDLER CALLED ==========');
+        this.logger.log('🎯 [EVENT HANDLER] Handler function executed - BEFORE setImmediate');
+        this.logger.log('🎯 [EVENT HANDLER] Event ID: ' + (event?.eventId || 'NO ID'));
+        this.logger.log('🎯 [EVENT HANDLER] Event type: ' + (event?.eventType || 'NO TYPE'));
+        
         // Use setImmediate to avoid blocking the event loop
         setImmediate(async () => {
+          this.logger.log('🚨 [EVENT RECEIVED] ========== MessageSentEvent RECEIVED (inside setImmediate) ==========');
           this.logger.log('🚨 [EVENT RECEIVED] MessageSentEvent received in WebSocketEventService!');
+          this.logger.log('🚨 [EVENT RECEIVED] Event ID: ' + (event?.eventId || 'NO ID'));
+          this.logger.log('🚨 [EVENT RECEIVED] Event timestamp: ' + (event?.timestamp || 'NO TIMESTAMP'));
           this.logger.debug('📨 [EVENT DATA]', event.eventData);
           try {
             const messageEvent = event as MessageSentEvent;
@@ -83,6 +98,13 @@ export class WebSocketEventService implements OnModuleInit {
               recipientIds,
             } = messageEvent.eventData;
 
+            this.logger.log('📊 [EVENT DATA] Extracted values:');
+            this.logger.log(`   - conversationId: ${conversationId}`);
+            this.logger.log(`   - messageId: ${messageId}`);
+            this.logger.log(`   - senderId: ${senderId}`);
+            this.logger.log(`   - content length: ${content?.length || 0}`);
+            this.logger.log(`   - messageType: ${messageType}`);
+            this.logger.log(`   - recipientCount: ${recipientIds?.length || 0}`);
             this.logger.debug('MessageSentEvent received:', {
               conversationId,
               messageId,
@@ -93,10 +115,37 @@ export class WebSocketEventService implements OnModuleInit {
             // Frontend expects MessageEventData format with 'message' property
             this.logger.log(`🚀 [WEBSOCKET] About to call MessagingGateway.broadcastMessage for conversation ${conversationId}`);
             this.logger.debug(`🚀 [WEBSOCKET] Gateway exists: ${!!this.messagingGateway}`);
+            this.logger.log(`📊 [WEBSOCKET] Message details: messageId=${messageId}, senderId=${senderId}, conversationId=${conversationId}, recipientCount=${recipientIds?.length || 0}`);
             
-            // Use async/await to ensure non-blocking
-            await Promise.resolve();
-            this.messagingGateway.broadcastMessage(conversationId, {
+            // Fetch sender information from database to include in payload
+            let senderInfo: {
+              id: string;
+              firstName: string;
+              lastName: string;
+              avatarUrl: string | null;
+              email: string;
+              role: string;
+            } | null = null;
+            try {
+              const sender = await this.prisma.user.findUnique({
+                where: { id: senderId },
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                  email: true,
+                  role: true,
+                },
+              });
+              if (sender) {
+                senderInfo = sender;
+              }
+            } catch (error) {
+              this.logger.warn(`Failed to fetch sender info for ${senderId}:`, error);
+            }
+            
+            const messagePayload = {
               message: {
                 id: messageId,
                 conversationId,
@@ -114,15 +163,26 @@ export class WebSocketEventService implements OnModuleInit {
                 attachmentNames: [],
                 attachmentSizes: [],
                 editedAt: null,
-                sender: null, // Will be populated by client
+                sender: senderInfo, // Include complete sender information
                 replyTo: null,
                 reactions: [],
                 readReceipts: [],
               },
               eventType: 'message_sent',
-            }, senderId); // Pass senderId to exclude sender from broadcast
+            };
             
-            this.logger.log(`✅ [WEBSOCKET] MessagingGateway.broadcastMessage completed for conversation ${conversationId}`);
+            this.logger.log(`📤 [WEBSOCKET] Calling broadcastMessage with senderId=${senderId}`);
+            this.logger.log(`📤 [WEBSOCKET] Message payload keys: ${Object.keys(messagePayload).join(', ')}`);
+            this.logger.log(`📤 [WEBSOCKET] Message payload.message keys: ${messagePayload.message ? Object.keys(messagePayload.message).join(', ') : 'NO MESSAGE'}`);
+            
+            try {
+              this.messagingGateway.broadcastMessage(conversationId, messagePayload, senderId); // Pass senderId to exclude sender from broadcast
+              this.logger.log(`✅ [WEBSOCKET] MessagingGateway.broadcastMessage completed for conversation ${conversationId}`);
+            this.logger.log(`🚨 [EVENT RECEIVED] ========== MessageSentEvent HANDLING COMPLETE ==========`);
+            } catch (error) {
+              this.logger.error(`❌ [WEBSOCKET] Error calling broadcastMessage:`, error);
+              this.logger.error(`❌ [WEBSOCKET] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+            }
 
             // Send delivery confirmations with safe iteration (non-blocking)
             const safeRecipientIds = this.ensureArray(recipientIds, 'recipientIds');
@@ -152,12 +212,24 @@ export class WebSocketEventService implements OnModuleInit {
             
             // Wait for all delivery confirmations in parallel (non-blocking)
             await Promise.allSettled(deliveryPromises);
+            this.logger.log('🚨 [EVENT RECEIVED] ========== MessageSentEvent HANDLING COMPLETE ==========');
           } catch (error) {
-            this.logger.error('Error processing MessageSentEvent:', error);
+            this.logger.error('❌ [EVENT RECEIVED] Error processing MessageSentEvent:', error);
+            this.logger.error('❌ [EVENT RECEIVED] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+            this.logger.error('❌ [EVENT RECEIVED] Error message:', error instanceof Error ? error.message : String(error));
           }
         });
+        this.logger.log('🎯 [EVENT HANDLER] Handler function completed - AFTER setImmediate call');
       },
-    );
+      );
+      this.logger.log('✅ [EVENT SUBSCRIPTION] MessageSentEvent subscription completed successfully');
+      this.logger.log('✅ [EVENT SUBSCRIPTION] Subscription result: ' + (subscriptionResult !== undefined ? 'SUCCESS' : 'UNDEFINED'));
+    } catch (error) {
+      this.logger.error('❌ [EVENT SUBSCRIPTION] Failed to subscribe to MessageSentEvent:', error);
+      this.logger.error('❌ [EVENT SUBSCRIPTION] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    }
+    
+    this.logger.log('✅ [EVENT SUBSCRIPTION] subscribeToMessagingEvents completed');
 
     // Message read event - broadcast read receipt
     this.eventBus.subscribe(

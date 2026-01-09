@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Clock, CheckCircle, XCircle, Plus, CreditCard, LayoutGrid, List, ExternalLink } from "lucide-react";
+import { Calendar, Clock, CheckCircle, XCircle, Plus, CreditCard, LayoutGrid, List, ExternalLink, ArrowLeft, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Meeting } from "@/lib/api/services/meetings";
 import { logger } from "@/lib/logger";
@@ -151,7 +151,7 @@ export default function SessionsPage() {
 
   return (
     <div
-      className="w-full h-full p-4 sm:p-6 space-y-6"
+      className="w-full h-full p-4 sm:p-6 pb-8 sm:pb-12 space-y-6"
       role="main"
       aria-label="Sessions management page"
     >
@@ -206,7 +206,7 @@ export default function SessionsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Session Actions */}
           <Card className="border-primary/20 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
+            <CardHeader>
               <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
                 Session Actions
@@ -246,7 +246,7 @@ export default function SessionsPage() {
 
           {/* Account Actions */}
           <Card className="border-purple-200/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
+            <CardHeader>
               <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-purple-600" />
                 Account Settings
@@ -306,10 +306,10 @@ export default function SessionsPage() {
             <TabsContent key={tab.id} value={tab.id} className="space-y-4 mt-4">
               {viewMode === 'split' ? (
                 // Split Panel Layout
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-[calc(100vh-450px)] min-h-[500px]">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-[calc(100vh-450px)] min-h-[500px] mb-8 sm:mb-12">
                   {/* Left: Compact Sessions List */}
                   <div className="lg:col-span-2">
-                    <Card className="h-full shadow-lg border-border/50 p-0 flex flex-col">
+                    <Card className="overflow-hidden h-full shadow-lg border-border/50 p-0 flex flex-col">
                       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-5 py-4 border-b border-blue-200/50">
                         <div className="flex items-center gap-2">
                           <div className="p-1.5 bg-blue-100 rounded-lg">
@@ -339,9 +339,20 @@ export default function SessionsPage() {
                     {selectedSession ? (
                       <Card className="h-full overflow-y-auto shadow-lg border-primary/20 p-0 flex flex-col">
                         <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b">
-                          <div className="text-lg font-bold flex items-center gap-2">
-                            <Calendar className="h-5 w-5 text-primary" />
-                            Session Details
+                          <div className="flex items-center justify-between">
+                            <div className="text-lg font-bold flex items-center gap-2">
+                              <Calendar className="h-5 w-5 text-primary" />
+                              Session Details
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedSession(null)}
+                              className="h-8 w-8 p-0 hover:bg-primary/20"
+                              aria-label="Back to calendar"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                         <div className="p-6 space-y-4 flex-1 overflow-y-auto">

@@ -1,9 +1,5 @@
 import ResetPasswordClient from './ResetPasswordClient';
 
-export function generateStaticParams() {
-  return [];
-}
-
 interface ResetPasswordTokenPageProps {
   params: { token: string };
 }

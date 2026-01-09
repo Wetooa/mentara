@@ -99,26 +99,87 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     error: conversationsError,
     refetch: refetchConversations,
   } = useQuery({
-    queryKey: queryKeys.messaging.conversations(),
+    queryKey: queryKeys.messaging.conversations(user?.id || ''),
     queryFn: () => api.messaging.getConversations(),
+    enabled: !!user?.id,
     staleTime: STALE_TIME.SHORT, // 2 minutes
     gcTime: GC_TIME.MEDIUM, // 10 minutes
     refetchOnWindowFocus: true, // Refetch on focus for messaging
   });
 
-  // Get messages for current conversation
+  // Get messages for current conversation with retry logic for 403 errors
   const {
     data: messages = [],
     isLoading: isLoadingMessages,
     error: messagesError,
     refetch: refetchMessages,
   } = useQuery({
-    queryKey: conversationId ? queryKeys.messaging.messages(conversationId) : [],
-    queryFn: () => conversationId ? api.messaging.getMessages(conversationId) : Promise.resolve([]),
-    enabled: !!conversationId,
+    queryKey: conversationId && user?.id ? queryKeys.messaging.messages(user.id, conversationId) : [],
+    queryFn: async () => {
+      if (!conversationId) return [];
+      
+      // Validate conversation exists and user is participant before fetching
+      try {
+        const conversation = await api.messaging.getConversation(conversationId);
+        const isParticipant = conversation.participants.some(
+          (p) => p.userId === user?.id
+        );
+        
+        if (!isParticipant) {
+          const error = new Error('NOT_PARTICIPANT') as Error & { isParticipantError?: boolean };
+          error.isParticipantError = true;
+          throw error;
+        }
+        
+        return api.messaging.getMessages(conversationId);
+      } catch (error: unknown) {
+        // Check if this is a participant verification error
+        const isParticipantError = 
+          (error as any)?.isParticipantError ||
+          (error as any)?.response?.status === 403 ||
+          (error as Error)?.message?.includes('participant') ||
+          (error as Error)?.message?.includes('Forbidden') ||
+          (error as Error)?.message === 'NOT_PARTICIPANT';
+        
+        if (isParticipantError) {
+          const participantError = new Error('NOT_PARTICIPANT') as Error & { isParticipantError?: boolean };
+          participantError.isParticipantError = true;
+          throw participantError;
+        }
+        throw error;
+      }
+    },
+    enabled: !!conversationId && !!user?.id,
     staleTime: 1000 * 30, // 30 seconds (real-time messaging needs very short stale time)
     gcTime: GC_TIME.MEDIUM, // 10 minutes
     refetchOnWindowFocus: true, // Refetch messages on focus
+    retry: (failureCount, error: unknown) => {
+      // Only retry on 403 errors (not a participant) with exponential backoff
+      // This handles race conditions where conversation is created but user isn't yet recognized as participant
+      const err = error as Error & { isParticipantError?: boolean; response?: { status?: number } };
+      const isParticipantError = 
+        err?.isParticipantError ||
+        err?.message === 'NOT_PARTICIPANT' ||
+        err?.response?.status === 403 ||
+        err?.message?.includes('participant') ||
+        err?.message?.includes('Forbidden');
+      
+      if (isParticipantError && failureCount < 3) {
+        // Exponential backoff: 500ms, 1000ms, 2000ms
+        const delay = Math.min(500 * Math.pow(2, failureCount), 2000);
+        console.log(
+          `🔄 [MESSAGING] Retrying message fetch (attempt ${failureCount + 1}/3) after ${delay}ms due to participant verification error`
+        );
+        return true;
+      }
+      
+      // Don't retry other errors
+      return false;
+    },
+    retryDelay: (attemptIndex) => {
+      // Exponential backoff: 500ms, 1000ms, 2000ms
+      return Math.min(500 * Math.pow(2, attemptIndex), 2000);
+    },
   });
 
   // Send message mutation with acknowledgment support
@@ -127,14 +188,18 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       conversationId: string; 
       messageData: SendMessageDto; 
     }) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:190',message:'sendMessage mutationFn called',data:{conversationId,contentLength:messageData.content?.length,isConnected,hasJoinedRoom:false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
       return api.messaging.sendMessage(conversationId, messageData);
     },
     onMutate: async ({ conversationId, messageData }) => {
       // Optimistic update
-      await queryClient.cancelQueries({ queryKey: queryKeys.messaging.messages(conversationId) });
+      if (!user?.id) return { previousMessages: null, conversationId };
+      await queryClient.cancelQueries({ queryKey: queryKeys.messaging.messages(user.id, conversationId) });
       
       const previousMessages = queryClient.getQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(conversationId)
+        queryKeys.messaging.messages(user.id, conversationId)
       );
 
       // Add optimistic message
@@ -165,49 +230,56 @@ export function useMessaging(options: UseMessagingOptions = {}) {
         readReceipts: [],
       };
 
-      queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(conversationId),
-        old => old ? [...old, tempMessage] : [tempMessage]
-      );
+      if (user?.id) {
+        queryClient.setQueryData<MessagingMessage[]>(
+          queryKeys.messaging.messages(user.id, conversationId),
+          old => old ? [...old, tempMessage] : [tempMessage]
+        );
+      }
 
       return { previousMessages, conversationId };
     },
     onError: (error, variables, context) => {
       // Rollback optimistic update
-      if (context) {
+      if (context && user?.id) {
         queryClient.setQueryData(
-          queryKeys.messaging.messages(context.conversationId),
+          queryKeys.messaging.messages(user.id, context.conversationId),
           context.previousMessages
         );
       }
       toast.error('Failed to send message');
     },
     onSuccess: (newMessage, { conversationId }) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:245',message:'sendMessage onSuccess - message sent to backend',data:{messageId:newMessage.id,conversationId,isConnected,expectingWebSocketEvent:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
       // Replace temp message with real message
-      queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(conversationId),
-        old => {
-          if (!old) return [newMessage];
-          // Remove temp messages and prevent duplicates
-          const filtered = old.filter(msg => 
-            !msg.id.startsWith('temp-') && msg.id !== newMessage.id
-          );
-          return [...filtered, newMessage];
-        }
-      );
+      if (user?.id) {
+        queryClient.setQueryData<MessagingMessage[]>(
+          queryKeys.messaging.messages(user.id, conversationId),
+          old => {
+            if (!old) return [newMessage];
+            // Remove temp messages and prevent duplicates
+            const filtered = old.filter(msg => 
+              !msg.id.startsWith('temp-') && msg.id !== newMessage.id
+            );
+            return [...filtered, newMessage];
+          }
+        );
 
-      // Update conversations list
-      queryClient.setQueryData<MessagingConversation[]>(
-        queryKeys.messaging.conversations(),
-        old => {
-          if (!old) return old;
-          return old.map(conv => 
-            conv.id === conversationId 
-              ? { ...conv, lastMessage: newMessage }
-              : conv
-          );
-        }
-      );
+        // Update conversations list
+        queryClient.setQueryData<MessagingConversation[]>(
+          queryKeys.messaging.conversations(user.id),
+          old => {
+            if (!old) return old;
+            return old.map(conv => 
+              conv.id === conversationId 
+                ? { ...conv, lastMessage: newMessage }
+                : conv
+            );
+          }
+        );
+      }
     },
   });
 
@@ -224,61 +296,217 @@ export function useMessaging(options: UseMessagingOptions = {}) {
 
   // ============ WEBSOCKET REAL-TIME EVENTS ============
 
-  // Join conversation room when conversationId changes
+  // Join conversation room when conversationId changes OR when connection is restored
+  // This ensures we re-join rooms after reconnection
   useEffect(() => {
-    if (!enableRealtime || !conversationId || !isConnected) return;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:294',message:'useEffect for joinConversation triggered',data:{enableRealtime,conversationId,isConnected,connectionState:JSON.stringify(connectionState)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
+    // #endregion
+    if (!enableRealtime || !conversationId || !isConnected) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:298',message:'Skipping join - conditions not met',data:{enableRealtime,conversationId,isConnected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
+      // #endregion
+      return;
+    }
 
-    console.log('🚪 Joining conversation room:', conversationId);
-    joinConversationWS(conversationId);
+    // Add a small delay to ensure socket is fully ready after connection
+    // This is especially important after reconnection
+    const joinTimeout = setTimeout(() => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:305',message:'Calling joinConversationWS after delay',data:{conversationId,isConnected,delay:100},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
+      // #endregion
+      console.log('🚪 Joining conversation room:', conversationId);
+      joinConversationWS(conversationId);
+    }, 100); // Small delay to ensure socket is ready
 
     return () => {
+      clearTimeout(joinTimeout);
       console.log('🚪 Leaving conversation room:', conversationId);
       leaveConversationWS(conversationId);
     };
-  }, [conversationId, isConnected, enableRealtime, joinConversationWS, leaveConversationWS]);
+  }, [conversationId, isConnected, enableRealtime, joinConversationWS, leaveConversationWS, connectionState]);
 
   // Setup event listeners using subscription functions
   useEffect(() => {
-    if (!enableRealtime) return;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:301',message:'useEffect for event listeners triggered',data:{enableRealtime,conversationId,isConnected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    if (!enableRealtime) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:302',message:'Skipping event listeners - realtime disabled',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      return;
+    }
 
     const unsubscribers: (() => void)[] = [];
 
     // Subscribe to new messages using the specific subscription function
     const unsubscribeMessages = subscribeToMessages((message: MessagingMessage) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:307',message:'subscribeToMessages callback executed - NEW MESSAGE RECEIVED',data:{messageId:message.id,conversationId:message.conversationId,currentConversationId:conversationId,matches:message.conversationId===conversationId,senderId:message.senderId,currentUserId:user?.id,isOwnMessage:message.senderId===user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
       try {
         console.log('📨 New message received:', message);
         
+        // Populate sender object if missing (WebSocket messages have sender: null)
+        if (!message.sender && message.senderId && user?.id) {
+          // Get conversation from cache to find sender in participants
+          const conversation = queryClient.getQueryData<MessagingConversation>(
+            queryKeys.messaging.conversation(user.id, message.conversationId)
+          ) || conversations.find(conv => conv.id === message.conversationId);
+          
+          if (conversation?.participants) {
+            const senderParticipant = conversation.participants.find(
+              p => p.userId === message.senderId
+            );
+            
+            if (senderParticipant?.user) {
+              // Populate sender object from participant's user info
+              // Note: participant.user may not have all User fields, so we provide defaults
+              message.sender = {
+                id: senderParticipant.user.id,
+                firstName: senderParticipant.user.firstName,
+                lastName: senderParticipant.user.lastName,
+                email: senderParticipant.user.email,
+                avatarUrl: senderParticipant.user.avatarUrl,
+                role: (senderParticipant.user as any).role || user?.role || 'client',
+                isEmailVerified: (senderParticipant.user as any).isEmailVerified ?? true,
+                createdAt: (senderParticipant.user as any).createdAt || new Date().toISOString(),
+                updatedAt: (senderParticipant.user as any).updatedAt || new Date().toISOString(),
+              } as any; // Type assertion needed since participant.user may not have all User fields
+              console.log('✅ Populated sender from conversation participants:', {
+                id: message.sender.id,
+                name: `${message.sender.firstName} ${message.sender.lastName}`,
+                senderId: message.senderId
+              });
+            } else {
+              // Fallback: create minimal sender object
+              console.warn('⚠️ Sender participant not found for senderId:', message.senderId, 'in conversation:', message.conversationId);
+              message.sender = {
+                id: message.senderId,
+                firstName: 'Unknown',
+                lastName: 'User',
+                email: '',
+                avatarUrl: undefined,
+                role: 'client' as any,
+                isEmailVerified: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              } as any;
+            }
+          } else {
+            // Fallback: conversation not found or has no participants
+            console.warn('⚠️ Conversation not found or has no participants for conversationId:', message.conversationId);
+            // Use fallback immediately
+            message.sender = {
+              id: message.senderId,
+              firstName: 'Unknown',
+              lastName: 'User',
+              email: '',
+              avatarUrl: undefined,
+              role: 'client' as any,
+              isEmailVerified: false,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            } as any;
+            
+            // Try to fetch conversation async and update message in cache if found
+            (async () => {
+              try {
+                const conv = await api.messaging.getConversation(message.conversationId);
+                if (conv?.participants) {
+                  const senderParticipant = conv.participants.find(p => p.userId === message.senderId);
+                  if (senderParticipant?.user) {
+                    const correctSender = {
+                      id: senderParticipant.user.id,
+                      firstName: senderParticipant.user.firstName,
+                      lastName: senderParticipant.user.lastName,
+                      email: senderParticipant.user.email,
+                      avatarUrl: senderParticipant.user.avatarUrl,
+                      role: (senderParticipant.user as any).role || 'client',
+                      isEmailVerified: (senderParticipant.user as any).isEmailVerified ?? true,
+                      createdAt: (senderParticipant.user as any).createdAt || new Date().toISOString(),
+                      updatedAt: (senderParticipant.user as any).updatedAt || new Date().toISOString(),
+                    } as any;
+                    
+                    // Update the message in cache with correct sender
+                    if (user?.id) {
+                      queryClient.setQueryData<MessagingMessage[]>(
+                        queryKeys.messaging.messages(user.id, message.conversationId),
+                        old => {
+                          if (!old) return old;
+                          return old.map(msg => 
+                            msg.id === message.id 
+                              ? { ...msg, sender: correctSender }
+                              : msg
+                          );
+                        }
+                      );
+                    }
+                    console.log('✅ Updated message sender in cache after fetching conversation');
+                  }
+                }
+              } catch (error) {
+                console.error('❌ Failed to fetch conversation for sender lookup:', error);
+              }
+            })();
+          }
+        }
+        
         // Add to current conversation messages (avoid duplicates)
-        if (message.conversationId === conversationId) {
+        if (message.conversationId === conversationId && user?.id) {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:313',message:'Updating query client with new message',data:{messageId:message.id,conversationId:message.conversationId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+          // #endregion
           queryClient.setQueryData<MessagingMessage[]>(
-            queryKeys.messaging.messages(message.conversationId),
+            queryKeys.messaging.messages(user.id, message.conversationId),
             old => {
-              if (!old) return [message];
+              if (!old) {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:316',message:'Query data was empty - creating new array',data:{messageId:message.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                // #endregion
+                return [message];
+              }
               // Check if message already exists to prevent duplicates
               const messageExists = old.some(existingMsg => existingMsg.id === message.id);
               if (messageExists) {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:320',message:'Message already exists - skipping duplicate',data:{messageId:message.id,oldCount:old.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                // #endregion
                 console.log('📝 Message already exists, skipping:', message.id);
                 return old;
               }
+              // #region agent log
+              fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:323',message:'Adding new message to query data',data:{messageId:message.id,oldCount:old.length,newCount:old.length+1},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+              // #endregion
               return [...old, message];
             }
           );
         }
 
         // Update conversations list
-        queryClient.setQueryData<MessagingConversation[]>(
-          queryKeys.messaging.conversations(),
-          old => {
-            if (!old) return old;
-            return old.map(conv => 
-              conv.id === message.conversationId 
-                ? { ...conv, lastMessage: message }
-                : conv
-            );
-          }
-        );
+        if (user?.id) {
+          queryClient.setQueryData<MessagingConversation[]>(
+            queryKeys.messaging.conversations(user.id),
+            old => {
+              if (!old) return old;
+              return old.map(conv => 
+                conv.id === message.conversationId 
+                  ? { ...conv, lastMessage: message }
+                  : conv
+              );
+            }
+          );
+        }
 
+        // Validate message has senderId before processing
+        if (!message.senderId) {
+          console.warn('Received message without senderId:', message.id);
+          return;
+        }
+        
         // Show toast for messages from others (not in current conversation)
+        // Always use message.senderId as source of truth
         if (message.senderId !== user?.id && message.conversationId !== conversationId) {
           toast('New message', {
             description: message.content.length > 50 
@@ -303,23 +531,25 @@ export function useMessaging(options: UseMessagingOptions = {}) {
           return;
         }
         
-        queryClient.setQueryData<MessagingMessage[]>(
-          queryKeys.messages(conversationId),
-          old => {
-            if (!old) return old;
-            return old.map(msg => 
-              msg.id === data.messageId
-                ? {
-                    ...msg,
-                    content: data.content ?? msg.content,
-                    isDeleted: data.isDeleted ?? msg.isDeleted,
-                    isEdited: true,
-                    updatedAt: new Date().toISOString(),
-                  }
-                : msg
-            );
-          }
-        );
+        if (user?.id) {
+          queryClient.setQueryData<MessagingMessage[]>(
+            queryKeys.messaging.messages(user.id, conversationId),
+            old => {
+              if (!old) return old;
+              return old.map(msg => 
+                msg.id === data.messageId
+                  ? {
+                      ...msg,
+                      content: data.content ?? msg.content,
+                      isDeleted: data.isDeleted ?? msg.isDeleted,
+                      isEdited: true,
+                      updatedAt: new Date().toISOString(),
+                    }
+                  : msg
+              );
+            }
+          );
+        }
       } catch (error) {
         console.error('💥 Error handling message_updated event:', error, data);
         toast.error('Error updating message');
@@ -328,10 +558,10 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     unsubscribers.push(unsubscribeMessageUpdated);
 
     const unsubscribeMessageRead = onEvent('message_read', (data: MessageReadEventData) => {
-      if (!conversationId) return;
+      if (!conversationId || !user?.id) return;
       
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(conversationId),
+        queryKeys.messaging.messages(user.id, conversationId),
         old => {
           if (!old) return old;
           return old.map(msg => 
@@ -356,10 +586,10 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     unsubscribers.push(unsubscribeMessageRead);
 
     const unsubscribeMessageReaction = onEvent('message_reaction', (data: MessageReactionEventData) => {
-      if (!conversationId) return;
+      if (!conversationId || !user?.id) return;
       
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(conversationId),
+        queryKeys.messaging.messages(user.id, conversationId),
         old => {
           if (!old) return old;
           return old.map(msg => {

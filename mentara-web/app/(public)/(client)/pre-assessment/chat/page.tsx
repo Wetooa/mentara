@@ -700,8 +700,19 @@ function PreAssessmentChatPageContent() {
       
       console.log('[Chatbot] Session completed with results:', results);
       
-      // Redirect to signup
-      router.push("/pre-assessment/signup?method=chat");
+      // Store pre-assessment results in localStorage for registration
+      // Include the converted answers array so registration can use it
+      localStorage.setItem('preassessment_chatbot_results', JSON.stringify({
+        sessionId,
+        scores: results.scores,
+        severityLevels: results.severityLevels,
+        answers: results.answers, // Converted answers array (201 items)
+        method: 'chatbot',
+        timestamp: Date.now()
+      }));
+      
+      // Redirect to sign-up page
+      router.push("/auth/sign-up?method=chat&sessionId=" + sessionId);
     } catch (error) {
       console.error('[Chatbot] Failed to complete session:', error);
       toast.error('Failed to complete assessment. Please try again.');
@@ -784,11 +795,11 @@ function PreAssessmentChatPageContent() {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 min-w-0">
-          <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
-          <span className="font-semibold text-gray-900 text-xs sm:text-sm whitespace-nowrap truncate">AI Assessment</span>
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-shrink-0 min-w-0">
+          <Sparkles className="h-4 w-4 text-primary flex-shrink-0 self-center" />
+          <span className="font-semibold text-gray-900 text-xs sm:text-sm whitespace-nowrap truncate leading-none">AI Assessment</span>
         </div>
-        <div className="flex-shrink-0 w-9 h-9 flex items-center justify-center">
+        <div className="flex-shrink-0 flex items-center justify-center">
           <Logo />
         </div>
       </motion.nav>
@@ -1000,7 +1011,7 @@ function PreAssessmentChatPageContent() {
                   Based on our conversation, we're ready to match you with a therapist.
                 </p>
                 <Button 
-                  onClick={() => router.push("/pre-assessment/signup?method=chat")} 
+                  onClick={() => router.push(`/auth/sign-up?method=chat&sessionId=${sessionId || ''}`)} 
                   className="w-full h-11 rounded-xl shadow-md hover:shadow-lg transition-all" 
                   size="lg"
                 >

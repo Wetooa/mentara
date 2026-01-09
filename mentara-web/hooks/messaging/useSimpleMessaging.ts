@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useMessaging } from './useMessaging';
 import { groupMessagesByDate, formatDateLabel } from '@/lib/utils/messageUtils';
 import type { Message, Conversation } from '@/components/messages/types';
@@ -14,6 +15,7 @@ export function useSimpleMessaging(params: {
   conversationId?: string;
   enableRealtime?: boolean;
 } = {}) {
+  const { user } = useAuth();
   const {
     conversations,
     messages,
@@ -41,9 +43,25 @@ export function useSimpleMessaging(params: {
   const convertedMessages: Message[] = useMemo(() => {
     if (!messages) return [];
     
-    return messages.map(msg => ({
-      id: msg.id,
-      sender: msg.senderId === 'current-user' ? 'me' : 'them', // TODO: Get current user ID properly
+    // Ensure user context is current before comparing
+    const currentUserId = user?.id;
+    if (!currentUserId) {
+      console.warn('User context not available for message sender detection');
+    }
+    
+    return messages.map(msg => {
+      // Validate senderId is present
+      if (!msg.senderId) {
+        console.warn('Message missing senderId:', msg.id);
+      }
+      
+      // Compare senderId from message with current user ID
+      // Always use message.senderId as the source of truth
+      const isOwnMessage = currentUserId && msg.senderId === currentUserId;
+      
+      return {
+        id: msg.id,
+        sender: isOwnMessage ? 'me' : 'them',
       text: msg.content,
       time: new Date(msg.createdAt).toLocaleTimeString([], { 
         hour: '2-digit', 
@@ -64,8 +82,9 @@ export function useSimpleMessaging(params: {
       })) || [],
       replyTo: msg.replyToId,
       isDeleted: msg.isDeleted,
-    }));
-  }, [messages]);
+      };
+    });
+  }, [messages, user?.id]);
 
   // Group messages by date for display
   const messageGroups = useMemo(() => {

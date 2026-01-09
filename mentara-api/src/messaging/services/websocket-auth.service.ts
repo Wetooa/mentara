@@ -384,8 +384,22 @@ export class WebSocketAuthMiddleware {
           return next(new Error('Authentication token required'));
         }
 
-        // Verify JWT token
-        const payload = this.jwtService.verify(token);
+        // Verify JWT token with expiration check
+        let payload: any;
+        try {
+          payload = this.jwtService.verify(token);
+        } catch (jwtError: any) {
+          if (jwtError.name === 'TokenExpiredError') {
+            this.logger.warn(`Token expired for socket ${socket.id}`);
+            return next(new Error('Token expired'));
+          }
+          if (jwtError.name === 'JsonWebTokenError') {
+            this.logger.warn(`Invalid token for socket ${socket.id}`);
+            return next(new Error('Invalid token'));
+          }
+          throw jwtError;
+        }
+
         if (!payload.sub || !payload.email) {
           this.logger.warn(`Invalid token payload for socket ${socket.id}`);
           return next(new Error('Invalid token payload'));
@@ -408,7 +422,7 @@ export class WebSocketAuthMiddleware {
         });
 
         if (!user) {
-          this.logger.warn(`User not found or inactive for socket ${socket.id}`);
+          this.logger.warn(`User not found or inactive for socket ${socket.id}, userId: ${payload.sub}`);
           return next(new Error('User not found or inactive'));
         }
 
@@ -416,10 +430,10 @@ export class WebSocketAuthMiddleware {
         (socket as any).userId = user.id;
         (socket as any).user = user;
 
-        this.logger.log(`Socket ${socket.id} authenticated as user ${user.id}`);
+        this.logger.debug(`Socket ${socket.id} authenticated as user ${user.id} (${user.firstName} ${user.lastName})`);
         next();
       } catch (error) {
-        this.logger.error(`Auth middleware error for socket ${socket.id}:`, error.message);
+        this.logger.error(`Auth middleware error for socket ${socket.id}:`, error instanceof Error ? error.message : String(error));
         next(new Error('Authentication failed'));
       }
     };

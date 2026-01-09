@@ -222,6 +222,45 @@ These environment variables enhance functionality but are not required for basic
 
 ### AI Services
 
+#### `AI_PROVIDER`
+- **Type**: String
+- **Default**: `ollama`
+- **Example**: `ollama`, `gemini`, `sambanova`
+- **Description**: AI provider to use for chat completions and pre-assessment chatbot
+- **Options**:
+  - `ollama` - Local Ollama server with OpenAI-compatible API (default, no API key required)
+  - `gemini` - Google Gemini API (requires GEMINI_API_KEY)
+  - `sambanova` - SambaNova Cloud API (requires SAMBANOVA_API_KEY)
+- **Notes**: The default provider is `ollama`. Ensure Ollama is running locally if using the default.
+
+#### `OLLAMA_BASE_URL`
+- **Type**: String (HTTP/HTTPS URL)
+- **Default**: `http://localhost:11434`
+- **Example**: `http://localhost:11434`, `http://192.168.1.100:11434`
+- **Description**: Base URL for the Ollama server
+- **Notes**: Default port is 11434. Change this if your Ollama server is running on a different host or port.
+
+#### `OLLAMA_MODEL`
+- **Type**: String
+- **Default**: `deepseek-r1:1.5b`
+- **Example**: `deepseek-r1:1.5b`, `llama3.2`, `mistral`
+- **Description**: Ollama model to use for chat completions
+- **Notes**: Ensure the model is pulled in Ollama before use: `ollama pull deepseek-r1:1.5b`. The model must be available on your Ollama server.
+
+#### `GEMINI_API_KEY`
+- **Type**: String
+- **Example**: `AIza...`
+- **Description**: Google Gemini API key for AI-powered chatbot functionality
+- **Source**: Google AI Studio
+- **Notes**: Required when `AI_PROVIDER=gemini`
+
+#### `GEMINI_MODEL`
+- **Type**: String
+- **Default**: `gemini-2.0-flash-exp`
+- **Example**: `gemini-2.0-flash-exp`, `gemini-pro`
+- **Description**: Gemini model to use for chat completions
+- **Notes**: Only used when `AI_PROVIDER=gemini`
+
 #### `SAMBANOVA_API_KEY`
 - **Type**: String
 - **Minimum Length**: 20 characters

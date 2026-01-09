@@ -70,7 +70,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     // Log authentication attempt
     if (authHeader) {
       const tokenPreview = authHeader.substring(0, 20) + '...';
-      this.logger.debug(`JWT authentication attempt from ${request.ip} - token preview: ${tokenPreview}`);
+      // Debug log removed to reduce noise
     } else if (!isPublic) {
       this.logger.warn(`JWT authentication attempt from ${request.ip} - no Authorization header found`);
     }
@@ -102,7 +102,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       request.userId = user.userId; // For @CurrentUserId() decorator
       request.userRole = user.role; // For @CurrentUserRole() decorator
 
-      this.logger.debug(`JWT authentication successful for user: ${user.userId} (${user.email})`);
+      // Debug log removed to reduce noise
     }
     
     return user;

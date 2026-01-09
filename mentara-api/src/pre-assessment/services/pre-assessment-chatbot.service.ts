@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException, HttpException, BadRequestException } from '@nestjs/common';
-import { GeminiClientService } from './gemini-client.service';
+import { ConfigService } from '@nestjs/config';
+import { AiProviderFactory } from './ai-provider.factory';
 import { QuestionnaireSelectorService, QuestionnaireSelectionResult } from './questionnaire-selector.service';
 import { QuestionnaireFormGeneratorService, QuestionnaireFormData } from './questionnaire-form-generator.service';
 import { ConversationInsightsService, ConversationInsights } from './conversation-insights.service';
@@ -38,11 +39,12 @@ export class PreAssessmentChatbotService {
   private readonly SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
   constructor(
-    private readonly geminiClient: GeminiClientService,
+    private readonly aiProvider: AiProviderFactory,
     private readonly prisma: PrismaService,
     private readonly questionnaireSelector: QuestionnaireSelectorService,
     private readonly formGenerator: QuestionnaireFormGeneratorService,
     private readonly insightsService: ConversationInsightsService,
+    private readonly configService: ConfigService,
   ) {
     // Cleanup expired sessions every 5 minutes
     setInterval(() => this.cleanupExpiredSessions(), 5 * 60 * 1000);
@@ -75,8 +77,8 @@ export class PreAssessmentChatbotService {
       ? `chatbot_${userId}_${Date.now()}`
       : `chatbot_anon_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-    // Get system prompt with questionnaire context
-    const systemPrompt = this.buildSystemPrompt();
+    // Get system prompt - use initial lightweight prompt for new sessions (Phase 1)
+    const systemPrompt = this.buildInitialSystemPrompt();
     const welcomeMessage = this.getWelcomeMessage();
 
     // Create session in database (userId and clientId are optional for anonymous sessions)
@@ -221,9 +223,12 @@ export class PreAssessmentChatbotService {
     try {
       // Extract conversation insights (gracefully handle errors)
       // Skip insights extraction for "Answer submitted" messages to reduce API calls
+      // In development mode, skip AI-based insights extraction
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      this.logger.log(`🔍 [DEBUG] NODE_ENV check: ${process.env.NODE_ENV}, isDevelopment: ${isDevelopment}`);
       let newInsights: ConversationInsights | null = null;
       let updatedInsights = (session.conversationInsights as any) || null;
-      if (!isAnswerSubmittedMessage) {
+      if (!isAnswerSubmittedMessage && !isDevelopment) {
         try {
           newInsights = await this.insightsService.extractInsights(conversationHistory);
           const existingInsights = (session.conversationInsights as any) || null;
@@ -235,7 +240,11 @@ export class PreAssessmentChatbotService {
           // Continue without insights
         }
       } else {
-        this.logger.log('Skipping insights extraction for "Answer submitted" message to reduce API calls');
+        if (isDevelopment) {
+          this.logger.log('🔧 [DEV MODE] Skipping AI-based insights extraction');
+        } else {
+          this.logger.log('Skipping insights extraction for "Answer submitted" message to reduce API calls');
+        }
       }
 
       // Suggest questionnaires based on conversation (gracefully handle errors)
@@ -256,7 +265,8 @@ export class PreAssessmentChatbotService {
       // 1. We don't have a current questionnaire yet
       // 2. This is not an "Answer submitted" message (which is auto-generated)
       // 3. We don't have recent structured answers (meaning user is actively answering)
-      if (!hasCurrentQuestionnaire && !isAnswerSubmittedMessage && !hasRecentStructuredAnswerBeforeRefresh) {
+      // 4. We're NOT in development mode (development mode uses hardcoded Anxiety questionnaire)
+      if (!hasCurrentQuestionnaire && !isAnswerSubmittedMessage && !hasRecentStructuredAnswerBeforeRefresh && !isDevelopment) {
         try {
           questionnaireSelection = await this.questionnaireSelector.suggestQuestionnaires(
             conversationHistory,
@@ -266,7 +276,11 @@ export class PreAssessmentChatbotService {
           // Continue with empty selection
         }
       } else {
-        this.logger.log('Skipping AI-based questionnaire selection to reduce API calls (has current questionnaire or is answer submission)');
+        if (isDevelopment) {
+          this.logger.log('🔧 [DEV MODE] Skipping AI-based questionnaire selection - using hardcoded Anxiety questionnaire');
+        } else {
+          this.logger.log('Skipping AI-based questionnaire selection to reduce API calls (has current questionnaire or is answer submission)');
+        }
       }
 
       // Refresh session to get latest structured answers (in case answer was just submitted)
@@ -299,6 +313,13 @@ export class PreAssessmentChatbotService {
         currentQuestionnaire = nextQuestionnaire;
       }
 
+      // In development mode, ensure we're working on Anxiety questionnaire
+      // Note: isDevelopment was already declared earlier in this function
+      if (isDevelopment && !currentQuestionnaire) {
+        currentQuestionnaire = 'Anxiety';
+        this.logger.log('🔧 [DEV MODE] Setting current questionnaire to Anxiety');
+      }
+
       // Enhance conversation history with questionnaire context for AI
       const enhancedHistory: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = this.enhanceHistoryWithQuestionnaireContext(
         conversationHistory,
@@ -308,39 +329,52 @@ export class PreAssessmentChatbotService {
         isAnswerSubmittedMessage,
       );
 
-      // Log conversation history being sent to Gemini
-      this.logger.log('=== Sending to Gemini ===');
-      this.logger.log(`Session ID: ${sessionId}`);
-      this.logger.log(`Current Questionnaire: ${currentQuestionnaire || 'none'}`);
-      this.logger.log(`Conversation History Length: ${conversationHistory.length}`);
-      this.logger.log(`Enhanced History Length: ${enhancedHistory.length}`);
-      this.logger.log(`Enhanced History: ${JSON.stringify(enhancedHistory, null, 2)}`);
-
-      // Get AI response
-      this.logger.log('Calling Gemini chatCompletion...');
+      // Get structured answers for mock response (already checked isDevelopment above)
+      const structuredAnswers = (session.structuredAnswers as Record<string, number>) || {};
+      
       let aiResponse: string;
       let usedFallback = false;
-      
-      try {
-        aiResponse = await this.geminiClient.chatCompletion(
-          enhancedHistory,
-          {
-            temperature: 0.7,
-            max_tokens: 4000,
-          },
-        );
-        this.logger.log(`✅ Received AI Response (first 200 chars): ${aiResponse.substring(0, 200)}...`);
-      } catch (geminiError) {
-        // If Gemini fails, provide a helpful fallback response
-        this.logger.error('❌ Gemini API call failed, using fallback response');
-        this.logger.error('Error details:', geminiError instanceof Error ? geminiError.message : String(geminiError));
+
+      if (isDevelopment) {
+        // Use mock responses in development mode
+        this.logger.log('🔧 [DEV MODE] Using mock responses with anxiety tool calls - BYPASSING LLM');
+        this.logger.log(`🔧 [DEV MODE] NODE_ENV: ${process.env.NODE_ENV}`);
+        // Count user messages to determine conversation phase
+        const userMessageCount = conversationHistory.filter(msg => msg.role === 'user').length;
+        aiResponse = this.getMockResponse(structuredAnswers, currentQuestionnaire, userMessageCount);
+        this.logger.log(`✅ [DEV MODE] Mock Response (first 200 chars): ${aiResponse.substring(0, 200)}...`);
+      } else {
+        // Log conversation history being sent to AI Provider
+        this.logger.log('=== Sending to AI Provider ===');
+        this.logger.log(`Session ID: ${sessionId}`);
+        this.logger.log(`Current Questionnaire: ${currentQuestionnaire || 'none'}`);
+        this.logger.log(`Conversation History Length: ${conversationHistory.length}`);
+        this.logger.log(`Enhanced History Length: ${enhancedHistory.length}`);
+        this.logger.log(`Enhanced History: ${JSON.stringify(enhancedHistory, null, 2)}`);
+
+        // Get AI response
+        this.logger.log(`Calling AI Provider (${this.aiProvider.getProvider()}) chatCompletion...`);
+        
+        try {
+          aiResponse = await this.aiProvider.chatCompletion(
+            enhancedHistory,
+            {
+              temperature: 0.7,
+              max_tokens: 4000,
+            },
+          );
+          this.logger.log(`✅ Received AI Response (first 200 chars): ${aiResponse.substring(0, 200)}...`);
+        } catch (aiError) {
+        // If AI provider fails, provide a helpful fallback response
+        this.logger.error('❌ AI Provider call failed, using fallback response');
+        this.logger.error('Error details:', aiError instanceof Error ? aiError.message : String(aiError));
         
         usedFallback = true;
         
         // Determine fallback response based on error type
-        if (geminiError instanceof HttpException) {
-          const status = geminiError.getStatus();
-          const errorMessage = geminiError.message;
+        if (aiError instanceof HttpException) {
+          const status = aiError.getStatus();
+          const errorMessage = aiError.message;
           
           if (status === 400) {
             // Bad request - likely model or format issue
@@ -356,7 +390,7 @@ export class PreAssessmentChatbotService {
             aiResponse = this.getFallbackResponse(userMessage, 'rate_limit');
           } else if (status === 500 || status === 503) {
             // Server error
-            this.logger.error('⚠️ Server Error - Gemini service issue');
+            this.logger.error('⚠️ Server Error - AI service issue');
             aiResponse = this.getFallbackResponse(userMessage, 'server_error');
           } else {
             // Unknown error
@@ -369,6 +403,7 @@ export class PreAssessmentChatbotService {
         }
         
         this.logger.warn(`📝 Using fallback response (type: ${usedFallback ? 'fallback' : 'ai'})`);
+        }
       }
 
       // Parse tool calls from AI response
@@ -392,7 +427,7 @@ export class PreAssessmentChatbotService {
 
       // Check if this is an "Answer submitted" message and if we have a recent structured answer
       // (Note: isAnswerSubmittedMessage was already determined above)
-      const structuredAnswers = (session.structuredAnswers as Record<string, number>) || {};
+      // structuredAnswers was already declared earlier in this function
       const hasRecentStructuredAnswer = Object.keys(structuredAnswers).length > 0;
       
       // If this is an "Answer submitted" message and we have structured answers, 
@@ -890,7 +925,8 @@ export class PreAssessmentChatbotService {
     } | null;
   } {
     // Extract TOOL_CALL JSON block using regex that handles nested structures
-    const toolCallRegex = /TOOL_CALL:\s*(\{[\s\S]*?\})\s*(?:\n|$)/;
+    // Also handle markdown formatting like **TOOL_CALL:** as fallback
+    const toolCallRegex = /(?:\*\*)?TOOL_CALL(?:\*\*)?:\s*(\{[\s\S]*?\})\s*(?:\n|$)/;
     const match = aiResponse.match(toolCallRegex);
 
     if (!match) {
@@ -1021,6 +1057,99 @@ export class PreAssessmentChatbotService {
     }
 
     return null;
+  }
+
+  /**
+   * Get mock response for development mode
+   * Returns hardcoded anxiety-focused responses with tool calls
+   */
+  private getMockResponse(
+    structuredAnswers: Record<string, number>,
+    currentQuestionnaire: string | null,
+    userMessageCount: number = 0,
+  ): string {
+    const answeredCount = Object.keys(structuredAnswers).filter((id) =>
+      id.startsWith('anxiety_q'),
+    ).length;
+
+    // Handle initial conversation before tool calls start
+    // First user message: about feeling anxious due to exams
+    if (userMessageCount === 1 && answeredCount === 0) {
+      return "I understand. Exams can be really tough and it's completely normal to feel anxious about them. The pressure of upcoming tests, deadlines, and the fear of not performing well can definitely take a toll on your mental well-being. I'm here to help you work through these feelings. Can you tell me a bit more about how this anxiety has been affecting your daily life? For example, are you finding it hard to focus on studying, or is it impacting your sleep?";
+    }
+
+    // Second user message: follow-up response before starting structured questions
+    if (userMessageCount === 2 && answeredCount === 0) {
+      return "Thank you for sharing that with me. It sounds like the anxiety around your exams is really impacting you, and I want to make sure we get a clear picture of what you're experiencing. To help me understand better and connect you with the right support, I'd like to ask you some specific questions about your anxiety. These will help us assess how it's been affecting you over the past couple of weeks.";
+    }
+
+    // Anxiety questions (GAD-7) with improved conversational context
+    const anxietyQuestions = [
+      {
+        id: 'anxiety_q1',
+        question: 'Over the last 2 weeks, how often have you felt nervous, anxious, or on edge?',
+        context: "I understand you're here to talk about how you've been feeling. Many people experience anxiety in different ways - some feel it as a constant sense of unease, while others notice it more in certain situations. Let's start by understanding how often you've been feeling nervous or on edge lately.",
+      },
+      {
+        id: 'anxiety_q2',
+        question: 'Over the last 2 weeks, how often have you been unable to stop or control worrying?',
+        context: "Thank you for sharing that with me. One of the challenging aspects of anxiety is when worries feel like they're running on a loop and you can't seem to turn them off, even when you try. This can be really exhausting. I'd like to understand how often you've experienced this feeling of not being able to control your worries.",
+      },
+      {
+        id: 'anxiety_q3',
+        question: 'Over the last 2 weeks, how often have you been worrying too much about different things?',
+        context: "I appreciate you continuing with me. Sometimes anxiety can make us worry about many different things at once - work, relationships, health, finances, or even everyday tasks. It can feel like your mind is jumping from one concern to another. Let's explore how often you've found yourself worrying about multiple different things.",
+      },
+      {
+        id: 'anxiety_q4',
+        question: 'Over the last 2 weeks, how often have you had trouble relaxing?',
+        context: "Thank you for that. When anxiety is present, it can make it really difficult to unwind and relax, even when you're trying to. You might find yourself feeling tense or on alert even during moments when you should be able to rest. I'd like to understand how often you've experienced trouble relaxing.",
+      },
+      {
+        id: 'anxiety_q5',
+        question: 'Over the last 2 weeks, how often have you been so restless that it\'s hard to sit still?',
+        context: "I see. Anxiety doesn't just affect our thoughts - it can also show up physically. Some people experience restlessness, like they need to keep moving or can't sit still, even when they want to. This physical restlessness can be another way anxiety manifests. Let's talk about how often you've felt this way.",
+      },
+      {
+        id: 'anxiety_q6',
+        question: 'Over the last 2 weeks, how often have you become easily annoyed or irritable?',
+        context: "Thank you for continuing. When we're dealing with anxiety, it can sometimes make us more sensitive or reactive than usual. Small things that normally wouldn't bother us might suddenly feel overwhelming, and we might find ourselves getting annoyed or irritable more easily. I'd like to understand how often this has been happening for you.",
+      },
+      {
+        id: 'anxiety_q7',
+        question: 'Over the last 2 weeks, how often have you felt afraid as if something awful might happen?',
+        context: "I appreciate you sharing all of this with me. One of the more distressing aspects of anxiety can be that persistent feeling of dread or fear that something bad is about to happen, even when there's no clear reason to feel that way. This sense of impending doom can be really unsettling. Let's explore how often you've experienced this feeling.",
+      },
+    ];
+
+    const options = [
+      { value: 0, label: 'Not at all' },
+      { value: 1, label: 'Several days' },
+      { value: 2, label: 'More than half the days' },
+      { value: 3, label: 'Nearly every day' },
+    ];
+
+    // If we've answered all 7 questions, return completion message
+    if (answeredCount >= 7) {
+      return "Thank you for completing the anxiety assessment. I've gathered important information about your experience with anxiety. Based on your responses, I can see that anxiety has been affecting various aspects of your daily life. This assessment will help us connect you with therapists who specialize in anxiety disorders and can provide the support you need.";
+    }
+
+    // Get the next question to ask
+    const nextQuestion = anxietyQuestions[answeredCount];
+    if (!nextQuestion) {
+      return "Thank you for sharing your experiences. I've gathered enough information to help connect you with appropriate support.";
+    }
+
+    // Build the response with conversational text and tool call
+    const toolCallJson = JSON.stringify({
+      tool: 'ask_question',
+      questionId: nextQuestion.id,
+      topic: 'Anxiety',
+      question: nextQuestion.question,
+      options: options,
+    });
+
+    return `${nextQuestion.context}\n\nTOOL_CALL: ${toolCallJson}`;
   }
 
   /**
@@ -1187,9 +1316,11 @@ Your role:
 Questionnaire details:
 ${questionnaireDetails}
 
-CRITICAL - Tool Calls for Structured Questions:
-When you need to ask a question that requires a rating or scale response (0-4), you MUST use a tool call to present structured options.
+CRITICAL - Tool Calls for Structured Questions (MANDATORY):
+EVERY question that requires a rating or scale response (0-4) MUST use a TOOL_CALL - there are NO exceptions.
+NEVER ask structured questions in plain text (like "How has anxiety affected your daily life?").
 NEVER ask users to type numbers like "0 to 4" - always use tool calls for ratings.
+ALL structured questions are ONLY asked via TOOL_CALL format.
 
 Format your response with the tool call as a JSON block prefixed with TOOL_CALL:
 TOOL_CALL: {"tool":"ask_question","questionId":"unique_id_here","topic":"TopicName","question":"Your question text here?","options":[{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]}
@@ -1208,46 +1339,219 @@ Assistant: "I'm sorry to hear you're going through this. Let me ask you about so
 
 TOOL_CALL: {"tool":"ask_question","questionId":"depression_q1","topic":"Depression","question":"Over the last 2 weeks, how often have you felt down, depressed, or hopeless?","options":[{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]}"
 
-Another example with conversational follow-up:
+Another example with contextual conversational follow-up (relates to the question being asked):
 User: "I answered the last question"
-Assistant: "Thank you for sharing. Let's continue.
+Assistant: "I appreciate you sharing that. Let's explore how depression might be affecting your interest in activities you normally enjoy.
 
-TOOL_CALL: {"tool":"ask_question","questionId":"depression_q2","topic":"Depression","question":"How often have you had little interest or pleasure in doing things?","options":[{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]}
-
-Take your time with each question - there's no rush."
+TOOL_CALL: {"tool":"ask_question","questionId":"depression_q2","topic":"Depression","question":"How often have you had little interest or pleasure in doing things?","options":[{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]}"
 
 Guidelines:
 - Ask one question at a time from the current questionnaire
-- ALWAYS use TOOL_CALL when asking for a rating/scale response (NEVER ask users to type "0 to 4" or similar)
-- You can include conversational text before or after the tool call for warmth and context
+- ALWAYS use TOOL_CALL when asking for a rating/scale response - NEVER ask structured questions in plain text
+- Include 2-3 sentences of contextual conversational text before each tool call - relate it to the specific question/topic you're asking about
+- Make conversational text relevant (e.g., "Let's talk about how anxiety affects your sleep" before asking a sleep-related anxiety question)
+- Avoid generic acknowledgments like "You've already answered" or "Let's move on" - make it specific to what you're exploring
 - Each questionId should be unique in format: {topic_lowercase}_q{number}
 - Match the options to the appropriate scale for the questionnaire (typically 0-3 or 0-4)
 - When the system indicates a questionnaire is relevant, focus on asking questions from that questionnaire
 - Rephrase questions naturally but keep the core meaning clear
-- If the user seems uncomfortable, acknowledge their feelings before continuing
+- If the user seems uncomfortable, acknowledge their feelings empathetically before continuing
 - Progress through questionnaires systematically, tracking which questions you've asked
 - When you've gathered enough information, indicate the assessment is complete
 - You can ask questions from multiple questionnaires if the user's responses indicate multiple conditions
+- After receiving an answer, ALWAYS immediately continue with the next question - never wait for user prompts
 
 CRITICAL - Auto-Continue After Structured Answers:
 - When a user answers a structured question (via tool call), the system will automatically send you a message indicating the answer was received
-- You MUST immediately acknowledge the answer briefly (e.g., "Thank you" or "Got it") and then CONTINUE with the next question or relevant follow-up
+- You MUST immediately acknowledge with 2-3 sentences of contextual conversational text that relates to the next question you're about to ask
+- Make the text relevant - mention the aspect or symptom area you're exploring next (e.g., "Let's explore how anxiety affects your ability to concentrate" before asking a concentration question)
+- Then CONTINUE with the next question via TOOL_CALL - NEVER ask in plain text
 - DO NOT wait for additional user input - automatically proceed with the next step in the assessment
-- Keep acknowledgments brief (1-2 sentences max) and then immediately present the next question or continue the conversation
-- Example flow: User answers → You acknowledge briefly → You ask next question or provide next tool call
+- Example flow: User answers → You provide contextual acknowledgment related to next question (2-3 sentences) → You ask next question via TOOL_CALL
 - This creates a smooth, continuous flow without requiring the user to send additional messages
+- NEVER stop and wait - always proactively continue with the next question after receiving an answer
+- Avoid generic responses like "You've already answered" or "Let's move on" - make it specific and contextual
 
 Common option scales:
 - 0-3 depression/anxiety scale: [{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]
 - 0-4 frequency scale: [{"value":0,"label":"Never"},{"value":1,"label":"Rarely"},{"value":2,"label":"Sometimes"},{"value":3,"label":"Often"},{"value":4,"label":"Very often"}]
 - 0-1 yes/no: [{"value":0,"label":"No"},{"value":1,"label":"Yes"}]
 
-Remember: You're helping someone who may be going through a difficult time. Be kind, patient, and professional. ALWAYS use tool calls for structured questions - never ask users to type numbers.`;
+Remember: You're helping someone who may be going through a difficult time. Be kind, patient, and professional. 
+Provide warm, empathetic conversational responses (2-3 sentences) that are contextual and relate to the specific question you're asking.
+ALWAYS use TOOL_CALL for EVERY structured question - NEVER ask structured questions in plain text.
+ALWAYS automatically continue with the next question after receiving an answer - never wait for user prompts.
+Make your conversational text relevant to the topic/question - avoid generic acknowledgments like "Let's move on" or "You've already answered".`;
+  }
+
+  /**
+   * Build lightweight initial system prompt for disorder identification phase
+   * This prompt is used before questionnaires are selected to reduce token usage
+   */
+  private buildInitialSystemPrompt(): string {
+    const questionnaires = LIST_OF_QUESTIONNAIRES.join(', ');
+    
+    return `You are a compassionate mental health assessment assistant helping a user through a pre-assessment conversation.
+
+Available assessment areas: ${questionnaires}
+
+CRITICAL - Keep responses SHORT and CONVERSATIONAL:
+- Keep each response to 2-3 sentences maximum
+- Be warm but brief - no long explanations
+- Ask quick follow-up questions to identify relevant assessment areas
+- Once you identify a potential concern (e.g., anxiety, depression, insomnia), IMMEDIATELY move to asking structured questions via tool calls
+- DO NOT provide long explanations about disorders - just acknowledge briefly and move to assessment
+
+MANDATORY - ALL Structured Questions Use TOOL_CALLS:
+- When asking ANY question that requires a rating or scale response (0-4, 0-10, etc.), you MUST use TOOL_CALL format
+- NEVER ask questions like "On a scale from 0 to 10, how often..." in plain text
+- Once a concern is identified (anxiety, depression, etc.), IMMEDIATELY start using TOOL_CALL format for ALL questions
+- There are NO exceptions - structured questions are ONLY asked via TOOL_CALL
+
+TOOL_CALL Format Example:
+TOOL_CALL: {"tool":"ask_question","questionId":"anxiety_q1","topic":"Anxiety","question":"Over the last 2 weeks, how often have you felt nervous, anxious, or on edge?","options":[{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]}
+
+Your role in this initial phase:
+1. Engage briefly (1-2 short exchanges) to understand their main concerns
+2. Quickly identify which assessment areas are relevant
+3. IMMEDIATELY transition to asking structured questions via TOOL_CALL format once a concern is identified
+4. Be supportive but concise
+
+Guidelines:
+- Keep responses under 50 words when possible
+- After 1-2 user messages mentioning symptoms, you should have enough to identify relevant questionnaires
+- Once you identify a concern (anxiety, depression, insomnia, etc.), IMMEDIATELY start asking questions via TOOL_CALL format
+- The system will provide questionnaire details when available, but you should start using TOOL_CALL format right away
+- No need for long explanations - just brief acknowledgment and move to TOOL_CALL questions
+- NEVER ask structured questions in plain text - ALWAYS use TOOL_CALL format
+
+Remember: Short, conversational exchanges. Quick identification. Immediate action with TOOL_CALL format. Be kind but brief.`;
+  }
+
+  /**
+   * Build targeted system prompt with only selected questionnaire details
+   * This prompt is used after disorders are identified to focus on relevant questionnaires
+   */
+  private buildTargetedSystemPrompt(selectedQuestionnaires: string[]): string {
+    if (selectedQuestionnaires.length === 0) {
+      // Fallback to initial prompt if no questionnaires selected
+      return this.buildInitialSystemPrompt();
+    }
+
+    // Build detailed questionnaire information only for selected questionnaires
+    const questionnaireDetails = selectedQuestionnaires.map((q) => {
+      const config = QUESTIONNAIRE_SCORING[q];
+      if (!config) return `${q}: No configuration available`;
+      
+      const severityLevels = Object.entries(config.severityLevels)
+        .map(([key, value]: [string, any]) => `${key} (${value.range[0]}-${value.range[1]})`)
+        .join(', ');
+      
+      return `${q}:
+  - Severity levels: ${severityLevels}
+  - Scoring: ${JSON.stringify(config.scoreMapping)}
+  - ${config.reverseScoredQuestions ? `Reverse scored questions: ${config.reverseScoredQuestions.join(', ')}` : 'No reverse scoring'}`;
+    }).join('\n\n');
+
+    const questionnairesList = selectedQuestionnaires.join(', ');
+
+    return `You are a compassionate mental health assessment assistant helping a user complete a pre-assessment questionnaire through conversation.
+
+Relevant questionnaires: ${questionnairesList}
+
+CRITICAL - Response Format:
+1. Provide 2-3 sentences of conversational, empathetic text that relates to the specific question you're about to ask
+2. Make the conversational text contextual - mention the topic or aspect you're exploring (e.g., "Let's talk about how anxiety has been affecting your daily life" before asking an anxiety question)
+3. Then write the TOOL_CALL on the next line - you MUST include a tool call for every structured question
+
+MANDATORY - ALL Structured Questions Require Tool Calls:
+- You MUST use TOOL_CALL for EVERY question that requires a rating or scale response
+- NEVER ask structured questions in plain text (like "How has anxiety affected your daily life?")
+- If you want to ask about anxiety, depression, or any other topic that needs a rating - it MUST be in a TOOL_CALL
+- There are NO exceptions - structured questions are ONLY asked via tool calls
+
+Example CORRECT response (contextual conversational text related to the question):
+"I'd like to understand more about how anxiety has been impacting you day-to-day. This will help us get a better picture of what you're experiencing.
+TOOL_CALL: {"tool":"ask_question","questionId":"anxiety_q1","topic":"Anxiety","question":"Over the last 2 weeks, how often have you felt nervous, anxious, or on edge?","options":[{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]}"
+
+Example WRONG (DO NOT DO THIS):
+- Asking questions in plain text: "How has anxiety affected your daily life and relationships?"
+- Very brief 1-3 word responses like "Thanks." or "Got it."
+- Generic acknowledgments not related to the question: "You've already answered the previous question. Let's move on."
+- Multiple questions at once
+- Markdown formatting like **TOOL_CALL:**
+
+Rules:
+- Provide 2-3 sentences of contextual conversational text before tool calls - relate it to the specific question/topic you're asking about
+- Make the text relevant to what you're exploring (mention the aspect or symptom area)
+- ONE question per response
+- Use natural, warm language - show empathy and understanding
+- NO markdown formatting
+- Be conversational while still moving the assessment forward
+- EVERY structured question MUST use TOOL_CALL format - NEVER ask in plain text
+
+Questionnaire details:
+${questionnaireDetails}
+
+CRITICAL - Tool Call Format (COPY THIS EXACTLY):
+Write exactly this format. NO markdown. NO bold. NO asterisks. Just plain text:
+
+TOOL_CALL: {"tool":"ask_question","questionId":"anxiety_q1","topic":"Anxiety","question":"Over the last 2 weeks, how often have you felt nervous, anxious, or on edge?","options":[{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]}
+
+Rules:
+- Start with exactly: TOOL_CALL: (no spaces before, no markdown, no **)
+- Then the JSON on the same line
+- questionId: {topic}_q{number} (e.g., anxiety_q1, anxiety_q2)
+- ONE question per response only
+
+Guidelines:
+- ONE question per response. Never ask multiple questions.
+- EVERY structured question MUST use TOOL_CALL format - NEVER ask in plain text
+- Provide 2-3 sentences of contextual conversational text before tool calls - relate it to the specific question/topic you're asking about (mention the aspect you're exploring)
+- Use TOOL_CALL format exactly as shown - NO markdown, NO bold, NO asterisks
+- questionId format: {topic}_q{number} (e.g., anxiety_q1, anxiety_q2, anxiety_q3)
+- Use the exact question text from the questionnaire, just make it conversational
+- Match options to the scale shown in questionnaire details
+- Be warm, supportive, and show empathy in your conversational responses
+- Make conversational text relevant to the question - avoid generic phrases like "Let's move on" or "You've already answered"
+
+CRITICAL - Auto-Continue After User Answers:
+When a user answers a structured question, you MUST IMMEDIATELY continue with the next question. Do NOT wait for additional user input.
+
+Format your response with:
+1. Contextual conversational text (2-3 sentences) that relates to the specific question you're about to ask
+2. Make it relevant to the topic/question - mention what aspect you're exploring next
+3. Then immediately provide the next TOOL_CALL with the next question
+
+Example response after user answers (contextual, related to next question):
+"I understand. Let's explore how anxiety might be affecting your ability to control worry or manage daily tasks.
+TOOL_CALL: {"tool":"ask_question","questionId":"anxiety_q2","topic":"Anxiety","question":"Over the last 2 weeks, how often have you been unable to stop or control worrying?","options":[{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]}"
+
+BAD Example (DO NOT DO THIS):
+"You've already answered the previous question. Let's move on to the next one. I want to make sure you feel comfortable."
+This is too generic - make it relate to the actual question you're asking.
+
+IMPORTANT - Always Continue:
+- After receiving an answer, ALWAYS immediately provide the next question via TOOL_CALL
+- Never stop and wait for the user to prompt you - proactively continue the assessment
+- Make your conversational text contextual - relate it to the specific question/topic you're asking about
+- NEVER ask structured questions in plain text - they MUST be in TOOL_CALL format
+
+Common option scales:
+- 0-3 depression/anxiety scale: [{"value":0,"label":"Not at all"},{"value":1,"label":"Several days"},{"value":2,"label":"More than half the days"},{"value":3,"label":"Nearly every day"}]
+- 0-4 frequency scale: [{"value":0,"label":"Never"},{"value":1,"label":"Rarely"},{"value":2,"label":"Sometimes"},{"value":3,"label":"Often"},{"value":4,"label":"Very often"}]
+- 0-1 yes/no: [{"value":0,"label":"No"},{"value":1,"label":"Yes"}]
+
+Remember: You're helping someone who may be going through a difficult time. Be kind, patient, and professional. 
+Provide warm, empathetic conversational responses (2-3 sentences) that are contextual and relate to the specific question you're asking.
+ALWAYS use TOOL_CALL for EVERY structured question - NEVER ask structured questions in plain text.
+ALWAYS automatically continue with the next question after receiving an answer - never wait for user prompts.
+Make your conversational text relevant to the topic/question - avoid generic acknowledgments like "Let's move on" or "You've already answered".`;
   }
 
   /**
    * Enhance conversation history with questionnaire context
-   * NOTE: Gemini API uses systemInstruction for system messages
+   * NOTE: Some AI APIs (like Gemini) use systemInstruction for system messages
    */
   private enhanceHistoryWithQuestionnaireContext(
     conversationHistory: Array<{ role: string; content: string }>,
@@ -1271,18 +1575,27 @@ Remember: You're helping someone who may be going through a difficult time. Be k
       return true;
     });
 
-    // Build questionnaire context if available
-    let questionnaireContext = '';
+    // Determine which questionnaires are selected for Phase 2 (targeted prompts)
+    const selectedQuestionnaires: string[] = [];
     if (currentQuestionnaire) {
-      const config = QUESTIONNAIRE_SCORING[currentQuestionnaire];
-      if (config) {
-        questionnaireContext = `\n\nCurrent questionnaire: ${currentQuestionnaire}
-Scoring: ${JSON.stringify(config.scoreMapping)}
-Severity levels: ${Object.keys(config.severityLevels).join(', ')}
-
-Focus on asking questions from this questionnaire. Extract answers on a 0-4 scale.`;
+      selectedQuestionnaires.push(currentQuestionnaire);
+    }
+    // Also include questionnaires from questionnaireSelection if available
+    if (questionnaireSelection?.suggestedQuestionnaires) {
+      for (const q of questionnaireSelection.suggestedQuestionnaires) {
+        if (typeof q === 'string' && !selectedQuestionnaires.includes(q)) {
+          selectedQuestionnaires.push(q);
+        } else if (q?.questionnaire && typeof q.questionnaire === 'string' && !selectedQuestionnaires.includes(q.questionnaire)) {
+          selectedQuestionnaires.push(q.questionnaire);
+        }
       }
     }
+    
+    // Determine if we're in Phase 1 (initial assessment) or Phase 2 (targeted questions)
+    const isPhase1 = selectedQuestionnaires.length === 0 && !currentQuestionnaire;
+    
+    // Build questionnaire context for additional information (structured answers, etc.)
+    let questionnaireContext = '';
     
     // Add structured answers context if available
     if (structuredAnswers && Object.keys(structuredAnswers).length > 0) {
@@ -1292,7 +1605,7 @@ Focus on asking questions from this questionnaire. Extract answers on a 0-4 scal
       questionnaireContext += `\n\nRecently answered structured questions:\n${answersList}\n\nWhen the user sends "Answer submitted", it means they have already answered the question via the structured form. Acknowledge the answer and continue with the next question.`;
     }
 
-    // Gemini API uses systemInstruction for system messages
+    // Build enhanced history with system instruction
     const enhanced: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
     let systemMessageContent = '';
     let systemMessageFound = false;
@@ -1319,31 +1632,45 @@ Focus on asking questions from this questionnaire. Extract answers on a 0-4 scal
       }
     }
     
+    // Build the appropriate system prompt based on phase
+    let baseSystemPrompt: string;
+    if (isPhase1) {
+      // Phase 1: Use lightweight initial prompt
+      this.logger.log('Using Phase 1 (initial assessment) prompt - lightweight for disorder identification');
+      baseSystemPrompt = this.buildInitialSystemPrompt();
+    } else {
+      // Phase 2: Use targeted prompt with only selected questionnaires
+      this.logger.log(`Using Phase 2 (targeted questions) prompt - focused on ${selectedQuestionnaires.length} questionnaire(s): ${selectedQuestionnaires.join(', ')}`);
+      baseSystemPrompt = this.buildTargetedSystemPrompt(selectedQuestionnaires);
+    }
+    
     // Add the combined system message at the beginning with questionnaire context
     if (systemMessageFound) {
+      // If there's an existing system message, we'll replace it with our optimized prompt
+      // but we might want to preserve some context from the old message
       enhanced.unshift({
         role: 'system',
-        content: (systemMessageContent + questionnaireContext).trim(),
+        content: (baseSystemPrompt + questionnaireContext).trim(),
       });
     } else {
-      // No system message found - create a basic one
-      this.logger.warn('⚠️ No system message found in conversation history, creating default system message');
+      // No system message found - create the appropriate one based on phase
+      this.logger.log(`Creating new system message (Phase ${isPhase1 ? '1' : '2'})`);
       enhanced.unshift({
         role: 'system',
-        content: (this.buildSystemPrompt() + questionnaireContext).trim(),
+        content: (baseSystemPrompt + questionnaireContext).trim(),
       });
     }
 
     // Final validation
     if (enhanced.length === 0) {
       this.logger.error('⚠️ Enhanced history is empty after processing!');
-      throw new Error('Cannot send empty conversation history to Gemini API');
+      throw new Error('Cannot send empty conversation history to AI Provider');
     }
 
     // Ensure first message is system
     if (enhanced[0].role !== 'system') {
       this.logger.error('⚠️ First message is not a system message!');
-      // Gemini doesn't require system message at start, but we'll keep it for consistency
+      // Some AI providers don't require system message at start, but we'll keep it for consistency
     }
 
     this.logger.log(`Enhanced history: ${enhanced.length} messages (1 system, ${enhanced.filter(m => m.role === 'user').length} user, ${enhanced.filter(m => m.role === 'assistant').length} assistant)`);
@@ -1469,23 +1796,26 @@ Your responses will help me understand how to best support you. If you prefer, y
 
     for (const questionnaire of questionnaires) {
       const answers = mergedAnswers[questionnaire] || [];
-      // Pad with -1 for unanswered questions
+      // Pad with 0 for unanswered questions (validation requires 0-10 range)
       const config = QUESTIONNAIRE_SCORING[questionnaire];
       if (config) {
         const expectedCount = Object.keys(config.severityLevels).length * 5; // Approximate
         while (answers.length < expectedCount) {
-          answers.push(-1);
+          answers.push(0);
         }
       }
-      allAnswers.push(...answers);
+      // Convert any -1 values to 0 (unanswered questions)
+      const normalizedAnswers = answers.map(answer => answer === -1 ? 0 : answer);
+      allAnswers.push(...normalizedAnswers);
     }
 
-    // Ensure we have 201 answers total
+    // Ensure we have 201 answers total, pad with 0 for unanswered
     while (allAnswers.length < 201) {
-      allAnswers.push(-1);
+      allAnswers.push(0);
     }
 
-    return allAnswers.slice(0, 201);
+    // Convert any remaining -1 values to 0 before returning
+    return allAnswers.slice(0, 201).map(answer => answer === -1 ? 0 : answer);
   }
 
   /**

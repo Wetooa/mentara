@@ -2,9 +2,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 // import { useSubscriptionStatus } from '@/hooks/billing'; // Removed - subscriptions are outdated
 import { toast } from "sonner";
 import { TherapistCardData } from "@/types/therapist";
+import { TimezoneUtils } from "@/lib/utils/timezone";
 
 interface AvailableSlot {
   id: string;
@@ -254,7 +256,13 @@ export function useBookingModal(
   ]);
 
   const resetForm = (therapist?: TherapistCardData) => {
-    setSelectedDate(undefined);
+    // Set default date to minimum advance booking date (0.5 hours from now)
+    // This ensures the date meets the backend requirement and prevents validation errors
+    const minAdvanceDate = TimezoneUtils.getMinimumAdvanceBookingDate(0.5);
+    // Extract just the date portion (set time to midnight to represent the day)
+    const defaultDate = new Date(minAdvanceDate);
+    defaultDate.setHours(0, 0, 0, 0);
+    setSelectedDate(defaultDate);
     setSelectedSlot(null);
     setSelectedDuration(null);
     setMeetingType(MeetingType.VIDEO);

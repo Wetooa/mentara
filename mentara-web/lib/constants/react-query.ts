@@ -41,6 +41,8 @@ export const REFETCH_INTERVAL = {
   MODERATE: 1000 * 60 * 5,
   /** Occasional auto-refresh (15 minutes) - less critical data */
   OCCASIONAL: 1000 * 60 * 15,
+  /** Notifications polling (10 seconds) - notification updates */
+  NOTIFICATIONS: 10000,
 } as const;
 
 // Retry configuration

@@ -1,3 +1,7 @@
+/**
+ * @deprecated Notification gateway is no longer used. Notifications are delivered via HTTP polling.
+ * This gateway is kept for potential future use but is not currently active.
+ */
 import { Injectable, Logger } from '@nestjs/common';
 import {
   WebSocketGateway,

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../providers/prisma-client.provider';
-import { GeminiClientService } from '../../../pre-assessment/services/gemini-client.service';
+import { SambaNovaClientService } from '../../../pre-assessment/services/sambanova-client.service';
 
 export interface ReviewSentimentAnalysis {
   overallSentiment: 'positive' | 'neutral' | 'negative' | 'mixed';
@@ -19,7 +19,7 @@ export class ReviewSentimentAnalysisService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly geminiClient: GeminiClientService,
+    private readonly sambanovaClient: SambaNovaClientService,
   ) {}
 
   /**
@@ -120,8 +120,12 @@ export class ReviewSentimentAnalysisService {
 
       Respond with JSON: {"sentiment": "positive|neutral|negative|mixed", "score": -1 to 1}`;
 
-      const response = await this.geminiClient.chatCompletion(
-        [{ role: 'user', content: prompt }],
+      // SambaNova requires a system message first, then user message
+      const response = await this.sambanovaClient.chatCompletion(
+        [
+          { role: 'system', content: 'You are a sentiment analysis assistant. Analyze text and respond with valid JSON only.' },
+          { role: 'user', content: prompt },
+        ],
         { temperature: 0.3, max_tokens: 200 },
       );
 

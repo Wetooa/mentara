@@ -37,6 +37,10 @@ export interface OptionalEnvVars {
   SAMBANOVA_BASE_URL?: string;
   SAMBANOVA_MODEL?: string;
   TEST_DATABASE_URL?: string;
+  // AI Provider Configuration
+  AI_PROVIDER?: 'gemini' | 'ollama' | 'sambanova';
+  OLLAMA_BASE_URL?: string;
+  OLLAMA_MODEL?: string;
 }
 
 const logger = new Logger('EnvironmentValidation');
@@ -226,32 +230,57 @@ export function logEnvironmentInfo(): void {
   logger.log(
     `🤖 AI Service: ${process.env.AI_SERVICE_URL || 'Not configured'}`,
   );
-  logger.log(
-    `🤖 SambaNova API: ${process.env.SAMBANOVA_API_KEY ? 'Configured' : 'Not configured'}`,
-  );
-  if (process.env.SAMBANOVA_API_KEY) {
-    const modelName = process.env.SAMBANOVA_MODEL || 'Meta-Llama-3.1-8B-Instruct (default)';
-    logger.log(`🤖 SambaNova Model: ${modelName}`);
-    
-    // Warn if using a potentially problematic model
-    if (modelName.toLowerCase().includes('allam')) {
-      logger.warn(
-        '⚠️ Warning: ALLaM models are designed for Arabic and may not work well for English conversations',
+
+  // AI Provider Configuration
+  const aiProvider = process.env.AI_PROVIDER || 'ollama';
+  logger.log(`🤖 AI Provider: ${aiProvider}`);
+
+  // Log provider-specific configuration
+  switch (aiProvider.toLowerCase()) {
+    case 'gemini':
+      logger.log(
+        `🤖 Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured'}`,
       );
-      logger.warn(
-        '⚠️ Consider setting SAMBANOVA_MODEL to: Meta-Llama-3.1-8B-Instruct, Meta-Llama-3.1-70B-Instruct, or Meta-Llama-3.2-1B-Instruct',
+      if (process.env.GEMINI_API_KEY) {
+        logger.log(
+          `🤖 Gemini Model: ${process.env.GEMINI_MODEL || 'gemini-2.0-flash-exp'}`,
+        );
+      }
+      break;
+    case 'sambanova':
+      logger.log(
+        `🤖 SambaNova API: ${process.env.SAMBANOVA_API_KEY ? 'Configured' : 'Not configured'}`,
       );
-    }
+      if (process.env.SAMBANOVA_API_KEY) {
+        const modelName = process.env.SAMBANOVA_MODEL || 'Meta-Llama-3.1-8B-Instruct (default)';
+        logger.log(`🤖 SambaNova Model: ${modelName}`);
+        logger.log(
+          `   Base URL: ${process.env.SAMBANOVA_BASE_URL || 'https://api.sambanova.ai/v1'}`,
+        );
+
+        // Warn if using a potentially problematic model
+        if (modelName.toLowerCase().includes('allam')) {
+          logger.warn(
+            '⚠️ Warning: ALLaM models are designed for Arabic and may not work well for English conversations',
+          );
+          logger.warn(
+            '⚠️ Consider setting SAMBANOVA_MODEL to: Meta-Llama-3.1-8B-Instruct, Meta-Llama-3.1-70B-Instruct, or Meta-Llama-3.2-1B-Instruct',
+          );
+        }
+      }
+      break;
+    case 'ollama':
+    default:
+      logger.log(
+        `🤖 Ollama Base URL: ${process.env.OLLAMA_BASE_URL || 'http://localhost:11434'}`,
+      );
+      logger.log(
+        `🤖 Ollama Model: ${process.env.OLLAMA_MODEL || 'deepseek-r1:1.5b'}`,
+      );
+      break;
   }
+
   logger.log(
     `☁️ Supabase Storage: ${process.env.SUPABASE_URL ? 'Configured' : 'Not configured'}`,
   );
-  logger.log(
-    `🤖 SambaNova API: ${process.env.SAMBANOVA_API_KEY ? 'Configured' : 'Not configured'}`,
-  );
-  if (process.env.SAMBANOVA_API_KEY) {
-    logger.log(
-      `   Base URL: ${process.env.SAMBANOVA_BASE_URL || 'https://api.sambanova.ai/v1'}`,
-    );
-  }
 }

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClientService } from './gemini-client.service';
+import { AiProviderFactory } from './ai-provider.factory';
 import { LIST_OF_QUESTIONNAIRES } from '../pre-assessment.utils';
 
 export interface QuestionnaireSuggestion {
@@ -150,7 +150,7 @@ export class QuestionnaireSelectorService {
   };
 
   constructor(
-    private readonly geminiClient: GeminiClientService,
+    private readonly aiProvider: AiProviderFactory,
   ) {}
 
   /**
@@ -206,6 +206,8 @@ Available questionnaires: ${LIST_OF_QUESTIONNAIRES.join(', ')}
 
 User's messages: "${userMessages}"
 
+CRITICAL: Be PROACTIVE - if the user mentions ANY symptoms, feelings, or concerns that relate to a questionnaire, suggest it immediately. Don't wait for multiple mentions.
+
 For each relevant questionnaire, provide:
 1. The questionnaire name (must match exactly from the list)
 2. Priority score (1-10, where 10 is most urgent/relevant)
@@ -215,17 +217,17 @@ For each relevant questionnaire, provide:
 Format your response as JSON array:
 [
   {
-    "questionnaire": "Depression",
+    "questionnaire": "Anxiety",
     "priority": 9,
-    "reasoning": "User mentions feeling sad and hopeless",
+    "reasoning": "User mentions anxiety and insomnia",
     "confidence": 0.85
   }
 ]
 
-Only include questionnaires that are clearly relevant. If no questionnaires are clearly relevant, return an empty array.`;
+Be generous with suggestions - if there's any indication of a condition (anxiety, depression, insomnia, stress, etc.), include the relevant questionnaire. Only return an empty array if there are truly no relevant questionnaires.`;
 
     try {
-      // Gemini API uses systemInstruction for system messages, so we combine them
+      // Build enhanced history with system instruction
       const enhancedHistory: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
       let systemMessageFound = false;
       
@@ -256,7 +258,7 @@ Only include questionnaires that are clearly relevant. If no questionnaires are 
         });
       }
       
-      const response = await this.geminiClient.chatCompletion(
+      const response = await this.aiProvider.chatCompletion(
         enhancedHistory,
         {
           temperature: 0.3, // Lower temperature for more consistent analysis
