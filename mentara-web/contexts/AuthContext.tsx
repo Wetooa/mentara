@@ -60,6 +60,7 @@ const publicRoutes = [
   "/about",
   "/community",
   "/landing",
+  "/loading",
 
   "/therapist-application",
   "/pre-assessment",
