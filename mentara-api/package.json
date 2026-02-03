@@ -5,6 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "scripts": {
     "build": "node --max-old-space-size=8192 node_modules/.bin/nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -44,6 +45,7 @@
     "@nestjs/swagger": "^11.2.5",
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/websockets": "^11.1.12",
+    "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "@types/bcrypt": "^6.0.0",
     "@types/passport-jwt": "^4.0.1",
@@ -53,6 +55,7 @@
     "cache-manager-redis-yet": "^5.1.5",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
+    "dotenv": "^17.2.3",
     "helmet": "^8.1.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

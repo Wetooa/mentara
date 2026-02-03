@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2023",
+    "strict": true,
+    "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
     "sourceMap": true,
-    "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
@@ -18,17 +21,9 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "strict": false,
     "isolatedModules": true,
     "resolveJsonModule": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts",
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "node_modules", "dist"]
 }
