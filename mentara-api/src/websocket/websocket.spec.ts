@@ -23,9 +23,7 @@ describe('WebSocket Tests', () => {
     connectionManager = moduleFixture.get<ConnectionManagerService>(
       ConnectionManagerService,
     );
-    authService = moduleFixture.get<WebSocketAuthService>(
-      WebSocketAuthService,
-    );
+    authService = moduleFixture.get<WebSocketAuthService>(WebSocketAuthService);
 
     const httpServer = app.getHttpServer();
     serverUrl = `http://localhost:${httpServer.address().port}`;
@@ -167,11 +165,10 @@ describe('WebSocket Tests', () => {
     it('should use standardized room naming', () => {
       const userId = 'test-user-4';
       const room = connectionManager.getUserRoom(userId);
-      
+
       // Room should follow the standardized format
       expect(room).toMatch(/^user_[a-zA-Z0-9-]+$/);
       expect(room).toBe(`user_${userId}`);
     });
   });
 });
-
