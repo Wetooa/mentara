@@ -328,14 +328,14 @@ function handleUnauthorized(
 /**
  * Get active request count (for debugging)
  */
-export function getActiveRequestCount(): number {
+function getActiveRequestCount(): number {
   return activeRequests.size;
 }
 
 /**
  * Clear all request tracking (for cleanup/testing)
  */
-export function clearRequestTracking(): void {
+function clearRequestTracking(): void {
   activeRequests.clear();
 }
 

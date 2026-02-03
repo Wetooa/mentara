@@ -79,13 +79,13 @@ import {
   createAuditLogsService,
   type AuditLogsService,
 } from "./services/audit-logs";
-export type { ApiError, ApiResponse } from "@/types/api";
+;
 
 // Export client utilities
-export { apiClient, createApiClient };
+;
 
 // Export service creators
-export { createAdminService, createAuthService, createBookingService, createClientService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, createWorksheetService, createBillingService, createVideoCallService, createJournalService, createAuditLogsService, type AdminService, type AuthService, type BookingService, type ClientService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse, type WorksheetsService, type BillingService, type VideoCallService, type JournalService, type AuditLogsService };
+;
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -109,7 +109,7 @@ const journalService = createJournalService(apiClient);
 const auditLogsService = createAuditLogsService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
-export const api = {
+const api = {
   // New unified structure
   auth: authService,
   client: clientService,
@@ -135,7 +135,7 @@ export const api = {
 };
 
 // Export the main API type
-export type MainApi = typeof api;
+type MainApi = typeof api;
 
 // Hook for React components to use the API
 export function useApi() {
@@ -144,5 +144,5 @@ export function useApi() {
 
 // Re-export commonly used types from centralized type definitions
 export type {
-  AdminAuthResponse, ClientAuthResponse, ClientUser, EmailResponse, LoginDto, RegisterAdminDto, RegisterClientDto, RegisterModeratorDto, ResendOtpDto, SendOtpDto, SuccessMessageResponse, TherapistAuthResponse, VerifyOtpDto
+  AdminAuthResponse, ClientAuthResponse,   LoginDto,       TherapistAuthResponse, 
 } from "@/types/auth";

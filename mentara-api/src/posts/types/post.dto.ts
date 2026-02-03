@@ -41,7 +41,7 @@ export interface PostUpdateInputDto {
 }
 
 // Post response DTO
-export interface PostResponseDto {
+interface PostResponseDto {
   id: string;
   title: string;
   content: string;
@@ -78,7 +78,7 @@ export interface PostResponseDto {
 }
 
 // Post query DTO
-export interface PostQueryDto {
+interface PostQueryDto {
   communityId?: string;
   authorId?: string;
   tags?: string[];
@@ -92,7 +92,7 @@ export interface PostQueryDto {
 }
 
 // Post interaction DTO
-export interface PostInteractionDto {
+interface PostInteractionDto {
   action: 'like' | 'unlike' | 'bookmark' | 'unbookmark' | 'report';
   reason?: string;
 }

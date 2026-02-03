@@ -58,20 +58,20 @@ export const QUESTIONNAIRE_DISPLAY_NAMES: Record<CanonicalQuestionnaireId, strin
 /**
  * Helper function to validate if a questionnaire ID is canonical
  */
-export function isCanonicalQuestionnaireId(id: string): id is CanonicalQuestionnaireId {
+function isCanonicalQuestionnaireId(id: string): id is CanonicalQuestionnaireId {
   return CANONICAL_QUESTIONNAIRE_IDS.includes(id as CanonicalQuestionnaireId);
 }
 
 /**
  * Helper function to get display name for a questionnaire ID
  */
-export function getQuestionnaireDisplayName(id: CanonicalQuestionnaireId): string {
+function getQuestionnaireDisplayName(id: CanonicalQuestionnaireId): string {
   return QUESTIONNAIRE_DISPLAY_NAMES[id];
 }
 
 /**
  * Get all canonical questionnaire IDs
  */
-export function getAllCanonicalQuestionnaireIds(): readonly CanonicalQuestionnaireId[] {
+function getAllCanonicalQuestionnaireIds(): readonly CanonicalQuestionnaireId[] {
   return CANONICAL_QUESTIONNAIRE_IDS;
 }

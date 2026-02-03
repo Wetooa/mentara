@@ -11,15 +11,15 @@ export const LoginDtoSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-export const RefreshTokenDtoSchema = z.object({
+const RefreshTokenDtoSchema = z.object({
   refreshToken: z.string().min(1, "Refresh token is required"),
 });
 
-export const LogoutDtoSchema = z.object({
+const LogoutDtoSchema = z.object({
   refreshToken: z.string().optional(),
 });
 
-export const RegisterUserDtoSchema = z.object({
+const RegisterUserDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
   firstName: z.string().min(1, "First name is required"),
@@ -27,7 +27,7 @@ export const RegisterUserDtoSchema = z.object({
   role: z.string(),
 });
 
-export const ChangePasswordDtoSchema = z
+const ChangePasswordDtoSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
     newPassword: z
@@ -59,7 +59,7 @@ export const ResetPasswordDtoSchema = z
   });
 
 // Email Verification Schemas
-export const SendVerificationEmailDtoSchema = z.object({
+const SendVerificationEmailDtoSchema = z.object({
   email: z.string().email("Invalid email format").optional(),
 });
 
@@ -72,19 +72,19 @@ export const VerifyEmailDtoSchema = z.object({
 });
 
 // OTP Type Enum Schema
-export const OtpTypeSchema = z.enum([
+const OtpTypeSchema = z.enum([
   "registration",
   "password_reset",
   "login_verification",
 ]);
 
 // OTP Verification Schemas
-export const SendOtpDtoSchema = z.object({
+const SendOtpDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
   type: OtpTypeSchema.default("registration"),
 });
 
-export const VerifyOtpDtoSchema = z.object({
+const VerifyOtpDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
   otpCode: z
     .string()
@@ -93,7 +93,7 @@ export const VerifyOtpDtoSchema = z.object({
   type: OtpTypeSchema.default("registration"),
 });
 
-export const ResendOtpDtoSchema = z.object({
+const ResendOtpDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
   type: OtpTypeSchema.default("registration"),
 });
@@ -111,7 +111,7 @@ export const ResendRegistrationOtpDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
 });
 
-export const RegisterWithOtpDtoSchema = z.object({
+const RegisterWithOtpDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
   otpCode: z
     .string()
@@ -124,7 +124,7 @@ export const RegisterWithOtpDtoSchema = z.object({
 });
 
 // Role-specific Registration Schemas
-export const RegisterClientDtoSchema = z.object({
+const RegisterClientDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
   firstName: z.string().min(1, "First name is required"),
@@ -148,7 +148,7 @@ export const RegisterModeratorDtoSchema = z.object({
   assignedCommunities: z.array(z.string()).default([]),
 });
 
-export const RegisterTherapistDtoSchema = z.object({
+const RegisterTherapistDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
   firstName: z.string().min(1, "First name is required"),
@@ -162,18 +162,18 @@ export const RegisterTherapistDtoSchema = z.object({
 });
 
 // Session Management Schemas
-export const TerminateSessionDtoSchema = z.object({
+const TerminateSessionDtoSchema = z.object({
   sessionId: z.string().min(1, "Session ID is required"),
 });
 
-export const CheckUserExistsDtoSchema = z.object({
+const CheckUserExistsDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
 });
 
 // Type extraction helpers (for intellisense and type safety)
-export type LoginDtoType = z.infer<typeof LoginDtoSchema>;
-export type RegisterUserDtoType = z.infer<typeof RegisterUserDtoSchema>;
-export type RegisterClientDtoType = z.infer<typeof RegisterClientDtoSchema>;
-export type RegisterTherapistDtoType = z.infer<typeof RegisterTherapistDtoSchema>;
-export type RegisterAdminDtoType = z.infer<typeof RegisterAdminDtoSchema>;
-export type RegisterModeratorDtoType = z.infer<typeof RegisterModeratorDtoSchema>;
+type LoginDtoType = z.infer<typeof LoginDtoSchema>;
+type RegisterUserDtoType = z.infer<typeof RegisterUserDtoSchema>;
+type RegisterClientDtoType = z.infer<typeof RegisterClientDtoSchema>;
+type RegisterTherapistDtoType = z.infer<typeof RegisterTherapistDtoSchema>;
+type RegisterAdminDtoType = z.infer<typeof RegisterAdminDtoSchema>;
+type RegisterModeratorDtoType = z.infer<typeof RegisterModeratorDtoSchema>;

@@ -288,7 +288,7 @@ export function ConnectionStatus({
 }
 
 // Simplified status indicator for minimal UI contexts
-export function ConnectionStatusIndicator({
+function ConnectionStatusIndicator({
   isConnected,
   isReconnecting,
   error,
@@ -322,4 +322,3 @@ export function ConnectionStatusIndicator({
   );
 }
 
-export default ConnectionStatus;

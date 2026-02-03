@@ -106,7 +106,7 @@ export const useGlobalLoading = (
  * Hook to get loading state for a specific operation ID
  * Useful for monitoring loading operations started elsewhere
  */
-export const useLoadingState = (operationId: string | null) => {
+const useLoadingState = (operationId: string | null) => {
   const operation = useGlobalLoadingStore((state) => 
     operationId ? state.operations[operationId] : null
   );
@@ -123,7 +123,7 @@ export const useLoadingState = (operationId: string | null) => {
  * Hook to get aggregated loading state across all operations
  * Useful for showing global loading indicators
  */
-export const useAggregatedLoadingState = () => {
+const useAggregatedLoadingState = () => {
   const { isVisible, aggregatedProgress, primaryOperation } = useGlobalLoadingStore((state) => ({
     isVisible: state.isVisible,
     aggregatedProgress: state.aggregatedProgress,
@@ -142,7 +142,7 @@ export const useAggregatedLoadingState = () => {
  * Hook for managing multiple loading operations simultaneously
  * Useful for complex components with multiple async operations
  */
-export const useMultipleLoading = (type: LoadingType = 'general') => {
+const useMultipleLoading = (type: LoadingType = 'general') => {
   const store = useGlobalLoadingStore();
   const operationIds = useRef<Set<string>>(new Set());
 

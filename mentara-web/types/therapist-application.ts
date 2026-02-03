@@ -52,7 +52,7 @@ export interface TherapistApplicationFormData {
 }
 
 // Form field option interface
-export interface FormFieldOption {
+interface FormFieldOption {
   label: string;
   value: string;
   hasSpecify?: boolean;

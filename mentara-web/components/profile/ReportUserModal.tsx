@@ -262,4 +262,3 @@ export function ReportUserModal({
   );
 }
 
-export default ReportUserModal;

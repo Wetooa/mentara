@@ -1,11 +1,11 @@
 // Default animation duration in seconds
-export const DEFAULT_DURATION = 0.2;
+const DEFAULT_DURATION = 0.2;
 
 /**
  * Check if user prefers reduced motion
  * Respects the prefers-reduced-motion media query
  */
-export function prefersReducedMotion(): boolean {
+function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -14,7 +14,7 @@ export function prefersReducedMotion(): boolean {
  * Get animation duration based on user preference
  * Returns 0 if user prefers reduced motion, otherwise returns the provided duration
  */
-export function getAnimationDuration(duration: number = DEFAULT_DURATION): number {
+function getAnimationDuration(duration: number = DEFAULT_DURATION): number {
   return prefersReducedMotion() ? 0 : duration;
 }
 
@@ -22,7 +22,7 @@ export function getAnimationDuration(duration: number = DEFAULT_DURATION): numbe
  * Get animation variants that respect reduced motion preference
  * Returns simplified animations when user prefers reduced motion
  */
-export function getRespectfulAnimation(variants: {
+function getRespectfulAnimation(variants: {
   initial?: any;
   animate?: any;
   exit?: any;
@@ -101,7 +101,7 @@ export const reset = {
   transition: { duration: DEFAULT_DURATION },
 };
 
-export const fadeUp = {
+const fadeUp = {
   initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: 10 },
@@ -115,28 +115,28 @@ export const fadeDown = {
   transition: { duration: 0.5, ease: "easeOut" },
 };
 
-export const fadeLeft = {
+const fadeLeft = {
   initial: { opacity: 0, x: -10 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -10 },
   transition: { duration: 0.5, ease: "easeOut" },
 };
 
-export const fadeRight = {
+const fadeRight = {
   initial: { opacity: 0, x: 10 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: 10 },
   transition: { duration: 0.5, ease: "easeOut" },
 };
 
-export const scaleIn = {
+const scaleIn = {
   initial: { opacity: 0, scale: 0.95 },
   animate: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.95 },
   transition: { duration: 0.4, ease: "easeOut" },
 };
 
-export const slideIn = (
+const slideIn = (
   direction: "left" | "right" | "up" | "down" = "up",
   distance = 100
 ) => {

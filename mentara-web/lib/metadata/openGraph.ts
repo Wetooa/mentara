@@ -133,7 +133,7 @@ export function generateOpenGraphMetadata(options: OpenGraphOptions): OpenGraph 
 /**
  * Generate Open Graph metadata specifically for user profiles
  */
-export function generateProfileOpenGraph(profile: {
+function generateProfileOpenGraph(profile: {
   firstName: string;
   lastName: string;
   bio?: string;
@@ -162,7 +162,7 @@ export function generateProfileOpenGraph(profile: {
 /**
  * Generate Open Graph metadata for community pages
  */
-export function generateCommunityOpenGraph(community: {
+function generateCommunityOpenGraph(community: {
   name: string;
   description: string;
   imageUrl?: string;
@@ -185,7 +185,7 @@ export function generateCommunityOpenGraph(community: {
 /**
  * Generate Open Graph metadata for articles/posts
  */
-export function generateArticleOpenGraph(article: {
+function generateArticleOpenGraph(article: {
   title: string;
   summary?: string;
   content?: string;
@@ -230,7 +230,7 @@ export function generateArticleOpenGraph(article: {
 /**
  * Generate Twitter Card metadata (complementary to Open Graph)
  */
-export function generateTwitterMetadata(options: {
+function generateTwitterMetadata(options: {
   title: string;
   description: string;
   image?: string;
@@ -260,7 +260,7 @@ export function generateTwitterMetadata(options: {
 /**
  * Generate Open Graph metadata for therapist listings
  */
-export function generateTherapistListingOpenGraph(therapists: Array<{
+function generateTherapistListingOpenGraph(therapists: Array<{
   firstName: string;
   lastName: string;
   specializations?: string[];
@@ -298,7 +298,7 @@ export function generateTherapistListingOpenGraph(therapists: Array<{
 /**
  * Helper to validate and optimize image URLs for Open Graph
  */
-export function optimizeOpenGraphImage(imageUrl?: string, fallbackType?: "profile" | "community" | "default"): string {
+function optimizeOpenGraphImage(imageUrl?: string, fallbackType?: "profile" | "community" | "default"): string {
   if (!imageUrl) {
     switch (fallbackType) {
       case "profile":

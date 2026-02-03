@@ -150,7 +150,7 @@ export function useTherapistDashboard() {
 /**
  * Hook for fetching therapist dashboard statistics only
  */
-export function useTherapistStats() {
+function useTherapistStats() {
   const api = useApi();
 
   return useQuery({
@@ -165,7 +165,7 @@ export function useTherapistStats() {
 /**
  * Hook for fetching upcoming appointments
  */
-export function useTherapistUpcomingAppointments() {
+function useTherapistUpcomingAppointments() {
   const api = useApi();
 
   return useQuery({
@@ -202,7 +202,7 @@ export function useTherapistMeetings(
 /**
  * Hook for getting a specific meeting
  */
-export function useTherapistMeeting(meetingId: string | null) {
+function useTherapistMeeting(meetingId: string | null) {
   const api = useApi();
 
   return useQuery({
@@ -218,7 +218,7 @@ export function useTherapistMeeting(meetingId: string | null) {
 /**
  * Hook for updating meeting status
  */
-export function useUpdateMeetingStatus() {
+function useUpdateMeetingStatus() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -292,7 +292,7 @@ export function useUpdateMeetingStatus() {
 /**
  * Hook for starting a meeting (generates meeting URL)
  */
-export function useStartMeeting() {
+function useStartMeeting() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -330,7 +330,7 @@ export function useStartMeeting() {
 /**
  * Hook for refreshing dashboard data manually
  */
-export function useRefreshDashboard() {
+function useRefreshDashboard() {
   const queryClient = useQueryClient();
 
   return () => {
@@ -350,7 +350,7 @@ export function useRefreshDashboard() {
 /**
  * Hook for prefetching meeting details (for hover states, etc.)
  */
-export function usePrefetchMeeting() {
+function usePrefetchMeeting() {
   const queryClient = useQueryClient();
   const api = useApi();
 

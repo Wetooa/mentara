@@ -23,7 +23,7 @@ interface BookingStep {
   description: string;
 }
 
-export const BOOKING_STEPS: BookingStep[] = [
+const BOOKING_STEPS: BookingStep[] = [
   {
     step: 1,
     title: "Session Details",
@@ -266,7 +266,7 @@ export function useClientBooking({
 /**
  * Simplified booking hook for basic use cases
  */
-export function useSimpleBooking(therapistId: string) {
+function useSimpleBooking(therapistId: string) {
   const { 
     therapist, 
     therapistLoading, 

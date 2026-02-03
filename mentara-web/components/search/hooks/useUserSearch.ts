@@ -4,13 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { User } from '@/components/search/UserSearchItem';
 
-export interface SearchUsersResponse {
+interface SearchUsersResponse {
   users: User[];
   total: number;
   hasMore: boolean;
 }
 
-export interface SearchUsersParams {
+interface SearchUsersParams {
   query: string;
   role?: string;
   page?: number;
@@ -82,4 +82,3 @@ export const useUserSearch = () => {
   };
 };
 
-export default useUserSearch;

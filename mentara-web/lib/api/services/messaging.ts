@@ -23,7 +23,7 @@ export interface MessagingMessage {
   readReceipts: MessagingReadReceipt[];
 }
 
-export interface MessagingAttachment {
+interface MessagingAttachment {
   id: string;
   messageId: string;
   url: string;
@@ -79,7 +79,7 @@ export interface MessagingParticipant {
   };
 }
 
-export interface MessagingTypingIndicator {
+interface MessagingTypingIndicator {
   conversationId: string;
   userId: string;
   isTyping: boolean;

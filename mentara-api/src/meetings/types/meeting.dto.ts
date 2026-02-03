@@ -163,7 +163,7 @@ export interface VideoCallStatus {
   };
 }
 
-export interface MeetingResponseDto {
+interface MeetingResponseDto {
   id: string;
   title: string;
   description?: string;
@@ -206,7 +206,7 @@ export interface MeetingResponseDto {
 }
 
 // Meeting query DTOs
-export interface MeetingQueryDto {
+interface MeetingQueryDto {
   clientId?: string;
   therapistId?: string;
   status?: 'scheduled' | 'ongoing' | 'completed' | 'cancelled' | 'missed' | 'rescheduled';

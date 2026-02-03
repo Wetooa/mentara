@@ -216,4 +216,3 @@ function ProfilePageSkeleton() {
   );
 }
 
-export default ProfilePage;

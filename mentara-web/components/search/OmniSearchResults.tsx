@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { type EntityType } from './OmniSearchBar';
 
-export interface SearchResult {
+interface SearchResult {
   id: string;
   type: EntityType;
   title: string;
@@ -20,7 +20,7 @@ export interface SearchResult {
   url?: string;
 }
 
-export interface OmniSearchResultsData {
+interface OmniSearchResultsData {
   users?: any[];
   therapists?: any[];
   posts?: any[];
@@ -242,7 +242,7 @@ function LoadingState() {
   );
 }
 
-export const OmniSearchResults: React.FC<OmniSearchResultsProps> = ({
+const OmniSearchResults: React.FC<OmniSearchResultsProps> = ({
   results,
   query,
   isLoading = false,
@@ -337,4 +337,3 @@ export const OmniSearchResults: React.FC<OmniSearchResultsProps> = ({
   );
 };
 
-export default OmniSearchResults;

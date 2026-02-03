@@ -31,7 +31,7 @@ let configFetchPromise: Promise<typeof DEFAULT_WEBRTC_CONFIG> | null = null;
  * Fetch WebRTC configuration from backend
  * Caches the result to avoid repeated API calls
  */
-export async function fetchWebRTCConfig(): Promise<typeof DEFAULT_WEBRTC_CONFIG> {
+async function fetchWebRTCConfig(): Promise<typeof DEFAULT_WEBRTC_CONFIG> {
   // Return cached config if available
   if (cachedConfig) {
     return cachedConfig;
@@ -83,13 +83,13 @@ export function getWebRTCConfigSync(): typeof DEFAULT_WEBRTC_CONFIG {
 /**
  * Clear cached WebRTC config (useful for testing or config updates)
  */
-export function clearWebRTCConfigCache(): void {
+function clearWebRTCConfigCache(): void {
   cachedConfig = null;
   configFetchPromise = null;
 }
 
 // Export default config for backwards compatibility
-export const WEBRTC_CONFIG = DEFAULT_WEBRTC_CONFIG;
+const WEBRTC_CONFIG = DEFAULT_WEBRTC_CONFIG;
 
 export const MEDIA_CONSTRAINTS = {
   video: {
@@ -143,7 +143,7 @@ export const CONNECTION_TIMEOUTS = {
   MAX_RECONNECTION_ATTEMPTS: 3,
 };
 
-export const AUDIO_LEVELS = {
+const AUDIO_LEVELS = {
   MUTE_THRESHOLD: 0.01,
   SPEAKING_THRESHOLD: 0.1,
   UPDATE_INTERVAL: 100, // ms

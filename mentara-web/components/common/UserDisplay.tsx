@@ -142,7 +142,7 @@ export { MemoizedUserDisplay as UserDisplay };
 /**
  * Simplified user display component for headers and navigation
  */
-export const HeaderUserDisplay = memo(function HeaderUserDisplay() {
+const HeaderUserDisplay = memo(function HeaderUserDisplay() {
   return (
     <MemoizedUserDisplay
       variant="full"
@@ -156,7 +156,7 @@ export const HeaderUserDisplay = memo(function HeaderUserDisplay() {
 /**
  * Compact user display for mobile or constrained spaces
  */
-export const CompactUserDisplay = memo(function CompactUserDisplay() {
+const CompactUserDisplay = memo(function CompactUserDisplay() {
   return (
     <MemoizedUserDisplay
       variant="avatar-only"
@@ -169,7 +169,7 @@ export const CompactUserDisplay = memo(function CompactUserDisplay() {
 /**
  * User display with loading state for when profile data is still being fetched
  */
-export const UserDisplayWithLoading = memo(function UserDisplayWithLoading() {
+const UserDisplayWithLoading = memo(function UserDisplayWithLoading() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {

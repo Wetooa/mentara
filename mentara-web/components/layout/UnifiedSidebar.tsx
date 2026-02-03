@@ -13,7 +13,7 @@ import {
   setStorageItem,
 } from "@/lib/config/storage";
 
-export interface NavItem {
+interface NavItem {
   name: string;
   path: string;
   icon: string;
@@ -287,4 +287,3 @@ export function UnifiedSidebar({
   );
 }
 
-export default UnifiedSidebar;

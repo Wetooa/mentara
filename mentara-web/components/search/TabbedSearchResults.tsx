@@ -12,7 +12,7 @@ import { useCommunityNavigation } from '@/store/community';
 import { useAuth } from '@/contexts/AuthContext';
 import { type EntityType } from './OmniSearchBar';
 
-export interface SearchResult {
+interface SearchResult {
   id: string;
   type: EntityType;
   title: string;
@@ -23,7 +23,7 @@ export interface SearchResult {
   url?: string;
 }
 
-export interface TabbedSearchResultsData {
+interface TabbedSearchResultsData {
   users?: any[];
   therapists?: any[];
   posts?: any[];
@@ -553,4 +553,3 @@ export const TabbedSearchResults: React.FC<TabbedSearchResultsProps> = ({
   );
 };
 
-export default TabbedSearchResults;

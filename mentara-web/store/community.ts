@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { Community, Room, CommunityWithStructure } from "@/types/api/communities";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
-export interface CommunityNavigationState {
+interface CommunityNavigationState {
   // Selected community and room state
   selectedCommunityId?: string;
   selectedRoomId?: string;
@@ -32,7 +32,7 @@ export interface CommunityNavigationState {
   getCurrentPath: (userRole?: string) => string;
 }
 
-export const useCommunityNavigationStore = create<CommunityNavigationState>()(
+const useCommunityNavigationStore = create<CommunityNavigationState>()(
   persist(
     (set, get) => ({
       // Initial state

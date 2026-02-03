@@ -23,7 +23,7 @@ export interface AuditLog {
   category: 'auth' | 'user' | 'session' | 'community' | 'admin' | 'security' | 'payment' | 'system';
 }
 
-export interface AuditLogCreateDto {
+interface AuditLogCreateDto {
   action: string;
   resource: string;
   resourceId: string;
@@ -36,7 +36,7 @@ export interface AuditLogCreateDto {
   category: 'auth' | 'user' | 'session' | 'community' | 'admin' | 'security' | 'payment' | 'system';
 }
 
-export interface AuditLogQuery {
+interface AuditLogQuery {
   userId?: string;
   action?: string;
   resource?: string;
@@ -53,7 +53,7 @@ export interface AuditLogQuery {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface AuditLogListResponse {
+interface AuditLogListResponse {
   logs: AuditLog[];
   total: number;
   hasMore: boolean;
@@ -66,7 +66,7 @@ export interface AuditLogListResponse {
   };
 }
 
-export interface AuditLogStats {
+interface AuditLogStats {
   totalLogs: number;
   logsByCategory: Record<string, number>;
   logsBySeverity: Record<string, number>;
@@ -86,7 +86,7 @@ export interface AuditLogStats {
   }>;
 }
 
-export interface SecurityEvent {
+interface SecurityEvent {
   id: string;
   type: 'failed_login' | 'suspicious_activity' | 'unauthorized_access' | 'data_breach' | 'account_compromise';
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -102,7 +102,7 @@ export interface SecurityEvent {
   notes?: string;
 }
 
-export interface SecurityEventQuery {
+interface SecurityEventQuery {
   type?: string;
   severity?: 'low' | 'medium' | 'high' | 'critical';
   resolved?: boolean;
@@ -116,7 +116,7 @@ export interface SecurityEventQuery {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface ComplianceReport {
+interface ComplianceReport {
   id: string;
   name: string;
   type: 'gdpr' | 'hipaa' | 'sox' | 'custom';

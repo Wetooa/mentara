@@ -56,7 +56,7 @@ export interface MeetingSession {
   updatedAt: string;
 }
 
-export interface MeetingSessionData {
+interface MeetingSessionData {
   meetingId: string;
   startTime: Date;
   endTime?: Date;
@@ -68,20 +68,20 @@ export interface MeetingSessionData {
   quality?: MeetingQuality;
 }
 
-export interface ChatMessage {
+interface ChatMessage {
   senderId: string;
   senderRole: 'therapist' | 'client';
   message: string;
   timestamp: Date;
 }
 
-export interface MeetingQuality {
+interface MeetingQuality {
   videoQuality: 'poor' | 'fair' | 'good' | 'excellent';
   audioQuality: 'poor' | 'fair' | 'good' | 'excellent';
   connectionStability: 'poor' | 'fair' | 'good' | 'excellent';
 }
 
-export interface ParticipantInfo {
+interface ParticipantInfo {
   userId: string;
   role: 'therapist' | 'client';
   mediaStatus: {
@@ -93,7 +93,7 @@ export interface ParticipantInfo {
   joinedAt: Date;
 }
 
-export interface MeetingRoomState {
+interface MeetingRoomState {
   meetingId: string;
   participants: ParticipantInfo[];
   startTime: Date;
@@ -103,7 +103,7 @@ export interface MeetingRoomState {
 }
 
 // WebSocket event types
-export interface MeetingEvents {
+interface MeetingEvents {
   'meeting-joined': {
     meetingId: string;
     meeting: {
@@ -174,7 +174,7 @@ export interface MeetingEvents {
 }
 
 // Request/Response types for WebSocket
-export interface JoinMeetingRequest {
+interface JoinMeetingRequest {
   meetingId: string;
   mediaPreferences?: {
     video: boolean;
@@ -182,24 +182,24 @@ export interface JoinMeetingRequest {
   };
 }
 
-export interface MediaToggleRequest {
+interface MediaToggleRequest {
   meetingId: string;
   mediaType: 'video' | 'audio' | 'screen';
   enabled: boolean;
 }
 
-export interface ChatMessageRequest {
+interface ChatMessageRequest {
   meetingId: string;
   message: string;
   timestamp: Date;
 }
 
-export interface MeetingControlRequest {
+interface MeetingControlRequest {
   meetingId: string;
   action: 'start' | 'end' | 'pause' | 'record';
 }
 
-export interface WebRTCSignalRequest {
+interface WebRTCSignalRequest {
   meetingId: string;
   targetUserId: string;
   signal: any;

@@ -10,7 +10,7 @@ export interface QuestionnaireScores {
   [questionnaireName: string]: QuestionnaireScore;
 }
 
-export interface SeverityLevel {
+interface SeverityLevel {
   range: [number, number];
   label: string;
 }
@@ -242,7 +242,7 @@ export const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
   },
 };
 
-export function calculateQuestionnaireScore(
+function calculateQuestionnaireScore(
   questionnaireName: string,
   answers: number[],
 ): QuestionnaireScore {
@@ -284,7 +284,7 @@ export function calculateQuestionnaireScore(
 }
 
 // New function to work with flat array of 201 responses
-export function calculateAllScoresFromFlatArray(
+function calculateAllScoresFromFlatArray(
   flatAnswers: number[],
 ): QuestionnaireScores {
   if (flatAnswers.length !== 201) {

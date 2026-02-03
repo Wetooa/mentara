@@ -147,7 +147,7 @@ export function useTrendingSearches() {
 /**
  * Hook for managing search history with mutations
  */
-export function useSearchHistory() {
+function useSearchHistory() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -180,7 +180,7 @@ export function useSearchHistory() {
 /**
  * Advanced search hook with pagination and filters
  */
-export function useAdvancedSearch(params: {
+function useAdvancedSearch(params: {
   query: string;
   types?: EntityType[];
   filters?: Record<string, any>;
@@ -205,7 +205,7 @@ export function useAdvancedSearch(params: {
 /**
  * Hook for prefetching search results (useful for search suggestions)
  */
-export function usePrefetchSearch() {
+function usePrefetchSearch() {
   const api = useApi();
   const queryClient = useQueryClient();
 

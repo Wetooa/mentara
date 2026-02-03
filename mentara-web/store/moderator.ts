@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { ContentModerationParams, UserModerationParams, AuditLogParams } from "@/types/api";
 
 // Content moderation store for filters and UI state
-export interface ModeratorContentState {
+interface ModeratorContentState {
   // Filter preferences
   filters: ContentModerationParams;
   setFilters: (filters: Partial<ContentModerationParams>) => void;
@@ -74,7 +74,7 @@ export const useModeratorContentStore = create<ModeratorContentState>()(
 );
 
 // User moderation store for filters and UI state
-export interface ModeratorUserState {
+interface ModeratorUserState {
   // Filter preferences
   filters: UserModerationParams;
   setFilters: (filters: Partial<UserModerationParams>) => void;
@@ -89,7 +89,7 @@ export interface ModeratorUserState {
   setSelectedUserId: (id: string | null) => void;
 }
 
-export const useModeratorUserStore = create<ModeratorUserState>()(
+const useModeratorUserStore = create<ModeratorUserState>()(
   persist(
     (set) => ({
       // Default filters
@@ -132,7 +132,7 @@ export const useModeratorUserStore = create<ModeratorUserState>()(
 );
 
 // Audit logs store for filters and search
-export interface ModeratorAuditLogsState {
+interface ModeratorAuditLogsState {
   // Filter preferences
   filters: AuditLogParams;
   setFilters: (filters: Partial<AuditLogParams>) => void;
@@ -150,7 +150,7 @@ export interface ModeratorAuditLogsState {
   setDateRange: (range: { startDate: string; endDate: string }) => void;
 }
 
-export const useModeratorAuditLogsStore = create<ModeratorAuditLogsState>()(
+const useModeratorAuditLogsStore = create<ModeratorAuditLogsState>()(
   persist(
     (set) => ({
       // Default filters
@@ -189,7 +189,7 @@ export const useModeratorAuditLogsStore = create<ModeratorAuditLogsState>()(
 );
 
 // General moderator UI state (not persisted)
-export interface ModeratorUIState {
+interface ModeratorUIState {
   // Dialog states
   actionDialogOpen: boolean;
   setActionDialogOpen: (open: boolean) => void;

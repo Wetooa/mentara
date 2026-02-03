@@ -5,7 +5,7 @@ import { User, Therapist, Client, Admin, Moderator } from '@prisma/client';
  */
 
 // Extended User types with relationships
-export type UserWithProfile = User & {
+type UserWithProfile = User & {
   client?: Client;
   therapist?: Therapist;
   admin?: Admin;
@@ -13,28 +13,28 @@ export type UserWithProfile = User & {
 };
 
 // Therapist with User relationship
-export type TherapistWithUser = Therapist & {
+type TherapistWithUser = Therapist & {
   user: User;
   matchScore?: number;
 };
 
 // Client with User relationship  
-export type ClientWithUser = Client & {
+type ClientWithUser = Client & {
   user: User;
 };
 
 // Admin with User relationship
-export type AdminWithUser = Admin & {
+type AdminWithUser = Admin & {
   user: User;
 };
 
 // Moderator with User relationship
-export type ModeratorWithUser = Moderator & {
+type ModeratorWithUser = Moderator & {
   user: User;
 };
 
 // Community statistics
-export interface CommunityStats {
+interface CommunityStats {
   totalMembers: number;
   totalPosts: number;
   activeCommunities: number;
@@ -46,14 +46,14 @@ export interface CommunityStats {
 }
 
 // Therapist specialization types
-export interface TherapistSpecialization {
+interface TherapistSpecialization {
   illness: string;
   expertiseLevel: number; // 1-5 scale
   successRate?: number; // 0-100 percentage
 }
 
 // Pre-assessment types
-export interface PreAssessmentAnswersData {
+interface PreAssessmentAnswersData {
   questionnaires: string[];
   rawAnswers: number[][];
   answerMatrix?: number[][];
@@ -62,7 +62,7 @@ export interface PreAssessmentAnswersData {
   aiEstimate?: Record<string, boolean>;
 }
 
-export interface PreAssessmentResponse {
+interface PreAssessmentResponse {
   id: string;
   clientId: string;
   answers: PreAssessmentAnswersData;

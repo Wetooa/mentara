@@ -22,7 +22,7 @@ import { TherapistFilters } from "@/types/filters";
 /**
  * Core hook for fetching therapist recommendations with search/filter parameters
  */
-export function useTherapistRecommendations(
+function useTherapistRecommendations(
   params: TherapistSearchParams = {}
 ) {
   const api = useApi();
@@ -43,7 +43,7 @@ export function useTherapistRecommendations(
 /**
  * Hook for fetching a specific therapist profile
  */
-export function useTherapistProfile(therapistId: string | null) {
+function useTherapistProfile(therapistId: string | null) {
   const api = useApi();
 
   return useQuery({
@@ -59,7 +59,7 @@ export function useTherapistProfile(therapistId: string | null) {
 /**
  * Hook for infinite scroll therapist recommendations
  */
-export function useInfiniteTherapistRecommendations(
+function useInfiniteTherapistRecommendations(
   baseParams: Omit<TherapistSearchParams, "offset"> = {}
 ) {
   const api = useApi();
@@ -86,7 +86,7 @@ export function useInfiniteTherapistRecommendations(
 /**
  * Hook that transforms API data to card format for UI compatibility
  */
-export function useTherapistCards(params: TherapistSearchParams = {}) {
+function useTherapistCards(params: TherapistSearchParams = {}) {
   const { data, error, isLoading, refetch } =
     useTherapistRecommendations(params);
 
@@ -115,7 +115,7 @@ export function useTherapistCards(params: TherapistSearchParams = {}) {
  * - Implements proper pagination with awareness of client-side filtering
  * - Fetches larger batches intelligently based on filter complexity
  */
-export function useFilteredTherapists(
+function useFilteredTherapists(
   searchQuery: string,
   filter: string,
   params: TherapistSearchParams & {
@@ -325,7 +325,7 @@ export function useFilteredTherapists(
 /**
  * Hook for prefetching therapist profiles (hover states, etc.)
  */
-export function usePrefetchTherapistProfile() {
+function usePrefetchTherapistProfile() {
   const queryClient = useQueryClient();
   const api = useApi();
 
@@ -342,7 +342,7 @@ export function usePrefetchTherapistProfile() {
 /**
  * Hook for search and cache management utilities
  */
-export function useTherapistSearch() {
+function useTherapistSearch() {
   const queryClient = useQueryClient();
   const api = useApi();
 

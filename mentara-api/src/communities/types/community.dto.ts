@@ -106,7 +106,7 @@ export interface CommunityStatsResponse {
   illnessCommunities?: any[];
 }
 
-export interface CommunityRecommendationResponse {
+interface CommunityRecommendationResponse {
   id: string;
   community: CommunityResponse;
   score: number;
@@ -116,7 +116,7 @@ export interface CommunityRecommendationResponse {
   recentActivity?: number;
 }
 
-export interface CommunityRecommendationsResult {
+interface CommunityRecommendationsResult {
   recommendations: CommunityRecommendationResponse[];
   total: number;
   hasMore: boolean;

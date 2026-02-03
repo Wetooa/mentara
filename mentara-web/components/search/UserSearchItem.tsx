@@ -155,4 +155,3 @@ export const UserSearchItem: React.FC<UserSearchItemProps> = ({
   );
 };
 
-export default UserSearchItem;

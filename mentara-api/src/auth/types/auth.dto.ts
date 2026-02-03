@@ -9,7 +9,7 @@ export interface LoginDto {
   password: string;
 }
 
-export interface RegisterUserDto {
+interface RegisterUserDto {
   email: string;
   password: string;
   firstName: string;
@@ -17,16 +17,16 @@ export interface RegisterUserDto {
   role: string;
 }
 
-export interface RefreshTokenDto {
+interface RefreshTokenDto {
   refreshToken: string;
 }
 
-export interface LogoutDto {
+interface LogoutDto {
   refreshToken?: string;
 }
 
 // Password management DTOs
-export interface ChangePasswordDto {
+interface ChangePasswordDto {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
@@ -43,7 +43,7 @@ export interface ResetPasswordDto {
 }
 
 // Email verification DTOs
-export interface SendVerificationEmailDto {
+interface SendVerificationEmailDto {
   email?: string;
 }
 
@@ -56,18 +56,18 @@ export interface VerifyEmailDto {
 }
 
 // OTP DTOs
-export interface SendOtpDto {
+interface SendOtpDto {
   email: string;
   type: 'registration' | 'password_reset' | 'login_verification';
 }
 
-export interface VerifyOtpDto {
+interface VerifyOtpDto {
   email: string;
   otpCode: string;
   type: 'registration' | 'password_reset' | 'login_verification';
 }
 
-export interface ResendOtpDto {
+interface ResendOtpDto {
   email: string;
   type: 'registration' | 'password_reset' | 'login_verification';
 }
@@ -82,7 +82,7 @@ export interface ResendRegistrationOtpDto {
   email: string;
 }
 
-export interface RegisterWithOtpDto {
+interface RegisterWithOtpDto {
   email: string;
   otpCode: string;
   password: string;
@@ -161,10 +161,10 @@ export interface RegisterTherapistDto {
 }
 
 // Session management DTOs
-export interface TerminateSessionDto {
+interface TerminateSessionDto {
   sessionId: string;
 }
 
-export interface CheckUserExistsDto {
+interface CheckUserExistsDto {
   email: string;
 }

@@ -35,12 +35,12 @@ export class ZodValidationPipe implements PipeTransform {
 }
 
 // Factory function to create validation pipes
-export function ZodValidationPipeFactory(schema: any) {
+function ZodValidationPipeFactory(schema: any) {
   return new ZodValidationPipe(schema);
 }
 
 // Decorator for easy parameter validation
-export function ValidateBody(schema: any) {
+function ValidateBody(schema: any) {
   return function (target: any, propertyKey: string, parameterIndex: number) {
     // This would work with a custom decorator implementation
     // For now, we'll use the pipe directly in controllers
@@ -48,14 +48,14 @@ export function ValidateBody(schema: any) {
 }
 
 // Decorator for query validation
-export function ValidateQuery(schema: any) {
+function ValidateQuery(schema: any) {
   return function (target: any, propertyKey: string, parameterIndex: number) {
     // This would work with a custom decorator implementation
   };
 }
 
 // Decorator for param validation
-export function ValidateParam(schema: any) {
+function ValidateParam(schema: any) {
   return function (target: any, propertyKey: string, parameterIndex: number) {
     // This would work with a custom decorator implementation
   };

@@ -31,7 +31,7 @@ export function useModeratorContentQueue(params: ContentModerationParams = {}) {
 /**
  * Hook for moderating content (approve, reject, flag, remove)
  */
-export function useModerateContent() {
+function useModerateContent() {
   const api = useApi();
   const queryClient = useQueryClient();
   

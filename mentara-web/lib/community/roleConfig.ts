@@ -21,7 +21,7 @@ import {
 
 export type UserRole = 'client' | 'therapist';
 
-export interface RoleConfig {
+interface RoleConfig {
   // Theming
   theme: {
     primary: string;
@@ -81,7 +81,7 @@ export interface RoleConfig {
   };
 }
 
-export const roleConfigs: Record<UserRole, RoleConfig> = {
+const roleConfigs: Record<UserRole, RoleConfig> = {
   client: {
     theme: {
       primary: 'community-accent',

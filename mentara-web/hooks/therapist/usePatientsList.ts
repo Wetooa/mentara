@@ -169,7 +169,7 @@ export function usePatientWorksheets(patientId: string | null) {
 /**
  * Hook for updating patient session notes
  */
-export function useUpdatePatientNotes() {
+function useUpdatePatientNotes() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -227,7 +227,7 @@ export function useUpdatePatientNotes() {
 /**
  * Hook for assigning a worksheet to a patient
  */
-export function useAssignWorksheet() {
+function useAssignWorksheet() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -261,7 +261,7 @@ export function useAssignWorksheet() {
 /**
  * Hook for getting patient progress data
  */
-export function usePatientProgress(patientId: string | null) {
+function usePatientProgress(patientId: string | null) {
   const api = useApi();
 
   return useQuery({
@@ -278,7 +278,7 @@ export function usePatientProgress(patientId: string | null) {
 /**
  * Hook for prefetching patient data (for hover states, quick navigation)
  */
-export function usePrefetchPatientData() {
+function usePrefetchPatientData() {
   const queryClient = useQueryClient();
   const api = useApi();
 
@@ -296,7 +296,7 @@ export function usePrefetchPatientData() {
  * Backward compatibility hook - use usePatientsList instead
  * @deprecated Use usePatientsList instead
  */
-export function usePatientsData() {
+function usePatientsData() {
   const { data, isLoading, error } = usePatientsList();
 
   return {

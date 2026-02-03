@@ -10,7 +10,7 @@ import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '@/lib/constants/au
 /**
  * Check authentication token status
  */
-export function checkAuthToken(): {
+function checkAuthToken(): {
   hasToken: boolean;
   tokenLength: number;
   tokenPreview: string;
@@ -69,7 +69,7 @@ export function checkAuthToken(): {
 /**
  * Migrate token from old key to new key
  */
-export function migrateToken(): {
+function migrateToken(): {
   success: boolean;
   message: string;
   migrated: boolean;
@@ -105,7 +105,7 @@ export function migrateToken(): {
 /**
  * Clear all authentication tokens
  */
-export function clearAuthTokens(): void {
+function clearAuthTokens(): void {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
   localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
   localStorage.removeItem('token'); // Also clear old key if exists
@@ -115,7 +115,7 @@ export function clearAuthTokens(): void {
 /**
  * Test API request with current token
  */
-export async function testApiRequest(url: string = '/api/pre-assessment/chatbot/start'): Promise<{
+async function testApiRequest(url: string = '/api/pre-assessment/chatbot/start'): Promise<{
   success: boolean;
   status: number;
   message: string;
@@ -164,7 +164,7 @@ export async function testApiRequest(url: string = '/api/pre-assessment/chatbot/
  * Decode JWT token (without verification)
  * Useful for debugging token contents
  */
-export function decodeToken(): {
+function decodeToken(): {
   success: boolean;
   payload?: any;
   header?: any;

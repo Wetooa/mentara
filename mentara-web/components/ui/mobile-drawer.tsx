@@ -118,4 +118,3 @@ export function MobileDrawer({ isOpen, onClose, children, title }: MobileDrawerP
   );
 }
 
-export default MobileDrawer;

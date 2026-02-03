@@ -6,7 +6,7 @@ import { create } from "zustand";
 
 const inProd = process.env.NODE_ENV === "production";
 
-export interface PreAssessmentChecklistState {
+interface PreAssessmentChecklistState {
   step: number;
   miniStep: number;
   nextStep: () => void;
@@ -101,7 +101,7 @@ interface Details {
   nickName: string;
 }
 
-export interface SignUpStore {
+interface SignUpStore {
   details: Details;
   setDetails: (details: Details) => void;
 }
@@ -120,14 +120,14 @@ interface AssessmentData {
 }
 
 // Assessment data store for registration flow
-export interface PreAssessmentStore {
+interface PreAssessmentStore {
   assessmentData: AssessmentData | null;
   setAssessmentData: (data: AssessmentData) => void;
   getAssessmentData: () => AssessmentData | null;
   clearAssessmentData: () => void;
 }
 
-export const usePreAssessmentStore = create<PreAssessmentStore>()((set, get) => ({
+const usePreAssessmentStore = create<PreAssessmentStore>()((set, get) => ({
   assessmentData: null,
   setAssessmentData: (data) => set({ assessmentData: data }),
   getAssessmentData: () => get().assessmentData,

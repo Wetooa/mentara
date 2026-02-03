@@ -18,7 +18,7 @@ const ONBOARDING_STORAGE_KEYS = {
 /**
  * Return type for the useOnboardingRedirect hook
  */
-export interface UseOnboardingRedirectReturn {
+interface UseOnboardingRedirectReturn {
   /** Whether this is a first-time user */
   isFirstTimeUser: boolean;
   /** Whether the user needs to complete onboarding */
@@ -67,7 +67,7 @@ export interface UseOnboardingRedirectReturn {
  * 3. Welcome page (/user/welcome)
  * 4. Regular dashboard access
  */
-export function useOnboardingRedirect(): UseOnboardingRedirectReturn {
+function useOnboardingRedirect(): UseOnboardingRedirectReturn {
   const router = useRouter();
   const pathname = usePathname();
   const { user, backendUser, isFirstTimeUser, isLoaded } = useAuth();

@@ -12,7 +12,7 @@ export interface FileUploadResponse {
   success: boolean;
 }
 
-export interface FileUploadError {
+interface FileUploadError {
   success: false;
   error: string;
   details?: string;

@@ -26,7 +26,7 @@ interface SimplePageMetadataProps {
  * - Shows original favicon with green dot overlay when notifications exist
  * - Replaces the complex NotificationMetadata system
  */
-export function SimplePageMetadata({
+function SimplePageMetadata({
   pageName,
   enabled = true,
   onNotificationChange,
@@ -79,7 +79,7 @@ export function DashboardPageMetadata({
  * Hook to get current notification state without side effects
  * Replaces the complex useNotificationMetadataState
  */
-export function useSimpleNotificationState() {
+function useSimpleNotificationState() {
   const { hasNotifications, unreadCount, isLoading, error } = useSimplePageMetadata({
     pageName: "temp", // Not used since we're not updating title
     enabled: true,

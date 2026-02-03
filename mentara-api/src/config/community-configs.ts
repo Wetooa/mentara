@@ -44,7 +44,7 @@ export const ILLNESS_COMMUNITIES: CommunityConfig[] = getAllCanonicalCommunities
 }));
 
 // Keep legacy export for backward compatibility
-export const COMMUNITIES = ILLNESS_COMMUNITIES;
+const COMMUNITIES = ILLNESS_COMMUNITIES;
 
 /**
  * Helper function to get community configuration by slug
@@ -68,7 +68,7 @@ export function getCommunityBySlug(slug: string): CommunityConfig | undefined {
  * Helper function to get all community names
  * @returns Array of all community names
  */
-export function getAllCommunityNames(): string[] {
+function getAllCommunityNames(): string[] {
   return ILLNESS_COMMUNITIES.map((community) => community.name);
 }
 
@@ -77,7 +77,7 @@ export function getAllCommunityNames(): string[] {
  * @param illness - The illness type to filter by
  * @returns Array of communities for the specified illness
  */
-export function getCommunitiesByIllness(illness: string): CommunityConfig[] {
+function getCommunitiesByIllness(illness: string): CommunityConfig[] {
   return ILLNESS_COMMUNITIES.filter(
     (community) => community.illness === illness,
   );
@@ -87,7 +87,7 @@ export function getCommunitiesByIllness(illness: string): CommunityConfig[] {
  * Helper function to get all available illness types
  * @returns Array of unique illness types
  */
-export function getAllIllnessTypes(): string[] {
+function getAllIllnessTypes(): string[] {
   return [
     ...new Set(
       ILLNESS_COMMUNITIES.map((community) => community.illness).filter(Boolean),
@@ -101,7 +101,7 @@ export function getAllIllnessTypes(): string[] {
  * 
  * UPDATED: Now uses canonical questionnaire IDs instead of Has_* format
  */
-export const AI_DISORDER_TO_COMMUNITY_MAPPING: Record<string, string[]> = {
+const AI_DISORDER_TO_COMMUNITY_MAPPING: Record<string, string[]> = {
   // Primary mappings based on canonical questionnaire IDs
   depression: ['depression-support'],
   anxiety: ['anxiety-warriors'],
@@ -146,7 +146,7 @@ export const AI_DISORDER_TO_COMMUNITY_MAPPING: Record<string, string[]> = {
  * @param disorderPredictions - Object with disorder predictions (boolean values)
  * @returns Array of recommended community slugs
  */
-export function getRecommendedCommunitiesFromAI(
+function getRecommendedCommunitiesFromAI(
   disorderPredictions: Record<string, boolean>
 ): string[] {
   const recommendedSlugs = new Set<string>();

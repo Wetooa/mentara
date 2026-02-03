@@ -138,7 +138,7 @@ export function getResponsesByCategory(category: QuickResponse["category"]): Qui
 /**
  * Get response by ID
  */
-export function getResponseById(id: string): QuickResponse | undefined {
+function getResponseById(id: string): QuickResponse | undefined {
   return QUICK_RESPONSES.find((r) => r.id === id);
 }
 

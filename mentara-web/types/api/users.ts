@@ -1,6 +1,6 @@
 // User management DTOs matching backend exactly
 
-export interface User {
+interface User {
   id: string;
   email: string;
   firstName: string;
@@ -17,7 +17,7 @@ export interface User {
   updatedAt: string;
 }
 
-export interface CreateUserRequest {
+interface CreateUserRequest {
   email: string;
   firstName: string;
   middleName: string;
@@ -30,7 +30,7 @@ export interface CreateUserRequest {
   coverImageUrl: string;
 }
 
-export interface UpdateUserRequest {
+interface UpdateUserRequest {
   firstName?: string;
   middleName?: string;
   lastName?: string;
@@ -42,12 +42,12 @@ export interface UpdateUserRequest {
   isActive?: boolean;
 }
 
-export interface UserDeactivationDto {
+interface UserDeactivationDto {
   reason?: string;
   deactivatedBy?: string;
 }
 
-export interface UserListParams {
+interface UserListParams {
   role?: string;
   status?: string;
   limit?: number;
@@ -55,7 +55,7 @@ export interface UserListParams {
   includeInactive?: boolean;
 }
 
-export interface UserListResponse {
+interface UserListResponse {
   users: User[];
   total: number;
   hasMore: boolean;

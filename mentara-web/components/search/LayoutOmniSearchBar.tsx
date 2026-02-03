@@ -32,7 +32,7 @@ const ROLE_ENTITY_TYPES: Record<string, EntityType[]> = {
   moderator: ["users", "posts", "communities"],
 };
 
-export interface LayoutOmniSearchBarProps {
+interface LayoutOmniSearchBarProps {
   placeholder?: string;
   className?: string;
   onResultSelect?: (result: any, type: EntityType) => void;
@@ -498,4 +498,3 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
   );
 };
 
-export default LayoutOmniSearchBar;

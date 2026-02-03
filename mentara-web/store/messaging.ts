@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { STORAGE_KEYS } from "@/lib/config/storage";
 
-export interface MessagingState {
+interface MessagingState {
   // Selected conversation
   selectedConversationId: string | null;
   

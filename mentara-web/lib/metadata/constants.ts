@@ -149,7 +149,7 @@ export const ROLE_METADATA = {
 } as const;
 
 // Simplified notification metadata (removed complex emoji mappings)
-export const SIMPLE_NOTIFICATION_CONFIG = {
+const SIMPLE_NOTIFICATION_CONFIG = {
   FAVICON_DEFAULT: "/favicon.ico",
   FAVICON_WITH_NOTIFICATION: "/favicon-notification.ico",
 } as const;

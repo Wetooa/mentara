@@ -557,7 +557,7 @@ const getMainSocket = (): SimpleWebSocket => {
 /**
  * Get socket instance (with optional namespace and token)
  */
-export const getSocket = (namespace?: string, token?: string): Socket => {
+const getSocket = (namespace?: string, token?: string): Socket => {
   const socketInstance = namespace ? getSocketInstance(namespace) : getMainSocket();
   
   // Auto-connect if token provided and not connected
@@ -571,7 +571,7 @@ export const getSocket = (namespace?: string, token?: string): Socket => {
 /**
  * Get namespaced socket instance
  */
-export const getNamespacedSocket = (namespace: string, token?: string): Socket => {
+const getNamespacedSocket = (namespace: string, token?: string): Socket => {
   return getSocket(namespace, token);
 };
 
@@ -583,7 +583,7 @@ export const createSocket = getNamespacedSocket;
 /**
  * Connect socket and return promise
  */
-export const connectSocket = (namespace?: string, token?: string): Promise<Socket> => {
+const connectSocket = (namespace?: string, token?: string): Promise<Socket> => {
   // #region agent log
   fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:542',message:'connectSocket() called',data:{namespace:namespace||'default',hasToken:!!token},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
   // #endregion
@@ -601,7 +601,7 @@ export const connectSocket = (namespace?: string, token?: string): Promise<Socke
 /**
  * Check if socket is connected
  */
-export const isSocketConnected = (namespace?: string): boolean => {
+const isSocketConnected = (namespace?: string): boolean => {
   const socketInstance = namespace ? 
     (sockets[namespace] || null) : 
     mainSocket;
@@ -612,7 +612,7 @@ export const isSocketConnected = (namespace?: string): boolean => {
 /**
  * Disconnect socket
  */
-export const disconnectSocket = (namespace?: string): void => {
+const disconnectSocket = (namespace?: string): void => {
   if (namespace) {
     if (sockets[namespace]) {
       sockets[namespace].disconnect();
@@ -631,22 +631,22 @@ export const disconnectSocket = (namespace?: string): void => {
 };
 
 // Specific namespace helpers
-export const getMessagingSocket = (token?: string) => getNamespacedSocket('/messaging', token);
-export const getMeetingsSocket = (token?: string) => getNamespacedSocket('/meetings', token);
+const getMessagingSocket = (token?: string) => getNamespacedSocket('/messaging', token);
+const getMeetingsSocket = (token?: string) => getNamespacedSocket('/meetings', token);
 
-export const connectMessagingSocket = (token?: string) => {
+const connectMessagingSocket = (token?: string) => {
   // #region agent log
   fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:586',message:'connectMessagingSocket() called',data:{hasToken:!!token},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
   // #endregion
   return connectSocket('/messaging', token);
 };
-export const connectMeetingsSocket = (token?: string) => connectSocket('/meetings', token);
+const connectMeetingsSocket = (token?: string) => connectSocket('/meetings', token);
 
-export const isMessagingConnected = () => isSocketConnected('/messaging');
-export const isMeetingsConnected = () => isSocketConnected('/meetings');
+const isMessagingConnected = () => isSocketConnected('/messaging');
+const isMeetingsConnected = () => isSocketConnected('/meetings');
 
 // Enhanced reconnection with backoff strategy
-export const smartReconnect = async (namespace?: string, maxRetries: number = 5): Promise<boolean> => {
+const smartReconnect = async (namespace?: string, maxRetries: number = 5): Promise<boolean> => {
   let attempt = 0;
   
   while (attempt < maxRetries) {
@@ -678,7 +678,7 @@ export const smartReconnect = async (namespace?: string, maxRetries: number = 5)
 /**
  * Manual recovery from connection issues (including TransportErrors)
  */
-export const recoverConnection = async (namespace?: string): Promise<boolean> => {
+const recoverConnection = async (namespace?: string): Promise<boolean> => {
   const socketInstance = namespace ? getSocketInstance(namespace) : getMainSocket();
   return await socketInstance.recover();
 };
@@ -686,7 +686,7 @@ export const recoverConnection = async (namespace?: string): Promise<boolean> =>
 /**
  * Check if socket has transport error
  */
-export const hasTransportError = (namespace?: string): boolean => {
+const hasTransportError = (namespace?: string): boolean => {
   const socketInstance = namespace ? 
     (sockets[namespace] || null) : 
     mainSocket;
@@ -697,7 +697,7 @@ export const hasTransportError = (namespace?: string): boolean => {
 /**
  * Get current retry count for transport error recovery
  */
-export const getRetryCount = (namespace?: string): number => {
+const getRetryCount = (namespace?: string): number => {
   const socketInstance = namespace ? 
     (sockets[namespace] || null) : 
     mainSocket;
@@ -706,12 +706,12 @@ export const getRetryCount = (namespace?: string): number => {
 };
 
 // Connection quality and stats (simplified)
-export const getConnectionQuality = (namespace?: string): 'excellent' | 'good' | 'poor' | 'unknown' => {
+const getConnectionQuality = (namespace?: string): 'excellent' | 'good' | 'poor' | 'unknown' => {
   const connected = isSocketConnected(namespace);
   return connected ? 'good' : 'unknown';
 };
 
-export const getConnectionStats = (namespace?: string) => {
+const getConnectionStats = (namespace?: string) => {
   const socketInstance = namespace ? 
     (sockets[namespace] || null) : 
     mainSocket;
@@ -734,7 +734,7 @@ export const getConnectionStats = (namespace?: string) => {
   };
 };
 
-export const monitorConnectionHealth = (namespace?: string, callback?: (stats: any) => void) => {
+const monitorConnectionHealth = (namespace?: string, callback?: (stats: any) => void) => {
   const intervalId = setInterval(() => {
     const stats = getConnectionStats(namespace);
     if (stats && callback) {
@@ -818,11 +818,11 @@ export const getConnectionState = () => {
   const socketInstance = getSocketInstance('/messaging');
   return socketInstance.getState();
 };
-export const isWebSocketConnected = () => isMessagingConnected();
+const isWebSocketConnected = () => isMessagingConnected();
 
 // TransportError recovery methods for messaging namespace
-export const recoverMessagingConnection = () => recoverConnection('/messaging');
-export const hasMessagingTransportError = () => hasTransportError('/messaging');
-export const getMessagingRetryCount = () => getRetryCount('/messaging');
+const recoverMessagingConnection = () => recoverConnection('/messaging');
+const hasMessagingTransportError = () => hasTransportError('/messaging');
+const getMessagingRetryCount = () => getRetryCount('/messaging');
 
-export type { ConnectionState, WebSocketConfig };
+export type { ConnectionState,  };

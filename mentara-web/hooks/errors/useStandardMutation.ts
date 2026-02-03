@@ -18,7 +18,7 @@ export interface StandardMutationConfig<TData, TVariables> {
 }
 
 // Standardized mutation hook
-export function useStandardMutation<TData = unknown, TVariables = unknown>(
+function useStandardMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: StandardMutationConfig<TData, TVariables>,
   options?: Omit<UseMutationOptions<TData, MentaraApiError, TVariables>, 'mutationFn' | 'onSuccess' | 'onError'>
@@ -67,7 +67,7 @@ export function useStandardMutation<TData = unknown, TVariables = unknown>(
 // Specialized mutation hooks for common patterns
 
 // Authentication mutations
-export function useAuthMutation<TData = unknown, TVariables = unknown>(
+function useAuthMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {
@@ -93,7 +93,7 @@ export function useBillingMutation<TData = unknown, TVariables = unknown>(
 }
 
 // Booking mutations
-export function useBookingMutation<TData = unknown, TVariables = unknown>(
+function useBookingMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {
@@ -107,7 +107,7 @@ export function useBookingMutation<TData = unknown, TVariables = unknown>(
 }
 
 // Messaging mutations
-export function useMessagingMutation<TData = unknown, TVariables = unknown>(
+function useMessagingMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {
@@ -121,7 +121,7 @@ export function useMessagingMutation<TData = unknown, TVariables = unknown>(
 }
 
 // Community mutations
-export function useCommunityMutation<TData = unknown, TVariables = unknown>(
+function useCommunityMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {
@@ -135,7 +135,7 @@ export function useCommunityMutation<TData = unknown, TVariables = unknown>(
 }
 
 // Worksheet mutations
-export function useWorksheetMutation<TData = unknown, TVariables = unknown>(
+function useWorksheetMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {
@@ -149,7 +149,7 @@ export function useWorksheetMutation<TData = unknown, TVariables = unknown>(
 }
 
 // File upload mutations
-export function useFileUploadMutation<TData = unknown, TVariables = unknown>(
+function useFileUploadMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {
@@ -163,7 +163,7 @@ export function useFileUploadMutation<TData = unknown, TVariables = unknown>(
 }
 
 // Profile mutations
-export function useProfileMutation<TData = unknown, TVariables = unknown>(
+function useProfileMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {
@@ -177,7 +177,7 @@ export function useProfileMutation<TData = unknown, TVariables = unknown>(
 }
 
 // Admin mutations
-export function useAdminMutation<TData = unknown, TVariables = unknown>(
+function useAdminMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {
@@ -190,7 +190,7 @@ export function useAdminMutation<TData = unknown, TVariables = unknown>(
 }
 
 // Meeting mutations
-export function useMeetingMutation<TData = unknown, TVariables = unknown>(
+function useMeetingMutation<TData = unknown, TVariables = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   config: Omit<StandardMutationConfig<TData, TVariables>, 'context'> = {}
 ) {

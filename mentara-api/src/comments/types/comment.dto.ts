@@ -30,7 +30,7 @@ export interface CommentUpdateInputDto {
 }
 
 // Comment response DTO
-export interface CommentResponseDto {
+interface CommentResponseDto {
   id: string;
   content: string;
   authorId: string;
@@ -59,7 +59,7 @@ export interface CommentResponseDto {
 }
 
 // Comment query DTO
-export interface CommentQueryDto {
+interface CommentQueryDto {
   postId?: string;
   authorId?: string;
   parentCommentId?: string;
@@ -71,7 +71,7 @@ export interface CommentQueryDto {
 }
 
 // Comment interaction DTO
-export interface CommentInteractionDto {
+interface CommentInteractionDto {
   action: 'like' | 'unlike' | 'report';
   reason?: string;
 }

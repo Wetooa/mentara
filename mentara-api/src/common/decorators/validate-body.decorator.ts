@@ -72,7 +72,7 @@ export const ValidatedQuery = createParamDecorator(
 );
 
 // Params validation decorator for path parameters
-export const ValidatedParams = createParamDecorator(
+const ValidatedParams = createParamDecorator(
   (schema: any, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     const params = request.params;

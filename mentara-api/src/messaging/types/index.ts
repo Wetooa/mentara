@@ -14,7 +14,7 @@ export type {
   BlockUserDto,
   SearchMessagesDto,
   ConversationListParams,
-  ConversationResponseDto,
-  MessageResponseDto,
-  MessagingStatsDto,
+  
+  
+  
 } from './messaging.dto';

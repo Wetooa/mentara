@@ -21,7 +21,7 @@ interface State {
  * Error boundary specifically designed for therapist listing components
  * Provides graceful fallback UI and error reporting for the matching system
  */
-export class TherapistListingErrorBoundary extends React.Component<Props, State> {
+class TherapistListingErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -143,7 +143,7 @@ export class TherapistListingErrorBoundary extends React.Component<Props, State>
 /**
  * Hook-based wrapper for functional components
  */
-export function withTherapistListingErrorBoundary<P extends object>(
+function withTherapistListingErrorBoundary<P extends object>(
   Component: React.ComponentType<P>
 ) {
   return function ErrorBoundaryWrapper(props: P) {

@@ -16,7 +16,7 @@ export const TEST_COMMUNITY_IDS = {
   PRIVATE_THERAPY: 'community-private-101',
 };
 
-export const TEST_ROOM_GROUP_IDS = {
+const TEST_ROOM_GROUP_IDS = {
   ANXIETY_GENERAL: 'room-group-anxiety-general-123',
   DEPRESSION_GENERAL: 'room-group-depression-general-456',
   WELLNESS_GENERAL: 'room-group-wellness-general-789',
@@ -583,5 +583,5 @@ export {
   MockBuilder,
   SecurityGuardTestUtils,
   RoleBasedTestUtils,
-  CommunityAccessGuardTestUtils,
+  
 };

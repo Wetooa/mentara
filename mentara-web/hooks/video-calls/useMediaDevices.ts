@@ -19,7 +19,7 @@ const DEFAULT_MEDIA_CONSTRAINTS = {
   }
 };
 
-export function useMediaDevices(): UseMediaDevicesReturn {
+function useMediaDevices(): UseMediaDevicesReturn {
   const [mediaState, setMediaState] = useState<MediaDeviceState>({
     videoEnabled: false,
     audioEnabled: false,

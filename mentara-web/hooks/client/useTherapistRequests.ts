@@ -201,7 +201,7 @@ export function useTherapistRequests(): UseTherapistRequestsReturn {
  * Hook specifically for sending therapist requests (lightweight version)
  * Use this when you only need to send requests without managing pending state
  */
-export function useCreateTherapistRequest() {
+function useCreateTherapistRequest() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -265,7 +265,7 @@ export function useCreateTherapistRequest() {
  * Hook specifically for canceling therapist requests (lightweight version)
  * Use this when you only need to cancel requests without managing pending state
  */
-export function useCancelTherapistRequest() {
+function useCancelTherapistRequest() {
   const api = useApi();
   const queryClient = useQueryClient();
 

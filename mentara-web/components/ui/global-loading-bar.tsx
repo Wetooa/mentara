@@ -177,7 +177,7 @@ const GlobalLoadingBar: React.FC<LoadingBarProps> = ({
 export default GlobalLoadingBar;
 
 // Custom CSS for shimmer animation (to be added to globals.css)
-export const shimmerKeyframes = `
+const shimmerKeyframes = `
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);

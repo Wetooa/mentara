@@ -62,7 +62,7 @@ export const QUESTIONNAIRE_MAP: Record<
 };
 
 // Reverse mapping from questionnaire IDs to display names
-export const QUESTIONNAIRE_ID_TO_NAME_MAP: Record<
+const QUESTIONNAIRE_ID_TO_NAME_MAP: Record<
   string,
   ListOfQuestionnaires
 > = {
@@ -84,25 +84,25 @@ export const QUESTIONNAIRE_ID_TO_NAME_MAP: Record<
 };
 
 // Helper function to get questionnaire by display name
-export const getQuestionnaireByName = (
+const getQuestionnaireByName = (
   name: ListOfQuestionnaires
 ): QuestionnaireProps => {
   return QUESTIONNAIRE_MAP[name];
 };
 
 // Helper function to get all questionnaire names
-export const getAllQuestionnaireNames = (): readonly ListOfQuestionnaires[] => {
+const getAllQuestionnaireNames = (): readonly ListOfQuestionnaires[] => {
   return LIST_OF_QUESTIONNAIRES;
 };
 
 // Helper function to get questionnaire by ID
-export const getQuestionnaireById = (id: string): QuestionnaireProps | null => {
+const getQuestionnaireById = (id: string): QuestionnaireProps | null => {
   const displayName = QUESTIONNAIRE_ID_TO_NAME_MAP[id];
   return displayName ? QUESTIONNAIRE_MAP[displayName] : null;
 };
 
 // Helper function to validate if a questionnaire name exists
-export const isValidQuestionnaireName = (
+const isValidQuestionnaireName = (
   name: string
 ): name is ListOfQuestionnaires => {
   return LIST_OF_QUESTIONNAIRES.includes(name as ListOfQuestionnaires);

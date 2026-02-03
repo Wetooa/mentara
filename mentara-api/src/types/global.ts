@@ -1,14 +1,14 @@
 import { User } from '@prisma/client';
 
 // Re-export User for external modules
-export type { User };
+;
 
 /**
  * Global types used across multiple modules in the application
  */
 
 // JWT Payload interface
-export interface JwtPayload {
+interface JwtPayload {
   sub: string; // user id
   email: string;
   role: string;
@@ -60,14 +60,14 @@ export interface SuccessResponse {
   message: string;
 }
 
-export interface ErrorResponse {
+interface ErrorResponse {
   success: false;
   message: string;
   errors?: string[];
 }
 
 // Request User type (for authenticated requests)
-export interface RequestUser {
+interface RequestUser {
   id: string;
   email: string;
   role: UserRole;

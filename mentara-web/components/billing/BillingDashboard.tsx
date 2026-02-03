@@ -67,7 +67,7 @@ interface BillingDashboardProps {
   className?: string;
 }
 
-export function BillingDashboard({ className }: BillingDashboardProps) {
+function BillingDashboard({ className }: BillingDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false);
   

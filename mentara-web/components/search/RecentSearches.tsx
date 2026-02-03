@@ -161,4 +161,3 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
   );
 };
 
-export default RecentSearches;

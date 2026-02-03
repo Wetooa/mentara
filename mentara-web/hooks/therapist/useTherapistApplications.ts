@@ -46,7 +46,7 @@ const getApplicationDetailRetryConfig = (
  * Hook for fetching therapist applications list (admin functionality)
  * Uses the admin endpoint for comprehensive application data
  */
-export function useTherapistApplications(params: ApplicationListParams = {}) {
+function useTherapistApplications(params: ApplicationListParams = {}) {
   const api = useApi();
 
   return useQuery({
@@ -67,7 +67,7 @@ export function useTherapistApplications(params: ApplicationListParams = {}) {
  * Hook for fetching therapist applications list with full response metadata (admin functionality)
  * Returns the complete response including pagination data
  */
-export function useTherapistApplicationsWithMetadata(
+function useTherapistApplicationsWithMetadata(
   params: ApplicationListParams = {}
 ) {
   const api = useApi();
@@ -96,7 +96,7 @@ export function useTherapistApplicationsWithMetadata(
 /**
  * Hook for fetching a specific therapist application by ID
  */
-export function useTherapistApplication(applicationId: string | null) {
+function useTherapistApplication(applicationId: string | null) {
   const api = useApi();
 
   return useQuery({
@@ -113,7 +113,7 @@ export function useTherapistApplication(applicationId: string | null) {
 /**
  * Hook for fetching the current user's therapist application
  */
-export function useMyTherapistApplication() {
+function useMyTherapistApplication() {
   const api = useApi();
 
   return useQuery({
@@ -129,7 +129,7 @@ export function useMyTherapistApplication() {
 /**
  * Hook for submitting a new therapist application
  */
-export function useSubmitTherapistApplication() {
+function useSubmitTherapistApplication() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -233,7 +233,7 @@ export function useUpdateTherapistApplicationStatus() {
 /**
  * Hook for bulk actions on therapist applications (admin functionality)
  */
-export function useBulkUpdateApplications() {
+function useBulkUpdateApplications() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -276,7 +276,7 @@ export function useBulkUpdateApplications() {
 /**
  * Hook for prefetching application details
  */
-export function usePrefetchTherapistApplication() {
+function usePrefetchTherapistApplication() {
   const queryClient = useQueryClient();
   const api = useApi();
 

@@ -16,7 +16,7 @@ export interface StandardQueryConfig<TData> {
 }
 
 // Standardized query hook
-export function useStandardQuery<TData = unknown>(
+function useStandardQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: StandardQueryConfig<TData> = { context: "generic" },
@@ -60,7 +60,7 @@ export function useStandardQuery<TData = unknown>(
 // Specialized query hooks for common patterns
 
 // Authentication queries
-export function useAuthQuery<TData = unknown>(
+function useAuthQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -91,7 +91,7 @@ export function useBillingQuery<TData = unknown>(
 }
 
 // Booking queries
-export function useBookingQuery<TData = unknown>(
+function useBookingQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -107,7 +107,7 @@ export function useBookingQuery<TData = unknown>(
 }
 
 // Messaging queries
-export function useMessagingQuery<TData = unknown>(
+function useMessagingQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -123,7 +123,7 @@ export function useMessagingQuery<TData = unknown>(
 }
 
 // Community queries
-export function useCommunityQuery<TData = unknown>(
+function useCommunityQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -139,7 +139,7 @@ export function useCommunityQuery<TData = unknown>(
 }
 
 // Worksheet queries
-export function useWorksheetQuery<TData = unknown>(
+function useWorksheetQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -155,7 +155,7 @@ export function useWorksheetQuery<TData = unknown>(
 }
 
 // Profile queries
-export function useProfileQuery<TData = unknown>(
+function useProfileQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -171,7 +171,7 @@ export function useProfileQuery<TData = unknown>(
 }
 
 // Admin queries
-export function useAdminQuery<TData = unknown>(
+function useAdminQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -187,7 +187,7 @@ export function useAdminQuery<TData = unknown>(
 }
 
 // Meeting queries
-export function useMeetingQuery<TData = unknown>(
+function useMeetingQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -203,7 +203,7 @@ export function useMeetingQuery<TData = unknown>(
 }
 
 // Therapist queries
-export function useTherapistQuery<TData = unknown>(
+function useTherapistQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -219,7 +219,7 @@ export function useTherapistQuery<TData = unknown>(
 }
 
 // File upload queries
-export function useFileQuery<TData = unknown>(
+function useFileQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},
@@ -235,7 +235,7 @@ export function useFileQuery<TData = unknown>(
 }
 
 // Notification queries
-export function useNotificationQuery<TData = unknown>(
+function useNotificationQuery<TData = unknown>(
   queryKey: unknown[],
   queryFn: () => Promise<TData>,
   config: Omit<StandardQueryConfig<TData>, 'context'> = {},

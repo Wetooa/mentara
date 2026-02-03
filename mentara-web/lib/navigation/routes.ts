@@ -2,7 +2,7 @@
  * Route constants and helpers for navigation
  */
 
-export const ROUTES = {
+const ROUTES = {
   // Client routes
   CLIENT: {
     DASHBOARD: "/client",

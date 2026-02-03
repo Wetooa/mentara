@@ -207,4 +207,4 @@ export function usePostDetail(postId: string) {
   };
 }
 
-export type UsePostDetailReturn = ReturnType<typeof usePostDetail>;
+type UsePostDetailReturn = ReturnType<typeof usePostDetail>;

@@ -39,7 +39,7 @@ interface PaymentFailureRecoveryProps {
   onPaymentResolved?: () => void;
 }
 
-export function PaymentFailureRecovery({
+function PaymentFailureRecovery({
   userId,
   onPaymentResolved,
 }: PaymentFailureRecoveryProps) {

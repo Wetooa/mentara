@@ -193,7 +193,7 @@ export default function TherapistRequestCard({
 /**
  * Compact version of the TherapistRequestCard for smaller displays or lists
  */
-export function CompactTherapistRequestCard({
+function CompactTherapistRequestCard({
   request,
   onCancel,
   isCanceling = false,

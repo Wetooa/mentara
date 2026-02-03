@@ -92,4 +92,3 @@ export function MobileProgressHeader({
   );
 }
 
-export default MobileProgressHeader;

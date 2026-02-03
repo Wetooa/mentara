@@ -46,7 +46,7 @@ export const REFETCH_INTERVAL = {
 } as const;
 
 // Retry configuration
-export const RETRY_CONFIG = {
+const RETRY_CONFIG = {
   /** Default retry count */
   DEFAULT_COUNT: 3,
   /** Quick retry count for fast-failing requests */

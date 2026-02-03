@@ -59,7 +59,7 @@ export function buildNestedDateFilter(
 /**
  * Get default date range (last 30 days)
  */
-export function getDefaultDateRange(): { start: Date; end: Date } {
+function getDefaultDateRange(): { start: Date; end: Date } {
   const end = new Date();
   const start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
   return { start, end };
@@ -68,7 +68,7 @@ export function getDefaultDateRange(): { start: Date; end: Date } {
 /**
  * Get date range for common periods
  */
-export function getDateRangeForPeriod(
+function getDateRangeForPeriod(
   period: 'today' | 'week' | 'month' | 'year',
 ): { start: Date; end: Date } {
   const end = new Date();

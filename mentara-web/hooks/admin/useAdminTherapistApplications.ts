@@ -81,7 +81,7 @@ const getAdminTherapistQueryKeys = () => ({
     [...queryKeys.admin.therapistApplications.list(), 'metrics', { startDate, endDate }] as const,
 });
 
-export const adminTherapistQueryKeys = getAdminTherapistQueryKeys();
+const adminTherapistQueryKeys = getAdminTherapistQueryKeys();
 
 // =============================
 // QUERY HOOKS
@@ -123,7 +123,7 @@ export function usePendingTherapistApplications(
 /**
  * Get all therapist applications (not just pending)
  */
-export function useAllTherapistApplications(
+function useAllTherapistApplications(
   filters?: PendingTherapistFiltersDto,
   options?: {
     enabled?: boolean;
@@ -387,7 +387,7 @@ export function useRejectTherapist() {
 /**
  * Update therapist status (including suspension) with optimistic updates
  */
-export function useUpdateTherapistStatus() {
+function useUpdateTherapistStatus() {
   const api = useApi();
   const queryClient = useQueryClient();
 

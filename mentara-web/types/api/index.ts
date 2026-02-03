@@ -3,22 +3,7 @@
 
 // Import consolidated API response types from api-responses.ts
 // This ensures a single source of truth for API response structures
-export type {
-  ApiResponse,
-  ApiError,
-  PaginatedResponse,
-  PaginationMeta,
-  SuccessResponse,
-  ErrorResponse,
-  TokenPair,
-  AuthResponse,
-  EmailResponse,
-  OtpEmailData,
-  FileUploadResponse,
-  SearchResponse,
-  StatsResponse,
-  HealthCheckResponse,
-} from '../api-responses';
+;
 
 // Frontend-specific auth extensions (core auth types now in commons)
 export * from './auth-extensions';
@@ -32,20 +17,20 @@ export * from './messaging';
 // Content types (avoiding conflicts by being selective)
 export {
   // Posts-specific types
-  PostCreateInputDto,
-  PostUpdateInputDto,
-  PostListParams,
-  PostListResponse,
-  HeartPostResponse,
-  CheckHeartedResponse,
+  
+  
+  
+  
+  
+  
 } from './posts';
 
 export {
   // Comments-specific types
-  CommentCreateInputDto,
-  CommentUpdateInputDto,
-  CommentListParams,
-  CommentListResponse,
+  
+  
+  
+  
   // HeartCommentResponse removed - using HeartToggleResponse from @mentara/commons
   // CreateReplyRequest removed - using CommentCreateInputDto with parentId
 } from './comments';

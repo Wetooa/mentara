@@ -9,7 +9,7 @@ export * from './post.dto';
 export type {
   PostCreateInputDto,
   PostUpdateInputDto,
-  PostResponseDto,
-  PostQueryDto,
-  PostInteractionDto,
+  
+  
+  
 } from './post.dto';

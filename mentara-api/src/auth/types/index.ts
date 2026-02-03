@@ -14,7 +14,7 @@ export * from './auth.constants';
 // Re-export commonly used types for convenience
 export type {
   LoginDto,
-  RegisterUserDto,
+  
   RegisterClientDto,
   RegisterTherapistDto,
   RegisterAdminDto,
@@ -23,19 +23,19 @@ export type {
   ResetPasswordDto,
   VerifyEmailDto,
   ResendVerificationEmailDto,
-  SendOtpDto,
-  VerifyOtpDto,
-  ResendOtpDto,
+  
+  
+  
 } from './auth.dto';
 
 export type {
   AuthResponse,
   ClientAuthResponse,
-  TherapistAuthResponse,
-  AdminAuthResponse,
-  ModeratorAuthResponse,
+  
+  
+  
   EmailResponse,
   UserResponse,
-  TokenPair,
-  AuthUser,
+  
+  
 } from './auth.response';

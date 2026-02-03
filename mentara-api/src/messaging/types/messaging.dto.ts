@@ -95,7 +95,7 @@ export interface ConversationListParams {
 }
 
 // Response DTOs
-export interface ConversationResponseDto {
+interface ConversationResponseDto {
   id: string;
   type: 'direct' | 'group' | 'therapy_session';
   title?: string;
@@ -133,7 +133,7 @@ export interface ConversationResponseDto {
   };
 }
 
-export interface MessageResponseDto {
+interface MessageResponseDto {
   id: string;
   content: string;
   type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'system';
@@ -180,7 +180,7 @@ export interface MessageResponseDto {
   };
 }
 
-export interface MessagingStatsDto {
+interface MessagingStatsDto {
   totalConversations: number;
   activeConversations: number;
   unreadMessages: number;
@@ -190,17 +190,17 @@ export interface MessagingStatsDto {
 }
 
 // WebSocket DTOs
-export interface JoinConversationDto {
+interface JoinConversationDto {
   conversationId: string;
   userId?: string;
 }
 
-export interface LeaveConversationDto {
+interface LeaveConversationDto {
   conversationId: string;
   userId?: string;
 }
 
-export interface TypingIndicatorDto {
+interface TypingIndicatorDto {
   conversationId: string;
   isTyping: boolean;
   userId?: string;

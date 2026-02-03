@@ -123,7 +123,7 @@ export interface ApiTherapistResponse {
   };
 }
 
-export interface TherapistRecommendation {
+interface TherapistRecommendation {
   id: string;
   userId: string;
   firstName: string;
@@ -161,7 +161,7 @@ export interface TherapistRecommendation {
 }
 
 // Updated response interface to match actual API structure
-export interface ApiTherapistRecommendationResponse {
+interface ApiTherapistRecommendationResponse {
   success: boolean;
   data: {
     totalCount: number;
@@ -188,7 +188,7 @@ export interface ApiTherapistRecommendationResponse {
 }
 
 // Legacy interface for backward compatibility
-export interface TherapistRecommendationResponse {
+interface TherapistRecommendationResponse {
   totalCount: number;
   userConditions: string[];
   therapists: TherapistRecommendation[];
@@ -201,7 +201,7 @@ export interface TherapistRecommendationResponse {
   pageSize?: number;
 }
 
-export interface TherapistSearchParams {
+interface TherapistSearchParams {
   limit?: number;
   includeInactive?: boolean;
   province?: string;

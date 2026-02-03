@@ -105,7 +105,7 @@ export function formatDateLabel(dateString: string): string {
  * @param timestamp Timestamp string or Date
  * @returns Formatted time string
  */
-export function formatMessageTime(timestamp: string | Date): string {
+function formatMessageTime(timestamp: string | Date): string {
   const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
   
   return new Intl.DateTimeFormat("en-US", {
@@ -121,7 +121,7 @@ export function formatMessageTime(timestamp: string | Date): string {
  * @param message2 Second message
  * @returns True if messages are from same sender
  */
-export function isSameSender(message1: Message, message2: Message): boolean {
+function isSameSender(message1: Message, message2: Message): boolean {
   return message1.sender === message2.sender;
 }
 
@@ -132,7 +132,7 @@ export function isSameSender(message1: Message, message2: Message): boolean {
  * @param maxGapMinutes Maximum time gap in minutes to still group messages
  * @returns True if messages should be grouped
  */
-export function shouldGroupMessages(
+function shouldGroupMessages(
   message1: Message, 
   message2: Message, 
   maxGapMinutes: number = 5

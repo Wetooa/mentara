@@ -201,4 +201,3 @@ export function ProfileHeader({
   );
 }
 
-export default ProfileHeader;

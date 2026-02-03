@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 
 // Hook for fetching reviews with filters
-export function useReviews(params: GetReviewsParams = {}) {
+function useReviews(params: GetReviewsParams = {}) {
   const api = useApi();
 
   return useQuery({
@@ -31,7 +31,7 @@ export function useReviews(params: GetReviewsParams = {}) {
 }
 
 // Hook for fetching therapist-specific reviews
-export function useTherapistReviews(therapistId: string, params: Omit<GetReviewsParams, 'therapistId'> = {}) {
+function useTherapistReviews(therapistId: string, params: Omit<GetReviewsParams, 'therapistId'> = {}) {
   const api = useApi();
 
   return useQuery({
@@ -65,7 +65,7 @@ export function useTherapistReviewStats(therapistId: string) {
 }
 
 // Hook for creating a review
-export function useCreateReview() {
+function useCreateReview() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -132,7 +132,7 @@ export function useCreateReview() {
 }
 
 // Hook for updating a review
-export function useUpdateReview() {
+function useUpdateReview() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -157,7 +157,7 @@ export function useUpdateReview() {
 }
 
 // Hook for deleting a review
-export function useDeleteReview() {
+function useDeleteReview() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -180,7 +180,7 @@ export function useDeleteReview() {
 }
 
 // Hook for marking a review as helpful
-export function useMarkReviewHelpful() {
+function useMarkReviewHelpful() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -217,7 +217,7 @@ export function useMarkReviewHelpful() {
 }
 
 // Hook for moderating reviews (admin/moderator only)
-export function useModerateReview() {
+function useModerateReview() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -248,7 +248,7 @@ export function useModerateReview() {
 }
 
 // Hook for fetching pending reviews (admin/moderator only)
-export function usePendingReviews(params: { page?: number; limit?: number } = {}) {
+function usePendingReviews(params: { page?: number; limit?: number } = {}) {
   const api = useApi();
 
   return useQuery({

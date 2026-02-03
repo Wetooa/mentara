@@ -81,4 +81,4 @@ export function extractErrorMessage(error: unknown): string {
 }
 
 // Export for backwards compatibility
-export { MentaraApiError as ApiError };
+;

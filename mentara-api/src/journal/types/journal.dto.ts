@@ -6,7 +6,7 @@ export interface JournalEntryUpdateInputDto {
   content: string;
 }
 
-export interface JournalEntryResponseDto {
+interface JournalEntryResponseDto {
   id: string;
   userId: string;
   content: string;

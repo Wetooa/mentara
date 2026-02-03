@@ -329,4 +329,3 @@ export function ProfileEditModal({
   );
 }
 
-export default ProfileEditModal;

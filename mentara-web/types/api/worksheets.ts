@@ -54,11 +54,9 @@ export interface Worksheet {
 }
 
 export enum WorksheetStatus {
-  ASSIGNED = "ASSIGNED",
   SUBMITTED = "SUBMITTED",
   REVIEWED = "REVIEWED",
-  OVERDUE = "OVERDUE",
-}
+  }
 
 export interface WorksheetMaterial {
   id: string;
@@ -124,7 +122,7 @@ export interface WorksheetStats {
   overdue: number;
 }
 
-export interface UserInfo {
+interface UserInfo {
   id: string;
   firstName: string;
   lastName: string;
@@ -236,7 +234,7 @@ export interface WorksheetDetailDTO {
 }
 
 // Optional: Response wrapper if the API returns additional metadata
-export interface WorksheetDetailResponse {
+interface WorksheetDetailResponse {
   worksheet: WorksheetDetailDTO;
   assignment?: {
     clientName: string;

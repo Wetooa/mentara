@@ -52,7 +52,7 @@ export function useUpcomingSessions(limit = 10) {
 /**
  * Hook for fetching completed sessions
  */
-export function useCompletedSessions(limit = 10) {
+function useCompletedSessions(limit = 10) {
   const api = useApi();
 
   return useQuery({
@@ -73,7 +73,7 @@ export function useCompletedSessions(limit = 10) {
 /**
  * Hook for fetching cancelled sessions
  */
-export function useCancelledSessions(limit = 10) {
+function useCancelledSessions(limit = 10) {
   const api = useApi();
 
   return useQuery({
@@ -94,7 +94,7 @@ export function useCancelledSessions(limit = 10) {
 /**
  * Hook for fetching in-progress sessions
  */
-export function useInProgressSessions(limit = 10) {
+function useInProgressSessions(limit = 10) {
   const api = useApi();
 
   return useQuery({
@@ -116,7 +116,7 @@ export function useInProgressSessions(limit = 10) {
 /**
  * Hook for fetching sessions by status
  */
-export function useSessionsByStatus(status: Meeting["status"], limit = 10) {
+function useSessionsByStatus(status: Meeting["status"], limit = 10) {
   const api = useApi();
 
   return useQuery({
@@ -138,7 +138,7 @@ export function useSessionsByStatus(status: Meeting["status"], limit = 10) {
 /**
  * Hook for fetching sessions within a date range
  */
-export function useSessionsInDateRange(dateFrom: string, dateTo: string, limit = 20) {
+function useSessionsInDateRange(dateFrom: string, dateTo: string, limit = 20) {
   const api = useApi();
 
   return useQuery({
@@ -220,7 +220,7 @@ export function useSessionStats() {
 /**
  * Hook for prefetching sessions (useful for navigation)
  */
-export function usePrefetchSessions() {
+function usePrefetchSessions() {
   const queryClient = useQueryClient();
   const api = useApi();
 
@@ -263,7 +263,7 @@ export function usePrefetchSessions() {
 /**
  * Hook for invalidating session queries (useful after mutations)
  */
-export function useInvalidateSessions() {
+function useInvalidateSessions() {
   const queryClient = useQueryClient();
 
   return {

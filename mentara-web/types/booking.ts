@@ -15,7 +15,7 @@ export enum MeetingType {
   CHAT = "chat",
 }
 
-export interface CreateMeetingRequest {
+interface CreateMeetingRequest {
   therapistId: string;
   startTime: string;
   duration: number;
@@ -24,7 +24,7 @@ export interface CreateMeetingRequest {
   meetingType?: MeetingType;
 }
 
-export interface MeetingDuration {
+interface MeetingDuration {
   id: string;
   name: string;
   duration: number; // in minutes
@@ -32,12 +32,12 @@ export interface MeetingDuration {
   sortOrder: number;
 }
 
-export interface AvailableSlot {
+interface AvailableSlot {
   startTime: string;
   availableDurations: MeetingDuration[];
 }
 
-export interface Meeting {
+interface Meeting {
   id: string;
   title?: string;
   description?: string;
@@ -68,7 +68,7 @@ export interface Meeting {
   updatedAt: string;
 }
 
-export interface BookingFormData {
+interface BookingFormData {
   date: string;
   timeSlot: AvailableSlot;
   duration: MeetingDuration;

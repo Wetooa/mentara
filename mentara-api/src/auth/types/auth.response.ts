@@ -42,7 +42,7 @@ export interface ClientAuthResponse extends AuthResponse {
   };
 }
 
-export interface TherapistAuthResponse extends AuthResponse {
+interface TherapistAuthResponse extends AuthResponse {
   user: AuthUser & {
     role: UserRole.THERAPIST;
     therapist?: {
@@ -52,7 +52,7 @@ export interface TherapistAuthResponse extends AuthResponse {
   };
 }
 
-export interface AdminAuthResponse extends AuthResponse {
+interface AdminAuthResponse extends AuthResponse {
   user: AuthUser & {
     role: UserRole.ADMIN;
     admin?: {
@@ -61,7 +61,7 @@ export interface AdminAuthResponse extends AuthResponse {
   };
 }
 
-export interface ModeratorAuthResponse extends AuthResponse {
+interface ModeratorAuthResponse extends AuthResponse {
   user: AuthUser & {
     role: UserRole.MODERATOR;
     moderator?: {
@@ -95,27 +95,27 @@ export interface EmailResponse {
   sentTo?: string;
 }
 
-export interface EmailStatusResponse {
+interface EmailStatusResponse {
   emailVerified: boolean;
   verificationSentAt?: Date;
   canResend: boolean;
 }
 
 // OTP responses
-export interface OtpEmailData {
+interface OtpEmailData {
   email: string;
   otpCode: string;
   expiresAt: Date;
 }
 
-export interface AutoOtpEmailRequest {
+interface AutoOtpEmailRequest {
   email: string;
   otpCode: string;
   type: 'registration' | 'password_reset' | 'login_verification';
 }
 
 // Session responses
-export interface SessionInfoResponse {
+interface SessionInfoResponse {
   sessionId: string;
   userId: string;
   createdAt: Date;
@@ -124,29 +124,29 @@ export interface SessionInfoResponse {
   userAgent?: string;
 }
 
-export interface ActiveSessionsResponse {
+interface ActiveSessionsResponse {
   sessions: SessionInfoResponse[];
   currentSessionId: string;
 }
 
-export interface TerminateSessionResponse {
+interface TerminateSessionResponse {
   success: boolean;
   message: string;
   terminatedSessionId: string;
 }
 
-export interface TerminateOtherSessionsResponse {
+interface TerminateOtherSessionsResponse {
   success: boolean;
   message: string;
   terminatedCount: number;
 }
 
-export interface UniversalLogoutResponse {
+interface UniversalLogoutResponse {
   success: boolean;
   message: string;
 }
 
-export interface CheckUserExistsResponse {
+interface CheckUserExistsResponse {
   exists: boolean;
   email?: string;
 }

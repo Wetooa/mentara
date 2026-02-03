@@ -41,7 +41,7 @@ export interface TherapistProfile extends UserProfile {
   sessionLength?: string;
 }
 
-export interface NotificationData {
+interface NotificationData {
   unreadCount: number;
   hasUrgent: boolean;
   // Removed latestType since we no longer use complex notification metadata
@@ -205,7 +205,7 @@ export function generateRoleMetadata(
 /**
  * Generate metadata for community pages
  */
-export function generateCommunityMetadata(community: {
+function generateCommunityMetadata(community: {
   name: string;
   description: string;
   imageUrl?: string;
@@ -229,7 +229,7 @@ export function generateCommunityMetadata(community: {
 /**
  * Generate metadata for content/posts
  */
-export function generateContentMetadata(content: {
+function generateContentMetadata(content: {
   title: string;
   summary?: string;
   authorName?: string;
@@ -280,7 +280,7 @@ export function generateMetadataWithStructuredData(
  * Update page title with simple format (client-side)
  * Simplified: Always returns "Mentara | [Page Name]" format regardless of notifications
  */
-export function updateTitleWithNotifications(
+function updateTitleWithNotifications(
   baseTitle: string,
   _notificationData?: NotificationData
 ): string {

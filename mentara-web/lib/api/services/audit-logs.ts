@@ -12,7 +12,7 @@ export interface AuditLogParams {
   limit?: number;
 }
 
-export interface AuditLog {
+interface AuditLog {
   id: string;
   action: string;
   resource: string;

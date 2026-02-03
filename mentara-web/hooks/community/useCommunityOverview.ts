@@ -8,7 +8,7 @@ import { useCommunityAssignment } from '@/hooks/community/useCommunityAssignment
  * Comprehensive hook that provides a complete overview of community functionality
  * This is the main entry point for community features
  */
-export function useCommunityOverview(communityId?: string) {
+function useCommunityOverview(communityId?: string) {
   // Core community data and operations
   const {
     userCommunities,

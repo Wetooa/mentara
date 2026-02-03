@@ -100,7 +100,7 @@ export function useCommunities() {
 /**
  * Hook for managing community posts and interactions
  */
-export function useCommunityPosts(communityId?: string, roomId?: string) {
+function useCommunityPosts(communityId?: string, roomId?: string) {
   const api = useApi();
   const queryClient = useQueryClient();
 

@@ -40,7 +40,7 @@ interface SessionManagementProps {
   onCancelSession?: (sessionId: string) => void;
 }
 
-export function SessionManagement({
+function SessionManagement({
   sessions,
   onCreateSession,
   onEditSession,

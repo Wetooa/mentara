@@ -53,7 +53,7 @@ export function Skeleton({
 /**
  * Pre-built skeleton components for common use cases
  */
-export function SkeletonCard({ className }: { className?: string }) {
+function SkeletonCard({ className }: { className?: string }) {
   return (
     <div className={cn("p-4 space-y-3", className)}>
       <Skeleton variant="rectangular" className="h-4 w-3/4" />
@@ -63,7 +63,7 @@ export function SkeletonCard({ className }: { className?: string }) {
   );
 }
 
-export function SkeletonAvatar({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+function SkeletonAvatar({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const sizeClasses = {
     sm: "h-8 w-8",
     md: "h-12 w-12",
@@ -89,7 +89,7 @@ export function SkeletonList({ count = 3 }: { count?: number }) {
   );
 }
 
-export function SkeletonMessage({ className }: { className?: string }) {
+function SkeletonMessage({ className }: { className?: string }) {
   return (
     <div className={cn("flex gap-3", className)}>
       <SkeletonAvatar size="sm" />

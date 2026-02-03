@@ -64,7 +64,7 @@ interface AuditLogsProps {
   className?: string;
 }
 
-export function AuditLogs({
+function AuditLogs({
   logs = [],
   total = 0,
   stats = { totalLogs: 0, todayLogs: 0, criticalEvents: 0 },

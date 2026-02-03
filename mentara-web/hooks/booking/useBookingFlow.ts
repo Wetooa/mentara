@@ -72,7 +72,7 @@ interface UseBookingFlowReturn {
   isFormValid: () => boolean;
 }
 
-export function useBookingFlow(therapistId?: string): UseBookingFlowReturn {
+function useBookingFlow(therapistId?: string): UseBookingFlowReturn {
   const api = useApi();
   const queryClient = useQueryClient();
   

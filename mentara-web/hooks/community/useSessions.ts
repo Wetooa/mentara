@@ -130,7 +130,7 @@ export function useSessions(filters?: SessionFilters) {
 }
 
 // Hook for getting upcoming sessions specifically
-export function useUpcomingSessions(communityId?: string) {
+function useUpcomingSessions(communityId?: string) {
   const [sessions, setSessions] = useState<GroupSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -147,7 +147,7 @@ export function useUpcomingSessions(communityId?: string) {
 }
 
 // Hook for session detail
-export function useSessionDetail(sessionId: string) {
+function useSessionDetail(sessionId: string) {
   const [session, setSession] = useState<GroupSession | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -14,6 +14,6 @@ export type {
   RecommendationQueryDto,
   CommunityResponse,
   CommunityStatsResponse,
-  CommunityRecommendationResponse,
-  CommunityRecommendationsResult,
+  
+  
 } from './community.dto';

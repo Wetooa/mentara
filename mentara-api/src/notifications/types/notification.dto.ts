@@ -6,7 +6,7 @@ export interface NotificationQuery {
   priority?: NotificationPriority;
 }
 
-export interface CreateNotificationDto {
+interface CreateNotificationDto {
   title: string;
   message: string;
   type: NotificationType;
@@ -16,7 +16,7 @@ export interface CreateNotificationDto {
   userId: string;
 }
 
-export interface UpdateNotificationSettingsDto {
+interface UpdateNotificationSettingsDto {
   emailAppointmentReminders?: boolean;
   emailNewMessages?: boolean;
   emailWorksheetUpdates?: boolean;

@@ -1,6 +1,6 @@
 // Client DTOs matching backend exactly
 
-export interface OnboardingData {
+interface OnboardingData {
   profile: {
     firstName: string;
     lastName: string;
@@ -67,7 +67,7 @@ export interface ClientProfile {
   updatedAt: string;
 }
 
-export interface ClientProgress {
+interface ClientProgress {
   totalSessions: number;
   completedWorksheets: number;
   currentStreak: number;
@@ -83,7 +83,7 @@ export interface ClientProgress {
   }>;
 }
 
-export interface AssignedTherapist {
+interface AssignedTherapist {
   id: string;
   firstName: string;
   lastName: string;
@@ -101,14 +101,14 @@ export interface AssignedTherapist {
   };
 }
 
-export interface AssessmentSubmission {
+interface AssessmentSubmission {
   responses: Record<string, any>;
   assessmentType: string;
   completedAt?: string;
   metadata?: Record<string, unknown>;
 }
 
-export interface AssessmentResults {
+interface AssessmentResults {
   id: string;
   scores: Record<string, number>;
   recommendations: string[];

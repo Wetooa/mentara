@@ -1,12 +1,12 @@
 // Search DTOs matching backend exactly
 
-export interface SearchParams {
+interface SearchParams {
   q: string; // query string
   limit?: number;
   offset?: number;
 }
 
-export interface TherapistSearchParams extends SearchParams {
+interface TherapistSearchParams extends SearchParams {
   specialties?: string[];
   languages?: string[];
   minExperience?: number;
@@ -19,7 +19,7 @@ export interface TherapistSearchParams extends SearchParams {
   availableTo?: string;
 }
 
-export interface PostSearchParams extends SearchParams {
+interface PostSearchParams extends SearchParams {
   communityId?: string;
   roomId?: string;
   authorId?: string;
@@ -28,21 +28,21 @@ export interface PostSearchParams extends SearchParams {
   dateTo?: string;
 }
 
-export interface UserSearchParams extends SearchParams {
+interface UserSearchParams extends SearchParams {
   role?: 'client' | 'therapist' | 'moderator' | 'admin';
   isActive?: boolean;
 }
 
-export interface CommunitySearchParams extends SearchParams {
+interface CommunitySearchParams extends SearchParams {
   category?: string;
   isPublic?: boolean;
 }
 
-export interface GlobalSearchParams extends SearchParams {
+interface GlobalSearchParams extends SearchParams {
   type?: 'therapists' | 'posts' | 'communities' | 'users';
 }
 
-export interface SearchResult<T> {
+interface SearchResult<T> {
   items: T[];
   total: number;
   hasMore: boolean;
@@ -50,7 +50,7 @@ export interface SearchResult<T> {
   suggestions?: string[];
 }
 
-export interface TherapistSearchResult {
+interface TherapistSearchResult {
   id: string;
   firstName: string;
   lastName: string;
@@ -66,7 +66,7 @@ export interface TherapistSearchResult {
   isAvailable: boolean;
 }
 
-export interface PostSearchResult {
+interface PostSearchResult {
   id: string;
   title: string;
   content: string;
@@ -79,7 +79,7 @@ export interface PostSearchResult {
   createdAt: string;
 }
 
-export interface UserSearchResult {
+interface UserSearchResult {
   id: string;
   firstName: string;
   lastName: string;
@@ -89,7 +89,7 @@ export interface UserSearchResult {
   createdAt: string;
 }
 
-export interface CommunitySearchResult {
+interface CommunitySearchResult {
   id: string;
   name: string;
   description: string;
@@ -100,7 +100,7 @@ export interface CommunitySearchResult {
   createdAt: string;
 }
 
-export interface GlobalSearchResult {
+interface GlobalSearchResult {
   id: string;
   type: 'therapist' | 'post' | 'community' | 'user';
   title: string;

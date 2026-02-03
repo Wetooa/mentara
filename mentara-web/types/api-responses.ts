@@ -4,7 +4,7 @@
  */
 
 // Generic API response wrapper
-export interface ApiResponse<T = any> {
+interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
   message?: string;
@@ -12,7 +12,7 @@ export interface ApiResponse<T = any> {
 }
 
 // Pagination metadata
-export interface PaginationMeta {
+interface PaginationMeta {
   total: number;
   page: number;
   limit: number;
@@ -22,17 +22,17 @@ export interface PaginationMeta {
 }
 
 // Paginated response wrapper
-export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
+interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
   meta: PaginationMeta;
 }
 
 // Common response types
-export interface SuccessResponse {
+interface SuccessResponse {
   success: boolean;
   message: string;
 }
 
-export interface ErrorResponse {
+interface ErrorResponse {
   success: false;
   message: string;
   errors?: string[];
@@ -40,33 +40,33 @@ export interface ErrorResponse {
 }
 
 // Authentication response types
-export interface TokenPair {
+interface TokenPair {
   accessToken: string;
   refreshToken: string;
 }
 
-export interface AuthResponse<T = any> {
+interface AuthResponse<T = any> {
   user: T;
   tokens: TokenPair;
   isFirstLogin?: boolean;
 }
 
 // Email response types
-export interface EmailResponse {
+interface EmailResponse {
   success: boolean;
   message: string;
   sentTo?: string;
 }
 
 // OTP response types
-export interface OtpEmailData {
+interface OtpEmailData {
   email: string;
   otpCode: string;
   expiresAt: string;
 }
 
 // File upload response
-export interface FileUploadResponse {
+interface FileUploadResponse {
   id: string;
   filename: string;
   originalName: string;
@@ -77,7 +77,7 @@ export interface FileUploadResponse {
 }
 
 // Search response
-export interface SearchResponse<T = any> {
+interface SearchResponse<T = any> {
   results: T[];
   total: number;
   query: string;
@@ -86,7 +86,7 @@ export interface SearchResponse<T = any> {
 }
 
 // Statistics response
-export interface StatsResponse {
+interface StatsResponse {
   period: string;
   data: Record<string, number | string>;
   trends?: {
@@ -97,7 +97,7 @@ export interface StatsResponse {
 }
 
 // Health check response
-export interface HealthCheckResponse {
+interface HealthCheckResponse {
   status: 'healthy' | 'degraded' | 'unhealthy';
   timestamp: string;
   uptime: string;
@@ -110,7 +110,7 @@ export interface HealthCheckResponse {
 }
 
 // API Error class
-export class ApiError extends Error {
+class ApiError extends Error {
   public status: number;
   public code?: string;
   public details?: any;

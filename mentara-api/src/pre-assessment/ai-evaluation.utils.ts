@@ -348,7 +348,7 @@ function shuffleArray<T>(array: T[]): T[] {
 /**
  * Helper function to validate AI evaluation data structure
  */
-export function validateAIEvaluationData(data: any): data is AIEvaluationData {
+function validateAIEvaluationData(data: any): data is AIEvaluationData {
   return (
     typeof data === 'object' &&
     typeof data.confidence === 'number' &&

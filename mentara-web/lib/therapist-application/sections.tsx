@@ -117,28 +117,28 @@ export const therapistApplicationSections: ApplicationSection[] = [
 /**
  * Get section by ID
  */
-export const getSectionById = (id: string): ApplicationSection | undefined => {
+const getSectionById = (id: string): ApplicationSection | undefined => {
   return therapistApplicationSections.find((section) => section.id === id);
 };
 
 /**
  * Get all required sections
  */
-export const getRequiredSections = (): ApplicationSection[] => {
+const getRequiredSections = (): ApplicationSection[] => {
   return therapistApplicationSections.filter((section) => section.isRequired);
 };
 
 /**
  * Get section field count
  */
-export const getSectionFieldCount = (section: ApplicationSection): number => {
+const getSectionFieldCount = (section: ApplicationSection): number => {
   return section.fields.length;
 };
 
 /**
  * Get total field count across all sections
  */
-export const getTotalFieldCount = (): number => {
+const getTotalFieldCount = (): number => {
   return therapistApplicationSections.reduce(
     (total, section) => total + section.fields.length,
     0

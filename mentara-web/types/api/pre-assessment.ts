@@ -28,7 +28,7 @@ export interface PreAssessment {
   };
 }
 
-export interface PreAssessmentAnalysis {
+interface PreAssessmentAnalysis {
   scaleScores: {
     [scaleName: string]: {
       rawScore: number;

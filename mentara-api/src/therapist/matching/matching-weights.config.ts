@@ -14,7 +14,7 @@ export interface ComprehensiveMatchingWeights extends MatchingWeights {
  * Default comprehensive matching weights
  * Based on the plan: 8-factor matching system
  */
-export const DEFAULT_COMPREHENSIVE_WEIGHTS: ComprehensiveMatchingWeights = {
+const DEFAULT_COMPREHENSIVE_WEIGHTS: ComprehensiveMatchingWeights = {
   conditionMatch: 0.25, // 25% - Primary condition matching
   approachCompatibility: 0.15, // 15% - Therapeutic approach compatibility
   experienceAndSuccess: 0.15, // 15% - Experience and success rates
@@ -29,7 +29,7 @@ export const DEFAULT_COMPREHENSIVE_WEIGHTS: ComprehensiveMatchingWeights = {
  * High-urgency client weights
  * Prioritizes experience and performance for critical cases
  */
-export const HIGH_URGENCY_WEIGHTS: ComprehensiveMatchingWeights = {
+const HIGH_URGENCY_WEIGHTS: ComprehensiveMatchingWeights = {
   conditionMatch: 0.30, // Increased for critical conditions
   approachCompatibility: 0.15,
   experienceAndSuccess: 0.20, // Increased for experienced therapists
@@ -44,7 +44,7 @@ export const HIGH_URGENCY_WEIGHTS: ComprehensiveMatchingWeights = {
  * Low-engagement client weights
  * Prioritizes retention and engagement compatibility
  */
-export const LOW_ENGAGEMENT_WEIGHTS: ComprehensiveMatchingWeights = {
+const LOW_ENGAGEMENT_WEIGHTS: ComprehensiveMatchingWeights = {
   conditionMatch: 0.20, // Reduced
   approachCompatibility: 0.12, // Reduced
   experienceAndSuccess: 0.12, // Reduced
@@ -59,7 +59,7 @@ export const LOW_ENGAGEMENT_WEIGHTS: ComprehensiveMatchingWeights = {
  * New client weights (no history)
  * Relies more on stated credentials and preferences
  */
-export const NEW_CLIENT_WEIGHTS: ComprehensiveMatchingWeights = {
+const NEW_CLIENT_WEIGHTS: ComprehensiveMatchingWeights = {
   conditionMatch: 0.25,
   approachCompatibility: 0.18, // Increased - preferences more important
   experienceAndSuccess: 0.15,
@@ -100,7 +100,7 @@ export function getMatchingWeights(
 /**
  * Validate that weights sum to 1.0
  */
-export function validateWeights(weights: ComprehensiveMatchingWeights): boolean {
+function validateWeights(weights: ComprehensiveMatchingWeights): boolean {
   const sum =
     weights.conditionMatch +
     weights.approachCompatibility +

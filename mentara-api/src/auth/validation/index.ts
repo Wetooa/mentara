@@ -11,20 +11,20 @@ export * from './validation.utils';
 // Re-export commonly used schemas for convenience
 export {
   LoginDtoSchema,
-  RegisterUserDtoSchema,
-  RegisterClientDtoSchema,
-  RegisterTherapistDtoSchema,
+  
+  
+  
   RegisterAdminDtoSchema,
   RegisterModeratorDtoSchema,
   RequestPasswordResetDtoSchema,
   ResetPasswordDtoSchema,
   VerifyEmailDtoSchema,
   ResendVerificationEmailDtoSchema,
-  SendOtpDtoSchema,
-  VerifyOtpDtoSchema,
-  ResendOtpDtoSchema,
+  
+  
+  
   VerifyRegistrationOtpDtoSchema,
   ResendRegistrationOtpDtoSchema,
-  TerminateSessionDtoSchema,
-  CheckUserExistsDtoSchema,
+  
+  
 } from './auth.schemas';

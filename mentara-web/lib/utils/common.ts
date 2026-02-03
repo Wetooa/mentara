@@ -9,7 +9,7 @@
  * @param decimals Number of decimal places (default: 2)
  * @returns Formatted file size string
  */
-export function formatFileSize(bytes: number, decimals: number = 2): string {
+function formatFileSize(bytes: number, decimals: number = 2): string {
   if (bytes === 0) return "0 Bytes";
   
   const k = 1024;
@@ -43,7 +43,7 @@ export function getInitials(name: string, maxLength: number = 2): string {
  * @param suffix Suffix to add when truncated (default: "...")
  * @returns Truncated text with suffix if needed
  */
-export function truncateText(text: string, maxLength: number, suffix: string = "..."): string {
+function truncateText(text: string, maxLength: number, suffix: string = "..."): string {
   if (!text || text.length <= maxLength) return text;
   return text.slice(0, maxLength - suffix.length) + suffix;
 }
@@ -53,7 +53,7 @@ export function truncateText(text: string, maxLength: number, suffix: string = "
  * @param length Length of the ID (default: 8)
  * @returns Random alphanumeric string
  */
-export function generateId(length: number = 8): string {
+function generateId(length: number = 8): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
   for (let i = 0; i < length; i++) {
@@ -67,7 +67,7 @@ export function generateId(length: number = 8): string {
  * @param text Text to capitalize
  * @returns Text with each word capitalized
  */
-export function capitalizeWords(text: string): string {
+function capitalizeWords(text: string): string {
   if (!text) return "";
   
   return text
@@ -83,7 +83,7 @@ export function capitalizeWords(text: string): string {
  * @param max Maximum value
  * @returns Clamped value
  */
-export function clamp(value: number, min: number, max: number): number {
+function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
@@ -93,7 +93,7 @@ export function clamp(value: number, min: number, max: number): number {
  * @param wait Delay in milliseconds
  * @returns Debounced function
  */
-export function debounce<T extends (...args: any[]) => any>(
+function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -110,7 +110,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * @param obj Object to clone
  * @returns Deep cloned object
  */
-export function deepClone<T>(obj: T): T {
+function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") return obj;
   if (obj instanceof Date) return new Date(obj.getTime()) as unknown as T;
   if (obj instanceof Array) return obj.map(item => deepClone(item)) as unknown as T;
@@ -129,7 +129,7 @@ export function deepClone<T>(obj: T): T {
  * @param value Value to check
  * @returns True if value is considered empty
  */
-export function isEmpty(value: any): boolean {
+function isEmpty(value: any): boolean {
   if (value === null || value === undefined) return true;
   if (typeof value === 'string') return value.trim().length === 0;
   if (Array.isArray(value)) return value.length === 0;
@@ -142,7 +142,7 @@ export function isEmpty(value: any): boolean {
  * @param ms Milliseconds to sleep
  * @returns Promise that resolves after the delay
  */
-export function sleep(ms: number): Promise<void> {
+function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -151,7 +151,7 @@ export function sleep(ms: number): Promise<void> {
  * @param num Number to format
  * @returns Formatted number string
  */
-export function formatNumber(num: number): string {
+function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
@@ -160,7 +160,7 @@ export function formatNumber(num: number): string {
  * @param str String to convert
  * @returns kebab-case string
  */
-export function toKebabCase(str: string): string {
+function toKebabCase(str: string): string {
   return str
     .replace(/([a-z])([A-Z])/g, '$1-$2')
     .replace(/\s+/g, '-')
@@ -172,7 +172,7 @@ export function toKebabCase(str: string): string {
  * @param str String to convert
  * @returns camelCase string
  */
-export function toCamelCase(str: string): string {
+function toCamelCase(str: string): string {
   return str
     .replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '')
     .replace(/^./, c => c.toLowerCase());
@@ -184,7 +184,7 @@ export function toCamelCase(str: string): string {
  * @param keyFn Function to generate key for comparison
  * @returns Array with duplicates removed
  */
-export function uniqueBy<T>(array: T[], keyFn: (item: T) => any): T[] {
+function uniqueBy<T>(array: T[], keyFn: (item: T) => any): T[] {
   const seen = new Set();
   return array.filter(item => {
     const key = keyFn(item);

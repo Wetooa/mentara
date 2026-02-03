@@ -162,6 +162,6 @@ export function generateBreadcrumbs(
 /**
  * Get breadcrumb label for a specific route segment
  */
-export function getBreadcrumbLabel(segment: string): string {
+function getBreadcrumbLabel(segment: string): string {
   return ROUTE_LABELS[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
 }

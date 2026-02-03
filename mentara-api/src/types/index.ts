@@ -12,7 +12,7 @@ export * from './database';
 export * from './enums';
 
 // Therapist recommendation request (keeping here as it's specific to therapist module)
-export interface TherapistRecommendationRequest {
+interface TherapistRecommendationRequest {
   userId: string;
   limit?: number;
   includeInactive?: boolean;

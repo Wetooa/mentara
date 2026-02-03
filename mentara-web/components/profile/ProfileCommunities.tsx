@@ -131,4 +131,3 @@ function CommunityItem({
   );
 }
 
-export default ProfileCommunities;

@@ -252,7 +252,7 @@ export class TestAssertions {
 }
 
 // Performance Testing Utilities
-export class PerformanceTestUtils {
+class PerformanceTestUtils {
   /**
    * Measures function execution time
    */
@@ -309,7 +309,7 @@ export class PerformanceTestUtils {
 }
 
 // Database Testing Utilities
-export class DatabaseTestUtils {
+class DatabaseTestUtils {
   /**
    * Creates a transaction-wrapped test for database operations
    */
@@ -336,7 +336,7 @@ export class DatabaseTestUtils {
 }
 
 // Integration Testing Helpers
-export class IntegrationTestHelpers {
+class IntegrationTestHelpers {
   /**
    * Creates a full request context for integration tests
    */

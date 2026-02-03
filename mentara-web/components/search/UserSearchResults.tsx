@@ -20,7 +20,7 @@ interface UserSearchResultsProps {
   className?: string;
 }
 
-export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
+const UserSearchResults: React.FC<UserSearchResultsProps> = ({
   users,
   onUserSelect,
   onMessage,
@@ -230,4 +230,3 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
   );
 };
 
-export default UserSearchResults;

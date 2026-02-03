@@ -208,4 +208,3 @@ export const LoadingBarProvider: React.FC<LoadingBarProviderProps> = (props) => 
   );
 };
 
-export default LoadingBarProvider;

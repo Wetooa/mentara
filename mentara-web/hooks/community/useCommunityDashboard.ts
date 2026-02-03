@@ -84,7 +84,7 @@ interface UseCommunityDashboardReturn {
   getActivityText: (activity: RecentActivity) => string;
 }
 
-export function useCommunityDashboard(): UseCommunityDashboardReturn {
+function useCommunityDashboard(): UseCommunityDashboardReturn {
   const api = useApi();
   const queryClient = useQueryClient();
   

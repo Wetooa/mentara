@@ -1,6 +1,6 @@
 // Notifications DTOs matching backend exactly
 
-export interface Notification {
+interface Notification {
   id: string;
   userId: string;
   type: NotificationType;
@@ -15,7 +15,7 @@ export interface Notification {
   updatedAt: string;
 }
 
-export interface NotificationListParams {
+interface NotificationListParams {
   limit?: number;
   offset?: number;
   isRead?: boolean;
@@ -25,23 +25,23 @@ export interface NotificationListParams {
   endDate?: string;
 }
 
-export interface NotificationListResponse {
+interface NotificationListResponse {
   notifications: Notification[];
   total: number;
   unreadCount: number;
   hasMore: boolean;
 }
 
-export interface UnreadCountResponse {
+interface UnreadCountResponse {
   count: number;
 }
 
-export interface MarkReadResponse {
+interface MarkReadResponse {
   success: boolean;
   markedCount?: number;
 }
 
-export interface CreateNotificationRequest {
+interface CreateNotificationRequest {
   userId: string;
   type: NotificationType;
   title: string;
@@ -51,7 +51,7 @@ export interface CreateNotificationRequest {
   actionUrl?: string;
 }
 
-export interface NotificationSettings {
+interface NotificationSettings {
   emailNotifications: boolean;
   pushNotifications: boolean;
   messageNotifications: boolean;
@@ -64,7 +64,7 @@ export interface NotificationSettings {
 }
 
 // Notification Types - matching backend exactly
-export type NotificationType = 
+type NotificationType = 
   | 'APPOINTMENT_REMINDER'
   | 'APPOINTMENT_CONFIRMED'
   | 'APPOINTMENT_CANCELLED'
@@ -103,4 +103,4 @@ export type NotificationType =
   | 'PAYMENT_FAILED'
   | 'SUBSCRIPTION_EXPIRING';
 
-export type NotificationPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+type NotificationPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';

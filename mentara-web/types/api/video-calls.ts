@@ -9,7 +9,7 @@ export interface VideoCallUser {
   role: string;
 }
 
-export interface VideoCallSession {
+interface VideoCallSession {
   id: string;
   callerId: string;
   recipientId: string;
@@ -69,7 +69,7 @@ export interface CallErrorData {
 }
 
 // WebSocket Event Types
-export type VideoCallWebSocketEvents = {
+type VideoCallWebSocketEvents = {
   // Outgoing events (client to server)
   initiate_video_call: { recipientId: string };
   video_call_answer: { callId: string; accept: boolean };
@@ -161,7 +161,7 @@ export interface UseMediaDevicesReturn {
 }
 
 // API Service Types
-export interface VideoCallApiService {
+interface VideoCallApiService {
   // These would be minimal since video calls are peer-to-peer
   // But might be useful for logging or analytics
   logCallStart: (callId: string, recipientId: string) => Promise<void>;
@@ -170,7 +170,7 @@ export interface VideoCallApiService {
 }
 
 // Notification Integration Types
-export interface VideoCallNotification {
+interface VideoCallNotification {
   id: string;
   type: 'INCOMING_VIDEO_CALL' | 'VIDEO_CALL_MISSED' | 'VIDEO_CALL_ENDED';
   title: string;

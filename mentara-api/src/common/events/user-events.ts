@@ -20,7 +20,7 @@ export class UserRegisteredEvent extends BaseDomainEvent<UserRegisteredData> {
   }
 }
 
-export interface UserLoginData {
+interface UserLoginData {
   userId: string;
   email: string;
   loginMethod: 'email' | 'oauth';
@@ -28,19 +28,19 @@ export interface UserLoginData {
   failureReason?: string;
 }
 
-export class UserLoginEvent extends BaseDomainEvent<UserLoginData> {
+class UserLoginEvent extends BaseDomainEvent<UserLoginData> {
   constructor(data: UserLoginData, metadata?: EventMetadata) {
     super(data.userId, 'User', data, metadata);
   }
 }
 
-export interface UserLogoutData {
+interface UserLogoutData {
   userId: string;
   sessionDuration: number; // in seconds
   logoutMethod: 'manual' | 'timeout' | 'forced';
 }
 
-export class UserLogoutEvent extends BaseDomainEvent<UserLogoutData> {
+class UserLogoutEvent extends BaseDomainEvent<UserLogoutData> {
   constructor(data: UserLogoutData, metadata?: EventMetadata) {
     super(data.userId, 'User', data, metadata);
   }

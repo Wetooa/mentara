@@ -7,7 +7,7 @@ export const NotificationQuerySchema = z.object({
   priority: z.nativeEnum(NotificationPriority).optional(),
 });
 
-export const CreateNotificationDtoSchema = z.object({
+const CreateNotificationDtoSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title must be less than 255 characters"),
   message: z.string().min(1, "Message is required").max(1000, "Message must be less than 1000 characters"),
   type: z.nativeEnum(NotificationType),
@@ -17,7 +17,7 @@ export const CreateNotificationDtoSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
 });
 
-export const UpdateNotificationSettingsDtoSchema = z.object({
+const UpdateNotificationSettingsDtoSchema = z.object({
   emailAppointmentReminders: z.boolean().optional(),
   emailNewMessages: z.boolean().optional(),
   emailWorksheetUpdates: z.boolean().optional(),

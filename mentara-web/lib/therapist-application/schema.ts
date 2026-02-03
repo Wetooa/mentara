@@ -237,11 +237,11 @@ export type UnifiedTherapistForm = z.infer<typeof unifiedTherapistSchema>;
 /**
  * Schema validation utilities
  */
-export const validateTherapistForm = (data: unknown) => {
+const validateTherapistForm = (data: unknown) => {
   return unifiedTherapistSchema.safeParse(data);
 };
 
-export const validateTherapistFormAsync = (data: unknown) => {
+const validateTherapistFormAsync = (data: unknown) => {
   return unifiedTherapistSchema.safeParseAsync(data);
 };
 

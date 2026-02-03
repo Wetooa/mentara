@@ -67,7 +67,7 @@ export interface UpdateReviewRequest {
   isAnonymous?: boolean;
 }
 
-export interface ModerateReviewRequest {
+interface ModerateReviewRequest {
   status: ReviewStatus;
   moderationNote?: string;
 }
@@ -113,7 +113,7 @@ export interface ReviewHelpfulResponse {
 }
 
 // Form validation schemas
-export interface ReviewFormData {
+interface ReviewFormData {
   rating: number;
   title: string;
   content: string;

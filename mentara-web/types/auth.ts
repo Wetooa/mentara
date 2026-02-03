@@ -1,10 +1,10 @@
 // Shared authentication types for the Mentara platform
 import { MeetingType } from "./booking";
 
-export type UserRole = "client" | "therapist" | "admin" | "moderator";
+type UserRole = "client" | "therapist" | "admin" | "moderator";
 
 // Base user interface
-export interface BaseUser {
+interface BaseUser {
   id: string;
   email: string;
   firstName: string;
@@ -16,7 +16,7 @@ export interface BaseUser {
 }
 
 // Client-specific types
-export interface ClientPreferences {
+interface ClientPreferences {
   language: string;
   timezone: string;
   communicationPreferences: {
@@ -49,7 +49,7 @@ export interface ClientProfileResponse {
   hasSeenTherapistRecommendations: boolean;
 }
 
-export interface AssessmentResults {
+interface AssessmentResults {
   assessmentId: string;
   completedAt: string;
   scores: {
@@ -63,7 +63,7 @@ export interface AssessmentResults {
   riskFlags: string[];
 }
 
-export interface ClientProfile {
+interface ClientProfile {
   dateOfBirth?: string;
   gender?: string;
   goals: string[];
@@ -83,7 +83,7 @@ export interface ClientUser extends BaseUser {
 }
 
 // Therapist-specific types
-export interface AvailabilitySchedule {
+interface AvailabilitySchedule {
   [dayOfWeek: string]: {
     isAvailable: boolean;
     slots: {
@@ -94,7 +94,7 @@ export interface AvailabilitySchedule {
   };
 }
 
-export interface TherapistLicense {
+interface TherapistLicense {
   licenseNumber: string;
   licenseType: string;
   issuingAuthority: string;
@@ -103,7 +103,7 @@ export interface TherapistLicense {
   isVerified: boolean;
 }
 
-export interface TherapistProfile {
+interface TherapistProfile {
   bio: string;
   specializations: string[];
   credentials: string[];
@@ -120,7 +120,7 @@ export interface TherapistProfile {
   };
 }
 
-export interface Appointment {
+interface Appointment {
   id: string;
   clientId: string;
   therapistId: string;
@@ -145,7 +145,7 @@ export interface TherapistUser extends BaseUser {
 }
 
 // Admin-specific types
-export interface SystemMetrics {
+interface SystemMetrics {
   totalUsers: number;
   activeUsers: number;
   newSignups: number;
@@ -160,7 +160,7 @@ export interface SystemMetrics {
   uptime: string;
 }
 
-export interface AdminActivity {
+interface AdminActivity {
   id: string;
   adminId: string;
   action: string;
@@ -172,7 +172,7 @@ export interface AdminActivity {
   userAgent?: string;
 }
 
-export interface AuditLogEntry {
+interface AuditLogEntry {
   id: string;
   userId: string;
   userRole: UserRole;
@@ -186,7 +186,7 @@ export interface AuditLogEntry {
   severity: "low" | "medium" | "high" | "critical";
 }
 
-export interface SecurityEvent {
+interface SecurityEvent {
   id: string;
   type:
     | "failed_login"
@@ -203,7 +203,7 @@ export interface SecurityEvent {
   resolvedAt?: string;
 }
 
-export interface AdminProfile {
+interface AdminProfile {
   permissions: string[];
   isSuperAdmin: boolean;
   lastLoginAt?: string;
@@ -218,7 +218,7 @@ export interface AdminUser extends BaseUser {
 }
 
 // Moderator-specific types
-export interface CommunityInfo {
+interface CommunityInfo {
   id: string;
   name: string;
   description: string;
@@ -229,7 +229,7 @@ export interface CommunityInfo {
   moderatorIds: string[];
 }
 
-export interface ModerationAction {
+interface ModerationAction {
   id: string;
   moderatorId: string;
   type: "warn" | "mute" | "ban" | "delete_post" | "delete_comment" | "approve";
@@ -242,7 +242,7 @@ export interface ModerationAction {
   isReversed: boolean;
 }
 
-export interface ModerationQueueItem {
+interface ModerationQueueItem {
   id: string;
   type: "report" | "flagged_content" | "appeal";
   priority: "low" | "medium" | "high" | "urgent";
@@ -258,7 +258,7 @@ export interface ModerationQueueItem {
   reviewedAt?: string;
 }
 
-export interface CommunityStatistics {
+interface CommunityStatistics {
   communityId: string;
   name: string;
   totalPosts: number;
@@ -269,7 +269,7 @@ export interface CommunityStatistics {
   averageResolutionTime: number; // hours
 }
 
-export interface ModerationGuideline {
+interface ModerationGuideline {
   id: string;
   title: string;
   description: string;
@@ -281,7 +281,7 @@ export interface ModerationGuideline {
   updatedAt: string;
 }
 
-export interface ModeratorProfile {
+interface ModeratorProfile {
   permissions: string[];
   assignedCommunities: string[];
   moderationLevel: "junior" | "senior" | "lead";
@@ -292,7 +292,7 @@ export interface ModeratorProfile {
   };
 }
 
-export interface ModeratorUser extends BaseUser {
+interface ModeratorUser extends BaseUser {
   role: "moderator";
   profile: ModeratorProfile;
   permissions: string[];
@@ -306,14 +306,14 @@ export interface TokenPair {
   refreshToken: string;
 }
 
-export interface AuthResponse<T = BaseUser> {
+interface AuthResponse<T = BaseUser> {
   user: T;
   tokens: TokenPair;
   isFirstLogin?: boolean;
 }
 
 // Query parameter types
-export interface AuditLogQueryParams {
+interface AuditLogQueryParams {
   page?: number;
   limit?: number;
   userId?: string;
@@ -324,7 +324,7 @@ export interface AuditLogQueryParams {
   endDate?: string;
 }
 
-export interface ModerationQueueQueryParams {
+interface ModerationQueueQueryParams {
   page?: number;
   limit?: number;
   status?: "pending" | "in_review" | "resolved" | "escalated";
@@ -335,13 +335,13 @@ export interface ModerationQueueQueryParams {
 }
 
 // Union types for role-based operations
-export type RoleSpecificUser =
+type RoleSpecificUser =
   | ClientUser
   | TherapistUser
   | AdminUser
   | ModeratorUser;
 
-export type UserByRole<T extends UserRole> = T extends "client"
+type UserByRole<T extends UserRole> = T extends "client"
   ? ClientUser
   : T extends "therapist"
     ? TherapistUser
@@ -352,30 +352,30 @@ export type UserByRole<T extends UserRole> = T extends "client"
         : never;
 
 // Error types
-export interface AuthError {
+interface AuthError {
   code: string;
   message: string;
   details?: Record<string, unknown>;
 }
 
 // Verification types
-export interface VerificationStatus {
+interface VerificationStatus {
   documentsVerified: boolean;
   licenseVerified: boolean;
   backgroundCheckComplete: boolean;
   overallStatus: "verified" | "pending" | "rejected";
 }
 
-export interface EmailVerificationRequest {
+interface EmailVerificationRequest {
   email: string;
   userId?: string;
 }
 
-export interface PasswordResetRequest {
+interface PasswordResetRequest {
   email: string;
 }
 
-export interface PasswordResetConfirmation {
+interface PasswordResetConfirmation {
   token: string;
   newPassword: string;
 }
@@ -419,7 +419,7 @@ export interface VerifyOtpDto {
   otpCode: string;
 }
 
-export interface SendOtpDto {
+interface SendOtpDto {
   email: string;
   type: OtpType;
 }
@@ -442,7 +442,7 @@ export interface ResetPasswordDto {
 // OTP Types
 export type OtpType = "email_verification" | "password_reset" | "login";
 
-export interface OtpEmailData {
+interface OtpEmailData {
   otp: string;
   email: string;
   type: OtpType;

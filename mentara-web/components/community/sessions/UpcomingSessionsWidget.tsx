@@ -16,7 +16,7 @@ interface UpcomingSessionsWidgetProps {
   maxSessions?: number;
 }
 
-export function UpcomingSessionsWidget({
+function UpcomingSessionsWidget({
   sessions,
   onViewSession,
   onViewAll,

@@ -35,7 +35,7 @@ export interface PaginationMeta {
 /**
  * Paginated API Response interface
  */
-export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
+interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
   meta: PaginationMeta;
 }
 

@@ -163,4 +163,3 @@ function ActivityItem({
   );
 }
 
-export default ProfileActivity;

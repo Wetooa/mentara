@@ -4,7 +4,7 @@
 // ====================
 // USER FILTERS
 // ====================
-export interface UserListFilters {
+interface UserListFilters {
   role?: 'client' | 'therapist' | 'moderator' | 'admin';
   status?: 'active' | 'inactive' | 'suspended';
   search?: string;
@@ -17,7 +17,7 @@ export interface UserListFilters {
 // ====================
 // THERAPIST FILTERS
 // ====================
-export interface TherapistListFilters {
+interface TherapistListFilters {
   specialties?: string[];
   province?: string;
   minRating?: number;
@@ -29,7 +29,7 @@ export interface TherapistListFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface TherapistRecommendationParams {
+interface TherapistRecommendationParams {
   limit?: number;
   includeInactive?: boolean;
   province?: string;
@@ -39,7 +39,7 @@ export interface TherapistRecommendationParams {
   offset?: number;
 }
 
-export interface TherapistApplicationFilters {
+interface TherapistApplicationFilters {
   status?: 'pending' | 'approved' | 'rejected' | 'under_review';
   limit?: number;
   offset?: number;
@@ -50,7 +50,7 @@ export interface TherapistApplicationFilters {
 // ====================
 // COMMUNITY FILTERS
 // ====================
-export interface CommunityListFilters {
+interface CommunityListFilters {
   category?: string;
   isPublic?: boolean;
   search?: string;
@@ -63,7 +63,7 @@ export interface CommunityListFilters {
 // ====================
 // POST FILTERS
 // ====================
-export interface PostListFilters {
+interface PostListFilters {
   roomId?: string;
   authorId?: string;
   tags?: string[];
@@ -77,7 +77,7 @@ export interface PostListFilters {
 // ====================
 // COMMENT FILTERS
 // ====================
-export interface CommentListFilters {
+interface CommentListFilters {
   postId?: string;
   authorId?: string;
   parentId?: string;
@@ -90,7 +90,7 @@ export interface CommentListFilters {
 // ====================
 // REVIEW FILTERS
 // ====================
-export interface ReviewListFilters {
+interface ReviewListFilters {
   therapistId?: string;
   rating?: number;
   verified?: boolean;
@@ -103,7 +103,7 @@ export interface ReviewListFilters {
 // ====================
 // BOOKING FILTERS
 // ====================
-export interface BookingListFilters {
+interface BookingListFilters {
   therapistId?: string;
   clientId?: string;
   status?: 'scheduled' | 'completed' | 'cancelled' | 'no_show';
@@ -118,7 +118,7 @@ export interface BookingListFilters {
 // ====================
 // FILE FILTERS
 // ====================
-export interface FileListFilters {
+interface FileListFilters {
   uploadedBy?: string;
   fileType?: string;
   category?: string;
@@ -133,7 +133,7 @@ export interface FileListFilters {
 // ====================
 // NOTIFICATION FILTERS
 // ====================
-export interface NotificationListFilters {
+interface NotificationListFilters {
   type?: string;
   read?: boolean;
   priority?: 'low' | 'medium' | 'high' | 'urgent';
@@ -148,13 +148,13 @@ export interface NotificationListFilters {
 // ====================
 // ANALYTICS FILTERS
 // ====================
-export interface AnalyticsTimeRange {
+interface AnalyticsTimeRange {
   startDate: string;
   endDate: string;
   period: 'day' | 'week' | 'month' | 'year';
 }
 
-export interface AnalyticsQueryParams {
+interface AnalyticsQueryParams {
   timeRange?: AnalyticsTimeRange;
   metrics?: string[];
   filters?: {
@@ -173,7 +173,7 @@ export interface AnalyticsQueryParams {
 // ====================
 // SEARCH FILTERS
 // ====================
-export interface TherapistSearchFilters {
+interface TherapistSearchFilters {
   specialties?: string[];
   languages?: string[];
   minExperience?: number;
@@ -185,7 +185,7 @@ export interface TherapistSearchFilters {
   availableTo?: string;
 }
 
-export interface PostSearchFilters {
+interface PostSearchFilters {
   communityId?: string;
   roomId?: string;
   authorId?: string;
@@ -194,24 +194,24 @@ export interface PostSearchFilters {
   dateTo?: string;
 }
 
-export interface UserSearchFilters {
+interface UserSearchFilters {
   role?: 'client' | 'therapist' | 'moderator' | 'admin';
   isActive?: boolean;
 }
 
-export interface CommunitySearchFilters {
+interface CommunitySearchFilters {
   category?: string;
   isPublic?: boolean;
 }
 
-export interface GlobalSearchFilters {
+interface GlobalSearchFilters {
   type?: 'therapists' | 'posts' | 'communities' | 'users';
 }
 
 // ====================
 // SESSION FILTERS
 // ====================
-export interface SessionListFilters {
+interface SessionListFilters {
   clientId?: string;
   therapistId?: string;
   sessionType?: 'initial' | 'regular' | 'followup' | 'final';
@@ -227,7 +227,7 @@ export interface SessionListFilters {
 // ====================
 // MESSAGING FILTERS
 // ====================
-export interface ConversationListFilters {
+interface ConversationListFilters {
   type?: 'direct' | 'group';
   participantId?: string;
   hasUnread?: boolean;
@@ -237,7 +237,7 @@ export interface ConversationListFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface MessageListFilters {
+interface MessageListFilters {
   conversationId?: string;
   senderId?: string;
   messageType?: 'text' | 'image' | 'file';
@@ -252,7 +252,7 @@ export interface MessageListFilters {
 // ====================
 // PRE-ASSESSMENT FILTERS
 // ====================
-export interface PreAssessmentFilters {
+interface PreAssessmentFilters {
   userId?: string;
   status?: 'completed' | 'in_progress' | 'abandoned';
   startDate?: string;
@@ -266,7 +266,7 @@ export interface PreAssessmentFilters {
 // ====================
 // AUDIT LOG FILTERS
 // ====================
-export interface AuditLogFilters {
+interface AuditLogFilters {
   userId?: string;
   action?: string;
   resource?: string;
@@ -286,7 +286,7 @@ export interface AuditLogFilters {
 // ====================
 // WORKSHEET FILTERS
 // ====================
-export interface WorksheetListFilters {
+interface WorksheetListFilters {
   assignedTo?: string;
   assignedBy?: string;
   status?: 'pending' | 'in_progress' | 'completed' | 'overdue';
@@ -301,13 +301,13 @@ export interface WorksheetListFilters {
 // ====================
 // BILLING FILTERS  
 // ====================
-export interface BillingPlanFilters {
+interface BillingPlanFilters {
   type?: 'free' | 'basic' | 'premium' | 'enterprise';
   active?: boolean;
   billingCycle?: 'monthly' | 'yearly';
 }
 
-export interface InvoiceFilters {
+interface InvoiceFilters {
   status?: 'pending' | 'paid' | 'overdue' | 'cancelled';
   startDate?: string;
   endDate?: string;
@@ -320,7 +320,7 @@ export interface InvoiceFilters {
 // ====================
 // ADMIN FILTERS
 // ====================
-export interface AdminUserFilters {
+interface AdminUserFilters {
   role?: 'client' | 'therapist' | 'moderator' | 'admin';
   status?: 'active' | 'inactive' | 'suspended';
   search?: string;
@@ -333,7 +333,7 @@ export interface AdminUserFilters {
 // ====================
 // EXPORT UNION TYPES FOR FLEXIBILITY
 // ====================
-export type AnyListFilters = 
+type AnyListFilters = 
   | UserListFilters
   | TherapistListFilters
   | CommunityListFilters
@@ -347,7 +347,7 @@ export type AnyListFilters =
   | WorksheetListFilters
   | InvoiceFilters;
 
-export type AnySearchFilters =
+type AnySearchFilters =
   | TherapistSearchFilters
   | PostSearchFilters
   | UserSearchFilters

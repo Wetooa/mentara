@@ -12,11 +12,11 @@ export type {
   ModerateReviewDto,
   GetReviewsDto,
   ReviewIdParam,
-  TherapistIdParam,
-  MeetingIdParam,
-  ReviewResponseDto,
+  
+  
+  
   ReviewStatsDto,
   ReviewListResponse,
-  ReviewHelpfulDto,
-  ReviewReportDto,
+  
+  
 } from './review.dto';

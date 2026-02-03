@@ -24,7 +24,7 @@ import type {
   SaveMeetingSessionDto,
 } from './types';
 
-export interface MeetingSessionData {
+interface MeetingSessionData {
   meetingId: string;
   startTime: Date;
   endTime?: Date;

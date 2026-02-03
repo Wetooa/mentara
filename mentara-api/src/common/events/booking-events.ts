@@ -72,7 +72,7 @@ export class AppointmentRescheduledEvent extends BaseDomainEvent<AppointmentResc
   }
 }
 
-export interface AppointmentReminderData {
+interface AppointmentReminderData {
   appointmentId: string;
   clientId: string;
   therapistId: string;
@@ -81,13 +81,13 @@ export interface AppointmentReminderData {
   deliveryMethod: 'email' | 'sms' | 'push' | 'in_app';
 }
 
-export class AppointmentReminderEvent extends BaseDomainEvent<AppointmentReminderData> {
+class AppointmentReminderEvent extends BaseDomainEvent<AppointmentReminderData> {
   constructor(data: AppointmentReminderData, metadata?: EventMetadata) {
     super(data.appointmentId, 'Appointment', data, metadata);
   }
 }
 
-export interface SessionStartedData {
+interface SessionStartedData {
   sessionId: string;
   appointmentId: string;
   clientId: string;
@@ -98,13 +98,13 @@ export interface SessionStartedData {
   scheduledStartTime: Date;
 }
 
-export class SessionStartedEvent extends BaseDomainEvent<SessionStartedData> {
+class SessionStartedEvent extends BaseDomainEvent<SessionStartedData> {
   constructor(data: SessionStartedData, metadata?: EventMetadata) {
     super(data.sessionId, 'Session', data, metadata);
   }
 }
 
-export interface SessionEndedData {
+interface SessionEndedData {
   sessionId: string;
   appointmentId: string;
   clientId: string;
@@ -115,13 +115,13 @@ export interface SessionEndedData {
   endReason: 'completed' | 'technical_issue' | 'no_show' | 'cancelled';
 }
 
-export class SessionEndedEvent extends BaseDomainEvent<SessionEndedData> {
+class SessionEndedEvent extends BaseDomainEvent<SessionEndedData> {
   constructor(data: SessionEndedData, metadata?: EventMetadata) {
     super(data.sessionId, 'Session', data, metadata);
   }
 }
 
-export interface SessionCompletedData {
+interface SessionCompletedData {
   sessionId: string;
   appointmentId: string;
   clientId: string;
@@ -133,13 +133,13 @@ export interface SessionCompletedData {
   sessionRating?: number; // 1-5
 }
 
-export class SessionCompletedEvent extends BaseDomainEvent<SessionCompletedData> {
+class SessionCompletedEvent extends BaseDomainEvent<SessionCompletedData> {
   constructor(data: SessionCompletedData, metadata?: EventMetadata) {
     super(data.sessionId, 'Session', data, metadata);
   }
 }
 
-export interface TherapistAssignedData {
+interface TherapistAssignedData {
   clientId: string;
   therapistId: string;
   assignedBy: string; // userId of admin or system
@@ -151,7 +151,7 @@ export interface TherapistAssignedData {
   effectiveDate: Date;
 }
 
-export class TherapistAssignedEvent extends BaseDomainEvent<TherapistAssignedData> {
+class TherapistAssignedEvent extends BaseDomainEvent<TherapistAssignedData> {
   constructor(data: TherapistAssignedData, metadata?: EventMetadata) {
     super(
       `${data.clientId}_${data.therapistId}`,
@@ -162,7 +162,7 @@ export class TherapistAssignedEvent extends BaseDomainEvent<TherapistAssignedDat
   }
 }
 
-export interface TherapistUnassignedData {
+interface TherapistUnassignedData {
   clientId: string;
   therapistId: string;
   unassignedBy: string;
@@ -171,7 +171,7 @@ export interface TherapistUnassignedData {
   sessionCount: number;
 }
 
-export class TherapistUnassignedEvent extends BaseDomainEvent<TherapistUnassignedData> {
+class TherapistUnassignedEvent extends BaseDomainEvent<TherapistUnassignedData> {
   constructor(data: TherapistUnassignedData, metadata?: EventMetadata) {
     super(
       `${data.clientId}_${data.therapistId}`,

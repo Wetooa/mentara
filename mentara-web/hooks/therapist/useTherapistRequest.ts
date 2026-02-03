@@ -64,4 +64,3 @@ export function useTherapistRequest() {
   };
 }
 
-export default useTherapistRequest;

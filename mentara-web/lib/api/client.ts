@@ -8,13 +8,13 @@ import { logger } from "@/lib/logger";
 /**
  * API client timeout constant (in milliseconds)
  */
-export const API_TIMEOUT = 10000; // 10 seconds (default)
+const API_TIMEOUT = 10000; // 10 seconds (default)
 
 /**
  * Extended timeout for AI/chatbot operations (in milliseconds)
  * AI API calls with Ollama can take 120+ seconds, so we need a longer timeout
  */
-export const AI_OPERATION_TIMEOUT = 180000; // 180 seconds (3 minutes) - increased for Ollama performance
+const AI_OPERATION_TIMEOUT = 180000; // 180 seconds (3 minutes) - increased for Ollama performance
 
 /**
  * Create and configure the main API client

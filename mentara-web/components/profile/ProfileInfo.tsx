@@ -178,4 +178,3 @@ function ClientInfo({ user }: { user: PublicProfileResponse['user'] }) {
   );
 }
 
-export default ProfileInfo;

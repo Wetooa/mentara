@@ -29,7 +29,7 @@ interface Therapist {
  * Hook for managing client-therapist relationship
  * Uses React Query for better state management and caching
  */
-export function useTherapist() {
+function useTherapist() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -117,7 +117,7 @@ export function useTherapist() {
 /**
  * Hook for requesting therapist assignment (simplified version)
  */
-export function useTherapistAssignment() {
+function useTherapistAssignment() {
   const { assignTherapist, removeTherapist, isAssigning, isRemoving } = useTherapist();
 
   return {
@@ -131,7 +131,7 @@ export function useTherapistAssignment() {
 /**
  * Hook for just getting assigned therapist data
  */
-export function useAssignedTherapist() {
+function useAssignedTherapist() {
   const { therapist, loading, error, refetch } = useTherapist();
 
   return {
@@ -168,7 +168,7 @@ export function useAssignedTherapists() {
 /**
  * Hook for getting therapist profile by ID
  */
-export function useTherapistProfile(therapistId: string, enabled: boolean = true) {
+function useTherapistProfile(therapistId: string, enabled: boolean = true) {
   const api = useApi();
 
   return useQuery({
@@ -202,7 +202,7 @@ export function useTherapistProfile(therapistId: string, enabled: boolean = true
 }
 
 // Export namespace for better organization
-export const TherapistHooks = {
+const TherapistHooks = {
   useAssignedTherapist,
   useAssignedTherapists,
   useTherapistAssignment,

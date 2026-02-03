@@ -74,4 +74,3 @@ export function ConnectTherapistButton({
   );
 }
 
-export default ConnectTherapistButton;

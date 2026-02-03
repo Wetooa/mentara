@@ -17,7 +17,7 @@ const WELCOME_PAGE_VISITED_KEY = "welcome_page_visited";
 /**
  * Therapist card properties for welcome page display
  */
-export interface TherapistProps {
+interface TherapistProps {
   /** Therapist profile photo URL */
   photo: string;
   /** Therapist first name */
@@ -33,7 +33,7 @@ export interface TherapistProps {
 /**
  * Match explanation data for therapist recommendations
  */
-export interface MatchExplanation {
+interface MatchExplanation {
   /** Match percentage as string */
   matchPercentage: string;
   /** Specialties that match user conditions */
@@ -47,7 +47,7 @@ export interface MatchExplanation {
 /**
  * User assessment summary data
  */
-export interface AssessmentSummary {
+interface AssessmentSummary {
   /** Primary mental health conditions */
   primaryConditions: string[];
   /** Secondary mental health conditions */
@@ -57,7 +57,7 @@ export interface AssessmentSummary {
 /**
  * Return type for the useWelcomePage hook
  */
-export interface UseWelcomePageReturn {
+interface UseWelcomePageReturn {
   /** User's display name */
   userName: string;
   /** Recommended therapists list */
@@ -131,7 +131,7 @@ export interface UseWelcomePageReturn {
  * - Error handling with retry functionality
  * - Navigation to user dashboard
  */
-export function useWelcomePage(): UseWelcomePageReturn {
+function useWelcomePage(): UseWelcomePageReturn {
   const { user } = useAuth();
   const api = useApi();
   const router = useRouter();

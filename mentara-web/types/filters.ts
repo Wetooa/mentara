@@ -21,19 +21,19 @@ export interface TherapistFilters {
   sortOrder: 'asc' | 'desc';
 }
 
-export interface FilterOption {
+interface FilterOption {
   value: string;
   label: string;
   count?: number;
 }
 
-export interface PriceRange {
+interface PriceRange {
   min: number;
   max: number;
   step: number;
 }
 
-export interface ExperienceRange {
+interface ExperienceRange {
   min: number;
   max: number;
   step: number;
@@ -110,7 +110,7 @@ export const LOCATION_OPTIONS: FilterOption[] = [
   { value: 'yukon', label: 'Yukon' },
 ];
 
-export const SORT_OPTIONS: FilterOption[] = [
+const SORT_OPTIONS: FilterOption[] = [
   { value: 'rating', label: 'Highest Rated' },
   { value: 'price', label: 'Price (Low to High)' },
   { value: 'experience', label: 'Most Experience' },

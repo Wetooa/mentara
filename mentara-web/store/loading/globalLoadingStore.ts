@@ -245,7 +245,7 @@ export const useGlobalLoadingStore = create<GlobalLoadingStore>()(
 );
 
 // Helper hook to get just the loading state for specific operation
-export const useLoadingOperation = (id: string) => {
+const useLoadingOperation = (id: string) => {
   return useGlobalLoadingStore((state) => state.operations[id] || null);
 };
 

@@ -7,7 +7,7 @@
  */
 
 // Conversation creation DTO
-export interface CreateConversationDto {
+interface CreateConversationDto {
   participantIds: string[];
   type: 'direct' | 'group' | 'therapy_session';
   title?: string;
@@ -41,7 +41,7 @@ export interface SendMessageDto {
 }
 
 // Message update DTO
-export interface UpdateMessageDto {
+interface UpdateMessageDto {
   content?: string;
   isEdited?: boolean;
   editReason?: string;
@@ -54,20 +54,20 @@ export interface UpdateMessageDto {
 }
 
 // Message reaction DTO
-export interface AddReactionDto {
+interface AddReactionDto {
   emoji: string;
   action: 'add' | 'remove';
 }
 
 // Block user DTO
-export interface BlockUserDto {
+interface BlockUserDto {
   userId: string; // ID of user to block
   reason?: 'spam' | 'harassment' | 'inappropriate' | 'other';
   description?: string;
 }
 
 // Search messages DTO
-export interface SearchMessagesDto {
+interface SearchMessagesDto {
   query?: string;
   conversationId?: string;
   authorId?: string;
@@ -83,7 +83,7 @@ export interface SearchMessagesDto {
 }
 
 // Conversation list parameters DTO
-export interface ConversationListParams {
+interface ConversationListParams {
   type?: 'direct' | 'group' | 'therapy_session';
   status?: 'active' | 'archived' | 'muted';
   hasUnread?: boolean;
@@ -183,7 +183,7 @@ export interface MessageResponseDto {
   };
 }
 
-export interface MessagingStatsDto {
+interface MessagingStatsDto {
   totalConversations: number;
   activeConversations: number;
   unreadMessages: number;
@@ -193,27 +193,27 @@ export interface MessagingStatsDto {
 }
 
 // WebSocket DTOs
-export interface JoinConversationDto {
+interface JoinConversationDto {
   conversationId: string;
   userId?: string;
 }
 
-export interface LeaveConversationDto {
+interface LeaveConversationDto {
   conversationId: string;
   userId?: string;
 }
 
-export interface TypingIndicatorDto {
+interface TypingIndicatorDto {
   conversationId: string;
   isTyping: boolean;
   userId?: string;
 }
 
 // Backward compatibility aliases
-export type Conversation = ConversationResponseDto;
-export type Message = MessageResponseDto;
-export type MessageReaction = NonNullable<MessageResponseDto['reactions'][0]>;
-export type ConversationParticipant = NonNullable<ConversationResponseDto['participants'][0]>;
+type Conversation = ConversationResponseDto;
+type Message = MessageResponseDto;
+type MessageReaction = NonNullable<MessageResponseDto['reactions'][0]>;
+type ConversationParticipant = NonNullable<ConversationResponseDto['participants'][0]>;
 export type MessageAttachment = {
   id?: string;
   type: 'image' | 'file' | 'video' | 'audio';
@@ -223,32 +223,32 @@ export type MessageAttachment = {
   mimeType?: string;
   thumbnailUrl?: string;
 };
-export type SearchMessagesResponse = {
+type SearchMessagesResponse = {
   messages: Message[];
   total: number;
   hasMore: boolean;
 };
-export type MessagesListParams = {
+type MessagesListParams = {
   limit?: number;
   offset?: number;
   before?: string; // cursor for pagination
 };
 
 // Additional types for backward compatibility
-export interface TypingData {
+interface TypingData {
   conversationId: string;
   userId: string;
   isTyping: boolean;
   timestamp: string;
 }
 
-export interface UserStatusData {
+interface UserStatusData {
   userId: string;
   status: 'online' | 'offline' | 'away';
   lastSeen?: string;
 }
 
-export interface BlockedUser {
+interface BlockedUser {
   id: string;
   blockerId: string;
   blockedUserId: string;

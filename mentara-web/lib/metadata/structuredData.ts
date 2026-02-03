@@ -423,7 +423,7 @@ function generateBreadcrumbListStructuredData(breadcrumbs: Array<{
 /**
  * Helper to combine multiple structured data objects
  */
-export function combineStructuredData(dataObjects: Record<string, any>[]): Record<string, any> {
+function combineStructuredData(dataObjects: Record<string, any>[]): Record<string, any> {
   if (dataObjects.length === 1) {
     return dataObjects[0];
   }

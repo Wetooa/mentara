@@ -1,12 +1,12 @@
 // Analytics DTOs matching backend exactly
 
-export interface AnalyticsTimeRange {
+interface AnalyticsTimeRange {
   startDate: string;
   endDate: string;
   period: 'day' | 'week' | 'month' | 'year';
 }
 
-export interface UserAnalytics {
+interface UserAnalytics {
   totalUsers: number;
   activeUsers: number;
   newUsers: number;
@@ -29,7 +29,7 @@ export interface UserAnalytics {
   };
 }
 
-export interface TherapistAnalytics {
+interface TherapistAnalytics {
   totalTherapists: number;
   activeTherapists: number;
   averageRating: number;
@@ -47,7 +47,7 @@ export interface TherapistAnalytics {
   }>;
 }
 
-export interface ClientAnalytics {
+interface ClientAnalytics {
   totalClients: number;
   activeClients: number;
   completedAssessments: number;
@@ -65,7 +65,7 @@ export interface ClientAnalytics {
   };
 }
 
-export interface CommunityAnalytics {
+interface CommunityAnalytics {
   totalCommunities: number;
   activeCommunities: number;
   totalMembers: number;
@@ -85,7 +85,7 @@ export interface CommunityAnalytics {
   }>;
 }
 
-export interface SessionAnalytics {
+interface SessionAnalytics {
   totalSessions: number;
   completedSessions: number;
   cancelledSessions: number;
@@ -108,7 +108,7 @@ export interface SessionAnalytics {
   }>;
 }
 
-export interface RevenueAnalytics {
+interface RevenueAnalytics {
   totalRevenue: number;
   recurringRevenue: number;
   averageRevenuePerUser: number;
@@ -128,7 +128,7 @@ export interface RevenueAnalytics {
   }>;
 }
 
-export interface PlatformAnalytics {
+interface PlatformAnalytics {
   overview: {
     totalUsers: number;
     totalSessions: number;
@@ -143,7 +143,7 @@ export interface PlatformAnalytics {
   revenueAnalytics: RevenueAnalytics;
 }
 
-export interface AnalyticsQuery {
+interface AnalyticsQuery {
   timeRange?: AnalyticsTimeRange;
   metrics?: string[];
   filters?: {
@@ -159,7 +159,7 @@ export interface AnalyticsQuery {
   offset?: number;
 }
 
-export interface CustomAnalyticsReport {
+interface CustomAnalyticsReport {
   id: string;
   name: string;
   description: string;

@@ -7,7 +7,7 @@
  * Meeting statuses that should be considered "active" and block availability slots
  * Used by both availability checking and conflict detection to ensure consistency
  */
-export const ACTIVE_MEETING_STATUSES = [
+const ACTIVE_MEETING_STATUSES = [
   'SCHEDULED',
   'WAITING',
   'CONFIRMED', 
@@ -22,7 +22,7 @@ export const ACTIVE_MEETING_STATUSES_ARRAY = [...ACTIVE_MEETING_STATUSES];
 /**
  * All possible meeting statuses
  */
-export const ALL_MEETING_STATUSES = [
+const ALL_MEETING_STATUSES = [
   'SCHEDULED',
   'WAITING',
   'CONFIRMED',
@@ -35,7 +35,7 @@ export const ALL_MEETING_STATUSES = [
 /**
  * Meeting statuses that represent completed/finished meetings
  */
-export const COMPLETED_MEETING_STATUSES = [
+const COMPLETED_MEETING_STATUSES = [
   'COMPLETED',
   'CANCELLED',
   'NO_SHOW'

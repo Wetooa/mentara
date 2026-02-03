@@ -461,7 +461,7 @@ export function getAllQuestionnaireNames(): string[] {
 }
 
 // Helper function to get question by global ID
-export function getQuestionById(id: number): Question | undefined {
+function getQuestionById(id: number): Question | undefined {
   for (const questionnaire of Object.values(QUESTIONNAIRES)) {
     const question = questionnaire.questions.find(q => q.id === id);
     if (question) {

@@ -47,13 +47,13 @@ export interface Conversation {
 }
 
 // For grouping messages by date
-export interface MessageGroup {
+interface MessageGroup {
   date: string;
   messages: Message[];
 }
 
 // Interface for the entire messages state
-export interface MessagesState {
+interface MessagesState {
   contacts: Contact[];
   conversations: Conversation[];
   selectedContactId: string | null;

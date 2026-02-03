@@ -45,7 +45,7 @@ export async function checkEmailAvailable(
 /**
  * Validate email format
  */
-export function isValidEmail(email: string): boolean {
+function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
@@ -53,7 +53,7 @@ export function isValidEmail(email: string): boolean {
 /**
  * Generate a random verification token
  */
-export function generateVerificationToken(): string {
+function generateVerificationToken(): string {
   return (
     Math.random().toString(36).substring(2, 15) +
     Math.random().toString(36).substring(2, 15)

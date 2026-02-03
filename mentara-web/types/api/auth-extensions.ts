@@ -25,22 +25,22 @@ export interface AuthUser {
 }
 
 // Pre-assessment related types
-export interface PreAssessmentSubmission {
+interface PreAssessmentSubmission {
   answerMatrix: number[][];
   metadata?: Record<string, any>;
 }
 
-export interface CommunityAssignmentResponse {
+interface CommunityAssignmentResponse {
   success: boolean;
   assignedCommunities: string[];
 }
 
-export interface ForceLogoutRequest {
+interface ForceLogoutRequest {
   userId: string;
   reason?: string;
 }
 
-export interface ForceLogoutResponse {
+interface ForceLogoutResponse {
   success: boolean;
   message: string;
 }

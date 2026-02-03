@@ -54,7 +54,7 @@ interface UserModerationProps {
   className?: string;
 }
 
-export function UserModeration({
+function UserModeration({
   users = [],
   total = 0,
   isLoading = false,

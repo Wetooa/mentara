@@ -11,7 +11,7 @@ export enum UserRole {
 }
 
 // Meeting statuses
-export enum MeetingStatus {
+enum MeetingStatus {
   SCHEDULED = 'scheduled',
   ONGOING = 'ongoing',
   COMPLETED = 'completed',
@@ -20,7 +20,7 @@ export enum MeetingStatus {
 }
 
 // Meeting types
-export enum MeetingType {
+enum MeetingType {
   INITIAL_CONSULTATION = 'initial_consultation',
   THERAPY_SESSION = 'therapy_session',
   FOLLOW_UP = 'follow_up',
@@ -28,7 +28,7 @@ export enum MeetingType {
 }
 
 // Review status
-export enum ReviewStatus {
+enum ReviewStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
@@ -36,7 +36,7 @@ export enum ReviewStatus {
 }
 
 // Therapist application status
-export enum ApplicationStatus {
+enum ApplicationStatus {
   PENDING = 'pending',
   UNDER_REVIEW = 'under_review',
   APPROVED = 'approved',
@@ -45,7 +45,7 @@ export enum ApplicationStatus {
 }
 
 // Message types
-export enum MessageType {
+enum MessageType {
   TEXT = 'text',
   IMAGE = 'image',
   FILE = 'file',
@@ -53,7 +53,7 @@ export enum MessageType {
 }
 
 // Message status
-export enum MessageStatus {
+enum MessageStatus {
   SENT = 'sent',
   DELIVERED = 'delivered',
   READ = 'read',
@@ -61,7 +61,7 @@ export enum MessageStatus {
 }
 
 // User online status
-export enum UserStatus {
+enum UserStatus {
   ONLINE = 'online',
   OFFLINE = 'offline',
   AWAY = 'away',
@@ -69,21 +69,21 @@ export enum UserStatus {
 }
 
 // Conversation types
-export enum ConversationType {
+enum ConversationType {
   DIRECT = 'direct',
   GROUP = 'group',
   THERAPY_SESSION = 'therapy_session',
 }
 
 // OTP types
-export enum OtpType {
+enum OtpType {
   REGISTRATION = 'registration',
   PASSWORD_RESET = 'password_reset',
   LOGIN_VERIFICATION = 'login_verification',
 }
 
 // Session formats for therapists
-export enum SessionFormat {
+enum SessionFormat {
   IN_PERSON = 'in_person',
   VIDEO_CALL = 'video_call',
   PHONE_CALL = 'phone_call',
@@ -92,7 +92,7 @@ export enum SessionFormat {
 }
 
 // Worksheet statuses
-export enum WorksheetStatus {
+enum WorksheetStatus {
   ASSIGNED = 'assigned',
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
@@ -100,7 +100,7 @@ export enum WorksheetStatus {
 }
 
 // Notification types
-export enum NotificationType {
+enum NotificationType {
   MESSAGE = 'message',
   MEETING_REMINDER = 'meeting_reminder',
   ASSIGNMENT = 'assignment',

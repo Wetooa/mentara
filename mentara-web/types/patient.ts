@@ -44,7 +44,7 @@ export interface WorksheetInfo {
 }
 
 // Session notes for detailed clinical documentation
-export interface SessionNote {
+interface SessionNote {
   id: string;
   sessionId: string;
   patientId: string;
@@ -58,7 +58,7 @@ export interface SessionNote {
 }
 
 // Treatment goals for progress tracking
-export interface TreatmentGoal {
+interface TreatmentGoal {
   id: string;
   patientId: string;
   therapistId: string;
@@ -74,7 +74,7 @@ export interface TreatmentGoal {
 }
 
 // Progress metrics for tracking patient improvements
-export interface ProgressMetric {
+interface ProgressMetric {
   id: string;
   patientId: string;
   metricType: string; // anxiety_level, depression_score, etc.
@@ -86,7 +86,7 @@ export interface ProgressMetric {
 }
 
 // Patient filtering and search options
-export interface PatientFilters {
+interface PatientFilters {
   status?: "active" | "inactive" | "completed" | "all";
   diagnosis?: string;
   treatmentPlan?: string;
@@ -107,7 +107,7 @@ export interface PatientFilters {
 }
 
 // Patient statistics for dashboard
-export interface PatientStatistics {
+interface PatientStatistics {
   totalPatients: number;
   activePatients: number;
   completedTreatments: number;
@@ -118,7 +118,7 @@ export interface PatientStatistics {
 }
 
 // Treatment plan template
-export interface TreatmentPlanTemplate {
+interface TreatmentPlanTemplate {
   id: string;
   name: string;
   description: string;
@@ -133,7 +133,7 @@ export interface TreatmentPlanTemplate {
 }
 
 // Clinical assessment result
-export interface ClinicalAssessment {
+interface ClinicalAssessment {
   id: string;
   patientId: string;
   therapistId: string;

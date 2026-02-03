@@ -22,13 +22,13 @@ export * from './filters';
 export * from './api';
 
 // Legacy types - keeping for backward compatibility but should be migrated
-export interface Therapist {
+interface Therapist {
   id: string;
   name: string;
   avatar: string;
 }
 
-export interface DashboardStats {
+interface DashboardStats {
   activePatients: number;
   rescheduled: number;
   cancelled: number;
@@ -42,7 +42,7 @@ export interface DashboardStats {
 }
 
 // Legacy appointment interface - use types/auth.ts Appointment instead for new code
-export interface LegacyAppointment {
+interface LegacyAppointment {
   id: string;
   patientId: string;
   patientName: string;
@@ -52,21 +52,21 @@ export interface LegacyAppointment {
   reportId?: string;
 }
 
-export interface Session {
+interface Session {
   id: string;
   number: number;
   date: string;
   notes: string;
 }
 
-export interface Worksheet {
+interface Worksheet {
   id: string;
   title: string;
   assignedDate: string;
   status: "completed" | "pending" | "overdue";
 }
 
-export interface Patient {
+interface Patient {
   id: string;
   name: string;
   fullName: string;

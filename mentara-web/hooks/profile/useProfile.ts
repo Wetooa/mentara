@@ -37,7 +37,7 @@ export function useProfile(userId: string) {
 }
 
 // Hook for updating own profile (text fields only)
-export function useUpdateProfile() {
+function useUpdateProfile() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -128,7 +128,7 @@ export function useUpdateProfileWithFiles(userId: string) {
 }
 
 // Hook for uploading profile avatar only
-export function useUploadAvatar() {
+function useUploadAvatar() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -166,7 +166,7 @@ export function useUploadAvatar() {
 }
 
 // Hook for uploading cover image only
-export function useUploadCoverImage() {
+function useUploadCoverImage() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -237,7 +237,7 @@ export function useReportUser() {
 }
 
 // Utility hook to check if the current user is viewing their own profile
-export function useIsOwnProfile(profileUserId: string) {
+function useIsOwnProfile(profileUserId: string) {
   // Note: useAuth is imported at the component level to avoid circular dependencies
   // Components should import useAuth directly from the context
   return false; // This hook is mainly for reference - use useAuth directly in components

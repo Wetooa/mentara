@@ -38,7 +38,7 @@ export class CommentAddedEvent extends BaseDomainEvent<CommentAddedData> {
   }
 }
 
-export interface PostLikedData {
+interface PostLikedData {
   postId: string;
   userId: string;
   authorId: string;
@@ -46,13 +46,13 @@ export interface PostLikedData {
   totalLikes: number;
 }
 
-export class PostLikedEvent extends BaseDomainEvent<PostLikedData> {
+class PostLikedEvent extends BaseDomainEvent<PostLikedData> {
   constructor(data: PostLikedData, metadata?: EventMetadata) {
     super(data.postId, 'Post', data, metadata);
   }
 }
 
-export interface PostUnlikedData {
+interface PostUnlikedData {
   postId: string;
   userId: string;
   authorId: string;
@@ -60,13 +60,13 @@ export interface PostUnlikedData {
   totalLikes: number;
 }
 
-export class PostUnlikedEvent extends BaseDomainEvent<PostUnlikedData> {
+class PostUnlikedEvent extends BaseDomainEvent<PostUnlikedData> {
   constructor(data: PostUnlikedData, metadata?: EventMetadata) {
     super(data.postId, 'Post', data, metadata);
   }
 }
 
-export interface CommunityJoinedData {
+interface CommunityJoinedData {
   communityId: string;
   userId: string;
   joinedAt: Date;
@@ -74,13 +74,13 @@ export interface CommunityJoinedData {
   invitedBy?: string;
 }
 
-export class CommunityJoinedEvent extends BaseDomainEvent<CommunityJoinedData> {
+class CommunityJoinedEvent extends BaseDomainEvent<CommunityJoinedData> {
   constructor(data: CommunityJoinedData, metadata?: EventMetadata) {
     super(data.communityId, 'Community', data, metadata);
   }
 }
 
-export interface CommunityLeftData {
+interface CommunityLeftData {
   communityId: string;
   userId: string;
   leftAt: Date;
@@ -89,13 +89,13 @@ export interface CommunityLeftData {
   membershipDuration: number; // in days
 }
 
-export class CommunityLeftEvent extends BaseDomainEvent<CommunityLeftData> {
+class CommunityLeftEvent extends BaseDomainEvent<CommunityLeftData> {
   constructor(data: CommunityLeftData, metadata?: EventMetadata) {
     super(data.communityId, 'Community', data, metadata);
   }
 }
 
-export interface PostReportedData {
+interface PostReportedData {
   postId: string;
   reportedBy: string;
   reportReason:
@@ -109,13 +109,13 @@ export interface PostReportedData {
   authorId: string;
 }
 
-export class PostReportedEvent extends BaseDomainEvent<PostReportedData> {
+class PostReportedEvent extends BaseDomainEvent<PostReportedData> {
   constructor(data: PostReportedData, metadata?: EventMetadata) {
     super(data.postId, 'Post', data, metadata);
   }
 }
 
-export interface PostModerationData {
+interface PostModerationData {
   postId: string;
   moderatorId: string;
   action: 'approved' | 'rejected' | 'flagged' | 'deleted';
@@ -125,20 +125,20 @@ export interface PostModerationData {
   reportCount?: number;
 }
 
-export class PostModerationEvent extends BaseDomainEvent<PostModerationData> {
+class PostModerationEvent extends BaseDomainEvent<PostModerationData> {
   constructor(data: PostModerationData, metadata?: EventMetadata) {
     super(data.postId, 'Post', data, metadata);
   }
 }
 
-export interface FollowUserData {
+interface FollowUserData {
   followerId: string;
   followedUserId: string;
   followType: 'support' | 'professional' | 'friend';
   followedAt: Date;
 }
 
-export class FollowUserEvent extends BaseDomainEvent<FollowUserData> {
+class FollowUserEvent extends BaseDomainEvent<FollowUserData> {
   constructor(data: FollowUserData, metadata?: EventMetadata) {
     super(
       `${data.followerId}_${data.followedUserId}`,
@@ -149,14 +149,14 @@ export class FollowUserEvent extends BaseDomainEvent<FollowUserData> {
   }
 }
 
-export interface UnfollowUserData {
+interface UnfollowUserData {
   followerId: string;
   followedUserId: string;
   unfollowedAt: Date;
   followDuration: number; // in days
 }
 
-export class UnfollowUserEvent extends BaseDomainEvent<UnfollowUserData> {
+class UnfollowUserEvent extends BaseDomainEvent<UnfollowUserData> {
   constructor(data: UnfollowUserData, metadata?: EventMetadata) {
     super(
       `${data.followerId}_${data.followedUserId}`,

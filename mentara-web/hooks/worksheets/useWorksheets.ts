@@ -22,7 +22,7 @@ interface Worksheet {
 /**
  * Hook for managing worksheets (for clients)
  */
-export function useWorksheets() {
+function useWorksheets() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -81,7 +81,7 @@ export function useWorksheets() {
 /**
  * Hook for managing worksheets (for therapists)
  */
-export function useTherapistWorksheets() {
+function useTherapistWorksheets() {
   const api = useApi();
   const queryClient = useQueryClient();
 

@@ -71,7 +71,7 @@ export class UserResponseDto implements UserDto {
 /**
  * User profile response DTO with additional computed fields
  */
-export class UserProfileResponseDto extends UserResponseDto implements UserProfileResponse {
+class UserProfileResponseDto extends UserResponseDto implements UserProfileResponse {
   fullName?: string;
 
   constructor(user: any) {
@@ -95,7 +95,7 @@ export class UserProfileResponseDto extends UserResponseDto implements UserProfi
 /**
  * Authentication response DTO
  */
-export class AuthResponseDto implements AuthResponse {
+class AuthResponseDto implements AuthResponse {
   user: {
     id: string;
     email: string;

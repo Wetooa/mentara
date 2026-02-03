@@ -185,4 +185,3 @@ export function TherapistAvailability({ availability }: TherapistAvailabilityPro
   );
 }
 
-export default TherapistAvailability;

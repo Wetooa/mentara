@@ -78,7 +78,7 @@ export function useCommunityRooms(communityId?: string) {
 /**
  * Hook for managing rooms within a specific room group
  */
-export function useRoomsByGroup(roomGroupId: string) {
+function useRoomsByGroup(roomGroupId: string) {
   const api = useApi();
 
   const {

@@ -17,7 +17,7 @@
  */
 
 // User roles enum (matching backend)
-export type UserRole = 'client' | 'therapist' | 'moderator' | 'admin';
+type UserRole = 'client' | 'therapist' | 'moderator' | 'admin';
 
 // Therapist application status (matching Prisma enum)
 export type TherapistApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
@@ -174,7 +174,7 @@ export interface TherapistApplicationStatistics {
 }
 
 // === Admin User Management DTOs ===
-export interface AdminUpdateUserDto {
+interface AdminUpdateUserDto {
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -188,7 +188,7 @@ export interface AdminUpdateUserDto {
   location?: string;
 }
 
-export interface AdminUserQuery {
+interface AdminUserQuery {
   search?: string;
   role?: UserRole;
   isActive?: boolean;
@@ -200,7 +200,7 @@ export interface AdminUserQuery {
 }
 
 // === Admin Therapist Management DTOs ===
-export interface AdminUpdateTherapistDto {
+interface AdminUpdateTherapistDto {
   status?: TherapistApplicationStatus;
   areasOfExpertise?: string[];
   hourlyRate?: number;
@@ -216,7 +216,7 @@ export interface AdminUpdateTherapistDto {
   profileSummary?: string;
 }
 
-export interface AdminTherapistQuery {
+interface AdminTherapistQuery {
   search?: string;
   status?: TherapistApplicationStatus;
   specialties?: string[];
@@ -317,7 +317,7 @@ export interface TherapistApplicationMetricsResponse {
 /**
  * Extended response that matches backend service getTherapistApplicationMetrics
  */
-export interface TherapistApplicationMetricsExtended {
+interface TherapistApplicationMetricsExtended {
   period: {
     start: string;
     end: string;
@@ -344,7 +344,7 @@ export interface TherapistApplicationMetricsExtended {
 /**
  * Service response for getPendingApplications method
  */
-export interface PendingApplicationsServiceResponse {
+interface PendingApplicationsServiceResponse {
   applications: TherapistApplication[];
   summary: {
     totalPending: number;
@@ -356,7 +356,7 @@ export interface PendingApplicationsServiceResponse {
 }
 
 // === Admin Account Management ===
-export interface CreateAdminAccountDto {
+interface CreateAdminAccountDto {
   email: string;
   password: string;
   firstName: string;
@@ -364,18 +364,18 @@ export interface CreateAdminAccountDto {
   role: 'admin' | 'moderator';
 }
 
-export interface CreateAdminDto {
+interface CreateAdminDto {
   userId: string;
   permissions: string[];
   adminLevel?: string;
 }
 
-export interface UpdateAdminDto {
+interface UpdateAdminDto {
   permissions?: string[];
   adminLevel?: string;
 }
 
-export interface AdminResponseDto {
+interface AdminResponseDto {
   userId: string;
   permissions: string[];
   adminLevel: string;
@@ -383,7 +383,7 @@ export interface AdminResponseDto {
   updatedAt: Date;
 }
 
-export interface AdminAccountQuery {
+interface AdminAccountQuery {
   search?: string;
   role?: 'admin' | 'moderator';
   isActive?: boolean;
@@ -394,7 +394,7 @@ export interface AdminAccountQuery {
 }
 
 // === Application Status Update (from therapist interfaces) ===
-export interface ApplicationStatusUpdateDto {
+interface ApplicationStatusUpdateDto {
   status: 'APPROVED' | 'REJECTED' | 'PENDING';
   adminNotes?: string;
   credentials?: {

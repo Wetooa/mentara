@@ -1,6 +1,6 @@
 // Questionnaire scoring system and base interfaces
 
-export interface QuestionnaireOption {
+interface QuestionnaireOption {
   text: string;
   value: number;
 }

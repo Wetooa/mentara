@@ -5,7 +5,7 @@ import { useState, useCallback } from "react";
 /**
  * Authentication operation types for tracking loading states
  */
-export type AuthOperation =
+type AuthOperation =
   | "login"
   | "logout"
   | "register"
@@ -19,7 +19,7 @@ export type AuthOperation =
 /**
  * Loading state information for an authentication operation
  */
-export interface LoadingState {
+interface LoadingState {
   /** Whether the operation is currently loading */
   isLoading: boolean;
   /** The type of operation being performed */
@@ -33,7 +33,7 @@ export interface LoadingState {
 /**
  * Return type for the useAuthLoadingStates hook
  */
-export interface UseAuthLoadingStatesReturn {
+interface UseAuthLoadingStatesReturn {
   /** All current loading states keyed by operation */
   loadingStates: Record<string, LoadingState>;
   /** Whether any operation is currently loading */
@@ -111,7 +111,7 @@ export interface UseAuthLoadingStatesReturn {
  * - Convenient state management utilities
  * - TypeScript support with proper typing
  */
-export function useAuthLoadingStates(): UseAuthLoadingStatesReturn {
+function useAuthLoadingStates(): UseAuthLoadingStatesReturn {
   const [loadingStates, setLoadingStates] = useState<
     Record<string, LoadingState>
   >({});

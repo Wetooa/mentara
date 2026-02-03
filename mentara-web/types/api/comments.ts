@@ -1,11 +1,5 @@
 // Import DTOs from @mentara/commons for consistency
-export type {
-  CommentCreateInputDto,
-  CommentUpdateInputDto,
-  Comment as CommonComment,
-  CommentHeart as CommonCommentHeart,
-  HeartToggleResponse,
-} from '@mentara/commons';
+;
 
 // Extended Comment interface with UI-specific fields
 export interface Comment {
@@ -52,7 +46,7 @@ export interface CommentHeart {
   createdAt: string;
 }
 
-export interface CommentListParams {
+interface CommentListParams {
   postId?: string;
   userId?: string; // Updated from authorId to match backend
   parentId?: string;
@@ -61,7 +55,7 @@ export interface CommentListParams {
   sortBy?: 'best' | 'new' | 'old' | 'hearts'; // Updated sort options
 }
 
-export interface CommentListResponse {
+interface CommentListResponse {
   comments: Comment[];
   total: number;
   hasMore: boolean;

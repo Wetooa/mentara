@@ -170,7 +170,7 @@ export function getMoodEmoji(mood: Mood): string {
 /**
  * Get mood label by mood ID
  */
-export function getMoodLabel(mood: Mood, tagalog = false): string {
+function getMoodLabel(mood: Mood, tagalog = false): string {
   const moodOption = MOOD_OPTIONS.find((m) => m.id === mood);
   if (!moodOption) return "Neutral";
   return tagalog ? moodOption.tagalogLabel : moodOption.label;

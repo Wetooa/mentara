@@ -70,11 +70,11 @@ export interface ReviewIdParam {
   id: string;
 }
 
-export interface TherapistIdParam {
+interface TherapistIdParam {
   therapistId: string;
 }
 
-export interface MeetingIdParam {
+interface MeetingIdParam {
   meetingId: string;
 }
 
@@ -160,11 +160,11 @@ export interface ReviewListResponse {
 }
 
 // Review interaction DTOs
-export interface ReviewHelpfulDto {
+interface ReviewHelpfulDto {
   action: 'helpful' | 'unhelpful' | 'remove';
 }
 
-export interface ReviewReportDto {
+interface ReviewReportDto {
   reason: 'inappropriate' | 'spam' | 'fake' | 'harassment' | 'other';
   description?: string;
 }

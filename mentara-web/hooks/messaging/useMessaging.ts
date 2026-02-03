@@ -783,4 +783,4 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   };
 }
 
-export type UseMessagingReturn = ReturnType<typeof useMessaging>;
+type UseMessagingReturn = ReturnType<typeof useMessaging>;

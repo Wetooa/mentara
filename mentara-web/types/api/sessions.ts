@@ -122,7 +122,7 @@ export interface CreateSessionRequest {
   recurrencePattern?: RecurrencePattern;
 }
 
-export interface UpdateSessionRequest extends Partial<CreateSessionRequest> {
+interface UpdateSessionRequest extends Partial<CreateSessionRequest> {
   id: string;
   status?: SessionStatus;
 }
@@ -140,7 +140,7 @@ export interface SessionFilters {
   onlyUserSessions?: boolean; // Only sessions user is attending
 }
 
-export interface SessionsListResponse {
+interface SessionsListResponse {
   sessions: GroupSession[];
   total: number;
   upcoming: number;
@@ -148,12 +148,12 @@ export interface SessionsListResponse {
   completed: number;
 }
 
-export interface RSVPRequest {
+interface RSVPRequest {
   sessionId: string;
   status: "join" | "leave";
 }
 
-export interface SessionStats {
+interface SessionStats {
   totalSessions: number;
   upcomingSessions: number;
   completedSessions: number;

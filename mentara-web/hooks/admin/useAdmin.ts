@@ -28,7 +28,7 @@ import type {
 /**
  * Hook for checking admin permissions
  */
-export function useAdminCheck() {
+function useAdminCheck() {
   const api = useApi();
   
   return useQuery({
@@ -59,7 +59,7 @@ export function useAdminDashboard() {
 /**
  * Hook for fetching admin users list (basic query only)
  */
-export function useAdminUsersList(params: AdminUserListParams = {}) {
+function useAdminUsersList(params: AdminUserListParams = {}) {
   const api = useApi();
   
   return useQuery({
@@ -74,7 +74,7 @@ export function useAdminUsersList(params: AdminUserListParams = {}) {
 /**
  * Hook for fetching specific admin user by ID
  */
-export function useAdminUser(userId: string | null) {
+function useAdminUser(userId: string | null) {
   const api = useApi();
   
   return useQuery({
@@ -90,7 +90,7 @@ export function useAdminUser(userId: string | null) {
 /**
  * Hook for creating a new user (admin functionality)
  */
-export function useCreateUser() {
+function useCreateUser() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -119,7 +119,7 @@ export function useCreateUser() {
 /**
  * Hook for updating user data (admin functionality)
  */
-export function useUpdateUser() {
+function useUpdateUser() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -175,7 +175,7 @@ export function useUpdateUser() {
 /**
  * Hook for updating user role (admin functionality)
  */
-export function useUpdateUserRole() {
+function useUpdateUserRole() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -207,7 +207,7 @@ export function useUpdateUserRole() {
 /**
  * Hook for suspending a user (admin functionality)
  */
-export function useSuspendUser() {
+function useSuspendUser() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -244,7 +244,7 @@ export function useSuspendUser() {
 /**
  * Hook for unsuspending a user (admin functionality)
  */
-export function useUnsuspendUser() {
+function useUnsuspendUser() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -270,7 +270,7 @@ export function useUnsuspendUser() {
 /**
  * Hook for deleting a user (admin functionality)
  */
-export function useDeleteUser() {
+function useDeleteUser() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -303,7 +303,7 @@ export function useDeleteUser() {
 /**
  * Hook for fetching therapist applications (admin functionality)
  */
-export function useAdminTherapistApplications(params: { status?: string; limit?: number; offset?: number } = {}) {
+function useAdminTherapistApplications(params: { status?: string; limit?: number; offset?: number } = {}) {
   const api = useApi();
   
   return useQuery({
@@ -318,7 +318,7 @@ export function useAdminTherapistApplications(params: { status?: string; limit?:
 /**
  * Hook for fetching specific therapist application (admin functionality)
  */
-export function useAdminTherapistApplication(applicationId: string | null) {
+function useAdminTherapistApplication(applicationId: string | null) {
   const api = useApi();
   
   return useQuery({
@@ -334,7 +334,7 @@ export function useAdminTherapistApplication(applicationId: string | null) {
 /**
  * Hook for updating therapist application status (admin functionality)
  */
-export function useUpdateTherapistApplicationStatus() {
+function useUpdateTherapistApplicationStatus() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -422,7 +422,7 @@ export function useAdminEngagement(params: EngagementParams = {}) {
 /**
  * Hook for fetching platform overview analytics (admin functionality)
  */
-export function useAdminPlatformOverview() {
+function useAdminPlatformOverview() {
   const api = useApi();
   
   return useQuery({
@@ -438,7 +438,7 @@ export function useAdminPlatformOverview() {
  * Hook for fetching matching performance analytics (admin functionality)
  * TODO: Create backend endpoint for matching performance analytics
  */
-export function useAdminMatchingPerformance(startDate?: string, endDate?: string) {
+function useAdminMatchingPerformance(startDate?: string, endDate?: string) {
   const api = useApi();
   
   return useQuery({
@@ -468,7 +468,7 @@ export function useAdminModerationReports(params: ModerationReportParams = {}) {
 /**
  * Hook for updating moderation report (admin functionality)
  */
-export function useUpdateModerationReport() {
+function useUpdateModerationReport() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -512,7 +512,7 @@ export function useAdminFlaggedContent(params: { type?: string; page?: number; l
 /**
  * Hook for moderating content (admin functionality)
  */
-export function useAdminModerateContent() {
+function useAdminModerateContent() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -550,7 +550,7 @@ export function useAdminModerateContent() {
 /**
  * Hook for fetching system configuration (admin functionality)
  */
-export function useAdminSystemConfig() {
+function useAdminSystemConfig() {
   const api = useApi();
   
   return useQuery({
@@ -565,7 +565,7 @@ export function useAdminSystemConfig() {
 /**
  * Hook for updating system configuration (admin functionality)
  */
-export function useUpdateSystemConfig() {
+function useUpdateSystemConfig() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -589,7 +589,7 @@ export function useUpdateSystemConfig() {
 /**
  * Hook for fetching feature flags (admin functionality)
  */
-export function useAdminFeatureFlags() {
+function useAdminFeatureFlags() {
   const api = useApi();
   
   return useQuery({
@@ -604,7 +604,7 @@ export function useAdminFeatureFlags() {
 /**
  * Hook for updating feature flag (admin functionality)
  */
-export function useUpdateFeatureFlag() {
+function useUpdateFeatureFlag() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -633,7 +633,7 @@ export function useUpdateFeatureFlag() {
 /**
  * Hook for fetching admin profile
  */
-export function useAdminProfile() {
+function useAdminProfile() {
   const api = useApi();
   
   return useQuery({
@@ -648,7 +648,7 @@ export function useAdminProfile() {
 /**
  * Hook for updating admin profile
  */
-export function useUpdateAdminProfile() {
+function useUpdateAdminProfile() {
   const api = useApi();
   const queryClient = useQueryClient();
   

@@ -149,7 +149,7 @@ export function useAvailableSlots(therapistId: string, date: string) {
  * Hook for getting available slots for multiple dates
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function useMultiDateSlots(therapistId: string, dates: string[]) {
+function useMultiDateSlots(therapistId: string, dates: string[]) {
   // This would need useQueries from React Query
   // For now, let's return a simpler implementation
   return {

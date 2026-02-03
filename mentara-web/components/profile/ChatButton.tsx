@@ -71,7 +71,7 @@ export function ChatButton({
 /**
  * Compact chat button variant for smaller spaces
  */
-export function ChatButtonCompact({ 
+function ChatButtonCompact({ 
   targetUserId,
   className,
   disabled = false
@@ -90,7 +90,7 @@ export function ChatButtonCompact({
 /**
  * Chat icon button (icon only, no text)
  */
-export function ChatIconButton({ 
+function ChatIconButton({ 
   targetUserId,
   className,
   disabled = false
@@ -135,4 +135,3 @@ export function ChatIconButton({
   );
 }
 
-export default ChatButton;

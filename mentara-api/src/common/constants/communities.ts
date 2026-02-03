@@ -173,7 +173,7 @@ export function getAllCanonicalCommunities(): CommunityDefinition[] {
 /**
  * Get community definition by questionnaire ID
  */
-export function getCommunityByQuestionnaireId(id: CanonicalQuestionnaireId): CommunityDefinition {
+function getCommunityByQuestionnaireId(id: CanonicalQuestionnaireId): CommunityDefinition {
   return CANONICAL_COMMUNITIES[id];
 }
 
@@ -187,14 +187,14 @@ export function getCommunityBySlug(slug: string): CommunityDefinition | undefine
 /**
  * Get all community slugs
  */
-export function getAllCommunitySlugs(): string[] {
+function getAllCommunitySlugs(): string[] {
   return getAllCanonicalCommunities().map(community => community.slug);
 }
 
 /**
  * Map questionnaire ID to community slug (for AI recommendations)
  */
-export function getSlugForQuestionnaireId(id: CanonicalQuestionnaireId): string {
+function getSlugForQuestionnaireId(id: CanonicalQuestionnaireId): string {
   return CANONICAL_COMMUNITIES[id].slug;
 }
 

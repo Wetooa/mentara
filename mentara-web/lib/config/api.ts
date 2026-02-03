@@ -5,7 +5,7 @@ if (!baseURL.endsWith('/api')) {
   baseURL = baseURL.endsWith('/') ? `${baseURL}api` : `${baseURL}/api`;
 }
 
-export const apiConfig = {
+const apiConfig = {
   baseURL,
   timeout: 10000,
   retryDelay: (attemptIndex: number) =>

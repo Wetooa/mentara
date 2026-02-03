@@ -25,7 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { CallControlsProps } from '@/types/api/video-calls';
 
-export function CallControls({
+function CallControls({
   videoEnabled,
   audioEnabled,
   onToggleVideo,
@@ -235,7 +235,7 @@ export function CallControls({
 }
 
 // Simplified version for mobile or minimal UI
-export function MobileCallControls({
+function MobileCallControls({
   videoEnabled,
   audioEnabled,
   onToggleVideo,

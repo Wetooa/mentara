@@ -66,7 +66,7 @@ const DEFAULT_ERROR_MESSAGES: Record<ErrorContext, string> = {
   generic: "An unexpected error occurred. Please try again.",
 };
 
-export class StandardErrorBoundary extends Component<StandardErrorBoundaryProps, ErrorBoundaryState> {
+class StandardErrorBoundary extends Component<StandardErrorBoundaryProps, ErrorBoundaryState> {
   private errorHandler: StandardErrorHandler;
   private maxRetries: number = 3;
 
@@ -301,7 +301,7 @@ export function AuthErrorBoundary({ children, ...props }: Omit<StandardErrorBoun
   );
 }
 
-export function BillingErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
+function BillingErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
   return (
     <StandardErrorBoundary context="billing" {...props}>
       {children}
@@ -309,7 +309,7 @@ export function BillingErrorBoundary({ children, ...props }: Omit<StandardErrorB
   );
 }
 
-export function BookingErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
+function BookingErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
   return (
     <StandardErrorBoundary context="booking" {...props}>
       {children}
@@ -317,7 +317,7 @@ export function BookingErrorBoundary({ children, ...props }: Omit<StandardErrorB
   );
 }
 
-export function MessagingErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
+function MessagingErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
   return (
     <StandardErrorBoundary context="messaging" {...props}>
       {children}
@@ -325,7 +325,7 @@ export function MessagingErrorBoundary({ children, ...props }: Omit<StandardErro
   );
 }
 
-export function CommunityErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
+function CommunityErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
   return (
     <StandardErrorBoundary context="community" {...props}>
       {children}
@@ -333,7 +333,7 @@ export function CommunityErrorBoundary({ children, ...props }: Omit<StandardErro
   );
 }
 
-export function WorksheetErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
+function WorksheetErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
   return (
     <StandardErrorBoundary context="worksheets" {...props}>
       {children}
@@ -341,7 +341,7 @@ export function WorksheetErrorBoundary({ children, ...props }: Omit<StandardErro
   );
 }
 
-export function MeetingErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
+function MeetingErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
   return (
     <StandardErrorBoundary context="meeting" {...props}>
       {children}
@@ -349,7 +349,7 @@ export function MeetingErrorBoundary({ children, ...props }: Omit<StandardErrorB
   );
 }
 
-export function AdminErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
+function AdminErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
   return (
     <StandardErrorBoundary context="admin" {...props}>
       {children}
@@ -357,7 +357,7 @@ export function AdminErrorBoundary({ children, ...props }: Omit<StandardErrorBou
   );
 }
 
-export function GenericErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
+function GenericErrorBoundary({ children, ...props }: Omit<StandardErrorBoundaryProps, 'context'>) {
   return (
     <StandardErrorBoundary context="generic" {...props}>
       {children}

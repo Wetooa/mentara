@@ -17,7 +17,7 @@ import type {
 /**
  * Hook for fetching flagged content with comprehensive filtering
  */
-export function useFlaggedContent(filters: ContentModerationFilters = {}) {
+function useFlaggedContent(filters: ContentModerationFilters = {}) {
   const api = useApi();
   
   return useQuery({
@@ -49,7 +49,7 @@ export function useFlaggedContent(filters: ContentModerationFilters = {}) {
 /**
  * Hook for moderating individual content items
  */
-export function useModerateContent() {
+function useModerateContent() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -125,7 +125,7 @@ export function useModerateContent() {
 /**
  * Hook for bulk moderation actions
  */
-export function useBulkModerate() {
+function useBulkModerate() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -160,7 +160,7 @@ export function useBulkModerate() {
 /**
  * Hook for fetching moderation reports
  */
-export function useModerationReports(filters: { status?: string; type?: string; priority?: string; limit?: number; offset?: number } = {}) {
+function useModerationReports(filters: { status?: string; type?: string; priority?: string; limit?: number; offset?: number } = {}) {
   const api = useApi();
   
   return useQuery({
@@ -175,7 +175,7 @@ export function useModerationReports(filters: { status?: string; type?: string; 
 /**
  * Hook for updating moderation report status
  */
-export function useUpdateReport() {
+function useUpdateReport() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -213,7 +213,7 @@ export function useUpdateReport() {
 /**
  * Hook for submitting new moderation reports
  */
-export function useSubmitReport() {
+function useSubmitReport() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -242,7 +242,7 @@ export function useSubmitReport() {
 /**
  * Hook for fetching user violations and moderation history
  */
-export function useUserViolations(userId: string | null) {
+function useUserViolations(userId: string | null) {
   const api = useApi();
   
   return useQuery({
@@ -258,7 +258,7 @@ export function useUserViolations(userId: string | null) {
 /**
  * Hook for moderating users (warn, suspend, unsuspend)
  */
-export function useModerateUser() {
+function useModerateUser() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -303,7 +303,7 @@ export function useModerateUser() {
 /**
  * Hook for fetching moderation statistics
  */
-export function useModerationStats(dateFrom?: string, dateTo?: string) {
+function useModerationStats(dateFrom?: string, dateTo?: string) {
   const api = useApi();
   
   return useQuery({
@@ -318,7 +318,7 @@ export function useModerationStats(dateFrom?: string, dateTo?: string) {
 /**
  * Hook for fetching moderation history/actions
  */
-export function useModerationHistory(filters: { moderatorId?: string; limit?: number; offset?: number } = {}) {
+function useModerationHistory(filters: { moderatorId?: string; limit?: number; offset?: number } = {}) {
   const api = useApi();
   
   return useQuery({
@@ -333,7 +333,7 @@ export function useModerationHistory(filters: { moderatorId?: string; limit?: nu
 /**
  * Hook for fetching automated moderation rules
  */
-export function useAutoModerationRules() {
+function useAutoModerationRules() {
   const api = useApi();
   
   return useQuery({
@@ -348,7 +348,7 @@ export function useAutoModerationRules() {
 /**
  * Hook for updating automated moderation rules
  */
-export function useUpdateAutoModerationRules() {
+function useUpdateAutoModerationRules() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -372,7 +372,7 @@ export function useUpdateAutoModerationRules() {
 /**
  * Hook for fetching content preview for moderation
  */
-export function useContentPreview(contentType: 'post' | 'comment' | null, contentId: string | null) {
+function useContentPreview(contentType: 'post' | 'comment' | null, contentId: string | null) {
   const api = useApi();
   
   return useQuery({
@@ -388,7 +388,7 @@ export function useContentPreview(contentType: 'post' | 'comment' | null, conten
 /**
  * Hook for smart content filtering based on priority and type
  */
-export function useSmartContentFilter() {
+function useSmartContentFilter() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -429,7 +429,7 @@ export function useSmartContentFilter() {
 /**
  * Hook for moderation workflow automation
  */
-export function useModerationWorkflow() {
+function useModerationWorkflow() {
   const queryClient = useQueryClient();
   const moderateContent = useModerateContent();
   const moderateUser = useModerateUser();

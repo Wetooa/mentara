@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { UserRole } from '../../types/enums';
 
-export const AdminUpdateUserDtoSchema = z.object({
+const AdminUpdateUserDtoSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
   email: z.string().email().optional(),
@@ -25,7 +25,7 @@ export const AdminUserQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
 });
 
-export const AdminUpdateTherapistDtoSchema = z.object({
+const AdminUpdateTherapistDtoSchema = z.object({
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED']).optional(),
   areasOfExpertise: z.array(z.string()).optional(),
   hourlyRate: z.number().positive().optional(),
@@ -41,7 +41,7 @@ export const AdminUpdateTherapistDtoSchema = z.object({
   profileSummary: z.string().optional(),
 });
 
-export const AdminTherapistQuerySchema = z.object({
+const AdminTherapistQuerySchema = z.object({
   search: z.string().optional(),
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED']).optional(),
   specialties: z.array(z.string()).optional(),
@@ -52,7 +52,7 @@ export const AdminTherapistQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
 });
 
-export const CreateAdminAccountDtoSchema = z.object({
+const CreateAdminAccountDtoSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   firstName: z.string().min(1, 'First name is required'),
@@ -60,7 +60,7 @@ export const CreateAdminAccountDtoSchema = z.object({
   role: z.enum(['admin', 'moderator']),
 });
 
-export const CreateAdminDtoSchema = z.object({
+const CreateAdminDtoSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   firstName: z.string().min(1, 'First name is required'),
@@ -76,7 +76,7 @@ export const UpdateAdminDtoSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export const AdminAccountQuerySchema = z.object({
+const AdminAccountQuerySchema = z.object({
   search: z.string().optional(),
   role: z.enum(['admin', 'moderator']).optional(),
   isActive: z.coerce.boolean().optional(),

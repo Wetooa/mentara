@@ -37,7 +37,7 @@ const billingQueryKeys = {
 };
 
 // Subscription Hooks
-export const useSubscription = () => {
+const useSubscription = () => {
   const api = useApi();
 
   // return useBillingQuery(
@@ -75,7 +75,7 @@ export const useSubscriptionPlans = () => {
   );
 };
 
-export const useSubscriptionPlan = (planId: string) => {
+const useSubscriptionPlan = (planId: string) => {
   const api = useApi();
 
   return useQuery({
@@ -187,7 +187,7 @@ export const useCreatePaymentMethod = () => {
   );
 };
 
-export const useAttachPaymentMethod = () => {
+const useAttachPaymentMethod = () => {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -247,7 +247,7 @@ export const useSetDefaultPaymentMethod = () => {
   );
 };
 
-export const useVerifyInsurance = () => {
+const useVerifyInsurance = () => {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -281,7 +281,7 @@ export const useInvoices = (options: BillingListOptions = {}) => {
   );
 };
 
-export const useInvoice = (invoiceId: string) => {
+const useInvoice = (invoiceId: string) => {
   const api = useApi();
 
   return useQuery({
@@ -344,7 +344,7 @@ export const usePayInvoice = () => {
 };
 
 // Payment Intent Hooks (for one-time payments)
-export const useCreatePaymentIntent = () => {
+const useCreatePaymentIntent = () => {
   const api = useApi();
 
   return useBillingMutation(
@@ -356,7 +356,7 @@ export const useCreatePaymentIntent = () => {
   );
 };
 
-export const useConfirmPaymentIntent = () => {
+const useConfirmPaymentIntent = () => {
   const api = useApi();
 
   return useBillingMutation(
@@ -374,7 +374,7 @@ export const useConfirmPaymentIntent = () => {
   );
 };
 
-export const usePaymentIntent = (paymentIntentId: string) => {
+const usePaymentIntent = (paymentIntentId: string) => {
   const api = useApi();
 
   return useQuery({
@@ -412,7 +412,7 @@ export const useCreatePortalSession = () => {
 };
 
 // Coupon Hooks
-export const useValidateCoupon = () => {
+const useValidateCoupon = () => {
   const api = useApi();
 
   return useBillingMutation(
@@ -424,7 +424,7 @@ export const useValidateCoupon = () => {
   );
 };
 
-export const useApplyCoupon = () => {
+const useApplyCoupon = () => {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -448,7 +448,7 @@ export const useApplyCoupon = () => {
 };
 
 // Billing Stats Hook (for admin/analytics)
-export const useBillingStats = (
+const useBillingStats = (
   period: "month" | "quarter" | "year" = "month"
 ) => {
   const api = useApi();
@@ -466,7 +466,7 @@ export const useBillingStats = (
 };
 
 // Tax Calculation Hook
-export const useCalculateTax = () => {
+const useCalculateTax = () => {
   const api = useApi();
 
   return useBillingMutation(
@@ -558,4 +558,4 @@ export const useSubscriptionPreview = () => {
 };
 
 // Export billingQueryKeys for external use
-export { billingQueryKeys };
+;

@@ -10,7 +10,7 @@ import { LIST_OF_QUESTIONNAIRES } from "@/constants/questionnaire/questionnaire-
  * Falls back to static data if API is unavailable
  * GET /pre-assessment/questionnaires
  */
-export function useQuestionnaires() {
+function useQuestionnaires() {
   const api = useApi();
 
   return useQuery({
@@ -36,7 +36,7 @@ export function useQuestionnaires() {
 /**
  * Hook to get a specific questionnaire by ID
  */
-export function useQuestionnaire(questionnaireId: string) {
+function useQuestionnaire(questionnaireId: string) {
   const { data: questionnaires, ...query } = useQuestionnaires();
   
   const questionnaire = questionnaires?.find(q => q.id === questionnaireId);
@@ -52,7 +52,7 @@ export function useQuestionnaire(questionnaireId: string) {
 /**
  * Hook to get questions for a specific questionnaire
  */
-export function useQuestionnaireQuestions(questionnaireId: string) {
+function useQuestionnaireQuestions(questionnaireId: string) {
   const { data: questionnaire, ...query } = useQuestionnaire(questionnaireId);
   
   return {
@@ -64,6 +64,6 @@ export function useQuestionnaireQuestions(questionnaireId: string) {
   };
 }
 
-export type UseQuestionnairesReturn = ReturnType<typeof useQuestionnaires>;
-export type UseQuestionnaireReturn = ReturnType<typeof useQuestionnaire>;
-export type UseQuestionnaireQuestionsReturn = ReturnType<typeof useQuestionnaireQuestions>;
+type UseQuestionnairesReturn = ReturnType<typeof useQuestionnaires>;
+type UseQuestionnaireReturn = ReturnType<typeof useQuestionnaire>;
+type UseQuestionnaireQuestionsReturn = ReturnType<typeof useQuestionnaireQuestions>;

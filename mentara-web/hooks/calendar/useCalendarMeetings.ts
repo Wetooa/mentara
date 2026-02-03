@@ -173,7 +173,7 @@ export function useCalendarMeetings(params: {
 /**
  * Hook for getting meetings for a specific date range
  */
-export function useCalendarMeetingsDateRange(startDate: Date, endDate: Date) {
+function useCalendarMeetingsDateRange(startDate: Date, endDate: Date) {
   const { meetings, isLoading, error, refetch } = useCalendarMeetings()
   
   const filteredMeetings = useMemo(() => {
@@ -194,7 +194,7 @@ export function useCalendarMeetingsDateRange(startDate: Date, endDate: Date) {
 /**
  * Hook for getting meetings for a specific date
  */
-export function useCalendarMeetingsForDate(date: Date) {
+function useCalendarMeetingsForDate(date: Date) {
   const { meetings, isLoading, error, refetch } = useCalendarMeetings()
   
   const dayMeetings = useMemo(() => {

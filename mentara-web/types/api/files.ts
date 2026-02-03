@@ -1,18 +1,18 @@
 // Files DTOs matching backend exactly
 
-export interface FileUploadRequest {
+interface FileUploadRequest {
   file: File;
   metadata?: FileMetadata;
 }
 
-export interface FileMetadata {
+interface FileMetadata {
   type?: "avatar" | "document" | "worksheet" | "message" | "post";
   description?: string;
   associatedId?: string; // ID of related entity (user, worksheet, etc.)
   isPublic?: boolean;
 }
 
-export interface UploadedFile {
+interface UploadedFile {
   id: string;
   filename: string;
   originalName: string;
@@ -32,7 +32,7 @@ export interface UploadedFile {
   updatedAt: string;
 }
 
-export interface FileListParams {
+interface FileListParams {
   type?: "avatar" | "document" | "worksheet" | "message" | "post";
   uploadedBy?: string;
   associatedId?: string;
@@ -43,22 +43,22 @@ export interface FileListParams {
   sortOrder?: "asc" | "desc";
 }
 
-export interface FileListResponse {
+interface FileListResponse {
   files: UploadedFile[];
   total: number;
   hasMore: boolean;
 }
 
-export interface SecureUrlRequest {
+interface SecureUrlRequest {
   expirationMinutes?: number;
 }
 
-export interface SecureUrlResponse {
+interface SecureUrlResponse {
   url: string;
   expiresAt: string;
 }
 
-export interface FileStats {
+interface FileStats {
   totalFiles: number;
   totalSize: number;
   averageSize: number;
@@ -66,7 +66,7 @@ export interface FileStats {
 }
 
 // For therapist application documents
-export interface ApplicationDocument {
+interface ApplicationDocument {
   id: string;
   applicationId: string;
   filename: string;
@@ -77,7 +77,7 @@ export interface ApplicationDocument {
   uploadedAt: string;
 }
 
-export interface ApplicationDocumentListResponse {
+interface ApplicationDocumentListResponse {
   documents: ApplicationDocument[];
   total: number;
 }

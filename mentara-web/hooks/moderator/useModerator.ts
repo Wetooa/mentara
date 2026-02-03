@@ -24,7 +24,7 @@ import type {
 /**
  * Hook for fetching moderator dashboard statistics
  */
-export function useModeratorDashboard() {
+function useModeratorDashboard() {
   const api = useApi();
   
   return useQuery({
@@ -39,7 +39,7 @@ export function useModeratorDashboard() {
 /**
  * Hook for fetching content moderation queue
  */
-export function useContentModerationQueue(params: ContentModerationParams = {}) {
+function useContentModerationQueue(params: ContentModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
@@ -55,7 +55,7 @@ export function useContentModerationQueue(params: ContentModerationParams = {}) 
 /**
  * Hook for moderating content (approve, reject, flag, remove)
  */
-export function useModerateContent() {
+function useModerateContent() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -107,7 +107,7 @@ export function useModerateContent() {
 /**
  * Hook for fetching content moderation reports
  */
-export function useContentModerationReports(params: { type?: string; status?: string; limit?: number; offset?: number } = {}) {
+function useContentModerationReports(params: { type?: string; status?: string; limit?: number; offset?: number } = {}) {
   const api = useApi();
   
   return useQuery({
@@ -122,7 +122,7 @@ export function useContentModerationReports(params: { type?: string; status?: st
 /**
  * Hook for updating moderation report status
  */
-export function useUpdateModerationReport() {
+function useUpdateModerationReport() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -158,7 +158,7 @@ export function useUpdateModerationReport() {
 /**
  * Hook for fetching flagged users for moderation
  */
-export function useFlaggedUsers(params: UserModerationParams = {}) {
+function useFlaggedUsers(params: UserModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
@@ -173,7 +173,7 @@ export function useFlaggedUsers(params: UserModerationParams = {}) {
 /**
  * Hook for moderating users (suspend, warn, flag, clearFlags)
  */
-export function useModerateUser() {
+function useModerateUser() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -222,7 +222,7 @@ export function useModerateUser() {
 /**
  * Hook for fetching user moderation history
  */
-export function useUserModerationHistory(userId: string | null) {
+function useUserModerationHistory(userId: string | null) {
   const api = useApi();
   
   return useQuery({
@@ -238,7 +238,7 @@ export function useUserModerationHistory(userId: string | null) {
 /**
  * Hook for searching audit logs
  */
-export function useAuditLogsSearch(params: AuditLogParams = {}) {
+function useAuditLogsSearch(params: AuditLogParams = {}) {
   const api = useApi();
   
   return useQuery({
@@ -253,7 +253,7 @@ export function useAuditLogsSearch(params: AuditLogParams = {}) {
 /**
  * Hook for fetching audit logs statistics
  */
-export function useAuditLogsStats() {
+function useAuditLogsStats() {
   const api = useApi();
   
   return useQuery({
@@ -268,7 +268,7 @@ export function useAuditLogsStats() {
 /**
  * Hook for fetching system events
  */
-export function useSystemEvents(params: SystemEventParams = {}) {
+function useSystemEvents(params: SystemEventParams = {}) {
   const api = useApi();
   
   return useQuery({
@@ -284,7 +284,7 @@ export function useSystemEvents(params: SystemEventParams = {}) {
 /**
  * Hook for resolving system events
  */
-export function useResolveSystemEvent() {
+function useResolveSystemEvent() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -318,7 +318,7 @@ export function useResolveSystemEvent() {
 /**
  * Hook for fetching moderator profile
  */
-export function useModeratorProfile() {
+function useModeratorProfile() {
   const api = useApi();
   
   return useQuery({
@@ -333,7 +333,7 @@ export function useModeratorProfile() {
 /**
  * Hook for updating moderator profile
  */
-export function useUpdateModeratorProfile() {
+function useUpdateModeratorProfile() {
   const api = useApi();
   const queryClient = useQueryClient();
   
@@ -356,7 +356,7 @@ export function useUpdateModeratorProfile() {
 /**
  * Hook for fetching moderator activity statistics
  */
-export function useModeratorActivity() {
+function useModeratorActivity() {
   const api = useApi();
   
   return useQuery({
@@ -371,7 +371,7 @@ export function useModeratorActivity() {
 /**
  * Hook for prefetching content for moderation
  */
-export function usePrefetchContentForModeration() {
+function usePrefetchContentForModeration() {
   const queryClient = useQueryClient();
   const api = useApi();
   
@@ -398,7 +398,7 @@ export function usePrefetchContentForModeration() {
 /**
  * Hook for bulk moderation actions
  */
-export function useBulkModeration() {
+function useBulkModeration() {
   const api = useApi();
   const queryClient = useQueryClient();
   

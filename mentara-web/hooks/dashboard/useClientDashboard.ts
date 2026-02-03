@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 /**
  * Hook for fetching client-specific dashboard data
  */
-export function useClientDashboard() {
+function useClientDashboard() {
   const api = useApi();
 
   return useQuery({
@@ -33,7 +33,7 @@ export function useClientDashboard() {
 /**
  * Hook for fetching client session summary
  */
-export function useClientSessions() {
+function useClientSessions() {
   const api = useApi();
 
   return useQuery({
@@ -49,7 +49,7 @@ export function useClientSessions() {
 /**
  * Hook for fetching client progress data
  */
-export function useClientProgress() {
+function useClientProgress() {
   const api = useApi();
 
   return useQuery({
@@ -65,7 +65,7 @@ export function useClientProgress() {
 /**
  * Hook for fetching client wellness metrics
  */
-export function useClientWellness() {
+function useClientWellness() {
   const api = useApi();
 
   return useQuery({

@@ -40,7 +40,7 @@ export class ConversationCreatedEvent extends BaseDomainEvent<ConversationCreate
   }
 }
 
-export interface ConversationArchivedData {
+interface ConversationArchivedData {
   conversationId: string;
   archivedBy: string;
   participantIds: string[];
@@ -50,7 +50,7 @@ export interface ConversationArchivedData {
   conversationDuration: number; // in days
 }
 
-export class ConversationArchivedEvent extends BaseDomainEvent<ConversationArchivedData> {
+class ConversationArchivedEvent extends BaseDomainEvent<ConversationArchivedData> {
   constructor(data: ConversationArchivedData, metadata?: EventMetadata) {
     super(data.conversationId, 'Conversation', data, metadata);
   }
@@ -83,7 +83,7 @@ export class MessageReadEvent extends BaseDomainEvent<MessageReadData> {
   }
 }
 
-export interface MessageDeliveredData {
+interface MessageDeliveredData {
   messageId: string;
   conversationId: string;
   deliveredTo: string;
@@ -92,7 +92,7 @@ export interface MessageDeliveredData {
   deliveryStatus: 'delivered' | 'failed' | 'pending';
 }
 
-export class MessageDeliveredEvent extends BaseDomainEvent<MessageDeliveredData> {
+class MessageDeliveredEvent extends BaseDomainEvent<MessageDeliveredData> {
   constructor(data: MessageDeliveredData, metadata?: EventMetadata) {
     super(data.messageId, 'Message', data, metadata);
   }

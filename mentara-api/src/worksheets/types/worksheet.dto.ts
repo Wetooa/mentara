@@ -83,7 +83,7 @@ export interface WorksheetSubmissionCreateInputDto {
 }
 
 // Worksheet submission update DTO
-export interface WorksheetSubmissionUpdateInputDto {
+interface WorksheetSubmissionUpdateInputDto {
   responses?: {
     questionId?: string;
     questionText?: string;
@@ -107,7 +107,7 @@ export interface WorksheetSubmissionUpdateInputDto {
 }
 
 // Response DTOs
-export interface WorksheetResponseDto {
+interface WorksheetResponseDto {
   id: string;
   title: string;
   description: string;
@@ -148,7 +148,7 @@ export interface WorksheetResponseDto {
   };
 }
 
-export interface WorksheetSubmissionResponseDto {
+interface WorksheetSubmissionResponseDto {
   id: string;
   worksheetId: string;
   worksheet: {
@@ -201,7 +201,7 @@ export interface WorksheetSubmissionResponseDto {
 }
 
 // Query DTOs
-export interface WorksheetQueryDto {
+interface WorksheetQueryDto {
   type?: 'assignment' | 'exercise' | 'reflection' | 'assessment' | 'homework' | 'journal';
   difficulty?: 'easy' | 'medium' | 'hard';
   category?: string;
@@ -219,7 +219,7 @@ export interface WorksheetQueryDto {
   offset?: number;
 }
 
-export interface WorksheetSubmissionQueryDto {
+interface WorksheetSubmissionQueryDto {
   worksheetId?: string;
   clientId?: string;
   status?: 'not_started' | 'in_progress' | 'completed' | 'overdue' | 'graded';
@@ -234,7 +234,7 @@ export interface WorksheetSubmissionQueryDto {
 }
 
 // Statistics DTOs
-export interface WorksheetStatsDto {
+interface WorksheetStatsDto {
   totalWorksheets: number;
   templatesCount: number;
   assignmentsCount: number;

@@ -1010,7 +1010,7 @@ export function getCompletedSessions(communityId?: string): GroupSession[] {
   );
 }
 
-export function getUserSessions(
+function getUserSessions(
   userId: string,
   status?: SessionStatus
 ): GroupSession[] {

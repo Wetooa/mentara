@@ -271,4 +271,3 @@ export const OmniSearchBar: React.FC<OmniSearchBarProps> = ({
   );
 };
 
-export default OmniSearchBar;

@@ -9,7 +9,7 @@ import { useEffect } from 'react';
  * Combined messaging hook that maintains backward compatibility
  * Renamed to avoid conflict with the main useMessaging hook
  */
-export function useCombinedMessaging() {
+function useCombinedMessaging() {
   const contacts = useContacts();
   const conversations = useConversations();
   const webSocket = useMessagingWebSocket();
@@ -66,11 +66,11 @@ export function useCombinedMessaging() {
 }
 
 // Export individual hooks for specific use cases
-export { useContacts } from './useContacts';
-export { useConversations } from './useConversations';
-export { useMessagingWebSocket } from './useWebSocket';
+;
+;
+;
 // Removed useRealtimeMessaging - now using simplified useMessaging hook
-export { useSimpleMessaging } from './useSimpleMessaging';
+;
 
 // Export the new conversation starter hooks
-export { useStartConversation, useStartConversationSimple } from './useStartConversation';
+export {  useStartConversationSimple } from './useStartConversation';

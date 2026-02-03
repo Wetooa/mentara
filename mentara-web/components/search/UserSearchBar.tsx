@@ -32,7 +32,7 @@ import { RecentSearches } from "./RecentSearches";
 import { logger } from "@/lib/logger";
 // import { ConnectionStatus, useGlobalConnectionStatus } from '@/components/realtime/ConnectionStatus';
 
-export interface User {
+interface User {
   id: string;
   firstName: string;
   lastName: string;
@@ -75,7 +75,7 @@ const getRoleColor = (role: string) => {
   }
 };
 
-export const UserSearchBar: React.FC<UserSearchBarProps> = ({
+const UserSearchBar: React.FC<UserSearchBarProps> = ({
   placeholder = "Search users...",
   onUserSelect,
   roleFilter = "all",
@@ -377,4 +377,3 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   );
 };
 
-export default UserSearchBar;

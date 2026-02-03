@@ -1,4 +1,4 @@
-export { DatabaseTestSetup } from './database-test.setup';
+;
 export { TestDataFactory } from './test-data.factory';
 
 // Mock utilities
@@ -113,10 +113,10 @@ export const TEST_EMAILS = {
 };
 
 // Helper functions for tests
-export const delay = (ms: number) =>
+const delay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export const expectToThrowAsync = async (
+const expectToThrowAsync = async (
   asyncFn: () => Promise<any>,
   expectedError: any,
 ) => {
@@ -129,7 +129,7 @@ export const expectToThrowAsync = async (
   expect(error).toBeInstanceOf(expectedError);
 };
 
-export const waitForCondition = async (
+const waitForCondition = async (
   condition: () => boolean,
   timeoutMs: number = 5000,
   intervalMs: number = 100,

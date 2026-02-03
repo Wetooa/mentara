@@ -8,7 +8,7 @@ import type { AuditLog, AuditLogParams } from '@/types/api';
 /**
  * Hook for searching audit logs
  */
-export function useModeratorAuditLogs(params: AuditLogParams = {}) {
+function useModeratorAuditLogs(params: AuditLogParams = {}) {
   const api = useApi();
   
   return useQuery({
@@ -29,7 +29,7 @@ export function useModeratorAuditLogs(params: AuditLogParams = {}) {
 /**
  * Hook for fetching audit logs statistics
  */
-export function useModeratorAuditLogsStats() {
+function useModeratorAuditLogsStats() {
   const api = useApi();
   
   return useQuery({

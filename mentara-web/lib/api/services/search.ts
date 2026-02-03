@@ -15,7 +15,7 @@ export interface GlobalSearchResponse {
   messages?: any[];
 }
 
-export interface UserSearchParams {
+interface UserSearchParams {
   query: string;
   role?: string;
   page?: number;

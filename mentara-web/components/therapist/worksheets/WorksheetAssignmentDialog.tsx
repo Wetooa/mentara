@@ -31,7 +31,7 @@ interface WorksheetAssignmentDialogProps {
   onSuccess?: () => void;
 }
 
-export function WorksheetAssignmentDialog({ 
+function WorksheetAssignmentDialog({ 
   client, 
   trigger,
   onSuccess 

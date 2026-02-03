@@ -5,14 +5,14 @@
 /**
  * Get current time in UTC
  */
-export function getCurrentUTCTime(): Date {
+function getCurrentUTCTime(): Date {
   return new Date();
 }
 
 /**
  * Format a date in UTC (simple format)
  */
-export function formatUTCDate(
+function formatUTCDate(
   date: Date | string,
   format: string = "yyyy-MM-dd"
 ): string {
@@ -54,7 +54,7 @@ export function formatUTCDate(
 /**
  * Check if a date is in the past (UTC time)
  */
-export function isPastUTC(date: Date | string): boolean {
+function isPastUTC(date: Date | string): boolean {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
   return dateObj < now;
@@ -64,7 +64,7 @@ export function isPastUTC(date: Date | string): boolean {
  * Check if booking can be made (respects minimum advance time in UTC)
  * Default: 24 hours (1 day) in advance to align with cancellation policy
  */
-export function canBookInAdvanceUTC(
+function canBookInAdvanceUTC(
   date: Date | string,
   minAdvanceHours: number = 24
 ): boolean {
@@ -81,7 +81,7 @@ export function canBookInAdvanceUTC(
  * Get the minimum advance booking date (date that meets the minimum advance booking requirement)
  * Default: 0.5 hours from now (matching backend slot-generator.service.ts minAdvanceBooking)
  */
-export function getMinimumAdvanceBookingDate(
+function getMinimumAdvanceBookingDate(
   minAdvanceHours: number = 0.5
 ): Date {
   const now = new Date();
@@ -91,14 +91,14 @@ export function getMinimumAdvanceBookingDate(
 /**
  * Format time for display (using user's local timezone for display)
  */
-export function formatForDisplay(date: Date | string): string {
+function formatForDisplay(date: Date | string): string {
   return formatUTCDate(date, "MMM d, yyyy h:mm a");
 }
 
 /**
  * Format date for API calls (ISO string UTC)
  */
-export function formatForApi(date: Date | string): string {
+function formatForApi(date: Date | string): string {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   return dateObj.toISOString();
 }

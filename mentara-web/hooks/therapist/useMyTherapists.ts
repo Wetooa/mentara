@@ -81,4 +81,3 @@ export function useDisconnectTherapist() {
   };
 }
 
-export default useMyTherapists;

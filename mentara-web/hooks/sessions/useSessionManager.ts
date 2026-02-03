@@ -214,7 +214,7 @@ export function useSessionManager(options: SessionManagerOptions = {}) {
 /**
  * Higher-order component to wrap components that need session management
  */
-export function withSessionManager<T extends object>(
+function withSessionManager<T extends object>(
   Component: React.ComponentType<T>,
   options?: SessionManagerOptions
 ) {
@@ -227,7 +227,7 @@ export function withSessionManager<T extends object>(
 /**
  * Hook for role-sensitive operations
  */
-export function useRoleProtectedOperation() {
+function useRoleProtectedOperation() {
   const { validateSessionForOperation, hasRoleAccess } = useSessionManager();
 
   const executeWithRoleCheck = useCallback(

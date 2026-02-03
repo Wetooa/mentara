@@ -4,7 +4,7 @@ import { UserRole } from "@/lib/auth";
 /**
  * Return type for the useRole hook
  */
-export interface UseRoleReturn {
+interface UseRoleReturn {
   /** Whether the current user has client role */
   isUser: boolean;
   /** Whether the current user has therapist role */
@@ -60,7 +60,7 @@ export interface UseRoleReturn {
  * - TypeScript support with proper role typing
  * - Used extensively in layout-based route protection
  */
-export function useRole(): UseRoleReturn {
+function useRole(): UseRoleReturn {
   const { user } = useAuth();
 
   /** Whether the current user has client role */

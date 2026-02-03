@@ -1,5 +1,5 @@
 // Community DTOs matching backend exactly
-export enum ActiveCommunities {}
+enum ActiveCommunities {}
 
 export interface Community {
   id: string;
@@ -92,7 +92,7 @@ export interface CommentHeart {
 
 // Reply interface removed - replies are now handled as nested comments via parentId
 
-export interface Membership {
+interface Membership {
   id: string;
   communityId: string;
   userId: string;
@@ -122,7 +122,7 @@ export interface CommunityStats {
   totalComments: number;
 }
 
-export interface CreatePostRequest {
+interface CreatePostRequest {
   title: string;
   content: string;
   roomId: string;

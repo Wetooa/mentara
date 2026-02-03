@@ -34,7 +34,7 @@ interface BillingIntegrationProps {
   className?: string;
 }
 
-export function BillingIntegration({
+function BillingIntegration({
   compactMode = false,
   className
 }: BillingIntegrationProps) {

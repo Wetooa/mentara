@@ -127,16 +127,16 @@ export const ReviewIdParamSchema = z.object({
   id: z.string().uuid('Invalid review ID format'),
 });
 
-export const TherapistIdParamSchema = z.object({
+const TherapistIdParamSchema = z.object({
   therapistId: z.string().uuid('Invalid therapist ID format'),
 });
 
-export const MeetingIdParamSchema = z.object({
+const MeetingIdParamSchema = z.object({
   meetingId: z.string().uuid('Invalid meeting ID format'),
 });
 
 // Review interaction validation
-export const ReviewHelpfulDtoSchema = z
+const ReviewHelpfulDtoSchema = z
   .object({
     action: z.enum(['helpful', 'unhelpful', 'remove'] as const, {
       message: 'Invalid action',
@@ -144,7 +144,7 @@ export const ReviewHelpfulDtoSchema = z
   })
   .strict();
 
-export const ReviewReportDtoSchema = z
+const ReviewReportDtoSchema = z
   .object({
     reason: z.enum(
       ['inappropriate', 'spam', 'fake', 'harassment', 'other'] as const,

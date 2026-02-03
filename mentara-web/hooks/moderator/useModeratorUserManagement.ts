@@ -9,7 +9,7 @@ import type { User, UserModerationParams, ModerateUserRequest } from '@/types/ap
 /**
  * Hook for fetching flagged users for moderation
  */
-export function useModeratorFlaggedUsers(params: UserModerationParams = {}) {
+function useModeratorFlaggedUsers(params: UserModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
@@ -30,7 +30,7 @@ export function useModeratorFlaggedUsers(params: UserModerationParams = {}) {
 /**
  * Hook for fetching user moderation history
  */
-export function useModeratorUserHistory(userId: string | null) {
+function useModeratorUserHistory(userId: string | null) {
   const api = useApi();
   
   return useQuery({
@@ -46,7 +46,7 @@ export function useModeratorUserHistory(userId: string | null) {
 /**
  * Hook for moderating users (suspend, warn, flag, clearFlags)
  */
-export function useModerateUser() {
+function useModerateUser() {
   const api = useApi();
   const queryClient = useQueryClient();
   

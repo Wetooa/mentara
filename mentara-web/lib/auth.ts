@@ -1,7 +1,7 @@
 // Types
 export type UserRole = "client" | "therapist" | "moderator" | "admin";
 
-export interface AuthUser {
+interface AuthUser {
   id: string;
   email: string;
   role: UserRole;

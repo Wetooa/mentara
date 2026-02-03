@@ -9,7 +9,7 @@ export * from './comment.dto';
 export type {
   CommentCreateInputDto,
   CommentUpdateInputDto,
-  CommentResponseDto,
-  CommentQueryDto,
-  CommentInteractionDto,
+  
+  
+  
 } from './comment.dto';

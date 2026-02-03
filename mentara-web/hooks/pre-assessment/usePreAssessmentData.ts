@@ -12,7 +12,7 @@ import {
  * React Query hook for fetching user's pre-assessment
  * GET /pre-assessment
  */
-export function useUserPreAssessment() {
+function useUserPreAssessment() {
   const api = useApi();
 
   return useQuery({
@@ -41,7 +41,7 @@ export function useUserPreAssessment() {
  * React Query hook for creating a pre-assessment
  * POST /pre-assessment
  */
-export function useCreatePreAssessment() {
+function useCreatePreAssessment() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -64,7 +64,7 @@ export function useCreatePreAssessment() {
  * React Query hook for updating a pre-assessment
  * PUT /pre-assessment
  */
-export function useUpdatePreAssessment() {
+function useUpdatePreAssessment() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -87,7 +87,7 @@ export function useUpdatePreAssessment() {
  * React Query hook for deleting user's pre-assessment
  * DELETE /pre-assessment
  */
-export function useDeletePreAssessment() {
+function useDeletePreAssessment() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -124,8 +124,8 @@ export function useHasPreAssessment() {
   };
 }
 
-export type UseUserPreAssessmentReturn = ReturnType<typeof useUserPreAssessment>;
-export type UseCreatePreAssessmentReturn = ReturnType<typeof useCreatePreAssessment>;
-export type UseUpdatePreAssessmentReturn = ReturnType<typeof useUpdatePreAssessment>;
-export type UseDeletePreAssessmentReturn = ReturnType<typeof useDeletePreAssessment>;
-export type UseHasPreAssessmentReturn = ReturnType<typeof useHasPreAssessment>;
+type UseUserPreAssessmentReturn = ReturnType<typeof useUserPreAssessment>;
+type UseCreatePreAssessmentReturn = ReturnType<typeof useCreatePreAssessment>;
+type UseUpdatePreAssessmentReturn = ReturnType<typeof useUpdatePreAssessment>;
+type UseDeletePreAssessmentReturn = ReturnType<typeof useDeletePreAssessment>;
+type UseHasPreAssessmentReturn = ReturnType<typeof useHasPreAssessment>;

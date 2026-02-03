@@ -33,7 +33,7 @@ import { useMyTherapists, useDisconnectTherapist } from "@/hooks/therapist/useMy
 import { Skeleton } from "@/components/ui/skeleton";
 import { TherapistRecommendation } from "@/types/api/therapist";
 
-export interface ActiveTherapistCardProps {
+interface ActiveTherapistCardProps {
   therapist: TherapistRecommendation;
   onViewProfile: (therapistId: string) => void;
   onMessage: (therapistId: string) => void;

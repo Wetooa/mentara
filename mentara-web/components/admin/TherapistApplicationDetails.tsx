@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useUpdateTherapistApplicationStatus } from "@/hooks/therapist/useTherapistApplications";
 import { FilePreviewModal } from "./FilePreviewModal";
 // Backend-specific type that matches actual API response
-export interface TherapistApplicationResponse {
+interface TherapistApplicationResponse {
   id: string;
   status: "APPROVED" | "REJECTED" | "PENDING";
   submittedAt: string;

@@ -126,7 +126,7 @@ export function formatPhoneNumber(phone: string): string {
 /**
  * Get crisis message template by ID
  */
-export function getCrisisTemplate(id: string): CrisisMessageTemplate | undefined {
+function getCrisisTemplate(id: string): CrisisMessageTemplate | undefined {
   return CRISIS_MESSAGE_TEMPLATES.find((t) => t.id === id);
 }
 

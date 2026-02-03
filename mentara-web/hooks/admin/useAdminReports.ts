@@ -3,7 +3,7 @@ import { useApi } from "@/lib/api";
 import { toast } from "sonner";
 
 // Query Keys
-export const adminReportsQueryKeys = {
+const adminReportsQueryKeys = {
   all: ['admin', 'reports'] as const,
   lists: () => [...adminReportsQueryKeys.all, 'list'] as const,
   list: (filters: any) => [...adminReportsQueryKeys.lists(), filters] as const,
@@ -45,7 +45,7 @@ export function useAdminReports(filters: ReportFilters = {}) {
   });
 }
 
-export function useAdminReportDetails(reportId: string | null) {
+function useAdminReportDetails(reportId: string | null) {
   const api = useApi();
 
   return useQuery({
@@ -56,7 +56,7 @@ export function useAdminReportDetails(reportId: string | null) {
   });
 }
 
-export function useAdminReportsOverview() {
+function useAdminReportsOverview() {
   const api = useApi();
 
   return useQuery({
@@ -66,7 +66,7 @@ export function useAdminReportsOverview() {
   });
 }
 
-export function useUpdateReportStatus() {
+function useUpdateReportStatus() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -91,7 +91,7 @@ export function useUpdateReportStatus() {
   });
 }
 
-export function useReportAction() {
+function useReportAction() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -121,7 +121,7 @@ export function useReportAction() {
 }
 
 // Specific action hooks for easier usage
-export function useBanUser() {
+function useBanUser() {
   const reportAction = useReportAction();
   
   return {
@@ -131,7 +131,7 @@ export function useBanUser() {
   };
 }
 
-export function useRestrictUser() {
+function useRestrictUser() {
   const reportAction = useReportAction();
   
   return {
@@ -141,7 +141,7 @@ export function useRestrictUser() {
   };
 }
 
-export function useDeleteContent() {
+function useDeleteContent() {
   const reportAction = useReportAction();
   
   return {
@@ -151,7 +151,7 @@ export function useDeleteContent() {
   };
 }
 
-export function useDismissReport() {
+function useDismissReport() {
   const reportAction = useReportAction();
   
   return {

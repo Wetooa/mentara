@@ -1,6 +1,6 @@
 import { UserRole } from '../../types/enums';
 
-export interface AdminUpdateUserDto {
+interface AdminUpdateUserDto {
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -25,7 +25,7 @@ export interface AdminUserQuery {
   limit?: number;
 }
 
-export interface AdminUpdateTherapistDto {
+interface AdminUpdateTherapistDto {
   status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
   areasOfExpertise?: string[];
   hourlyRate?: number;
@@ -41,7 +41,7 @@ export interface AdminUpdateTherapistDto {
   profileSummary?: string;
 }
 
-export interface AdminTherapistQuery {
+interface AdminTherapistQuery {
   search?: string;
   status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
   specialties?: string[];
@@ -52,7 +52,7 @@ export interface AdminTherapistQuery {
   limit?: number;
 }
 
-export interface CreateAdminAccountDto {
+interface CreateAdminAccountDto {
   email: string;
   password: string;
   firstName: string;
@@ -60,7 +60,7 @@ export interface CreateAdminAccountDto {
   role: 'admin' | 'moderator';
 }
 
-export interface CreateAdminDto {
+interface CreateAdminDto {
   userId: string;
   permissions: string[];
   adminLevel?: string;
@@ -79,7 +79,7 @@ export interface AdminResponseDto {
   updatedAt: Date;
 }
 
-export interface AdminAccountQuery {
+interface AdminAccountQuery {
   search?: string;
   role?: 'admin' | 'moderator';
   isActive?: boolean;

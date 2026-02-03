@@ -4,7 +4,7 @@
  */
 
 // Dashboard response types
-export interface ModeratorDashboardResponseDto {
+interface ModeratorDashboardResponseDto {
   pendingReports: number;
   resolvedReports: number;
   totalCommunities: number;
@@ -19,7 +19,7 @@ export interface ModeratorDashboardResponseDto {
   };
 }
 
-export interface AdminDashboardResponseDto {
+interface AdminDashboardResponseDto {
   totalUsers: number;
   totalTherapists: number;
   totalClients: number;
@@ -39,7 +39,7 @@ export interface AdminDashboardResponseDto {
   };
 }
 
-export interface TherapistDashboardResponseDto {
+interface TherapistDashboardResponseDto {
   totalClients: number;
   upcomingAppointments: number;
   completedSessions: number;
@@ -50,7 +50,7 @@ export interface TherapistDashboardResponseDto {
 }
 
 // Billing types
-export interface CreatePaymentMethodDto {
+interface CreatePaymentMethodDto {
   type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET' | 'GCASH' | 'MAYA' | 'INSURANCE';
   nickname?: string;
   
@@ -109,7 +109,7 @@ export enum UserRole {
 }
 
 // Meeting-related enums
-export enum MeetingStatus {
+enum MeetingStatus {
   SCHEDULED = 'scheduled',
   ONGOING = 'ongoing', 
   COMPLETED = 'completed',
@@ -117,14 +117,14 @@ export enum MeetingStatus {
   MISSED = 'missed',
 }
 
-export enum MeetingType {
+enum MeetingType {
   INITIAL_CONSULTATION = 'initial_consultation',
   THERAPY_SESSION = 'therapy_session',
   FOLLOW_UP = 'follow_up',
   EMERGENCY = 'emergency',
 }
 
-export enum MeetingDuration {
+enum MeetingDuration {
   THIRTY = 30,
   FORTY_FIVE = 45,
   SIXTY = 60,
@@ -132,7 +132,7 @@ export enum MeetingDuration {
 }
 
 // Review-related enums
-export enum ReviewStatus {
+enum ReviewStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
@@ -140,7 +140,7 @@ export enum ReviewStatus {
 }
 
 // Application status enum
-export enum ApplicationStatus {
+enum ApplicationStatus {
   PENDING = 'pending',
   UNDER_REVIEW = 'under_review',
   APPROVED = 'approved',
@@ -149,7 +149,7 @@ export enum ApplicationStatus {
 }
 
 // Session formats
-export enum SessionFormat {
+enum SessionFormat {
   IN_PERSON = 'in_person',
   VIDEO_CALL = 'video_call',
   PHONE_CALL = 'phone_call',
@@ -158,14 +158,14 @@ export enum SessionFormat {
 }
 
 // OTP types
-export enum OtpType {
+enum OtpType {
   REGISTRATION = 'registration',
   PASSWORD_RESET = 'password_reset',
   LOGIN_VERIFICATION = 'login_verification',
 }
 
 // Worksheet status
-export enum WorksheetStatus {
+enum WorksheetStatus {
   ASSIGNED = 'ASSIGNED',
   SUBMITTED = 'SUBMITTED',
   REVIEWED = 'REVIEWED',
@@ -186,14 +186,14 @@ export interface User {
 }
 
 // Therapist specialization
-export interface TherapistSpecialization {
+interface TherapistSpecialization {
   illness: string;
   expertiseLevel: number; // 1-5 scale
   successRate?: number; // 0-100 percentage
 }
 
 // Community type
-export interface Community {
+interface Community {
   id: string;
   name: string;
   description: string;
@@ -205,7 +205,7 @@ export interface Community {
 }
 
 // Post type - Updated to match backend response structure
-export interface Post {
+interface Post {
   id: string;
   title: string;
   content: string;
@@ -248,7 +248,7 @@ export interface Post {
 }
 
 // Comment type
-export interface Comment {
+interface Comment {
   id: string;
   content: string;
   authorId: string;
@@ -261,7 +261,7 @@ export interface Comment {
 }
 
 // Worksheet type
-export interface Worksheet {
+interface Worksheet {
   id: string;
   title: string;
   description: string;
@@ -275,7 +275,7 @@ export interface Worksheet {
 }
 
 // Pre-assessment type
-export interface PreAssessment {
+interface PreAssessment {
   id: string;
   clientId: string;
   questionnaires: string[];

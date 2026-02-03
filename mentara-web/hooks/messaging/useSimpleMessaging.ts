@@ -11,7 +11,7 @@ import type { Message, Conversation } from '@/components/messages/types';
  * for easy use in message components like MessageChatArea
  * Now uses the new simplified useMessaging hook
  */
-export function useSimpleMessaging(params: {
+function useSimpleMessaging(params: {
   conversationId?: string;
   enableRealtime?: boolean;
 } = {}) {

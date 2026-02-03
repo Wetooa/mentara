@@ -62,7 +62,7 @@ const defaultConfig: PushNotificationConfig = {
   vibration: true,
 };
 
-export function usePushNotifications() {
+function usePushNotifications() {
   const api = useApi();
   const { user, accessToken } = useAuth();
   const queryClient = useQueryClient();

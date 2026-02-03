@@ -1,6 +1,6 @@
 // Posts DTOs matching backend exactly
 
-export interface PostCreateInputDto {
+interface PostCreateInputDto {
   title: string;
   content: string;
   roomId: string;
@@ -8,7 +8,7 @@ export interface PostCreateInputDto {
   isAnonymous?: boolean;
 }
 
-export interface PostUpdateInputDto {
+interface PostUpdateInputDto {
   title?: string;
   content?: string;
   tags?: string[];
@@ -76,7 +76,7 @@ export interface Comment {
   updatedAt: string;
 }
 
-export interface CommentHeart {
+interface CommentHeart {
   id: string;
   commentId: string;
   userId: string;
@@ -89,7 +89,7 @@ export interface CommentHeart {
   createdAt: string;
 }
 
-export interface PostListParams {
+interface PostListParams {
   roomId?: string;
   authorId?: string;
   tags?: string[];
@@ -99,17 +99,17 @@ export interface PostListParams {
   isAnonymous?: boolean;
 }
 
-export interface PostListResponse {
+interface PostListResponse {
   posts: Post[];
   total: number;
   hasMore: boolean;
 }
 
-export interface HeartPostResponse {
+interface HeartPostResponse {
   isHearted: boolean;
   heartCount: number;
 }
 
-export interface CheckHeartedResponse {
+interface CheckHeartedResponse {
   isHearted: boolean;
 }

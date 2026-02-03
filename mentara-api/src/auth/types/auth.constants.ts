@@ -13,29 +13,29 @@ export const ALLOWED_DOCUMENT_MIME_TYPES = [
 ] as const;
 
 // Maximum file size for document uploads (in bytes) - 10MB
-export const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
+const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
 
 // Required document types for therapist applications
-export const REQUIRED_DOCUMENT_TYPES = [
+const REQUIRED_DOCUMENT_TYPES = [
   'license',
   'diploma'
 ] as const;
 
 // Optional document types for therapist applications
-export const OPTIONAL_DOCUMENT_TYPES = [
+const OPTIONAL_DOCUMENT_TYPES = [
   'certification',
   'insurance',
   'reference_letter'
 ] as const;
 
 // All document types
-export const ALL_DOCUMENT_TYPES = [
+const ALL_DOCUMENT_TYPES = [
   ...REQUIRED_DOCUMENT_TYPES,
   ...OPTIONAL_DOCUMENT_TYPES
 ] as const;
 
 // Document type mapping for display names
-export const DOCUMENT_TYPE_MAPPING = {
+const DOCUMENT_TYPE_MAPPING = {
   license: 'Professional License',
   diploma: 'Degree/Diploma',
   certification: 'Professional Certification',
@@ -44,7 +44,7 @@ export const DOCUMENT_TYPE_MAPPING = {
 } as const;
 
 // Auth-related error codes
-export const AUTH_ERROR_CODES = {
+const AUTH_ERROR_CODES = {
   INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
   EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
   ACCOUNT_SUSPENDED: 'ACCOUNT_SUSPENDED',
@@ -57,7 +57,7 @@ export const AUTH_ERROR_CODES = {
 } as const;
 
 // Session constants
-export const SESSION_CONSTANTS = {
+const SESSION_CONSTANTS = {
   ACCESS_TOKEN_EXPIRY: '15m',
   REFRESH_TOKEN_EXPIRY: '7d', 
   OTP_EXPIRY_MINUTES: 10,
@@ -66,7 +66,7 @@ export const SESSION_CONSTANTS = {
 } as const;
 
 // Rate limiting constants  
-export const RATE_LIMIT_CONSTANTS = {
+const RATE_LIMIT_CONSTANTS = {
   LOGIN_ATTEMPTS: 5,
   OTP_REQUESTS: 3,
   PASSWORD_RESET_REQUESTS: 3,

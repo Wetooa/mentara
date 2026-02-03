@@ -14,6 +14,6 @@ export type {
   SaveMeetingSessionDto,
   VideoRoomResponse,
   VideoCallStatus,
-  MeetingResponseDto,
-  MeetingQueryDto,
+  
+  
 } from './meeting.dto';

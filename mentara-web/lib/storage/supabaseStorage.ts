@@ -3,7 +3,7 @@
  * Direct API calls without Supabase JS client dependency
  */
 
-export interface SupabaseStorageConfig {
+interface SupabaseStorageConfig {
   url: string;
   anonKey: string;
 }
@@ -160,7 +160,7 @@ export async function uploadFile(
 /**
  * Delete file from Supabase Storage
  */
-export async function deleteFile(
+async function deleteFile(
   bucket: string,
   path: string
 ): Promise<void> {
@@ -183,7 +183,7 @@ export async function deleteFile(
 /**
  * Get signed URL for private file access
  */
-export async function getSignedUrl(
+async function getSignedUrl(
   bucket: string,
   path: string,
   expiresIn: number = 3600

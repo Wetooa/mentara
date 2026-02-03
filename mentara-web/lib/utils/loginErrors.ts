@@ -122,7 +122,7 @@ export function mapLoginError(error: unknown): LoginErrorResult {
 /**
  * Get a simplified error message for toast notifications
  */
-export function getSimpleErrorMessage(error: unknown): string {
+function getSimpleErrorMessage(error: unknown): string {
   const mapped = mapLoginError(error);
   return mapped.message;
 }
@@ -130,7 +130,7 @@ export function getSimpleErrorMessage(error: unknown): string {
 /**
  * Check if an error is a login-related authentication error
  */
-export function isLoginError(error: unknown): boolean {
+function isLoginError(error: unknown): boolean {
   if (error instanceof Error && 'response' in error) {
     const axiosError = error as AxiosError;
     return axiosError.response?.status === 401;

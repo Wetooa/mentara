@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { useCallNotifications } from '@/hooks/video-calls/useCallNotifications';
 import type { IncomingCallNotificationProps } from '@/types/api/video-calls';
 
-export function IncomingCallNotification({
+function IncomingCallNotification({
   incomingCall,
   onAccept,
   onDecline,
@@ -237,7 +237,7 @@ export function IncomingCallNotificationContainer() {
 }
 
 // Optional: Global notification container component that can be used in layout
-export function VideoCallNotificationContainer() {
+function VideoCallNotificationContainer() {
   return (
     <div 
       id="video-call-notifications" 

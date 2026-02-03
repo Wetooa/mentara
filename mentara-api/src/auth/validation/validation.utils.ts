@@ -61,12 +61,12 @@ export function formatValidationErrors(
 }
 
 // Check if validation has errors
-export function hasValidationErrors<T>(result: ValidationResult<T>): boolean {
+function hasValidationErrors<T>(result: ValidationResult<T>): boolean {
   return !result.success && !!result.errors && result.errors.length > 0;
 }
 
 // Get first validation error message
-export function getFirstValidationError<T>(
+function getFirstValidationError<T>(
   result: ValidationResult<T>,
 ): string | undefined {
   if (!result.errors || result.errors.length === 0) {

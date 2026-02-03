@@ -5,7 +5,7 @@
  * @param sessionLength - String like "60 minutes", "45 min", "1 hour"
  * @returns Number of minutes
  */
-export function sessionLengthToMinutes(sessionLength: string): number {
+function sessionLengthToMinutes(sessionLength: string): number {
   if (!sessionLength) return 60; // Default to 60 minutes
 
   // Extract number from string
@@ -28,7 +28,7 @@ export function sessionLengthToMinutes(sessionLength: string): number {
  * @param sessionDuration - Number of minutes
  * @returns Formatted string like "60 minutes"
  */
-export function minutesToSessionLength(sessionDuration: number): string {
+function minutesToSessionLength(sessionDuration: number): string {
   if (sessionDuration >= 60 && sessionDuration % 60 === 0) {
     const hours = sessionDuration / 60;
     return hours === 1 ? '1 hour' : `${hours} hours`;

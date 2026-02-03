@@ -107,15 +107,15 @@ const ROLE_PERMISSIONS = {
 };
 
 // Decorator to define required permissions
-export const RequirePermissions = (...permissions: string[]) =>
+const RequirePermissions = (...permissions: string[]) =>
   Reflect.defineMetadata('permissions', permissions, Reflect);
 
 // Decorator to define minimum role required
-export const RequireRole = (role: keyof typeof ROLE_HIERARCHY) =>
+const RequireRole = (role: keyof typeof ROLE_HIERARCHY) =>
   Reflect.defineMetadata('min_role', role, Reflect);
 
 // Decorator to allow resource owner access
-export const AllowResourceOwner = (resourceIdParam: string = 'id') =>
+const AllowResourceOwner = (resourceIdParam: string = 'id') =>
   Reflect.defineMetadata('resource_owner_param', resourceIdParam, Reflect);
 
 @Injectable()

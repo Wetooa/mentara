@@ -11,7 +11,7 @@ import { Reflector } from '@nestjs/core';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 
 // Decorator for requiring community membership
-export const RequireCommunityMembership = () =>
+const RequireCommunityMembership = () =>
   SetMetadata('require_community_membership', true);
 
 // Decorator for requiring room access (community membership + room visibility)
@@ -22,7 +22,7 @@ export const RequirePostingRole = () =>
   SetMetadata('require_posting_role', true);
 
 // Decorator for requiring moderator role in community context
-export const RequireCommunityModerator = () =>
+const RequireCommunityModerator = () =>
   SetMetadata('require_community_moderator', true);
 
 @Injectable()

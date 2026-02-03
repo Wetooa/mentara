@@ -11,7 +11,7 @@ export interface UseReportPostParams {
   content?: string;
 }
 
-export interface UseReportCommentParams {
+interface UseReportCommentParams {
   commentId: string;
   reason: string;
   content?: string;
@@ -62,7 +62,7 @@ export function useReportPost() {
 /**
  * Hook for reporting community comments
  */
-export function useReportComment() {
+function useReportComment() {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -104,7 +104,7 @@ export function useReportComment() {
 /**
  * Combined hook that provides both post and comment reporting functionality
  */
-export function useCommunityReporting() {
+function useCommunityReporting() {
   const reportPost = useReportPost();
   const reportComment = useReportComment();
 
