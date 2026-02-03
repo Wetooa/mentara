@@ -1,17 +1,1096 @@
-// generator client {
-//   provider        = "prisma-client-js"
-//   previewFeatures = ["prismaSchemaFolder"]
-//   binaryTargets   = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
-// }
-
 generator client {
-  provider        = "prisma-client" // or `prisma-client-js`
-  output          = "../generated/prisma"
-  engineType      = "client" // enable Prisma ORM without Rust
+  provider   = "prisma-client"
+  output     = "../generated/prisma"
+  engineType = "client"
 }
 
 datasource db {
-  provider  = "postgresql"
-  // url       = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+}
+
+model Admin {
+  userId      String      @id @unique
+  permissions String[]
+  adminLevel  String      @default("admin")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime
+  User        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Therapist   Therapist[]
+
+  @@index([userId])
+}
+
+model ChatbotMessage {
+  id                   String             @id
+  sessionId            String
+  role                 ChatbotMessageRole
+  content              String
+  questionnaireContext String?
+  extractedAnswer      Int?
+  timestamp            DateTime           @default(now())
+  createdAt            DateTime           @default(now())
+  ChatbotSession       ChatbotSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([role])
+  @@index([sessionId])
+  @@index([sessionId, timestamp])
+  @@index([timestamp])
+}
+
+model ChatbotSession {
+  id                      String           @id
+  sessionId               String           @unique
+  userId                  String?
+  clientId                String?
+  startedAt               DateTime         @default(now())
+  completedAt             DateTime?
+  isComplete              Boolean          @default(false)
+  currentQuestionnaire    String?
+  completedQuestionnaires String[]         @default([])
+  collectedAnswers        Json
+  conversationInsights    Json?
+  lastActivity            DateTime         @default(now())
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime
+  completionConfidence    Float?
+  completionReason        String?
+  presentedQuestionnaires String[]         @default([])
+  structuredAnswers       Json?
+  ChatbotMessage          ChatbotMessage[]
+  Client                  Client?          @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  PreAssessment           PreAssessment?
+
+  @@index([clientId])
+  @@index([clientId, isComplete])
+  @@index([isComplete])
+  @@index([lastActivity])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([userId, isComplete])
+}
+
+model Client {
+  userId                          String             @id @unique
+  hasSeenTherapistRecommendations Boolean            @default(false)
+  createdAt                       DateTime           @default(now())
+  updatedAt                       DateTime           @default(now())
+  birthdate                       DateTime?
+  city                            String?
+  country                         String?
+  ChatbotSession                  ChatbotSession[]
+  User                            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ClientEngagement                ClientEngagement?
+  ClientPreferences               ClientPreferences?
+  ClientTherapist                 ClientTherapist[]
+  Meeting                         Meeting[]
+  Payment                         Payment[]
+  PreAssessment                   PreAssessment?
+  Review                          Review[]
+  Worksheet                       Worksheet[]
+
+  @@index([userId])
+}
+
+model ClientEngagement {
+  id                      String   @id
+  clientId                String   @unique
+  loginFrequency          Int      @default(0)
+  platformUsageScore      Float    @default(0.0)
+  journalEntryCount       Int      @default(0)
+  worksheetCompletionRate Float    @default(0.0)
+  meetingAttendanceRate   Float    @default(0.0)
+  averageSessionRating    Float?
+  engagementTrend         String   @default("stable")
+  lastCalculatedAt        DateTime @default(now())
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime
+  Client                  Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([engagementTrend])
+  @@index([platformUsageScore])
+}
+
+model ClientPreferences {
+  id                     String   @id
+  clientId               String   @unique
+  genderPreference       String?
+  agePreference          String?
+  languagePreferences    String[] @default([])
+  treatmentApproaches    String[] @default([])
+  sessionFormat          String?
+  sessionFrequency       String?
+  budgetRange            String?
+  locationPreference     String?
+  availabilityPreference String[] @default([])
+  specialConsiderations  String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime
+  Client                 Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+model ClientTherapist {
+  id          String    @id
+  clientId    String
+  therapistId String
+  assignedAt  DateTime  @default(now())
+  status      String    @default("active")
+  Client      Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  Therapist   Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@unique([clientId, therapistId])
+  @@index([assignedAt])
+  @@index([clientId])
+  @@index([clientId, status])
+  @@index([status])
+  @@index([therapistId])
+  @@index([therapistId, status])
+}
+
+model Comment {
+  id              String         @id
+  postId          String
+  userId          String
+  content         String
+  parentId        String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime
+  attachmentUrls  String[]       @default([])
+  attachmentNames String[]       @default([])
+  attachmentSizes Int[]          @default([])
+  Comment         Comment?       @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade)
+  other_Comment   Comment[]      @relation("CommentToComment")
+  Post            Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  User            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  CommentHeart    CommentHeart[]
+  Report          Report[]
+
+  @@index([createdAt])
+  @@index([parentId])
+  @@index([postId, createdAt])
+  @@index([postId])
+  @@index([postId, parentId])
+  @@index([userId])
+}
+
+model CommentHeart {
+  id        String   @id
+  commentId String
+  createdAt DateTime @default(now())
+  userId    String
+  Comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+model Community {
+  id                     String                   @id
+  name                   String                   @unique
+  slug                   String                   @unique
+  description            String
+  imageUrl               String
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime
+  Membership             Membership[]
+  ModeratorCommunity     ModeratorCommunity[]
+  RoomGroup              RoomGroup[]
+  group_therapy_sessions group_therapy_sessions[]
+
+  @@index([createdAt])
+  @@index([name])
+  @@index([slug])
+  @@index([updatedAt])
+}
+
+model Conversation {
+  id                      String                    @id
+  type                    ConversationType          @default(DIRECT)
+  title                   String?
+  isActive                Boolean                   @default(true)
+  lastMessageAt           DateTime?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime
+  ConversationParticipant ConversationParticipant[]
+  Message                 Message[]
+
+  @@index([createdAt])
+  @@index([isActive])
+  @@index([isActive, lastMessageAt])
+  @@index([lastMessageAt])
+  @@index([type])
+  @@index([type, isActive, lastMessageAt])
+  @@index([type, lastMessageAt])
+}
+
+model ConversationParticipant {
+  id             String          @id
+  conversationId String
+  userId         String
+  joinedAt       DateTime        @default(now())
+  lastReadAt     DateTime?
+  role           ParticipantRole @default(MEMBER)
+  isActive       Boolean         @default(true)
+  isMuted        Boolean         @default(false)
+  Conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  User           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([conversationId])
+  @@index([isActive])
+  @@index([userId])
+}
+
+model JournalEntry {
+  id        String   @id
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([userId])
+}
+
+model Meeting {
+  id           String         @id
+  title        String?
+  description  String?
+  startTime    DateTime
+  endTime      DateTime?
+  duration     Int            @default(60)
+  status       MeetingStatus  @default(SCHEDULED)
+  meetingType  String         @default("video")
+  meetingUrl   String?
+  clientId     String
+  therapistId  String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  Client       Client         @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  Therapist    Therapist      @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  MeetingNotes MeetingNotes[]
+  Payment      Payment[]
+  Review       Review[]
+
+  @@index([clientId])
+  @@index([clientId, startTime, endTime])
+  @@index([clientId, status, startTime])
+  @@index([endTime])
+  @@index([startTime])
+  @@index([status])
+  @@index([therapistId])
+  @@index([therapistId, startTime, endTime])
+  @@index([therapistId, startTime, status])
+  @@index([therapistId, status, startTime])
+}
+
+model MeetingNotes {
+  id        String   @id @unique
+  meetingId String
+  notes     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+}
+
+model Membership {
+  id          String    @id
+  joinedAt    DateTime  @default(now())
+  communityId String
+  userId      String
+  Community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+  @@index([communityId])
+  @@index([userId])
+}
+
+model Message {
+  id                 String               @id
+  conversationId     String
+  senderId           String
+  content            String
+  messageType        MessageType          @default(TEXT)
+  attachmentUrls     String[]             @default([])
+  attachmentNames    String[]             @default([])
+  attachmentSizes    Int[]                @default([])
+  replyToId          String?
+  isEdited           Boolean              @default(false)
+  isDeleted          Boolean              @default(false)
+  editedAt           DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  Conversation       Conversation         @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  Message            Message?             @relation("MessageToMessage", fields: [replyToId], references: [id])
+  other_Message      Message[]            @relation("MessageToMessage")
+  User               User                 @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  MessageReaction    MessageReaction[]
+  MessageReadReceipt MessageReadReceipt[]
+
+  @@index([conversationId, createdAt, isDeleted])
+  @@index([conversationId, messageType])
+  @@index([conversationId, senderId, createdAt])
+  @@index([isDeleted])
+  @@index([messageType])
+  @@index([replyToId])
+  @@index([senderId, createdAt])
+  @@index([senderId])
+}
+
+model MessageReaction {
+  id        String   @id
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+  Message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@index([userId])
+}
+
+model MessageReadReceipt {
+  id        String   @id
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+  Message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+}
+
+model Moderator {
+  userId              String               @id @unique
+  permissions         String[]
+  assignedCommunities Json?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime
+  User                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ModeratorCommunity  ModeratorCommunity[]
+
+  @@index([userId])
+}
+
+model ModeratorCommunity {
+  id          String    @id
+  moderatorId String
+  communityId String
+  assignedAt  DateTime  @default(now())
+  Community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  Moderator   Moderator @relation(fields: [moderatorId], references: [userId], onDelete: Cascade)
+
+  @@unique([moderatorId, communityId])
+  @@index([communityId])
+  @@index([moderatorId])
+}
+
+model Notification {
+  id        String               @id
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  priority  NotificationPriority @default(NORMAL)
+  data      Json?
+  actionUrl String?
+  isRead    Boolean              @default(false)
+  readAt    DateTime?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime
+  User      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([isRead])
+  @@index([priority])
+  @@index([type])
+  @@index([userId])
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, type, createdAt(sort: Desc)])
+}
+
+model Payment {
+  id              String         @id
+  amount          Decimal        @db.Decimal(10, 2)
+  currency        String         @default("USD")
+  status          PaymentStatus  @default(PENDING)
+  clientId        String
+  therapistId     String
+  meetingId       String?
+  paymentMethodId String?
+  processedAt     DateTime?
+  failedAt        DateTime?
+  failureReason   String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime
+  Client          Client         @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  Meeting         Meeting?       @relation(fields: [meetingId], references: [id])
+  PaymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  Therapist       Therapist      @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([createdAt])
+  @@index([meetingId])
+  @@index([status, createdAt])
+  @@index([status])
+  @@index([therapistId])
+  @@index([therapistId, status, createdAt])
+}
+
+model PaymentMethod {
+  id                    String            @id
+  userId                String
+  type                  PaymentMethodType @default(CARD)
+  cardLast4             String?
+  cardBrand             String?
+  isDefault             Boolean           @default(false)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime
+  accountHolderName     String?
+  accountLast4          String?
+  accountType           String?
+  bankName              String?
+  billingAddress        Json?
+  cardNumber            String?
+  cardType              String?
+  cardholderName        String?
+  expiryMonth           Int?
+  expiryYear            Int?
+  gcashEmail            String?
+  gcashName             String?
+  gcashNumber           String?
+  isActive              Boolean           @default(true)
+  isVerified            Boolean?
+  lastUsed              DateTime?
+  mayaEmail             String?
+  mayaName              String?
+  mayaNumber            String?
+  mayaVerified          Boolean?
+  nickname              String?
+  routingNumber         String?
+  walletAccountName     String?
+  walletEmail           String?
+  walletProvider        String?
+  coverageDetails       Json?
+  groupNumber           String?
+  insuranceProviderName String?
+  insuranceVerified     Boolean?          @default(false)
+  memberId              String?
+  policyNumber          String?
+  Payment               Payment[]
+  User                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isDefault])
+  @@index([type])
+  @@index([userId])
+}
+
+model Post {
+  id              String      @id
+  title           String
+  content         String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime
+  userId          String
+  roomId          String?
+  attachmentUrls  String[]    @default([])
+  attachmentNames String[]    @default([])
+  attachmentSizes Int[]       @default([])
+  Comment         Comment[]
+  Room            Room?       @relation(fields: [roomId], references: [id])
+  User            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  PostHeart       PostHeart[]
+  Report          Report[]
+
+  @@index([createdAt])
+  @@index([roomId, createdAt])
+  @@index([roomId])
+  @@index([roomId, userId, createdAt])
+  @@index([title])
+  @@index([userId, createdAt])
+  @@index([userId])
+}
+
+model PostHeart {
+  id        String   @id
+  postId    String
+  createdAt DateTime @default(now())
+  userId    String
+  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model PreAssessment {
+  id                     String              @id
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime
+  clientId               String              @unique
+  answers                Json
+  scores                 Json
+  severityLevels         Json
+  aiEstimate             Json
+  isProcessed            Boolean             @default(false)
+  processedAt            DateTime?
+  accessibilityNeeds     Json?
+  assessmentMethod       PreAssessmentMethod @default(CHECKLIST)
+  chatbotSessionId       String?             @unique
+  conversationInsights   Json?
+  crisisSupportNeeds     Json?
+  culturalConsiderations Json?
+  familySupportSystem    Json?
+  medicationHistory      Json?
+  pastTherapyExperiences Json?
+  ChatbotSession         ChatbotSession?     @relation(fields: [chatbotSessionId], references: [id])
+  Client                 Client              @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+
+  @@index([assessmentMethod])
+  @@index([chatbotSessionId])
+  @@index([clientId])
+}
+
+model Report {
+  id                               String       @id
+  reason                           String
+  content                          String?
+  status                           ReportStatus @default(PENDING)
+  postId                           String?
+  commentId                        String?
+  reporterId                       String
+  createdAt                        DateTime     @default(now())
+  updatedAt                        DateTime
+  reportedUserId                   String?
+  Comment                          Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  Post                             Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  User_Report_reportedUserIdToUser User?        @relation("Report_reportedUserIdToUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  User_Report_reporterIdToUser     User         @relation("Report_reporterIdToUser", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([commentId])
+  @@index([postId])
+  @@index([reportedUserId])
+  @@index([reporterId])
+  @@index([status, createdAt])
+}
+
+model Review {
+  id          String    @id
+  rating      Int
+  title       String?
+  content     String?
+  isAnonymous Boolean   @default(false)
+  clientId    String
+  therapistId String
+  meetingId   String?
+  isVerified  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  Client      Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  Meeting     Meeting?  @relation(fields: [meetingId], references: [id])
+  Therapist   Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@unique([clientId, therapistId, meetingId])
+  @@index([clientId])
+  @@index([createdAt])
+  @@index([rating])
+  @@index([therapistId, createdAt])
+  @@index([therapistId])
+  @@index([therapistId, rating])
+}
+
+model Room {
+  id          String    @id
+  name        String
+  order       Int
+  postingRole String    @default("member")
+  roomGroupId String
+  Post        Post[]
+  RoomGroup   RoomGroup @relation(fields: [roomGroupId], references: [id], onDelete: Cascade)
+}
+
+model RoomGroup {
+  id          String    @id
+  name        String
+  order       Int
+  communityId String
+  Room        Room[]
+  Community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+}
+
+model Therapist {
+  userId                              String                                @id @unique
+  mobile                              String
+  province                            String
+  timezone                            String                                @default("UTC")
+  status                              TherapistApplicationStatus            @default(PENDING)
+  submissionDate                      DateTime                              @default(now())
+  processingDate                      DateTime                              @default(now())
+  processedByAdminId                  String?
+  providerType                        String
+  professionalLicenseType             String
+  isPRCLicensed                       String
+  prcLicenseNumber                    String
+  expirationDateOfLicense             DateTime
+  practiceStartDate                   DateTime
+  licenseVerified                     Boolean                               @default(false)
+  licenseVerifiedAt                   DateTime?
+  licenseVerifiedBy                   String?
+  certifications                      Json?
+  certificateUrls                     String[]                              @default([])
+  certificateNames                    String[]                              @default([])
+  licenseUrls                         String[]                              @default([])
+  licenseNames                        String[]                              @default([])
+  documentUrls                        String[]                              @default([])
+  documentNames                       String[]                              @default([])
+  yearsOfExperience                   Int?
+  educationBackground                 String?
+  specialCertifications               String[]
+  practiceLocation                    String?
+  acceptsInsurance                    Boolean                               @default(false)
+  acceptedInsuranceTypes              String[]
+  areasOfExpertise                    String[]
+  assessmentTools                     String[]
+  therapeuticApproachesUsedList       String[]
+  languagesOffered                    String[]
+  providedOnlineTherapyBefore         Boolean
+  comfortableUsingVideoConferencing   Boolean
+  preferredSessionLength              Int[]
+  privateConfidentialSpace            String?
+  compliesWithDataPrivacyAct          Boolean
+  professionalLiabilityInsurance      String?
+  complaintsOrDisciplinaryActions     String?
+  willingToAbideByPlatformGuidelines  Boolean
+  expertise                           String[]
+  approaches                          String[]
+  languages                           String[]
+  illnessSpecializations              String[]
+  acceptTypes                         String[]
+  treatmentSuccessRates               Json
+  sessionLength                       String
+  hourlyRate                          Decimal                               @db.Decimal(10, 2)
+  createdAt                           DateTime                              @default(now())
+  updatedAt                           DateTime
+  ClientTherapist                     ClientTherapist[]
+  Meeting                             Meeting[]
+  Payment                             Payment[]
+  Review                              Review[]
+  Admin                               Admin?                                @relation(fields: [processedByAdminId], references: [userId])
+  User                                User                                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  TherapistAvailability               TherapistAvailability[]
+  TherapistPerformance                TherapistPerformance?
+  Worksheet                           Worksheet[]
+  group_session_therapist_invitations group_session_therapist_invitations[]
+
+  @@index([createdAt])
+  @@index([hourlyRate])
+  @@index([province])
+  @@index([province, status])
+  @@index([status, createdAt])
+  @@index([status, hourlyRate])
+  @@index([status])
+  @@index([timezone])
+  @@index([userId])
+  @@index([yearsOfExperience])
+}
+
+model TherapistAvailability {
+  id          String    @id
+  therapistId String
+  dayOfWeek   String
+  startTime   String
+  endTime     String
+  timezone    String    @default("UTC")
+  isAvailable Boolean   @default(true)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  Therapist   Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@unique([therapistId, dayOfWeek, startTime, endTime])
+  @@index([dayOfWeek])
+  @@index([therapistId])
+}
+
+model TherapistPerformance {
+  id                      String    @id
+  therapistId             String    @unique
+  averageResponseTime     Int?
+  clientRetentionRate     Float     @default(0.0)
+  noShowRate              Float     @default(0.0)
+  cancellationRate        Float     @default(0.0)
+  averageSessionDuration  Float     @default(0.0)
+  clientProgressRate      Float     @default(0.0)
+  workloadCapacity        Float     @default(0.0)
+  availabilityUtilization Float     @default(0.0)
+  lastCalculatedAt        DateTime  @default(now())
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime
+  Therapist               Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@index([availabilityUtilization])
+  @@index([clientRetentionRate])
+  @@index([therapistId])
+  @@index([workloadCapacity])
+}
+
+model TypingIndicator {
+  id             String   @id
+  conversationId String
+  userId         String
+  isTyping       Boolean  @default(true)
+  lastTypingAt   DateTime @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([conversationId])
+  @@index([lastTypingAt])
+}
+
+model User {
+  id                                  String                       @id @unique
+  email                               String                       @unique
+  firstName                           String
+  middleName                          String?
+  lastName                            String
+  birthDate                           DateTime?
+  address                             String?
+  role                                String                       @default("client")
+  createdAt                           DateTime                     @default(now())
+  updatedAt                           DateTime
+  password                            String?
+  emailVerified                       Boolean                      @default(false)
+  emailVerifyToken                    String?                      @unique
+  emailVerifyTokenExp                 DateTime?
+  resetToken                          String?                      @unique
+  resetTokenExpiry                    DateTime?
+  isActive                            Boolean                      @default(true)
+  failedLoginCount                    Int                          @default(0)
+  avatarUrl                           String?
+  coverImageUrl                       String?
+  bio                                 String?
+  suspendedAt                         DateTime?
+  suspendedBy                         String?
+  suspensionReason                    String?
+  deactivatedAt                       DateTime?
+  deactivatedBy                       String?
+  deactivationReason                  String?
+  lastLoginAt                         DateTime?
+  lockoutUntil                        DateTime?
+  Admin                               Admin?
+  Client                              Client?
+  Comment                             Comment[]
+  CommentHeart                        CommentHeart[]
+  ConversationParticipant             ConversationParticipant[]
+  JournalEntry                        JournalEntry[]
+  Membership                          Membership[]
+  Message                             Message[]
+  MessageReaction                     MessageReaction[]
+  MessageReadReceipt                  MessageReadReceipt[]
+  Moderator                           Moderator?
+  Notification                        Notification[]
+  PaymentMethod                       PaymentMethod[]
+  Post                                Post[]
+  PostHeart                           PostHeart[]
+  Report_Report_reportedUserIdToUser  Report[]                     @relation("Report_reportedUserIdToUser")
+  Report_Report_reporterIdToUser      Report[]                     @relation("Report_reporterIdToUser")
+  Therapist                           Therapist?
+  UserBlock_UserBlock_blockedIdToUser UserBlock[]                  @relation("UserBlock_blockedIdToUser")
+  UserBlock_UserBlock_blockerIdToUser UserBlock[]                  @relation("UserBlock_blockerIdToUser")
+  group_session_participants          group_session_participants[]
+  group_therapy_sessions              group_therapy_sessions[]
+
+  @@index([createdAt])
+  @@index([emailVerified])
+  @@index([email])
+  @@index([email, isActive])
+  @@index([isActive])
+  @@index([lastLoginAt])
+  @@index([role])
+  @@index([role, isActive, createdAt])
+  @@index([role, isActive])
+}
+
+model UserBlock {
+  id                             String   @id
+  blockerId                      String
+  blockedId                      String
+  reason                         String?
+  createdAt                      DateTime @default(now())
+  User_UserBlock_blockedIdToUser User     @relation("UserBlock_blockedIdToUser", fields: [blockedId], references: [id], onDelete: Cascade)
+  User_UserBlock_blockerIdToUser User     @relation("UserBlock_blockerIdToUser", fields: [blockerId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+  @@index([blockerId])
+}
+
+model Worksheet {
+  id                  String               @id
+  clientId            String
+  therapistId         String
+  title               String
+  instructions        String
+  dueDate             DateTime
+  status              WorksheetStatus      @default(ASSIGNED)
+  materialUrls        String[]             @default([])
+  materialNames       String[]             @default([])
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime
+  Client              Client               @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  Therapist           Therapist            @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  WorksheetSubmission WorksheetSubmission?
+
+  @@index([clientId])
+  @@index([clientId, status])
+  @@index([dueDate])
+  @@index([status, dueDate])
+  @@index([status])
+  @@index([therapistId])
+  @@index([therapistId, status])
+}
+
+model WorksheetSubmission {
+  id          String    @id
+  worksheetId String    @unique
+  fileUrls    String[]
+  fileNames   String[]
+  fileSizes   Int[]
+  submittedAt DateTime  @default(now())
+  feedback    String?
+  Worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+
+  @@index([submittedAt])
+  @@index([worksheetId])
+}
+
+model group_session_participants {
+  id                     String                 @id
+  sessionId              String
+  userId                 String
+  joinedAt               DateTime               @default(now())
+  attendanceStatus       AttendanceStatus       @default(REGISTERED)
+  leftAt                 DateTime?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime
+  group_therapy_sessions group_therapy_sessions @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  User                   User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([sessionId, attendanceStatus])
+  @@index([userId])
+}
+
+model group_session_therapist_invitations {
+  id                     String                 @id
+  sessionId              String
+  therapistId            String
+  status                 InvitationStatus       @default(PENDING)
+  invitedAt              DateTime               @default(now())
+  respondedAt            DateTime?
+  message                String?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime
+  group_therapy_sessions group_therapy_sessions @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  Therapist              Therapist              @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@unique([sessionId, therapistId])
+  @@index([therapistId, status])
+}
+
+model group_therapy_sessions {
+  id                                  String                                @id
+  title                               String
+  description                         String?
+  communityId                         String
+  createdById                         String
+  sessionType                         SessionType
+  scheduledAt                         DateTime
+  duration                            Int
+  maxParticipants                     Int
+  virtualLink                         String?
+  location                            String?
+  locationAddress                     String?
+  status                              GroupSessionStatus                    @default(PENDING_APPROVAL)
+  cancelledAt                         DateTime?
+  cancellationReason                  String?
+  completedAt                         DateTime?
+  createdAt                           DateTime                              @default(now())
+  updatedAt                           DateTime
+  group_session_participants          group_session_participants[]
+  group_session_therapist_invitations group_session_therapist_invitations[]
+  Community                           Community                             @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  User                                User                                  @relation(fields: [createdById], references: [id])
+
+  @@index([communityId])
+  @@index([createdById])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+enum AttendanceStatus {
+  REGISTERED
+  ATTENDED
+  NO_SHOW
+  CANCELLED
+}
+
+enum ChatbotMessageRole {
+  SYSTEM
+  USER
+  ASSISTANT
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+  SESSION
+  SUPPORT
+}
+
+enum GroupSessionStatus {
+  PENDING_APPROVAL
+  APPROVED
+  CANCELLED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  WAITING
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  AUDIO
+  VIDEO
+  SYSTEM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  APPOINTMENT_REMINDER
+  APPOINTMENT_CONFIRMED
+  APPOINTMENT_CANCELLED
+  APPOINTMENT_RESCHEDULED
+  MESSAGE_RECEIVED
+  MESSAGE_REACTION
+  WORKSHEET_ASSIGNED
+  WORKSHEET_DUE
+  WORKSHEET_FEEDBACK
+  REVIEW_REQUEST
+  REVIEW_RECEIVED
+  THERAPIST_APPLICATION
+  THERAPIST_APPROVED
+  THERAPIST_REJECTED
+  THERAPIST_STATUS_UPDATED
+  THERAPIST_REQUEST_ACCEPTED
+  THERAPIST_REQUEST_DECLINED
+  ALTERNATIVE_RECOMMENDATIONS
+  CLIENT_REQUEST_RECEIVED
+  CLIENT_REQUEST_CANCELLED
+  PROFILE_COMPLETION
+  COMMUNITY_POST
+  COMMUNITY_REPLY
+  COMMUNITY_RECOMMENDATION
+  COMMUNITY_JOINED
+  COMMUNITY_WELCOME
+  RECOMMENDATIONS_UPDATED
+  NEW_RECOMMENDATIONS
+  RELATIONSHIP_ESTABLISHED
+  REQUEST_REMINDER
+  SYSTEM_MAINTENANCE
+  SYSTEM_UPDATE
+  SECURITY_ALERT
+  SCHEDULING_INFO
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  SUBSCRIPTION_EXPIRING
+  INCOMING_VIDEO_CALL
+  VIDEO_CALL_MISSED
+  VIDEO_CALL_ENDED
+}
+
+enum ParticipantRole {
+  MEMBER
+  MODERATOR
+  ADMIN
+}
+
+enum PaymentMethodType {
+  CARD
+  BANK_ACCOUNT
+  DIGITAL_WALLET
+  GCASH
+  MAYA
+  INSURANCE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PreAssessmentMethod {
+  CHECKLIST
+  CHATBOT
+  HYBRID
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+enum SessionType {
+  VIRTUAL
+  IN_PERSON
+}
+
+enum TherapistApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum WorksheetStatus {
+  ASSIGNED
+  SUBMITTED
+  REVIEWED
+  OVERDUE
 }
