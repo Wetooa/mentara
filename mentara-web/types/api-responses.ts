@@ -104,7 +104,7 @@ export interface HealthCheckResponse {
   version: string;
   services?: {
     database: 'up' | 'down';
-    redis: 'up' | 'down';
+    cache: 'up' | 'down';
     email: 'up' | 'down';
   };
 }

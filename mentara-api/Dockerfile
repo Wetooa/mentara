@@ -3,7 +3,7 @@
 
 # Stage 1: Base image with dependencies
 FROM node:18-alpine AS base
-RUN apk add --no-cache libc6-compat dumb-init
+RUN apk add --no-cache libc6-compat dumb-init curl
 WORKDIR /app
 
 # Create non-root user
@@ -62,9 +62,9 @@ USER nestjs
 # Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node dist/health-check.js || exit 1
+# Health check (uses PORT so compose can override)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD ["sh", "-c", "curl -fsS http://127.0.0.1:${PORT:-3000}/health || exit 1"]
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -73,5 +73,5 @@ ENV PORT=3000
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start the application
-CMD ["node", "dist/main.js"]
+# Start the application (Nest outputs to dist/ or dist/src/ depending on config)
+CMD ["sh", "-c", "node dist/src/main.js 2>/dev/null || node dist/main.js"]

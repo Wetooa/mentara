@@ -26,10 +26,9 @@ export class GroupSessionsEnricher extends BaseEnricher {
         },
         memberships: {
           where: {
-            user: {
-              role: 'therapist',
-            },
+            user: { role: 'therapist' },
           },
+          include: { user: { select: { id: true } } },
           take: 5,
         },
       },
@@ -126,17 +125,17 @@ export class GroupSessionsEnricher extends BaseEnricher {
       // Set to reasonable hour (10 AM - 6 PM)
       scheduledAt.setHours(10 + random.nextInt(8), 0, 0, 0);
 
-      // Select 2-3 therapists to invite
       const numTherapists = Math.min(
         2 + random.nextInt(2),
         therapistMembers.length,
       );
-      const selectedTherapists = [];
+      const selectedTherapists: { userId: string }[] = [];
       const therapistsCopy = [...therapistMembers];
 
       for (let j = 0; j < numTherapists; j++) {
         const index = random.nextInt(therapistsCopy.length);
-        selectedTherapists.push(therapistsCopy[index]);
+        const m = therapistsCopy[index];
+        selectedTherapists.push({ userId: m.user.id });
         therapistsCopy.splice(index, 1);
       }
 
@@ -167,28 +166,25 @@ export class GroupSessionsEnricher extends BaseEnricher {
         },
       });
 
-      // Create invitations for therapists (all accepted for testing)
-      for (const therapistMember of selectedTherapists) {
+      for (const t of selectedTherapists) {
         await this.prisma.groupSessionTherapistInvitation.create({
           data: {
             sessionId: session.id,
-            therapistId: therapistMember.userId,
+            therapistId: t.userId,
             status: 'ACCEPTED',
             respondedAt: new Date(),
           },
         });
       }
 
-      // Add 3-8 participants (community members)
+      const excludedUserIds = [
+        moderator.userId,
+        ...selectedTherapists.map((t) => t.userId),
+      ];
       const otherMembers = await this.prisma.membership.findMany({
         where: {
           communityId: community.id,
-          userId: {
-            notIn: [
-              moderator.userId,
-              ...selectedTherapists.map((t) => t.userId),
-            ],
-          },
+          userId: { notIn: excludedUserIds },
         },
         take: 15,
       });
@@ -200,11 +196,12 @@ export class GroupSessionsEnricher extends BaseEnricher {
       );
 
       for (let j = 0; j < numParticipants; j++) {
-        if (otherMembers[j]) {
+        const member = otherMembers[j];
+        if (member) {
           await this.prisma.groupSessionParticipant.create({
             data: {
               sessionId: session.id,
-              userId: otherMembers[j].userId,
+              userId: member.userId,
               attendanceStatus: 'REGISTERED',
               joinedAt: this.randomDateAfter(session.createdAt, 7),
             },

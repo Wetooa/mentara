@@ -67,34 +67,31 @@ export class CacheService {
   }
 
   /**
-   * Invalidate cache by pattern (requires Redis)
-   * For in-memory cache, this will attempt to match keys
+   * Invalidate cache by pattern. Requires a cache store that supports SCAN (e.g. Redis).
+   * For in-memory cache, attempts key matching if the store supports keys().
    */
   async invalidatePattern(pattern: string): Promise<void> {
     try {
       const store = (this.cacheManager as any).store;
-      
-      // If using Redis store, use Redis pattern matching
+
       if (store && store.client) {
-        // Redis implementation using SCAN for better performance than KEYS
         const client = store.client;
         const keys: string[] = [];
         let cursor = '0';
-        
+
         do {
           const result = await client.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
           cursor = result[0];
           keys.push(...result[1]);
         } while (cursor !== '0');
-        
+
         if (keys.length > 0) {
-          // Delete keys in batches to avoid blocking
           const batchSize = 100;
           for (let i = 0; i < keys.length; i += batchSize) {
             const batch = keys.slice(i, i + batchSize);
             await Promise.all(batch.map((key: string) => this.del(key)));
           }
-          this.logger.log(`✅ Invalidated ${keys.length} Redis cache keys matching pattern: ${pattern}`);
+          this.logger.log(`Invalidated ${keys.length} cache keys matching pattern: ${pattern}`);
         } else {
           this.logger.debug(`No keys found matching pattern: ${pattern}`);
         }

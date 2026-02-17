@@ -15,17 +15,20 @@ export class CommentsEnricher extends BaseEnricher {
     let added = 0;
     let errors = 0;
 
-    // Ensure clients have minimum comments
+    // Ensure clients have minimum comments (comments live on User)
     const clients = await this.prisma.client.findMany({
       include: {
-        user: true,
-        _count: { select: { comments: true } },
+        user: {
+          include: {
+            _count: { select: { comments: true } },
+          },
+        },
       },
     });
 
     for (const client of clients) {
       try {
-        const missing = Math.max(0, 10 - client._count.comments);
+        const missing = Math.max(0, 10 - client.user._count.comments);
         if (missing > 0) {
           added += await this.ensureUserHasComments(client.userId, missing);
         }
@@ -34,18 +37,21 @@ export class CommentsEnricher extends BaseEnricher {
       }
     }
 
-    // Ensure therapists have minimum comments
+    // Ensure therapists have minimum comments (comments live on User)
     const therapists = await this.prisma.therapist.findMany({
       where: { status: 'APPROVED' },
       include: {
-        user: true,
-        _count: { select: { comments: true } },
+        user: {
+          include: {
+            _count: { select: { comments: true } },
+          },
+        },
       },
     });
 
     for (const therapist of therapists) {
       try {
-        const missing = Math.max(0, 5 - therapist._count.comments);
+        const missing = Math.max(0, 5 - therapist.user._count.comments);
         if (missing > 0) {
           added += await this.ensureUserHasComments(therapist.userId, missing);
         }
@@ -55,12 +61,13 @@ export class CommentsEnricher extends BaseEnricher {
     }
 
     // Ensure posts have minimum comments
-    const posts = await this.prisma.post.findMany({
-      where: {
-        _count: { comments: { lt: 2 } },
-      },
+    const postsWithCount = await this.prisma.post.findMany({
       take: 50,
+      include: {
+        _count: { select: { comments: true } },
+      },
     });
+    const posts = postsWithCount.filter((p) => p._count.comments < 2);
 
     for (const post of posts) {
       try {
@@ -82,22 +89,16 @@ export class CommentsEnricher extends BaseEnricher {
     userId: string,
     minComments: number,
   ): Promise<number> {
-    // Get user's community memberships
-    const memberships = await this.prisma.communityMember.findMany({
+    const memberships = await this.prisma.membership.findMany({
       where: { userId },
       select: { communityId: true },
     });
 
     if (memberships.length === 0) return 0;
 
-    const communityIds = memberships.map((m) => m.communityId);
-
     // Get posts to comment on (not user's own posts)
     const postsToCommentOn = await this.prisma.post.findMany({
-      where: {
-        communityId: { in: communityIds },
-        userId: { not: userId },
-      },
+      where: { userId: { not: userId } },
       orderBy: { createdAt: 'desc' },
       take: minComments * 2,
     });
@@ -139,36 +140,33 @@ export class CommentsEnricher extends BaseEnricher {
 
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
-      select: { communityId: true, userId: true, createdAt: true },
+      select: { userId: true, createdAt: true },
     });
 
     if (!post) return 0;
 
-    // Get community members who can comment (excluding post author)
-    const members = await this.prisma.communityMember.findMany({
+    const users = await this.prisma.user.findMany({
       where: {
-        communityId: post.communityId,
-        userId: { not: post.userId },
+        id: { not: post.userId },
+        role: { in: ['client', 'therapist'] },
       },
       take: missing,
     });
 
     const templates = this.getCommentTemplates();
 
-    for (let i = 0; i < Math.min(missing, members.length); i++) {
-      const template = templates[i % templates.length];
-
+    for (let i = 0; i < Math.min(missing, users.length); i++) {
       await this.prisma.comment.create({
         data: {
           postId,
-          userId: members[i].userId,
-          content: template,
+          userId: users[i].id,
+          content: templates[i % templates.length],
           createdAt: this.randomDateAfter(post.createdAt, 15),
         },
       });
     }
 
-    return Math.min(missing, members.length);
+    return Math.min(missing, users.length);
   }
 
   private getCommentTemplates(): string[] {

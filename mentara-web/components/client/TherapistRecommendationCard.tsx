@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { normalizeSessionDuration } from "@/lib/utils/session-duration";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,7 @@ export function TherapistRecommendationCard({
   showMatchExplanation = false,
   disabled = false,
 }: TherapistRecommendationCardProps) {
+  const router = useRouter();
   const matchScore = therapist.matchScore || 0;
   const averageRating =
     therapist.reviews?.length > 0
@@ -308,7 +310,7 @@ export function TherapistRecommendationCard({
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  // TODO: Navigate to therapist profile
+                  router.push(`/client/profile/${therapist.id}`);
                 }}
                 className="hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 font-medium"
               >

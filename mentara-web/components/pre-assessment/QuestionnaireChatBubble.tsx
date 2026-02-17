@@ -71,7 +71,7 @@ export function QuestionnaireChatBubble({
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-white border border-gray-200/80 rounded-2xl p-4 shadow-sm max-w-full hover:shadow-md transition-shadow">
+    <div className="flex flex-col gap-2.5 bg-white border border-gray-200/90 rounded-2xl p-3 sm:p-3.5 shadow-sm max-w-full hover:shadow-md transition-shadow">
       {/* Topic badge */}
       {topic && (
         <div className="text-xs font-medium text-primary/70 uppercase tracking-wide">
@@ -85,7 +85,7 @@ export function QuestionnaireChatBubble({
       </div>
 
       {/* Options as clickable buttons */}
-      <div className="flex flex-col gap-2 mt-1">
+      <div className="flex flex-col gap-2">
         {options.map((option) => {
           const isSelected = selectedAnswer === option.value;
           const isDisabled = disabled || (selectedAnswer !== undefined && !isSelected);

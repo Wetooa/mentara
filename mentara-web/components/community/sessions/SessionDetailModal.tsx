@@ -61,6 +61,7 @@ export function SessionDetailModal({
   const isFull = session.currentParticipants >= session.maxParticipants;
   const isUserAttending = session.userRSVP === "attending";
   const isUserWaitlisted = session.userRSVP === "waitlist";
+  const isWebinar = session.format === "webinar";
 
   const capacityPercentage =
     (session.currentParticipants / session.maxParticipants) * 100;
@@ -74,7 +75,9 @@ export function SessionDetailModal({
           status === "join"
             ? isFull
               ? "Added to waitlist"
-              : "Successfully joined session"
+              : session.format === "webinar"
+                ? "You are registered!"
+                : "Successfully joined session"
             : "Successfully left session";
         toast.success(message);
       } catch (error) {
@@ -459,6 +462,12 @@ END:VCALENDAR`;
             {!isCancelled && !isCompleted && (
               <>
                 <Separator />
+                {isUserAttending && isWebinar && (
+                  <p className="text-sm font-medium text-primary flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    You are registered!
+                  </p>
+                )}
                 <div className="flex gap-2">
                   {isUserAttending ? (
                     <>
@@ -469,7 +478,7 @@ END:VCALENDAR`;
                         disabled={isRSVPing}
                       >
                         <X className="h-4 w-4 mr-2" />
-                        Leave Session
+                        {isWebinar ? "Cancel Registration" : "Leave Session"}
                       </Button>
                       <Button onClick={downloadICS} variant="outline">
                         <Download className="h-4 w-4 mr-2" />
@@ -493,7 +502,11 @@ END:VCALENDAR`;
                       disabled={isRSVPing}
                     >
                       <CheckCircle2 className="h-4 w-4 mr-2" />
-                      {isFull ? "Join Waitlist" : "Join Session"}
+                      {isFull
+                        ? "Join Waitlist"
+                        : isWebinar
+                          ? "Register"
+                          : "Join Session"}
                     </Button>
                   )}
                 </div>

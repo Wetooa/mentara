@@ -82,51 +82,33 @@ export class WorksheetsEnricher extends BaseEnricher {
     therapistId: string,
     minWorksheets: number,
   ): Promise<number> {
+    const rel = await this.prisma.clientTherapist.findFirst({
+      where: { therapistId, status: 'active' },
+      select: { clientId: true },
+    });
+    if (!rel) return 0;
+
     const templates = [
-      {
-        title: 'Daily Mood Tracker',
-        category: 'Mood Monitoring',
-        duration: 10,
-      },
-      {
-        title: 'Cognitive Behavioral Thought Record',
-        category: 'CBT',
-        duration: 20,
-      },
-      {
-        title: 'Anxiety Exposure Hierarchy',
-        category: 'Anxiety Management',
-        duration: 30,
-      },
-      {
-        title: 'Gratitude Journal',
-        category: 'Positive Psychology',
-        duration: 15,
-      },
-      {
-        title: 'Sleep Hygiene Assessment',
-        category: 'Sleep Health',
-        duration: 25,
-      },
-      { title: 'Mindfulness Body Scan', category: 'Mindfulness', duration: 25 },
-      {
-        title: 'Values Clarification Exercise',
-        category: 'Life Purpose',
-        duration: 35,
-      },
+      { title: 'Daily Mood Tracker', instructions: 'Mood Monitoring worksheet.' },
+      { title: 'Cognitive Behavioral Thought Record', instructions: 'CBT thought record.' },
+      { title: 'Anxiety Exposure Hierarchy', instructions: 'Anxiety management steps.' },
+      { title: 'Gratitude Journal', instructions: 'Positive psychology journaling.' },
+      { title: 'Sleep Hygiene Assessment', instructions: 'Sleep health assessment.' },
+      { title: 'Mindfulness Body Scan', instructions: 'Mindfulness exercise.' },
+      { title: 'Values Clarification Exercise', instructions: 'Life purpose values.' },
     ];
 
     for (let i = 0; i < minWorksheets; i++) {
       const template = templates[i % templates.length];
+      const dueDate = this.randomPastDate(60);
 
       await this.prisma.worksheet.create({
         data: {
-          title: `${template.title} - ${i + 1}`,
-          description: `Therapeutic worksheet for ${template.category}`,
-          category: template.category,
+          clientId: rel.clientId,
           therapistId,
-          estimatedDuration: template.duration,
-          createdAt: this.randomPastDate(120),
+          title: `${template.title} - ${i + 1}`,
+          instructions: template.instructions,
+          dueDate,
         },
       });
     }
@@ -139,44 +121,32 @@ export class WorksheetsEnricher extends BaseEnricher {
     therapistId: string,
     minAssignments: number,
   ): Promise<number> {
-    // Get therapist's worksheets
-    const worksheets = await this.prisma.worksheet.findMany({
-      where: { therapistId },
-      take: minAssignments,
+    const existing = await this.prisma.worksheet.count({
+      where: { clientId, therapistId },
     });
+    const missing = Math.max(0, minAssignments - existing);
+    if (missing === 0) return 0;
 
-    if (worksheets.length === 0) {
-      // Create worksheets first
-      await this.ensureTherapistHasWorksheets(therapistId, minAssignments);
-      return this.ensureClientHasAssignments(
-        clientId,
-        therapistId,
-        minAssignments,
-      );
-    }
+    const templates = [
+      { title: 'Client Assignment 1', instructions: 'Complete this worksheet.' },
+      { title: 'Client Assignment 2', instructions: 'Follow the instructions.' },
+      { title: 'Client Assignment 3', instructions: 'Submit by due date.' },
+    ];
 
-    const random = this.getRandom(clientId, 'worksheet-assignments');
-
-    for (let i = 0; i < Math.min(minAssignments, worksheets.length); i++) {
-      const worksheet = worksheets[i];
-
-      // Check if already assigned
-      const existing = await this.prisma.worksheet.findFirst({
-        where: {
-          id: worksheet.id,
+    for (let i = 0; i < missing; i++) {
+      const t = templates[i % templates.length];
+      const dueDate = this.randomPastDate(30);
+      await this.prisma.worksheet.create({
+        data: {
           clientId,
+          therapistId,
+          title: t.title,
+          instructions: t.instructions,
+          dueDate,
         },
       });
-
-      if (!existing) {
-        // Assign worksheet to client
-        await this.prisma.worksheet.update({
-          where: { id: worksheet.id },
-          data: { clientId },
-        });
-      }
     }
 
-    return Math.min(minAssignments, worksheets.length);
+    return missing;
   }
 }

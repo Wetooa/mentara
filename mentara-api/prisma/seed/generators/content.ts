@@ -16,6 +16,9 @@ export interface ContentData {
   comments: any[];
   postHearts: any[];
   commentHearts: any[];
+  /** Counts for logging when hearts are not retained in memory */
+  postHeartsCount?: number;
+  commentHeartsCount?: number;
 }
 
 /**
@@ -149,9 +152,12 @@ export async function generateContent(
   // Create engagement (hearts/likes)
   await createEngagement(prisma, config, contentCreators, result);
 
+  const heartsLog = result.postHeartsCount != null && result.commentHeartsCount != null
+    ? `${result.postHeartsCount} post hearts, ${result.commentHeartsCount} comment hearts`
+    : `${result.postHearts.length} post hearts, ${result.commentHearts.length} comment hearts`;
   console.log(`    ✅ ${result.posts.length} posts created`);
   console.log(`    ✅ ${result.comments.length} comments created`);
-  console.log(`    ✅ ${result.postHearts.length} post hearts, ${result.commentHearts.length} comment hearts`);
+  console.log(`    ✅ ${heartsLog}`);
 
   return result;
 }
@@ -239,7 +245,7 @@ async function createComments(
   result: ContentData
 ): Promise<void> {
   for (const post of result.posts) {
-    const commentsToCreate = randomInt(1, config.commentsPerPost + 2);
+    const commentsToCreate = Math.min(5, randomInt(1, config.commentsPerPost + 1));
     
     for (let i = 0; i < commentsToCreate; i++) {
       const commenter = randomChoice(contentCreators);
@@ -267,8 +273,11 @@ async function createComments(
   }
 }
 
+/** Max users to consider for hearts per post/comment to avoid O(n²) memory and DB load */
+const MAX_HEARTERS_PER_ITEM = 12;
+
 /**
- * Create engagement (hearts/likes)
+ * Create engagement (hearts/likes). Capped per item to avoid huge memory and DB load.
  */
 async function createEngagement(
   prisma: PrismaClient,
@@ -276,55 +285,53 @@ async function createEngagement(
   contentCreators: any[],
   result: ContentData
 ): Promise<void> {
-  // Create post hearts
+  let postHeartsCreated = 0;
+  let commentHeartsCreated = 0;
+
+  // Shuffle and take a subset so we don't iterate all users for every post
+  const shuffledUsers = [...contentCreators].sort(() => Math.random() - 0.5);
+  const hearterPool = shuffledUsers.slice(0, Math.min(MAX_HEARTERS_PER_ITEM, contentCreators.length));
+
   for (const post of result.posts) {
-    for (const user of contentCreators) {
-      // Skip author's own posts
+    for (const user of hearterPool) {
       if (user.id === post.userId) continue;
-      
-      if (Math.random() < config.heartLikelihoodForPosts) {
-        try {
-          const heart = await prisma.postHeart.create({
-            data: {
-              userId: user.id,
-              postId: post.id,
-              createdAt: new Date(post.createdAt.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000),
-            },
-          });
-          
-          result.postHearts.push(heart);
-        } catch (error) {
-          // Skip duplicate hearts
-          continue;
-        }
+      if (Math.random() >= config.heartLikelihoodForPosts) continue;
+      try {
+        await prisma.postHeart.create({
+          data: {
+            userId: user.id,
+            postId: post.id,
+            createdAt: new Date(post.createdAt.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000),
+          },
+        });
+        postHeartsCreated++;
+      } catch {
+        // Skip duplicate hearts
       }
     }
   }
 
-  // Create comment hearts
   for (const comment of result.comments) {
-    for (const user of contentCreators) {
-      // Skip author's own comments
+    for (const user of hearterPool) {
       if (user.id === comment.userId) continue;
-      
-      if (Math.random() < config.heartLikelihoodForComments) {
-        try {
-          const heart = await prisma.commentHeart.create({
-            data: {
-              userId: user.id,
-              commentId: comment.id,
-              createdAt: new Date(comment.createdAt.getTime() + Math.random() * 3 * 24 * 60 * 60 * 1000),
-            },
-          });
-          
-          result.commentHearts.push(heart);
-        } catch (error) {
-          // Skip duplicate hearts
-          continue;
-        }
+      if (Math.random() >= config.heartLikelihoodForComments) continue;
+      try {
+        await prisma.commentHeart.create({
+          data: {
+            userId: user.id,
+            commentId: comment.id,
+            createdAt: new Date(comment.createdAt.getTime() + Math.random() * 3 * 24 * 60 * 60 * 1000),
+          },
+        });
+        commentHeartsCreated++;
+      } catch {
+        // Skip duplicate hearts
       }
     }
   }
+
+  result.postHeartsCount = postHeartsCreated;
+  result.commentHeartsCount = commentHeartsCreated;
 }
 
 /**

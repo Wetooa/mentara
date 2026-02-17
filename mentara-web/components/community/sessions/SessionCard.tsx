@@ -46,6 +46,7 @@ export function SessionCard({
   const isFull = session.currentParticipants >= session.maxParticipants;
   const isUserAttending = session.userRSVP === "attending";
   const isUserWaitlisted = session.userRSVP === "waitlist";
+  const isWebinar = session.format === "webinar";
 
   const capacityPercentage =
     (session.currentParticipants / session.maxParticipants) * 100;
@@ -274,7 +275,7 @@ export function SessionCard({
               {isUserAttending && (
                 <>
                   <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                  Attending
+                  {isWebinar ? "Registered" : "Attending"}
                 </>
               )}
               {isUserWaitlisted && (
@@ -286,7 +287,7 @@ export function SessionCard({
               {!isUserAttending && !isUserWaitlisted && (
                 <>
                   <User className="h-3.5 w-3.5 mr-1.5" />
-                  {isFull ? "Join Waitlist" : "Join Session"}
+                  {isFull ? "Join Waitlist" : isWebinar ? "Register" : "Join Session"}
                 </>
               )}
             </Button>

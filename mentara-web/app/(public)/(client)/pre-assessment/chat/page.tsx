@@ -1,19 +1,23 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect, useRef, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ArrowLeft, Loader2, MessageSquare, Sparkles, Bot, User, CheckCircle2 } from "lucide-react";
+import { Send, ArrowLeft, Loader2, MessageSquare, Sparkles, Bot, User, CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Logo from "@/components/Logo";
 import { fadeDown } from "@/lib/animations";
 import { useApi } from "@/lib/api";
 import { toast } from "sonner";
+import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
+import { getDemoLoginConfig } from "@/lib/demo-config";
 import { QuestionnaireChatBubble } from "@/components/pre-assessment/QuestionnaireChatBubble";
 import { AssessmentProgressBar } from "@/components/pre-assessment/AssessmentProgressBar";
 import { ChatbotDebugPanel } from "@/components/pre-assessment/ChatbotDebugPanel";
+import { AssessmentContextModal } from "@/components/pre-assessment/AssessmentContextModal";
+import { SoftSnapshotModal } from "@/components/pre-assessment/SoftSnapshotModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,9 +54,148 @@ interface QuestionnaireMessage extends BaseMessage {
 
 type Message = TextMessage | QuestionnaireMessage;
 
+const DEMO_WORK_STRESS_MESSAGES: Message[] = [
+  {
+    id: "1",
+    role: "assistant",
+    content:
+      "Hi! I'm here to help assess your mental health needs. This will help us match you with the right therapist. How are you feeling today?",
+    timestamp: new Date(),
+  },
+  {
+    id: "2",
+    role: "user",
+    content: "I've been really stressed lately, mostly from work.",
+    timestamp: new Date(),
+  },
+  {
+    id: "3",
+    role: "assistant",
+    content:
+      "I hear you. Work stress can take a real toll. Can you tell me a bit more about what's been going on at work? For example, is it the workload, relationships with colleagues, or something else?",
+    timestamp: new Date(),
+  },
+  {
+    id: "4",
+    role: "user",
+    content:
+      "It's the workload mostly. I can't switch off and I feel burned out.",
+    timestamp: new Date(),
+  },
+  {
+    id: "5",
+    role: "user",
+    content:
+      "Sleep has been bad. I lie awake thinking about deadlines and then I'm exhausted the next day. My energy is pretty low.",
+    timestamp: new Date(),
+  },
+  {
+    id: "6",
+    role: "assistant",
+    content:
+      "That sounds really tough—both the burnout and the sleep. That's a common pattern when stress builds up. How long would you say this has been going on? Weeks, or more like months?",
+    timestamp: new Date(),
+  },
+  {
+    id: "8",
+    role: "user",
+    content: "Probably a few months now. It got worse after we had a big project launch.",
+    timestamp: new Date(),
+  },
+  {
+    id: "9",
+    role: "assistant",
+    content:
+      "Thanks for sharing that. So it's been building for a while and the project launch intensified things. Do you have any support at work—someone you can talk to, or flexibility to set boundaries around hours?",
+    timestamp: new Date(),
+  },
+  {
+    id: "10",
+    role: "user",
+    content:
+      "Not really. My manager is nice but everyone is stretched. I feel guilty if I log off on time.",
+    timestamp: new Date(),
+  },
+  {
+    id: "10b",
+    role: "user",
+    content: "I've tried setting boundaries but it's hard to stick to them.",
+    timestamp: new Date(),
+  },
+  {
+    id: "11",
+    role: "assistant",
+    content:
+      "It makes sense that you'd feel that way when the whole team is under pressure. Guilt can keep us overgiving. Besides work, do you have people or activities that help you recharge—family, friends, hobbies?",
+    timestamp: new Date(),
+  },
+  {
+    id: "12",
+    role: "user",
+    content:
+      "I used to go to the gym and see friends on weekends. Lately I've been cancelling a lot because I'm too tired or I'm catching up on work.",
+    timestamp: new Date(),
+  },
+  {
+    id: "13",
+    role: "assistant",
+    content:
+      "So the stress has started to crowd out the things that usually help you recharge. That's a big signal. When you do have a bit of time to yourself, how do you feel—relieved, or still on edge?",
+    timestamp: new Date(),
+  },
+  {
+    id: "14",
+    role: "user",
+    content: "Mostly still on edge. I check my phone for messages and can't really relax.",
+    timestamp: new Date(),
+  },
+  {
+    id: "15",
+    role: "assistant",
+    content:
+      "That difficulty switching off is something we can work on. Have you ever talked to a therapist or counselor before, or would this be your first time considering it?",
+    timestamp: new Date(),
+  },
+  {
+    id: "16",
+    role: "user",
+    content:
+      "I had a few sessions years ago when I was in college. It helped. I've been thinking about trying again but wasn't sure where to start.",
+    timestamp: new Date(),
+  },
+  {
+    id: "17",
+    role: "assistant",
+    content:
+      "It's a good step that you're reaching out now. Based on what you've shared—workload, burnout, sleep, and pulling back from support and hobbies—we have a clearer picture. I'll summarize this as a soft snapshot so any therapist you're matched with can pick up from here. Is there anything else you'd want them to know before we move to matching?",
+    timestamp: new Date(),
+  },
+  {
+    id: "18",
+    role: "user",
+    content: "I think that covers it. I'm open to someone who gets work stress and maybe CBT or something practical.",
+    timestamp: new Date(),
+  },
+  {
+    id: "19",
+    role: "assistant",
+    content:
+      "Noted—we'll look for a therapist who has experience with work-related stress and can offer practical, structured approaches like CBT. You've shared a lot today; thank you. When you're ready, you can view your snapshot and we'll suggest matches that fit. Anything else on your mind right now?",
+    timestamp: new Date(),
+  },
+  {
+    id: "20",
+    role: "user",
+    content: "No, that's it for now. Thanks for listening.",
+    timestamp: new Date(),
+  },
+];
+
 function PreAssessmentChatPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const api = useApi();
+  const isDemoMode = searchParams.get("demo") === "1";
   const [mounted, setMounted] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -63,7 +206,12 @@ function PreAssessmentChatPageContent() {
   const [showEndConversationDialog, setShowEndConversationDialog] = useState(false);
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [answeredQuestionsCount, setAnsweredQuestionsCount] = useState(0);
+  const [assessmentContextOpen, setAssessmentContextOpen] = useState(false);
+  const [softSnapshotOpen, setSoftSnapshotOpen] = useState(false);
+  const [demoLoginLoading, setDemoLoginLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const demoLoginConfig = useMemo(() => getDemoLoginConfig(), []);
 
   useEffect(() => {
     setMounted(true);
@@ -75,16 +223,20 @@ function PreAssessmentChatPageContent() {
         const result = await api.preAssessment.startChatbotSession();
         console.log('[Chatbot] Session started:', result.sessionId);
         setSessionId(result.sessionId);
-        
-        // Initialize with welcome message (backend creates this)
-        setMessages([
-          {
-            id: "1",
-            role: "assistant",
-            content: "Hi! I'm here to help assess your mental health needs. This will help us match you with the right therapist. How are you feeling today?",
-            timestamp: new Date(),
-          },
-        ]);
+
+        if (isDemoMode) {
+          setMessages(DEMO_WORK_STRESS_MESSAGES);
+        } else {
+          setMessages([
+            {
+              id: "1",
+              role: "assistant",
+              content:
+                "Hi! I'm here to help assess your mental health needs. This will help us match you with the right therapist. How are you feeling today?",
+              timestamp: new Date(),
+            },
+          ]);
+        }
       } catch (error) {
         console.error('[Chatbot] Failed to start session:', error);
         toast.error('Failed to start chatbot. Please try again.');
@@ -97,7 +249,7 @@ function PreAssessmentChatPageContent() {
     if (typeof window !== 'undefined') {
       startSession();
     }
-  }, [api.preAssessment, router]);
+  }, [api.preAssessment, router, isDemoMode]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -773,6 +925,24 @@ function PreAssessmentChatPageContent() {
     }
   };
 
+  const handleDemoSubmit = async () => {
+    if (!demoLoginConfig.enabled) return;
+    setDemoLoginLoading(true);
+    try {
+      const response = await api.auth.login({
+        email: demoLoginConfig.email,
+        password: demoLoginConfig.password,
+      });
+      localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+      router.push("/client/welcome?demo=1");
+    } catch {
+      toast.error("Demo login failed. Check credentials or try again.");
+    } finally {
+      setDemoLoginLoading(false);
+    }
+  };
+
   // Don't render anything during SSR
   if (typeof window === 'undefined' || !mounted) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -784,37 +954,44 @@ function PreAssessmentChatPageContent() {
         variants={fadeDown}
         initial="hidden"
         animate="visible"
-        className="sticky top-0 z-50 flex justify-between items-center px-3 sm:px-4 py-2.5 sm:py-3 border-b border-gray-200/80 bg-white/95 backdrop-blur-md shadow-sm"
+        className="sticky top-0 z-50 flex items-center justify-between gap-2 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-gray-200/80 bg-white/95 backdrop-blur-md shadow-sm"
       >
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push("/pre-assessment")}
-          className="rounded-full w-9 h-9 hover:bg-primary/10 hover:text-primary transition-all active:scale-95 flex-shrink-0"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-shrink-0 min-w-0">
-          <Sparkles className="h-4 w-4 text-primary flex-shrink-0 self-center" />
-          <span className="font-semibold text-gray-900 text-xs sm:text-sm whitespace-nowrap truncate leading-none">AI Assessment</span>
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push("/pre-assessment")}
+            className="rounded-full w-9 h-9 hover:bg-primary/10 hover:text-primary transition-all active:scale-95 flex-shrink-0"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+            <span className="font-semibold text-gray-900 text-xs sm:text-sm whitespace-nowrap truncate">AI Assessment</span>
+          </div>
         </div>
-        <div className="flex-shrink-0 flex items-center justify-center">
+        <div className="flex-shrink-0">
           <Logo />
         </div>
       </motion.nav>
 
-      {/* Progress Bar */}
+      {/* Progress Bar - sticky below nav with padding so label is not cut off */}
       <AssessmentProgressBar
         progress={getAssessmentProgress()}
         answeredQuestions={answeredQuestionsCount}
       />
 
       <div className="flex-1 flex flex-col max-w-4xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-3 min-h-0">
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-3 pb-4 scroll-smooth px-1">
+        {/* Messages - same sender grouped (tight), new sender has more gap */}
+        <div className="flex-1 overflow-y-auto pb-4 scroll-smooth px-1">
           <AnimatePresence>
-            {messages.map((message) => {
+            {messages.map((message, index) => {
+              const prevRole = index > 0 ? (messages[index - 1].type === 'questionnaire' ? 'assistant' : messages[index - 1].role) : null;
+              const currentRole = message.type === 'questionnaire' ? 'assistant' : message.role;
+              const isSameSender = prevRole === currentRole;
+              const spacingClass = index === 0 ? 'mt-0' : isSameSender ? 'mt-1.5' : 'mt-4';
+
               // Handle questionnaire messages
               if (message.type === 'questionnaire') {
                 return (
@@ -824,7 +1001,7 @@ function PreAssessmentChatPageContent() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="flex gap-3 justify-start"
+                    className={`flex gap-3 justify-start ${spacingClass}`}
                   >
                     <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-primary/10">
                       <Bot className="h-4 w-4 text-primary" />
@@ -854,26 +1031,24 @@ function PreAssessmentChatPageContent() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                  className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"} ${spacingClass}`}
                 >
                   {message.role === "assistant" && (
                     <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-primary/10">
                       <Bot className="h-4 w-4 text-primary" />
                     </div>
                   )}
-                  <Card
-                    className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] transition-all hover:shadow-md ${
+                  <div
+                    className={`max-w-[85%] sm:max-w-[80%] md:max-w-[75%] rounded-2xl overflow-hidden transition-all hover:shadow-md py-2 px-3 sm:px-4 ${
                       message.role === "user"
                         ? "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-primary/20"
-                        : "bg-white border-gray-200 shadow-sm hover:border-gray-300"
+                        : "bg-white border border-gray-200/90 shadow-sm hover:border-gray-300"
                     }`}
                   >
-                    <CardContent className="py-2.5 px-3 sm:px-4">
-                      <p className={`text-sm whitespace-pre-wrap leading-relaxed ${
-                        message.role === "user" ? "text-primary-foreground" : "text-gray-900"
-                      }`}>{message.content}</p>
-                    </CardContent>
-                  </Card>
+                    <p className={`text-sm whitespace-pre-wrap leading-relaxed ${
+                      message.role === "user" ? "text-primary-foreground" : "text-gray-900"
+                    }`}>{message.content}</p>
+                  </div>
                   {message.role === "user" && (
                     <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-primary/10">
                       <User className="h-4 w-4 text-primary" />
@@ -888,19 +1063,17 @@ function PreAssessmentChatPageContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="flex gap-3 justify-start"
+              className="flex gap-3 justify-start mt-4"
             >
               <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-primary/10">
                 <Bot className="h-4 w-4 text-primary" />
               </div>
-              <Card className="bg-white border-gray-200 shadow-sm">
-                <CardContent className="py-2.5 px-4">
-                  <div className="flex items-center gap-2.5">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <span className="text-xs text-gray-600 font-medium">Thinking...</span>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="bg-white border border-gray-200/90 shadow-sm rounded-2xl py-2 px-3 sm:px-4">
+                <div className="flex items-center gap-2.5">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-xs text-gray-600 font-medium">Thinking...</span>
+                </div>
+              </div>
             </motion.div>
           )}
           {isProcessing && (
@@ -908,19 +1081,17 @@ function PreAssessmentChatPageContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="flex gap-3 justify-start"
+              className="flex gap-3 justify-start mt-4"
             >
               <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center ring-2 ring-green-200">
                 <Loader2 className="h-4 w-4 animate-spin text-green-600" />
               </div>
-              <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-sm">
-                <CardContent className="py-2.5 px-4">
-                  <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <span className="text-xs text-green-800 font-medium">Processing your assessment...</span>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 shadow-sm rounded-2xl py-2 px-3 sm:px-4">
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <span className="text-xs text-green-800 font-medium">Processing your assessment...</span>
+                </div>
+              </div>
             </motion.div>
           )}
           <div ref={messagesEndRef} />
@@ -953,73 +1124,122 @@ function PreAssessmentChatPageContent() {
           </motion.div>
         )}
 
-        {/* Input Area */}
+        {/* View My Snapshot + Assessment Context - at bottom beside input */}
+        {!assessmentComplete && (
+          <div className="flex items-center justify-center gap-2 sm:gap-3 py-2 px-1 flex-shrink-0 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full border-primary/30 text-primary hover:bg-primary/10"
+              onClick={() => setSoftSnapshotOpen(true)}
+            >
+              View My Snapshot
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full border-gray-200 hover:bg-gray-50 text-muted-foreground hover:text-foreground gap-1.5"
+              onClick={() => setAssessmentContextOpen(true)}
+              aria-label="Assessment Context"
+            >
+              <Info className="h-4 w-4" />
+              <span className="text-xs sm:text-sm">Assessment Context</span>
+            </Button>
+            {isDemoMode && demoLoginConfig.enabled && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full border-amber-200 text-amber-700 hover:bg-amber-50"
+                onClick={handleDemoSubmit}
+                disabled={demoLoginLoading}
+              >
+                {demoLoginLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Input Area - plain div to avoid ShadCN Card default padding */}
         {!assessmentComplete ? (
-          <Card className="border-gray-200/80 shadow-lg bg-white/95 backdrop-blur-sm sticky bottom-0 z-40">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex gap-2 sm:gap-2.5">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Type your message..."
-                  disabled={isLoading || isProcessing}
-                  className="flex-1 h-10 sm:h-11 rounded-xl border-2 focus:border-primary/50 transition-colors text-sm"
-                  aria-label="Type your message"
-                />
+          <div className="border border-gray-200/80 rounded-xl shadow-lg bg-white/95 backdrop-blur-sm sticky bottom-0 z-40 py-3 sm:py-3.5 px-3 sm:px-4">
+            <div className="flex gap-2 sm:gap-2.5">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message..."
+                disabled={isLoading || isProcessing}
+                className="flex-1 h-10 sm:h-11 rounded-xl border-2 focus:border-primary/50 transition-colors text-sm"
+                aria-label="Type your message"
+              />
+              <Button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading || isProcessing}
+                className="px-4 sm:px-6 h-10 sm:h-11 rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex-shrink-0"
+                aria-label="Send message"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            {canEndConversation() && (
+              <div className="mt-2.5 sm:mt-3 flex justify-end">
                 <Button
-                  onClick={handleSend}
-                  disabled={!input.trim() || isLoading || isProcessing}
-                  className="px-4 sm:px-6 h-10 sm:h-11 rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex-shrink-0"
-                  aria-label="Send message"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEndConversation}
+                  disabled={isLoading || isProcessing}
+                  className="text-xs h-7 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all"
                 >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
+                  End Conversation
                 </Button>
               </div>
-              {canEndConversation() && (
-                <div className="mt-2.5 sm:mt-3 flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleEndConversation}
-                    disabled={isLoading || isProcessing}
-                    className="text-xs h-7 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all"
-                  >
-                    End Conversation
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            )}
+          </div>
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
+            className="border border-primary/30 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 shadow-lg py-5 px-4 sm:px-6 text-center space-y-4"
           >
-            <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 shadow-lg">
-              <CardContent className="p-6 text-center space-y-4">
-                <div className="flex items-center justify-center gap-2 text-primary mb-2">
-                  <CheckCircle2 className="h-6 w-6" />
-                  <h3 className="text-lg font-semibold">Assessment Complete!</h3>
-                </div>
-                <p className="text-sm text-gray-700">
-                  Based on our conversation, we're ready to match you with a therapist.
-                </p>
-                <Button 
-                  onClick={() => router.push(`/auth/sign-up?method=chat&sessionId=${sessionId || ''}`)} 
-                  className="w-full h-11 rounded-xl shadow-md hover:shadow-lg transition-all" 
-                  size="lg"
-                >
-                  Continue to Sign Up
-                  <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-center gap-2 text-primary mb-2">
+              <CheckCircle2 className="h-6 w-6" />
+              <h3 className="text-lg font-semibold">Assessment Complete!</h3>
+            </div>
+            <p className="text-sm text-gray-700">
+              Based on our conversation, we're ready to match you with a therapist.
+            </p>
+            <Button 
+              onClick={() => router.push(`/auth/sign-up?method=chat&sessionId=${sessionId || ''}`)} 
+              className="w-full h-11 rounded-xl shadow-md hover:shadow-lg transition-all" 
+              size="lg"
+            >
+              Continue to Sign Up
+              <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
+            </Button>
+            {isDemoMode && demoLoginConfig.enabled && (
+              <Button
+                variant="outline"
+                onClick={handleDemoSubmit}
+                disabled={demoLoginLoading}
+                className="w-full h-11 rounded-xl border-primary/30"
+                size="lg"
+              >
+                {demoLoginLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+            )}
           </motion.div>
         )}
       </div>
@@ -1042,6 +1262,18 @@ function PreAssessmentChatPageContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Assessment Context & Soft Snapshot modals - pitch demo */}
+      <AssessmentContextModal
+        open={assessmentContextOpen}
+        onOpenChange={setAssessmentContextOpen}
+        useDemoContent={true}
+      />
+      <SoftSnapshotModal
+        open={softSnapshotOpen}
+        onOpenChange={setSoftSnapshotOpen}
+        useDemoContent={true}
+      />
 
       {/* Debug Panel */}
       <ChatbotDebugPanel onInjectResponse={handleDebugInject} />

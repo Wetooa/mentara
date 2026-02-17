@@ -27,7 +27,6 @@ export interface UsersData {
 export async function generateUsers(prisma: PrismaClient, config: UserConfig): Promise<UsersData> {
   console.log('  Creating user accounts...');
   
-  // Hash the default password once
   const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
   
   const result: UsersData = {
@@ -38,16 +37,91 @@ export async function generateUsers(prisma: PrismaClient, config: UserConfig): P
     moderators: [],
   };
 
-  // Create test accounts first
   await createTestAccounts(prisma, hashedPassword, result);
-
-  // Generate additional users to meet config requirements
   await generateAdditionalUsers(prisma, config, hashedPassword, result);
 
   console.log(`    ✅ ${result.users.length} users created`);
   console.log(`    📊 ${result.clients.length} clients, ${result.therapists.length} therapists, ${result.admins.length} admins, ${result.moderators.length} moderators`);
 
   return result;
+}
+
+/**
+ * Ensure all test accounts exist (create only if missing). Additive / idempotent.
+ * Returns how many were created.
+ */
+export async function ensureTestAccounts(prisma: PrismaClient): Promise<number> {
+  const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+  let created = 0;
+
+  for (const account of ALL_TEST_ACCOUNTS) {
+    const existing = await prisma.user.findUnique({ where: { id: account.id } });
+    if (existing) continue;
+
+    const user = await prisma.user.create({
+      data: {
+        id: account.id,
+        email: account.email,
+        firstName: account.firstName,
+        lastName: account.lastName,
+        role: account.role,
+        password: hashedPassword,
+        emailVerified: true,
+        bio: account.bio,
+        isActive: account.isActive ?? true,
+        avatarUrl: generateAvatarUrl(account.firstName, account.lastName),
+        createdAt: randomPastDate(90),
+      },
+    });
+
+    const result: UsersData = {
+      users: [user],
+      clients: [],
+      therapists: [],
+      admins: [],
+      moderators: [],
+    };
+    await createRoleSpecificProfile(prisma, user, account, result);
+    created++;
+  }
+
+  return created;
+}
+
+/**
+ * Add users up to config targets (only creates the shortfall). Additive.
+ * Returns total created.
+ */
+export async function addUsersUpTo(prisma: PrismaClient, config: UserConfig): Promise<number> {
+  const [currentClients, currentTherapists, currentAdmins, currentModerators] = await Promise.all([
+    prisma.client.count(),
+    prisma.therapist.count(),
+    prisma.admin.count(),
+    prisma.moderator.count(),
+  ]);
+
+  const needed = {
+    clients: Math.max(0, config.clients - currentClients),
+    therapists: Math.max(0, config.therapists - currentTherapists),
+    admins: Math.max(0, config.admins - currentAdmins),
+    moderators: Math.max(0, config.moderators - currentModerators),
+  };
+
+  const totalNeeded =
+    needed.clients + needed.therapists + needed.admins + needed.moderators;
+  if (totalNeeded === 0) return 0;
+
+  const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+  const result: UsersData = {
+    users: [],
+    clients: [],
+    therapists: [],
+    admins: [],
+    moderators: [],
+  };
+
+  await generateAdditionalUsers(prisma, needed, hashedPassword, result);
+  return result.users.length;
 }
 
 /**

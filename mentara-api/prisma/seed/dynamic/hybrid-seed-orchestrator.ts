@@ -148,11 +148,15 @@ export class HybridSeedOrchestrator {
   ): Promise<boolean> {
     const clients = await prisma.client.findMany({
       include: {
-        _count: {
-          select: {
-            posts: true,
-            comments: true,
-            communityMembers: true,
+        user: {
+          include: {
+            _count: {
+              select: {
+                posts: true,
+                comments: true,
+                memberships: true,
+              },
+            },
           },
         },
       },
@@ -160,9 +164,10 @@ export class HybridSeedOrchestrator {
 
     let violations = 0;
     for (const client of clients) {
-      if (client._count.posts < 5) violations++;
-      if (client._count.comments < 10) violations++;
-      if (client._count.communityMembers < 1) violations++;
+      const c = client.user._count;
+      if (c.posts < 5) violations++;
+      if (c.comments < 10) violations++;
+      if (c.memberships < 1) violations++;
     }
 
     console.log(
@@ -180,8 +185,14 @@ export class HybridSeedOrchestrator {
         _count: {
           select: {
             assignedClients: true,
-            posts: true,
             meetings: true,
+          },
+        },
+        user: {
+          include: {
+            _count: {
+              select: { posts: true },
+            },
           },
         },
       },
@@ -190,7 +201,7 @@ export class HybridSeedOrchestrator {
     let violations = 0;
     for (const therapist of therapists) {
       if (therapist._count.assignedClients < 2) violations++;
-      if (therapist._count.posts < 2) violations++;
+      if (therapist.user._count.posts < 2) violations++;
       if (therapist._count.meetings < 4) violations++;
     }
 
@@ -207,8 +218,7 @@ export class HybridSeedOrchestrator {
       include: {
         _count: {
           select: {
-            members: true,
-            posts: true,
+            memberships: true,
           },
         },
       },
@@ -216,8 +226,7 @@ export class HybridSeedOrchestrator {
 
     let violations = 0;
     for (const community of communities) {
-      if (community._count.members < 8) violations++;
-      if (community._count.posts < 10) violations++;
+      if (community._count.memberships < 8) violations++;
     }
 
     console.log(

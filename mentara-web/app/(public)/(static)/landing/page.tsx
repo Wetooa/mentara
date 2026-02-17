@@ -265,10 +265,11 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Hero Section - pt clears sticky nav; safe-area for notched mobile */}
       <section
         ref={heroRef}
-        className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-tertiary via-background to-primary/10 overflow-hidden"
+        className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-tertiary via-background to-primary/10 overflow-hidden pb-8"
+        style={{ paddingTop: "max(5rem, calc(env(safe-area-inset-top, 0px) + 3rem))" }}
       >
         {/* Background decorations */}
         <div className="absolute inset-0 bg-grid-black/[0.02] bg-[size:50px_50px]" />
@@ -277,24 +278,24 @@ export default function LandingPage() {
 
         <motion.div
           style={{ y: heroY, opacity: heroOpacity }}
-          className="container px-4 mx-auto relative z-10"
+          className="container px-4 sm:px-6 mx-auto relative z-10"
         >
           <motion.div
             initial="hidden"
             animate="visible"
             variants={containerVariants}
-            className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto"
+            className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center max-w-7xl mx-auto"
           >
             {/* Left content */}
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               <motion.div variants={itemVariants}>
                 <Badge
                   variant="secondary"
-                  className="mb-4 bg-primary/10 text-primary border-primary/20"
+                  className="mb-3 sm:mb-4 bg-primary/10 text-primary border-primary/20"
                 >
                   🌟 Mental Health Platform
                 </Badge>
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                   <span className="text-secondary">Safe Support.</span>{" "}
                   <br className="hidden sm:block" />
                   <span className="text-secondary">Expert Help.</span>{" "}
@@ -307,7 +308,13 @@ export default function LandingPage() {
 
               <motion.p
                 variants={itemVariants}
-                className="text-xl text-muted-foreground max-w-lg leading-relaxed"
+                className="text-base sm:text-xl text-muted-foreground max-w-lg leading-relaxed"
+              >
+                Connecting Filipinos to the right therapist.
+              </motion.p>
+              <motion.p
+                variants={itemVariants}
+                className="text-sm sm:text-lg text-muted-foreground/90 max-w-lg leading-relaxed"
               >
                 Begin your journey to wellness with personalized support from
                 experts who understand your unique needs and are committed to
@@ -316,24 +323,34 @@ export default function LandingPage() {
 
               <motion.div
                 variants={itemVariants}
-                className="flex flex-col sm:flex-row gap-4"
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4"
               >
-                <Link href="/pre-assessment">
+                <Link href="/pre-assessment/chat?demo=1" className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all group"
+                    className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg shadow-lg hover:shadow-xl transition-all group"
                   >
-                    Get Started Today
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    Talk to Mentara
+                    <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link href="/about">
+                <Link href="/pre-assessment" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="lg"
-                    className="border-primary/20 text-primary hover:bg-primary/10 font-medium px-8 py-4 rounded-xl text-lg group"
+                    className="w-full sm:w-auto border-primary/20 text-primary hover:bg-primary/10 font-medium px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg group"
                   >
-                    <Play className="mr-2 w-5 h-5" />
+                    Get Started Today
+                    <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+                <Link href="/about" className="w-full sm:w-auto">
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="w-full sm:w-auto text-primary hover:bg-primary/10 font-medium px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg group"
+                  >
+                    <Play className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
                     Learn More
                   </Button>
                 </Link>
@@ -342,7 +359,7 @@ export default function LandingPage() {
               {/* Enhanced animated stats */}
               <motion.div
                 variants={itemVariants}
-                className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-8"
+                className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6 sm:pt-8"
               >
                 {stats.map((stat, index) => (
                   <AnimatedStat
@@ -358,7 +375,7 @@ export default function LandingPage() {
 
             {/* Right content - Hero image */}
             <motion.div variants={itemVariants} className="relative">
-              <div className="relative aspect-square max-w-lg mx-auto">
+              <div className="relative aspect-square max-w-[280px] sm:max-w-md lg:max-w-lg mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-tertiary/30 rounded-3xl transform rotate-6" />
                 <div className="relative bg-card rounded-3xl overflow-hidden shadow-2xl border border-border">
                   <Image
@@ -377,8 +394,8 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-background">
-        <div className="container px-4 mx-auto">
+      <section className="py-16 sm:py-24 bg-background">
+        <div className="container px-4 sm:px-6 mx-auto">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -393,7 +410,7 @@ export default function LandingPage() {
               >
                 Why Choose Mentara
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-secondary mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-secondary mb-4 sm:mb-6">
                 Breaking Barriers Together
               </h2>
               <Separator className="w-20 mx-auto bg-primary/30 h-1 rounded-full" />
@@ -490,18 +507,18 @@ export default function LandingPage() {
       {/* Testimonials Section */}
       <section
         ref={testimonialsRef}
-        className="py-24 bg-gradient-to-br from-community-warm/5 via-background to-community-calm/5 relative overflow-hidden"
+        className="py-16 sm:py-24 bg-gradient-to-br from-community-warm/5 via-background to-community-calm/5 relative overflow-hidden"
       >
         {/* Background effects */}
         <div className="absolute inset-0 bg-grid-black/[0.02] bg-[size:40px_40px]" />
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-radial from-primary/5 to-transparent rounded-full blur-3xl" />
 
-        <div className="container px-4 mx-auto relative z-10">
+        <div className="container px-4 sm:px-6 mx-auto relative z-10">
           <motion.div
             initial="hidden"
             animate={testimonialsInView ? "visible" : "hidden"}
             variants={containerVariants}
-            className="text-center mb-16"
+            className="text-center mb-10 sm:mb-16"
           >
             <motion.div variants={itemVariants}>
               <Badge
@@ -511,7 +528,7 @@ export default function LandingPage() {
                 <Heart className="w-4 h-4 mr-2" />
                 Real Stories
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-secondary mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-secondary mb-4 sm:mb-6">
                 Voices of Healing
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -580,19 +597,19 @@ export default function LandingPage() {
       </section>
 
       {/* Trust & Security Section */}
-      <section className="py-24 bg-gradient-to-br from-background to-community-calm/5 relative overflow-hidden">
+      <section className="py-16 sm:py-24 bg-gradient-to-br from-background to-community-calm/5 relative overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 bg-grid-black/[0.01] bg-[size:60px_60px]" />
         <div className="absolute top-40 left-40 w-80 h-80 bg-community-soothing/10 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-20 w-64 h-64 bg-community-warm/10 rounded-full blur-2xl" />
 
-        <div className="container px-4 mx-auto relative z-10">
+        <div className="container px-4 sm:px-6 mx-auto relative z-10">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
             variants={containerVariants}
-            className="text-center mb-16"
+            className="text-center mb-10 sm:mb-16"
           >
             <motion.div variants={itemVariants}>
               <Badge
@@ -602,7 +619,7 @@ export default function LandingPage() {
                 <Lock className="w-4 h-4 mr-2" />
                 Security & Trust
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-secondary mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-secondary mb-4 sm:mb-6">
                 Your Safety is Our Priority
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -698,7 +715,7 @@ export default function LandingPage() {
       </section>
 
       {/* Enhanced CTA Section */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-16 sm:py-24 relative overflow-hidden">
         {/* Dynamic background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-tertiary/15" />
         <div className="absolute inset-0 bg-grid-black/[0.02] bg-[size:50px_50px]" />

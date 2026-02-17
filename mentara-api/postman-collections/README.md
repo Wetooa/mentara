@@ -598,9 +598,7 @@ Enable detailed logging in Postman:
 ## 📞 Support & Resources
 
 ### Documentation
-- [Backend API Documentation](../mentara-api/docs/)
-- [Authentication Guide](../mentara-api/docs/api/auth/)
-- [Testing Best Practices](../project-docs/technical-docs/INTEGRATION_TESTING_STRATEGY.md)
+- [Test Accounts](../docs/TEST_ACCOUNTS.md) - Seeded test credentials for API testing
 
 ### Development Tools
 - **Newman**: Command-line Postman runner

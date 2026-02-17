@@ -15,17 +15,20 @@ export class PostsEnricher extends BaseEnricher {
     let added = 0;
     let errors = 0;
 
-    // Ensure clients have minimum posts
+    // Ensure clients have minimum posts (posts live on User)
     const clients = await this.prisma.client.findMany({
       include: {
-        user: true,
-        _count: { select: { posts: true } },
+        user: {
+          include: {
+            _count: { select: { posts: true } },
+          },
+        },
       },
     });
 
     for (const client of clients) {
       try {
-        const missing = Math.max(0, 5 - client._count.posts);
+        const missing = Math.max(0, 5 - client.user._count.posts);
         if (missing > 0) {
           added += await this.ensureUserHasPosts(client.userId, missing);
         }
@@ -34,18 +37,21 @@ export class PostsEnricher extends BaseEnricher {
       }
     }
 
-    // Ensure therapists have minimum posts
+    // Ensure therapists have minimum posts (posts live on User)
     const therapists = await this.prisma.therapist.findMany({
       where: { status: 'APPROVED' },
       include: {
-        user: true,
-        _count: { select: { posts: true } },
+        user: {
+          include: {
+            _count: { select: { posts: true } },
+          },
+        },
       },
     });
 
     for (const therapist of therapists) {
       try {
-        const missing = Math.max(0, 2 - therapist._count.posts);
+        const missing = Math.max(0, 2 - therapist.user._count.posts);
         if (missing > 0) {
           added += await this.ensureUserHasPosts(therapist.userId, missing);
         }
@@ -63,7 +69,7 @@ export class PostsEnricher extends BaseEnricher {
   }
 
   async ensureUserHasPosts(userId: string, minPosts: number): Promise<number> {
-    const memberships = await this.prisma.communityMember.findMany({
+    const memberships = await this.prisma.membership.findMany({
       where: { userId },
       select: { communityId: true },
     });
@@ -72,20 +78,18 @@ export class PostsEnricher extends BaseEnricher {
       return 0; // Can't create posts without community membership
     }
 
-    const random = this.getRandom(userId, 'posts');
     const topics = this.getPostTopics();
 
     for (let i = 0; i < minPosts; i++) {
-      const communityId =
-        memberships[random.nextInt(memberships.length)].communityId;
       const topic = topics[i % topics.length];
+      const title =
+        topic.length > 80 ? topic.slice(0, 77) + '...' : topic;
 
       await this.prisma.post.create({
         data: {
           userId,
-          communityId,
+          title,
           content: topic,
-          createdAt: this.randomPastDate(60),
         },
       });
     }
@@ -97,32 +101,43 @@ export class PostsEnricher extends BaseEnricher {
     communityId: string,
     minPosts: number,
   ): Promise<number> {
-    const existing = await this.prisma.post.count({
+    const roomGroups = await this.prisma.roomGroup.findMany({
       where: { communityId },
+      include: { rooms: { take: 1 } },
     });
+    const roomIds = roomGroups.flatMap((rg) => rg.rooms.map((r) => r.id));
+    const existing =
+      roomIds.length > 0
+        ? await this.prisma.post.count({
+            where: { roomId: { in: roomIds } },
+          })
+        : 0;
 
     const missing = minPosts - existing;
     if (missing <= 0) return 0;
 
-    const members = await this.prisma.communityMember.findMany({
+    const members = await this.prisma.membership.findMany({
       where: { communityId },
       take: 10,
     });
 
     if (members.length === 0) return 0;
 
-    const random = this.getRandom(communityId, 'posts');
+    const topics = this.getPostTopics();
+    const firstRoomId = roomIds[0] ?? null;
 
     for (let i = 0; i < missing; i++) {
-      const member = members[random.nextInt(members.length)];
-      const topic = this.getPostTopics()[i % this.getPostTopics().length];
+      const member = members[i % members.length];
+      const topic = topics[i % topics.length];
+      const title =
+        topic.length > 80 ? topic.slice(0, 77) + '...' : topic;
 
       await this.prisma.post.create({
         data: {
           userId: member.userId,
-          communityId,
+          title,
           content: topic,
-          createdAt: this.randomPastDate(45),
+          ...(firstRoomId && { roomId: firstRoomId }),
         },
       });
     }

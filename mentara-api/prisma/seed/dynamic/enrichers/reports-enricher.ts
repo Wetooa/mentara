@@ -3,7 +3,7 @@
  * Creates content moderation reports for testing
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ReportStatus } from '@prisma/client';
 import { BaseEnricher, EnrichmentResult } from './base-enricher';
 
 export class ReportsEnricher extends BaseEnricher {
@@ -42,7 +42,7 @@ export class ReportsEnricher extends BaseEnricher {
               postId: post.id,
               reason:
                 this.getReportReasons()[i % this.getReportReasons().length],
-              status: i === 0 ? 'resolved' : 'pending',
+              status: i === 0 ? ReportStatus.REVIEWED : ReportStatus.PENDING,
               createdAt: this.randomPastDate(15),
             },
           });

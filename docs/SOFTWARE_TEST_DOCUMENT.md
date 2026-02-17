@@ -271,7 +271,7 @@ COLLEGE OF COMPUTER STUDIES
 - **Staging**: Production-parity environment for pre-deployment validation
 - **Production**: Live environment with smoke testing and monitoring
 - **Test Data**: Prisma seeders, synthetic AI datasets, Stripe test keys, WebRTC test configurations
-- **Test Accounts**: Documented in `docs/TEST_ACCOUNTS.md` (Client, Therapist, Admin, Moderator roles)
+- **Test Accounts**: Documented in `mentara-api/docs/TEST_ACCOUNTS.md` (Client, Therapist, Admin, Moderator roles)
 
 ---
 

@@ -55,9 +55,7 @@ export class ReviewsEnricher extends BaseEnricher {
       where: {
         therapistId,
         status: 'COMPLETED',
-        Review: {
-          none: {},
-        },
+        reviews: { none: {} },
       },
       take: minReviews,
     });
@@ -67,15 +65,16 @@ export class ReviewsEnricher extends BaseEnricher {
 
     for (const meeting of completedMeetings) {
       const template = templates[random.nextInt(templates.length)];
+      const afterDate = meeting.endTime ?? meeting.startTime;
 
       await this.prisma.review.create({
         data: {
           clientId: meeting.clientId,
           therapistId,
           meetingId: meeting.id,
-          rating: random.nextIntRange(4, 5), // 4-5 stars
-          reviewText: template,
-          createdAt: this.randomDateAfter(meeting.endTime, 3),
+          rating: random.nextIntRange(4, 5),
+          content: template,
+          createdAt: this.randomDateAfter(afterDate, 3),
         },
       });
     }

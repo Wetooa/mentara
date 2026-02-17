@@ -3,7 +3,7 @@
  * Ensures client-therapist relationships have sufficient meetings
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, MeetingStatus } from '@prisma/client';
 import { BaseEnricher, EnrichmentResult } from './base-enricher';
 
 export class MeetingsEnricher extends BaseEnricher {
@@ -15,17 +15,19 @@ export class MeetingsEnricher extends BaseEnricher {
     let added = 0;
     let errors = 0;
 
-    // Get all active client-therapist relationships
     const relationships = await this.prisma.clientTherapist.findMany({
       where: { status: 'active' },
-      include: {
-        _count: { select: { meetings: true } },
-      },
     });
 
     for (const relationship of relationships) {
       try {
-        const missing = Math.max(0, 3 - relationship._count.meetings);
+        const count = await this.prisma.meeting.count({
+          where: {
+            clientId: relationship.clientId,
+            therapistId: relationship.therapistId,
+          },
+        });
+        const missing = Math.max(0, 3 - count);
         if (missing > 0) {
           added += await this.ensureRelationshipHasMeetings(
             relationship.clientId,
@@ -38,11 +40,10 @@ export class MeetingsEnricher extends BaseEnricher {
       }
     }
 
-    // Ensure completed meetings have notes
     const completedMeetings = await this.prisma.meeting.findMany({
       where: {
         status: 'COMPLETED',
-        meetingNotes: null,
+        meetingNotes: { none: {} },
       },
       take: 50,
     });
@@ -84,9 +85,13 @@ export class MeetingsEnricher extends BaseEnricher {
       const duration = random.pickRandom([30, 60, 90]);
       const endTime = new Date(startTime.getTime() + duration * 60000);
 
-      const status = isPast
-        ? 'COMPLETED'
-        : random.pickRandom(['SCHEDULED', 'CONFIRMED', 'WAITING']);
+      const status: MeetingStatus = isPast
+        ? MeetingStatus.COMPLETED
+        : random.pickRandom([
+            MeetingStatus.SCHEDULED,
+            MeetingStatus.CONFIRMED,
+            MeetingStatus.WAITING,
+          ]);
 
       const meeting = await this.prisma.meeting.create({
         data: {
@@ -128,11 +133,12 @@ export class MeetingsEnricher extends BaseEnricher {
 
     const random = this.getRandom(meetingId, 'notes');
 
+    const noteIndex = random.nextInt(notes.length);
     await this.prisma.meetingNotes.create({
       data: {
         id: `${meetingId}-notes`,
         meetingId,
-        notes: notes[random.nextInt(notes.length)],
+        notes: notes[noteIndex],
       },
     });
 

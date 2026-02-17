@@ -43,7 +43,7 @@ mentara-api/
 │   ├── billing/           # Payment processing
 │   ├── admin/             # Admin dashboard
 │   └── ...
-└── docs/                  # Comprehensive API documentation
+└── docs/                  # Test accounts (see docs/TEST_ACCOUNTS.md)
 ```
 
 ## 📊 Database Schema
@@ -95,6 +95,25 @@ npm run db:migrate    # Run migrations
 npm run db:generate   # Generate Prisma client
 npm run db:seed       # Seed with initial data
 ```
+
+   **Restore schema without migrations** (e.g. tables were dropped):
+```bash
+npm run db:push       # Push current schema to DB
+npm run db:generate   # Regenerate Prisma client
+npm run db:seed       # Seed (use --force to reseed over existing data)
+```
+
+   **Additive seeding** (add more data without wiping tables):
+```bash
+npm run db:seed:add   # Ensures test accounts/communities, tops up users/communities, runs enrichers
+# Or: npm run db:seed -- --add --mode=light
+```
+   Use this when you want to add new users, posts, relationships, etc. on top of existing data. Never truncates.
+
+   **Basic test accounts after seeding** (password for all: `password123`):
+   - Client: `client1@mentaratest.dev`
+   - Therapist: `therapist1@mentaratest.dev`
+   - See [docs/TEST_ACCOUNTS.md](docs/TEST_ACCOUNTS.md) for full list.
 
 4. **Start development server**:
 ```bash
@@ -267,36 +286,28 @@ All test accounts use the password: **`password123`**
 
 **Note**: These are development/test accounts only. Do not use in production.
 
-## 📡 API Documentation
+## 📡 API Modules
 
-### Core Modules
-
-| Module | Description | Documentation |
-|--------|-------------|---------------|
-| **Auth** | User authentication & registration | [📖 docs/api/auth/](docs/api/auth/) |
-| **Messaging** | Real-time messaging with WebSocket | [📖 docs/api/messaging/](docs/api/messaging/) |
-| **Booking** | Session scheduling & availability | [📖 docs/api/booking/](docs/api/booking/) |
-| **Communities** | Support groups & discussions | [📖 docs/api/communities/](docs/api/communities/) |
-| **Therapist** | Therapist management & recommendations | [📖 docs/api/therapist/](docs/api/therapist/) |
-| **Users** | User profiles & management | [📖 docs/api/users/](docs/api/users/) |
-| **Client** | Client-specific functionality | [📖 docs/api/client/](docs/api/client/) |
-| **Pre-Assessment** | Mental health assessments | [📖 docs/api/pre-assessment/](docs/api/pre-assessment/) |
-| **Reviews** | Therapist reviews & ratings | [📖 docs/api/reviews/](docs/api/reviews/) |
-| **Files** | File upload & management | [📖 docs/api/files/](docs/api/files/) |
-| **Billing** | Payment processing | [📖 docs/api/billing/](docs/api/billing/) |
-| **Admin** | Admin dashboard | [📖 docs/api/admin/](docs/api/admin/) |
-| **Sessions** | Therapy session tracking | [📖 docs/api/sessions/](docs/api/sessions/) |
-| **Worksheets** | Therapy assignments | [📖 docs/api/worksheets/](docs/api/worksheets/) |
-| **Notifications** | User notifications | [📖 docs/api/notifications/](docs/api/notifications/) |
-| **Analytics** | Usage analytics | [📖 docs/api/analytics/](docs/api/analytics/) |
-| **Audit Logs** | System audit trails | [📖 docs/api/audit-logs/](docs/api/audit-logs/) |
-| **Moderation** | AI-powered content moderation | [📖 docs/api/moderation/](docs/api/moderation/) |
-
-### Quick Start Guides
-- [🚀 Frontend Integration](docs/guides/frontend-integration.md)
-- [🔧 Development Workflow](docs/guides/development-workflow.md)
-- [🧪 Testing Guide](docs/guides/testing.md)
-- [🔐 Authentication Setup](docs/guides/authentication.md)
+| Module | Description |
+|--------|-------------|
+| **Auth** | User authentication & registration |
+| **Messaging** | Real-time messaging with WebSocket |
+| **Booking** | Session scheduling & availability |
+| **Communities** | Support groups & discussions |
+| **Therapist** | Therapist management & recommendations |
+| **Users** | User profiles & management |
+| **Client** | Client-specific functionality |
+| **Pre-Assessment** | Mental health assessments |
+| **Reviews** | Therapist reviews & ratings |
+| **Files** | File upload & management |
+| **Billing** | Payment processing |
+| **Admin** | Admin dashboard |
+| **Sessions** | Therapy session tracking |
+| **Worksheets** | Therapy assignments |
+| **Notifications** | User notifications |
+| **Analytics** | Usage analytics |
+| **Audit Logs** | System audit trails |
+| **Moderation** | AI-powered content moderation |
 
 ## 🌟 Key Features
 
@@ -418,11 +429,7 @@ mentara-api/
 │   ├── migrations/              # Database migrations
 │   ├── schema.prisma            # Main schema file
 │   └── seed.ts                  # Database seeding
-├── docs/                        # API documentation
-│   ├── api/                     # Module-specific docs
-│   ├── guides/                  # Development guides
-│   ├── examples/                # Code examples
-│   └── architecture/            # Architecture docs
+├── docs/                        # Test accounts (TEST_ACCOUNTS.md)
 ├── scripts/                     # Utility scripts
 └── schema/                      # TypeScript schemas
 ```
@@ -459,7 +466,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Documentation**: [docs/](docs/)
+- **Test Accounts**: [docs/TEST_ACCOUNTS.md](docs/TEST_ACCOUNTS.md)
 - **Issues**: [GitHub Issues](https://github.com/your-org/mentara-api/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/your-org/mentara-api/discussions)
 

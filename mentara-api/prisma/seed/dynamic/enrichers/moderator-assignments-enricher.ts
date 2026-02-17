@@ -62,7 +62,7 @@ export class ModeratorAssignmentsEnricher extends BaseEnricher {
 
     const availableCommunities = await this.prisma.community.findMany({
       where: {
-        moderators: {
+        moderatorCommunities: {
           none: { moderatorId },
         },
       },
@@ -89,14 +89,14 @@ export class ModeratorAssignmentsEnricher extends BaseEnricher {
 
     if (existingModerators > 0) return 0;
 
-    // Assign a moderator
-    const moderator = await this.prisma.moderator.findFirst({
-      orderBy: {
-        moderatorCommunities: {
-          _count: 'asc', // Moderator with fewest communities
-        },
+    const moderatorsWithCount = await this.prisma.moderator.findMany({
+      include: {
+        _count: { select: { moderatorCommunities: true } },
       },
     });
+    const moderator = moderatorsWithCount.sort(
+      (a, b) => a._count.moderatorCommunities - b._count.moderatorCommunities,
+    )[0];
 
     if (!moderator) return 0;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import { UserDisplay } from "@/components/common/UserDisplay";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 import { getSidebarStorageKey, getStorageItem } from "@/lib/config/storage";
+import { getDemoLoginConfig } from "@/lib/demo-config";
 
 // Lazy load heavy layout components
 const NotificationDropdown = dynamic(
@@ -100,7 +101,7 @@ export default function MainLayout({
     }
   };
 
-  const navItems = [
+  const baseNavItems = [
     {
       name: "Dashboard",
       path: "/client",
@@ -138,6 +139,23 @@ export default function MainLayout({
       id: "worksheets",
     },
   ];
+
+  const demoConfig = useMemo(() => getDemoLoginConfig(), []);
+  const navItems = useMemo(
+    () =>
+      demoConfig.enabled
+        ? [
+            ...baseNavItems,
+            {
+              name: "Your Matches (demo)",
+              path: "/client/welcome?demo=1",
+              icon: "/icons/therapist.svg",
+              id: "welcome-demo",
+            },
+          ]
+        : baseNavItems,
+    [demoConfig.enabled]
+  );
 
   return (
     <>

@@ -19,10 +19,10 @@ export function AssessmentProgressBar({
   const clampedProgress = Math.min(100, Math.max(0, progress));
 
   return (
-    <div className={cn("w-full bg-gray-50/80 border-b border-gray-200/50 px-3 sm:px-4 py-2.5 sm:py-3 sticky top-[57px] sm:top-[61px] z-40 backdrop-blur-sm", className)}>
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-2 gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+    <div className={cn("w-full bg-gray-50/80 border-b border-gray-200/50 sticky top-18 z-40 backdrop-blur-sm box-border", className)}>
+      <div className="max-w-4xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 min-h-[4rem] flex flex-col justify-center">
+        <div className="flex items-center justify-between mb-2 gap-2 min-h-[1.25rem]">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 overflow-visible">
             <span className="text-xs font-medium text-gray-700 whitespace-nowrap">Assessment Progress</span>
             {answeredQuestions !== undefined && totalQuestions !== undefined && (
               <span className="text-xs text-gray-500 whitespace-nowrap">

@@ -3,7 +3,7 @@
  * Ensures users receive relevant notifications
  */
 
-import { PrismaClient } from '@prisma/client';
+import { NotificationType, PrismaClient } from '@prisma/client';
 import { BaseEnricher, EnrichmentResult } from './base-enricher';
 
 export class NotificationsEnricher extends BaseEnricher {
@@ -69,32 +69,36 @@ export class NotificationsEnricher extends BaseEnricher {
     return missing;
   }
 
-  private getNotificationTemplates() {
+  private getNotificationTemplates(): {
+    title: string;
+    message: string;
+    type: NotificationType;
+  }[] {
     return [
       {
         title: 'New comment on your post',
         message: 'Someone commented on your recent post',
-        type: 'comment',
+        type: NotificationType.MESSAGE_REACTION,
       },
       {
         title: 'Upcoming session reminder',
         message: 'You have a therapy session tomorrow',
-        type: 'appointment',
+        type: NotificationType.APPOINTMENT_REMINDER,
       },
       {
         title: 'New message received',
         message: 'You have a new message in your inbox',
-        type: 'message',
+        type: NotificationType.MESSAGE_RECEIVED,
       },
       {
         title: 'Worksheet assigned',
         message: 'Your therapist assigned you a new worksheet',
-        type: 'worksheet',
+        type: NotificationType.WORKSHEET_ASSIGNED,
       },
       {
-        title: 'Community activity',
-        message: 'New posts in communities you follow',
-        type: 'community',
+        title: 'Review received',
+        message: 'A client left you a review',
+        type: NotificationType.REVIEW_RECEIVED,
       },
     ];
   }

@@ -19,6 +19,7 @@ password123
 - **Role:** Client
 - **ID:** `dev_client_1`
 - **Features:** Full client access, community memberships, can book therapy sessions
+- **Phase 2 demo:** Used as the default demo login from the AI assessment chat ("Submit & view Your Matches"). When demo is enabled, the pre-assessment chat can log in as this user and redirect to the Your Matches (welcome) screen.
 
 ### Client 2
 

@@ -1,6 +1,7 @@
 /**
  * Rooms Enricher
- * Creates video chat rooms for therapy sessions
+ * Ensures communities have room groups with rooms (discussion rooms).
+ * Room in this schema is a community discussion room, not a meeting video room.
  */
 
 import { PrismaClient } from '@prisma/client';
@@ -15,20 +16,21 @@ export class RoomsEnricher extends BaseEnricher {
     let added = 0;
     let errors = 0;
 
-    // Create rooms for video meetings that don't have one
-    const videoMeetings = await this.prisma.meeting.findMany({
-      where: {
-        meetingType: 'video',
-        Room: {
-          none: {},
-        },
-      },
-      take: 30,
+    const roomGroups = await this.prisma.roomGroup.findMany({
+      include: { _count: { select: { rooms: true } } },
     });
 
-    for (const meeting of videoMeetings) {
+    for (const group of roomGroups) {
+      if (group._count.rooms > 0) continue;
       try {
-        added += await this.createRoomForMeeting(meeting.id);
+        await this.prisma.room.create({
+          data: {
+            name: 'General',
+            order: 0,
+            roomGroupId: group.id,
+          },
+        });
+        added++;
       } catch (error) {
         errors++;
       }
@@ -40,20 +42,5 @@ export class RoomsEnricher extends BaseEnricher {
       itemsUpdated: 0,
       errors,
     };
-  }
-
-  private async createRoomForMeeting(meetingId: string): Promise<number> {
-    const roomId = `room-${meetingId}`;
-
-    await this.prisma.room.create({
-      data: {
-        id: roomId,
-        meetingId,
-        isActive: false, // Will be active during session
-        createdAt: this.randomPastDate(5),
-      },
-    });
-
-    return 1;
   }
 }

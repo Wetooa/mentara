@@ -11,38 +11,51 @@ import { CacheService } from './cache.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const logger = new Logger('CacheModule');
-        const redisUrl = configService.get<string>('REDIS_URL');
-        const redisHost = configService.get<string>('REDIS_HOST') || 'localhost';
-        const redisPort = configService.get<number>('REDIS_PORT') || 6379;
-        
-        // Use Redis if URL or host is configured, otherwise use in-memory cache
-        if (redisUrl || redisHost) {
+        // Purpose-based env: CACHE_STORE_* preferred; REDIS_* kept for backward compatibility
+        const cacheStoreUrl =
+          configService.get<string>('CACHE_STORE_URL') ||
+          configService.get<string>('REDIS_URL');
+        const cacheStoreHost =
+          configService.get<string>('CACHE_STORE_HOST') ||
+          configService.get<string>('REDIS_HOST') ||
+          'localhost';
+        const cacheStorePort =
+          configService.get<number>('CACHE_STORE_PORT') ||
+          configService.get<number>('REDIS_PORT') ||
+          6379;
+
+        if (cacheStoreUrl || cacheStoreHost) {
           try {
             const store = await redisStore({
-              url: redisUrl || `redis://${redisHost}:${redisPort}`,
+              url:
+                cacheStoreUrl || `redis://${cacheStoreHost}:${cacheStorePort}`,
               ttl: 300 * 1000, // 5 minutes in milliseconds
             });
-            
-            logger.log(`✅ Redis cache connected: ${redisUrl || `${redisHost}:${redisPort}`}`);
-            
+
+            logger.log(
+              `Cache store connected: ${cacheStoreUrl || `${cacheStoreHost}:${cacheStorePort}`}`,
+            );
+
             return {
               store: () => store,
-              ttl: 300 * 1000, // 5 minutes default TTL
+              ttl: 300 * 1000,
             };
-          } catch (error) {
-            logger.warn(`⚠️ Failed to connect to Redis: ${error.message}. Falling back to in-memory cache.`);
+          } catch (error: any) {
+            logger.warn(
+              `Cache store unavailable (${error?.message ?? error}). Using in-memory cache.`,
+            );
             return {
-              ttl: 300, // 5 minutes default TTL
-              max: 1000, // Maximum number of items in cache
+              ttl: 300,
+              max: 1000,
             };
           }
-        } else {
-          logger.log('📦 Using in-memory cache (Redis not configured)');
-          return {
-            ttl: 300, // 5 minutes default TTL
-            max: 1000, // Maximum number of items in cache
-          };
         }
+
+        logger.log('Using in-memory cache (no cache store configured)');
+        return {
+          ttl: 300,
+          max: 1000,
+        };
       },
       inject: [ConfigService],
     }),
