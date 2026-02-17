@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import {
@@ -27,16 +27,25 @@ import {
 import { TherapistRecommendationCard } from "@/components/client/TherapistRecommendationCard";
 import { TherapistSelectionSummary } from "@/components/client/TherapistSelectionSummary";
 import { CommunityRecommendationCard } from "@/components/client/CommunityRecommendationCard";
+import { CommunityRecommendationDetailModal } from "@/components/client/CommunityRecommendationDetailModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import type { CommunityRecommendation } from "@/lib/api/services/communities";
 
 export default function ClientWelcomePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const api = useApi();
   const queryClient = useQueryClient();
 
+  const isDemoMode =
+    searchParams.get("demo") === "1" || searchParams.get("forceRefresh") === "1";
+
   const [selectedTherapists, setSelectedTherapists] = useState<string[]>([]);
   const [selectedCommunities, setSelectedCommunities] = useState<string[]>([]);
+  const [communityDetailModal, setCommunityDetailModal] =
+    useState<CommunityRecommendation | null>(null);
+  const [isJoiningCommunity, setIsJoiningCommunity] = useState(false);
   const [currentStep, setCurrentStep] = useState<
     | "loading"
     | "recommendations"
@@ -47,7 +56,7 @@ export default function ClientWelcomePage() {
     | "complete"
   >("loading");
 
-  // Use unified hook for recommendations
+  // Use unified hook for recommendations (forceRefresh when ?demo=1 or ?forceRefresh=1 for pitch demo)
   const {
     therapists: recommendedTherapists,
     communities: recommendedCommunities,
@@ -57,7 +66,7 @@ export default function ClientWelcomePage() {
     welcomeMessage,
     isFirstTime,
     averageMatchScore,
-  } = useWelcomeRecommendations();
+  } = useWelcomeRecommendations({ forceRefresh: isDemoMode });
 
   // Communities are now included in the main recommendations response
 
@@ -197,6 +206,27 @@ export default function ClientWelcomePage() {
       "You can explore therapist recommendations later from your dashboard."
     );
     router.push("/client");
+  };
+
+  const handleJoinGroupFromModal = async (community: CommunityRecommendation) => {
+    setIsJoiningCommunity(true);
+    try {
+      const result = await api.communities.joinCommunities([community.slug]);
+      const successCount = result.data.successfulJoins.length;
+      if (successCount > 0) {
+        setSelectedCommunities((prev) =>
+          prev.includes(community.slug) ? prev : [...prev, community.slug]
+        );
+        toast.success(`Joined ${community.name}`);
+      }
+      if (result.data.failedJoins.length > 0) {
+        toast.warning(result.data.failedJoins[0].reason ?? "Could not join");
+      }
+    } catch {
+      toast.error("Failed to join community. Please try again.");
+    } finally {
+      setIsJoiningCommunity(false);
+    }
   };
 
   const maxSelections = 5;
@@ -463,6 +493,7 @@ export default function ClientWelcomePage() {
                       handleCommunitySelect(community.slug, selected)
                     }
                     showMatchExplanation={true}
+                    onViewDetails={setCommunityDetailModal}
                     disabled={
                       !selectedCommunities.includes(community.slug) &&
                       selectedCommunities.length >= maxCommunitySelections
@@ -470,6 +501,14 @@ export default function ClientWelcomePage() {
                   />
                 ))}
               </div>
+
+              <CommunityRecommendationDetailModal
+                community={communityDetailModal}
+                open={!!communityDetailModal}
+                onOpenChange={(open) => !open && setCommunityDetailModal(null)}
+                onJoinGroup={handleJoinGroupFromModal}
+                isJoining={isJoiningCommunity}
+              />
 
               {/* Community Action Buttons */}
               <Card>
@@ -583,19 +622,19 @@ export default function ClientWelcomePage() {
           <div className="space-y-3 sm:space-y-4">
             <div className="inline-block">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-green-600 via-green-700 to-green-800 bg-clip-text text-transparent mb-3 sm:mb-4 leading-tight">
-                Welcome to Mentara!
+                Your Matches
               </h1>
               <div className="h-1 w-24 sm:w-32 bg-gradient-to-r from-green-500 to-green-700 mx-auto rounded-full"></div>
             </div>
             <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium px-1">
               Based on your personalized assessment, we&apos;ve discovered
-              therapists who are
+              therapists and communities
               <span className="text-green-600 font-semibold">
                 {" "}
-                perfectly matched
+                matched
               </span>{" "}
-              to your unique needs. Select up to {maxSelections} therapists
-              you&apos;d like to connect with.
+              to your needs. Select therapists and communities below, then
+              continue.
             </p>
           </div>
 
@@ -645,11 +684,14 @@ export default function ClientWelcomePage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-gray-900">
-                        Personalized Matches
+                        Your Matches
                       </h3>
                       <p className="text-gray-600 font-medium">
-                        Found {recommendedTherapists?.length || 0} exceptional
-                        therapists matching your unique preferences
+                        {recommendedTherapists?.length || 0} therapist
+                        {(recommendedTherapists?.length ?? 0) !== 1 ? "s" : ""}{" "}
+                        and {(recommendedCommunities?.length ?? 0)} communit
+                        {(recommendedCommunities?.length ?? 0) !== 1 ? "ies" : "y"}{" "}
+                        matched to your snapshot
                       </p>
                     </div>
                   </div>
@@ -681,7 +723,8 @@ export default function ClientWelcomePage() {
               </CardContent>
             </Card>
 
-            {/* Therapist Recommendations */}
+            {/* Therapist Matches */}
+            <h3 className="text-lg font-bold text-gray-900">Therapist Matches</h3>
             <div className="grid gap-6">
               {(recommendedTherapists || []).map((therapist, index) => (
                 <TherapistRecommendationCard
@@ -700,6 +743,34 @@ export default function ClientWelcomePage() {
                 />
               ))}
             </div>
+
+            {/* Recommended Communities - same screen (split view) */}
+            {(recommendedCommunities?.length ?? 0) > 0 && (
+              <>
+                <h3 className="text-lg font-bold text-gray-900 pt-4">
+                  Recommended Communities
+                </h3>
+                <div className="grid gap-6">
+                  {(recommendedCommunities || []).map((community, index) => (
+                    <CommunityRecommendationCard
+                      key={community.id}
+                      community={community}
+                      rank={index + 1}
+                      isSelected={selectedCommunities.includes(community.slug)}
+                      onSelect={(selected) =>
+                        handleCommunitySelect(community.slug, selected)
+                      }
+                      showMatchExplanation={true}
+                      onViewDetails={setCommunityDetailModal}
+                      disabled={
+                        !selectedCommunities.includes(community.slug) &&
+                        selectedCommunities.length >= maxSelections
+                      }
+                    />
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* Selection Summary & Actions */}
             {selectedTherapists.length > 0 && (
@@ -731,6 +802,14 @@ export default function ClientWelcomePage() {
                 </CardContent>
               </Card>
             )}
+
+            <CommunityRecommendationDetailModal
+              community={communityDetailModal}
+              open={!!communityDetailModal}
+              onOpenChange={(open) => !open && setCommunityDetailModal(null)}
+              onJoinGroup={handleJoinGroupFromModal}
+              isJoining={isJoiningCommunity}
+            />
           </div>
         ) : (
           // No recommendations available

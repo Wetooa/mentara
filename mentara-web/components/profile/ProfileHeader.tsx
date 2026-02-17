@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import { format, parseISO } from "date-fns";
 import { ChatButton } from "./ChatButton";
 import { ConnectTherapistButton } from "./ConnectTherapistButton";
 import { getUserDisplayName, getUserInitials } from "@/lib/utils/userUtils";
+import { ROUTES } from "@/lib/navigation/routes";
 
 interface ProfileHeaderProps {
   profile: PublicProfileResponse;
@@ -157,6 +159,18 @@ export function ProfileHeader({
                       variant="outline"
                       size="sm"
                     />
+                  )}
+
+                  {/* Book Session - Only for therapist profiles */}
+                  {user.role === "therapist" && (
+                    <Link
+                      href={`${ROUTES.CLIENT.BOOKING}?therapist=${encodeURIComponent(user.id)}`}
+                    >
+                      <Button variant="default" size="sm" className="gap-2">
+                        <Calendar className="w-4 h-4" />
+                        Book Session
+                      </Button>
+                    </Link>
                   )}
 
                   {/* Report button - Always available for other profiles */}

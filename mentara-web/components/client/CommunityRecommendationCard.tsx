@@ -22,6 +22,7 @@ interface CommunityRecommendationCardProps {
   onSelect: (selected: boolean) => void;
   disabled?: boolean;
   showMatchExplanation?: boolean;
+  onViewDetails?: (community: CommunityRecommendation) => void;
 }
 
 export function CommunityRecommendationCard({
@@ -31,6 +32,7 @@ export function CommunityRecommendationCard({
   onSelect,
   disabled = false,
   showMatchExplanation = true,
+  onViewDetails,
 }: CommunityRecommendationCardProps) {
   const [showDetails, setShowDetails] = useState(false);
 
@@ -50,8 +52,6 @@ export function CommunityRecommendationCard({
     if (score >= 0.4) return "Fair Match";
     return "Possible Match";
   };
-
-  console.log("community", community);
 
   return (
     <Card
@@ -110,10 +110,26 @@ export function CommunityRecommendationCard({
           </div>
 
           <div className="flex items-center gap-2">
+            {onViewDetails && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewDetails(community);
+                }}
+                className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+              >
+                View
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowDetails(!showDetails)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetails(!showDetails);
+              }}
               className="text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 transition-colors duration-200 p-2 rounded-lg"
             >
               <Info className="h-4 w-4" />

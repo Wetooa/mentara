@@ -94,7 +94,7 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
           >
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-purple-600" />
-              <h2 className="text-lg font-bold">Worksheets</h2>
+              <h2 className="text-lg font-bold">Assigned Worksheets</h2>
             </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button

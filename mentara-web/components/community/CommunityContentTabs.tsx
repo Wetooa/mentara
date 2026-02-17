@@ -76,7 +76,7 @@ export function CommunityContentTabs({
             </TabsTrigger>
             <TabsTrigger value="sessions" className="gap-2">
               <Calendar className="h-4 w-4" />
-              Sessions
+              Events & Learning
               {sessions.length > 0 && (
                 <Badge variant="secondary" className="ml-1 h-5 px-1.5">
                   {sessions.length}

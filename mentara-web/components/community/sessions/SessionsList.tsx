@@ -190,7 +190,7 @@ export function SessionsList({
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Group Sessions</h2>
+          <h2 className="text-2xl font-bold">Upcoming Webinars</h2>
           <p className="text-sm text-muted-foreground">
             Join virtual or in-person sessions led by therapists and moderators
           </p>

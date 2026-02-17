@@ -68,7 +68,7 @@ export function RoomContentTabs({
             </TabsTrigger>
             <TabsTrigger value="sessions" className="gap-2">
               <CalendarIcon className="h-4 w-4" />
-              Sessions
+              Events & Learning
               {upcomingSessionsCount > 0 && (
                 <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                   {upcomingSessionsCount}
