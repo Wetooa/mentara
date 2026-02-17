@@ -57,7 +57,7 @@ export class WorksheetsEnricher extends BaseEnricher {
 
     for (const client of clientsWithTherapists) {
       try {
-        const missing = Math.max(0, 1 - client._count.worksheets);
+        const missing = Math.max(0, 4 - client._count.worksheets);
         if (missing > 0 && client.assignedTherapists.length > 0) {
           added += await this.ensureClientHasAssignments(
             client.userId,
@@ -128,9 +128,10 @@ export class WorksheetsEnricher extends BaseEnricher {
     if (missing === 0) return 0;
 
     const templates = [
-      { title: 'Client Assignment 1', instructions: 'Complete this worksheet.' },
-      { title: 'Client Assignment 2', instructions: 'Follow the instructions.' },
-      { title: 'Client Assignment 3', instructions: 'Submit by due date.' },
+      { title: 'Daily Mood Tracker', instructions: 'Track your mood and note triggers.' },
+      { title: 'Thought Record', instructions: 'Complete the cognitive thought record.' },
+      { title: 'Anxiety Exposure Hierarchy', instructions: 'List steps and rate anxiety levels.' },
+      { title: 'Gratitude & Reflection', instructions: 'Reflect and submit by due date.' },
     ];
 
     for (let i = 0; i < missing; i++) {

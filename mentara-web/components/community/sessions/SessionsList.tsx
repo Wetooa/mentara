@@ -44,6 +44,7 @@ interface SessionsListProps {
   sessions: GroupSession[];
   onViewDetails?: (session: GroupSession) => void;
   onRSVP?: (sessionId: string, status: "join" | "leave") => void;
+  isRSVPing?: boolean;
   onCreateSession?: () => void;
   canCreateSession?: boolean;
   communityId?: string;
@@ -58,6 +59,7 @@ export function SessionsList({
   sessions,
   onViewDetails,
   onRSVP,
+  isRSVPing = false,
   onCreateSession,
   canCreateSession = false,
   communityId,
@@ -65,7 +67,7 @@ export function SessionsList({
   isLoading = false,
 }: SessionsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("upcoming");
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [selectedTypes, setSelectedTypes] = useState<SessionType[]>([]);
   const [selectedFormats, setSelectedFormats] = useState<SessionFormat[]>([]);
@@ -101,12 +103,9 @@ export function SessionsList({
       filtered = filtered.filter((s) => selectedFormats.includes(s.format));
     }
 
-    // Filter by community/room
+    // Filter by community only (sessions/webinars are community-level, not room-specific)
     if (communityId) {
       filtered = filtered.filter((s) => s.communityId === communityId);
-    }
-    if (roomId) {
-      filtered = filtered.filter((s) => s.roomId === roomId);
     }
 
     // Sort
@@ -136,7 +135,6 @@ export function SessionsList({
     selectedFormats,
     sortBy,
     communityId,
-    roomId,
   ]);
 
   const sessionCounts = useMemo(() => {
@@ -382,6 +380,7 @@ export function SessionsList({
                   session={session}
                   onViewDetails={onViewDetails}
                   onRSVP={onRSVP}
+                  isRSVPing={isRSVPing}
                 />
               ))}
             </div>

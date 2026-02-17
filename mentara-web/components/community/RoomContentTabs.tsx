@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { MessageCircle, Calendar as CalendarIcon } from "lucide-react";
 import { SessionsList, SessionDetailModal, CreateSessionModal } from "./sessions";
 import { useSessions } from "@/hooks/community/useSessions";
 import { GroupSession } from "@/types/api/sessions";
+import { api } from "@/lib/api";
+import type { CreateSessionRequest } from "@/types/api/sessions";
 
 interface RoomContentTabsProps {
   postsContent: React.ReactNode;
@@ -27,12 +30,26 @@ export function RoomContentTabs({
   const [selectedSession, setSelectedSession] = useState<GroupSession | null>(null);
   const [isSessionDetailOpen, setIsSessionDetailOpen] = useState(false);
   const [isCreateSessionOpen, setIsCreateSessionOpen] = useState(false);
+  const [createSessionTherapistIds, setCreateSessionTherapistIds] = useState<string[]>([]);
 
-  // Use sessions hook
-  const { sessions, isLoading: sessionsLoading, handleRSVP } = useSessions({
+  const { sessions, isLoading: sessionsLoading, fetchError, handleRSVP, isRSVPing, refreshSessions } = useSessions({
     communityId,
     roomId,
   });
+
+  useEffect(() => {
+    if (!isCreateSessionOpen || !communityId) return;
+    api.communities
+      .getCommunityMembers(communityId, 50)
+      .then(({ members }) => {
+        const ids = (members as { userId: string; user?: { role?: string } }[])
+          .filter((m) => m.user?.role === "therapist")
+          .map((m) => m.userId)
+          .slice(0, 2);
+        setCreateSessionTherapistIds(ids);
+      })
+      .catch(() => setCreateSessionTherapistIds([]));
+  }, [isCreateSessionOpen, communityId]);
 
   const upcomingSessionsCount = sessions.filter(
     s => s.status === 'upcoming' || s.status === 'ongoing'
@@ -45,13 +62,49 @@ export function RoomContentTabs({
 
   const handleSessionRSVP = async (sessionId: string, status: 'join' | 'leave') => {
     await handleRSVP(sessionId, status);
-    if (selectedSession?.id === sessionId) {
-      const updatedSession = sessions.find(s => s.id === sessionId);
-      if (updatedSession) {
-        setSelectedSession(updatedSession);
-      }
-    }
   };
+
+  useEffect(() => {
+    if (!selectedSession || sessions.length === 0) return;
+    const updated = sessions.find((s) => s.id === selectedSession.id);
+    if (updated && (updated.userRSVP !== selectedSession.userRSVP || updated.currentParticipants !== selectedSession.currentParticipants)) {
+      setSelectedSession(updated);
+    }
+  }, [sessions, selectedSession?.id]);
+
+  const handleCreateSessionSubmit = useCallback(
+    async (data: CreateSessionRequest) => {
+      if (createSessionTherapistIds.length === 0) {
+        throw new Error(
+          "This community has no therapist members. Add at least one therapist to the community to create a session."
+        );
+      }
+      const start = new Date(data.startTime);
+      const end = new Date(data.endTime);
+      const durationMinutes = Math.round(
+        (end.getTime() - start.getTime()) / (60 * 1000)
+      );
+      const sessionFormat =
+        data.format === "webinar" || data.format === "group-therapy"
+          ? data.format
+          : "group-therapy";
+      await api.groupSessions.createSession({
+        title: data.title,
+        description: data.description ?? "",
+        communityId: data.communityId,
+        sessionType: data.type === "virtual" ? "VIRTUAL" : "IN_PERSON",
+        sessionFormat,
+        scheduledAt: data.startTime,
+        duration: durationMinutes,
+        maxParticipants: data.maxParticipants,
+        virtualLink: data.meetingLink,
+        location: data.location,
+        therapistIds: createSessionTherapistIds,
+      });
+      await refreshSessions();
+    },
+    [createSessionTherapistIds, refreshSessions]
+  );
 
   return (
     <>
@@ -84,10 +137,20 @@ export function RoomContentTabs({
 
         <TabsContent value="sessions" className="mt-0">
           <div className="max-w-4xl mx-auto p-4 lg:p-6">
+            {fetchError && (
+              <div className="mb-4 p-4 rounded-lg border border-destructive/50 bg-destructive/5 text-sm text-destructive">
+                <p className="font-medium">Could not load sessions</p>
+                <p className="mt-1">{fetchError.message}</p>
+                <Button variant="outline" size="sm" className="mt-3" onClick={() => refreshSessions()}>
+                  Try again
+                </Button>
+              </div>
+            )}
             <SessionsList
               sessions={sessions}
               onViewDetails={handleViewSessionDetails}
               onRSVP={handleSessionRSVP}
+              isRSVPing={isRSVPing}
               onCreateSession={() => setIsCreateSessionOpen(true)}
               canCreateSession={canCreateSession}
               communityId={communityId}
@@ -107,12 +170,14 @@ export function RoomContentTabs({
           setSelectedSession(null);
         }}
         onRSVP={handleSessionRSVP}
+        isRSVPing={isRSVPing}
       />
 
       <CreateSessionModal
         isOpen={isCreateSessionOpen}
         onClose={() => setIsCreateSessionOpen(false)}
-        communityId={communityId}
+        onSubmit={handleCreateSessionSubmit}
+        communityId={communityId ?? ""}
         roomId={roomId}
       />
     </>

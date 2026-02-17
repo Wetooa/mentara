@@ -6,7 +6,6 @@ import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 // import { useSubscriptionStatus } from '@/hooks/billing'; // Removed - subscriptions are outdated
 import { toast } from "sonner";
 import { TherapistCardData } from "@/types/therapist";
-import { TimezoneUtils } from "@/lib/utils/timezone";
 
 interface AvailableSlot {
   id: string;
@@ -256,13 +255,11 @@ export function useBookingModal(
   ]);
 
   const resetForm = (therapist?: TherapistCardData) => {
-    // Set default date to minimum advance booking date (0.5 hours from now)
-    // This ensures the date meets the backend requirement and prevents validation errors
-    const minAdvanceDate = TimezoneUtils.getMinimumAdvanceBookingDate(0.5);
-    // Extract just the date portion (set time to midnight to represent the day)
-    const defaultDate = new Date(minAdvanceDate);
-    defaultDate.setHours(0, 0, 0, 0);
-    setSelectedDate(defaultDate);
+    // Default to the day after today (tomorrow) at midnight
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    setSelectedDate(tomorrow);
     setSelectedSlot(null);
     setSelectedDuration(null);
     setMeetingType(MeetingType.ONLINE);

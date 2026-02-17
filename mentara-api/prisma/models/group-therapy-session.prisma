@@ -16,6 +16,7 @@ model GroupTherapySession {
 
   // Session Details
   sessionType     SessionType
+  sessionFormat   String? // 'group-therapy' | 'webinar'; null = group-therapy for backward compat
   scheduledAt     DateTime
   duration        Int // Duration in minutes
   maxParticipants Int // Max number of participants
@@ -47,7 +48,7 @@ model GroupTherapySession {
   @@index([createdById])
   @@index([status])
   @@index([scheduledAt])
-  @@map("group_therapy_sessions")
+  @@map("GroupTherapySessions")
 }
 
 model GroupSessionTherapistInvitation {
@@ -75,7 +76,7 @@ model GroupSessionTherapistInvitation {
 
   @@unique([sessionId, therapistId])
   @@index([therapistId, status])
-  @@map("group_session_therapist_invitations")
+  @@map("GroupSessionTherapistInvitations")
 }
 
 model GroupSessionParticipant {
@@ -103,7 +104,7 @@ model GroupSessionParticipant {
   @@unique([sessionId, userId])
   @@index([userId])
   @@index([sessionId, attendanceStatus])
-  @@map("group_session_participants")
+  @@map("GroupSessionParticipants")
 }
 
 // Enums

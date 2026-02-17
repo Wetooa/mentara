@@ -6,7 +6,7 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
-import { PrismaClient, GroupSessionStatus } from '@prisma/client';
+import { PrismaClient, GroupSessionStatus, AttendanceStatus } from '@prisma/client';
 
 @Injectable()
 export class GroupSessionService {
@@ -24,6 +24,7 @@ export class GroupSessionService {
       title: string;
       description?: string;
       sessionType: 'VIRTUAL' | 'IN_PERSON';
+      sessionFormat?: 'group-therapy' | 'webinar';
       scheduledAt: Date;
       duration: number;
       maxParticipants: number;
@@ -52,6 +53,7 @@ export class GroupSessionService {
         communityId,
         createdById: moderatorId,
         sessionType: data.sessionType,
+        sessionFormat: data.sessionFormat ?? 'group-therapy',
         scheduledAt: new Date(data.scheduledAt),
         duration: data.duration,
         maxParticipants: data.maxParticipants,
@@ -81,9 +83,9 @@ export class GroupSessionService {
   }
 
   /**
-   * Get session by ID
+   * Get session by ID. When userId is provided, adds currentUserJoined to the result.
    */
-  async getSession(sessionId: string) {
+  async getSession(sessionId: string, userId?: string) {
     const session = await this.prisma.groupTherapySession.findUnique({
       where: { id: sessionId },
       include: {
@@ -132,11 +134,38 @@ export class GroupSessionService {
       throw new NotFoundException('Group session not found');
     }
 
-    return session;
+    const hasUser =
+      typeof userId === 'string' && userId.trim().length > 0;
+    if (!hasUser) {
+      return session;
+    }
+
+    const participant = await this.prisma.groupSessionParticipant.findUnique({
+      where: {
+        sessionId_userId: { sessionId, userId: userId.trim() },
+      },
+      select: { attendanceStatus: true },
+    });
+    const currentUserJoined =
+      !!participant && participant.attendanceStatus !== AttendanceStatus.CANCELLED;
+    return { ...session, currentUserJoined };
+  }
+
+  /** UUID v4 pattern; if communityId doesn't match, treat as slug and resolve. */
+  private async resolveCommunityId(communityId: string): Promise<string> {
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (uuidPattern.test(communityId)) return communityId;
+    const bySlug = await this.prisma.community.findFirst({
+      where: { slug: communityId },
+      select: { id: true },
+    });
+    return bySlug?.id ?? communityId;
   }
 
   /**
-   * Get sessions for a community
+   * Get sessions for a community (by id or slug). Returns all session formats including webinars.
+   * When userId is provided, adds currentUserJoined to each session.
    */
   async getSessionsByCommunity(
     communityId: string,
@@ -144,10 +173,16 @@ export class GroupSessionService {
       status?: GroupSessionStatus;
       upcoming?: boolean;
     },
+    userId?: string,
   ) {
-    const where: any = { communityId };
+    const resolvedId = await this.resolveCommunityId(communityId);
+    const where: any = { communityId: resolvedId };
 
-    if (filters?.status) {
+    const displayOnlyStatuses = ['upcoming', 'ongoing'];
+    if (
+      filters?.status &&
+      !displayOnlyStatuses.includes(String(filters.status))
+    ) {
       where.status = filters.status;
     }
 
@@ -155,7 +190,7 @@ export class GroupSessionService {
       where.scheduledAt = { gte: new Date() };
     }
 
-    return this.prisma.groupTherapySession.findMany({
+    const sessions = await this.prisma.groupTherapySession.findMany({
       where,
       include: {
         createdBy: {
@@ -189,6 +224,28 @@ export class GroupSessionService {
       orderBy: {
         scheduledAt: 'asc',
       },
+    });
+
+    const hasUser =
+      typeof userId === 'string' && userId.trim().length > 0;
+    if (!hasUser || sessions.length === 0) {
+      return sessions;
+    }
+
+    const sessionIds = sessions.map((s) => s.id);
+    const participantRows = await this.prisma.groupSessionParticipant.findMany({
+      where: {
+        userId: userId.trim(),
+        sessionId: { in: sessionIds },
+        attendanceStatus: { not: AttendanceStatus.CANCELLED },
+      },
+      select: { sessionId: true },
+    });
+    const joinedSessionIds = new Set(participantRows.map((p) => p.sessionId));
+
+    return sessions.map((s) => {
+      const currentUserJoined = joinedSessionIds.has(s.id);
+      return { ...s, currentUserJoined };
     });
   }
 

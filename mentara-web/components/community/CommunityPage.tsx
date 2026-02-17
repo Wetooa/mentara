@@ -49,6 +49,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
   const {
     selectedCommunityId,
     selectedRoomId,
+    selectedCommunity,
     selectedRoom,
     isCreatePostOpen,
     newPostTitle,
@@ -256,8 +257,8 @@ export default function CommunityPage({ role }: CommunityPageProps) {
             )}
           />
           <ResizablePanel defaultSize={80} className="h-full !overflow-y-auto">
-            {!selectedRoomId ? (
-              // Welcome/No Room Selected State
+            {!selectedCommunityId ? (
+              // Welcome/No Community Selected State
               <div
                 className={cn(
                   "flex-1 flex items-center justify-center h-full",
@@ -373,9 +374,9 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                 </div>
               </div>
             ) : (
-              // Room Content with Tabs
+              // Community Content with Tabs (Posts + Events & Learning)
               <div className="flex flex-col h-full">
-                {/* Room Header */}
+                {/* Room/Community Header */}
                 <div
                   className={cn(
                     "bg-white border-b p-4 lg:p-6",
@@ -455,7 +456,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
                   )}
 
                   <div className="flex items-center justify-between gap-4">
-                    <h1 className="text-2xl font-bold">{selectedRoom?.name}</h1>
+                    <h1 className="text-2xl font-bold">{selectedRoom?.name ?? selectedCommunity?.name ?? "Community"}</h1>
 
                     <Dialog
                       open={isCreatePostOpen}
@@ -681,7 +682,7 @@ export default function CommunityPage({ role }: CommunityPageProps) {
           </div>
         </div>
 
-        {!selectedRoomId ? (
+        {!selectedCommunityId ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center p-4">
               <h2 className="text-2xl font-bold mb-2">

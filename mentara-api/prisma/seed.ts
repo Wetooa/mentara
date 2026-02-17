@@ -233,6 +233,7 @@ class DatabaseSeeder {
       prisma.meeting.count(),
       prisma.worksheet.count(),
       prisma.preAssessment.count(),
+      prisma.groupTherapySession.count(),
     ]);
 
     const [
@@ -244,6 +245,7 @@ class DatabaseSeeder {
       meetings,
       worksheets,
       assessments,
+      groupSessions,
     ] = counts;
 
     console.log(`👥 Users: ${users}`);
@@ -254,6 +256,7 @@ class DatabaseSeeder {
     console.log(`📅 Meetings: ${meetings}`);
     console.log(`📋 Worksheets: ${worksheets}`);
     console.log(`🧠 Assessments: ${assessments}`);
+    console.log(`📆 Group Sessions: ${groupSessions}`);
   }
 }
 

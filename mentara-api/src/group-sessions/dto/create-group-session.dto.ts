@@ -12,6 +12,7 @@ export const CreateGroupSessionDtoSchema = z.object({
   location: z.string().max(200).optional(),
   locationAddress: z.string().max(500).optional(),
   therapistIds: z.array(z.string().cuid()).min(1).max(10),
+  sessionFormat: z.enum(['group-therapy', 'webinar']).optional(),
 });
 
 export type CreateGroupSessionDto = z.infer<typeof CreateGroupSessionDtoSchema>;

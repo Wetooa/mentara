@@ -78,6 +78,7 @@ export class GroupSessionController {
    */
   @Get('community/:communityId')
   async getSessionsByCommunity(
+    @GetUser('id') userId: string,
     @Param('communityId') communityId: string,
     @Query('status') status?: string,
     @Query('upcoming') upcoming?: string,
@@ -85,15 +86,18 @@ export class GroupSessionController {
     return this.groupSessionService.getSessionsByCommunity(communityId, {
       status: status as any,
       upcoming: upcoming === 'true',
-    });
+    }, userId);
   }
 
   /**
    * Get session details
    */
   @Get(':sessionId')
-  async getSession(@Param('sessionId') sessionId: string) {
-    return this.groupSessionService.getSession(sessionId);
+  async getSession(
+    @GetUser('id') userId: string,
+    @Param('sessionId') sessionId: string,
+  ) {
+    return this.groupSessionService.getSession(sessionId, userId);
   }
 
   /**

@@ -29,11 +29,10 @@ export async function generateCommunities(
     generalCommunities: [],
   };
 
-  // First, create required test communities with specific IDs
+  // First, create required test communities (same as others: DB assigns UUID)
   for (const testCommunity of TEST_COMMUNITIES) {
     const community = await prisma.community.create({
       data: {
-        id: testCommunity.id, // Use specific ID from TEST_ACCOUNTS.md
         name: testCommunity.name,
         slug: testCommunity.slug,
         description: testCommunity.description,
@@ -41,7 +40,7 @@ export async function generateCommunities(
         createdAt: randomPastDate(180),
       },
     });
-    
+
     result.communities.push(community);
     result.mentalHealthCommunities.push(community);
   }
@@ -99,12 +98,11 @@ export async function ensureTestCommunities(prisma: PrismaClient): Promise<numbe
   let created = 0;
 
   for (const tc of TEST_COMMUNITIES) {
-    const existing = await prisma.community.findUnique({ where: { id: tc.id } });
+    const existing = await prisma.community.findFirst({ where: { slug: tc.slug } });
     if (existing) continue;
 
     await prisma.community.create({
       data: {
-        id: tc.id,
         name: tc.name,
         slug: tc.slug,
         description: tc.description,

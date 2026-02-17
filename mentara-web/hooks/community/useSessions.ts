@@ -1,21 +1,106 @@
-// Custom hook for managing sessions with mock data
-
-import { useState, useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { GroupSession, SessionFilters } from "@/types/api/sessions";
-import {
-  mockSessions,
-  getUpcomingSessions,
-  getOngoingSessions,
-  getCompletedSessions,
-  getSessionById,
-  mockRSVPToSession,
-} from "@/lib/mock-data/sessions";
+import { api } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+
+function is409(err: unknown): boolean {
+  return (
+    !!err &&
+    typeof err === "object" &&
+    "response" in err &&
+    typeof (err as { response?: { status?: number } }).response?.status === "number" &&
+    (err as { response: { status: number } }).response.status === 409
+  );
+}
 
 export function useSessions(filters?: SessionFilters) {
-  const [sessions, setSessions] = useState<GroupSession[]>(mockSessions);
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const communityId = filters?.communityId;
+  const wantUpcomingOrOngoing =
+    filters?.status?.includes("upcoming") || filters?.status?.includes("ongoing");
 
-  // Filter sessions based on provided filters
+  const queryKey = queryKeys.communities.groupSessions(
+    communityId ?? "",
+    wantUpcomingOrOngoing
+  );
+
+  const {
+    data: sessions = [],
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const list = await api.groupSessions.getSessionsByCommunity(communityId!, {
+        upcoming: wantUpcomingOrOngoing ? true : undefined,
+      });
+      const byId = new Map<string, GroupSession>();
+      for (const s of list) {
+        const existing = byId.get(s.id);
+        if (!existing || s.userRSVP === "attending") byId.set(s.id, s);
+      }
+      return Array.from(byId.values());
+    },
+    enabled: !!communityId,
+    staleTime: 60 * 1000,
+  });
+
+  const rsvpMutation = useMutation({
+    mutationFn: async ({
+      sessionId,
+      status,
+    }: {
+      sessionId: string;
+      status: "join" | "leave";
+    }) => {
+      if (status === "join") {
+        await api.groupSessions.joinSession(sessionId);
+      } else {
+        await api.groupSessions.leaveSession(sessionId);
+      }
+    },
+    onSuccess: (_, { sessionId: _sessionId }) => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (err, { sessionId }, _context) => {
+      if (is409(err)) {
+        queryClient.setQueryData<GroupSession[]>(queryKey, (prev) => {
+          if (!prev) return prev;
+          return prev.map((s) =>
+            s.id === sessionId ? { ...s, userRSVP: "attending" as const } : s
+          );
+        });
+        queryClient.invalidateQueries({ queryKey });
+      }
+    },
+  });
+
+  const fetchError = queryError
+    ? queryError instanceof Error
+      ? queryError
+      : new Error(String(queryError))
+    : null;
+  const fetchSessions = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+  const refreshSessions = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+
+  const handleRSVP = useCallback(
+    async (sessionId: string, status: "join" | "leave") => {
+      try {
+        await rsvpMutation.mutateAsync({ sessionId, status });
+        return { success: true };
+      } catch {
+        return { success: false };
+      }
+    },
+    [rsvpMutation]
+  );
+
   const filteredSessions = useMemo(() => {
     if (!filters) return sessions;
 
@@ -25,9 +110,7 @@ export function useSessions(filters?: SessionFilters) {
       filtered = filtered.filter((s) => s.communityId === filters.communityId);
     }
 
-    if (filters.roomId) {
-      filtered = filtered.filter((s) => s.roomId === filters.roomId);
-    }
+    // Sessions/webinars are community-level, not room-level; do not filter by roomId
 
     if (filters.status && filters.status.length > 0) {
       filtered = filtered.filter((s) => filters.status?.includes(s.status));
@@ -74,36 +157,6 @@ export function useSessions(filters?: SessionFilters) {
     return filtered;
   }, [sessions, filters]);
 
-  // RSVP to a session
-  const handleRSVP = useCallback(
-    async (sessionId: string, status: "join" | "leave") => {
-      setIsLoading(true);
-
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const result = mockRSVPToSession(sessionId, status);
-
-      if (result.success) {
-        // Update the sessions state
-        setSessions((prevSessions) =>
-          prevSessions.map((s) => {
-            if (s.id === sessionId) {
-              const updatedSession = getSessionById(sessionId);
-              return updatedSession || s;
-            }
-            return s;
-          })
-        );
-      }
-
-      setIsLoading(false);
-      return result;
-    },
-    []
-  );
-
-  // Get a single session
   const getSession = useCallback(
     (sessionId: string) => {
       return sessions.find((s) => s.id === sessionId);
@@ -111,33 +164,21 @@ export function useSessions(filters?: SessionFilters) {
     [sessions]
   );
 
-  // Refresh sessions
-  const refreshSessions = useCallback(async () => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    setSessions([...mockSessions]);
-    setIsLoading(false);
-  }, []);
-
   return {
     sessions: filteredSessions,
     isLoading,
+    fetchError,
     handleRSVP,
+    isRSVPing: rsvpMutation.isPending,
     getSession,
     refreshSessions,
   };
 }
 
-// Hook for getting upcoming sessions specifically
 export function useUpcomingSessions(communityId?: string) {
-  const [sessions, setSessions] = useState<GroupSession[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useState(() => {
-    const upcoming = getUpcomingSessions(communityId);
-    setSessions(upcoming);
-    setIsLoading(false);
+  const { sessions, isLoading } = useSessions({
+    communityId,
+    status: ["upcoming", "ongoing"],
   });
 
   return {
@@ -146,32 +187,75 @@ export function useUpcomingSessions(communityId?: string) {
   };
 }
 
-// Hook for session detail
 export function useSessionDetail(sessionId: string) {
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<GroupSession | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
-  useState(() => {
-    const foundSession = getSessionById(sessionId);
-    setSession(foundSession);
-    setIsLoading(false);
+  const fetchDetail = useCallback(async () => {
+    if (!sessionId) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const s = await api.groupSessions.getSession(sessionId);
+      setSession(s ?? undefined);
+    } catch {
+      setSession(undefined);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [sessionId]);
+
+  useEffect(() => {
+    fetchDetail();
+  }, [fetchDetail]);
+
+  const rsvpMutation = useMutation({
+    mutationFn: async (status: "join" | "leave") => {
+      if (status === "join") {
+        await api.groupSessions.joinSession(sessionId);
+      } else {
+        await api.groupSessions.leaveSession(sessionId);
+      }
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey[0] === "communities" &&
+          query.queryKey[1] === "groupSessions",
+      });
+      await fetchDetail();
+    },
+    onError: (err) => {
+      if (is409(err)) {
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === "communities" &&
+            query.queryKey[1] === "groupSessions",
+        });
+        fetchDetail();
+      }
+    },
   });
 
   const handleRSVP = useCallback(
     async (status: "join" | "leave") => {
-      const result = mockRSVPToSession(sessionId, status);
-      if (result.success) {
-        const updatedSession = getSessionById(sessionId);
-        setSession(updatedSession);
+      try {
+        await rsvpMutation.mutateAsync(status);
+        return { success: true };
+      } catch {
+        return { success: false };
       }
-      return result;
     },
-    [sessionId]
+    [rsvpMutation]
   );
 
   return {
     session,
     isLoading,
     handleRSVP,
+    isRSVPing: rsvpMutation.isPending,
   };
 }

@@ -8,7 +8,7 @@ const DEMO_ENABLED =
   process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true";
 
 const DEMO_CLIENT_EMAIL =
-  process.env.NEXT_PUBLIC_DEMO_CLIENT_EMAIL || "client1@mentaratest.dev";
+  process.env.NEXT_PUBLIC_DEMO_CLIENT_EMAIL || "client3@mentaratest.dev";
 const DEMO_CLIENT_PASSWORD =
   process.env.NEXT_PUBLIC_DEMO_CLIENT_PASSWORD || "password123";
 

@@ -30,6 +30,7 @@ interface SessionCardProps {
   session: GroupSession;
   onViewDetails?: (session: GroupSession) => void;
   onRSVP?: (sessionId: string, status: "join" | "leave") => void;
+  isRSVPing?: boolean;
   variant?: "default" | "compact";
 }
 
@@ -37,6 +38,7 @@ export function SessionCard({
   session,
   onViewDetails,
   onRSVP,
+  isRSVPing = false,
   variant = "default",
 }: SessionCardProps) {
   const isUpcoming = session.status === "upcoming";
@@ -267,21 +269,21 @@ export function SessionCard({
           {!isCancelled && !isCompleted && (
             <Button
               size="sm"
-              variant={isUserAttending ? "outline" : "default"}
+              variant={isUserAttending || isUserWaitlisted ? "outline" : "default"}
               className="w-full"
               onClick={handleRSVPClick}
-              disabled={isFull && !isUserAttending && !isUserWaitlisted}
+              disabled={(isFull && !isUserAttending && !isUserWaitlisted) || isRSVPing}
             >
               {isUserAttending && (
                 <>
-                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                  {isWebinar ? "Registered" : "Attending"}
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                  {isWebinar ? "Cancel registration" : "Leave session"}
                 </>
               )}
               {isUserWaitlisted && (
                 <>
-                  <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
-                  Waitlisted
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                  Cancel waitlist
                 </>
               )}
               {!isUserAttending && !isUserWaitlisted && (

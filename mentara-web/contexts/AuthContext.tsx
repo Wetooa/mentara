@@ -9,14 +9,14 @@ import {
   useRef,
   useMemo,
 } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
 import { logger } from "@/lib/logger";
-import { getDemoLoginConfig } from "@/lib/demo-config";
+const CLIENT_WELCOME_REDIRECT_DONE_KEY = "client_welcome_redirect_done";
 
 // Load auth debug utilities in development
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
@@ -102,7 +102,6 @@ const isAnyRoleRoute = (pathname: string): boolean => {
 export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const api = useApi();
   const queryClient = useQueryClient();
@@ -521,28 +520,25 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         return;
       }
 
-      // Client welcome redirect logic - ensure clients see welcome page if they haven't seen recommendations
+      // Client welcome: redirect to welcome only once per session when they haven't seen recommendations
+      // /client/welcome is always accessible; we never redirect away from it
       if (
         isAuthenticated &&
-        userRole === "client" &&
-        user?.hasSeenTherapistRecommendations === false
-      ) {
-        if (!pathname.startsWith("/client/welcome")) {
-          router.push("/client/welcome");
-          return;
-        }
-      } else if (
-        isAuthenticated &&
-        userRole === "client" &&
-        user?.hasSeenTherapistRecommendations === true
+        userRole === "client"
       ) {
         if (pathname.startsWith("/client/welcome")) {
-          const forceWelcome =
-            searchParams?.get("demo") === "1" ||
-            searchParams?.get("forceWelcome") === "1" ||
-            getDemoLoginConfig().enabled;
-          if (!forceWelcome) {
-            router.back();
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem(CLIENT_WELCOME_REDIRECT_DONE_KEY, "1");
+          }
+        } else if (user?.hasSeenTherapistRecommendations === false) {
+          const alreadyRedirected =
+            typeof window !== "undefined" &&
+            sessionStorage.getItem(CLIENT_WELCOME_REDIRECT_DONE_KEY) === "1";
+          if (!alreadyRedirected) {
+            if (typeof window !== "undefined") {
+              sessionStorage.setItem(CLIENT_WELCOME_REDIRECT_DONE_KEY, "1");
+            }
+            router.push("/client/welcome");
             return;
           }
         }
@@ -573,7 +569,6 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     userRole,
     user,
     pathname,
-    searchParams,
     router,
     toast,
     hasToken,

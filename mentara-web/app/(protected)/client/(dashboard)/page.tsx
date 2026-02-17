@@ -373,9 +373,6 @@ export default function DashboardPage() {
           </div>
 
           <div className="md:col-span-1 lg:col-span-2" role="region" aria-labelledby="my-growth-heading">
-            <h2 id="my-growth-heading" className="text-sm font-semibold text-muted-foreground mb-2 px-1">
-              My Growth
-            </h2>
             <WorksheetStatus worksheets={dashboardData.worksheets} />
           </div>
 

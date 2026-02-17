@@ -206,23 +206,22 @@ export const TEST_MODERATORS: TestAccount[] = [
 
 /**
  * Required Test Communities (MUST ALWAYS EXIST)
- * From: TEST_ACCOUNTS.md
+ * Identified by slug; DB assigns UUID for id.
  */
-export const TEST_COMMUNITIES = [
+export const TEST_COMMUNITY_SLUGS = ['adhd-support', 'anxiety-support', 'depression-support'] as const;
+
+export const TEST_COMMUNITIES: Array<{ name: string; slug: string; description: string }> = [
   {
-    id: 'dev_comm_adhd-support',
     name: 'ADHD Support',
     slug: 'adhd-support',
     description: 'A supportive community for individuals with ADHD.',
   },
   {
-    id: 'dev_comm_anxiety-support',
     name: 'Anxiety Support',
     slug: 'anxiety-support',
     description: 'A supportive community for individuals with anxiety.',
   },
   {
-    id: 'dev_comm_depression-support',
     name: 'Depression Support',
     slug: 'depression-support',
     description: 'A supportive community for individuals with depression.',

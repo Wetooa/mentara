@@ -64,7 +64,7 @@ export const DEFAULT_MINIMUM_REQUIREMENTS: MinimumRequirements = {
     therapistRelationships: 0, // Optional (not all clients have therapists)
     meetingsIfHasTherapist: 3, // If has therapist, at least 3 sessions
     completedAssessments: 2, // Initial + follow-up
-    worksheetsIfHasTherapist: 1, // If has therapist, at least 1 worksheet
+    worksheetsIfHasTherapist: 4, // If has therapist, at least 4 worksheets per client
     conversations: 2, // Chats with 2 people
     messagesPerConversation: 5, // 5 messages per chat
   },

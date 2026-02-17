@@ -37,8 +37,14 @@ export function BookingCalendar({
   onDurationSelect,
   className,
 }: Readonly<BookingCalendarProps>) {
+  const defaultDate = (() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  })();
   const [calendarDate, setCalendarDate] = useState<Date>(
-    selectedDate || TimezoneUtils.getCurrent()
+    selectedDate || defaultDate
   );
 
   // Standard duration options
@@ -62,7 +68,7 @@ export function BookingCalendar({
   // Format date for API using Manila timezone
   const dateString = calendarDate
     ? TimezoneUtils.format(calendarDate, "yyyy-MM-dd")
-    : TimezoneUtils.format(TimezoneUtils.getCurrent(), "yyyy-MM-dd");
+    : TimezoneUtils.format(defaultDate, "yyyy-MM-dd");
 
   const {
     timeSlots,

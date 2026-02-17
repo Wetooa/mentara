@@ -2,7 +2,6 @@
 
 import { Suspense, useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, ArrowLeft, Loader2, MessageSquare, Sparkles, Bot, User, CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -210,7 +209,6 @@ function PreAssessmentChatPageContent() {
   const [softSnapshotOpen, setSoftSnapshotOpen] = useState(false);
   const [demoLoginLoading, setDemoLoginLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
   const demoLoginConfig = useMemo(() => getDemoLoginConfig(), []);
 
   useEffect(() => {
@@ -934,8 +932,10 @@ function PreAssessmentChatPageContent() {
         password: demoLoginConfig.password,
       });
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
-      queryClient.invalidateQueries({ queryKey: ["auth"] });
-      router.push("/client/welcome?demo=1");
+      // Always show welcome (Your Matches) after demo login, not the dashboard
+      const welcomeUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/client/welcome?demo=1`;
+      window.location.replace(welcomeUrl);
+      return;
     } catch {
       toast.error("Demo login failed. Check credentials or try again.");
     } finally {

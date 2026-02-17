@@ -1,10 +1,12 @@
 /**
  * Client-Therapist Relationships Enricher
- * Ensures therapists have minimum clients and vice versa
+ * Ensures therapists have minimum clients and vice versa.
+ * Also ensures test clients (client1, client2, client3) always have at least one therapist.
  */
 
 import { PrismaClient } from '@prisma/client';
 import { BaseEnricher, EnrichmentResult } from './base-enricher';
+import { TEST_CLIENTS } from '../../fixtures/test-accounts';
 
 export class RelationshipsEnricher extends BaseEnricher {
   constructor(prisma: PrismaClient) {
@@ -33,6 +35,15 @@ export class RelationshipsEnricher extends BaseEnricher {
             missing,
           );
         }
+      } catch (error) {
+        errors++;
+      }
+    }
+
+    // Ensure every test client has at least one therapist (idempotent)
+    for (const account of TEST_CLIENTS) {
+      try {
+        added += await this.ensureClientHasTherapist(account.id);
       } catch (error) {
         errors++;
       }

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { Suspense, useSearchParams } from "react";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,10 +72,19 @@ import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
 import { DurationOption } from "@/components/booking/DurationSelector";
 import { toast } from "sonner";
 
+function getDefaultBookingDate(): Date {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  return tomorrow;
+}
+
 export default function BookingPage() {
   const searchParams = useSearchParams();
   const [selectedTherapistId, setSelectedTherapistId] = useState<string>("");
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    () => getDefaultBookingDate()
+  );
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(
     null
   );

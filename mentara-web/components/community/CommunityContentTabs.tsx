@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   SessionsList,
@@ -8,9 +8,11 @@ import {
   CreateSessionModal,
 } from "./sessions";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Calendar, Video } from "lucide-react";
+import { MessageCircle, Calendar } from "lucide-react";
 import { useSessions } from "@/hooks/community/useSessions";
 import { GroupSession } from "@/types/api/sessions";
+import { api } from "@/lib/api";
+import type { CreateSessionRequest } from "@/types/api/sessions";
 
 interface CommunityContentTabsProps {
   postsContent: React.ReactNode;
@@ -31,13 +33,29 @@ export function CommunityContentTabs({
   );
   const [isSessionDetailOpen, setIsSessionDetailOpen] = useState(false);
   const [isCreateSessionOpen, setIsCreateSessionOpen] = useState(false);
+  const [createSessionTherapistIds, setCreateSessionTherapistIds] = useState<
+    string[]
+  >([]);
 
-  // Use sessions hook with filters
-  const { sessions, isLoading, handleRSVP } = useSessions({
+  const { sessions, isLoading, handleRSVP, refreshSessions } = useSessions({
     communityId,
     roomId,
     status: ["upcoming", "ongoing"],
   });
+
+  useEffect(() => {
+    if (!isCreateSessionOpen || !communityId) return;
+    api.communities
+      .getCommunityMembers(communityId, 50)
+      .then(({ members }) => {
+        const ids = (members as { userId: string; user?: { role?: string } }[])
+          .filter((m) => m.user?.role === "therapist")
+          .map((m) => m.userId)
+          .slice(0, 2);
+        setCreateSessionTherapistIds(ids);
+      })
+      .catch(() => setCreateSessionTherapistIds([]));
+  }, [isCreateSessionOpen, communityId]);
 
   const handleViewDetails = (session: GroupSession) => {
     setSelectedSession(session);
@@ -61,6 +79,40 @@ export function CommunityContentTabs({
   const handleCreateSession = () => {
     setIsCreateSessionOpen(true);
   };
+
+  const handleCreateSessionSubmit = useCallback(
+    async (data: CreateSessionRequest) => {
+      if (createSessionTherapistIds.length === 0) {
+        throw new Error(
+          "This community has no therapist members. Add at least one therapist to the community to create a session."
+        );
+      }
+      const start = new Date(data.startTime);
+      const end = new Date(data.endTime);
+      const durationMinutes = Math.round(
+        (end.getTime() - start.getTime()) / (60 * 1000)
+      );
+      const sessionFormat =
+        data.format === "webinar" || data.format === "group-therapy"
+          ? data.format
+          : "group-therapy";
+      await api.groupSessions.createSession({
+        title: data.title,
+        description: data.description ?? "",
+        communityId: data.communityId,
+        sessionType: data.type === "virtual" ? "VIRTUAL" : "IN_PERSON",
+        sessionFormat,
+        scheduledAt: data.startTime,
+        duration: durationMinutes,
+        maxParticipants: data.maxParticipants,
+        virtualLink: data.meetingLink,
+        location: data.location,
+        therapistIds: createSessionTherapistIds,
+      });
+      await refreshSessions();
+    },
+    [createSessionTherapistIds, refreshSessions]
+  );
 
   return (
     <>
@@ -119,7 +171,8 @@ export function CommunityContentTabs({
       <CreateSessionModal
         isOpen={isCreateSessionOpen}
         onClose={() => setIsCreateSessionOpen(false)}
-        communityId={communityId}
+        onSubmit={handleCreateSessionSubmit}
+        communityId={communityId ?? ""}
         roomId={roomId}
       />
     </>

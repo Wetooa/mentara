@@ -26,6 +26,10 @@ import {
   type DashboardService,
 } from "./services/dashboard";
 import {
+  createGroupSessionsService,
+  type GroupSessionsService,
+} from "./services/group-sessions";
+import {
   createFilesService,
   type FilesService,
 } from "./services/files";
@@ -85,7 +89,7 @@ export type { ApiError, ApiResponse } from "@/types/api";
 export { apiClient, createApiClient };
 
 // Export service creators
-export { createAdminService, createAuthService, createBookingService, createClientService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, createWorksheetService, createBillingService, createVideoCallService, createJournalService, createAuditLogsService, type AdminService, type AuthService, type BookingService, type ClientService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse, type WorksheetsService, type BillingService, type VideoCallService, type JournalService, type AuditLogsService };
+export { createAdminService, createAuthService, createBookingService, createClientService, createCommunityService, createDashboardService, createFilesService, createGroupSessionsService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, createWorksheetService, createBillingService, createVideoCallService, createJournalService, createAuditLogsService, type AdminService, type AuthService, type BookingService, type ClientService, type CommunityService, type DashboardService, type FilesService, type GroupSessionsService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse, type WorksheetsService, type BillingService, type VideoCallService, type JournalService, type AuditLogsService };
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -93,6 +97,7 @@ const clientService = createClientService(apiClient);
 const dashboardService = createDashboardService(apiClient);
 const therapistService = createTherapistService(apiClient);
 const communityService = createCommunityService(apiClient);
+const groupSessionsService = createGroupSessionsService(apiClient);
 const meetingsService = createMeetingsService(apiClient);
 const bookingService = createBookingService(apiClient);
 const notificationService = createNotificationService(apiClient);
@@ -116,6 +121,7 @@ export const api = {
   dashboard: dashboardService,
   therapists: therapistService,
   communities: communityService,
+  groupSessions: groupSessionsService,
   meetings: meetingsService,
   booking: bookingService,
   notifications: notificationService,

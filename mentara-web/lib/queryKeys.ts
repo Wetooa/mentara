@@ -224,6 +224,8 @@ const createQueryKeys = () => {
       joined: () => [...base.communities.all, 'joined'] as const,
       recommended: () => [...base.communities.all, 'recommended'] as const,
       activity: () => [...base.communities.all, 'activity'] as const,
+      groupSessions: (communityId: string, upcoming?: boolean) =>
+        [...base.communities.all, 'groupSessions', communityId, upcoming] as const,
     },
     messaging: {
       ...base.messaging,

@@ -19,7 +19,6 @@ password123
 - **Role:** Client
 - **ID:** `dev_client_1`
 - **Features:** Full client access, community memberships, can book therapy sessions
-- **Phase 2 demo:** Used as the default demo login from the AI assessment chat ("Submit & view Your Matches"). When demo is enabled, the pre-assessment chat can log in as this user and redirect to the Your Matches (welcome) screen.
 
 ### Client 2
 
@@ -36,6 +35,7 @@ password123
 - **Role:** Client
 - **ID:** `dev_client_3`
 - **Features:** Full client access, community memberships, can book therapy sessions
+- **Phase 2 demo:** Default demo login from the AI assessment chat (Submit). When demo is enabled, the pre-assessment chat logs in as this user and redirects to the Your Matches (welcome) screen.
 
 ## 👨‍⚕️ Therapist Accounts
 
@@ -135,25 +135,24 @@ password123
 
 ## 🏘️ Communities
 
+Communities use UUIDs for `id`; test communities are identified by **slug** (`adhd-support`, `anxiety-support`, `depression-support`) for lookups.
+
 ### ADHD Support
 
 - **Name:** ADHD Support
 - **Slug:** `adhd-support`
-- **ID:** `dev_comm_adhd-support`
 - **Description:** A supportive community for individuals with ADHD.
 
 ### Anxiety Support
 
 - **Name:** Anxiety Support
 - **Slug:** `anxiety-support`
-- **ID:** `dev_comm_anxiety-support`
 - **Description:** A supportive community for individuals with anxiety.
 
 ### Depression Support
 
 - **Name:** Depression Support
 - **Slug:** `depression-support`
-- **ID:** `dev_comm_depression-support`
 - **Description:** A supportive community for individuals with depression.
 
 ## 📊 Database Tables Populated
@@ -194,7 +193,7 @@ The seed script creates entries in the following tables:
 - Therapists are pre-approved for development convenience
 - All clients are members of all communities
 - All moderators can moderate all communities
-- All data uses predictable IDs for easy debugging and testing
+- User and account IDs are predictable for testing; community IDs are UUIDs (identify test communities by slug)
 
 ## 🔧 Development Commands
 

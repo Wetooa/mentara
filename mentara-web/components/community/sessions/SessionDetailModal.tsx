@@ -42,6 +42,7 @@ interface SessionDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRSVP?: (sessionId: string, status: "join" | "leave") => void;
+  isRSVPing?: boolean;
 }
 
 export function SessionDetailModal({
@@ -49,8 +50,10 @@ export function SessionDetailModal({
   isOpen,
   onClose,
   onRSVP,
+  isRSVPing: isRSVPingProp,
 }: SessionDetailModalProps) {
-  const [isRSVPing, setIsRSVPing] = useState(false);
+  const [internalRSVPing, setInternalRSVPing] = useState(false);
+  const isRSVPing = isRSVPingProp ?? internalRSVPing;
 
   if (!session) return null;
 
@@ -68,7 +71,7 @@ export function SessionDetailModal({
 
   const handleRSVP = async (status: "join" | "leave") => {
     if (onRSVP) {
-      setIsRSVPing(true);
+      if (isRSVPingProp === undefined) setInternalRSVPing(true);
       try {
         await onRSVP(session.id, status);
         const message =
@@ -83,7 +86,7 @@ export function SessionDetailModal({
       } catch (error) {
         toast.error("Failed to update RSVP");
       } finally {
-        setIsRSVPing(false);
+        if (isRSVPingProp === undefined) setInternalRSVPing(false);
       }
     }
   };
