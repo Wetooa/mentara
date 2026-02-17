@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -10,6 +11,8 @@ import {
   validateEnvironmentVariables,
   logEnvironmentInfo,
 } from './config/env-validation';
+
+const logger = new Logger('Bootstrap');
 
 /**
  * Check if a port is available
@@ -38,15 +41,15 @@ async function findAvailablePort(preferredPort: number): Promise<number> {
 }
 
 async function bootstrap() {
-  console.log('Memory before app load:', process.memoryUsage());
+  logger.log(`Memory before app load: ${JSON.stringify(process.memoryUsage())}`);
 
   // Validate environment variables before starting the application
   try {
     validateEnvironmentVariables();
     logEnvironmentInfo();
   } catch (error) {
-    console.error(
-      '❌ Failed to start application:',
+    logger.error(
+      'Failed to start application:',
       error instanceof Error ? error.message : error,
     );
     process.exit(1);
@@ -88,7 +91,7 @@ async function bootstrap() {
       } else {
         // In development, be more permissive
         if (process.env.NODE_ENV !== 'production') {
-          console.warn(`⚠️  CORS: Allowing origin ${origin} in development mode`);
+          logger.warn(`CORS: Allowing origin ${origin} in development mode`);
           callback(null, true);
         } else {
           callback(new Error('Not allowed by CORS'));
@@ -181,11 +184,11 @@ async function bootstrap() {
     try {
       actualPort = await findAvailablePort(preferredPort);
       if (actualPort !== preferredPort) {
-        console.log(`⚠️  Port ${preferredPort} is busy, using port ${actualPort} instead`);
+        logger.warn(`Port ${preferredPort} is busy, using port ${actualPort} instead`);
       }
     } catch (error) {
-      console.error(`❌ Could not find an available port: ${error.message}`);
-      console.error(`💡 Try: npx kill-port ${preferredPort} to free up the preferred port`);
+      logger.error(`Could not find an available port: ${error instanceof Error ? error.message : error}`);
+      logger.error(`Try: npx kill-port ${preferredPort} to free up the preferred port`);
       process.exit(1);
     }
   } else {
@@ -195,35 +198,33 @@ async function bootstrap() {
   
   try {
     await app.listen(actualPort);
-    console.log(`✅ Application is running on: ${await app.getUrl()}`);
-    console.log('🔌 WebSocket (Socket.io) support enabled');
-    console.log(`📡 WebSocket server listening on port: ${actualPort}`);
-    
+    logger.log(`Application is running on: ${await app.getUrl()}`);
+    logger.log('WebSocket (Socket.io) support enabled');
+    logger.log(`WebSocket server listening on port: ${actualPort}`);
+
     if (actualPort !== preferredPort) {
-      console.log(`🔄 Note: Using port ${actualPort} instead of preferred port ${preferredPort}`);
+      logger.log(`Note: Using port ${actualPort} instead of preferred port ${preferredPort}`);
     }
-  } catch (error) {
-    if (error.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${actualPort} is already in use. Please:
-1. Kill the process using the port: npx kill-port ${actualPort}
-2. Or use a different port by setting PORT environment variable
-3. Or wait for the previous process to terminate`);
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+    if (err.code === 'EADDRINUSE') {
+      logger.error(`Port ${actualPort} is already in use. Kill the process: npx kill-port ${actualPort}, or set PORT, or wait for the previous process to terminate`);
       process.exit(1);
     } else {
-      console.error('❌ Failed to start server:', error);
+      logger.error('Failed to start server:', error);
       process.exit(1);
     }
   }
 
   // Graceful shutdown handlers
   const shutdown = async (signal: string) => {
-    console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+    logger.log(`Received ${signal}. Starting graceful shutdown...`);
     try {
       await app.close();
-      console.log('✅ Application shut down successfully');
+      logger.log('Application shut down successfully');
       process.exit(0);
     } catch (error) {
-      console.error('❌ Error during shutdown:', error);
+      logger.error('Error during shutdown:', error);
       process.exit(1);
     }
   };
@@ -231,15 +232,15 @@ async function bootstrap() {
   // Handle termination signals
   process.on('SIGINT', () => shutdown('SIGINT'));
   process.on('SIGTERM', () => shutdown('SIGTERM'));
-  
+
   // Handle uncaught exceptions and unhandled rejections
   process.on('uncaughtException', (error) => {
-    console.error('❌ Uncaught Exception:', error);
+    logger.error('Uncaught Exception:', error);
     shutdown('uncaughtException');
   });
-  
+
   process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    logger.error('Unhandled Rejection:', promise, 'reason:', reason);
     shutdown('unhandledRejection');
   });
 }
