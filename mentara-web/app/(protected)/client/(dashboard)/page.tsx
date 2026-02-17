@@ -367,12 +367,15 @@ export default function DashboardPage() {
 
         {/* Main Dashboard Content - Compact 2-row layout */}
         <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 auto-rows-min" aria-label="Dashboard content">
-          {/* Row 1: Sessions, Worksheets, Therapist (3 cards) */}
+          {/* Row 1: Sessions, Worksheets (My Growth), Therapist (3 cards) */}
           <div className="md:col-span-1 lg:col-span-2">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
           </div>
 
-          <div className="md:col-span-1 lg:col-span-2">
+          <div className="md:col-span-1 lg:col-span-2" role="region" aria-labelledby="my-growth-heading">
+            <h2 id="my-growth-heading" className="text-sm font-semibold text-muted-foreground mb-2 px-1">
+              My Growth
+            </h2>
             <WorksheetStatus worksheets={dashboardData.worksheets} />
           </div>
 

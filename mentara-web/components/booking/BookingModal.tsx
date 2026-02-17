@@ -25,6 +25,7 @@ import {
   Calendar as CalendarIcon,
   Clock,
   Video,
+  MapPin,
   Loader2,
   AlertCircle,
   CheckCircle,
@@ -244,19 +245,25 @@ export default function BookingModal({
             {/* Meeting Type */}
             {selectedDuration && (
               <div>
-                <Label className="text-base font-semibold">Meeting Type</Label>
+                <Label htmlFor="session-type" className="text-base font-semibold">Select Session Type</Label>
                 <Select
                   value={meetingType}
-                  onValueChange={(value: any) => setMeetingType(value)}
+                  onValueChange={(value: string) => setMeetingType(value as "online" | "in-person")}
                 >
-                  <SelectTrigger className="mt-2">
+                  <SelectTrigger id="session-type" className="mt-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="video">
+                    <SelectItem value="online">
                       <div className="flex items-center gap-2">
                         <Video className="h-4 w-4" />
-                        Video Call
+                        Teletherapy
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="in-person">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        In-Person
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -320,7 +327,9 @@ export default function BookingModal({
               </div>
               <div>
                 <span className="text-muted-foreground">Type:</span>
-                <div className="font-medium">Video Call</div>
+                <div className="font-medium">
+                  {meetingType === "in-person" ? "In-Person" : "Teletherapy"}
+                </div>
               </div>
             </div>
           </div>

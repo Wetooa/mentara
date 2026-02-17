@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
+import { Suspense, useSearchParams } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +72,7 @@ import { DurationOption } from "@/components/booking/DurationSelector";
 import { toast } from "sonner";
 
 export default function BookingPage() {
+  const searchParams = useSearchParams();
   const [selectedTherapistId, setSelectedTherapistId] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(
@@ -97,12 +98,22 @@ export default function BookingPage() {
   // Get booking utilities
   const { cancelMeeting, isCancelling } = useBooking();
 
-  // Auto-select first therapist if there's only one
+  // Preselect therapist from URL when coming from profile "Book Session"
+  const therapistFromUrl = searchParams.get("therapist");
   useEffect(() => {
-    if (!therapistsLoading && !selectedTherapistId && therapists.length === 1) {
+    if (therapistsLoading || !therapistFromUrl) return;
+    const isAssigned = therapists.some((t) => t.id === therapistFromUrl);
+    if (isAssigned && !selectedTherapistId) {
+      setSelectedTherapistId(therapistFromUrl);
+    }
+  }, [therapists, therapistsLoading, therapistFromUrl, selectedTherapistId]);
+
+  // Auto-select first therapist if there's only one (and no URL param)
+  useEffect(() => {
+    if (!therapistsLoading && !selectedTherapistId && !therapistFromUrl && therapists.length === 1) {
       setSelectedTherapistId(therapists[0].id);
     }
-  }, [therapists, therapistsLoading, selectedTherapistId]);
+  }, [therapists, therapistsLoading, selectedTherapistId, therapistFromUrl]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handleSlotSelect = useCallback((date: string, timeSlot: TimeSlot) => {

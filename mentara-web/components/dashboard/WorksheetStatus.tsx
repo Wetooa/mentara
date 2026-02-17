@@ -11,6 +11,7 @@ import {
 import { format, parseISO, isToday } from "date-fns";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/navigation/routes";
 
 interface WorksheetStatusProps {
   worksheets: UserDashboardData["worksheets"];
@@ -81,7 +82,11 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
   );
 
   const handleViewAll = () => {
-    router.push("client/worksheets");
+    router.push(ROUTES.CLIENT.WORKSHEETS);
+  };
+
+  const handleWorksheetClick = (worksheetId: string) => {
+    router.push(ROUTES.CLIENT.WORKSHEET_DETAIL(worksheetId));
   };
 
   return (
@@ -122,6 +127,7 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
                       key={worksheet.id}
                       worksheet={worksheet}
                       index={index}
+                      onClick={handleWorksheetClick}
                     />
                   ))}
                 </div>
@@ -145,6 +151,7 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
                         key={worksheet.id}
                         worksheet={worksheet}
                         index={index}
+                        onClick={handleWorksheetClick}
                       />
                     ))}
                 </div>
@@ -163,6 +170,7 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
                       key={worksheet.id}
                       worksheet={worksheet}
                       index={index}
+                      onClick={handleWorksheetClick}
                     />
                   ))}
                 </div>
@@ -189,9 +197,11 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
 function WorksheetCard({
   worksheet,
   index = 0,
+  onClick,
 }: {
   worksheet: UserDashboardData["worksheets"][0];
   index?: number;
+  onClick?: (worksheetId: string) => void;
 }) {
   // Format dates
   const assignedDate = format(parseISO(worksheet.assignedDate), "MMM d");
@@ -221,15 +231,29 @@ function WorksheetCard({
 
   const status = statusProps[worksheet.status];
 
+  const handleClick = () => {
+    onClick?.(worksheet.id);
+  };
+
   return (
     <motion.div
+      role="button"
+      tabIndex={0}
       variants={worksheetCardVariants}
       whileHover={{
         scale: 1.02,
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         transition: { duration: 0.2 },
       }}
-      className={`p-3 sm:p-4 rounded-lg border ${status.bgColor}`}
+      onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+      className={`p-3 sm:p-4 rounded-lg border ${status.bgColor} ${onClick ? "cursor-pointer" : ""}`}
+      aria-label={onClick ? `Open ${worksheet.title}` : undefined}
     >
       <div className="flex flex-col sm:flex-row items-start gap-3">
         <motion.div

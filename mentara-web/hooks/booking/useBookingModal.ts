@@ -23,7 +23,7 @@ interface MeetingDuration {
 
 enum MeetingType {
   ONLINE = "online",
-  IN_PERSON = "in_person",
+  IN_PERSON = "in-person",
 }
 
 interface CreateMeetingRequest {
@@ -93,7 +93,7 @@ export function useBookingModal(
   const [selectedDuration, setSelectedDuration] =
     useState<MeetingDuration | null>(null);
   const [meetingType, setMeetingType] = useState<MeetingType>(
-    MeetingType.VIDEO
+    MeetingType.ONLINE
   );
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -265,7 +265,7 @@ export function useBookingModal(
     setSelectedDate(defaultDate);
     setSelectedSlot(null);
     setSelectedDuration(null);
-    setMeetingType(MeetingType.VIDEO);
+    setMeetingType(MeetingType.ONLINE);
     setTitle(therapist ? `Session with ${therapist.name}` : "");
     setDescription("");
   };
