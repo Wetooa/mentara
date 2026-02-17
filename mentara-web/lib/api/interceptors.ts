@@ -192,7 +192,6 @@ export function setupResponseInterceptors(client: AxiosInstance): void {
       if (error.response) {
         // Server responded with error status
         const status = error.response.status;
-        const data = error.response.data as any;
 
         // Convert to MentaraApiError for consistent error handling
         const apiError = MentaraApiError.fromAxiosError(error);
