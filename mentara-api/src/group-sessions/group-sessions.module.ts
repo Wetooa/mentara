@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../providers/prisma-client.provider';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // Services
@@ -22,7 +22,7 @@ import { ScheduleController } from './controllers/schedule.controller';
     ScheduleController,
   ],
   providers: [
-    PrismaClient,
+    PrismaService,
     EventEmitter2,
     GroupSessionService,
     GroupSessionInvitationService,
@@ -39,4 +39,4 @@ import { ScheduleController } from './controllers/schedule.controller';
     ScheduleService,
   ],
 })
-export class GroupSessionsModule {}
+export class GroupSessionsModule { }

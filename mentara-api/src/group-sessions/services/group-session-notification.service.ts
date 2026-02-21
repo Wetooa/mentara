@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaClient, NotificationType } from '@prisma/client';
+import { NotificationType } from '@prisma/client';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -7,9 +8,9 @@ export class GroupSessionNotificationService {
   private readonly logger = new Logger(GroupSessionNotificationService.name);
 
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   /**
    * Send invitation notifications to therapists

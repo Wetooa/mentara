@@ -7,11 +7,11 @@ import {
   Logger,
 } from '@nestjs/common';
 import {
-  PrismaClient,
   GroupSessionStatus,
   AttendanceStatus,
   InvitationStatus,
 } from '@prisma/client';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import { AvailabilityCheckService } from './availability-check.service';
 
 @Injectable()
@@ -19,9 +19,9 @@ export class GroupSessionParticipantService {
   private readonly logger = new Logger(GroupSessionParticipantService.name);
 
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaService,
     private readonly availabilityCheck: AvailabilityCheckService,
-  ) {}
+  ) { }
 
   /**
    * User joins a group session

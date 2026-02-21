@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../providers/prisma-client.provider';
 
 export interface ScheduleEvent {
   id: string;
@@ -16,7 +16,7 @@ export interface ScheduleEvent {
 
 @Injectable()
 export class ScheduleService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Get unified schedule for a user (therapist or client)

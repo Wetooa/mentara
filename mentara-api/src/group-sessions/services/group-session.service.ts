@@ -6,13 +6,14 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
-import { PrismaClient, GroupSessionStatus, AttendanceStatus } from '@prisma/client';
+import { GroupSessionStatus, AttendanceStatus } from '@prisma/client';
+import { PrismaService } from '../../providers/prisma-client.provider';
 
 @Injectable()
 export class GroupSessionService {
   private readonly logger = new Logger(GroupSessionService.name);
 
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Create a new group therapy session

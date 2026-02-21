@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../providers/prisma-client.provider';
 
 @Injectable()
 export class AvailabilityCheckService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Check if user has availability for a given time slot
@@ -56,7 +56,7 @@ export class AvailabilityCheckService {
     for (const participant of groupSessionConflicts) {
       const sessionEnd = new Date(
         participant.session.scheduledAt.getTime() +
-          participant.session.duration * 60000,
+        participant.session.duration * 60000,
       );
 
       // Check for overlap
@@ -97,7 +97,7 @@ export class AvailabilityCheckService {
       for (const invitation of invitationConflicts) {
         const sessionEnd = new Date(
           invitation.session.scheduledAt.getTime() +
-            invitation.session.duration * 60000,
+          invitation.session.duration * 60000,
         );
 
         if (

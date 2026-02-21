@@ -6,7 +6,8 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { PrismaClient, InvitationStatus } from '@prisma/client';
+import { InvitationStatus } from '@prisma/client';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import { AvailabilityCheckService } from './availability-check.service';
 import { GroupSessionService } from './group-session.service';
 
@@ -15,10 +16,10 @@ export class GroupSessionInvitationService {
   private readonly logger = new Logger(GroupSessionInvitationService.name);
 
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaService,
     private readonly availabilityCheck: AvailabilityCheckService,
     private readonly groupSessionService: GroupSessionService,
-  ) {}
+  ) { }
 
   /**
    * Create invitations for therapists
