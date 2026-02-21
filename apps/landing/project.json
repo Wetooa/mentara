@@ -5,10 +5,18 @@
     "sourceRoot": "apps/landing/src",
     "targets": {
         "build": {
-            "command": "npm run build"
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npm run build",
+                "cwd": "apps/landing"
+            }
         },
         "dev": {
-            "command": "npm run dev"
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npm run dev",
+                "cwd": "apps/landing"
+            }
         }
     }
 }

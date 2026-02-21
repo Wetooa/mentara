@@ -5,13 +5,32 @@
     "sourceRoot": "apps/api/src",
     "targets": {
         "build": {
-            "command": "npm run build"
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npm run build",
+                "cwd": "apps/api"
+            }
         },
         "dev": {
-            "command": "npm run start:dev"
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npm run start:dev",
+                "cwd": "apps/api"
+            }
         },
         "test": {
-            "command": "npm run test"
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npm run test",
+                "cwd": "apps/api"
+            }
+        },
+        "prisma:generate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npx prisma generate",
+                "cwd": "apps/api"
+            }
         }
     }
 }

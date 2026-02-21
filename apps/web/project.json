@@ -5,13 +5,25 @@
     "sourceRoot": "apps/web/app",
     "targets": {
         "build": {
-            "command": "npm run build"
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npm run build",
+                "cwd": "apps/web"
+            }
         },
         "dev": {
-            "command": "npm run dev"
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npm run dev",
+                "cwd": "apps/web"
+            }
         },
         "lint": {
-            "command": "npm run lint"
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npm run lint",
+                "cwd": "apps/web"
+            }
         }
     }
 }

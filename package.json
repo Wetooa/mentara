@@ -2,7 +2,17 @@
     "name": "mentara-monorepo",
     "version": "1.0.0",
     "private": true,
-    "scripts": {},
+    "scripts": {
+        "api": "nx dev mentara-api",
+        "web": "nx dev mentara-web",
+        "landing": "nx dev mentara-landing",
+        "build": "nx run-many -t build",
+        "test": "nx run-many -t test",
+        "lint": "nx run-many -t lint"
+    },
+    "workspaces": [
+        "apps/*"
+    ],
     "dependencies": {},
     "devDependencies": {
         "@nx/docker": "22.5.2",
