@@ -1,0 +1,17 @@
+{
+    "name": "mentara-web",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "application",
+    "sourceRoot": "apps/web/app",
+    "targets": {
+        "build": {
+            "command": "npm run build"
+        },
+        "dev": {
+            "command": "npm run dev"
+        },
+        "lint": {
+            "command": "npm run lint"
+        }
+    }
+}

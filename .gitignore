@@ -1,13 +1,45 @@
-.mcp.json
-mentara-api/prisma/migrations/
-node_modules
-.serena/
+# Node.js
 node_modules/
-mentara-api/.tsbuildinfo
-mentara-api/.tsbuildinfo
-mentara-api/.tsbuildinfo
+dist/
+build/
+.tsbuildinfo
+*.log
 
-# Root ignores
+# Nx
+.nx/installation
+.nx/cache
+.nx/workspace-data
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Mentara API
+apps/api/prisma/migrations/
+apps/api/.prisma/
+apps/api/.prisma/client/
+apps/api/uploads/
+apps/api/coverage/
+apps/api/.tsbuildinfo
+
+# Mentara Web (Next.js)
+apps/web/.next/
+apps/web/out/
+apps/web/.next-static/
+
+# Mentara Landing (SvelteKit)
+apps/landing/.svelte-kit/
+apps/landing/build/
+apps/landing/package/
+
+# Other Projects / Tools
+.mcp.json
+.serena/
 logs/
 scripts/
 security-hardening/
@@ -18,6 +50,9 @@ test-axios-unwrapping.js
 COMMONS_MIGRATION_INVENTORY.md
 COMMONS_TYPE_MIGRATION_MAPPING.md
 
-# Database exports (keep directory structure)
+# Database exports
 database/exports/*
 !database/exports/.gitkeep
+
+# Agent
+.agent

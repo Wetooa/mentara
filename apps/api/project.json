@@ -1,0 +1,17 @@
+{
+    "name": "mentara-api",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "application",
+    "sourceRoot": "apps/api/src",
+    "targets": {
+        "build": {
+            "command": "npm run build"
+        },
+        "dev": {
+            "command": "npm run start:dev"
+        },
+        "test": {
+            "command": "npm run test"
+        }
+    }
+}
