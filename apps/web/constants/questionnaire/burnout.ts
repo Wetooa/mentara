@@ -315,6 +315,28 @@ const MBI: QuestionnaireProps = {
       if (score >= 30) return "High-level burnout";
       return "Invalid score";
     },
+    severityLevels: {
+      interpretation: { range: [0, 100], label: "MBI Scale" },
+    },
+    getInterpretationFromAnswers: (answers: number[]) => {
+      let ee = 0, dp = 0, pa = 0;
+      for (let i = 0; i < answers.length; i++) {
+        const val = answers[i] === -1 ? 0 : answers[i];
+        if (i < 7) ee += val;
+        else if (i < 14) dp += val;
+        else pa += val;
+      }
+      const eeLevel = ee <= 16 ? "Low" : (ee <= 26 ? "Moderate" : "High");
+      const dpLevel = dp <= 6 ? "Low" : (dp <= 12 ? "Moderate" : "High");
+      const paLevel = pa >= 39 ? "High Accomplishment" : (pa >= 32 ? "Moderate" : "Low Accomplishment");
+
+      return `EE: ${eeLevel}, DP: ${dpLevel}, PA: ${paLevel}`;
+    },
+    subscales: {
+      EE: [0, 1, 2, 3, 4, 5, 6],
+      DP: [7, 8, 9, 10, 11, 12, 13],
+      PA: [14, 15, 16, 17, 18, 19, 20, 21],
+    }
   },
   disclaimer:
     "This questionnaire is a screening tool to assess burnout risk. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you are experiencing symptoms of burnout, please seek support from a healthcare professional.",

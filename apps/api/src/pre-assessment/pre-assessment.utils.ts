@@ -316,7 +316,7 @@ export function calculateQuestionnaireScore(
   for (let i = 0; i < answers.length; i++) {
     const answer = answers[i];
     if (answer === -1 || answer === undefined) continue;
-    score += answer;
+    totalScore += answer;
   }
 
   // PHQ/PSS specific logic (if needed, but ClinicalScorer says labels are "No Phobia" etc)
@@ -324,13 +324,13 @@ export function calculateQuestionnaireScore(
 
   let severity = 'Unknown severity';
   for (const [, range] of Object.entries(config.severityLevels)) {
-    if (score >= range.range[0] && score <= range.range[1]) {
+    if (totalScore >= range.range[0] && totalScore <= range.range[1]) {
       severity = range.label;
       break;
     }
   }
 
-  return { score, severity };
+  return { score: totalScore, severity };
 }
 
 // New function to work with flat array of 201 responses

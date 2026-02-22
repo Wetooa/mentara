@@ -26,7 +26,7 @@ export class PreAssessmentService {
     private readonly aiServiceClient: AiServiceClient,
     private readonly clinicalInsightsService: ClinicalInsightsService,
     private readonly therapeuticRecommendationsService: TherapeuticRecommendationsService,
-  ) {}
+  ) { }
 
   /**
    * Generate realistic mock AI evaluation based on user's assessment scores
@@ -47,19 +47,31 @@ export class PreAssessmentService {
       'Extreme': 1.0,
       'Low': 0.2,
       'High': 0.8,
-      'Substantial': 0.75,
+      'Substantial Level': 0.75,
       'Subclinical': 0.15,
       'Clinical': 0.8,
-      'None': 0.0,
-      'Subthreshold': 0.3,
-      'Positive': 0.7,
-      'Negative': 0.0,
+      'No Problems': 0.0,
+      'No Insomnia': 0.0,
+      'No Phobia': 0.0,
+      'Subthreshold Insomnia': 0.3,
+      'Moderate Insomnia': 0.6,
+      'Severe Insomnia': 0.9,
+      'Probable PTSD': 0.9,
+      'Positive Bipolar Screen (All 3 Criteria Met)': 0.9,
+      'Negative Screen': 0.0,
+      'Social anxiety specific (Potential Social Phobia)': 0.6,
+      'Generalized Social Interaction Anxiety': 0.8,
+      'Below Threshold': 0.1,
+      'Hazardous': 0.5,
+      'Harmful': 0.75,
+      'Dependent': 0.95,
+      'Low Risk': 0.1,
     };
 
     // Calculate overall confidence based on assessment completion and severity distribution
     const severityValues = Object.values(severityLevels).map(level => severityWeights[level] || 0.5);
     const avgSeverity = severityValues.reduce((sum, val) => sum + val, 0) / severityValues.length;
-    
+
     // Higher severity = higher confidence (more clear patterns)
     const baseConfidence = 0.6 + (avgSeverity * 0.3);
     const confidence = Math.round((baseConfidence + Math.random() * 0.15) * 1000) / 1000;
@@ -112,10 +124,10 @@ export class PreAssessmentService {
     ];
 
     const recommendations: string[] = [];
-    
+
     // Always include basic recommendations
     recommendations.push('therapy_sessions');
-    
+
     // Add specific recommendations based on severity
     if (avgSeverity >= 0.7) {
       recommendations.push('medication_evaluation', 'professional_counseling');
@@ -142,7 +154,7 @@ export class PreAssessmentService {
 
     // Generate estimated severity for key conditions
     const estimatedSeverity: any = {};
-    
+
     // Include the top 3-4 most relevant conditions
     const keyConditions = ['Stress', 'Anxiety', 'Depression'];
     keyConditions.forEach(condition => {
@@ -158,10 +170,10 @@ export class PreAssessmentService {
     const overallSeverityLevels = ['low', 'moderate', 'high', 'severe'];
     let overallLevel: string;
     if (avgSeverity < 0.3) overallLevel = 'low';
-    else if (avgSeverity < 0.6) overallLevel = 'moderate'; 
+    else if (avgSeverity < 0.6) overallLevel = 'moderate';
     else if (avgSeverity < 0.8) overallLevel = 'high';
     else overallLevel = 'severe';
-    
+
     estimatedSeverity.overall = overallLevel;
 
     return {
@@ -188,7 +200,7 @@ export class PreAssessmentService {
       this.logger.log(
         `AI evaluation generated: confidence ${aiEstimate.confidence}, ${aiEstimate.risk_factors.length} risk factors identified`,
       );
-      
+
       return aiEstimate;
     } catch (error) {
       this.logger.error(
@@ -361,7 +373,7 @@ export class PreAssessmentService {
 
         this.logger.log(
           `Clinical analysis generated: ${analysis.clinicalProfile.primaryConditions.length} primary conditions, ` +
-            `risk level: ${analysis.clinicalProfile.overallRiskLevel}`,
+          `risk level: ${analysis.clinicalProfile.overallRiskLevel}`,
         );
       } catch (analysisError) {
         this.logger.warn(
@@ -649,7 +661,7 @@ export class PreAssessmentService {
       const flatAnswers = preAssessment.answers as number[];
       const scores = preAssessment.scores as Record<string, number>;
       const severityLevels = preAssessment.severityLevels as Record<string, string>;
-      
+
       // Use the questionnaire list from utils
       const questionnaires = [...LIST_OF_QUESTIONNAIRES] as string[];
 
@@ -659,7 +671,7 @@ export class PreAssessmentService {
 
       // Convert scores to QuestionnaireScores format
       const questionnaireScores: QuestionnaireScores = {};
-      
+
       questionnaires.forEach((questionnaire) => {
         if (scores[questionnaire] !== undefined) {
           questionnaireScores[questionnaire] = {

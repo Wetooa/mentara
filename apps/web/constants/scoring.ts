@@ -14,13 +14,18 @@ export interface QuestionnaireQuestion {
 export interface QuestionnaireScoring {
   getScoreFromAnswers: (answers: number[]) => number;
   getInterpretationFromScore: (score: number) => string;
+  getInterpretationFromAnswers?: (answers: number[]) => string;
+  subscales?: Record<string, number[]>; // Item indices for subscales
 }
 
 export interface QuestionnaireProps {
   title: string;
   description: string;
   questions: QuestionnaireQuestion[];
-  scoring: QuestionnaireScoring;
+  scoring: QuestionnaireScoring & {
+    scoreMapping?: Record<number, number>;
+    severityLevels?: Record<string, { range: number[]; label: string }>;
+  };
   disclaimer: string;
 }
 
@@ -30,7 +35,7 @@ export const QUESTIONNAIRE_SCORING = {
   getScoreFromAnswers: (answers: number[]): number => {
     return answers.reduce((sum, answer) => sum + answer, 0);
   },
-  
+
   getInterpretationFromScore: (score: number): string => {
     // Default interpretation - should be overridden by specific questionnaires
     return `Score: ${score}`;

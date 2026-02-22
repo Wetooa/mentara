@@ -66,22 +66,14 @@ const DAST10: any = {
     ...QUESTIONNAIRE_SCORING,
     scoreMapping: { 0: 1, 1: 0 },
     severityLevels: {
-      none: { range: [0, 0], label: "No problems reported" },
-      low: { range: [1, 2], label: "Low level - Monitor, reassess later" },
-      moderate: {
-        range: [3, 5],
-        label: "Moderate level - Further investigation",
-      },
-      substantial: {
-        range: [6, 8],
-        label: "Substantial level - Intensive assessment",
-      },
-      severe: { range: [9, 10], label: "Severe level - Intensive assessment" },
+      none: { range: [0, 0], label: "No Problems" },
+      low: { range: [1, 2], label: "Low Level" },
+      moderate: { range: [3, 5], label: "Moderate Level" },
+      substantial: { range: [6, 8], label: "Substantial Level" },
+      severe: { range: [9, 10], label: "Severe Level" },
     },
     getSeverity: (score: number) => {
-      if (score === 0) return "No problems reported";
-      if (score >= 1 && score <= 2)
-        return "Low level - Monitor, reassess later";
+      return "Low level - Monitor, reassess later";
       if (score >= 3 && score <= 5)
         return "Moderate level - Further investigation";
       if (score >= 6 && score <= 8)

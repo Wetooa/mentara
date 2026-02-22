@@ -102,10 +102,20 @@ const MDQ: any = {
     scoreMapping: { 0: 0, 1: 1 },
     scoreThreshold: 7, // Score threshold for questions 1-13
     severityLevels: {
-      low: { range: [0, 6], label: "No significant symptoms" },
-      moderate: { range: [7, 10], label: "Possible mood disorder" },
-      high: { range: [11, 13], label: "High likelihood of bipolar disorder" },
-      possible: { range: [14, 15], label: "Possible Bipolar Disorder" },
+      negative: { range: [0, 0], label: "Negative Screen" },
+      positive: { range: [1, 1], label: "Positive Bipolar Screen (All 3 Criteria Met)" },
+    },
+    getInterpretationFromAnswers: (answers: number[]) => {
+      // 1. 7+ Yes in questions 0-12 (Yes=1)
+      const symptomCount = answers.slice(0, 13).filter(a => a === 1).length;
+      // 2. Symptom clustering (Question 13: Yes=1)
+      const clustering = answers[13] === 1;
+      // 3. Moderate/Serious problem (Question 14: Moderate=2, Serious=3)
+      const impairment = answers[14] >= 2;
+
+      return (symptomCount >= 7 && clustering && impairment)
+        ? "Positive Bipolar Screen (All 3 Criteria Met)"
+        : "Negative Screen";
     },
     subscales: {
       positiveActivation: [3, 4, 8, 9], // Increased energy/activity, grandiosity, decreased need for sleep

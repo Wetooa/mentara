@@ -120,10 +120,10 @@ const AUDIT: {
     ...QUESTIONNAIRE_SCORING,
 
     severityLevels: {
-      lowRisk: { range: [0, 7], label: "Low Risk" },
-      hazardous: { range: [8, 15], label: "Hazardous Use" },
-      harmful: { range: [16, 19], label: "Harmful Use" },
-      dependent: { range: [20, 40], label: "Possible Alcohol Dependence" },
+      low: { range: [0, 7], label: "Low Risk" },
+      hazardous: { range: [8, 15], label: "Hazardous" },
+      harmful: { range: [16, 19], label: "Harmful" },
+      dependent: { range: [20, 40], label: "Dependent" },
     },
   },
   standardDrinks: {

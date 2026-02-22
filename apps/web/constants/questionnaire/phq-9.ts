@@ -105,14 +105,11 @@ const PHQ_9: any = {
 
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
-      minimal: { range: [1, 4], label: "Minimal Depression" },
-      mild: { range: [5, 9], label: "Mild Depression" },
-      moderate: { range: [10, 14], label: "Moderate Depression" },
-      moderatelySevere: {
-        range: [15, 19],
-        label: "Moderately Severe Depression",
-      },
-      severe: { range: [20, 27], label: "Severe Depression" },
+      minimal: { range: [0, 4], label: "Minimal" },
+      mild: { range: [5, 9], label: "Mild" },
+      moderate: { range: [10, 14], label: "Moderate" },
+      moderatelySevere: { range: [15, 19], label: "Moderately Severe" },
+      severe: { range: [20, 27], label: "Severe" },
     },
   },
   disclaimer:

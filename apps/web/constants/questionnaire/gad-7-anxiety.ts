@@ -81,10 +81,10 @@ const GAD_7_ANXIETY: any = {
 
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
-      minimal: { range: [0, 4], label: "Minimal Anxiety" },
-      mild: { range: [5, 9], label: "Mild Anxiety" },
-      moderate: { range: [10, 14], label: "Moderate Anxiety" },
-      severe: { range: [15, 21], label: "Severe Anxiety" },
+      minimal: { range: [0, 4], label: "Minimal" },
+      mild: { range: [5, 9], label: "Mild" },
+      moderate: { range: [10, 14], label: "Moderate" },
+      severe: { range: [15, 21], label: "Severe" },
     },
   },
   disclaimer:
