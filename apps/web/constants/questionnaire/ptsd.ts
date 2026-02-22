@@ -1,243 +1,115 @@
 import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
-const PCL_5: QuestionnaireProps = {
-  title: "Post-traumatic Stress Disorder Checklist",
+const PCL_5: any = {
+  title: "PTSD Checklist 5",
   description:
     "The PCL-5 is a self-administered questionnaire used to assess the severity of PTSD symptoms over the past month. It helps in diagnosing and monitoring PTSD.",
   questions: [
     {
       prefix: "In the past month",
-      question:
-        "have you had repeated, disturbing, and unwanted memories of the stressful experience?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+      question: "Repeated, disturbing, and unwanted memories of the stressful experience?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
+    },
+    {
+      prefix: "In the past month",
+      question: "Repeated, disturbing dreams of the stressful experience?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
       question:
-        "have you had repeated, disturbing dreams of the stressful experience?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+        "Suddenly feeling or acting as if the stressful experience were actually happening again (as if you were actually back there reliving it)?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
+    },
+    {
+      prefix: "In the past month",
+      question: "Feeling very upset when something reminded you of the stressful experience?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
       question:
-        "have you suddenly felt or acted as if the stressful experience were actually happening again (as if you were actually back there reliving it)?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+        "Having strong physical reactions when something reminded you of the stressful experience (for example, heart pounding, trouble breathing, sweating)?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
+    },
+    {
+      prefix: "In the past month",
+      question: "Avoiding memories, thoughts, or feelings related to the stressful experience?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
       question:
-        "have you felt very upset when something reminded you of the stressful experience?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+        "Avoiding external reminders of the stressful experience (for example, people, places, conversations, activities, objects, or situations)?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
+    },
+    {
+      prefix: "In the past month",
+      question: "Trouble remembering important parts of the stressful experience?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
       question:
-        "have you had strong physical reactions when something reminded you of the stressful experience (for example, heart pounding, trouble breathing, sweating)?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+        "Having strong negative beliefs about yourself, other people, or the world (for example, having thoughts such as: I am bad, there is something seriously wrong with me, no one can be trusted, the world is completely dangerous)?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
       question:
-        "have you been avoiding memories, thoughts, or feelings related to the stressful experience?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+        "Blaming yourself or someone else for the stressful experience or what happened after it?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
+    },
+    {
+      prefix: "In the past month",
+      question: "Having strong negative feelings such as fear, horror, anger, guilt, or shame?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
+    },
+    {
+      prefix: "In the past month",
+      question: "Loss of interest in activities that you used to enjoy?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
+    },
+    {
+      prefix: "In the past month",
+      question: "Feeling distant or cut off from other people?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
       question:
-        "have you been avoiding external reminders of the stressful experience (for example, people, places, conversations, activities, objects, or situations)?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+        "Trouble experiencing positive feelings (for example, being unable to feel happiness or have loving feelings for people close to you)?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
-      question:
-        "have you had trouble remembering important parts of the stressful experience?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+      question: "Irritable behaviour, angry outbursts, or acting aggressively?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
-      question:
-        "have you had strong negative beliefs about yourself, other people, or the world (for example, having thoughts such as: I am bad, there is something seriously wrong with me, no one can be trusted, the world is completely dangerous)?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+      question: "Taking too many risks or doing things that could cause you harm?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
-      question:
-        "have you blamed yourself or someone else for the stressful experience or what happened after it?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+      question: "Being 'superalert' or watchful or on guard?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
-      question:
-        "have you had strong negative feelings such as fear, horror, anger, guilt, or shame?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+      question: "Feeling jumpy or easily startled?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
-      question: "have you lost interest in activities that you used to enjoy?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+      question: "Having difficulty concentrating?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
     {
       prefix: "In the past month",
-      question: "have you felt distant or cut off from other people?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
-    },
-    {
-      prefix: "In the past month",
-      question:
-        "have you had trouble experiencing positive feelings (for example, being unable to feel happiness or have loving feelings for people close to you)?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
-    },
-    {
-      prefix: "In the past month",
-      question:
-        "have you had irritable behavior, angry outbursts, or acted aggressively?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
-    },
-    {
-      prefix: "In the past month",
-      question:
-        "have you taken too many risks or done things that could cause you harm?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
-    },
-    {
-      prefix: "In the past month",
-      question: "have you been 'superalert' or watchful or on guard?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
-    },
-    {
-      prefix: "In the past month",
-      question: "have you felt jumpy or easily startled?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
-    },
-    {
-      prefix: "In the past month",
-      question: "have you had difficulty concentrating?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
-    },
-    {
-      prefix: "In the past month",
-      question: "have you had trouble falling or staying asleep?",
-      options: [
-        "Not at all",
-        "A little bit",
-        "Moderately",
-        "Quite a bit",
-        "Extremely",
-      ],
+      question: "Trouble falling or staying asleep?",
+      options: ["Not at all", "A little bit", "Moderately", "Quite a bit", "Extremely"],
     },
   ],
   scoring: {

@@ -1,4 +1,5 @@
-import { useAnimationControls, AnimationControls } from "framer-motion";
+import { useAnimationControls } from "framer-motion";
+import type { AnimationControls } from "framer-motion";
 import { fade, slide, start, reset } from "@/lib/animations";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 import { ListOfQuestionnaires } from "@/constants/questionnaire/questionnaire-mapping";
@@ -7,14 +8,14 @@ export interface UsePreAssessmentReturn {
   // State from store
   step: number;
   questionnaires: ListOfQuestionnaires[];
-  
+
   // Animation controls
   animationControls: AnimationControls;
-  
+
   // Actions
   handlePrevButtonOnClick: () => void;
   handleNextButtonOnClick: () => void;
-  
+
   // Computed properties
   isPrevDisabled: boolean;
 }
@@ -47,14 +48,14 @@ export function usePreAssessment(): UsePreAssessmentReturn {
     // State from store
     step,
     questionnaires,
-    
+
     // Animation controls
     animationControls,
-    
+
     // Actions
     handlePrevButtonOnClick,
     handleNextButtonOnClick,
-    
+
     // Computed properties
     isPrevDisabled,
   };

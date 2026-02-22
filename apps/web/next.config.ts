@@ -29,21 +29,21 @@ const nextConfig: NextConfig = {
       // Supports both localhost and production API URLs
       ...(process.env.NEXT_PUBLIC_API_URL
         ? (() => {
-            try {
-              const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-              const url = new URL(apiUrl);
-              return [
-                {
-                  protocol: url.protocol.slice(0, -1) as "http" | "https", // Remove trailing ':'
-                  hostname: url.hostname,
-                  pathname: "/**",
-                },
-              ];
-            } catch {
-              // If URL parsing fails, skip adding the pattern
-              return [];
-            }
-          })()
+          try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const url = new URL(apiUrl);
+            return [
+              {
+                protocol: url.protocol.slice(0, -1) as "http" | "https", // Remove trailing ':'
+                hostname: url.hostname,
+                pathname: "/**",
+              },
+            ];
+          } catch {
+            // If URL parsing fails, skip adding the pattern
+            return [];
+          }
+        })()
         : []),
       // Common localhost patterns for development
       {
@@ -59,12 +59,12 @@ const nextConfig: NextConfig = {
 
   // Optimize build output
   compress: true,
-  
+
   // Disable experimental features that require server-side processing
   experimental: {
     // Remove serverActions as it's SSR-specific
   },
-  
+
   // Optimize compiler options
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? {
@@ -78,12 +78,6 @@ const nextConfig: NextConfig = {
   //   buildActivityPosition: "bottom-left",
   // },
   devIndicators: false,
-
-  // Ignore ESLint errors during build for production readiness
-  // Note: Linting errors should be fixed in future iterations
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 
   // Ignore TypeScript errors during build for production readiness
   // Note: TypeScript errors should be fixed in future iterations

@@ -34,11 +34,11 @@ export interface UseClientRegistrationReturn {
   isVerifying: boolean;
   /** Current registration process status */
   registrationStatus:
-    | "idle"
-    | "registering"
-    | "registered"
-    | "verified"
-    | "error";
+  | "idle"
+  | "registering"
+  | "registered"
+  | "verified"
+  | "error";
 
   /** Current step in the registration flow */
   currentStep: "registration" | "verification";
@@ -118,7 +118,7 @@ export function useClientRegistration(
 ): UseClientRegistrationReturn {
   const api = useApi();
   const router = useRouter();
-  const { answers, questionnaires } = usePreAssessmentChecklistStore();
+  const { flatAnswers, questionnaires } = usePreAssessmentChecklistStore();
 
   // Loading states
   const [isLoading, setIsLoading] = useState(false);
@@ -152,16 +152,16 @@ export function useClientRegistration(
       // Check for chatbot pre-assessment results in localStorage
       let preassessmentAnswers: number[] | undefined = undefined;
       let chatbotSessionId: string | undefined = undefined;
-      
+
       try {
         const chatbotResultsStr = localStorage.getItem('preassessment_chatbot_results');
         if (chatbotResultsStr) {
           const chatbotResults = JSON.parse(chatbotResultsStr);
           chatbotSessionId = chatbotResults.sessionId;
-          
+
           // Use the converted answers array if available (stored when completing session)
           if (chatbotResults.answers && Array.isArray(chatbotResults.answers)) {
-            preassessmentAnswers = chatbotResults.answers;
+            preassessmentAnswers = chatbotResults.answers as number[];
             console.log('[Registration] Using chatbot pre-assessment answers from localStorage:', preassessmentAnswers.length, 'answers');
           } else {
             console.warn('[Registration] Chatbot results found but no answers array. Session ID:', chatbotSessionId);
@@ -170,28 +170,27 @@ export function useClientRegistration(
       } catch (localStorageError) {
         console.warn('[Registration] Error reading chatbot results from localStorage:', localStorageError);
       }
-      
+
       // If no chatbot results, check checklist store
       if (!preassessmentAnswers) {
         preassessmentAnswers =
-          answers.length > 0
-            ? answersToAnswerMatrix(questionnaires, answers)
+          flatAnswers.length > 0
+            ? answersToAnswerMatrix(questionnaires, flatAnswers)
             : undefined;
       }
 
       console.log("Pre-assessment answers:", preassessmentAnswers);
-      console.log("Registration answers:", answers);
+      console.log("Registration answers:", flatAnswers);
       console.log("Registration data:", data);
       console.log("Chatbot session ID:", chatbotSessionId);
 
-      // Call real backend registration API - this will automatically send OTP
       const result = await api.auth.client.register({
         email: data.email,
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
         birthDate: new Date().toISOString(), // You may want to collect this from the user
-        preassessmentAnswers,
+        preassessmentAnswers: preassessmentAnswers as number[] | undefined,
       });
 
       setRegistrationStatus("registered");
@@ -215,10 +214,10 @@ export function useClientRegistration(
       toast.success(successMessage);
     } catch (error: unknown) {
       setRegistrationStatus("error");
-      
+
       // Extract user-friendly error message
       const errorMessage = extractErrorMessage(error) || "Registration failed. Please try again.";
-      
+
       // Show user-friendly error message in toast
       toast.error("Registration failed", {
         description: errorMessage,
@@ -260,7 +259,7 @@ export function useClientRegistration(
     } catch (error: unknown) {
       // Extract user-friendly error message
       const errorMessage = extractErrorMessage(error) || "Verification failed. Please try again.";
-      
+
       toast.error("Verification failed", {
         description: errorMessage,
       });
@@ -281,11 +280,12 @@ export function useClientRegistration(
       toast.loading("Resending verification code...", { id: "resend-otp" });
 
       // Call backend resend OTP API
-      const result = await api.clientAuth.resendOtp({
+      const result = await api.auth.client.resendOtp({
         email: registrationData.email,
+        type: "email_verification",
       });
 
-      if (result.status === "success") {
+      if (result.success === true) {
         toast.success("Verification code sent! Please check your inbox.", {
           id: "resend-otp",
         });
@@ -295,7 +295,7 @@ export function useClientRegistration(
     } catch (error: unknown) {
       // Extract user-friendly error message
       const errorMessage = extractErrorMessage(error) || "Failed to resend verification code.";
-      
+
       toast.error("Failed to resend code", {
         description: errorMessage,
         id: "resend-otp",

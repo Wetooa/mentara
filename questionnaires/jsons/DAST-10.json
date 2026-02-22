@@ -1,0 +1,157 @@
+{
+  "scale_id": "DAST-10",
+  "full_name": "Drug Abuse Screening Test",
+  "domain": "Substance Use Disorder",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "Have you used drugs other than those required for medical reasons?",
+      "hooks": [
+        "recreational drug use",
+        "using non-medical drugs",
+        "taking drugs not prescribed to me",
+        "using over-the-counter drugs in excess"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "Do you use more than one drug at a time?",
+      "hooks": [
+        "mixing different drugs",
+        "polysubstance use",
+        "taking multiple drugs together",
+        "combining substances"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "Are you always able to stop using drugs when you want to?",
+      "hooks": [
+        "unable to quit",
+        "can't stop using",
+        "lost control of usage",
+        "difficulty stopping drug use"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "No",
+        "0": "Yes"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "Have you had 'blackouts' or 'flashbacks' as a result of drug use?",
+      "hooks": [
+        "losing time",
+        "memory gaps from drugs",
+        "flashback episodes",
+        "drug-induced blackouts"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "Do you ever feel bad or guilty about your drug use?",
+      "hooks": [
+        "feeling guilty about drugs",
+        "shame regarding drug use",
+        "regretting usage",
+        "feeling bad after taking drugs"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "Does your spouse (or parents) ever complain about your involvement with drugs?",
+      "hooks": [
+        "family complaining about drugs",
+        "spousal concern regarding usage",
+        "parents upset about drug use",
+        "social conflict over drugs"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "Have you neglected your family because of your use of drugs?",
+      "hooks": [
+        "ignoring family duties",
+        "prioritizing drugs over family",
+        "missing family events due to drugs",
+        "neglecting domestic responsibilities"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "Have you engaged in illegal activities in order to obtain drugs?",
+      "hooks": [
+        "stealing for drugs",
+        "illegal acts to get high",
+        "crime related to drug access",
+        "buying drugs illegally"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "Have you ever experienced withdrawal symptoms (felt sick) when you stopped taking drugs?",
+      "hooks": [
+        "withdrawal sickness",
+        "shaking when quitting",
+        "feeling ill without drugs",
+        "physical dependency symptoms"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "Have you had medical problems as a result of your drug use (e.g., memory loss, hepatitis, convulsions, bleeding, etc.)?",
+      "hooks": [
+        "health issues from drugs",
+        "seizures caused by drugs",
+        "hepatitis from usage",
+        "drug-related medical complications"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "No",
+        "1": "Yes"
+      }
+    }
+  ]
+}

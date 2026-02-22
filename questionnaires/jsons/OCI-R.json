@@ -1,0 +1,331 @@
+{
+  "scale_id": "OCI-R",
+  "full_name": "Obsessive-Compulsive Inventory - Revised",
+  "domain": "Obsessive-Compulsive Disorder",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "I have saved up so many things that they get in the way.",
+      "hooks": [
+        "clutter in my home",
+        "keeping too many things",
+        "difficulty navigating rooms due to stuff",
+        "saving everything"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "I check things more often than necessary.",
+      "hooks": [
+        "repetitive checking",
+        "checking things twice",
+        "not trusting my first check",
+        "compulsive checking"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "I get upset if objects are not arranged properly.",
+      "hooks": [
+        "need for symmetry",
+        "arranging items",
+        "distress over disorder",
+        "everything must be in its place"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "I feel compelled to count while I am doing things.",
+      "hooks": [
+        "counting items",
+        "mental counting",
+        "counting steps",
+        "compulsive numbers"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "I find it difficult to touch an object when I know it has been touched by strangers or certain people.",
+      "hooks": [
+        "fear of germs",
+        "contaminated objects",
+        "stranger danger touching",
+        "avoiding surfaces"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "I find it difficult to control my own thoughts.",
+      "hooks": [
+        "intrusive thoughts",
+        "racing mind",
+        "unwanted mental images",
+        "can't stop thinking"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "I collect things I don't need.",
+      "hooks": [
+        "hoarding items",
+        "collecting trash",
+        "keeping unnecessary things",
+        "gathering items"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "I repeatedly check doors, windows, drawers, etc.",
+      "hooks": [
+        "locking the door multiple times",
+        "checking windows",
+        "checking safety",
+        "repetitive locking"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "I get upset if others change the way I have arranged things.",
+      "hooks": [
+        "others moving my stuff",
+        "losing my order",
+        "anger at rearranging",
+        "disturbed organization"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "I feel I have to repeat certain numbers.",
+      "hooks": [
+        "safe numbers",
+        "repeating digits",
+        "mental number ritual",
+        "numerical compulsion"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "11",
+      "clinical_text": "I sometimes have to wash or clean myself simply because I feel contaminated.",
+      "hooks": [
+        "excessive showering",
+        "feeling dirty",
+        "feeling contaminated",
+        "cleansing rituals"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "12",
+      "clinical_text": "I am upset by unpleasant thoughts that come into my mind against my will.",
+      "hooks": [
+        "disturbing thoughts",
+        "unwelcome ideas",
+        "bad thoughts",
+        "mental distress"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "13",
+      "clinical_text": "I avoid throwing things away because I am afraid I might need them later.",
+      "hooks": [
+        "afraid to throw out",
+        "might need it someday",
+        "not discarding mail",
+        "keeping scraps"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "14",
+      "clinical_text": "I repeatedly check gas and water taps and light switches after turning them off.",
+      "hooks": [
+        "checking the stove",
+        "checking water faucets",
+        "light switch rituals",
+        "fire safety checking"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "15",
+      "clinical_text": "I need things to be arranged in a particular way.",
+      "hooks": [
+        "specific arrangement",
+        "exact placement",
+        "ordering items",
+        "ritualistic placing"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "16",
+      "clinical_text": "I feel that there are good and bad numbers.",
+      "hooks": [
+        "lucky numbers",
+        "bad luck digits",
+        "numerical superstition",
+        "avoiding certain numbers"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "17",
+      "clinical_text": "I wash my hands more often and longer than necessary.",
+      "hooks": [
+        "hand washing",
+        "scrubbing hands",
+        "using hot water to clean hands",
+        "long washing ritual"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "18",
+      "clinical_text": "I frequently get nasty thoughts and have difficulty in getting rid of them.",
+      "hooks": [
+        "violent thoughts",
+        "persistent nasty images",
+        "can't clear my head of bad ideas",
+        "obsessive nasty thinking"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little",
+        "2": "Moderately",
+        "3": "A lot",
+        "4": "Extremely"
+      }
+    }
+  ]
+}

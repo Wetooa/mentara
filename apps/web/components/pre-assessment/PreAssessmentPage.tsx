@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import PreAssessmentInitialCheckList from "@/components/pre-assessment/forms/ChecklistForm";
 import QuestionnaireForm from "@/components/pre-assessment/forms/QuestionnaireForm";
 import PreAssessmentSignUp from "@/components/pre-assessment/forms/PreAssessmentSignUp";
+import SnapshotForm from "@/components/pre-assessment/forms/SnapshotForm";
 import VerifyAccount from "@/components/auth/VerifyAccount";
 import PreAssessmentProgressBar from "@/components/pre-assessment/ProgressBar";
 import ModeSelectionForm from "@/components/pre-assessment/forms/ModeSelectionForm";
@@ -17,7 +18,7 @@ import { useRouter } from "next/navigation";
 
 function PreAssessmentPageContentInner() {
   const [mounted, setMounted] = useState(false);
-  
+
   // Use window.location instead of usePathname to avoid SSR issues
   const getInitialMode = (): 'selection' | 'checklist' => {
     if (typeof window !== 'undefined') {
@@ -26,7 +27,7 @@ function PreAssessmentPageContentInner() {
     }
     return 'selection';
   };
-  
+
   const [mode, setMode] = useState<'selection' | 'checklist' | 'chatbot' | 'registration'>('selection');
   const { user } = useAuth();
   const router = useRouter();
@@ -82,18 +83,20 @@ function PreAssessmentPageContentInner() {
       return <PreAssessmentSignUp />;
     }
 
-    // Checklist mode - show questionnaire selection first (step 0), then questionnaires
+    // Checklist mode - routing based on new unified step logic
     if (step === 0) {
       return (
         <PreAssessmentInitialCheckList
           handleNextButtonOnClick={handleNextButtonOnClick}
         />
       );
-    } else if (step > 0 && step < questionnaires.length + 1) {
+    } else if (step === 1) {
       return (
         <QuestionnaireForm handleNextButtonOnClick={handleNextButtonOnClick} />
       );
-    } else if (step === questionnaires.length + 1) {
+    } else if (step === 2) {
+      return <SnapshotForm />;
+    } else if (step === 3) {
       return <PreAssessmentSignUp />;
     } else {
       return <VerifyAccount />;

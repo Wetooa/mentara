@@ -2,98 +2,151 @@ import {
   type ListOfQuestionnaires,
   QUESTIONNAIRE_MAP,
 } from "@/constants/questionnaire/questionnaire-mapping";
+import { RAPPORT_QUESTIONS } from "@/constants/questionnaire/rapport-mapping";
 import { create } from "zustand";
 
 const inProd = process.env.NODE_ENV === "production";
 
 export interface PreAssessmentChecklistState {
-  step: number;
-  miniStep: number;
+  rapportStep: number;
+  rapportAnswers: number[];
+  setRapportAnswer: (step: number, choiceIndex: number) => void;
+  calculateTopQuestionnaires: () => void;
+
+  step: number; // 0=Rapport, 1=Screening, 2=Wait/Registration
+
+  flatAnswers: number[];
+  setFlatAnswer: (index: number, answer: number) => void;
+
   nextStep: () => void;
   prevStep: () => void;
 
   questionnaires: ListOfQuestionnaires[];
   setQuestionnaires: (to: ListOfQuestionnaires[]) => void;
-
-  answers: number[][];
-  setAnswers: (index: number, to: number[]) => void;
 }
 
 export const usePreAssessmentChecklistStore =
-  create<PreAssessmentChecklistState>()((set) => ({
+  create<PreAssessmentChecklistState>()((set, get) => ({
+    rapportStep: 0,
+    rapportAnswers: Array(5).fill(-1),
+    setRapportAnswer: (stepIndex, choiceIndex) =>
+      set((state) => {
+        const newAnswers = [...state.rapportAnswers];
+        newAnswers[stepIndex] = choiceIndex;
+        return { ...state, rapportAnswers: newAnswers };
+      }),
+    calculateTopQuestionnaires: () => {
+      const state = get();
+      const scores: Partial<Record<ListOfQuestionnaires, number>> = {};
+
+      state.rapportAnswers.forEach((choiceIndex, qIndex) => {
+        if (choiceIndex !== -1) {
+          const question = RAPPORT_QUESTIONS[qIndex];
+          const choice = question.choices[choiceIndex];
+          if (choice && choice.weights) {
+            Object.entries(choice.weights).forEach(([tool, weight]) => {
+              const qTool = tool as ListOfQuestionnaires;
+              scores[qTool] = (scores[qTool] || 0) + (weight as number);
+            });
+          }
+        }
+      });
+
+      const sortedTools = Object.entries(scores)
+        .sort(([, a], [, b]) => (b as number) - (a as number))
+        .map(([tool]) => tool as ListOfQuestionnaires);
+
+      const top3 = sortedTools.slice(0, 3);
+      if (top3.length === 0) {
+        // Fallback robust defaults if they skipped everything somehow
+        top3.push("Stress", "Anxiety", "Depression");
+      }
+
+      state.setQuestionnaires(top3);
+    },
+
     step: inProd ? 0 : 0,
-    miniStep: inProd ? 0 : 0,
+
+    flatAnswers: [],
+
+    setFlatAnswer: (index, answer) =>
+      set((state) => {
+        const newAnswers = [...state.flatAnswers];
+        newAnswers[index] = answer;
+        return { ...state, flatAnswers: newAnswers };
+      }),
+
     nextStep: () =>
       set((state) => {
-        // Initial Form
-        if (
-          state.step === 0 ||
-          state.step === state.questionnaires.length + 1
-        ) {
-          return { ...state, step: state.step + 1, miniStep: 0 };
+        // Step 0: Rapport Wizard
+        if (state.step === 0) {
+          if (state.rapportStep < 4) {
+            return { rapportStep: state.rapportStep + 1 };
+          } else {
+            // Final rapport step: calculate top questionnaires and move to screening
+            state.calculateTopQuestionnaires();
+            return { step: 1 };
+          }
         }
 
-        // Moving to next step
-        if (
-          state.miniStep <
-          QUESTIONNAIRE_MAP[state.questionnaires[state.step - 1]].questions
-            .length -
-            1
-        ) {
-          return { ...state, miniStep: state.miniStep + 1 };
+        // Step 1: Screening Assessment
+        if (state.step === 1) {
+          // Assessment completion -> Move to snapshot
+          return { step: 2 };
         }
 
-        // Moving to next questionnaire
-        return { ...state, step: state.step + 1, miniStep: 0 };
+        // Step 2: Snapshot View
+        if (state.step === 2) {
+          // Snapshot viewed -> Move to registration
+          return { step: 3 };
+        }
+
+        return state;
       }),
+
     prevStep: () =>
       set((state) => {
-        // Moving to previous question
-        if (state.miniStep > 0) {
-          return { ...state, miniStep: state.miniStep - 1 };
+        // Step 0: Rapport Wizard
+        if (state.step === 0) {
+          if (state.rapportStep > 0) {
+            return { rapportStep: state.rapportStep - 1 };
+          }
+          return state;
         }
 
-        // Initial Form or First Questionnaire
-        if (state.step <= 1) {
-          return { ...state, step: 0, miniStep: 0 };
+        // Step 1: Screening Assessment
+        if (state.step === 1) {
+          // Back to final rapport step
+          return { step: 0, rapportStep: 4 };
         }
 
-        // Last Questionnaire
-        if (state.step === state.questionnaires.length + 2) {
-          return { ...state, step: state.step - 1, miniStep: 0 };
+        // Step 2: Snapshot View
+        if (state.step === 2) {
+          // Back to assessment
+          return { step: 1 };
         }
 
-        // Moving to previous questionnaire
-        return {
-          ...state,
-          miniStep:
-            QUESTIONNAIRE_MAP[state.questionnaires[state.step - 2]].questions
-              .length - 1,
-          step: state.step - 1,
-        };
+        // Step 3: Registration
+        if (state.step === 3) {
+          // Back to snapshot
+          return { step: 2 };
+        }
+
+        return state;
       }),
 
     questionnaires: inProd ? [] : [],
-    answers: inProd ? [] : [],
 
     setQuestionnaires: (to) =>
-      set((state) => ({
-        ...state,
-        questionnaires: to,
-        answers: to.map((questionnaire) =>
-          Array(QUESTIONNAIRE_MAP[questionnaire].questions.length).fill(-1)
-        ),
-      })),
-
-    setAnswers: (index, to) =>
-      set((state) => ({
-        ...state,
-        answers: [
-          ...state.answers.slice(0, index),
-          to,
-          ...state.answers.slice(index + 1),
-        ],
-      })),
+      set((state) => {
+        // Calculate the total number of questions for the newly selected Top 3
+        const totalQuestions = to.reduce((acc, q) => acc + (QUESTIONNAIRE_MAP[q]?.questions.length || 0), 0);
+        return {
+          ...state,
+          questionnaires: to,
+          flatAnswers: Array(totalQuestions).fill(-1),
+        };
+      }),
   }));
 
 interface Details {

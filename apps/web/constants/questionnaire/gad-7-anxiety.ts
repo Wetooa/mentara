@@ -1,13 +1,13 @@
 import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
-const GAD_7_ANXIETY: QuestionnaireProps = {
-  title: "Anxiety Assessment (GAD-7)",
+const GAD_7_ANXIETY: any = {
+  title: "Generalized Anxiety Disorder",
   description:
     "The GAD-7 Anxiety Assessment helps measure anxiety severity over the past two weeks. It assigns scores based on how often the respondent has been bothered by specific anxiety-related problems.",
   questions: [
     {
       prefix: "Over the past two weeks",
-      question: "how often have you been feeling nervous, anxious, or on edge?",
+      question: "Feeling nervous, anxious or on edge",
       options: [
         "Not at all",
         "Several days",
@@ -17,7 +17,7 @@ const GAD_7_ANXIETY: QuestionnaireProps = {
     },
     {
       prefix: "Over the past two weeks",
-      question: "how often have you been unable to stop or control worrying?",
+      question: "Not being able to stop or control worrying",
       options: [
         "Not at all",
         "Several days",
@@ -27,8 +27,7 @@ const GAD_7_ANXIETY: QuestionnaireProps = {
     },
     {
       prefix: "Over the past two weeks",
-      question:
-        "how often have you been worrying too much about different things?",
+      question: "Worrying too much about different things",
       options: [
         "Not at all",
         "Several days",
@@ -38,7 +37,7 @@ const GAD_7_ANXIETY: QuestionnaireProps = {
     },
     {
       prefix: "Over the past two weeks",
-      question: "how often have you had trouble relaxing?",
+      question: "Trouble relaxing",
       options: [
         "Not at all",
         "Several days",
@@ -48,8 +47,7 @@ const GAD_7_ANXIETY: QuestionnaireProps = {
     },
     {
       prefix: "Over the past two weeks",
-      question:
-        "how often have you been so restless that it is hard to sit still?",
+      question: "Being so restless that it is hard to sit still",
       options: [
         "Not at all",
         "Several days",
@@ -59,7 +57,7 @@ const GAD_7_ANXIETY: QuestionnaireProps = {
     },
     {
       prefix: "Over the past two weeks",
-      question: "how often have you become easily annoyed or irritable?",
+      question: "Becoming easily annoyed or irritable",
       options: [
         "Not at all",
         "Several days",
@@ -69,8 +67,7 @@ const GAD_7_ANXIETY: QuestionnaireProps = {
     },
     {
       prefix: "Over the past two weeks",
-      question:
-        "how often have you felt afraid, as if something awful might happen?",
+      question: "Feeling afraid as if something awful might happen",
       options: [
         "Not at all",
         "Several days",

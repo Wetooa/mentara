@@ -1,47 +1,41 @@
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
+import { RAPPORT_QUESTIONS } from "@/constants/questionnaire/rapport-mapping";
 
 export interface UsePreAssessmentChecklistReturn {
   // State
-  questionnaires: string[];
-  
+  rapportStep: number;
+  currentRapportQuestion: typeof RAPPORT_QUESTIONS[0];
+  currentRapportChoice: number;
+
   // Actions
-  handleSelectQuestionnaire: (item: string) => void;
-  
+  handleSelectRapportChoice: (choiceIndex: number) => void;
+
   // Computed properties
-  isQuestionnaireSelected: (item: string) => boolean;
   isSubmitDisabled: boolean;
 }
 
 export function usePreAssessmentChecklist(): UsePreAssessmentChecklistReturn {
-  const { questionnaires, setQuestionnaires } = usePreAssessmentChecklistStore();
+  const { rapportStep, rapportAnswers, setRapportAnswer } = usePreAssessmentChecklistStore();
 
-  const handleSelectQuestionnaire = (item: string) => {
-    const isSelected = questionnaires.includes(item);
-    
-    if (isSelected) {
-      setQuestionnaires(
-        questionnaires.filter((questionnaire) => questionnaire !== item)
-      );
-    } else {
-      setQuestionnaires([...questionnaires, item]);
-    }
+  const currentRapportQuestion = RAPPORT_QUESTIONS[rapportStep];
+  const currentRapportChoice = rapportAnswers[rapportStep];
+
+  const handleSelectRapportChoice = (choiceIndex: number) => {
+    setRapportAnswer(rapportStep, choiceIndex);
   };
 
-  const isQuestionnaireSelected = (item: string) => {
-    return questionnaires.includes(item);
-  };
-
-  const isSubmitDisabled = questionnaires.length === 0;
+  const isSubmitDisabled = currentRapportChoice === -1;
 
   return {
     // State
-    questionnaires,
-    
+    rapportStep,
+    currentRapportQuestion,
+    currentRapportChoice,
+
     // Actions
-    handleSelectQuestionnaire,
-    
+    handleSelectRapportChoice,
+
     // Computed properties
-    isQuestionnaireSelected,
     isSubmitDisabled,
   };
 }

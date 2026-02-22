@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { usePreAssessmentQuestionnaire } from "@/hooks/pre-assessment/usePreAssessmentQuestionnaire";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 
 interface QuestionnaireFormProps {
   handleNextButtonOnClick: () => void;

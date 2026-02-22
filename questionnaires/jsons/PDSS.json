@@ -1,0 +1,133 @@
+{
+  "scale_id": "PDSS",
+  "full_name": "Panic Disorder Severity Scale",
+  "domain": "Panic Disorder",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "How many panic and limited symptoms attacks did you have during the week?",
+      "hooks": [
+        "number of panic attacks",
+        "how many attacks this week",
+        "frequency of panic episodes",
+        "limited symptom attacks frequency"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No panic or limited symptom episodes",
+        "1": "Mild: no full panic attacks and no more than 1 limited symptom attack/day",
+        "2": "Moderate: 1 or 2 full panic attacks and/or multiple limited symptom attacks/day",
+        "3": "Severe: more than 2 full attacks but not more than 1/day on average",
+        "4": "Extreme: full panic attacks occurred more than once a day, more days than not"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "If you had any panic attacks during the past week, how distressing (uncomfortable, frightening) were they while they were happening?",
+      "hooks": [
+        "how scary were the attacks",
+        "intensity of panic distress",
+        "uncomfortable feelings during attacks",
+        "painful panic episodes"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all distressing, or no panic or limited symptom attacks during the past week",
+        "1": "Mildly distressing (not too intense)",
+        "2": "Moderately distressing (intense, but still manageable)",
+        "3": "Severely distressing (very intense)",
+        "4": "Extremely distressing (extreme distress during all attacks)"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "During the past week, how much have you worried or felt anxious about when your next panic attack would occur or about fears related to the attacks?",
+      "hooks": [
+        "worrying about the next attack",
+        "anticipatory anxiety",
+        "fear of health problems from attacks",
+        "embarrassment about panicking"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "Occasionally or only mildly",
+        "2": "Frequently or moderately",
+        "3": "Very often or to a very disturbing degree",
+        "4": "Nearly constantly and to a disabling extent"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "During the past week were there any places or situations you avoided, or felt afraid of, because of fear of having a panic attack?",
+      "hooks": [
+        "avoiding crowds or malls",
+        "fear of public transportation",
+        "scared of being alone",
+        "avoidance of specific places"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "None: no fear or avoidance",
+        "1": "Mild: occasional fear and/or avoidance; little or no modification of lifestyle",
+        "2": "Moderate: noticeable fear and/or avoidance but still manageable; some lifestyle modification",
+        "3": "Severe: extensive avoidance; substantial modification of lifestyle required",
+        "4": "Extreme: pervasive disabling fear and/or avoidance; extensive lifestyle modification"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "During the past week, were there any activities that you avoided, or felt afraid of, because they caused physical sensations like those you feel during panic attacks?",
+      "hooks": [
+        "avoiding exercise or coffee",
+        "fear of hot showers",
+        "avoiding scary movies",
+        "scared of physical sensations"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No fear or avoidance of situations or activities because of distressing physical sensations",
+        "1": "Mild: occasional fear and/or avoidance; little lifestyle modification",
+        "2": "Moderate: noticeable avoidance but still manageable; limited lifestyle modification",
+        "3": "Severe: extensive avoidance; substantial modification of lifestyle or interference in functioning",
+        "4": "Extreme: pervasive and disabling avoidance; important tasks not performed"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "During the past week, how much did the above symptoms altogether interfere with your ability to work or carry out your responsibilities at home?",
+      "hooks": [
+        "panic affecting my job",
+        "trouble with chores due to anxiety",
+        "work interference",
+        "home responsibility impairment"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No interference with work or home responsibilities",
+        "1": "Slight interference; could do nearly everything",
+        "2": "Significant interference; still could manage to do the things I needed to do",
+        "3": "Substantial impairment; many important things I couldn't do",
+        "4": "Extreme, incapacitating impairment; essentially unable to manage responsibilities"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "During the past week, how much did panic and limited symptom attacks, worry about attacks and fear of situations and activities because of attacks interfere with your social life?",
+      "hooks": [
+        "avoiding friends because of panic",
+        "social life interference",
+        "can't go out with people",
+        "socializing is too hard"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No interference",
+        "1": "Slight interference with social activities; could do nearly everything",
+        "2": "Significant interference; could manage most things if I made the effort",
+        "3": "Substantial impairment; many social things I couldn't do",
+        "4": "Extreme, incapacitating impairment; hardly anything social I could do"
+      }
+    }
+  ]
+}

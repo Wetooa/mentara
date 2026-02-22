@@ -1,0 +1,367 @@
+{
+  "scale_id": "SIAS",
+  "full_name": "Social Interaction Anxiety Scale",
+  "domain": "Social Anxiety",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "I get nervous if I have to speak with someone in authority (teacher, boss, etc.).",
+      "hooks": [
+        "scared of boss",
+        "talking to authority",
+        "nervous with teachers",
+        "authority figures"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "I have difficulty making eye contact with others.",
+      "hooks": [
+        "can't look at eyes",
+        "avoiding eye contact",
+        "staring at the floor",
+        "eye contact is hard"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "I become tense if I have to talk about myself or my feelings.",
+      "hooks": [
+        "hiding feelings",
+        "opening up is hard",
+        "talking about me",
+        "tense sharing personal info"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "I find it difficult to mix comfortably with the people I work with.",
+      "hooks": [
+        "office anxiety",
+        "work social events",
+        "mixing with coworkers",
+        "colleague interaction"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "I find it easy to make friends my own age.",
+      "hooks": [
+        "making friends",
+        "socializing with peers",
+        "getting along with my age group",
+        "ease of friendship"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "4": "Not at all characteristic or true of me",
+        "3": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "1": "Very characteristic or true of me",
+        "0": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "I tense up if I meet an acquaintance in the street.",
+      "hooks": [
+        "running into people",
+        "public social panic",
+        "seeing someone I know",
+        "street interaction"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "When mixing socially, I am uncomfortable.",
+      "hooks": [
+        "social discomfort",
+        "socializing is awkward",
+        "uncomfortable around others",
+        "not at ease"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "I feel tense if I am alone with just one other person.",
+      "hooks": [
+        "one on one anxiety",
+        "scared to be alone with someone",
+        "tense in private conversation",
+        "individual interaction"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "I am at ease meeting people at parties, etc.",
+      "hooks": [
+        "party confidence",
+        "meeting people at events",
+        "socializing at gatherings",
+        "feeling good at parties"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "4": "Not at all characteristic or true of me",
+        "3": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "1": "Very characteristic or true of me",
+        "0": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "I have difficulty talking with other people.",
+      "hooks": [
+        "trouble speaking",
+        "can't find words",
+        "talking to others is hard",
+        "difficulty chatting"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "11",
+      "clinical_text": "I find it easy to think of things to talk about.",
+      "hooks": [
+        "easy talker",
+        "never run out of things to say",
+        "fluent conversation",
+        "good at small talk"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "4": "Not at all characteristic or true of me",
+        "3": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "1": "Very characteristic or true of me",
+        "0": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "12",
+      "clinical_text": "I worry about expressing myself in case I appear awkward.",
+      "hooks": [
+        "fear of looking awkward",
+        "appearing weird",
+        "social self-consciousness",
+        "awkward expression"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "13",
+      "clinical_text": "I find it difficult to disagree with another's point of view.",
+      "hooks": [
+        "can't disagree",
+        "fear of conflict",
+        "people pleasing",
+        "difficulty arguing"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "14",
+      "clinical_text": "I have difficulty talking to people I am attracted to.",
+      "hooks": [
+        "talking to a crush",
+        "dating anxiety",
+        "attraction nervousness",
+        "flirting difficulty"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "15",
+      "clinical_text": "I find myself worrying that I won't know what to say in social situations.",
+      "hooks": [
+        "running out of things to say",
+        "silent in social groups",
+        "social blanking",
+        "speechless anxiety"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "16",
+      "clinical_text": "I am nervous mixing with people I don't know well.",
+      "hooks": [
+        "stranger anxiety",
+        "meeting new people",
+        "new social circles",
+        "unknown people"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "17",
+      "clinical_text": "I feel I'll say something embarrassing when talking.",
+      "hooks": [
+        "fear of embarrassment",
+        "saying the wrong thing",
+        "verbal mistakes",
+        "social blunders"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "18",
+      "clinical_text": "When mixing in a group, I find myself worrying I will be ignored.",
+      "hooks": [
+        "fear of being ignored",
+        "group social anxiety",
+        "feeling invisible",
+        "excluded in groups"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "19",
+      "clinical_text": "I am tense mixing in a group.",
+      "hooks": [
+        "group tension",
+        "anxious in groups",
+        "crowd stress",
+        "social circle nerves"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    },
+    {
+      "id": "20",
+      "clinical_text": "I am unsure whether to greet someone I know only slightly.",
+      "hooks": [
+        "greeting dilemma",
+        "awkward hellos",
+        "not sure to wave",
+        "slight acquaintances"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all characteristic or true of me",
+        "1": "Slightly characteristic or true of me",
+        "2": "Moderately characteristic or true of me",
+        "3": "Very characteristic or true of me",
+        "4": "Extremely characteristic or true of me"
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 const AUDIT: {
   standardDrinks: Record<string, Record<string, number>>;
 } & QuestionnaireProps = {
-  title: "Alcohol Use Disorders Identification Test (AUDIT)",
+  title: "Alcohol Use Disorders Identification Test",
   description:
     "The Alcohol Use Disorders Identification Test (AUDIT) is a 10-item screening tool developed by the World Health Organization (WHO) to assess alcohol consumption, drinking behaviors, and alcohol-related problems. A score of 8 or more is considered to indicate hazardous or harmful alcohol use.",
   questions: [
@@ -13,8 +13,8 @@ const AUDIT: {
       options: [
         "Never",
         "Monthly or less",
-        "2-4 times a month",
-        "2-3 times a week",
+        "2 to 4 times a month",
+        "2 to 3 times a week",
         "4 or more times a week",
       ],
     },
@@ -22,7 +22,7 @@ const AUDIT: {
       prefix: "Quantity",
       question:
         "How many drinks containing alcohol do you have on a typical day when you are drinking?",
-      options: ["1 or 2", "3 or 4", "5 or 6", "7 to 9", "10 or more"],
+      options: ["1 or 2", "3 or 4", "5 or 6", "7, 8, or 9", "10 or more"],
     },
     {
       prefix: "Binge Drinking",
@@ -108,7 +108,7 @@ const AUDIT: {
     {
       prefix: "Concerns from Others",
       question:
-        "Has a relative, friend, doctor, or other health worker been concerned about your drinking or suggested you cut down?",
+        "Has a relative or friend or a doctor or another health worker been concerned about your drinking or suggested you cut down?",
       options: [
         "No",
         "Yes, but not in the last year",
@@ -119,7 +119,6 @@ const AUDIT: {
   scoring: {
     ...QUESTIONNAIRE_SCORING,
 
-    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
       lowRisk: { range: [0, 7], label: "Low Risk" },
       hazardous: { range: [8, 15], label: "Hazardous Use" },

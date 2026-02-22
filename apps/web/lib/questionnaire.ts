@@ -5,11 +5,11 @@ import {
 
 export function answersToAnswerMatrix(
   questionnaires: ListOfQuestionnaires[],
-  answers: number[][]
+  flatAnswers: number[]
 ) {
   const result = Array(201).fill(0);
 
-  // Get the starting indices for each questionnaire
+  // Get the starting indices for each questionnaire (ML Model expected positions)
   const startIndices: Record<ListOfQuestionnaires, number> = {
     Stress: 174, // PSS
     Anxiety: 69, // GAD7
@@ -28,15 +28,20 @@ export function answersToAnswerMatrix(
     "Substance or Alcohol Use Issues": 33, // AUDIT
   };
 
-  // Loop through the questionnaires and fill in the answers
+  let flatIndexTracker = 0;
+
+  // Loop through the questionnaires and fill in the answers from the 1D flat array sequentially
   for (let i = 0; i < questionnaires.length; i++) {
     const q = questionnaires[i];
     const startIndex = startIndices[q];
     const questionCount = QUESTIONNAIRE_MAP[q].questions.length;
 
-    // Fill answers for this questionnaire
+    // Fill answers for this specific questionnaire by reading the next N answers from the flat array
     for (let j = 0; j < questionCount; j++) {
-      result[startIndex + j] = answers[i][j];
+      if (flatIndexTracker < flatAnswers.length) {
+        result[startIndex + j] = flatAnswers[flatIndexTracker];
+      }
+      flatIndexTracker++;
     }
   }
 

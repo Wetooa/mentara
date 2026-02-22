@@ -1,105 +1,105 @@
 import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
-const OCI_R: QuestionnaireProps = {
-  title: "Obsessive-Compulsive Inventory - Revised (OCI-R)",
+const OCI_R: any = {
+  title: "Obsessive-Compulsive Inventory - Revised",
   description:
     "The Obsessive-Compulsive Inventory - Revised (OCI-R) is a self-administered questionnaire used to assess the severity of obsessive-compulsive disorder (OCD) symptoms. It is commonly used for diagnosing and monitoring OCD, focusing on obsessive thoughts and compulsive behaviors.",
   questions: [
     {
       prefix: "",
       question: "I have saved up so many things that they get in the way.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I check things more often than necessary.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I get upset if objects are not arranged properly.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I feel compelled to count while I am doing things.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question:
         "I find it difficult to touch an object when I know it has been touched by strangers or certain people.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I find it difficult to control my own thoughts.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
-      question: "I collect things I don’t need.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      question: "I collect things I don't need.",
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I repeatedly check doors, windows, drawers, etc.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I get upset if others change the way I have arranged things.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I feel I have to repeat certain numbers.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question:
         "I sometimes have to wash or clean myself simply because I feel contaminated.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question:
         "I am upset by unpleasant thoughts that come into my mind against my will.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question:
         "I avoid throwing things away because I am afraid I might need them later.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question:
         "I repeatedly check gas and water taps and light switches after turning them off.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I need things to be arranged in a particular way.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I feel that there are good and bad numbers.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question: "I wash my hands more often and longer than necessary.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
     {
       prefix: "",
       question:
         "I frequently get nasty thoughts and have difficulty in getting rid of them.",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+      options: ["Not at all", "A little", "Moderately", "A lot", "Extremely"],
     },
   ],
   scoring: {

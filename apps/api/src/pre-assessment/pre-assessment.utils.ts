@@ -84,92 +84,76 @@ const QUESTIONNAIRE_INDEX_MAPPING: Record<string, QuestionnaireIndexRange> = {
 // Questionnaire scoring configurations
 export const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
   Stress: {
-    scoreMapping: { 0: 4, 1: 3, 2: 2, 3: 1, 4: 0 },
-    reverseScoredQuestions: [3, 4, 6, 7],
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
       low: { range: [0, 13], label: 'Low Stress' },
       moderate: { range: [14, 26], label: 'Moderate Stress' },
-      high: { range: [27, 40], label: 'High Perceived Stress' },
+      high: { range: [27, 40], label: 'High Stress' },
     },
   },
   Anxiety: {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
-      minimal: { range: [0, 4], label: 'Minimal Anxiety' },
-      mild: { range: [5, 9], label: 'Mild Anxiety' },
-      moderate: { range: [10, 14], label: 'Moderate Anxiety' },
-      severe: { range: [15, 21], label: 'Severe Anxiety' },
+      minimal: { range: [0, 4], label: 'Minimal' },
+      mild: { range: [5, 9], label: 'Mild' },
+      moderate: { range: [10, 14], label: 'Moderate' },
+      severe: { range: [15, 21], label: 'Severe' },
     },
   },
   Depression: {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
-      minimal: { range: [0, 4], label: 'Minimal Depression' },
-      mild: { range: [5, 9], label: 'Mild Depression' },
-      moderate: { range: [10, 14], label: 'Moderate Depression' },
-      moderatelySevere: {
-        range: [15, 19],
-        label: 'Moderately Severe Depression',
-      },
-      severe: { range: [20, 27], label: 'Severe Depression' },
+      none: { range: [0, 0], label: 'No Phobia' },
+      mildModerate: { range: [1, 15], label: 'Mild-Moderate' },
+      moderateSevere: { range: [16, 25], label: 'Moderate-Severe' },
+      verySevere: { range: [26, 120], label: 'Very Severe' },
     },
   },
   Insomnia: {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      none: { range: [0, 7], label: 'No clinically significant insomnia' },
-      subthreshold: { range: [8, 14], label: 'Subthreshold insomnia' },
-      moderate: {
-        range: [15, 21],
-        label: 'Clinical insomnia (moderate severity)',
-      },
-      severe: { range: [22, 28], label: 'Clinical insomnia (severe)' },
+      none: { range: [0, 7], label: 'No Insomnia' },
+      subthreshold: { range: [8, 14], label: 'Subthreshold Insomnia' },
+      moderate: { range: [15, 21], label: 'Moderate Insomnia' },
+      severe: { range: [22, 28], label: 'Severe Insomnia' },
     },
   },
   Panic: {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      none: { range: [0, 7], label: 'No panic disorder' },
-      mild: { range: [8, 15], label: 'Mild panic disorder' },
-      moderate: { range: [16, 23], label: 'Moderate panic disorder' },
-      severe: { range: [24, 40], label: 'Severe panic disorder' },
+      minimal: { range: [0, 7], label: 'Minimal' },
+      mild: { range: [8, 10], label: 'Mild' },
+      moderate: { range: [11, 15], label: 'Moderate' },
+      severe: { range: [16, 28], label: 'Severe' },
     },
   },
   'Bipolar disorder (BD)': {
-    scoreMapping: { 0: 0, 1: 1, 2: 2 },
+    scoreMapping: { 0: 0, 1: 1 },
     severityLevels: {
-      negative: { range: [0, 6], label: 'Negative for bipolar disorder' },
-      positive: { range: [7, 13], label: 'Positive for bipolar disorder' },
+      negative: { range: [0, 0], label: 'Negative Screen' },
+      positive: { range: [1, 1], label: 'Positive Bipolar Screen (All 3 Criteria Met)' },
     },
   },
   'Obsessive compulsive disorder (OCD)': {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      subclinical: { range: [0, 20], label: 'Subclinical' },
-      mild: { range: [21, 40], label: 'Mild' },
-      moderate: { range: [41, 60], label: 'Moderate' },
-      severe: { range: [61, 80], label: 'Severe' },
-      extreme: { range: [81, 100], label: 'Extreme' },
+      below: { range: [0, 20], label: 'Below Threshold' },
+      clinical: { range: [21, 72], label: 'Clinical Range' },
     },
   },
   'Post-traumatic stress disorder (PTSD)': {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      none: { range: [0, 10], label: 'None to minimal' },
-      mild: { range: [11, 20], label: 'Mild' },
-      moderate: { range: [21, 30], label: 'Moderate' },
-      severe: { range: [31, 40], label: 'Severe' },
-      extreme: { range: [41, 80], label: 'Extreme' },
+      below: { range: [0, 32], label: 'Below Threshold' },
+      probable: { range: [33, 80], label: 'Probable PTSD' },
     },
   },
   'Social anxiety': {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      minimal: { range: [0, 20], label: 'Minimal or No Social Phobia' },
-      mild: { range: [21, 30], label: 'Mild Social Phobia' },
-      moderate: { range: [31, 40], label: 'Moderate Social Phobia' },
-      severe: { range: [41, 50], label: 'Severe Social Phobia' },
-      verySevere: { range: [51, 68], label: 'Very Severe Social Phobia' },
+      below: { range: [0, 33], label: 'Below Threshold' },
+      specific: { range: [34, 42], label: 'Social anxiety specific (Potential Social Phobia)' },
+      generalized: { range: [43, 80], label: 'Generalized Social Interaction Anxiety' },
     },
   },
   Phobia: {
@@ -183,61 +167,57 @@ export const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
     },
   },
   Burnout: {
-    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6 },
     severityLevels: {
-      low: { range: [0, 30], label: 'Low burnout' },
-      moderate: { range: [31, 50], label: 'Moderate burnout' },
-      high: { range: [51, 70], label: 'High burnout' },
-      severe: { range: [71, 100], label: 'Severe burnout' },
+      interpretation: { range: [0, 100], label: 'MBI Scale' },
     },
   },
   'Binge eating / Eating disorders': {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      none: { range: [0, 17], label: 'No binge eating' },
-      mild: { range: [18, 26], label: 'Mild binge eating' },
-      moderate: { range: [27, 46], label: 'Moderate binge eating' },
-      severe: { range: [47, 100], label: 'Severe binge eating' },
+      minimal: { range: [0, 17], label: 'Minimal/No Binge Eating' },
+      mildModerate: { range: [18, 26], label: 'Mild to moderate binge eating' },
+      severe: { range: [27, 46], label: 'Severe binge eating' },
     },
   },
   'ADD / ADHD': {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      none: { range: [0, 16], label: 'No ADHD symptoms' },
-      mild: { range: [17, 23], label: 'Mild ADHD symptoms' },
-      moderate: { range: [24, 30], label: 'Moderate ADHD symptoms' },
-      severe: { range: [31, 36], label: 'Severe ADHD symptoms' },
+      low: { range: [0, 30], label: 'Low' },
+      mildModerate: { range: [31, 39], label: 'Mild to Moderate' },
+      high: { range: [40, 49], label: 'High' },
+      veryHigh: { range: [50, 72], label: 'Very High' },
+      screenPositive: { range: [100, 100], label: 'Highly Consistent with Adult ADHD (Screen Positive)' },
+      screenNegative: { range: [101, 101], label: 'Below Clinical Screening Threshold' },
     },
   },
   'Substance or Alcohol Use Issues': {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      none: { range: [0, 7], label: 'No significant alcohol use' },
-      mild: { range: [8, 15], label: 'Mild alcohol use' },
-      moderate: { range: [16, 19], label: 'Moderate alcohol use' },
-      severe: { range: [20, 40], label: 'Severe alcohol use' },
+      low: { range: [0, 7], label: 'Low Risk' },
+      hazardous: { range: [8, 15], label: 'Hazardous' },
+      harmful: { range: [16, 19], label: 'Harmful' },
+      dependent: { range: [20, 40], label: 'Dependent' },
     },
   },
   'Drug Issues': {
-    scoreMapping: { 0: 0, 1: 1 }, // DAST10 is usually yes/no questions
+    scoreMapping: { 0: 0, 1: 1 },
     severityLevels: {
-      none: { range: [0, 2], label: 'No drug problem' },
-      low: { range: [3, 5], label: 'Low level drug problem' },
-      moderate: { range: [6, 8], label: 'Moderate level drug problem' },
-      substantial: { range: [9, 10], label: 'Substantial drug problem' },
+      none: { range: [0, 0], label: 'No Problems' },
+      low: { range: [1, 2], label: 'Low Level' },
+      moderate: { range: [3, 5], label: 'Moderate Level' },
+      substantial: { range: [6, 8], label: 'Substantial Level' },
+      severe: { range: [9, 10], label: 'Severe Level' },
     },
   },
   'Depression Secondary': {
-    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 }, // PHQ9 scoring
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
-      minimal: { range: [0, 4], label: 'Minimal Depression' },
-      mild: { range: [5, 9], label: 'Mild Depression' },
-      moderate: { range: [10, 14], label: 'Moderate Depression' },
-      moderatelySevere: {
-        range: [15, 19],
-        label: 'Moderately Severe Depression',
-      },
-      severe: { range: [20, 27], label: 'Severe Depression' },
+      minimal: { range: [0, 4], label: 'Minimal' },
+      mild: { range: [5, 9], label: 'Mild' },
+      moderate: { range: [10, 14], label: 'Moderate' },
+      moderatelySevere: { range: [15, 19], label: 'Moderately Severe' },
+      severe: { range: [20, 27], label: 'Severe' },
     },
   },
 };
@@ -245,36 +225,106 @@ export const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
 export function calculateQuestionnaireScore(
   questionnaireName: string,
   answers: number[],
-): QuestionnaireScore {
+): QuestionnaireScore & { subscales?: Record<string, number> } {
   const config = QUESTIONNAIRE_SCORING[questionnaireName];
   if (!config) {
     return { score: 0, severity: 'Unknown questionnaire' };
   }
 
-  let score = 0;
+  let totalScore = 0;
 
-  // Calculate score based on answers
-  for (let i = 0; i < answers.length; i++) {
-    const answer = answers[i];
-    if (answer === -1 || answer === undefined) continue; // Skip unanswered questions
+  // ASRS Special Scoring Logic
+  if (questionnaireName === 'ADD / ADHD') {
+    const shadedRules: Record<string, number[]> = {
+      '0': [2, 3, 4], '1': [2, 3, 4], '2': [2, 3, 4],
+      '3': [3, 4], '4': [3, 4], '5': [3, 4],
+      '6': [3, 4], '7': [3, 4], '8': [2, 3, 4],
+      '9': [3, 4], '10': [3, 4], '11': [2, 3, 4],
+      '12': [3, 4], '13': [3, 4], '14': [3, 4],
+      '15': [2, 3, 4], '16': [3, 4], '17': [2, 3, 4]
+    };
 
-    let questionScore = config.scoreMapping[answer] || 0;
+    // Calculate total score (0-72)
+    const rawTotal = answers.reduce((sum, val) => sum + (val === -1 ? 0 : val), 0);
 
-    // Handle reverse scoring for specific questionnaires
-    if (
-      questionnaireName === 'Stress' &&
-      (config as any).reverseScoredQuestions.includes(i)
-    ) {
-      questionScore = 4 - questionScore; // Reverse the score
+    // Screening Rule: 4 or more scores in shaded boxes of Part A (items 1-6)
+    let partAShadedCount = 0;
+    for (let i = 0; i < 6; i++) {
+      if (answers[i] !== -1 && shadedRules[i].includes(answers[i])) {
+        partAShadedCount++;
+      }
     }
 
-    score += questionScore;
+    let severity = 'Below Clinical Screening Threshold';
+    if (partAShadedCount >= 4) {
+      severity = 'Highly Consistent with Adult ADHD (Screen Positive)';
+    } else {
+      // Use conventional thresholds if screen is negative but total is high?
+      // ClinicalScorer says: if part_a >= 4 positive else negative.
+      // But it also has thresholds (0, 30, 'Low'), etc.
+      for (const [, range] of Object.entries(config.severityLevels)) {
+        if (rawTotal >= range.range[0] && rawTotal <= range.range[1]) {
+          severity = range.label;
+          break;
+        }
+      }
+    }
+
+    return { score: rawTotal, severity };
   }
 
-  // Determine severity level
+  // MBI Special Scoring Logic
+  if (questionnaireName === 'Burnout') {
+    const subscales: Record<string, number> = { EE: 0, DP: 0, PA: 0 };
+    // MBI Item mapping: EE (1,2,3,4,5,6,7), DP (8,9,10,11,12,13,14), PA (15,16,17,18,19,20,21,22)
+    // Note: Items 0-21 in answers array
+    for (let i = 0; i < answers.length; i++) {
+      const val = answers[i] === -1 ? 0 : answers[i];
+      if (i < 7) subscales.EE += val;
+      else if (i < 14) subscales.DP += val;
+      else subscales.PA += val;
+    }
+
+    const eeLevel = subscales.EE <= 16 ? "Low" : (subscales.EE <= 26 ? "Moderate" : "High");
+    const dpLevel = subscales.DP <= 6 ? "Low" : (subscales.DP <= 12 ? "Moderate" : "High");
+    const paLevel = subscales.PA >= 39 ? "High Accomplishment" : (subscales.PA >= 32 ? "Moderate" : "Low Accomplishment");
+
+    return {
+      score: subscales.EE + subscales.DP + subscales.PA,
+      severity: `EE: ${eeLevel}, DP: ${dpLevel}, PA: ${paLevel}`,
+      subscales
+    };
+  }
+
+  // MDQ Special Scoring Logic
+  if (questionnaireName === 'Bipolar disorder (BD)') {
+    // 1. 7+ Yes in questions 0-12 (Yes=1)
+    const symptomCount = answers.slice(0, 13).filter(a => a === 1).length;
+    // 2. Symptom clustering (Question 13)
+    const clustering = answers[13] === 1;
+    // 3. Moderate/Serious problem (Question 14 >= 2)
+    const impairment = answers[14] >= 2;
+
+    const positive = symptomCount >= 7 && clustering && impairment;
+    return {
+      score: positive ? 1 : 0,
+      severity: positive ? 'Positive Bipolar Screen (All 3 Criteria Met)' : 'Negative Screen'
+    };
+  }
+
+  // Default Scoring Logic
+  for (let i = 0; i < answers.length; i++) {
+    const answer = answers[i];
+    if (answer === -1 || answer === undefined) continue;
+    score += answer;
+  }
+
+  // PHQ/PSS specific logic (if needed, but ClinicalScorer says labels are "No Phobia" etc)
+  // We'll stick to the SEVERITY_THRESHOLDS exactly.
+
   let severity = 'Unknown severity';
   for (const [, range] of Object.entries(config.severityLevels)) {
-    if (score >= (range as any).range[0] && score <= (range as any).range[1]) {
+    if (score >= range.range[0] && score <= range.range[1]) {
       severity = range.label;
       break;
     }

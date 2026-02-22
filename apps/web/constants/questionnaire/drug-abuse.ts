@@ -1,65 +1,65 @@
 import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
-const DAST_10: QuestionnaireProps = {
-  title: "Drug Abuse Screening Test (DAST-10)",
+const DAST10: any = {
+  title: "Drug Abuse Screening Test",
   description:
-    "The Drug Abuse Screening Test (DAST-10) is a self-administered questionnaire designed to assess drug use and its potential consequences over the past 12 months. It is used for screening and evaluating substance use disorders.",
+    "The Drug Abuse Screening Test (DAST-10) is a 10-item self-report scale that assesses drug use behavior over the past 12 months. It provides a brief instrument for clinical screening and treatment evaluation research.",
   questions: [
     {
-      prefix: "",
+      prefix: "Usage",
       question:
         "Have you used drugs other than those required for medical reasons?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Polysubstance Use",
       question: "Do you use more than one drug at a time?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Control",
       question: "Are you always able to stop using drugs when you want to?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Symptoms",
       question:
         "Have you had 'blackouts' or 'flashbacks' as a result of drug use?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Emotions",
       question: "Do you ever feel bad or guilty about your drug use?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Social Conflict",
       question:
         "Does your spouse (or parents) ever complain about your involvement with drugs?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Neglect",
       question: "Have you neglected your family because of your use of drugs?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Illegal Activities",
       question:
         "Have you engaged in illegal activities in order to obtain drugs?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Withdrawal",
       question:
         "Have you ever experienced withdrawal symptoms (felt sick) when you stopped taking drugs?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
     {
-      prefix: "",
+      prefix: "Medical Problems",
       question:
         "Have you had medical problems as a result of your drug use (e.g., memory loss, hepatitis, convulsions, bleeding, etc.)?",
-      options: ["Yes", "No"],
+      options: ["No", "Yes"],
     },
   ],
   scoring: {
@@ -95,4 +95,4 @@ const DAST_10: QuestionnaireProps = {
     "This questionnaire is a screening tool for substance use disorders and does not provide a definitive diagnosis. A clinical evaluation by a healthcare professional is necessary for a formal assessment.",
 };
 
-export default DAST_10;
+export default DAST10 as any;

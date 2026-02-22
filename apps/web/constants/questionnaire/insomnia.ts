@@ -1,60 +1,64 @@
 import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
-const INSOMNIA_SURVEY: QuestionnaireProps = {
-  title: "Insomnia Severity Index (ISI)",
+const INSOMNIA_SURVEY: any = {
+  title: "Insomnia Severity Index",
   description:
     "The Insomnia Severity Index (ISI) is a self-administered questionnaire used to assess the severity of insomnia symptoms over the past two weeks. It helps determine the impact of sleep difficulties on daily life.",
   questions: [
     {
       prefix: "Over the past two weeks",
-      question: "how much difficulty have you had falling asleep?",
-      options: ["None", "Mild", "Moderate", "Severe", "Very severe"],
+      question: "Difficulty falling asleep",
+      options: ["None", "Mild", "Moderate", "Severe", "Very Severe"],
     },
     {
       prefix: "Over the past two weeks",
-      question: "how much difficulty have you had staying asleep?",
-      options: ["None", "Mild", "Moderate", "Severe", "Very severe"],
+      question: "Difficulty staying asleep",
+      options: ["None", "Mild", "Moderate", "Severe", "Very Severe"],
     },
     {
       prefix: "Over the past two weeks",
-      question: "how much of a problem has waking up too early been for you?",
-      options: ["None", "Mild", "Moderate", "Severe", "Very severe"],
+      question: "Problem waking up too early",
+      options: ["None", "Mild", "Moderate", "Severe", "Very Severe"],
     },
     {
       prefix: "Over the past two weeks",
-      question:
-        "how satisfied or dissatisfied are you with your current sleep pattern?",
+      question: "How SATISFIED/dissatisfied are you with your current sleep pattern?",
       options: [
-        "Very satisfied",
+        "Very Satisfied",
         "Satisfied",
-        "Neutral",
+        "Moderately Satisfied",
         "Dissatisfied",
-        "Very dissatisfied",
+        "Very Dissatisfied",
       ],
     },
     {
       prefix: "Over the past two weeks",
       question:
-        "how much has your sleep problem interfered with your daily functioning?",
-      options: ["Not at all", "A little", "Somewhat", "Much", "Very much"],
-    },
-    {
-      prefix: "Over the past two weeks",
-      question:
-        "how noticeable do you think your sleep problems are to others?",
+        "To what extent do you consider your sleep problem to INTERFERE with your daily functioning (e.g. daytime fatigue, ability to function at work/daily chores, concentration, memory, mood, etc.)",
       options: [
-        "Not at all noticeable",
-        "A little noticeable",
-        "Somewhat noticeable",
-        "Quite noticeable",
-        "Very noticeable",
+        "Not at all Interfering",
+        "A Little",
+        "Somewhat",
+        "Much",
+        "Very Much Interfering",
       ],
     },
     {
       prefix: "Over the past two weeks",
       question:
-        "how worried or distressed are you about your current sleep problem?",
-      options: ["Not at all", "A little", "Somewhat", "Much", "Very much"],
+        "How NOTICEABLE to others do you think your sleeping problem is in terms of impairing the quality of your life?",
+      options: [
+        "Not at all Noticeable",
+        "Barely",
+        "Somewhat",
+        "Much",
+        "Very Much Noticeable",
+      ],
+    },
+    {
+      prefix: "Over the past two weeks",
+      question: "How WORRIED/distressed are you about your current sleep problem?",
+      options: ["Not at all", "A Little", "Somewhat", "Much", "Very Much"],
     },
   ],
   scoring: {
