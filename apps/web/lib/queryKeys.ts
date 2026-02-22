@@ -1,0 +1,265 @@
+// Query keys for React Query - restructured to avoid temporal dead zone errors
+const createQueryKeys = () => {
+  // Base query keys - these don't reference other keys
+  const base = {
+    auditLogs: {
+      all: ['auditLogs'] as const,
+    },
+    therapists: {
+      all: ['therapists'] as const,
+      applications: ['therapists', 'applications'] as const,
+      availability: ['therapists', 'availability'] as const,
+      patients: ['therapists', 'patients'] as const,
+    },
+    therapist: {
+      all: ['therapist'] as const,
+      worksheets: ['therapist', 'worksheets'] as const,
+      matchedClients: ['therapist', 'matched-clients'] as const,
+    },
+    sessions: {
+      all: ['sessions'] as const,
+    },
+    booking: {
+      all: ['booking'] as const,
+    },
+    users: {
+      all: ['users'] as const,
+    },
+    profile: {
+      all: ['profile'] as const,
+    },
+    dashboard: {
+      all: ['dashboard'] as const,
+    },
+    admin: {
+      all: ['admin'] as const,
+    },
+    moderator: {
+      all: ['moderator'] as const,
+    },
+    billing: {
+      all: ['billing'] as const,
+    },
+    notifications: {
+      all: ['notifications'] as const,
+    },
+    preAssessment: {
+      all: ['preAssessment'] as const,
+    },
+    favorites: {
+      all: ['favorites'] as const,
+    },
+    reporting: {
+      all: ['reporting'] as const,
+    },
+    reviews: {
+      all: ['reviews'] as const,
+    },
+    communities: {
+      all: ['communities'] as const,
+    },
+    messaging: {
+      all: ['messaging'] as const,
+      conversations: ['messaging', 'conversations'] as const,
+    },
+    worksheets: {
+      all: ['worksheets'] as const,
+    },
+    client: {
+      all: ['client'] as const,
+    },
+  };
+
+  // Computed query keys - these can safely reference base keys
+  return {
+    auditLogs: {
+      ...base.auditLogs,
+      list: (params?: any) => [...base.auditLogs.all, 'list', params] as const,
+    },
+    therapists: {
+      ...base.therapists,
+      recommendations: (params?: any) => [...base.therapists.all, 'recommendations', params] as const,
+      therapistRecommendations: () => [...base.therapists.all, 'therapist-recommendations'] as const,
+      list: (params?: any) => [...base.therapists.all, 'list', params] as const,
+      byId: (id: string) => [...base.therapists.all, 'byId', id] as const,
+      detail: (id: string) => [...base.therapists.all, 'detail', id] as const,
+      applications: {
+        list: (params?: any) => [...base.therapists.applications, 'list', params] as const,
+        byId: (id: string) => [...base.therapists.applications, 'detail', id] as const,
+        my: () => [...base.therapists.applications, 'detail', 'me'] as const,
+      },
+      availability: {
+        byId: (id: string) => [...base.therapists.availability, 'byId', id] as const,
+        slots: (therapistId: string, params?: any) => [...base.therapists.availability, 'slots', therapistId, params] as const,
+      },
+      patients: {
+        list: (params?: any) => [...base.therapists.patients, 'list', params] as const,
+        matched: () => [...base.therapists.patients, 'matched'] as const,
+      },
+    },
+    therapist: {
+      ...base.therapist,
+      dashboard: () => [...base.therapist.all, 'dashboard'] as const,
+      stats: () => [...base.therapist.all, 'dashboard', 'stats'] as const,
+      appointments: () => [...base.therapist.all, 'dashboard', 'appointments'] as const,
+      meetings: (params?: any) => [...base.therapist.all, 'meetings', params] as const,
+      meeting: (meetingId: string) => [...base.therapist.all, 'meetings', meetingId] as const,
+      availability: () => [...base.therapists.availability, 'current'] as const,
+    },
+    sessions: {
+      ...base.sessions,
+      list: (params?: any) => [...base.sessions.all, 'list', params] as const,
+      upcoming: (limit?: number) => [...base.sessions.all, 'upcoming', limit] as const,
+      completed: (limit?: number) => [...base.sessions.all, 'completed', limit] as const,
+      cancelled: (limit?: number) => [...base.sessions.all, 'cancelled', limit] as const,
+      inProgress: (limit?: number) => [...base.sessions.all, 'in-progress', limit] as const,
+      byStatus: (status: string, limit?: number) => [...base.sessions.all, 'by-status', status, limit] as const,
+      dateRange: (dateFrom: string, dateTo: string, limit?: number) => [...base.sessions.all, 'date-range', dateFrom, dateTo, limit] as const,
+      byId: (id: string) => [...base.sessions.all, 'byId', id] as const,
+      stats: () => [...base.sessions.all, 'stats'] as const,
+    },
+    booking: {
+      ...base.booking,
+      slots: (therapistId: string, date?: string) => [...base.booking.all, 'slots', therapistId, date] as const,
+      appointments: (params?: any) => [...base.booking.all, 'appointments', params] as const,
+    },
+    users: {
+      ...base.users,
+      current: () => [...base.users.all, 'current'] as const,
+      byId: (id: string) => [...base.users.all, 'byId', id] as const,
+      list: (params?: any) => [...base.users.all, 'list', params] as const,
+      search: (query: string) => [...base.users.all, 'search', query] as const,
+      favorites: (userId?: string) => [...base.users.all, 'favorites', userId || 'current'] as const,
+    },
+    profile: {
+      ...base.profile,
+      current: () => [...base.profile.all, 'current'] as const,
+      byId: (id: string) => [...base.profile.all, 'byId', id] as const,
+    },
+    dashboard: {
+      ...base.dashboard,
+      client: () => [...base.dashboard.all, 'client'] as const,
+      therapist: () => [...base.dashboard.all, 'therapist'] as const,
+      admin: () => [...base.dashboard.all, 'admin'] as const,
+      moderator: () => [...base.dashboard.all, 'moderator'] as const,
+    },
+    admin: {
+      ...base.admin,
+      dashboard: () => [...base.admin.all, 'dashboard'] as const,
+      checkAdmin: () => [...base.admin.all, 'checkAdmin'] as const,
+      users: {
+        list: (params?: any) => [...base.admin.all, 'users', 'list', params] as const,
+        byId: (id: string) => [...base.admin.all, 'users', 'detail', id] as const,
+      },
+      stats: () => [...base.admin.all, 'stats'] as const,
+      reports: {
+        list: (filters?: any) => [...base.admin.all, 'reports', 'list', filters] as const,
+        detail: (id: string) => [...base.admin.all, 'reports', 'detail', id] as const,
+        overview: () => [...base.admin.all, 'reports', 'overview'] as const,
+      },
+      therapistApplications: {
+        list: (params?: any) => [...base.admin.all, 'therapistApplications', 'list', params] as const,
+        byId: (id: string) => [...base.admin.all, 'therapistApplications', 'detail', id] as const,
+      },
+      moderation: {
+        flaggedContent: (params?: any) => [...base.admin.all, 'moderation', 'flaggedContent', params] as const,
+      },
+      config: {
+        system: () => [...base.admin.all, 'config', 'system'] as const,
+        featureFlags: () => [...base.admin.all, 'config', 'featureFlags'] as const,
+      },
+    },
+    moderator: {
+      ...base.moderator,
+      dashboard: () => [...base.moderator.all, 'dashboard'] as const,
+      contentQueue: (params?: any) => [...base.moderator.all, 'contentQueue', params] as const,
+      auditLogs: (params?: any) => [...base.moderator.all, 'auditLogs', params] as const,
+      users: (params?: any) => [...base.moderator.all, 'users', params] as const,
+    },
+    billing: {
+      ...base.billing,
+      subscription: () => [...base.billing.all, 'subscription'] as const,
+      invoices: (params?: any) => [...base.billing.all, 'invoices', params] as const,
+      paymentMethods: () => [...base.billing.all, 'payment-methods'] as const,
+      stats: (period?: string) => [...base.billing.all, 'stats', period] as const,
+    },
+    notifications: {
+      ...base.notifications,
+      list: (params?: any) => [...base.notifications.all, 'list', params] as const,
+      unread: () => [...base.notifications.all, 'unread'] as const,
+      unreadCount: () => [...base.notifications.all, 'unreadCount'] as const,
+    },
+    preAssessment: {
+      ...base.preAssessment,
+      questionnaires: () => [...base.preAssessment.all, 'questionnaires'] as const,
+      responses: (params?: any) => [...base.preAssessment.all, 'responses', params] as const,
+    },
+    favorites: {
+      ...base.favorites,
+      list: () => [...base.favorites.all, 'list'] as const,
+      therapists: () => [...base.favorites.all, 'therapists'] as const,
+    },
+    reporting: {
+      ...base.reporting,
+      content: (params?: any) => [...base.reporting.all, 'content', params] as const,
+      reports: () => [...base.reporting.all, 'reports'] as const,
+    },
+    reviews: {
+      ...base.reviews,
+      list: (params?: any) => [...base.reviews.all, 'list', params] as const,
+      byTherapist: (therapistId: string, params?: any) => [...base.reviews.all, 'byTherapist', therapistId, params] as const,
+      therapistStats: (therapistId: string) => [...base.reviews.all, 'therapistStats', therapistId] as const,
+    },
+    communities: {
+      ...base.communities,
+      withStructure: (communityId?: string) => 
+        communityId 
+          ? [...base.communities.all, 'withStructure', communityId] as const
+          : [...base.communities.all, 'withStructure'] as const,
+      roomPosts: (roomId: string) => [...base.communities.all, 'roomPosts', roomId] as const,
+      stats: () => [...base.communities.all, 'stats'] as const,
+      userMemberships: () => [...base.communities.all, 'userMemberships'] as const,
+      members: (communityId: string, limit?: number, offset?: number) => 
+        [...base.communities.all, 'members', 'byCommunity', communityId, limit, offset] as const,
+      joined: () => [...base.communities.all, 'joined'] as const,
+      recommended: () => [...base.communities.all, 'recommended'] as const,
+      activity: () => [...base.communities.all, 'activity'] as const,
+      groupSessions: (communityId: string, upcoming?: boolean) =>
+        [...base.communities.all, 'groupSessions', communityId, upcoming] as const,
+    },
+    messaging: {
+      ...base.messaging,
+      contacts: (userId: string) => [...base.messaging.all, 'contacts', userId] as const,
+      conversation: (userId: string, id: string) => [...base.messaging.all, 'conversation', userId, id] as const,
+      conversations: (userId: string) => [...base.messaging.conversations, userId] as const,
+      messages: (userId: string, conversationId: string) => [...base.messaging.all, 'messages', userId, conversationId] as const,
+      search: (userId: string, query: string, conversationId?: string) => 
+        [...base.messaging.all, 'search', userId, query, conversationId] as const,
+      blockedUsers: (userId: string) => [...base.messaging.all, 'blocked', userId] as const,
+      startConversation: (userId: string, targetUserId: string) => [...base.messaging.all, 'startConversation', userId, targetUserId] as const,
+      recent: (userId: string, limit?: number) => [...base.messaging.all, 'recent', userId, limit] as const,
+    },
+    worksheets: {
+      ...base.worksheets,
+      my: () => [...base.worksheets.all, 'my'] as const,
+      assigned: () => [...base.worksheets.all, 'assigned'] as const,
+      byId: (id: string) => [...base.worksheets.all, 'byId', id] as const,
+      list: (params?: any) => [...base.worksheets.all, 'list', params] as const,
+      stats: (params?: any) => [...base.worksheets.all, 'stats', params] as const,
+    },
+    client: {
+      ...base.client,
+      assignedTherapist: () => [...base.client.all, 'assignedTherapist'] as const,
+      assignedTherapists: () => [...base.client.all, 'assignedTherapists'] as const,
+      profile: [...base.client.all, 'profile'] as const,
+      recommendations: [...base.client.all, 'recommendations'] as const,
+      pendingRequests: [...base.client.all, 'pending-requests'] as const,
+      therapistRequests: {
+        pending: () => [...base.client.all, 'therapist-requests', 'pending'] as const,
+        all: () => [...base.client.all, 'therapist-requests'] as const,
+      },
+    },
+  };
+};
+
+export const queryKeys = createQueryKeys();
