@@ -189,10 +189,10 @@ export interface AuditLogEntry {
 export interface SecurityEvent {
   id: string;
   type:
-    | "failed_login"
-    | "suspicious_activity"
-    | "data_breach"
-    | "unauthorized_access";
+  | "failed_login"
+  | "suspicious_activity"
+  | "data_breach"
+  | "unauthorized_access";
   severity: "low" | "medium" | "high" | "critical";
   userId?: string;
   ipAddress: string;
@@ -344,12 +344,12 @@ export type RoleSpecificUser =
 export type UserByRole<T extends UserRole> = T extends "client"
   ? ClientUser
   : T extends "therapist"
-    ? TherapistUser
-    : T extends "admin"
-      ? AdminUser
-      : T extends "moderator"
-        ? ModeratorUser
-        : never;
+  ? TherapistUser
+  : T extends "admin"
+  ? AdminUser
+  : T extends "moderator"
+  ? ModeratorUser
+  : never;
 
 // Error types
 export interface AuthError {
@@ -384,6 +384,7 @@ export interface PasswordResetConfirmation {
 export interface LoginDto {
   email: string;
   password: string;
+  sessionId?: string;
 }
 
 export interface RegisterClientDto {
@@ -397,6 +398,7 @@ export interface RegisterClientDto {
   avatarUrl?: string;
   hasSeenTherapistRecommendations?: boolean;
   preassessmentAnswers?: any; // Pre-assessment responses
+  sessionId?: string; // Pre-assessment session ID
 }
 
 export interface RegisterAdminDto {

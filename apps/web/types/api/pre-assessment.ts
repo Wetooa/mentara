@@ -41,8 +41,9 @@ export interface PreAssessmentAnalysis {
   recommendations: string[];
   suggestedCommunities: string[];
   therapistMatch?: {
-    specialties: string[];
-    urgency: 'routine' | 'priority' | 'urgent';
+    expertise: string[];
+    illnessSpecializations: string[];
+    areasOfExpertise: string[];
   };
   processedAt: string;
 }

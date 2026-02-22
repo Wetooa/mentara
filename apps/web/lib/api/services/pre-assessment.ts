@@ -43,6 +43,24 @@ export function createPreAssessmentService(client: AxiosInstance) {
     },
 
     /**
+     * Create a new anonymous pre-assessment
+     * POST /pre-assessment/anonymous
+     */
+    async createAnonymous(sessionId: string, data: CreatePreAssessmentDto): Promise<PreAssessment> {
+      const response = await client.post("/pre-assessment/anonymous", { sessionId, data });
+      return response.data;
+    },
+
+    /**
+     * Link an anonymous pre-assessment to a logged-in user
+     * POST /pre-assessment/link
+     */
+    async link(sessionId: string): Promise<PreAssessment> {
+      const response = await client.post("/pre-assessment/link", { sessionId });
+      return response.data;
+    },
+
+    /**
      * Get user's pre-assessment
      * GET /pre-assessment
      */
@@ -148,9 +166,9 @@ export function createPreAssessmentService(client: AxiosInstance) {
     async startChatbotSession(): Promise<{ sessionId: string }> {
       console.log('[API] Starting chatbot session...');
       try {
-      const response = await client.post("/pre-assessment/chatbot/start");
+        const response = await client.post("/pre-assessment/chatbot/start");
         console.log('[API] Chatbot session started:', response.data);
-      return response.data;
+        return response.data;
       } catch (error) {
         console.error('[API] Failed to start chatbot session:', error);
         throw error;
@@ -174,13 +192,13 @@ export function createPreAssessmentService(client: AxiosInstance) {
       };
     }> {
       const startTime = Date.now();
-      console.log('[API] 📤 Sending chatbot message:', { 
-        sessionId, 
+      console.log('[API] 📤 Sending chatbot message:', {
+        sessionId,
         messageLength: message.length,
         messagePreview: message.substring(0, 100),
         timestamp: new Date().toISOString(),
       });
-      
+
       try {
         // Use extended timeout for AI operations (180 seconds for Ollama)
         const response = await client.post("/pre-assessment/chatbot/message", {
@@ -189,7 +207,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
         }, {
           timeout: 180000, // 180 seconds (3 minutes) for AI operations - increased for Ollama
         });
-        
+
         const duration = Date.now() - startTime;
         console.log('[API] ✅ Chatbot response received:', {
           duration: `${duration}ms`,
@@ -199,13 +217,13 @@ export function createPreAssessmentService(client: AxiosInstance) {
           hasToolCall: !!response.data?.toolCall,
           toolCallDetails: response.data?.toolCall ? JSON.stringify(response.data.toolCall, null, 2) : 'none',
         });
-        
+
         return response.data;
       } catch (error: any) {
         const duration = Date.now() - startTime;
         const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
         const isNetworkError = !error.response && error.request;
-        
+
         console.error('[API] ❌ Failed to send chatbot message:', {
           errorType: isTimeout ? 'TIMEOUT' : isNetworkError ? 'NETWORK_ERROR' : 'API_ERROR',
           duration: `${duration}ms`,
@@ -220,7 +238,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
           responseData: error.response?.data,
           requestData: error.config?.data ? JSON.parse(error.config.data) : undefined,
         });
-        
+
         // Re-throw with more context
         if (isTimeout) {
           const timeoutError = new Error(
@@ -230,7 +248,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
           (timeoutError as any).originalError = error;
           throw timeoutError;
         }
-        
+
         throw error;
       }
     },

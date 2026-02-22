@@ -402,6 +402,153 @@ export class PreAssessmentService {
     }
   }
 
+  async createAnonymousPreAssessment(
+    sessionId: string,
+    data: CreatePreAssessmentDto,
+  ): Promise<PreAssessment> {
+    try {
+      this.logger.log(`Creating anonymous pre-assessment for session ${sessionId}`);
+
+      // Validate flat answers array
+      this.validateFlatAnswers(data.answers);
+
+      let scores: Record<string, number> = data.scores as Record<
+        string,
+        number
+      >;
+      let severityLevels: Record<string, string> =
+        data.severityLevels as Record<string, string>;
+
+      // Calculate scores if not provided
+      if (!data.scores || !data.severityLevels) {
+        this.logger.debug(
+          'Calculating scores and severity levels from flat answers',
+        );
+        const result = processPreAssessmentAnswers(data.answers);
+        scores = result.scores;
+        severityLevels = result.severityLevels;
+      }
+
+      const createData: any = {
+        sessionId,
+        answers: data.answers, // Flat array of 201 numeric responses
+        scores, // Assessment scale scores
+        severityLevels, // Severity classifications
+        aiEstimate: {}, // Empty AI estimate
+        isProcessed: true, // Mark as processed
+        processedAt: new Date(), // Set processing timestamp
+        ...(data.assessmentMethod && { assessmentMethod: data.assessmentMethod })
+      };
+
+      // Check if session already exists
+      const existingAssessment = await this.prisma.preAssessment.findUnique({
+        where: { sessionId },
+      });
+
+      let preAssessment: PreAssessment;
+      if (existingAssessment) {
+        this.logger.log(`Updating existing anonymous pre-assessment for session ${sessionId}`);
+        preAssessment = await this.prisma.preAssessment.update({
+          where: { sessionId },
+          data: createData,
+        });
+      } else {
+        preAssessment = await this.prisma.preAssessment.create({
+          data: createData,
+        });
+      }
+
+      // Generate comprehensive clinical analysis in background
+      try {
+        const questionnaireScores: QuestionnaireScores = {};
+        const severityLevelsForAnalysis = severityLevels;
+
+        const questionnaires = Object.keys(scores);
+        questionnaires.forEach((questionnaire) => {
+          if (scores[questionnaire] !== undefined) {
+            questionnaireScores[questionnaire] = {
+              score: scores[questionnaire],
+              severity: severityLevelsForAnalysis[questionnaire] || 'Unknown',
+            };
+          }
+        });
+
+        await this.generateClinicalAnalysis(
+          preAssessment,
+          questionnaires,
+          questionnaireScores,
+        );
+      } catch (analysisError) {
+        this.logger.warn(
+          'Advanced clinical analysis failed but core assessment succeeded:',
+          analysisError instanceof Error
+            ? analysisError.message
+            : analysisError,
+        );
+      }
+
+      return preAssessment;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      this.logger.error(
+        'Error creating anonymous pre-assessment:',
+        error instanceof Error ? error.message : error,
+      );
+      throw new InternalServerErrorException('Failed to create anonymous pre-assessment');
+    }
+  }
+
+  async linkAnonymousPreAssessment(
+    sessionId: string,
+    userId: string,
+  ): Promise<PreAssessment> {
+    try {
+      this.logger.log(`Linking anonymous pre-assessment ${sessionId} to user ${userId}`);
+
+      // Validate patient profile
+      const client = await this.prisma.client.findUnique({
+        where: { userId },
+        select: { userId: true },
+      });
+      if (!client) {
+        throw new NotFoundException('Client profile not found');
+      }
+
+      const existingAssessment = await this.prisma.preAssessment.findUnique({
+        where: { sessionId },
+      });
+
+      if (!existingAssessment) {
+        throw new NotFoundException('Anonymous pre-assessment session not found');
+      }
+
+      // Update assessment to link to client
+      const preAssessment = await this.prisma.preAssessment.update({
+        where: { id: existingAssessment.id },
+        data: {
+          clientId: userId,
+        },
+      });
+
+      return preAssessment;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        'Error linking anonymous pre-assessment:',
+        error instanceof Error ? error.message : error,
+      );
+      throw new InternalServerErrorException('Failed to link anonymous pre-assessment');
+    }
+  }
+
   private handleError(error: unknown, message: string): never {
     if (error instanceof NotFoundException) {
       throw error;

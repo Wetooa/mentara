@@ -2,7 +2,8 @@ model PreAssessment {
   id                     String              @id @default(uuid())
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
-  clientId               String
+  clientId               String?             // Made optional for anonymous assessments
+  sessionId              String?             @unique // Added for tracking anonymous assessments
   answers                Json // Flat array of 201 numeric responses
   scores                 Json
   severityLevels         Json
@@ -19,10 +20,11 @@ model PreAssessment {
   culturalConsiderations Json? // Cultural, religious, or identity considerations
   familySupportSystem    Json? // Family and support system information
   crisisSupportNeeds     Json? // Crisis support and safety planning needs
-  client                 Client              @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  client                 Client?             @relation(fields: [clientId], references: [userId], onDelete: Cascade)
   chatbotSession         ChatbotSession?     @relation(fields: [chatbotSessionId], references: [id], onDelete: SetNull)
 
   @@index([clientId])
+  @@index([sessionId])
   @@index([chatbotSessionId])
   @@index([assessmentMethod])
 }

@@ -26,7 +26,7 @@ export class ClientAuthService {
     private readonly tokenService: TokenService,
     private readonly emailService: EmailService,
     private readonly emailVerificationService: EmailVerificationService,
-  ) {}
+  ) { }
 
   async registerClient(registerDto: RegisterClientDto) {
     this.logger.log('Registering client with preassessment data');
@@ -72,9 +72,15 @@ export class ClientAuthService {
         },
       });
 
-      // Create preassessment record if answers are provided
+      // Create or link preassessment record
       let preAssessment: any = null;
-      if (
+      if (registerDto.sessionId) {
+        // Link existing anonymous assessment
+        preAssessment = await tx.preAssessment.update({
+          where: { sessionId: registerDto.sessionId },
+          data: { clientId: user.id },
+        });
+      } else if (
         registerDto.preassessmentAnswers &&
         registerDto.preassessmentAnswers.length > 0
       ) {
@@ -272,11 +278,11 @@ export class ClientAuthService {
     const completedSteps: string[] = [];
 
     if (profileCompleted) completedSteps.push('profile');
-    
+
     // If user has no pre-assessment, auto-mark recommendations as seen (skip that step)
     // If user has pre-assessment, check if they've seen recommendations
     const hasSeenRecommendations = !hasPreAssessment || user.client.hasSeenTherapistRecommendations;
-    
+
     if (hasSeenRecommendations) completedSteps.push('recommendations');
     if (assessmentCompleted) completedSteps.push('assessment');
 

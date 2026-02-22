@@ -23,10 +23,15 @@ export interface PreAssessmentChecklistState {
 
   questionnaires: ListOfQuestionnaires[];
   setQuestionnaires: (to: ListOfQuestionnaires[]) => void;
+
+  sessionId: string | null;
+  setSessionId: (id: string | null) => void;
 }
 
 export const usePreAssessmentChecklistStore =
   create<PreAssessmentChecklistState>()((set, get) => ({
+    sessionId: null,
+    setSessionId: (id) => set({ sessionId: id }),
     rapportStep: 0,
     rapportAnswers: Array(5).fill(-1),
     setRapportAnswer: (stepIndex, choiceIndex) =>

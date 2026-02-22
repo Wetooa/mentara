@@ -5,10 +5,10 @@
 
 import { z } from "zod";
 
-// Authentication Core Schemas
 export const LoginDtoSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(1, "Password is required"),
+  sessionId: z.string().optional(),
 });
 
 export const RefreshTokenDtoSchema = z.object({

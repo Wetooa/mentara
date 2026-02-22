@@ -6,23 +6,18 @@ import {
 } from './clinical-insights.service';
 
 export interface TherapistMatchCriteria {
-  requiredSpecializations: string[];
-  preferredApproaches: string[];
-  experienceLevel: 'any' | 'intermediate' | 'senior' | 'expert';
-  urgencyLevel: 'immediate' | 'high' | 'moderate' | 'routine';
-  treatmentModality: 'individual' | 'group' | 'family' | 'couples' | 'any';
-  sessionFrequency: 'multiple_weekly' | 'weekly' | 'biweekly' | 'monthly';
-  estimatedDuration: string;
-  specialRequirements: string[];
+  expertise: string[];
+  illnessSpecializations: string[];
+  areasOfExpertise: string[];
 }
 
 export interface InterventionRecommendation {
   type:
-    | 'therapy'
-    | 'psychiatric_eval'
-    | 'crisis_intervention'
-    | 'support_group'
-    | 'self_help';
+  | 'therapy'
+  | 'psychiatric_eval'
+  | 'crisis_intervention'
+  | 'support_group'
+  | 'self_help';
   priority: number;
   urgency: 'immediate' | 'high' | 'moderate' | 'routine';
   description: string;
@@ -238,144 +233,60 @@ export class TherapeuticRecommendationsService {
   private generateTherapistCriteria(
     clinicalProfile: ClinicalProfile,
   ): TherapistMatchCriteria {
-    const { primaryConditions, overallRiskLevel, treatmentRecommendations } =
-      clinicalProfile;
+    const { primaryConditions } = clinicalProfile;
 
-    const requiredSpecializations =
-      this.getRequiredSpecializations(primaryConditions);
-    const preferredApproaches = this.getPreferredApproaches(primaryConditions);
-    const experienceLevel = this.determineRequiredExperienceLevel(
-      overallRiskLevel,
-      primaryConditions,
-    );
-    const urgencyLevel = this.mapRiskToUrgency(overallRiskLevel);
-    const sessionFrequency = this.determineSessionFrequency(
-      overallRiskLevel,
-      primaryConditions,
-    );
-    const specialRequirements = this.getSpecialRequirements(primaryConditions);
+    const expertise = new Set<string>();
+    const illnessSpecializations = new Set<string>();
+    const areasOfExpertise = new Set<string>();
+
+    primaryConditions.forEach((condition) => {
+      switch (condition.condition) {
+        case 'Depression':
+          expertise.add('Depression');
+          illnessSpecializations.add('Major Depressive Disorder');
+          areasOfExpertise.add('Mood Disorders');
+          break;
+        case 'Anxiety':
+          expertise.add('Anxiety');
+          illnessSpecializations.add('Generalized Anxiety Disorder');
+          areasOfExpertise.add('Anxiety Disorders');
+          break;
+        case 'Post-traumatic stress disorder (PTSD)':
+          expertise.add('Trauma');
+          illnessSpecializations.add('PTSD');
+          areasOfExpertise.add('Trauma and Stressor-Related Disorders');
+          break;
+        case 'Bipolar disorder (BD)':
+          expertise.add('Bipolar');
+          illnessSpecializations.add('Bipolar Disorder');
+          areasOfExpertise.add('Mood Disorders');
+          break;
+        case 'Obsessive compulsive disorder (OCD)':
+          expertise.add('OCD');
+          illnessSpecializations.add('Obsessive-Compulsive Disorder');
+          areasOfExpertise.add('Anxiety Disorders');
+          break;
+        case 'ADD / ADHD':
+          expertise.add('ADHD');
+          illnessSpecializations.add('ADHD');
+          areasOfExpertise.add('Neurodevelopmental Disorders');
+          break;
+        default:
+          expertise.add('General Therapy');
+          areasOfExpertise.add('General Mental Health');
+      }
+    });
 
     return {
-      requiredSpecializations,
-      preferredApproaches,
-      experienceLevel,
-      urgencyLevel,
-      treatmentModality: 'individual', // Default to individual therapy
-      sessionFrequency,
-      estimatedDuration:
-        this.estimateOverallTreatmentDuration(primaryConditions),
-      specialRequirements,
+      expertise: Array.from(expertise),
+      illnessSpecializations: Array.from(illnessSpecializations),
+      areasOfExpertise: Array.from(areasOfExpertise),
     };
   }
 
-  /**
-   * Get required specializations based on conditions
-   */
-  private getRequiredSpecializations(
-    primaryConditions: ClinicalInsight[],
-  ): string[] {
-    const specializations = new Set<string>();
 
-    primaryConditions.forEach((condition) => {
-      switch (condition.condition) {
-        case 'Depression':
-          specializations.add('Depression Treatment');
-          specializations.add('Mood Disorders');
-          break;
-        case 'Anxiety':
-          specializations.add('Anxiety Disorders');
-          specializations.add('Stress Management');
-          break;
-        case 'Post-traumatic stress disorder (PTSD)':
-          specializations.add('Trauma Therapy');
-          specializations.add('PTSD Treatment');
-          specializations.add('EMDR');
-          break;
-        case 'Bipolar disorder (BD)':
-          specializations.add('Bipolar Disorder');
-          specializations.add('Mood Disorders');
-          break;
-        case 'Obsessive compulsive disorder (OCD)':
-          specializations.add('OCD Treatment');
-          specializations.add('Anxiety Disorders');
-          break;
-        case 'ADD / ADHD':
-          specializations.add('ADHD Treatment');
-          specializations.add('Attention Disorders');
-          break;
-        default:
-          specializations.add('General Clinical Psychology');
-      }
-    });
 
-    return Array.from(specializations);
-  }
 
-  /**
-   * Get preferred therapeutic approaches
-   */
-  private getPreferredApproaches(
-    primaryConditions: ClinicalInsight[],
-  ): string[] {
-    const approaches = new Set<string>();
-
-    primaryConditions.forEach((condition) => {
-      switch (condition.condition) {
-        case 'Depression':
-          approaches.add('Cognitive Behavioral Therapy (CBT)');
-          approaches.add('Interpersonal Therapy (IPT)');
-          approaches.add('Mindfulness-Based Cognitive Therapy (MBCT)');
-          break;
-        case 'Anxiety':
-          approaches.add('Cognitive Behavioral Therapy (CBT)');
-          approaches.add('Acceptance and Commitment Therapy (ACT)');
-          approaches.add('Exposure Therapy');
-          break;
-        case 'Post-traumatic stress disorder (PTSD)':
-          approaches.add(
-            'Eye Movement Desensitization and Reprocessing (EMDR)',
-          );
-          approaches.add('Cognitive Processing Therapy (CPT)');
-          approaches.add('Prolonged Exposure Therapy (PE)');
-          break;
-        case 'Bipolar disorder (BD)':
-          approaches.add('Dialectical Behavior Therapy (DBT)');
-          approaches.add('Cognitive Behavioral Therapy (CBT)');
-          approaches.add('Psychoeducation');
-          break;
-        default:
-          approaches.add('Cognitive Behavioral Therapy (CBT)');
-          approaches.add('Psychodynamic Therapy');
-      }
-    });
-
-    return Array.from(approaches);
-  }
-
-  /**
-   * Determine required therapist experience level
-   */
-  private determineRequiredExperienceLevel(
-    riskLevel: string,
-    primaryConditions: ClinicalInsight[],
-  ): 'any' | 'intermediate' | 'senior' | 'expert' {
-    if (riskLevel === 'critical') return 'expert';
-    if (riskLevel === 'high') return 'senior';
-
-    const complexConditions = [
-      'Post-traumatic stress disorder (PTSD)',
-      'Bipolar disorder (BD)',
-    ];
-    const hasComplexCondition = primaryConditions.some((c) =>
-      complexConditions.includes(c.condition),
-    );
-
-    if (hasComplexCondition) return 'senior';
-    if (primaryConditions.some((c) => c.clinicalLevel === 'severe'))
-      return 'intermediate';
-
-    return 'any';
-  }
 
   /**
    * Map risk level to urgency
@@ -774,22 +685,7 @@ export class TherapeuticRecommendationsService {
     ];
   }
 
-  private getSpecialRequirements(conditions: ClinicalInsight[]): string[] {
-    const requirements: string[] = [];
 
-    conditions.forEach((condition) => {
-      if (condition.condition.includes('PTSD')) {
-        requirements.push('Trauma-informed care');
-        requirements.push('EMDR certification preferred');
-      }
-      if (condition.condition.includes('Bipolar')) {
-        requirements.push('Mood disorder specialization');
-        requirements.push('Medication collaboration experience');
-      }
-    });
-
-    return requirements;
-  }
 
   private estimateOverallTreatmentDuration(
     conditions: ClinicalInsight[],

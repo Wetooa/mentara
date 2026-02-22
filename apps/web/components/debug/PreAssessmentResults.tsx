@@ -23,7 +23,14 @@ interface AssessmentResults {
   severityLevels: Record<string, string>;
   answers?: number[];
   conversationInsights?: any;
-  preAssessment?: any;
+  preAssessment?: {
+    recommendations?: {
+      expertise?: string[];
+      illnessSpecializations?: string[];
+      areasOfExpertise?: string[];
+      primaryConditions?: string[];
+    };
+  };
 }
 
 interface PreAssessmentResultsProps {
@@ -95,9 +102,10 @@ export function PreAssessmentResults({ results, onReset }: PreAssessmentResultsP
       <Separator />
 
       <Tabs defaultValue="scores" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="scores">Scores</TabsTrigger>
-          <TabsTrigger value="severity">Severity Levels</TabsTrigger>
+          <TabsTrigger value="severity">Severity</TabsTrigger>
+          <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
           <TabsTrigger value="raw">Raw Data</TabsTrigger>
         </TabsList>
 
@@ -169,6 +177,65 @@ export function PreAssessmentResults({ results, onReset }: PreAssessmentResultsP
             <Card>
               <CardContent className="py-8 text-center text-gray-500">
                 No severity levels available
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Recommendations Tab */}
+        <TabsContent value="recommendations" className="space-y-4 mt-4">
+          {results.preAssessment?.recommendations ? (
+            <div className="space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Info className="h-4 w-4 text-blue-500" />
+                    Matching Criteria
+                  </CardTitle>
+                  <CardDescription>
+                    Deterministic query criteria used to match this user with therapists (No AI used).
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Primary Conditions Detected</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {results.preAssessment.recommendations.primaryConditions?.map((c, i) => (
+                        <Badge key={i} variant="secondary">{c}</Badge>
+                      )) || <span className="text-sm text-gray-500">None detected</span>}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Required Therapist Expertise</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {results.preAssessment.recommendations.expertise?.map((e, i) => (
+                        <Badge key={i} className="bg-blue-100 text-blue-800 border-blue-200">{e}</Badge>
+                      )) || <span className="text-sm text-gray-500">None</span>}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Illness Specializations</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {results.preAssessment.recommendations.illnessSpecializations?.map((s, i) => (
+                        <Badge key={i} className="bg-purple-100 text-purple-800 border-purple-200">{s}</Badge>
+                      )) || <span className="text-sm text-gray-500">None</span>}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Areas of Expertise</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {results.preAssessment.recommendations.areasOfExpertise?.map((a, i) => (
+                        <Badge key={i} className="bg-green-100 text-green-800 border-green-200">{a}</Badge>
+                      )) || <span className="text-sm text-gray-500">None</span>}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-gray-500">
+                No recommendation criteria available for this assessment.
               </CardContent>
             </Card>
           )}

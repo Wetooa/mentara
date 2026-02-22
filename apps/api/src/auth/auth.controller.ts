@@ -49,7 +49,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly emailVerificationService: EmailVerificationService,
     private readonly passwordResetService: PasswordResetService,
-  ) {}
+  ) { }
 
   // Universal login works for all roles - role-specific registration endpoints:
   // - /auth/client/register
@@ -120,6 +120,7 @@ export class AuthController {
       loginDto.password,
       ipAddress,
       userAgent,
+      loginDto.sessionId,
     );
 
     return {

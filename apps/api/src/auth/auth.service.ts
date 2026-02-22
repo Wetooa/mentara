@@ -24,7 +24,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly emailVerificationService: EmailVerificationService,
     private readonly passwordResetService: PasswordResetService,
-  ) {}
+  ) { }
 
   async registerClient(
     email: string,
@@ -346,6 +346,7 @@ export class AuthService {
     password: string,
     ipAddress?: string,
     userAgent?: string,
+    sessionId?: string,
   ): Promise<{ user: any; token: string }> {
     const user = await this.prisma.user.findUnique({
       where: { email },
@@ -410,6 +411,18 @@ export class AuthService {
 
     // Reset failed login count and update last login
     await this.tokenService.resetFailedLoginCount(user.id);
+
+    // Link anonymous assessment if sessionId provided and user is a client
+    if (sessionId && user.role === 'client') {
+      try {
+        await this.prisma.preAssessment.updateMany({
+          where: { sessionId },
+          data: { clientId: user.id },
+        });
+      } catch (e) {
+        this.logger.warn(`Failed to link anonymous assessment ${sessionId} during login`, e);
+      }
+    }
 
     // Generate single token
     const { token } = await this.tokenService.generateToken(

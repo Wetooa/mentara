@@ -7,6 +7,7 @@
 export interface LoginDto {
   email: string;
   password: string;
+  sessionId?: string;
 }
 
 export interface RegisterUserDto {
@@ -103,6 +104,7 @@ export interface RegisterClientDto {
   avatarUrl?: string;
   hasSeenTherapistRecommendations?: boolean;
   preassessmentAnswers?: any; // Pre-assessment responses
+  sessionId?: string; // For linking anonymous assessments
 }
 
 export interface RegisterAdminDto {

@@ -118,7 +118,7 @@ export function useClientRegistration(
 ): UseClientRegistrationReturn {
   const api = useApi();
   const router = useRouter();
-  const { flatAnswers, questionnaires } = usePreAssessmentChecklistStore();
+  const { flatAnswers, questionnaires, sessionId } = usePreAssessmentChecklistStore();
 
   // Loading states
   const [isLoading, setIsLoading] = useState(false);
@@ -171,18 +171,20 @@ export function useClientRegistration(
         console.warn('[Registration] Error reading chatbot results from localStorage:', localStorageError);
       }
 
-      // If no chatbot results, check checklist store
-      if (!preassessmentAnswers) {
+      // If no chatbot results and no sessionId, check checklist store
+      if (!preassessmentAnswers && !chatbotSessionId && !sessionId) {
         preassessmentAnswers =
           flatAnswers.length > 0
             ? answersToAnswerMatrix(questionnaires, flatAnswers)
             : undefined;
       }
 
+      const finalSessionId = chatbotSessionId || sessionId || undefined;
+
       console.log("Pre-assessment answers:", preassessmentAnswers);
       console.log("Registration answers:", flatAnswers);
       console.log("Registration data:", data);
-      console.log("Chatbot session ID:", chatbotSessionId);
+      console.log("Session ID (Chatbot/Checklist):", finalSessionId);
 
       const result = await api.auth.client.register({
         email: data.email,
@@ -191,23 +193,24 @@ export function useClientRegistration(
         lastName: data.lastName,
         birthDate: new Date().toISOString(), // You may want to collect this from the user
         preassessmentAnswers: preassessmentAnswers as number[] | undefined,
+        sessionId: finalSessionId,
       });
 
       setRegistrationStatus("registered");
       setRegistrationData(data);
       setCurrentStep("verification");
 
-      // Clear chatbot results from localStorage after successful registration
+      // Clear chatbot results from localStorage or Zustand store after successful registration
       // The session will be linked after email verification and login
-      if (chatbotSessionId) {
+      if (finalSessionId) {
         // Keep sessionId in registrationData for later linking
-        (data as any).chatbotSessionId = chatbotSessionId;
+        (data as any).chatbotSessionId = finalSessionId;
         localStorage.removeItem('preassessment_chatbot_results');
         console.log('[Registration] Cleared chatbot results from localStorage. Session will be linked after verification.');
       }
 
       // Show appropriate success message based on whether preassessment data was included
-      const successMessage = preassessmentAnswers || chatbotSessionId
+      const successMessage = preassessmentAnswers || finalSessionId
         ? "Registration and pre-assessment completed! Please check your email for the verification code."
         : "Registration successful! Please check your email for the verification code.";
 

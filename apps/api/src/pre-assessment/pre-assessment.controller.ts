@@ -38,7 +38,7 @@ export class PreAssessmentController {
     private readonly geminiClient: GeminiClientService,
     private readonly chatbotService: PreAssessmentChatbotService,
     private readonly questionnaireSelector: QuestionnaireSelectorService,
-  ) {}
+  ) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -239,7 +239,7 @@ export class PreAssessmentController {
       ];
 
       const serviceInfo = this.geminiClient.getServiceInfo();
-      
+
       this.logger.log('Making test request to Gemini...');
       const response = await this.geminiClient.chatCompletion(testMessages, {
         temperature: 0.7,
@@ -270,7 +270,7 @@ export class PreAssessmentController {
   }
 
   // ========== AUTHENTICATED ROUTES ==========
-  
+
   @Public()
   @Post('chatbot/start')
   @HttpCode(HttpStatus.CREATED)
@@ -312,13 +312,13 @@ export class PreAssessmentController {
     try {
       this.logger.log(`[Chatbot Controller] Received message request ${userId ? `from user ${userId}` : 'anonymously'} for session ${body.sessionId}`);
       this.logger.log(`[Chatbot Controller] Message content: ${body.message?.substring(0, 100)}...`);
-      
+
       const result = await this.chatbotService.sendMessage(
         body.sessionId,
         userId,
         body.message,
       );
-      
+
       this.logger.log(`[Chatbot Controller] Successfully processed message, response length: ${result.response?.length || 0}`);
       return result;
     } catch (error) {
@@ -329,12 +329,12 @@ export class PreAssessmentController {
         userId,
         sessionId: body.sessionId,
       });
-      
+
       // Re-throw NotFoundException and other HTTP exceptions as-is
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Failed to process chatbot message',
       );
@@ -393,9 +393,9 @@ export class PreAssessmentController {
   @Post('chatbot/submit-questionnaire')
   @HttpCode(HttpStatus.OK)
   async submitQuestionnaireForm(
-    @Body() body: { 
-      sessionId: string; 
-      topic: string; 
+    @Body() body: {
+      sessionId: string;
+      topic: string;
       responses: Record<number, number>;
     },
     @CurrentUserId() userId?: string,
@@ -410,7 +410,7 @@ export class PreAssessmentController {
 
       // Get the questionnaire form generator to validate and map responses
       const formGenerator = new (await import('./services/questionnaire-form-generator.service')).QuestionnaireFormGeneratorService();
-      
+
       // Validate responses
       const validation = formGenerator.validateResponses(body.topic, body.responses);
       if (!validation.isValid) {
@@ -473,11 +473,11 @@ export class PreAssessmentController {
       };
     } catch (error) {
       this.logger.error('[Chatbot Controller] Error submitting questionnaire:', error);
-      
+
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      
+
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Failed to submit questionnaire',
       );
@@ -782,6 +782,46 @@ export class PreAssessmentController {
   // ========== ANONYMOUS ROUTES ==========
 
   @Public()
+  @Post('anonymous')
+  @HttpCode(HttpStatus.CREATED)
+  async createAnonymousPreAssessment(
+    @Body() body: { sessionId: string; data: CreatePreAssessmentDto },
+  ): Promise<PreAssessment> {
+    try {
+      this.logger.log(`Creating anonymous pre-assessment for session ${body.sessionId}`);
+      return await this.preAssessmentService.createAnonymousPreAssessment(
+        body.sessionId,
+        body.data,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  @Post('link')
+  @HttpCode(HttpStatus.OK)
+  async linkAnonymousPreAssessment(
+    @CurrentUserId() userId: string,
+    @Body() body: { sessionId: string },
+  ): Promise<PreAssessment> {
+    try {
+      this.logger.log(`Linking anonymous pre-assessment session ${body.sessionId} to user ${userId}`);
+      return await this.preAssessmentService.linkAnonymousPreAssessment(
+        body.sessionId,
+        userId,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  // ========== CHATBOT ANONYMOUS ROUTES ==========
+
+  @Public()
   @Post('chatbot/anonymous/start')
   @HttpCode(HttpStatus.CREATED)
   async startAnonymousChatbotSession(): Promise<{ sessionId: string }> {
@@ -816,13 +856,13 @@ export class PreAssessmentController {
     try {
       this.logger.log(`[Chatbot Controller] Received anonymous message request for session ${body.sessionId}`);
       this.logger.log(`[Chatbot Controller] Message content: ${body.message?.substring(0, 100)}...`);
-      
+
       const result = await this.chatbotService.sendMessage(
         body.sessionId,
         undefined,
         body.message,
       );
-      
+
       this.logger.log(`[Chatbot Controller] Successfully processed anonymous message, response length: ${result.response?.length || 0}`);
       return result;
     } catch (error) {
@@ -832,12 +872,12 @@ export class PreAssessmentController {
         stack: error instanceof Error ? error.stack : undefined,
         sessionId: body.sessionId,
       });
-      
+
       // Re-throw NotFoundException and other HTTP exceptions as-is
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Failed to process chatbot message',
       );

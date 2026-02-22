@@ -1,17 +1,22 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Heart, Sparkles, ArrowRight, Activity, TrendingUp } from "lucide-react";
+import { FileText, Heart, Sparkles, ArrowRight, Activity, TrendingUp, Loader2 } from "lucide-react";
 import { QUESTIONNAIRE_MAP } from "@/constants/questionnaire/questionnaire-mapping";
+import { useApi } from "@/lib/api";
+import { answersToAnswerMatrix } from "@/lib/questionnaire";
+import { toast } from "sonner";
 
 export default function SnapshotForm() {
-    const { questionnaires, flatAnswers, nextStep } = usePreAssessmentChecklistStore();
+    const { questionnaires, flatAnswers, nextStep, setSessionId } = usePreAssessmentChecklistStore();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const api = useApi();
 
     // Calculate scores and severity for the top 3 tools
     const insights = useMemo(() => {
@@ -62,6 +67,25 @@ export default function SnapshotForm() {
 
     const primaryConcern = insights[0];
     const secondaryConcerns = insights.slice(1);
+
+    const handleSecureProfile = async () => {
+        try {
+            setIsSubmitting(true);
+            const sessionId = crypto.randomUUID();
+            const answers = answersToAnswerMatrix(questionnaires, flatAnswers);
+
+            await api.preAssessment.createAnonymous(sessionId, {
+                answers,
+            });
+
+            setSessionId(sessionId);
+            nextStep();
+        } catch (error) {
+            console.error("Failed to save anonymous assessment", error);
+            toast.error("An error occurred while saving your assessment. Please try again.");
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="flex flex-col gap-6 p-6 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -154,10 +178,20 @@ export default function SnapshotForm() {
                 <Button
                     size="lg"
                     className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
-                    onClick={nextStep}
+                    onClick={handleSecureProfile}
+                    disabled={isSubmitting}
                 >
-                    Secure Your Profile
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    {isSubmitting ? (
+                        <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Securing Profile...
+                        </>
+                    ) : (
+                        <>
+                            Secure Your Profile
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        </>
+                    )}
                 </Button>
                 <p className="text-[11px] text-center text-gray-400 px-8">
                     By continuing, your assessment results will be securely saved to your new account.
