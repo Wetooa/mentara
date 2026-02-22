@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Heart, Sparkles, ArrowRight, Activity, TrendingUp, Loader2 } from "lucide-react";
+import { FileText, Heart, Sparkles, ArrowRight, Activity, TrendingUp, Loader2, Lock } from "lucide-react";
 import { QUESTIONNAIRE_MAP } from "@/constants/questionnaire/questionnaire-mapping";
 import { useApi } from "@/lib/api";
 import { answersToAnswerMatrix } from "@/lib/questionnaire";
@@ -102,64 +102,41 @@ export default function SnapshotForm() {
             </div>
 
             <div className="grid gap-6 mt-4">
-                {/* Primary Insight */}
-                {primaryConcern && (
-                    <Card className="border-primary/20 bg-primary/5 shadow-sm overflow-hidden">
-                        <CardHeader className="pb-2">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Activity className="h-5 w-5 text-primary" />
-                                    <CardTitle className="text-lg">Primary Focus</CardTitle>
-                                </div>
-                                <Badge variant="outline" className={primaryConcern.color}>
-                                    {primaryConcern.severity} Impact
-                                </Badge>
-                            </div>
-                            <CardDescription className="text-primary/80 font-medium text-base mt-1">
-                                {primaryConcern.name}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                    Your responses indicate that <span className="font-semibold text-gray-900">{primaryConcern.name}</span> is currently the most significant area affecting your well-being.
-                                </p>
-                                <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${Math.max(15, primaryConcern.percentage)}%` }}
-                                        className="h-full bg-primary"
-                                        transition={{ duration: 1, delay: 0.5 }}
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Secondary Insights */}
-                {secondaryConcerns.length > 0 && (
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        {secondaryConcerns.map((insight, idx) => (
-                            <Card key={idx} className="border-gray-200 shadow-sm bg-white">
-                                <CardHeader className="pb-2 pt-4 px-4">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">Secondary Area</span>
-                                        <Badge variant="outline" className={`text-[10px] h-5 ${insight.color}`}>
-                                            {insight.severity}
-                                        </Badge>
-                                    </div>
-                                    <CardTitle className="text-sm font-bold text-gray-800">{insight.name}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="px-4 pb-4">
-                                    <p className="text-xs text-gray-500 line-clamp-2">
-                                        Contributing factor in your overall mental health profile.
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ))}
+                <Card className="border-primary/20 bg-white shadow-sm overflow-hidden relative">
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-6">
+                        <div className="p-4 rounded-full bg-primary/10 mb-4">
+                            <Lock className="h-8 w-8 text-primary" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Results Locked</h3>
+                        <p className="text-sm text-gray-600 max-w-xs">
+                            Please secure your profile to view your clinical snapshot and therapist recommendations.
+                        </p>
                     </div>
-                )}
+
+                    {/* Blurred fake content to look like results */}
+                    <CardHeader className="pb-2 opacity-50 blur-sm pointer-events-none filter select-none">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Activity className="h-5 w-5 text-gray-400" />
+                                <CardTitle className="text-lg text-gray-400">Primary Focus</CardTitle>
+                            </div>
+                            <Badge variant="outline" className="bg-gray-100 text-gray-400 border-gray-200">
+                                Significant Impact
+                            </Badge>
+                        </div>
+                        <CardDescription className="text-gray-300 font-medium text-base mt-1 bg-gray-200 h-6 w-1/3 rounded">
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="opacity-50 blur-sm pointer-events-none filter select-none">
+                        <div className="space-y-3">
+                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+                            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden mt-4">
+                                <div className="h-full bg-gray-300 w-3/4" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 <Separator className="my-2" />
 
