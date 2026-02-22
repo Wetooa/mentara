@@ -117,19 +117,9 @@ const PCL_5: any = {
 
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      normal: { range: [0, 33], label: "Normal" },
-      mild: { range: [34, 43], label: "Mild PTSD" },
-      moderate: { range: [44, 53], label: "Moderate PTSD" },
-      severe: { range: [54, 80], label: "Severe PTSD" },
+      belowThreshold: { range: [0, 32], label: "Below Threshold" },
+      probablePTSD: { range: [33, 80], label: "Probable PTSD" },
     },
-    getSeverity: (score: number) => {
-      if (score <= 33) return "Normal";
-      if (score >= 34 && score <= 43) return "Mild PTSD";
-      if (score >= 44 && score <= 53) return "Moderate PTSD";
-      if (score >= 54) return "Severe PTSD";
-      return "Invalid score";
-    },
-
     // FIX: The subscale scores are not used in the current implementation.
     // subscaleScores: {
     //   reExperiencing: { range: [0, 20], label: "Re-experiencing" },

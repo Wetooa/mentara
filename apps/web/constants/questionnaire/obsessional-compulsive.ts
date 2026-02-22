@@ -106,11 +106,8 @@ const OCI_R: any = {
     ...QUESTIONNAIRE_SCORING,
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      minimal: { range: [0, 12], label: "Minimal OCD Symptoms" },
-      mild: { range: [13, 24], label: "Mild OCD Symptoms" },
-      moderate: { range: [25, 36], label: "Moderate OCD Symptoms" },
-      severe: { range: [37, 48], label: "Severe OCD Symptoms" },
-      extreme: { range: [49, 60], label: "Extreme OCD Symptoms" },
+      subclinical: { range: [0, 20], label: "Subclinical" },
+      clinical: { range: [21, 72], label: "Clinical" },
     },
 
     // FIX: Add the following properties to the scoring object

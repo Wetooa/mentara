@@ -165,9 +165,9 @@ const BES: QuestionnaireProps = {
     ...QUESTIONNAIRE_SCORING,
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
-      minimal: { range: [0, 17], label: "No or Minimal Binge-Eating" },
-      mildModerate: { range: [18, 26], label: "Mild to Moderate Binge-Eating" },
-      severe: { range: [27, 46], label: "Severe Binge-Eating" },
+      minimal: { range: [0, 17], label: "No or Minimal" },
+      moderate: { range: [18, 26], label: "Moderate" },
+      severe: { range: [27, 46], label: "Severe" },
     },
   },
   disclaimer:

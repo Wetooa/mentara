@@ -316,7 +316,12 @@ export function calculateQuestionnaireScore(
   for (let i = 0; i < answers.length; i++) {
     const answer = answers[i];
     if (answer === -1 || answer === undefined) continue;
-    totalScore += answer;
+
+    if (config.scoreMapping && config.scoreMapping[answer] !== undefined) {
+      totalScore += config.scoreMapping[answer];
+    } else {
+      totalScore += answer;
+    }
   }
 
   // PHQ/PSS specific logic (if needed, but ClinicalScorer says labels are "No Phobia" etc)

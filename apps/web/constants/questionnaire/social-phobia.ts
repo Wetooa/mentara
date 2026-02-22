@@ -230,11 +230,9 @@ const SIAS: any = {
     ...QUESTIONNAIRE_SCORING,
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      minimal: { range: [0, 20], label: "Minimal or No Social Phobia" },
-      mild: { range: [21, 30], label: "Mild Social Phobia" },
-      moderate: { range: [31, 40], label: "Moderate Social Phobia" },
-      severe: { range: [41, 50], label: "Severe Social Phobia" },
-      verySevere: { range: [51, 68], label: "Very Severe Social Phobia" },
+      normal: { range: [0, 33], label: "Normal Social Anxiety" },
+      potential: { range: [34, 42], label: "Social anxiety specific (Potential Social Phobia)" },
+      generalized: { range: [43, 80], label: "Generalized Social Interaction Anxiety" },
     },
   },
   disclaimer:

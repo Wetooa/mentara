@@ -94,11 +94,11 @@ const PDSS: any = {
 
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      minimal: { range: [0, 1.5], label: "Minimal Panic Disorder" },
-      mild: { range: [1.5, 3.0], label: "Mild Panic Disorder" },
-      moderate: { range: [3.0, 4.5], label: "Moderate Panic Disorder" },
-      severe: { range: [4.5, 6.0], label: "Severe Panic Disorder" },
-      extreme: { range: [6.0, 28], label: "Extreme Panic Disorder" },
+      minimal: { range: [0, 1], label: "Minimal" },
+      mild: { range: [2, 5], label: "Mild" },
+      moderate: { range: [6, 9], label: "Moderate" },
+      severe: { range: [10, 13], label: "Severe" },
+      extreme: { range: [14, 28], label: "Extreme" },
     },
   },
   disclaimer:

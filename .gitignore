@@ -26,6 +26,7 @@ apps/api/.prisma/client/
 apps/api/uploads/
 apps/api/coverage/
 apps/api/.tsbuildinfo
+.jest-cache
 
 # Mentara Web (Next.js)
 apps/web/.next/

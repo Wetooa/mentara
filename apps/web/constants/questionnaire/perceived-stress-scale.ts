@@ -70,9 +70,9 @@ const PERCEIVED_STRESS_SCALE: any = {
     scoreMapping: { 0: 4, 1: 3, 2: 2, 3: 1, 4: 0 },
     reversedScoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
-      low: { range: [0, 13], label: "Low Stress" },
-      moderate: { range: [14, 26], label: "Moderate Stress" },
-      high: { range: [27, 40], label: "High Perceived Stress" },
+      low: { range: [0, 13], label: "Low" },
+      moderate: { range: [14, 26], label: "Moderate" },
+      high: { range: [27, 40], label: "High" },
     },
     getScore: (answers: number[]): number => {
       return answers.reduce((total, answer, index) => {

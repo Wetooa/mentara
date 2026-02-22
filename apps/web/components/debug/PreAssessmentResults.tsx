@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 
 interface AssessmentResults {
   method: 'checklist' | 'chatbot';
-  scores: Record<string, { score: number; severity: string }>;
+  scores: Record<string, { score: number; severity: string; subscales?: Record<string, number> }>;
   severityLevels: Record<string, string>;
   answers?: number[];
   conversationInsights?: any;
@@ -125,6 +125,16 @@ export function PreAssessmentResults({ results, onReset }: PreAssessmentResultsP
                       {value.severity}
                     </Badge>
                   </div>
+                  {value.subscales && Object.keys(value.subscales).length > 0 && (
+                    <div className="mt-3 grid grid-cols-2 lg:grid-cols-3 gap-2">
+                      {Object.entries(value.subscales).map(([subKey, subVal]) => (
+                        <div key={subKey} className="flex justify-between text-xs bg-gray-50 px-2 py-1 rounded border">
+                          <span className="font-semibold text-gray-700">{subKey}:</span>
+                          <span className="text-gray-900">{subVal}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))

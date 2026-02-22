@@ -263,10 +263,8 @@ const PHQ: any = {
 
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 },
     severityLevels: {
-      minimal: { range: [0, 12], label: "Minimal Phobia" },
-      mild: { range: [13, 24], label: "Mild Phobia" },
-      moderate: { range: [25, 36], label: "Moderate Phobia" },
-      severe: { range: [37, Infinity], label: "Severe Phobia" },
+      none: { range: [0, 0], label: "No Phobia" },
+      clinical: { range: [1, Infinity], label: "Clinical Phobia" },
     },
 
     // FIX: The scoring logic is not implemented yet
