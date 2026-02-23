@@ -5,14 +5,11 @@
   "compilerOptions": {
     "deleteOutDir": false,
     "tsConfigPath": "tsconfig.build.json",
-    "outDir": "dist",
-    "watchMode": true,
-    "watchAssets": false,
     "assets": [],
     "plugins": []
   },
   "projects": {},
-  "monorepo": false,
+  "monorepo": true,
   "root": ".",
   "entryFile": "src/main",
   "generateOptions": {
