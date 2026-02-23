@@ -1,19 +1,36 @@
-/**
- * Community Module Types - Central exports for community types and DTOs
- */
+export interface CreateCommunityDto {
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  category?: string;
+  tags?: string[];
+}
 
-// Export all community DTOs
-export * from './community.dto';
+export interface UpdateCommunityDto extends Partial<CreateCommunityDto> {}
 
-// Re-export commonly used types for convenience
-export type {
-  CommunityCreateInputDto,
-  CommunityUpdateInputDto,
-  GenerateRecommendationsDto,
-  RecommendationInteractionDto,
-  RecommendationQueryDto,
-  CommunityResponse,
-  CommunityStatsResponse,
-  CommunityRecommendationResponse,
-  CommunityRecommendationsResult,
-} from './community.dto';
+export interface CommunityIdParamDto {
+  id: string;
+}
+
+export interface JoinCommunityDto {
+  userId: string;
+}
+
+export interface CommunityDto {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  category: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MembershipDto {
+  id: string;
+  communityId: string;
+  userId: string;
+  joinedAt: Date;
+}

@@ -1,40 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { CommunitiesController } from './communities.controller';
 import { CommunitiesService } from './communities.service';
-import { CommunityAssignmentService } from './community-assignment.service';
-import { CommunityMatchingService } from './services/community-matching.service';
-import { CommunityRecommendationService } from './services/community-recommendation.service';
-import { EnhancedCommunityService } from './services/enhanced-community.service';
-import { CommunityRecommendationController } from './controllers/community-recommendation.controller';
-import { ModerationController } from './controllers/moderation.controller';
-import { EnhancedCommunityController } from './controllers/enhanced-community.controller';
-import { PrismaService } from 'src/providers/prisma-client.provider';
-import { AiServiceClient } from '../pre-assessment/services/ai-service.client';
+import { CommunitiesController } from './communities.controller';
 
 @Module({
-  imports: [ConfigModule],
-  controllers: [
-    CommunitiesController,
-    CommunityRecommendationController,
-    ModerationController,
-    EnhancedCommunityController,
-  ],
-  providers: [
-    CommunitiesService,
-    CommunityAssignmentService,
-    CommunityMatchingService,
-    CommunityRecommendationService,
-    EnhancedCommunityService,
-    PrismaService,
-    AiServiceClient,
-  ],
-  exports: [
-    CommunitiesService,
-    CommunityAssignmentService,
-    CommunityMatchingService,
-    CommunityRecommendationService,
-    EnhancedCommunityService,
-  ],
+  controllers: [CommunitiesController],
+  providers: [CommunitiesService],
+  exports: [CommunitiesService],
 })
 export class CommunitiesModule {}
