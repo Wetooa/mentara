@@ -1,55 +1,100 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 export type PreAssessmentMethod = 'CHECKLIST' | 'CHATBOT' | 'HYBRID';
 
-export interface QuestionnaireScore {
-  score: number;
-  severity: string;
+export class QuestionnaireScore {
+  @ApiProperty()
+  score!: number;
+
+  @ApiProperty()
+  severity!: string;
 }
 
-export interface QuestionnaireScores {
+export class QuestionnaireScores {
   [key: string]: QuestionnaireScore;
 }
 
-export interface PreAssessmentDocuments {
-  soapAnalysisUrl: string | null;
-  conversationHistoryUrl: string | null;
+export class PreAssessmentDocuments {
+  @ApiPropertyOptional({ type: String, nullable: true })
+  soapAnalysisUrl!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  conversationHistoryUrl!: string | null;
 }
 
-export interface PreAssessmentData {
-  questionnaireScores: QuestionnaireScores;
+export class PreAssessmentData {
+  @ApiProperty({ type: 'object', additionalProperties: { $ref: '#/components/schemas/QuestionnaireScore' } })
+  questionnaireScores!: QuestionnaireScores;
+
+  @ApiPropertyOptional({ type: PreAssessmentDocuments })
   documents?: PreAssessmentDocuments;
 }
 
-export interface CreatePreAssessmentDto {
-  assessmentId: string | null;
-  method: PreAssessmentMethod;
-  completedAt: string | Date;
-  data: PreAssessmentData;
-  pastTherapyExperiences: string | null;
-  medicationHistory: string | null;
-  accessibilityNeeds: string | null;
+export class CreatePreAssessmentDto {
+  @ApiPropertyOptional({ type: String, nullable: true })
+  assessmentId!: string | null;
+
+  @ApiProperty({ enum: ['CHECKLIST', 'CHATBOT', 'HYBRID'] })
+  method!: PreAssessmentMethod;
+
+  @ApiProperty({ type: 'string', format: 'date-time' })
+  completedAt!: string | Date;
+
+  @ApiProperty({ type: PreAssessmentData })
+  data!: PreAssessmentData;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  pastTherapyExperiences!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  medicationHistory!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  accessibilityNeeds!: string | null;
 }
 
-export interface UpdatePreAssessmentDto {
-  assessmentId: string | null;
-  method: PreAssessmentMethod;
-  completedAt: string | Date;
-  data: PreAssessmentData;
-  pastTherapyExperiences: string | null;
-  medicationHistory: string | null;
-  accessibilityNeeds: string | null;
+export class UpdatePreAssessmentDto {
+  @ApiPropertyOptional({ type: String, nullable: true })
+  assessmentId!: string | null;
+
+  @ApiProperty({ enum: ['CHECKLIST', 'CHATBOT', 'HYBRID'] })
+  method!: PreAssessmentMethod;
+
+  @ApiProperty({ type: 'string', format: 'date-time' })
+  completedAt!: string | Date;
+
+  @ApiProperty({ type: PreAssessmentData })
+  data!: PreAssessmentData;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  pastTherapyExperiences!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  medicationHistory!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  accessibilityNeeds!: string | null;
 }
 
-export interface AurisChatDto {
-  sessionId: string;
-  message: string;
+export class AurisChatDto {
+  @ApiProperty()
+  sessionId!: string;
+
+  @ApiProperty()
+  message!: string;
 }
 
-export interface AurisResponseDto {
-  response: string;
-  state: {
+export class AurisResponseDto {
+  @ApiProperty()
+  response!: string;
+
+  @ApiProperty()
+  state!: {
     is_complete: boolean;
     [key: string]: any;
   };
+
+  @ApiPropertyOptional()
   results?: {
     assessmentId: string;
     method: PreAssessmentMethod;
@@ -61,4 +106,12 @@ export interface AurisResponseDto {
       accessibilityNeeds: string[];
     };
   };
+}
+
+export class PreAssessmentResponseDto {
+  @ApiProperty()
+  id!: string;
+
+  @ApiProperty()
+  message!: string;
 }

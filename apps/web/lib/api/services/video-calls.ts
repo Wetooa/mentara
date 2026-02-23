@@ -64,6 +64,8 @@ export interface GetCallHistoryParams {
  * - Quality reporting
  * - Call statistics
  */
+export type VideoCallService = ReturnType<typeof createVideoCallService>;
+
 export function createVideoCallService(axios: AxiosInstance) {
   return {
     // Call Logging

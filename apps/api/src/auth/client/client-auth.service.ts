@@ -4,7 +4,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import type { RegisterClientDto, EmailResponse } from '../types';
+import type { RegisterClientDto, EmailResponse, ClientAuthResponse } from '../types';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { TokenService } from '../shared/token.service';
 import { EmailVerificationService } from '../shared/email-verification.service';
@@ -15,7 +15,7 @@ import {
 } from '../shared/auth.helpers';
 
 @Injectable()
-export class ClientAuthService {
+export class ClientAuthService {s
   private readonly logger = new Logger(ClientAuthService.name);
 
   constructor(
@@ -63,13 +63,23 @@ export class ClientAuthService {
     });
 
     // Handle pre-assessment data if provided
-    if (registerDto.preassessmentAnswers || registerDto.sessionId) {
+    if (registerDto.sessionId) {
+      try {
+        await this.preAssessmentService.linkAnonymousPreAssessment(
+          result.user.id,
+          registerDto.sessionId,
+        );
+      } catch (error) {
+        this.logger.error(`Failed to link pre-assessment for client ${result.user.id}: ${error instanceof Error ? error.message : error}`);
+        // We don't throw here to avoid failing registration if linking fails
+      }
+    } else if (registerDto.preassessmentAnswers) {
       try {
         await this.preAssessmentService.createPreAssessment(result.user.id, {
           assessmentId: null,
           method: 'CHECKLIST', // Default method
           completedAt: new Date(),
-          data: registerDto.preassessmentAnswers || { questionnaireScores: {} },
+          data: registerDto.preassessmentAnswers,
           pastTherapyExperiences: null,
           medicationHistory: null,
           accessibilityNeeds: null,
@@ -124,7 +134,7 @@ export class ClientAuthService {
   async verifyRegistrationOtp(
     email: string,
     otpCode: string,
-  ): Promise<EmailResponse> {
+  ): Promise<ClientAuthResponse> {
     if (!otpCode || !email) {
       throw new BadRequestException('Email and OTP code are required');
     }
@@ -134,6 +144,9 @@ export class ClientAuthService {
         email,
         role: 'client',
       },
+      include: {
+        client: true,
+      },
     });
 
     if (!user) {
@@ -142,19 +155,40 @@ export class ClientAuthService {
 
     const result = await this.emailVerificationService.verifyEmail(otpCode);
 
-    if (result.success) {
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          emailVerified: true,
-        },
-      });
+    if (!result.success) {
+      throw new BadRequestException(result.message);
     }
 
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+      },
+    });
+
+    const { token } = await this.tokenService.generateToken(
+      user.id,
+      user.email,
+      user.role,
+    );
+
     return {
-      success: result.success,
-      status: result.success ? 'success' : 'error',
-      message: result.message,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        role: user.role as any,
+        isEmailVerified: true,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        client: {
+          hasSeenTherapistRecommendations: user.client?.hasSeenTherapistRecommendations ?? false,
+        },
+      },
+      token,
+      tokens: { accessToken: token, refreshToken: token },
+      message: 'Account verified successfully. You are now logged in.',
     };
   }
 

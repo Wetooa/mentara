@@ -2,7 +2,9 @@ import axios, { AxiosRequestConfig, AxiosError, AxiosInstance } from 'axios';
 
 // Minimalist client for the library to avoid forbidden app-to-lib imports
 const createLibClient = (): AxiosInstance => {
-  const baseURL = process.env['NEXT_PUBLIC_API_URL'] || 'http://localhost:3001/api';
+  // Orval generates paths with the /api prefix already, so we strip it from the baseURL
+  const baseURL = process.env['NEXT_PUBLIC_API_URL'] || 'http://localhost:3001';
+
   return axios.create({
 
     baseURL,

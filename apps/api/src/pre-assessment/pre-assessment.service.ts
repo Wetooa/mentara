@@ -106,4 +106,101 @@ export class PreAssessmentService {
       throw new InternalServerErrorException('Error retrieving pre-assessment');
     }
   }
+
+  /**
+   * Creates an anonymous pre-assessment.
+   */
+  async createAnonymousPreAssessment(
+    data: CreatePreAssessmentDto,
+  ): Promise<PreAssessment> {
+    try {
+      this.logger.log('Creating anonymous pre-assessment');
+
+      // Prepare data for Prisma matching the flat schema
+      const prismaData = {
+        clientId: null,
+        sessionId: data.assessmentId,
+        method: data.method,
+        data: data.data as any,
+        pastTherapyExperiences: data.pastTherapyExperiences,
+        medicationHistory: data.medicationHistory,
+        accessibilityNeeds: data.accessibilityNeeds,
+        soapAnalysisUrl: data.data.documents?.soapAnalysisUrl || null,
+        conversationHistoryUrl:
+          data.data.documents?.conversationHistoryUrl || null,
+      };
+
+      this.logger.log('Creating new anonymous pre-assessment');
+      return await this.prisma.preAssessment.create({
+        data: prismaData,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error in createAnonymousPreAssessment: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to create anonymous pre-assessment',
+      );
+    }
+  }
+
+  /**
+   * Links an anonymous pre-assessment to a registered client.
+   */
+  async linkAnonymousPreAssessment(
+    userId: string,
+    sessionId: string,
+  ): Promise<PreAssessment> {
+    try {
+      this.logger.log(`Linking pre-assessment ${sessionId} to user ${userId}`);
+
+      // Find the anonymous pre-assessment
+      const anonymousAssessment = await this.prisma.preAssessment.findFirst({
+        where: { sessionId, clientId: null },
+      });
+
+      if (!anonymousAssessment) {
+        throw new NotFoundException('Anonymous pre-assessment not found or already linked');
+      }
+
+      // Validate client exists
+      const client = await this.prisma.client.findUnique({
+        where: { userId },
+        select: { userId: true },
+      });
+
+      if (!client) {
+        throw new NotFoundException('Client profile not found');
+      }
+
+      // Check if pre-assessment already exists for this client to avoid duplicates, though unlikely on registration
+      const existingAssessment = await this.prisma.preAssessment.findFirst({
+        where: { clientId: userId },
+      });
+
+      if (existingAssessment) {
+        // If they somehow already have one, delete the anonymous one to avoid orphans
+        await this.prisma.preAssessment.delete({ where: { id: anonymousAssessment.id } });
+        return existingAssessment;
+      }
+
+      // Update the anonymous pre-assessment with the new clientId
+      return await this.prisma.preAssessment.update({
+        where: { id: anonymousAssessment.id },
+        data: { clientId: userId },
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        `Error in linkAnonymousPreAssessment: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+      throw new InternalServerErrorException('Failed to link anonymous pre-assessment');
+    }
+  }
 }

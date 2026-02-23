@@ -74,7 +74,7 @@ export class ClientAuthController {
   async verifyOtp(
     @Body(new ZodValidationPipe(VerifyRegistrationOtpDtoSchema))
     verifyDto: VerifyRegistrationOtpDto,
-  ): Promise<EmailResponse> {
+  ): Promise<ClientAuthResponse> {
     return this.clientAuthService.verifyRegistrationOtp(
       verifyDto.email,
       verifyDto.otpCode,

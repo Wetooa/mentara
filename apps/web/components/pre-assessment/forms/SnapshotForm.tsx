@@ -1,89 +1,56 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useMemo } from "react";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Heart, Sparkles, ArrowRight, Activity, TrendingUp, Loader2, Lock } from "lucide-react";
-import { QUESTIONNAIRE_MAP } from "@/constants/questionnaire/questionnaire-mapping";
-import { useApi } from "@/lib/api";
-import { answersToAnswerMatrix } from "@/lib/questionnaire";
+import { Heart, Sparkles, ArrowRight, Activity, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useAnonymousPreAssessment } from "@/hooks/pre-assessment/useAnonymousPreAssessment";
+import { calculateDetailedResults } from "@/lib/assessment-scoring";
 
 export default function SnapshotForm() {
-    const { questionnaires, flatAnswers, nextStep, setSessionId } = usePreAssessmentChecklistStore();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const api = useApi();
+    const { createAnonymous, isPending: isSubmitting } = useAnonymousPreAssessment();
+    const { questionnaires, flatAnswers, nextStep, rapportAnswers } = usePreAssessmentChecklistStore();
 
-    // Calculate scores and severity for the top 3 tools
+    // Calculate scores and severity for the top 3 tools using centralized logic
     const insights = useMemo(() => {
-        const results = [];
-        let answerOffset = 0;
+        const seed = rapportAnswers.join(",");
+        const results = calculateDetailedResults(questionnaires, flatAnswers, seed);
 
-        for (const qName of questionnaires) {
-            const qConfig = QUESTIONNAIRE_MAP[qName];
-            const qCount = qConfig.questions.length;
-            const qAnswers = flatAnswers.slice(answerOffset, answerOffset + qCount);
-
-            // Determine max option value for this specific tool (3 or 4 usually)
-            const optionsCount = qConfig.questions[0]?.options?.length || 4;
-            const maxPerQuestion = optionsCount - 1;
-
-            const score = qAnswers.reduce((sum, val) => sum + (val === -1 ? 0 : val), 0);
-            const maxPossible = qCount * maxPerQuestion;
-            const percentage = maxPossible > 0 ? (score / maxPossible) * 100 : 0;
-
-            // Map to visual severity
-            let severityLabel = "Low Impact";
+        return results.map(result => {
+            // Map to visual severity (maintaining existing UI logic for colors/desc)
             let severityColor = "bg-emerald-50 text-emerald-700 border-emerald-100";
             let description = "This area shows mild signs of disruption but appears manageable.";
 
-            if (percentage > 75) {
-                severityLabel = "Significant Impact";
+            if (result.severity === "Significant" || result.severity === "Severe" || result.severity === "Likely") {
                 severityColor = "bg-rose-50 text-rose-700 border-rose-100";
                 description = "Your responses suggest this is a core area requiring clinical attention.";
-            } else if (percentage > 35) {
-                severityLabel = "Moderate Impact";
+            } else if (result.severity === "Moderate" || result.severity === "Mild") {
                 severityColor = "bg-amber-50 text-amber-700 border-amber-100";
                 description = "This factor is contributing notably to your current mental state.";
             }
 
-            results.push({
-                name: qName,
-                score,
-                severity: severityLabel,
+            return {
+                name: result.name,
+                score: result.score,
+                severity: result.severity, // Use the professional label from utility
                 color: severityColor,
                 description,
-                percentage
-            });
-
-            answerOffset += qCount;
-        }
-        return results;
-    }, [questionnaires, flatAnswers]);
-
-    const primaryConcern = insights[0];
-    const secondaryConcerns = insights.slice(1);
+                percentage: result.percentage
+            };
+        });
+    }, [questionnaires, flatAnswers, rapportAnswers]);
 
     const handleSecureProfile = async () => {
         try {
-            setIsSubmitting(true);
-            const sessionId = crypto.randomUUID();
-            const answers = answersToAnswerMatrix(questionnaires, flatAnswers);
-
-            await api.preAssessment.createAnonymous(sessionId, {
-                answers,
-            });
-
-            setSessionId(sessionId);
+            await createAnonymous();
             nextStep();
         } catch (error) {
             console.error("Failed to save anonymous assessment", error);
             toast.error("An error occurred while saving your assessment. Please try again.");
-            setIsSubmitting(false);
         }
     };
 

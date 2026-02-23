@@ -39,6 +39,7 @@ describe('PreAssessmentController', () => {
           provide: PreAssessmentService,
           useValue: {
             createPreAssessment: jest.fn(),
+            createAnonymousPreAssessment: jest.fn(),
             getPreAssessmentByClientId: jest.fn(),
           },
         },
@@ -74,6 +75,29 @@ describe('PreAssessmentController', () => {
 
       await expect(
         controller.createPreAssessment('user-123', mockCreateDto),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('createAnonymousPreAssessment', () => {
+    it('should create an anonymous assessment successfully', async () => {
+      const mockAnonymousResponse = { ...mockPreAssessment, clientId: null };
+      (service.createAnonymousPreAssessment as jest.Mock).mockResolvedValue(mockAnonymousResponse);
+
+      const result = await controller.createAnonymousPreAssessment(mockCreateDto);
+
+      expect(result).toEqual({
+        id: 'assessment-123',
+        message: 'Anonymous pre-assessment created successfully',
+      });
+      expect(service.createAnonymousPreAssessment).toHaveBeenCalledWith(mockCreateDto);
+    });
+
+    it('should throw InternalServerErrorException on service error', async () => {
+      (service.createAnonymousPreAssessment as jest.Mock).mockRejectedValue(new Error('Service Error'));
+
+      await expect(
+        controller.createAnonymousPreAssessment(mockCreateDto),
       ).rejects.toThrow(InternalServerErrorException);
     });
   });

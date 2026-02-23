@@ -16,8 +16,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
 import { logger } from "@/lib/logger";
-const CLIENT_WELCOME_REDIRECT_DONE_KEY = "client_welcome_redirect_done";
-
 // Load auth debug utilities in development
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   import('@/lib/debug/auth-debug').catch(() => {
@@ -526,27 +524,17 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         return;
       }
 
-      // Client welcome: redirect to welcome only once per session when they haven't seen recommendations
+      // Client welcome: force redirect to welcome when they haven't seen recommendations
       // /client/welcome is always accessible; we never redirect away from it
       if (
         isAuthenticated &&
         userRole === "client"
       ) {
         if (pathname.startsWith("/client/welcome")) {
-          if (typeof window !== "undefined") {
-            sessionStorage.setItem(CLIENT_WELCOME_REDIRECT_DONE_KEY, "1");
-          }
+          // Allow access
         } else if (user?.hasSeenTherapistRecommendations === false) {
-          const alreadyRedirected =
-            typeof window !== "undefined" &&
-            sessionStorage.getItem(CLIENT_WELCOME_REDIRECT_DONE_KEY) === "1";
-          if (!alreadyRedirected) {
-            if (typeof window !== "undefined") {
-              sessionStorage.setItem(CLIENT_WELCOME_REDIRECT_DONE_KEY, "1");
-            }
-            router.push("/client/welcome");
-            return;
-          }
+          router.push("/client/welcome");
+          return;
         }
       }
 

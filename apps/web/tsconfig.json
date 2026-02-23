@@ -28,6 +28,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "api-client": [
+        "../../libs/api-client/src/index.ts"
       ]
     }
   },

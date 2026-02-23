@@ -17,13 +17,16 @@ import {
   Res,
   StreamableFile,
 } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { PreAssessmentService } from './pre-assessment.service';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
-import { CreatePreAssessmentDto, AurisChatDto } from './types/pre-assessment.dto';
+import { CreatePreAssessmentDto, AurisChatDto, PreAssessmentResponseDto } from './types/pre-assessment.dto';
+import { Public } from '../auth/core/decorators/public.decorator';
 import { PreAssessment } from '@prisma/client';
 import { AurisService } from './auris.service';
 
+@ApiTags('Pre-Assessment')
 @Controller('pre-assessment')
 @UseGuards(JwtAuthGuard)
 export class PreAssessmentController {
@@ -36,13 +39,31 @@ export class PreAssessmentController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: PreAssessmentResponseDto })
   async createPreAssessment(
     @CurrentUserId() id: string,
     @Body() data: CreatePreAssessmentDto,
-  ): Promise<{ id: string; message: string }> {
+  ): Promise<PreAssessmentResponseDto> {
     try {
       const response = await this.preAssessmentService.createPreAssessment(id, data);
       return { id: response.id, message: 'Pre-assessment created successfully' };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  @Public()
+  @Post('anonymous')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: PreAssessmentResponseDto })
+  async createAnonymousPreAssessment(
+    @Body() data: CreatePreAssessmentDto,
+  ): Promise<PreAssessmentResponseDto> {
+    try {
+      const response = await this.preAssessmentService.createAnonymousPreAssessment(data);
+      return { id: response.id, message: 'Anonymous pre-assessment created successfully' };
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : error,
