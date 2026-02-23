@@ -79,7 +79,6 @@ model Client {
   preAssessments                  PreAssessment[]
   reviews                         Review[]
   worksheets                      Worksheet[]
-  chatbotSessions                 ChatbotSession[]
   preferences                     ClientPreferences?
   engagement                      ClientEngagement?
 

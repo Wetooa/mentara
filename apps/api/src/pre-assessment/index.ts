@@ -21,6 +21,3 @@ export {
   type ContingencyPlan,
   type SuccessMetric,
 } from './analysis/therapeutic-recommendations.service';
-
-// Utility types
-export type { QuestionnaireScore, QuestionnaireScores } from './pre-assessment.utils';
