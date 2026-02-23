@@ -1,23 +1,40 @@
+export type PreAssessmentMethod = 'CHECKLIST' | 'CHATBOT' | 'HYBRID';
+
+export interface QuestionnaireScore {
+  score: number;
+  severity: string;
+}
+
+export interface QuestionnaireScores {
+  [key: string]: QuestionnaireScore;
+}
+
+export interface PreAssessmentDocuments {
+  soapAnalysisUrl: string | null;
+  conversationHistoryUrl: string | null;
+}
+
+export interface PreAssessmentData {
+  questionnaireScores: QuestionnaireScores;
+  documents?: PreAssessmentDocuments;
+}
+
 export interface CreatePreAssessmentDto {
-  answers: number[]; // Flat array of exactly 201 numeric responses
-  scores?: Record<string, number>;
-  severityLevels?: Record<string, string>;
-  assessmentMethod?: 'CHECKLIST' | 'CHATBOT' | 'HYBRID';
-  pastTherapyExperiences?: string[];
-  medicationHistory?: string[];
-  accessibilityNeeds?: string[];
-  soapAnalysisUrl?: string;
-  conversationHistoryUrl?: string;
+  assessmentId: string | null;
+  method: PreAssessmentMethod;
+  completedAt: string | Date;
+  data: PreAssessmentData;
+  pastTherapyExperiences: string | null;
+  medicationHistory: string | null;
+  accessibilityNeeds: string | null;
 }
 
 export interface UpdatePreAssessmentDto {
-  answers?: number[]; // Flat array of exactly 201 numeric responses
-  scores?: Record<string, number>;
-  severityLevels?: Record<string, string>;
-  assessmentMethod?: 'CHECKLIST' | 'CHATBOT' | 'HYBRID';
-  pastTherapyExperiences?: string[];
-  medicationHistory?: string[];
-  accessibilityNeeds?: string[];
-  soapAnalysisUrl?: string;
-  conversationHistoryUrl?: string;
+  assessmentId: string | null;
+  method: PreAssessmentMethod;
+  completedAt: string | Date;
+  data: PreAssessmentData;
+  pastTherapyExperiences: string | null;
+  medicationHistory: string | null;
+  accessibilityNeeds: string | null;
 }

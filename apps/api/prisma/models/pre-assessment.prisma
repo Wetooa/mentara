@@ -4,10 +4,11 @@ model PreAssessment {
   updatedAt              DateTime            @updatedAt
   clientId               String?             // Made optional for anonymous assessments
   sessionId              String?             @unique // Added for tracking anonymous assessments
-  answers                Json
   method                 PreAssessmentMethod @default(CHECKLIST)
   data                   Json // { questionnaireScores: {...} }
-  context                Json? // { pastTherapyExperiences: [...], medicationHistory: [...], accessibilityNeeds: [...] }
+  pastTherapyExperiences String?
+  medicationHistory      String?
+  accessibilityNeeds     String?
   soapAnalysisUrl        String?
   conversationHistoryUrl String?
   

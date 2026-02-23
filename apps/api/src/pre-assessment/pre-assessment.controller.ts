@@ -17,15 +17,9 @@ import {
   Res,
   StreamableFile,
 } from '@nestjs/common';
-import type { Response } from 'express';
 import { PreAssessmentService } from './pre-assessment.service';
-import { AiServiceClient } from './services/ai-service.client';
-import { GeminiClientService } from './services/gemini-client.service';
-import { QuestionnaireSelectorService } from './services/questionnaire-selector.service';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../auth/core/decorators/current-user-role.decorator';
-import { Public } from '../auth/core/decorators/public.decorator';
 import { CreatePreAssessmentDto } from './types/pre-assessment.dto';
 import { PreAssessment } from '@prisma/client';
 
@@ -36,9 +30,6 @@ export class PreAssessmentController {
 
   constructor(
     private readonly preAssessmentService: PreAssessmentService,
-    private readonly aiServiceClient: AiServiceClient,
-    private readonly geminiClient: GeminiClientService,
-    private readonly questionnaireSelector: QuestionnaireSelectorService,
   ) { }
 
   @Post()
@@ -61,7 +52,7 @@ export class PreAssessmentController {
   @HttpCode(HttpStatus.OK)
   async getPreAssessment(@CurrentUserId() id: string): Promise<PreAssessment> {
     try {
-      return await this.preAssessmentService.getPreAssessmentByUserId(id);
+      return await this.preAssessmentService.getPreAssessmentByClientId(id);
     } catch (error) {
       // If it's already a NotFoundException, re-throw it (don't convert to 500)
       if (error instanceof NotFoundException) {
