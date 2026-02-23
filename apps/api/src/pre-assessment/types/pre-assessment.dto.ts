@@ -38,3 +38,27 @@ export interface UpdatePreAssessmentDto {
   medicationHistory: string | null;
   accessibilityNeeds: string | null;
 }
+
+export interface AurisChatDto {
+  sessionId: string;
+  message: string;
+}
+
+export interface AurisResponseDto {
+  response: string;
+  state: {
+    is_complete: boolean;
+    [key: string]: any;
+  };
+  results?: {
+    assessmentId: string;
+    method: PreAssessmentMethod;
+    completedAt: string;
+    data: PreAssessmentData;
+    context: {
+      pastTherapyExperiences: string[];
+      medicationHistory: string[];
+      accessibilityNeeds: string[];
+    };
+  };
+}

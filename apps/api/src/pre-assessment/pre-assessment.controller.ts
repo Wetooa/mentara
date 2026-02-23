@@ -20,8 +20,9 @@ import {
 import { PreAssessmentService } from './pre-assessment.service';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
-import { CreatePreAssessmentDto } from './types/pre-assessment.dto';
+import { CreatePreAssessmentDto, AurisChatDto } from './types/pre-assessment.dto';
 import { PreAssessment } from '@prisma/client';
+import { AurisService } from './auris.service';
 
 @Controller('pre-assessment')
 @UseGuards(JwtAuthGuard)
@@ -30,6 +31,7 @@ export class PreAssessmentController {
 
   constructor(
     private readonly preAssessmentService: PreAssessmentService,
+    private readonly aurisService: AurisService,
   ) { }
 
   @Post()
@@ -63,5 +65,49 @@ export class PreAssessmentController {
         error instanceof Error ? error.message : error,
       );
     }
+  }
+
+  @Post('chat')
+  @HttpCode(HttpStatus.OK)
+  async chat(
+    @CurrentUserId() userId: string,
+    @Body() body: AurisChatDto,
+  ) {
+    return await this.aurisService.chat(userId, body.sessionId, body.message);
+  }
+
+  @Post('session/:sessionId/end')
+  @HttpCode(HttpStatus.OK)
+  async endSession(
+    @CurrentUserId() userId: string,
+    @Param('sessionId') sessionId: string,
+  ) {
+    return await this.aurisService.endSession(userId, sessionId);
+  }
+
+  @Get('session/:sessionId/pdf/summary')
+  async getPdfSummary(
+    @Param('sessionId') sessionId: string,
+    @Res({ passthrough: true }) res: any,
+  ) {
+    const pdfResponse = await this.aurisService.getPdfSummary(sessionId);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=assessment_summary_${sessionId}.pdf`,
+    });
+    return new StreamableFile(Buffer.from(pdfResponse.data));
+  }
+
+  @Get('session/:sessionId/pdf/history')
+  async getPdfHistory(
+    @Param('sessionId') sessionId: string,
+    @Res({ passthrough: true }) res: any,
+  ) {
+    const pdfResponse = await this.aurisService.getPdfHistory(sessionId);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=conversation_history_${sessionId}.pdf`,
+    });
+    return new StreamableFile(Buffer.from(pdfResponse.data));
   }
 }
