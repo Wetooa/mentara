@@ -88,6 +88,12 @@ export class PreAssessmentController {
     }
   }
 
+  @Post('session/new')
+  @HttpCode(HttpStatus.CREATED)
+  async createSession(@CurrentUserId() userId: string) {
+    return await this.aurisService.createSession(userId);
+  }
+
   @Post('chat')
   @HttpCode(HttpStatus.OK)
   async chat(

@@ -1,10 +1,8 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
 import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
-import type { TherapistRecommendation } from "@/lib/api/services/therapists";
-import { TherapistCardData, transformTherapistForCard, ApiTherapistResponse } from "@/types/therapist";
+import type { TherapistRecommendation } from "@/types/api/therapist";
+import { TherapistCardData, transformTherapistForCard } from "@/types/therapist";
+import { useRecommendationsControllerGetRecommendations } from "api-client";
 
 export interface UseTherapistRecommendationsOptions {
   /** Maximum number of therapists to fetch */
@@ -73,39 +71,26 @@ export interface UseWelcomeRecommendationsReturn {
  * Best for: Recommendation sections, "Suggested for You" areas
  */
 export function useTherapistRecommendations(
-  options: UseTherapistRecommendationsOptions = {}
+  options?: UseTherapistRecommendationsOptions
 ): UseTherapistRecommendationsReturn {
-  const {
-    limit = 10,
-    includeInactive = false,
-    province,
-    maxHourlyRate,
-  } = options;
-
-  const api = useApi();
 
   const { 
-    data: recommendationsData, 
+    data: recommendationsResponse, 
     isLoading, 
     error,
     refetch 
-  } = useQuery({
-    queryKey: queryKeys.therapists.recommendations({ limit, includeInactive, province, maxHourlyRate }),
-    queryFn: () => api.therapists.getRecommendations({ 
-      limit, 
-      includeInactive, 
-      province,
-      maxHourlyRate 
-    }),
-    staleTime: STALE_TIME.MEDIUM, // 5 minutes
-    gcTime: GC_TIME.MEDIUM, // 10 minutes
-    enabled: true,
-    refetchOnWindowFocus: false,
+  } = useRecommendationsControllerGetRecommendations({
+    query: {
+      staleTime: STALE_TIME.MEDIUM, // 5 minutes
+      gcTime: GC_TIME.MEDIUM, // 10 minutes
+      enabled: true,
+      refetchOnWindowFocus: false,
+    }
   });
 
   // Transform and memoize the data - handle actual API response structure
   const transformedData = useMemo(() => {
-    if (!recommendationsData) {
+    if (!recommendationsResponse) {
       return {
         therapists: [],
         totalCount: 0,
@@ -116,9 +101,10 @@ export function useTherapistRecommendations(
     }
 
     // Handle the actual API response structure: { success, data: { therapists, totalCount, ... }, timestamp }
-    const dataPayload = recommendationsData.data || recommendationsData;
+    // @ts-expect-error - The generated orval client might return any/void, so we cast/access dynamically
+    const dataPayload = recommendationsResponse?.data || recommendationsResponse;
     const therapists = dataPayload.therapists || [];
-    const totalCount = dataPayload.totalCount || 0;
+    const totalCount = dataPayload.total || dataPayload.totalCount || 0;
     const userConditions = dataPayload.userConditions || [];
     const matchCriteria = dataPayload.matchCriteria;
     
@@ -134,7 +120,7 @@ export function useTherapistRecommendations(
       matchCriteria,
       averageMatchScore,
     };
-  }, [recommendationsData]);
+  }, [recommendationsResponse]);
 
   return {
     ...transformedData,
@@ -149,45 +135,25 @@ export function useTherapistRecommendations(
  * Includes communities and additional welcome-specific data
  */
 export function useWelcomeRecommendations(
-  options: UseWelcomeRecommendationsOptions = {}
+  options?: UseWelcomeRecommendationsOptions
 ): UseWelcomeRecommendationsReturn {
-  const {
-    limit = 10,
-    includeInactive = false,
-    forceRefresh = false,
-    province,
-  } = options;
-
-  const api = useApi();
-
   const { 
-    data: recommendationsData, 
+    data: recommendationsResponse, 
     isLoading, 
     error,
     refetch 
-  } = useQuery({
-    queryKey: queryKeys.therapists.recommendations({ 
-      limit, 
-      includeInactive, 
-      province, 
-      forceRefresh,
-      welcome: true 
-    }),
-    queryFn: () => api.therapists.getWelcomeRecommendations({ 
-      limit, 
-      includeInactive, 
-      province, 
-      forceRefresh 
-    }),
-    staleTime: STALE_TIME.MEDIUM, // 5 minutes
-    gcTime: GC_TIME.MEDIUM, // 10 minutes
-    refetchOnWindowFocus: false,
-    enabled: true,
+  } = useRecommendationsControllerGetRecommendations({
+    query: {
+      staleTime: STALE_TIME.MEDIUM, // 5 minutes
+      gcTime: GC_TIME.MEDIUM, // 10 minutes
+      refetchOnWindowFocus: false,
+      enabled: true,
+    }
   });
 
   // Transform and memoize the data
   const transformedData = useMemo(() => {
-    if (!recommendationsData) {
+    if (!recommendationsResponse) {
       return {
         therapists: [],
         totalCount: 0,
@@ -198,9 +164,12 @@ export function useWelcomeRecommendations(
       };
     }
 
+    // @ts-expect-error - The generated orval client might return any/void, so we cast/access dynamically
+    const dataPayload = recommendationsResponse?.data || recommendationsResponse;
+
     // Handle welcome page response format
-    const therapists = recommendationsData.recommendations || [];
-    const totalCount = recommendationsData.totalCount || 0;
+    const therapists = dataPayload.therapists || [];
+    const totalCount = dataPayload.total || dataPayload.totalCount || 0;
     
     // Calculate average match score
     const averageMatchScore = therapists.length > 0
@@ -211,11 +180,11 @@ export function useWelcomeRecommendations(
       therapists,
       totalCount,
       averageMatchScore,
-      welcomeMessage: recommendationsData.welcomeMessage,
-      isFirstTime: recommendationsData.isFirstTime || false,
-      communities: recommendationsData.communities || [],
+      welcomeMessage: dataPayload.message || dataPayload.welcomeMessage,
+      isFirstTime: dataPayload.isFirstTime || false,
+      communities: dataPayload.communities || [],
     };
-  }, [recommendationsData]);
+  }, [recommendationsResponse]);
 
   return {
     ...transformedData,

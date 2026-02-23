@@ -20,6 +20,19 @@ export class AurisService {
     this.flaskUrl = this.configService.get<string>('FLASK_MICROSERVICE_URL') || 'http://localhost:5000';
   }
 
+  async createSession(userId: string): Promise<any> {
+    try {
+      this.logger.log(`User ${userId} creating new AURIS session`);
+      const response: AxiosResponse = await firstValueFrom(
+        this.httpService.post(`${this.flaskUrl}/api/session/new`),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Error creating Auris session: ${error.message}`);
+      throw new InternalServerErrorException('Failed to create AI session');
+    }
+  }
+
   async chat(userId: string, sessionId: string, message: string): Promise<any> {
     try {
       this.logger.log(`User ${userId} sending chat to AURIS session ${sessionId}`);

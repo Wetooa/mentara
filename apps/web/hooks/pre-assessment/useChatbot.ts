@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
-import { useApi } from "@/lib/api";
+import { usePreAssessmentControllerChat, usePreAssessmentControllerEndSession } from "api-client";
 import { useAuth } from "@/contexts/AuthContext";
 
 export type Role = "assistant" | "user";
@@ -32,8 +32,9 @@ export interface UseChatbotReturn {
 }
 
 export function useChatbot(): UseChatbotReturn {
-    const api = useApi();
     const { isAuthenticated } = useAuth();
+    const chatMutation = usePreAssessmentControllerChat();
+    const endSessionMutation = usePreAssessmentControllerEndSession();
 
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -53,8 +54,10 @@ export function useChatbot(): UseChatbotReturn {
             }
             isInitializing.current = true;
             setIsLoading(true);
-            const result = await api.preAssessment.startChatbotSession();
-            setSessionId(result.sessionId);
+            
+            // Client-side session start since the backend handles it via Python microservice seamlessly 
+            const newSessionId = crypto.randomUUID();
+            setSessionId(newSessionId);
             setMessages([
                 {
                     id: "1",
@@ -70,7 +73,7 @@ export function useChatbot(): UseChatbotReturn {
             setIsLoading(false);
             isInitializing.current = false;
         }
-    }, [api.preAssessment, sessionId]);
+    }, [sessionId, isAuthenticated]);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -93,12 +96,30 @@ export function useChatbot(): UseChatbotReturn {
         setIsLoading(true);
 
         try {
-            const response = await api.preAssessment.sendChatbotMessage(sessionId, content);
+            const rawResponse = await chatMutation.mutateAsync({
+                data: {
+                    sessionId,
+                    message: content,
+                }
+            });
+
+            // Map the `PreAssessmentControllerChat200` to expected structure.
+            // Auris microservice returns `{ response, state: { is_complete } }`
+            const response = rawResponse as unknown as {
+                response: string;
+                state: { is_complete: boolean };
+                toolCall?: {
+                    questionId: string;
+                    question: string;
+                    options: Array<{ value: number; label: string }>;
+                    topic?: string;
+                };
+            };
 
             const assistantMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: "assistant",
-                content: response.response,
+                content: response.response || "I didn't quite catch that, could you repeat?",
                 timestamp: new Date(),
                 type: response.toolCall ? "questionnaire" : "text",
                 questionData: response.toolCall ? {
@@ -111,14 +132,13 @@ export function useChatbot(): UseChatbotReturn {
 
             setMessages(prev => [...prev, assistantMessage]);
 
-            if (response.isComplete) {
+            if (response.state?.is_complete) {
                 setIsComplete(true);
                 toast.success("Assessment complete!");
             }
         } catch (error) {
             console.error("[useChatbot] Error sending message:", error);
             toast.error("Failed to send message. Please try again.");
-            // Option to remove the failed user message or mark it as failed
         } finally {
             setIsLoading(false);
         }
@@ -140,7 +160,7 @@ export function useChatbot(): UseChatbotReturn {
 
         try {
             setIsLoading(true);
-            await api.preAssessment.completeChatbotSession(sessionId);
+            await endSessionMutation.mutateAsync({ sessionId });
             setIsComplete(true);
             toast.success("Assessment finalized.");
         } catch (error) {
