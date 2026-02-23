@@ -19,11 +19,6 @@ export class CommunitiesService {
         take: limit,
         skip: offset,
         include: {
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
           _count: {
             select: {
               memberships: true,
@@ -48,11 +43,6 @@ export class CommunitiesService {
           OR: [{ id: idOrSlug }, { slug: idOrSlug }],
         },
         include: {
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
           roomGroups: {
             include: {
               rooms: true,
@@ -81,7 +71,7 @@ export class CommunitiesService {
 
   async create(data: CreateCommunityDto): Promise<Community> {
     try {
-      const { tags, ...rest } = data;
+      const { illnesses, ...rest } = data;
 
       // Check for slug/name uniqueness
       const existing = await this.prisma.community.findFirst({
@@ -97,26 +87,7 @@ export class CommunitiesService {
       return await this.prisma.community.create({
         data: {
           ...rest,
-          tags: tags ? {
-            create: tags.map((tagName) => ({
-              tag: {
-                connectOrCreate: {
-                  where: { slug: tagName.toLowerCase().replace(/\s+/g, '-') },
-                  create: {
-                    name: tagName,
-                    slug: tagName.toLowerCase().replace(/\s+/g, '-'),
-                  },
-                },
-              },
-            })),
-          } : undefined,
-        },
-        include: {
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
+          illnesses: illnesses as any,
         },
       });
     } catch (error) {
@@ -129,7 +100,7 @@ export class CommunitiesService {
 
   async update(id: string, data: UpdateCommunityDto): Promise<Community> {
     try {
-      const { tags, ...rest } = data;
+      const { illnesses, ...rest } = data;
 
       // Check existence
       await this.findOne(id);
@@ -138,27 +109,7 @@ export class CommunitiesService {
         where: { id },
         data: {
           ...rest,
-          tags: tags ? {
-            deleteMany: {},
-            create: tags.map((tagName) => ({
-              tag: {
-                connectOrCreate: {
-                  where: { slug: tagName.toLowerCase().replace(/\s+/g, '-') },
-                  create: {
-                    name: tagName,
-                    slug: tagName.toLowerCase().replace(/\s+/g, '-'),
-                  },
-                },
-              },
-            })),
-          } : undefined,
-        },
-        include: {
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
+          illnesses: illnesses as any,
         },
       });
     } catch (error) {

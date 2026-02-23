@@ -14,10 +14,22 @@ export interface RecommendedTherapistDto {
   matchReasons: string[];
 }
 
+export interface RecommendedCommunityDto {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  memberCount: number;
+  matchScore: number;
+  matchReasons: string[];
+}
+
 export interface RecommendationResponseDto {
   success: boolean;
   data: {
     therapists: RecommendedTherapistDto[];
+    communities: RecommendedCommunityDto[];
     total: number;
     userConditions: string[];
     userContext?: {

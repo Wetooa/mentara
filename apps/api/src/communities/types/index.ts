@@ -4,7 +4,7 @@ export interface CreateCommunityDto {
   description: string;
   imageUrl: string;
   category?: string;
-  tags?: string[];
+  illnesses?: string[];
 }
 
 export interface UpdateCommunityDto extends Partial<CreateCommunityDto> {}
@@ -24,6 +24,7 @@ export interface CommunityDto {
   description: string;
   imageUrl: string;
   category: string;
+  illnesses: string[];
   createdAt: Date;
   updatedAt: Date;
 }

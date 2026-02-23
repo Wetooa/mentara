@@ -15,7 +15,7 @@ export class RecommendationsController {
   constructor(private readonly recommendationsService: RecommendationsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get therapist recommendations based on user assessment' })
+  @ApiOperation({ summary: 'Get therapist and community recommendations based on user assessment' })
   @ApiResponse({ status: 200, description: 'Recommendations retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getRecommendations(@CurrentUserId() userId: string): Promise<RecommendationResponseDto> {

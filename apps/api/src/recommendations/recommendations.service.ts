@@ -1,6 +1,6 @@
-import { Injectable, Logger, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { RecommendationResponseDto, RecommendedTherapistDto } from './types/recommendations.dto';
+import { RecommendationResponseDto, RecommendedTherapistDto, RecommendedCommunityDto } from './types/recommendations.dto';
 
 @Injectable()
 export class RecommendationsService {
@@ -37,6 +37,24 @@ export class RecommendationsService {
     'social-phobia': 'Social Anxiety',
   };
 
+  private readonly conditionToEnumMap: Record<string, any> = {
+    Anxiety: 'ANXIETY',
+    Depression: 'DEPRESSION',
+    Insomnia: 'INSOMNIA',
+    ADHD: 'ADHD',
+    'Alcohol Use': 'ALCOHOL',
+    'Substance Use': 'DRUG_ABUSE',
+    PTSD: 'PTSD',
+    'Bipolar Disorder': 'BIPOLAR',
+    'Eating Disorders': 'EATING_DISORDER',
+    OCD: 'OCD',
+    Panic: 'PANIC',
+    Stress: 'STRESS',
+    Phobia: 'PHOBIA',
+    'Social Anxiety': 'SOCIAL_ANXIETY',
+    Burnout: 'BURNOUT',
+  };
+
   async getRecommendations(userId: string): Promise<RecommendationResponseDto> {
     try {
       this.logger.log(`Fetching recommendations for user ${userId}`);
@@ -64,7 +82,6 @@ export class RecommendationsService {
       this.logger.log(`User conditions identified: ${userConditions.join(', ')}`);
 
       // 3. Find therapists matching these conditions
-      // If no conditions identified or no pre-assessment, we'll suggest general ones
       const therapistWhere: any = {
         status: 'APPROVED',
       };
@@ -92,7 +109,6 @@ export class RecommendationsService {
             },
           },
         },
-        take: 10,
       });
 
       // 4. Transform and score therapists
@@ -102,11 +118,6 @@ export class RecommendationsService {
           ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
           : 0;
 
-        // Simple scoring logic:
-        // - Base score: 50
-        // - Each matching condition: +10
-        // - Rating: + (rating * 2)
-        // - Experience: + (years * 0.5)
         let matchScore = 50;
         const matchReasons: string[] = [];
 
@@ -125,17 +136,14 @@ export class RecommendationsService {
         matchScore += averageRating * 2;
         matchScore += (therapist.yearsOfExperience || 0) * 0.5;
 
-        // Add reason for rating if high
         if (averageRating >= 4.5) {
           matchReasons.push('Highly rated by clients');
         }
 
-        // Add reason for experience if significant
         if ((therapist.yearsOfExperience || 0) >= 10) {
           matchReasons.push('Extensive clinical experience');
         }
 
-        // Use accessibility needs to boost matching if remote/online is mentioned
         const accessibility = preAssessment?.accessibilityNeeds?.toLowerCase() || '';
         if ((accessibility.includes('online') || accessibility.includes('video') || accessibility.includes('remote')) && therapist.comfortableUsingVideoConferencing) {
           matchScore += 5;
@@ -158,14 +166,76 @@ export class RecommendationsService {
         };
       });
 
-      // Sort by match score descending
+      // Sort and take top 3 therapists
       recommendedTherapists.sort((a, b) => b.matchScore - a.matchScore);
+      const topTherapists = recommendedTherapists.slice(0, 3);
+
+      // 5. Find communities matching conditions
+      const targetEnums = userConditions
+        .map(c => this.conditionToEnumMap[c])
+        .filter(Boolean);
+
+      const communityWhere: any = {};
+      if (targetEnums.length > 0) {
+        communityWhere.illnesses = {
+          hasSome: targetEnums,
+        };
+      }
+
+      const communities = await this.prisma.community.findMany({
+        where: communityWhere,
+        include: {
+          _count: {
+            select: {
+              memberships: true,
+            },
+          },
+        },
+      });
+
+      // 6. Transform and score communities
+      const recommendedCommunities: RecommendedCommunityDto[] = communities.map((community) => {
+        let matchScore = 60; // Slightly higher base for communities
+        const matchReasons: string[] = [];
+        const communityIllnesses = community.illnesses || [];
+
+        userConditions.forEach((condition) => {
+          const enumValue = this.conditionToEnumMap[condition];
+          if (enumValue && communityIllnesses.includes(enumValue)) {
+            matchScore += 15;
+            matchReasons.push(`Focuses on ${condition}`);
+          }
+        });
+
+        // Boost based on popularity
+        const memberCount = community._count?.memberships || 0;
+        if (memberCount > 50) {
+          matchScore += 5;
+          matchReasons.push('Active community');
+        }
+
+        return {
+          id: community.id,
+          name: community.name,
+          slug: community.slug,
+          description: community.description,
+          imageUrl: community.imageUrl,
+          memberCount,
+          matchScore: Math.min(Math.round(matchScore), 100),
+          matchReasons: matchReasons.length > 0 ? matchReasons : ['Supportive peer environment'],
+        };
+      });
+
+      // Sort and take top 3 communities
+      recommendedCommunities.sort((a, b) => b.matchScore - a.matchScore);
+      const topCommunities = recommendedCommunities.slice(0, 3);
 
       return {
         success: true,
         data: {
-          therapists: recommendedTherapists,
-          total: recommendedTherapists.length,
+          therapists: topTherapists,
+          communities: topCommunities,
+          total: topTherapists.length + topCommunities.length,
           userConditions,
           userContext: {
             pastTherapyExperiences: preAssessment?.pastTherapyExperiences,
@@ -176,7 +246,7 @@ export class RecommendationsService {
       };
     } catch (error) {
       this.logger.error(`Error generating recommendations: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Failed to generate therapist recommendations');
+      throw new InternalServerErrorException('Failed to generate recommendations');
     }
   }
 }

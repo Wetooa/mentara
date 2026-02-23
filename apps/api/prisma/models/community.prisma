@@ -5,13 +5,13 @@ model Community {
   description          String
   imageUrl             String
   category             String                @default("mental-health")
+  illnesses            QuestionnaireType[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   memberships          Membership[]
   moderatorCommunities ModeratorCommunity[]
   roomGroups           RoomGroup[]
   groupSessions        GroupTherapySession[]
-  tags                 CommunityToTag[]
 
   @@index([name])
   @@index([slug])
@@ -19,25 +19,22 @@ model Community {
   @@index([updatedAt])
 }
 
-model CommunityTag {
-  id          String           @id @default(uuid())
-  name        String           @unique // Display name (e.g., "Anxiety")
-  slug        String           @unique // Canonical ID (e.g., "anxiety")
-  communities CommunityToTag[]
-
-  @@index([name])
-  @@index([slug])
-}
-
-model CommunityToTag {
-  communityId String
-  tagId       String
-  community   Community    @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  tag         CommunityTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([communityId, tagId])
-  @@index([communityId])
-  @@index([tagId])
+enum QuestionnaireType {
+  STRESS
+  ANXIETY
+  DEPRESSION
+  DRUG_ABUSE
+  INSOMNIA
+  PANIC
+  BIPOLAR
+  OCD
+  PTSD
+  SOCIAL_ANXIETY
+  PHOBIA
+  BURNOUT
+  EATING_DISORDER
+  ADHD
+  ALCOHOL
 }
 
 model Membership {
