@@ -129,6 +129,13 @@ export const RegisterClientDtoSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters long"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
+  middleName: z.string().optional(),
+  birthDate: z.string().optional(),
+  address: z.string().optional(),
+  avatarUrl: z.string().optional(),
+  hasSeenTherapistRecommendations: z.boolean().optional(),
+  preassessmentAnswers: z.any().optional(),
+  sessionId: z.string().optional(),
 });
 
 export const RegisterAdminDtoSchema = z.object({

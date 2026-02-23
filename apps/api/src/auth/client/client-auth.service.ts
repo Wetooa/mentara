@@ -7,15 +7,12 @@ import {
 import type { RegisterClientDto, EmailResponse } from '../types';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { TokenService } from '../shared/token.service';
-import { EmailService } from '../../email/email.service';
 import { EmailVerificationService } from '../shared/email-verification.service';
+import { PreAssessmentService } from '../../pre-assessment/pre-assessment.service';
 import {
   hashPassword,
   checkEmailAvailable,
-  verifyPassword,
 } from '../shared/auth.helpers';
-import { processPreAssessmentAnswers } from '../../pre-assessment/pre-assessment.utils';
-import { generateAIEvaluationData } from '../../pre-assessment/ai-evaluation.utils';
 
 @Injectable()
 export class ClientAuthService {
@@ -24,12 +21,12 @@ export class ClientAuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
-    private readonly emailService: EmailService,
     private readonly emailVerificationService: EmailVerificationService,
-  ) { }
+    private readonly preAssessmentService: PreAssessmentService,
+  ) {}
 
   async registerClient(registerDto: RegisterClientDto) {
-    this.logger.log('Registering client with preassessment data');
+    this.logger.log('Registering client');
 
     // Check if email is available
     await checkEmailAvailable(this.prisma, registerDto.email);
@@ -46,9 +43,7 @@ export class ClientAuthService {
           firstName: registerDto.firstName,
           lastName: registerDto.lastName,
           middleName: registerDto.middleName || undefined,
-          birthDate: registerDto.birthDate
-            ? new Date(registerDto.birthDate)
-            : undefined,
+          birthDate: registerDto.birthDate ? new Date(registerDto.birthDate) : undefined,
           address: registerDto.address || undefined,
           avatarUrl: registerDto.avatarUrl || undefined,
           role: 'client',
@@ -56,151 +51,49 @@ export class ClientAuthService {
         },
       });
 
-      // If no pre-assessment is provided, auto-mark recommendations as seen
-      // (since recommendations require pre-assessment data)
-      const hasPreAssessment = !!(
-        registerDto.preassessmentAnswers &&
-        registerDto.preassessmentAnswers.length > 0
-      );
-      const shouldMarkRecommendationsSeen = !hasPreAssessment;
-
       const client = await tx.client.create({
         data: {
           userId: user.id,
-          hasSeenTherapistRecommendations:
-            registerDto.hasSeenTherapistRecommendations || shouldMarkRecommendationsSeen,
+          hasSeenTherapistRecommendations: false, // Explicitly set to false on create
+          birthdate: registerDto.birthDate ? new Date(registerDto.birthDate) : undefined,
         },
       });
 
-      // Create or link preassessment record
-      let preAssessment: any = null;
-      if (registerDto.sessionId) {
-        // Link existing anonymous assessment
-        preAssessment = await tx.preAssessment.update({
-          where: { sessionId: registerDto.sessionId },
-          data: { clientId: user.id },
-        });
-      } else if (
-        registerDto.preassessmentAnswers &&
-        registerDto.preassessmentAnswers.length > 0
-      ) {
-        // Import scoring utilities
-
-        // Calculate scores from flat answers array
-        const { scores, severityLevels } = processPreAssessmentAnswers(
-          registerDto.preassessmentAnswers,
-        );
-
-        // Generate realistic AI evaluation data based on assessment results
-        const aiEvaluationData = generateAIEvaluationData(
-          scores,
-          severityLevels,
-        );
-
-        preAssessment = await tx.preAssessment.create({
-          data: {
-            clientId: user.id,
-            answers: registerDto.preassessmentAnswers, // Flat array of 201 responses
-            data: {
-              questionnaireScores: Object.fromEntries(
-                Object.entries(scores).map(([key, value]) => [
-                  key,
-                  {
-                    score: value,
-                    severity: severityLevels[key] || 'Unknown',
-                  },
-                ])
-              ),
-              documents: {
-                soapAnalysisUrl: null,
-                conversationHistoryUrl: null,
-              },
-            } as any,
-          },
-        });
-      }
-
-      return { user, client, preAssessment };
+      return { user, client };
     });
 
-    // Generate single token
+    // Handle pre-assessment data if provided
+    if (registerDto.preassessmentAnswers || registerDto.sessionId) {
+      try {
+        await this.preAssessmentService.createPreAssessment(result.user.id, {
+          assessmentId: null,
+          method: 'CHECKLIST', // Default method
+          completedAt: new Date(),
+          data: registerDto.preassessmentAnswers || { questionnaireScores: {} },
+          pastTherapyExperiences: null,
+          medicationHistory: null,
+          accessibilityNeeds: null,
+        });
+      } catch (error) {
+        this.logger.error(`Failed to create pre-assessment for client ${result.user.id}: ${error instanceof Error ? error.message : error}`);
+        // We don't throw here to avoid failing registration if pre-assessment fails
+      }
+    }
+
+    // Generate token
     const { token } = await this.tokenService.generateToken(
       result.user.id,
       result.user.email,
       result.user.role,
     );
 
-    // Send verification email using EmailVerificationService
+    // Send verification email
     await this.emailVerificationService.sendVerificationEmail(result.user.id);
 
     return {
       user: result.user,
-      tokens: { accessToken: token, refreshToken: token, expiresIn: 0 }, // For backward compatibility
-      message: result.preAssessment
-        ? 'Client registration and pre-assessment data saved successfully. Please check your email for the verification code.'
-        : 'Client registration successful. Please check your email for the verification code.',
-    };
-  }
-
-  async loginClient(
-    email: string,
-    password: string,
-    ipAddress?: string,
-    userAgent?: string,
-  ) {
-    // Find user with client role
-    const user = await this.prisma.user.findFirst({
-      where: {
-        email,
-        role: 'client',
-      },
-      include: {
-        client: true,
-      },
-    });
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Check if account is locked
-    if (user.lockoutUntil && user.lockoutUntil > new Date()) {
-      throw new UnauthorizedException(
-        'Account is temporarily locked due to failed login attempts',
-      );
-    }
-
-    // Verify password
-    if (!user.password) {
-      throw new UnauthorizedException('Account setup incomplete');
-    }
-    const isPasswordValid = await verifyPassword(password, user.password);
-    if (!isPasswordValid) {
-      // Increment failed login count
-      await this.handleFailedLogin(user.id);
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Reset failed login count and update last login
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        failedLoginCount: 0,
-        lockoutUntil: null,
-        lastLoginAt: new Date(),
-      },
-    });
-
-    // Generate single token
-    const { token } = await this.tokenService.generateToken(
-      user.id,
-      user.email,
-      user.role,
-    );
-
-    return {
-      user,
-      tokens: { accessToken: token, refreshToken: token, expiresIn: 0 }, // For backward compatibility
+      tokens: { accessToken: token, refreshToken: token, expiresIn: 0 },
+      message: 'Client registration successful. Please check your email for the verification code.',
     };
   }
 
@@ -208,27 +101,7 @@ export class ClientAuthService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        client: {
-          include: {
-            assignedTherapists: {
-              include: {
-                therapist: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        avatarUrl: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
+        client: true,
       },
     });
 
@@ -236,111 +109,15 @@ export class ClientAuthService {
       throw new UnauthorizedException('Client not found');
     }
 
-    // Return in the expected ClientProfileResponse format
     return {
       id: user.id,
       email: user.email,
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       role: 'client' as const,
-      avatarUrl: user.avatarUrl || undefined,
-      dateOfBirth: user.birthDate ? user.birthDate.toISOString() : undefined,
-      phoneNumber: undefined, // Phone number not stored in User model for clients
-      profileComplete: !!(user.firstName && user.lastName && user.birthDate),
-      therapistId:
-        user.client?.assignedTherapists?.[0]?.therapist?.user?.id || undefined,
+      client: user.client,
       createdAt: user.createdAt.toISOString(),
-      hasSeenTherapistRecommendations:
-        user.client?.hasSeenTherapistRecommendations || false,
-    };
-  }
-
-  async getFirstSignInStatus(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        client: {
-          select: {
-            hasSeenTherapistRecommendations: true,
-          },
-        },
-      },
-    });
-
-    if (!user || !user.client) {
-      throw new UnauthorizedException('Client not found');
-    }
-
-    // Check if user has completed pre-assessment
-    const latestAssessment = await this.prisma.preAssessment.findFirst({
-      where: { clientId: userId },
-      orderBy: { createdAt: 'desc' },
-    });
-    const hasPreAssessment = !!latestAssessment;
-    const assessmentCompleted = hasPreAssessment;
-
-    // Return in the expected OnboardingStatusResponse format
-    const profileCompleted = !!(
-      user.firstName &&
-      user.lastName &&
-      user.birthDate
-    );
-    const completedSteps: string[] = [];
-
-    if (profileCompleted) completedSteps.push('profile');
-
-    // If user has no pre-assessment, auto-mark recommendations as seen (skip that step)
-    // If user has pre-assessment, check if they've seen recommendations
-    const hasSeenRecommendations = !hasPreAssessment || user.client.hasSeenTherapistRecommendations;
-
-    if (hasSeenRecommendations) completedSteps.push('recommendations');
-    if (assessmentCompleted) completedSteps.push('assessment');
-
-    // Determine next step
-    let nextStep: string | undefined;
-    if (!profileCompleted) {
-      nextStep = 'profile';
-    } else if (!hasSeenRecommendations) {
-      // Only show recommendations if user has pre-assessment
-      nextStep = hasPreAssessment ? 'recommendations' : undefined;
-    } else if (!assessmentCompleted) {
-      nextStep = 'assessment';
-    }
-
-    return {
-      isFirstSignIn: !user.lastLoginAt,
-      hasSeenRecommendations,
-      profileCompleted,
-      assessmentCompleted,
-      isOnboardingComplete:
-        profileCompleted &&
-        hasSeenRecommendations &&
-        assessmentCompleted,
-      completedSteps,
-      nextStep,
-    };
-  }
-
-  async markRecommendationsSeen(userId: string) {
-    const client = await this.prisma.client.findUnique({
-      where: { userId },
-    });
-
-    if (!client) {
-      throw new UnauthorizedException('Client not found');
-    }
-
-    await this.prisma.client.update({
-      where: { userId },
-      data: {
-        hasSeenTherapistRecommendations: true,
-      },
-    });
-
-    // Return in the expected SuccessResponse format
-    return {
-      success: true,
-      message: 'Recommendations marked as seen',
+      updatedAt: user.updatedAt.toISOString(),
     };
   }
 
@@ -352,7 +129,6 @@ export class ClientAuthService {
       throw new BadRequestException('Email and OTP code are required');
     }
 
-    // First verify the user exists and has client role
     const user = await this.prisma.user.findFirst({
       where: {
         email,
@@ -364,11 +140,9 @@ export class ClientAuthService {
       throw new BadRequestException('Invalid email');
     }
 
-    // Use EmailVerificationService to verify the OTP
     const result = await this.emailVerificationService.verifyEmail(otpCode);
 
     if (result.success) {
-      // Update emailVerified flag for client
       await this.prisma.user.update({
         where: { id: user.id },
         data: {
@@ -389,7 +163,6 @@ export class ClientAuthService {
       throw new BadRequestException('Email is required');
     }
 
-    // Find user with client role
     const user = await this.prisma.user.findFirst({
       where: {
         email,
@@ -397,19 +170,15 @@ export class ClientAuthService {
       },
       select: {
         id: true,
-        email: true,
-        firstName: true,
         emailVerified: true,
       },
     });
 
     if (!user) {
-      // Don't reveal if email exists for security, but return success
       return {
         success: true,
         status: 'success',
-        message:
-          'If an account with this email exists, a new verification code has been sent.',
+        message: 'If an account with this email exists, a new verification code has been sent.',
       };
     }
 
@@ -417,37 +186,12 @@ export class ClientAuthService {
       throw new BadRequestException('Email already verified');
     }
 
-    // Use EmailVerificationService to resend verification email
-    await this.emailVerificationService.resendVerificationEmail(email);
+    await this.emailVerificationService.resendVerificationEmail(user.id);
 
     return {
       success: true,
       status: 'success',
       message: 'A new verification code has been sent to your email.',
     };
-  }
-
-  private async handleFailedLogin(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { failedLoginCount: true },
-    });
-
-    const newFailedCount = (user?.failedLoginCount || 0) + 1;
-    const maxAttempts = 5;
-    const lockoutDuration = 30 * 60 * 1000; // 30 minutes
-
-    const updateData: any = {
-      failedLoginCount: newFailedCount,
-    };
-
-    if (newFailedCount >= maxAttempts) {
-      updateData.lockoutUntil = new Date(Date.now() + lockoutDuration);
-    }
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: updateData,
-    });
   }
 }
