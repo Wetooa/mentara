@@ -27,7 +27,7 @@ export async function generateTherapyData(
   usersData: UsersData
 ): Promise<TherapyData> {
   console.log('  Creating therapy data...');
-  
+
   const result: TherapyData = {
     meetings: [],
     worksheets: [],
@@ -46,7 +46,7 @@ export async function generateTherapyData(
   await createWorksheets(prisma, config, relationshipsData, result);
 
   // Create pre-assessments for clients
-  await createAssessments(prisma, config, usersData, result);
+  // await createAssessments(prisma, config, usersData, result);
 
   // Create reviews
   await createReviews(prisma, config, relationshipsData, result);
@@ -73,23 +73,23 @@ async function createMeetings(
 ): Promise<void> {
   for (const relationshipData of relationshipsData.clientTherapistRelationships) {
     const { relationship, client, therapist } = relationshipData;
-    
+
     // Skip inactive relationships
     if (relationship.status !== 'active') continue;
 
     const meetingsToCreate = randomInt(1, config.meetingsPerRelationship);
     const relationshipStart = new Date(relationship.assignedAt);
-    
+
     for (let i = 0; i < meetingsToCreate; i++) {
       // Schedule meetings progressively in the future from relationship start
       const daysSinceStart = i * 7 + randomInt(0, 6); // Weekly sessions with some variation
       const meetingDate = new Date(relationshipStart.getTime() + daysSinceStart * 24 * 60 * 60 * 1000);
-      
+
       // Determine if meeting is in past, present, or future
       const now = new Date();
       const isPast = meetingDate < now;
       const isWithinWeek = Math.abs(meetingDate.getTime() - now.getTime()) < 7 * 24 * 60 * 60 * 1000;
-      
+
       let status = 'SCHEDULED';
       if (isPast) {
         status = Math.random() > 0.1 ? 'COMPLETED' : 'CANCELLED'; // 90% completion rate
@@ -113,7 +113,7 @@ async function createMeetings(
             createdAt: new Date(relationshipStart.getTime() + (i - 1) * 7 * 24 * 60 * 60 * 1000),
           },
         });
-        
+
         result.meetings.push(meeting);
       } catch (error) {
         console.log(`    ⚠️  Failed to create meeting: ${error}`);
@@ -133,18 +133,18 @@ async function createWorksheets(
 ): Promise<void> {
   for (const relationshipData of relationshipsData.clientTherapistRelationships) {
     const { relationship, client, therapist } = relationshipData;
-    
+
     // Skip inactive relationships
     if (relationship.status !== 'active') continue;
 
     const worksheetsToCreate = randomInt(1, config.worksheetsPerRelationship);
     const relationshipStart = new Date(relationship.assignedAt);
-    
+
     for (let i = 0; i < worksheetsToCreate; i++) {
       const template = randomChoice(WORKSHEET_TEMPLATES);
       const assignmentDate = new Date(relationshipStart.getTime() + i * 10 * 24 * 60 * 60 * 1000); // Every 10 days
       const dueDate = new Date(assignmentDate.getTime() + 7 * 24 * 60 * 60 * 1000); // 1 week to complete
-      
+
       // Determine status based on due date
       const now = new Date();
       let status = 'ASSIGNED';
@@ -167,13 +167,13 @@ async function createWorksheets(
             createdAt: assignmentDate,
           },
         });
-        
+
         result.worksheets.push(worksheet);
 
         // Create submission if worksheet was submitted
         if (status === 'SUBMITTED' || status === 'REVIEWED') {
           const submissionDate = new Date(dueDate.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-          
+
           try {
             await prisma.worksheetSubmission.create({
               data: {
@@ -221,7 +221,7 @@ async function createAssessments(
           processedAt: randomPastDate(180),
         },
       });
-      
+
       result.assessments.push(assessment);
     } catch (error) {
       console.log(`    ⚠️  Failed to create assessment: ${error}`);
@@ -240,14 +240,14 @@ async function createReviews(
 ): Promise<void> {
   for (const relationshipData of relationshipsData.clientTherapistRelationships) {
     const { relationship, client, therapist } = relationshipData;
-    
+
     // Only create reviews for some relationships
     if (Math.random() > config.reviewRate) continue;
 
     // Find a completed meeting to review
-    const eligibleMeetings = result.meetings.filter(m => 
-      m.clientId === client.id && 
-      m.therapistId === therapist.id && 
+    const eligibleMeetings = result.meetings.filter(m =>
+      m.clientId === client.id &&
+      m.therapistId === therapist.id &&
       m.status === 'COMPLETED'
     );
 
@@ -267,7 +267,7 @@ async function createReviews(
           createdAt: new Date(meetingToReview.endTime.getTime() + randomInt(1, 7) * 24 * 60 * 60 * 1000), // 1-7 days after meeting
         },
       });
-      
+
       result.reviews.push(review);
     } catch (error) {
       console.log(`    ⚠️  Failed to create review: ${error}`);
@@ -284,7 +284,7 @@ async function createMeetingNotes(
   result: TherapyData
 ): Promise<void> {
   const completedMeetings = result.meetings.filter(m => m.status === 'COMPLETED');
-  
+
   for (const meeting of completedMeetings) {
     // Create notes for most sessions
     if (Math.random() > config.sessionNotesRate) continue;
@@ -298,7 +298,7 @@ async function createMeetingNotes(
           createdAt: new Date(meeting.endTime.getTime() + randomInt(10, 120) * 60 * 1000), // 10-120 minutes after session
         },
       });
-      
+
       result.meetingNotes.push(notes);
     } catch (error) {
       console.log(`    ⚠️  Failed to create meeting notes: ${error}`);
@@ -314,10 +314,10 @@ async function createTherapistAvailability(
   usersData: UsersData
 ): Promise<void> {
   console.log('    Creating therapist availability...');
-  
+
   for (const therapistData of usersData.therapists) {
     const therapist = therapistData.user;
-    
+
     // Create availability for weekdays (Monday=1 to Friday=5)
     // Note: JavaScript getDay() returns 0=Sunday, 1=Monday, 2=Tuesday, etc.
     const weekdays = [1, 2, 3, 4, 5]; // Monday to Friday
@@ -327,10 +327,10 @@ async function createTherapistAvailability(
       // Generate realistic availability hours
       const startHours = [8, 9, 10]; // 8am, 9am, or 10am start
       const endHours = [16, 17, 18]; // 4pm, 5pm, or 6pm end
-      
+
       const startHour = randomChoice(startHours);
       const endHour = randomChoice(endHours.filter(h => h > startHour + 4)); // At least 4 hours
-      
+
       try {
         await prisma.therapistAvailability.create({
           data: {
@@ -347,7 +347,7 @@ async function createTherapistAvailability(
         console.log(`    ⚠️  Failed to create availability for therapist ${therapist.firstName}: ${error}`);
       }
     }
-    
+
     console.log(`    ✅ Created availability for therapist ${therapist.firstName} ${therapist.lastName}`);
   }
 }
@@ -428,7 +428,7 @@ function generateRealistictRating(): number {
   // Weighted towards positive ratings (realistic for therapy)
   const weights = [1, 2, 5, 15, 25]; // Weights for ratings 1-5
   const random = Math.random() * weights.reduce((a, b) => a + b, 0);
-  
+
   let cumulative = 0;
   for (let i = 0; i < weights.length; i++) {
     cumulative += weights[i];
@@ -466,7 +466,7 @@ function generateReviewComment(rating: number): string {
       "Unfortunately, this wasn't the right therapeutic approach for my needs.",
     ],
   };
-  
+
   const ratingComments = comments[rating as keyof typeof comments] || comments[3];
   return randomChoice(ratingComments);
 }

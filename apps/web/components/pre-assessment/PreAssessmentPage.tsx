@@ -20,33 +20,27 @@ function PreAssessmentPageContentInner() {
   const [mounted, setMounted] = useState(false);
 
   // Use window.location instead of usePathname to avoid SSR issues
-  const getInitialMode = (): 'selection' | 'checklist' => {
+  const getInitialMode = (): 'selection' | 'checklist' | 'chatbot' => {
     if (typeof window !== 'undefined') {
       const pathname = window.location.pathname;
       if (pathname.includes('/checklist')) return 'checklist';
+      if (pathname.includes('/chat')) return 'chatbot';
     }
     return 'selection';
   };
 
-  const [mode, setMode] = useState<'selection' | 'checklist' | 'chatbot' | 'registration'>('selection');
+  const [mode, setMode] = useState<'selection' | 'checklist' | 'chatbot' | 'registration'>(getInitialMode());
   const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
-    // Set mode only after mount
-    if (typeof window !== 'undefined') {
-      setMode(getInitialMode());
-    }
   }, []);
-  const { setQuestionnaires, nextStep } = usePreAssessmentChecklistStore();
+
   const {
     step,
-    questionnaires,
     animationControls,
-    handlePrevButtonOnClick,
     handleNextButtonOnClick,
-    isPrevDisabled,
   } = usePreAssessment();
 
   const handleModeSelection = (selectedMode: 'checklist' | 'chatbot') => {
@@ -54,7 +48,6 @@ function PreAssessmentPageContentInner() {
   };
 
   const handleChatbotComplete = () => {
-    // After chatbot assessment is complete, redirect to therapist page or dashboard
     router.push('/client/therapist');
   };
 
@@ -63,12 +56,10 @@ function PreAssessmentPageContentInner() {
   };
 
   const getCurrentForm = () => {
-    // Mode selection screen
     if (mode === 'selection') {
       return <ModeSelectionForm onSelectMode={handleModeSelection} />;
     }
 
-    // Chatbot mode
     if (mode === 'chatbot') {
       return (
         <ChatbotInterface
@@ -78,12 +69,10 @@ function PreAssessmentPageContentInner() {
       );
     }
 
-    // Registration mode (after checklist completion)
     if (mode === 'registration') {
       return <PreAssessmentSignUp />;
     }
 
-    // Checklist mode - routing based on new unified step logic
     if (step === 0) {
       return (
         <PreAssessmentInitialCheckList
@@ -108,14 +97,13 @@ function PreAssessmentPageContentInner() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       {mode === 'chatbot' ? (
-        // Chatbot takes full width and doesn't need the card wrapper
-        <div className="w-full h-full">
+        <div className="w-full h-full flex flex-col">
           {getCurrentForm()}
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg w-full mx-auto overflow-visible">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xl w-full max-w-4xl mx-auto overflow-visible mt-8 p-1">
           {mode === 'checklist' && <PreAssessmentProgressBar />}
 
           <div className="w-full">
