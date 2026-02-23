@@ -27,12 +27,12 @@ export interface ClinicalProfile {
 
 export interface RiskFactor {
   type:
-    | 'suicide'
-    | 'self_harm'
-    | 'substance_abuse'
-    | 'psychosis'
-    | 'mania'
-    | 'severe_depression';
+  | 'suicide'
+  | 'self_harm'
+  | 'substance_abuse'
+  | 'psychosis'
+  | 'mania'
+  | 'severe_depression';
   level: 'low' | 'moderate' | 'high' | 'critical';
   indicators: string[];
   urgency: 'immediate' | 'within_week' | 'within_month' | 'routine';
@@ -127,23 +127,22 @@ export class ClinicalInsightsService {
     preAssessment: PreAssessment,
   ): Record<string, string> {
     try {
-      // Access severityLevels from the dedicated field
-      const severityLevels = preAssessment.severityLevels as Record<
-        string,
-        string
-      >;
-      
-      if (severityLevels && typeof severityLevels === 'object') {
-        return severityLevels;
+      const data = ((preAssessment as any).data as any) || {};
+      const questionnaireScoresData = data.questionnaireScores || {};
+
+      if (Object.keys(questionnaireScoresData).length > 0) {
+        return Object.fromEntries(
+          Object.entries(questionnaireScoresData).map(([key, val]: [string, any]) => [key, val.severity])
+        );
       }
-      
+
       // Fallback: If severityLevels is empty, calculate from answers array
       const answers = preAssessment.answers as number[];
       if (Array.isArray(answers) && answers.length === 201) {
         const { severityLevels: calculatedLevels } = this.processAnswersArray(answers);
         return calculatedLevels;
       }
-      
+
       this.logger.warn('No severity levels data available, using empty object');
       return {};
     } catch (error) {
@@ -159,13 +158,9 @@ export class ClinicalInsightsService {
     preAssessment: PreAssessment,
   ): Record<string, boolean> {
     try {
-      // Access aiEstimate from the dedicated field
-      const aiEstimate = preAssessment.aiEstimate as Record<string, boolean>;
-      
-      if (aiEstimate && typeof aiEstimate === 'object') {
-        return aiEstimate;
-      }
-      
+      // AI Estimate is no longer supported directly but keep backward compatibility mock
+      return {};
+
       this.logger.warn('No valid AI predictions available');
       return {};
     } catch (error) {

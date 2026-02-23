@@ -38,7 +38,7 @@ export interface CommunityWithRoomGroupsResponse extends CommunityResponse {
 export class CommunitiesService {
   private readonly logger = new Logger(CommunitiesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findAllWithStructure(): Promise<CommunityWithRoomGroupsResponse[]> {
     return await this.prisma.community.findMany({
@@ -306,7 +306,7 @@ export class CommunitiesService {
 
   async getPostsByRoom(roomId: string, page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
-    
+
     const [posts, total] = await Promise.all([
       this.prisma.post.findMany({
         where: { roomId },
@@ -351,9 +351,9 @@ export class CommunitiesService {
   }
 
   async createPost(
-    title: string, 
-    content: string, 
-    roomId: string, 
+    title: string,
+    content: string,
+    roomId: string,
     userId: string,
     attachmentUrls: string[] = [],
     attachmentNames: string[] = [],
@@ -537,9 +537,7 @@ export class CommunitiesService {
           orderBy: { createdAt: 'desc' },
           take: 1,
           select: {
-            severityLevels: true,
-            aiEstimate: true,
-            scores: true,
+            data: true,
           },
         },
       },
@@ -547,13 +545,18 @@ export class CommunitiesService {
 
     // If user has processed preassessment data, use it for personalized recommendations
     const latestPreAssessment = user?.preAssessments?.[0] || null;
-    if (latestPreAssessment?.severityLevels) {
+    const preAssessmentData = ((latestPreAssessment as any)?.data as any) || {};
+    const questionnaireScoresData = preAssessmentData.questionnaireScores || {};
+
+    if (Object.keys(questionnaireScoresData).length > 0) {
       try {
-        const severityLevels = latestPreAssessment.severityLevels as Record<string, string>;
-        
+        const severityLevels = Object.fromEntries(
+          Object.entries(questionnaireScoresData).map(([key, val]: [string, any]) => [key, val.severity])
+        );
+
         // Map severity levels to community slugs for targeted recommendations
         const recommendedSlugs = this.mapSeverityLevelsToCommunities(severityLevels);
-        
+
         if (recommendedSlugs.length > 0) {
           // Get personalized community recommendations based on assessment
           const personalizedCommunities = await this.prisma.community.findMany({
@@ -609,7 +612,7 @@ export class CommunitiesService {
   private mapSeverityLevelsToCommunities(severityLevels: Record<string, string>): string[] {
     const communityMap: Record<string, string> = {
       'PHQ-9': 'depression-support',
-      'GAD-7': 'anxiety-warriors', 
+      'GAD-7': 'anxiety-warriors',
       'ASRS': 'adhd-support',
       'AUDIT': 'alcohol-recovery-support',
       'BES': 'eating-disorder-recovery',

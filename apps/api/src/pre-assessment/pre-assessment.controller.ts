@@ -24,7 +24,7 @@ import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../auth/core/decorators/current-user-role.decorator';
 import { Public } from '../auth/core/decorators/public.decorator';
-import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
+import { CreatePreAssessmentDto } from './types/pre-assessment.dto';
 import { PreAssessment } from '@prisma/client';
 
 @Controller('pre-assessment')
@@ -45,9 +45,10 @@ export class PreAssessmentController {
   async createPreAssessment(
     @CurrentUserId() id: string,
     @Body() data: CreatePreAssessmentDto,
-  ): Promise<PreAssessment> {
+  ): Promise<{ id: string; message: string }> {
     try {
-      return await this.preAssessmentService.createPreAssessment(id, data);
+      const response = await this.preAssessmentService.createPreAssessment(id, data);
+      return { id: response.id, message: 'Pre-assessment created successfully' };
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : error,
@@ -66,45 +67,6 @@ export class PreAssessmentController {
         throw error;
       }
       // For other errors, convert to InternalServerErrorException
-      throw new InternalServerErrorException(
-        error instanceof Error ? error.message : error,
-      );
-    }
-  }
-
-  @Get('history')
-  @HttpCode(HttpStatus.OK)
-  async getPreAssessmentHistory(@CurrentUserId() id: string): Promise<PreAssessment[]> {
-    try {
-      return await this.preAssessmentService.getAllPreAssessmentsByUserId(id);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        error instanceof Error ? error.message : error,
-      );
-    }
-  }
-
-  @Put()
-  @HttpCode(HttpStatus.OK)
-  async updatePreAssessment(
-    @CurrentUserId() id: string,
-    @Body() data: Partial<CreatePreAssessmentDto>,
-  ): Promise<PreAssessment> {
-    try {
-      return await this.preAssessmentService.updatePreAssessment(id, data);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        error instanceof Error ? error.message : error,
-      );
-    }
-  }
-
-  @Delete()
-  @HttpCode(HttpStatus.OK)
-  async deletePreAssessment(@CurrentUserId() id: string): Promise<null> {
-    try {
-      return await this.preAssessmentService.deletePreAssessment(id);
-    } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : error,
       );
@@ -491,10 +453,8 @@ export class PreAssessmentController {
     @Body() body: { sessionId: string },
     @CurrentUserId() userId?: string,
   ): Promise<{
-    scores: Record<string, { score: number; severity: string }>;
-    severityLevels: Record<string, string>;
-    answers?: number[]; // Converted answers array for registration
-    preAssessment?: PreAssessment;
+    success: boolean;
+    sessionId?: string;
   }> {
     try {
       const result = await this.chatbotService.completeSession(
@@ -550,16 +510,9 @@ export class PreAssessmentController {
               ),
               severityLevels: result.severityLevels,
               assessmentMethod: 'CHATBOT',
-              chatbotSessionId: dbSession.id,
-              conversationInsights: dbSession.conversationInsights,
             },
           );
         } else {
-          // User authenticated but no client profile - skip PreAssessment creation
-          // This can happen if:
-          // - User is a therapist/admin trying to test the chatbot
-          // - User account exists but client profile not yet created
-          // - Anonymous session (userId might be set from session but user not registered)
           this.logger.warn(
             `User ${userId} has no client profile, skipping PreAssessment creation. Session ${body.sessionId} will be linked later during registration.`,
           );
@@ -574,12 +527,9 @@ export class PreAssessmentController {
         structuredAnswers,
       );
 
-      // Session is already marked as complete by completeSession service method
-      // Return results (preAssessment is optional for anonymous sessions)
       return {
-        ...result,
-        answers, // Always include converted answers array for registration
-        ...(preAssessment && { preAssessment }),
+        success: true,
+        ...(userId ? {} : { sessionId: body.sessionId }),
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -727,9 +677,8 @@ export class PreAssessmentController {
     @Body() body: { sessionId: string },
     @CurrentUserId() userId: string,
   ): Promise<{
-    scores: Record<string, { score: number; severity: string }>;
-    severityLevels: Record<string, string>;
-    preAssessment: PreAssessment;
+    success: boolean;
+    message: string;
   }> {
     try {
       // Link the anonymous session to the user
@@ -762,15 +711,12 @@ export class PreAssessmentController {
           ),
           severityLevels: sessionData.severityLevels,
           assessmentMethod: 'CHATBOT',
-          chatbotSessionId: dbSession.id,
-          conversationInsights: sessionData.conversationInsights,
-        },
+        } as any,
       );
 
       return {
-        scores: sessionData.scores,
-        severityLevels: sessionData.severityLevels,
-        preAssessment,
+        success: true,
+        message: 'Session linked successfully',
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -786,13 +732,14 @@ export class PreAssessmentController {
   @HttpCode(HttpStatus.CREATED)
   async createAnonymousPreAssessment(
     @Body() body: { sessionId: string; data: CreatePreAssessmentDto },
-  ): Promise<PreAssessment> {
+  ): Promise<{ sessionId: string }> {
     try {
       this.logger.log(`Creating anonymous pre-assessment for session ${body.sessionId}`);
-      return await this.preAssessmentService.createAnonymousPreAssessment(
+      await this.preAssessmentService.createAnonymousPreAssessment(
         body.sessionId,
         body.data,
       );
+      return { sessionId: body.sessionId };
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : error,

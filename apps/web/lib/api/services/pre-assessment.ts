@@ -18,17 +18,7 @@ import { SuccessMessageResponse } from "@/types/auth";
  */
 export function createPreAssessmentService(client: AxiosInstance) {
   return {
-    // ================================
-    // QUESTIONNAIRE OPERATIONS
-    // ================================
-    /**
-     * Get available questionnaires
-     * GET /pre-assessment/questionnaires
-     */
-    async getQuestionnaires(): Promise<QuestionnaireDefinition[]> {
-      const response = await client.get("/pre-assessment/questionnaires");
-      return response.data;
-    },
+
 
     // ================================
     // PRE-ASSESSMENT OPERATIONS
@@ -78,71 +68,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
       return response.data;
     },
 
-    /**
-     * Update pre-assessment
-     * PUT /pre-assessment
-     */
-    async update(data: UpdatePreAssessmentDto): Promise<PreAssessment> {
-      const response = await client.put("/pre-assessment", data);
-      return response.data;
-    },
 
-    /**
-     * Update pre-assessment by ID (admin access)
-     * PUT /pre-assessment/:id
-     */
-    async updateById(id: string, data: UpdatePreAssessmentDto): Promise<PreAssessment> {
-      const response = await client.put(`/pre-assessment/${id}`, data);
-      return response.data;
-    },
-
-    /**
-     * Delete user's pre-assessment
-     * DELETE /pre-assessment
-     */
-    async delete(): Promise<SuccessMessageResponse> {
-      const response = await client.delete("/pre-assessment");
-      return response.data;
-    },
-
-    /**
-     * Delete pre-assessment by ID (admin access)
-     * DELETE /pre-assessment/:id
-     */
-    async deleteById(id: string): Promise<SuccessMessageResponse> {
-      const response = await client.delete(`/pre-assessment/${id}`);
-      return response.data;
-    },
-
-    /**
-     * List pre-assessments (admin access)
-     * GET /pre-assessment/list
-     */
-    async list(params?: PreAssessmentListParams): Promise<PreAssessmentListResponse> {
-      const response = await client.get("/pre-assessment/list", { params });
-      return response.data;
-    },
-
-    // ================================
-    // AI SERVICE OPERATIONS
-    // ================================
-    /**
-     * Get AI service health status
-     * GET /pre-assessment/ai-service/health
-     */
-    async getAIServiceHealth(): Promise<AIServiceHealthResponse> {
-      const response = await client.get("/pre-assessment/ai-service/health");
-      return response.data;
-    },
-
-    /**
-     * Reprocess pre-assessment with AI
-     * POST /pre-assessment/:id/reprocess
-     */
-    async reprocess(id: string, data?: ReprocessRequest): Promise<PreAssessment> {
-      const response = await client.post(`/pre-assessment/${id}/reprocess`, data);
-      return response.data;
-    },
 
     // ================================
     // CLINICAL ANALYSIS

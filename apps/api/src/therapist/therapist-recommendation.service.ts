@@ -148,15 +148,16 @@ export class TherapistRecommendationService {
         clinicalAnalysis = null;
       }
 
-      // Extract user conditions and AI evaluation data
+      // Extract user conditions from the new JSON structure
       const userConditions = this.extractUserConditions(latestPreAssessment);
-      const aiEvaluation = this.extractAiEvaluation(latestPreAssessment);
 
-      // Extract severity levels from the database field (not from answers)
-      const severityLevels = latestPreAssessment.severityLevels as Record<
-        string,
-        string
-      >;
+      const preAssessmentData = ((latestPreAssessment as any).data as any) || {};
+      const questionnaireScoresData = preAssessmentData.questionnaireScores || {};
+
+      // Extract severity levels from the new data field structure
+      const severityLevels = Object.fromEntries(
+        Object.entries(questionnaireScoresData).map(([key, val]: [string, any]) => [key, val.severity])
+      );
 
       // Enhanced therapist filtering based on clinical insights
       // FORGE: Filter by anxiety specialization to bypass AI calls
@@ -665,7 +666,7 @@ export class TherapistRecommendationService {
       ...client,
       preAssessment: latestPreAssessment,
     };
-    
+
     const compatibility = await this.compatibilityAnalysis.analyzeCompatibility(
       clientWithPreAssessment as any,
       therapist,
@@ -681,41 +682,18 @@ export class TherapistRecommendationService {
   ): Record<string, string> {
     const conditions: Record<string, string> = {};
 
-    // Extract data from the separate database fields (corrected approach)
-    const severityLevels = preAssessment.severityLevels as Record<
-      string,
-      string
-    >;
-    const scores = preAssessment.scores as Record<string, number>;
+    const data = ((preAssessment as any).data as any) || {};
+    const questionnaireScoresData = data.questionnaireScores || {};
 
-    if (severityLevels && scores) {
-      // Use questionnaire names from the scores object
-      Object.keys(scores).forEach((questionnaire) => {
-        if (severityLevels[questionnaire]) {
-          conditions[questionnaire] = severityLevels[questionnaire];
+    if (questionnaireScoresData) {
+      Object.entries(questionnaireScoresData).forEach(([questionnaire, value]: [string, any]) => {
+        if (value && value.severity) {
+          conditions[questionnaire] = value.severity;
         }
       });
     }
 
     return conditions;
-  }
-
-  /**
-   * Extract AI evaluation data from pre-assessment for enhanced matching
-   */
-  private extractAiEvaluation(preAssessment: PreAssessment): any {
-    const aiEstimate = preAssessment.aiEstimate as any;
-
-    if (!aiEstimate || typeof aiEstimate !== 'object') {
-      return null;
-    }
-
-    return {
-      confidence: aiEstimate.confidence || 0,
-      riskFactors: aiEstimate.risk_factors || [],
-      recommendations: aiEstimate.recommendations || [],
-      estimatedSeverity: aiEstimate.estimated_severity || {},
-    };
   }
 
   /**

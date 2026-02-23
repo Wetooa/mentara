@@ -48,37 +48,20 @@ export const LIST_OF_QUESTIONNAIRES = [
 ] as const;
 
 const QUESTIONNAIRE_INDEX_MAPPING: Record<string, QuestionnaireIndexRange> = {
-  Depression: { startIndex: 0, endIndex: 14, itemCount: 15 }, // PHQ
-  'ADD / ADHD': { startIndex: 15, endIndex: 32, itemCount: 18 }, // ASRS
-  'Substance or Alcohol Use Issues': {
-    startIndex: 33,
-    endIndex: 42,
-    itemCount: 10,
-  }, // AUDIT
-  'Binge eating / Eating disorders': {
-    startIndex: 43,
-    endIndex: 58,
-    itemCount: 16,
-  }, // BES
-  'Drug Issues': { startIndex: 59, endIndex: 68, itemCount: 10 }, // DAST10
-  Anxiety: { startIndex: 69, endIndex: 75, itemCount: 7 }, // GAD7
-  Insomnia: { startIndex: 76, endIndex: 82, itemCount: 7 }, // ISI
-  Burnout: { startIndex: 83, endIndex: 104, itemCount: 22 }, // MBI
-  'Bipolar disorder (BD)': { startIndex: 105, endIndex: 119, itemCount: 15 }, // MDQ
-  'Obsessive compulsive disorder (OCD)': {
-    startIndex: 120,
-    endIndex: 137,
-    itemCount: 18,
-  }, // OCI_R
-  'Post-traumatic stress disorder (PTSD)': {
-    startIndex: 138,
-    endIndex: 157,
-    itemCount: 20,
-  }, // PCL5
-  Panic: { startIndex: 158, endIndex: 164, itemCount: 7 }, // PDSS
-  'Depression Secondary': { startIndex: 165, endIndex: 173, itemCount: 9 }, // PHQ9
-  Stress: { startIndex: 174, endIndex: 183, itemCount: 10 }, // PSS
-  'Social anxiety': { startIndex: 184, endIndex: 200, itemCount: 17 }, // SPIN
+  Depression: { startIndex: 0, endIndex: 8, itemCount: 9 },
+  'ADD / ADHD': { startIndex: 9, endIndex: 26, itemCount: 18 },
+  'Substance or Alcohol Use Issues': { startIndex: 27, endIndex: 36, itemCount: 10 },
+  'Binge eating / Eating disorders': { startIndex: 37, endIndex: 52, itemCount: 16 },
+  'Drug Issues': { startIndex: 53, endIndex: 62, itemCount: 10 },
+  Anxiety: { startIndex: 63, endIndex: 69, itemCount: 7 },
+  Insomnia: { startIndex: 70, endIndex: 76, itemCount: 7 },
+  Burnout: { startIndex: 77, endIndex: 98, itemCount: 22 },
+  'Bipolar disorder (BD)': { startIndex: 99, endIndex: 113, itemCount: 15 },
+  'Obsessive compulsive disorder (OCD)': { startIndex: 114, endIndex: 131, itemCount: 18 },
+  'Post-traumatic stress disorder (PTSD)': { startIndex: 132, endIndex: 151, itemCount: 20 },
+  Panic: { startIndex: 152, endIndex: 158, itemCount: 7 },
+  Stress: { startIndex: 159, endIndex: 168, itemCount: 10 },
+  'Social anxiety': { startIndex: 169, endIndex: 185, itemCount: 17 },
 };
 
 // Questionnaire scoring configurations
@@ -103,10 +86,11 @@ export const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
   Depression: {
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
-      none: { range: [0, 0], label: 'No Phobia' },
-      mildModerate: { range: [1, 15], label: 'Mild-Moderate' },
-      moderateSevere: { range: [16, 25], label: 'Moderate-Severe' },
-      verySevere: { range: [26, 120], label: 'Very Severe' },
+      minimal: { range: [0, 4], label: 'Minimal' },
+      mild: { range: [5, 9], label: 'Mild' },
+      moderate: { range: [10, 14], label: 'Moderate' },
+      moderatelySevere: { range: [15, 19], label: 'Moderately Severe' },
+      severe: { range: [20, 27], label: 'Severe' },
     },
   },
   Insomnia: {
@@ -210,16 +194,7 @@ export const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
       severe: { range: [9, 10], label: 'Severe Level' },
     },
   },
-  'Depression Secondary': {
-    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
-    severityLevels: {
-      minimal: { range: [0, 4], label: 'Minimal' },
-      mild: { range: [5, 9], label: 'Mild' },
-      moderate: { range: [10, 14], label: 'Moderate' },
-      moderatelySevere: { range: [15, 19], label: 'Moderately Severe' },
-      severe: { range: [20, 27], label: 'Severe' },
-    },
-  },
+
 };
 
 export function calculateQuestionnaireScore(
@@ -342,8 +317,8 @@ export function calculateQuestionnaireScore(
 export function calculateAllScoresFromFlatArray(
   flatAnswers: number[],
 ): QuestionnaireScores {
-  if (flatAnswers.length !== 201) {
-    throw new Error(`Expected 201 responses, got ${flatAnswers.length}`);
+  if (flatAnswers.length !== 186) {
+    throw new Error(`Expected 186 responses, got ${flatAnswers.length}`);
   }
 
   const scores: QuestionnaireScores = {};

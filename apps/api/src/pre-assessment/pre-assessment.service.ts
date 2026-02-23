@@ -11,7 +11,7 @@ import {
   LIST_OF_QUESTIONNAIRES,
 } from './pre-assessment.utils';
 import { PreAssessment } from '@prisma/client';
-import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
+import { CreatePreAssessmentDto, UpdatePreAssessmentDto } from './types/pre-assessment.dto';
 import { AiServiceClient } from './services/ai-service.client';
 import { ClinicalInsightsService } from './analysis/clinical-insights.service';
 import { TherapeuticRecommendationsService } from './analysis/therapeutic-recommendations.service';
@@ -27,6 +27,37 @@ export class PreAssessmentService {
     private readonly clinicalInsightsService: ClinicalInsightsService,
     private readonly therapeuticRecommendationsService: TherapeuticRecommendationsService,
   ) { }
+
+  /**
+   * Format pre-assessment result to match the requested output structure
+   */
+  public formatPreAssessmentResults(assessment: PreAssessment): any {
+    const data = ((assessment as any).data as any) || {};
+    const context = ((assessment as any).context as any) || {};
+
+    const results: any = {
+      assessmentId: assessment.id,
+      method: (assessment as any).method,
+      completedAt: assessment.createdAt,
+      data: {
+        questionnaireScores: data.questionnaireScores || {},
+      },
+    };
+
+    if ((assessment as any).method === 'CHATBOT') {
+      results.data.documents = {
+        soapAnalysisUrl: (assessment as any).soapAnalysisUrl || null,
+        conversationHistoryUrl: (assessment as any).conversationHistoryUrl || null,
+      };
+      results.context = {
+        pastTherapyExperiences: context.pastTherapyExperiences || [],
+        medicationHistory: context.medicationHistory || [],
+        accessibilityNeeds: context.accessibilityNeeds || [],
+      };
+    }
+
+    return { results };
+  }
 
   /**
    * Generate realistic mock AI evaluation based on user's assessment scores
@@ -320,14 +351,25 @@ export class PreAssessmentService {
       const createData: any = {
         clientId: userId,
         answers: data.answers, // Flat array of 201 numeric responses
-        scores, // Assessment scale scores
-        severityLevels, // Severity classifications
-        aiEstimate, // AI analysis results
-        isProcessed: true, // Mark as processed
-        processedAt: new Date(), // Set processing timestamp
-        ...(data.assessmentMethod && { assessmentMethod: data.assessmentMethod }),
-        ...(data.chatbotSessionId && { chatbotSessionId: data.chatbotSessionId }),
-        ...(data.conversationInsights && { conversationInsights: data.conversationInsights }),
+        method: data.assessmentMethod || 'CHECKLIST',
+        data: {
+          questionnaireScores: Object.fromEntries(
+            Object.entries(scores).map(([key, value]) => [
+              key,
+              {
+                score: value,
+                severity: severityLevels[key] || 'Unknown',
+              },
+            ]),
+          ),
+        },
+        soapAnalysisUrl: data.soapAnalysisUrl || null,
+        conversationHistoryUrl: data.conversationHistoryUrl || null,
+        context: {
+          pastTherapyExperiences: data.pastTherapyExperiences || [],
+          medicationHistory: data.medicationHistory || [],
+          accessibilityNeeds: data.accessibilityNeeds || [],
+        },
       };
 
       let preAssessment: PreAssessment;
@@ -432,12 +474,25 @@ export class PreAssessmentService {
       const createData: any = {
         sessionId,
         answers: data.answers, // Flat array of 201 numeric responses
-        scores, // Assessment scale scores
-        severityLevels, // Severity classifications
-        aiEstimate: {}, // Empty AI estimate
-        isProcessed: true, // Mark as processed
-        processedAt: new Date(), // Set processing timestamp
-        ...(data.assessmentMethod && { assessmentMethod: data.assessmentMethod })
+        method: data.assessmentMethod || 'CHECKLIST',
+        data: {
+          questionnaireScores: Object.fromEntries(
+            Object.entries(scores).map(([key, value]) => [
+              key,
+              {
+                score: value,
+                severity: severityLevels[key] || 'Unknown',
+              },
+            ]),
+          ),
+        },
+        soapAnalysisUrl: data.soapAnalysisUrl || null,
+        conversationHistoryUrl: data.conversationHistoryUrl || null,
+        context: {
+          pastTherapyExperiences: data.pastTherapyExperiences || [],
+          medicationHistory: data.medicationHistory || [],
+          accessibilityNeeds: data.accessibilityNeeds || [],
+        },
       };
 
       // Check if session already exists
@@ -573,25 +628,13 @@ export class PreAssessmentService {
         throw new NotFoundException('Pre-assessment not found');
       }
 
-      return preAssessment;
+      return this.formatPreAssessmentResults(preAssessment);
     } catch (error: unknown) {
       this.handleError(error, 'Error retrieving pre-assessment');
     }
   }
 
-  async getAllPreAssessmentsByUserId(userId: string): Promise<PreAssessment[]> {
-    try {
-      const assessments = await this.prisma.preAssessment.findMany({
-        where: { clientId: userId },
-        orderBy: { createdAt: 'desc' },
-      });
 
-      return assessments;
-    } catch (error: unknown) {
-      this.handleError(error, 'Error retrieving pre-assessment history');
-      return [];
-    }
-  }
 
   async getLatestPreAssessmentByUserId(userId: string): Promise<PreAssessment | null> {
     try {
@@ -600,7 +643,7 @@ export class PreAssessmentService {
         orderBy: { createdAt: 'desc' },
       });
 
-      return preAssessment;
+      return preAssessment ? this.formatPreAssessmentResults(preAssessment) : null;
     } catch (error: unknown) {
       this.logger.error('Error retrieving latest pre-assessment:', error);
       return null;
@@ -620,7 +663,7 @@ export class PreAssessmentService {
         throw new NotFoundException('Pre-assessment not found');
       }
 
-      return preAssessment;
+      return this.formatPreAssessmentResults(preAssessment);
     } catch (error: unknown) {
       this.handleError(error, 'Error retrieving pre-assessment');
     }
@@ -642,103 +685,7 @@ export class PreAssessmentService {
     );
   }
 
-  async updatePreAssessment(
-    userId: string,
-    data: Partial<CreatePreAssessmentDto>,
-  ): Promise<PreAssessment> {
-    try {
-      const client = await this.prisma.client.findUnique({
-        where: { userId: userId },
-      });
-      if (!client) {
-        throw new NotFoundException('Client not found');
-      }
 
-      // Get latest existing pre-assessment to preserve current data
-      const existingAssessment = await this.prisma.preAssessment.findFirst({
-        where: { clientId: userId },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      if (!existingAssessment) {
-        throw new NotFoundException('Pre-assessment not found');
-      }
-
-      // Extract current data from existing assessment
-      const currentScores =
-        (existingAssessment.scores as Record<string, number>) || {};
-      const currentSeverityLevels =
-        (existingAssessment.severityLevels as Record<string, string>) || {};
-      const currentAiEstimate =
-        (existingAssessment.aiEstimate as Record<string, boolean>) || {};
-
-      let scores: Record<string, number>;
-      let severityLevels: Record<string, string>;
-      let aiEstimate: Record<string, boolean> = currentAiEstimate;
-
-      if (data.scores && this.isValidScores(data.scores)) {
-        scores = data.scores;
-      } else {
-        scores = currentScores;
-      }
-
-      if (
-        data.severityLevels &&
-        this.isValidSeverityLevels(data.severityLevels)
-      ) {
-        severityLevels = data.severityLevels;
-      } else {
-        severityLevels = currentSeverityLevels;
-      }
-
-      // Recalculate scores if new answers provided
-      if (data.answers && (!data.scores || !data.severityLevels)) {
-        this.validateFlatAnswers(data.answers);
-
-        const result = processPreAssessmentAnswers(data.answers);
-        scores = result.scores;
-        severityLevels = result.severityLevels;
-
-        // Attempt to get new AI estimate if answers changed
-        try {
-          const aiResult = await this.getAiEstimate(data.answers, scores, severityLevels);
-          if (aiResult) {
-            aiEstimate = aiResult;
-          }
-        } catch (aiError) {
-          this.logger.warn('AI evaluation generation failed during update:', aiError);
-        }
-      }
-
-      // Update the latest pre-assessment with new data
-      const preAssessment = await this.prisma.preAssessment.update({
-        where: { id: existingAssessment.id },
-        data: {
-          answers: data.answers || (existingAssessment.answers as number[]),
-          scores,
-          severityLevels,
-          aiEstimate,
-        },
-      });
-
-      return preAssessment;
-    } catch (error: unknown) {
-      this.handleError(error, 'Error updating pre-assessment');
-    }
-  }
-
-  async deletePreAssessment(userId: string): Promise<null> {
-    try {
-      // Delete all pre-assessments for the user (or just the latest one if we want to keep history)
-      // For now, delete all to match the old behavior
-      await this.prisma.preAssessment.deleteMany({
-        where: { clientId: userId },
-      });
-      return null;
-    } catch (error: unknown) {
-      this.handleError(error, 'Error deleting pre-assessment');
-    }
-  }
 
   /**
    * Generate comprehensive clinical analysis from pre-assessment data
@@ -806,13 +753,13 @@ export class PreAssessmentService {
 
       // Extract data from the separate database fields (correct approach)
       const flatAnswers = preAssessment.answers as number[];
-      const scores = preAssessment.scores as Record<string, number>;
-      const severityLevels = preAssessment.severityLevels as Record<string, string>;
+      const data = ((preAssessment as any).data as any) || {};
+      const questionnaireScoresData = data.questionnaireScores || {};
 
       // Use the questionnaire list from utils
       const questionnaires = [...LIST_OF_QUESTIONNAIRES] as string[];
 
-      if (!flatAnswers || !scores || !severityLevels) {
+      if (!flatAnswers || !questionnaireScoresData) {
         throw new BadRequestException('Invalid pre-assessment data structure');
       }
 
@@ -820,10 +767,10 @@ export class PreAssessmentService {
       const questionnaireScores: QuestionnaireScores = {};
 
       questionnaires.forEach((questionnaire) => {
-        if (scores[questionnaire] !== undefined) {
+        if (questionnaireScoresData[questionnaire] !== undefined) {
           questionnaireScores[questionnaire] = {
-            score: scores[questionnaire],
-            severity: severityLevels[questionnaire] || 'Unknown',
+            score: (questionnaireScoresData[questionnaire] as any).score,
+            severity: (questionnaireScoresData[questionnaire] as any).severity || 'Unknown',
           };
         }
       });

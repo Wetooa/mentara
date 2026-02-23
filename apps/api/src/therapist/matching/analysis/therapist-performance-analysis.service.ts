@@ -24,7 +24,7 @@ export interface TherapistPerformanceAnalysis {
 export class TherapistPerformanceAnalysisService {
   private readonly logger = new Logger(TherapistPerformanceAnalysisService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Analyze therapist performance comprehensively
@@ -438,14 +438,20 @@ export class TherapistPerformanceAnalysisService {
         where: { clientId: rel.clientId },
         orderBy: { createdAt: 'desc' },
         select: {
-          severityLevels: true,
+          data: true,
         },
       });
 
       if (!preAssessment) continue;
 
-      const severityLevels = preAssessment.severityLevels as Record<string, string> | null;
-      if (!severityLevels) continue;
+      const preAssessmentData = ((preAssessment as any).data as any) || {};
+      const questionnaireScoresData = preAssessmentData.questionnaireScores || {};
+
+      if (Object.keys(questionnaireScoresData).length === 0) continue;
+
+      const severityLevels = Object.fromEntries(
+        Object.entries(questionnaireScoresData).map(([key, val]: [string, any]) => [key, val.severity])
+      );
 
       // Check if client is making progress (has multiple sessions, journals, worksheets)
       const sessionCount = await this.prisma.meeting.count({
@@ -557,10 +563,10 @@ export class TherapistPerformanceAnalysisService {
 
     return Math.round(
       retentionScore +
-        progressScore +
-        utilizationScore +
-        attendanceScore +
-        capacityScore,
+      progressScore +
+      utilizationScore +
+      attendanceScore +
+      capacityScore,
     );
   }
 }

@@ -118,8 +118,8 @@ export class CompatibilityAnalysisService {
 
     const overallCompatibility = Math.round(
       communicationStyle * 0.4 +
-        personalityMatch * 0.4 +
-        culturalCompatibility * 0.2,
+      personalityMatch * 0.4 +
+      culturalCompatibility * 0.2,
     );
 
     return {
@@ -365,9 +365,9 @@ export class CompatibilityAnalysisService {
 
     const overallCompatibility = Math.round(
       formatMatch * 0.3 +
-        durationMatch * 0.2 +
-        frequencyMatch * 0.2 +
-        schedulingCompatibility * 0.3,
+      durationMatch * 0.2 +
+      frequencyMatch * 0.2 +
+      schedulingCompatibility * 0.3,
     );
 
     return {
@@ -472,9 +472,9 @@ export class CompatibilityAnalysisService {
 
     const overallCompatibility = Math.round(
       ageCompatibility * 0.2 +
-        genderCompatibility * 0.3 +
-        languageCompatibility * 0.3 +
-        culturalCompatibility * 0.2,
+      genderCompatibility * 0.3 +
+      languageCompatibility * 0.3 +
+      culturalCompatibility * 0.2,
     );
 
     return {
@@ -549,8 +549,8 @@ export class CompatibilityAnalysisService {
   ): number {
     return Math.round(
       personality.overallCompatibility * 0.4 +
-        session.overallCompatibility * 0.3 +
-        demographic.overallCompatibility * 0.3,
+      session.overallCompatibility * 0.3 +
+      demographic.overallCompatibility * 0.3,
     );
   }
 
@@ -615,9 +615,13 @@ export class CompatibilityAnalysisService {
    * Returns empty object if neither exists.
    */
   private getSeverityLevels(assessment: PreAssessment): Record<string, string> {
-    // Try direct field first (correct location)
-    if (assessment.severityLevels) {
-      return assessment.severityLevels as Record<string, string>;
+    const data = ((assessment as any).data as any) || {};
+    const questionnaireScoresData = data.questionnaireScores || {};
+
+    if (Object.keys(questionnaireScoresData).length > 0) {
+      return Object.fromEntries(
+        Object.entries(questionnaireScoresData).map(([key, val]: [string, any]) => [key, val.severity])
+      );
     }
 
     // Fallback to nested in answers (backward compatibility)

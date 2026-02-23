@@ -101,11 +101,21 @@ export class ClientAuthService {
           data: {
             clientId: user.id,
             answers: registerDto.preassessmentAnswers, // Flat array of 201 responses
-            scores, // Calculated scores by questionnaire
-            severityLevels, // Severity classifications
-            aiEstimate: aiEvaluationData as any, // Realistic AI evaluation data - cast to satisfy Prisma JSON type
-            isProcessed: true, // Mark as processed since we calculated scores
-            processedAt: new Date(),
+            data: {
+              questionnaireScores: Object.fromEntries(
+                Object.entries(scores).map(([key, value]) => [
+                  key,
+                  {
+                    score: value,
+                    severity: severityLevels[key] || 'Unknown',
+                  },
+                ])
+              ),
+              documents: {
+                soapAnalysisUrl: null,
+                conversationHistoryUrl: null,
+              },
+            } as any,
           },
         });
       }
