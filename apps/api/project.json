@@ -15,21 +15,21 @@
             ],
             "options": {
                 "command": "nest build",
-                "cwd": "apps/api"
+                "cwd": "."
             }
         },
         "dev": {
             "executor": "nx:run-commands",
             "options": {
                 "command": "nest start --watch",
-                "cwd": "apps/api"
+                "cwd": "."
             }
         },
         "start": {
             "executor": "nx:run-commands",
             "options": {
                 "command": "node -r tsconfig-paths/register dist/src/main.js",
-                "cwd": "apps/api"
+                "cwd": "."
             }
         },
         "test": {
