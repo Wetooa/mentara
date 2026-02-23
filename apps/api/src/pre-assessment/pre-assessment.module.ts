@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { PreAssessmentController } from './pre-assessment.controller';
 import { PreAssessmentService } from './pre-assessment.service';
 import { AiServiceClient } from './services/ai-service.client';
@@ -17,7 +18,7 @@ import { ClinicalInsightsService } from './analysis/clinical-insights.service';
 import { TherapeuticRecommendationsService } from './analysis/therapeutic-recommendations.service';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, HttpModule],
   controllers: [PreAssessmentController],
   providers: [
     PreAssessmentService,
@@ -50,4 +51,4 @@ import { TherapeuticRecommendationsService } from './analysis/therapeutic-recomm
     TherapeuticRecommendationsService,
   ],
 })
-export class PreAssessmentModule {}
+export class PreAssessmentModule { }

@@ -14,7 +14,10 @@ import {
   Logger,
   ForbiddenException,
   NotFoundException,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { PreAssessmentService } from './pre-assessment.service';
 import { AiServiceClient } from './services/ai-service.client';
 import { GeminiClientService } from './services/gemini-client.service';
@@ -233,7 +236,6 @@ export class PreAssessmentController {
 
   // ========== AUTHENTICATED ROUTES ==========
 
-  @Public()
   @Post('chatbot/start')
   @HttpCode(HttpStatus.CREATED)
   async startChatbotSession(
@@ -251,7 +253,6 @@ export class PreAssessmentController {
     }
   }
 
-  @Public()
   @Post('chatbot/message')
   @HttpCode(HttpStatus.OK)
   async sendChatbotMessage(
@@ -303,7 +304,6 @@ export class PreAssessmentController {
     }
   }
 
-  @Public()
   @Post('chatbot/answer')
   @HttpCode(HttpStatus.OK)
   async submitStructuredAnswer(
@@ -351,7 +351,6 @@ export class PreAssessmentController {
     }
   }
 
-  @Public()
   @Post('chatbot/submit-questionnaire')
   @HttpCode(HttpStatus.OK)
   async submitQuestionnaireForm(
@@ -446,7 +445,6 @@ export class PreAssessmentController {
     }
   }
 
-  @Public()
   @Post('chatbot/complete')
   @HttpCode(HttpStatus.OK)
   async completeChatbotSession(
@@ -497,18 +495,30 @@ export class PreAssessmentController {
             structuredAnswers,
           );
 
+          // Safely extract scores and severity levels from Flask's new results structure
+          const questionnaireScores = result?.data?.questionnaireScores || result?.scores || {};
+
+          const parsedScores = Object.fromEntries(
+            Object.entries(questionnaireScores).map(([key, value]: [string, any]) => [
+              key,
+              value?.score ?? value,
+            ])
+          );
+
+          const parsedSeverities = Object.fromEntries(
+            Object.entries(questionnaireScores).map(([key, value]: [string, any]) => [
+              key,
+              value?.severity ?? 'unknown',
+            ])
+          );
+
           // Save results to database with chatbot session link
           preAssessment = await this.preAssessmentService.createPreAssessment(
             userId,
             {
               answers,
-              scores: Object.fromEntries(
-                Object.entries(result.scores).map(([key, value]) => [
-                  key,
-                  value.score,
-                ]),
-              ),
-              severityLevels: result.severityLevels,
+              scores: parsedScores,
+              severityLevels: parsedSeverities,
               assessmentMethod: 'CHATBOT',
             },
           );
@@ -585,6 +595,32 @@ export class PreAssessmentController {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : error,
       );
+    }
+  }
+
+  @Get('chatbot/session/:sessionId/pdf/summary')
+  @HttpCode(HttpStatus.OK)
+  async getSummaryPdf(
+    @Param('sessionId') sessionId: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    try {
+      return await this.chatbotService.getPdfStream(sessionId, 'summary', res);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to generate summary PDF');
+    }
+  }
+
+  @Get('chatbot/session/:sessionId/pdf/history')
+  @HttpCode(HttpStatus.OK)
+  async getHistoryPdf(
+    @Param('sessionId') sessionId: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    try {
+      return await this.chatbotService.getPdfStream(sessionId, 'history', res);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to generate history PDF');
     }
   }
 
@@ -727,7 +763,6 @@ export class PreAssessmentController {
 
   // ========== ANONYMOUS ROUTES ==========
 
-  @Public()
   @Post('anonymous')
   @HttpCode(HttpStatus.CREATED)
   async createAnonymousPreAssessment(

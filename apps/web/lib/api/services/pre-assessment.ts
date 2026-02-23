@@ -216,10 +216,8 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * POST /pre-assessment/chatbot/complete
      */
     async completeChatbotSession(sessionId: string): Promise<{
-      scores: Record<string, { score: number; severity: string }>;
-      severityLevels: Record<string, string>;
-      answers?: number[]; // Converted answers array for registration
-      preAssessment?: PreAssessment;
+      success: boolean;
+      sessionId?: string;
     }> {
       const response = await client.post("/pre-assessment/chatbot/complete", {
         sessionId,
