@@ -38,7 +38,6 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { EventBusService } from './common/events/event-bus.service';
 import { CommonModule } from './common/common.module';
-import { CacheModule } from './cache/cache.module';
 import { JwtAuthGuard } from './auth/core/guards/jwt-auth.guard';
 import { SecurityGuard } from './common/guards/security.guard';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
@@ -84,7 +83,6 @@ import { ResponseTransformInterceptor } from './common/interceptors/response-tra
       verboseMemoryLeak: false,
     }),
     CommonModule,
-    CacheModule,
     AuthModule,
     UsersModule,
     CommunitiesModule,

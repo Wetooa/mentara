@@ -153,12 +153,63 @@ export const RegisterTherapistDtoSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters long"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  bio: z.string().min(10, "Bio must be at least 10 characters"),
-  specializations: z.array(z.string()).min(1, "At least one specialization is required"),
-  credentials: z.array(z.string()).min(1, "At least one credential is required"),
-  experience: z.number().min(0, "Experience cannot be negative"),
-  languages: z.array(z.string()).min(1, "At least one language is required"),
-  hourlyRate: z.number().min(0, "Hourly rate cannot be negative").optional(),
+  middleName: z.string().optional(),
+  
+  mobile: z.string().min(1, "Mobile number is required"),
+  province: z.string().min(1, "Province is required"),
+  timezone: z.string().optional(),
+  providerType: z.string().min(1, "Provider type is required"),
+  professionalLicenseType: z.string().min(1, "Professional license type is required"),
+  professionalLicenseType_specify: z.string().optional(),
+  isPRCLicensed: z.string().min(1, "PRC licensing status is required"),
+  prcLicenseNumber: z.string().min(1, "PRC license number is required"),
+  expirationDateOfLicense: z.string().min(1, "Expiration date of license is required"),
+  practiceStartDate: z.string().min(1, "Practice start date is required"),
+  
+  certifications: z.any().optional(),
+  certificateUrls: z.array(z.string()).optional(),
+  certificateNames: z.array(z.string()).optional(),
+  licenseUrls: z.array(z.string()).optional(),
+  licenseNames: z.array(z.string()).optional(),
+  documentUrls: z.array(z.string()).optional(),
+  documentNames: z.array(z.string()).optional(),
+  
+  yearsOfExperience: z.number().min(0).optional(),
+  educationBackground: z.string().optional(),
+  specialCertifications: z.array(z.string()).optional(),
+  practiceLocation: z.string().optional(),
+  
+  acceptsInsurance: z.boolean().optional(),
+  acceptedInsuranceTypes: z.array(z.string()).optional(),
+  
+  areasOfExpertise: z.array(z.string()).optional(),
+  assessmentTools: z.array(z.string()).optional(),
+  therapeuticApproachesUsedList: z.array(z.string()).optional(),
+  therapeuticApproachesUsedList_specify: z.array(z.string()).optional(),
+  
+  languagesOffered: z.array(z.string()).optional(),
+  languagesOffered_specify: z.string().optional(),
+  
+  providedOnlineTherapyBefore: z.string().min(1, "This field is required"),
+  comfortableUsingVideoConferencing: z.string().min(1, "This field is required"),
+  
+  preferredSessionLength: z.array(z.number()).min(1, "Preferred session length is required"),
+  preferredSessionLength_specify: z.string().optional(),
+  
+  privateConfidentialSpace: z.string().optional(),
+  compliesWithDataPrivacyAct: z.string().min(1, "Compliance with Data Privacy Act is required"),
+  professionalLiabilityInsurance: z.string().optional(),
+  complaintsOrDisciplinaryActions: z.string().optional(),
+  willingToAbideByPlatformGuidelines: z.string().min(1, "Willingness to abide by guidelines is required"),
+  
+  expertise: z.array(z.string()).optional(),
+  approaches: z.array(z.array(z.string())).optional().or(z.array(z.string()).optional()), // Flexible for now
+  languages: z.array(z.string()).optional(),
+  illnessSpecializations: z.array(z.string()).optional(),
+  acceptTypes: z.array(z.string()).optional(),
+  treatmentSuccessRates: z.any().optional(),
+  sessionLength: z.string().min(1, "Session length is required"),
+  hourlyRate: z.number().min(0, "Hourly rate is required"),
 });
 
 // Session Management Schemas

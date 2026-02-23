@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
-import { CacheService } from '../../cache/cache.service';
-
 export interface SchedulingSuggestion {
   therapistId: string;
   suggestedTimes: Array<{
@@ -29,7 +27,6 @@ export class SmartSchedulingService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cache: CacheService,
   ) {}
 
   /**
@@ -41,16 +38,6 @@ export class SmartSchedulingService {
     preferredTimes?: Array<{ start: Date; end: Date }>,
     duration: number = 60,
   ): Promise<SchedulingSuggestion> {
-    const cacheKey = this.cache.generateKey(
-      'scheduling-suggestions',
-      therapistId,
-      clientId,
-      duration,
-    );
-    const cached = await this.cache.get<SchedulingSuggestion>(cacheKey);
-    if (cached) {
-      return cached;
-    }
 
     // Get therapist availability
     const availabilities = await this.prisma.therapistAvailability.findMany({
@@ -175,9 +162,6 @@ export class SmartSchedulingService {
       therapistId,
       suggestedTimes: topSuggestions,
     };
-
-    // Cache for 1 hour
-    await this.cache.set(cacheKey, result, 3600);
 
     return result;
   }

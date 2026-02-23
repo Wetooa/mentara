@@ -1,7 +1,6 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { CacheService } from '../cache/cache.service';
 import { AnalyticsService } from '../analytics/analytics.service';
 
 /**
@@ -14,7 +13,6 @@ export class AnalyticsComputationJob {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cache: CacheService,
     @Inject(forwardRef(() => AnalyticsService))
     private readonly analyticsService: AnalyticsService,
   ) {}
@@ -55,10 +53,6 @@ export class AnalyticsComputationJob {
               range.start,
               range.end,
             );
-
-            // Cache the result for 30 minutes
-            const cacheKey = this.cache.generateKey('analytics', 'platform', range.name);
-            await this.cache.set(cacheKey, analytics, 1800); // 30 minutes TTL
 
             return { range: range.name, success: true };
           } catch (error) {
@@ -109,9 +103,6 @@ export class AnalyticsComputationJob {
               range.end,
             );
 
-            // Cache the result for 2 hours
-            const cacheKey = this.cache.generateKey('analytics', 'user-growth', range.name);
-            await this.cache.set(cacheKey, growthStats, 7200); // 2 hours TTL
 
             return { range: range.name, success: true };
           } catch (error) {

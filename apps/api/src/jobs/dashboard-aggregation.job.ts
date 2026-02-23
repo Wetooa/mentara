@@ -1,7 +1,6 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { CacheService } from '../cache/cache.service';
 import { DashboardService } from '../dashboard/dashboard.service';
 
 /**
@@ -14,7 +13,6 @@ export class DashboardAggregationJob {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cache: CacheService,
     @Inject(forwardRef(() => DashboardService))
     private readonly dashboardService: DashboardService,
   ) {}
@@ -53,10 +51,6 @@ export class DashboardAggregationJob {
             const dashboardData = await this.dashboardService.getClientDashboardData(
               client.userId,
             );
-
-            // Cache the result for 10 minutes
-            const cacheKey = this.cache.generateKey('dashboard', 'client', client.userId);
-            await this.cache.set(cacheKey, dashboardData, 600); // 10 minutes TTL
 
             return { userId: client.userId, success: true };
           } catch (error) {
@@ -115,10 +109,6 @@ export class DashboardAggregationJob {
             const dashboardData = await this.dashboardService.getTherapistDashboardData(
               therapist.userId,
             );
-
-            // Cache the result for 10 minutes
-            const cacheKey = this.cache.generateKey('dashboard', 'therapist', therapist.userId);
-            await this.cache.set(cacheKey, dashboardData, 600); // 10 minutes TTL
 
             return { userId: therapist.userId, success: true };
           } catch (error) {

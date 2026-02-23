@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { CacheService } from '../cache/cache.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 export interface UserPresence {
@@ -18,7 +17,6 @@ export class PresenceService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cache: CacheService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -34,8 +32,6 @@ export class PresenceService {
       status: 'available',
     };
 
-    const cacheKey = this.cache.generateKey('presence', userId);
-    await this.cache.set(cacheKey, presence, this.PRESENCE_TTL);
 
     // Emit presence event
     this.eventEmitter.emit('user.online', { userId, sessionId });
@@ -56,8 +52,6 @@ export class PresenceService {
       status: undefined,
     };
 
-    const cacheKey = this.cache.generateKey('presence', userId);
-    await this.cache.set(cacheKey, updatedPresence, this.PRESENCE_TTL * 2); // Keep offline status longer
 
     // Emit presence event
     this.eventEmitter.emit('user.offline', { userId });
@@ -73,8 +67,6 @@ export class PresenceService {
     
     if (presence) {
       presence.lastSeenAt = new Date();
-      const cacheKey = this.cache.generateKey('presence', userId);
-      await this.cache.set(cacheKey, presence, this.PRESENCE_TTL);
     } else {
       // If no presence record, create one as offline
       await this.markOffline(userId);
@@ -92,8 +84,6 @@ export class PresenceService {
     
     if (presence) {
       presence.status = status;
-      const cacheKey = this.cache.generateKey('presence', userId);
-      await this.cache.set(cacheKey, presence, this.PRESENCE_TTL);
       
       this.eventEmitter.emit('user.status.changed', { userId, status });
     }
@@ -103,13 +93,7 @@ export class PresenceService {
    * Get user presence
    */
   async getPresence(userId: string): Promise<UserPresence | null> {
-    const cacheKey = this.cache.generateKey('presence', userId);
-    const cached = await this.cache.get<UserPresence>(cacheKey);
     
-    if (cached) {
-      return cached;
-    }
-
     // If not in cache, check database for last activity
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -134,16 +118,6 @@ export class PresenceService {
   async getBulkPresence(userIds: string[]): Promise<Map<string, UserPresence>> {
     const presenceMap = new Map<string, UserPresence>();
     
-    // Try to get from cache first
-    const cachePromises = userIds.map(async (userId) => {
-      const cacheKey = this.cache.generateKey('presence', userId);
-      const cached = await this.cache.get<UserPresence>(cacheKey);
-      if (cached) {
-        presenceMap.set(userId, cached);
-      }
-    });
-
-    await Promise.all(cachePromises);
 
     // For users not in cache, fetch from database
     const missingUserIds = userIds.filter((id) => !presenceMap.has(id));
@@ -180,12 +154,6 @@ export class PresenceService {
   async getOnlineUsersCount(): Promise<number> {
     // This would require Redis SCAN or a separate set of online user IDs
     // For now, return cached count or estimate
-    const cacheKey = this.cache.generateKey('presence', 'stats', 'online-count');
-    const cached = await this.cache.get<number>(cacheKey);
-    
-    if (cached !== undefined) {
-      return cached;
-    }
 
     // Fallback: return 0 if not cached
     return 0;

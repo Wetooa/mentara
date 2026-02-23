@@ -129,37 +129,64 @@ export interface RegisterTherapistDto {
   password: string;
   firstName: string;
   lastName: string;
-  bio: string;
-  specializations: string[];
-  credentials: string[];
-  experience: number;
-  languages: string[];
-  hourlyRate?: number;
+  middleName?: string;
+  
+  // Therapist profile info
   mobile: string;
   province: string;
+  timezone?: string;
   providerType: string;
-  professionalLicenseType_specify?: string;
   professionalLicenseType: string;
-  isPRCLicensed: string; // Changed to string to match usage
-  prcLicenseNumber?: string;
+  professionalLicenseType_specify?: string;
+  isPRCLicensed: string; 
+  prcLicenseNumber: string;
   expirationDateOfLicense: string; // ISO date string
   practiceStartDate: string; // ISO date string
-  preferredSessionLength_specify?: string;
-  preferredSessionLength: string;
-  providedOnlineTherapyBefore: string; // Changed to string to match usage
-  comfortableUsingVideoConferencing: string; // Changed to string to match usage
-  compliesWithDataPrivacyAct: string; // Changed to string to match usage
-  willingToAbideByPlatformGuidelines: string; // Changed to string to match usage
-  areasOfExpertise: string[];
-  assessmentTools: string[];
-  therapeuticApproachesUsedList: string[];
+  
+  certifications?: any;
+  certificateUrls?: string[];
+  certificateNames?: string[];
+  licenseUrls?: string[];
+  licenseNames?: string[];
+  documentUrls?: string[];
+  documentNames?: string[];
+  
+  yearsOfExperience?: number;
+  educationBackground?: string;
+  specialCertifications?: string[];
+  practiceLocation?: string;
+  
+  acceptsInsurance?: boolean;
+  acceptedInsuranceTypes?: string[];
+  
+  areasOfExpertise?: string[];
+  assessmentTools?: string[];
+  therapeuticApproachesUsedList?: string[];
   therapeuticApproachesUsedList_specify?: string[];
-  languagesOffered: string[];
+  
+  languagesOffered?: string[];
   languagesOffered_specify?: string;
-  privateConfidentialSpace: string;
-  professionalLiabilityInsurance: string;
-  complaintsOrDisciplinaryActions: string;
-  accepts?: string[];
+  
+  providedOnlineTherapyBefore: string; 
+  comfortableUsingVideoConferencing: string;
+  
+  preferredSessionLength: number[];
+  preferredSessionLength_specify?: string;
+  
+  privateConfidentialSpace?: string;
+  compliesWithDataPrivacyAct: string;
+  professionalLiabilityInsurance?: string;
+  complaintsOrDisciplinaryActions?: string;
+  willingToAbideByPlatformGuidelines: string;
+  
+  expertise?: string[];
+  approaches?: string[];
+  languages?: string[];
+  illnessSpecializations?: string[];
+  acceptTypes?: string[];
+  treatmentSuccessRates?: any;
+  sessionLength: string;
+  hourlyRate: number;
 }
 
 // Session management DTOs
