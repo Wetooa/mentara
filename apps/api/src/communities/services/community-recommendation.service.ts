@@ -5,11 +5,6 @@ import {
   getCommunityRecommendationsWithScores,
   getCommunityBySlug,
 } from '../../config/community-configs';
-import { AiServiceClient } from '../../pre-assessment/services/ai-service.client';
-import {
-  processPreAssessmentAnswers,
-  QuestionnaireScores,
-} from '../../pre-assessment/pre-assessment.utils';
 
 export interface CommunityRecommendation {
   id: string;
@@ -33,7 +28,6 @@ export class CommunityRecommendationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly communityMatching: CommunityMatchingService,
-    private readonly aiServiceClient: AiServiceClient,
   ) {}
 
   /**
