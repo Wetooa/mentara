@@ -56,3 +56,6 @@ database/exports/*
 
 # Agent
 .agent
+
+# Orval
+generated/

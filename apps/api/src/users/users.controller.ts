@@ -15,6 +15,7 @@ import {
   Logger,
   ForbiddenException,
 } from '@nestjs/common';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/core/decorators/current-user-id.decorator';
@@ -36,6 +37,7 @@ import { SupabaseStorageService } from 'src/common/services/supabase-storage.ser
 import { RoleUtils } from 'src/utils/role-utils';
 import { UserResponseDto, SuccessMessageDto } from 'src/common/dto';
 
+@ApiTags('users')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
@@ -96,6 +98,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiParam({ name: 'id', description: 'The ID of the user' })
   async findOne(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
@@ -132,6 +135,7 @@ export class UsersController {
   }
 
   @Put(':id')
+  @ApiParam({ name: 'id', description: 'The ID of the user' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'avatar', maxCount: 1 },
@@ -240,6 +244,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiParam({ name: 'id', description: 'The ID of the user' })
   async remove(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
@@ -273,6 +278,7 @@ export class UsersController {
   }
 
   @Post(':id/deactivate')
+  @ApiParam({ name: 'id', description: 'The ID of the user' })
   async deactivateUser(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @Body(new ZodValidationPipe(DeactivateUserDtoSchema))
@@ -300,6 +306,7 @@ export class UsersController {
   }
 
   @Post(':id/reactivate')
+  @ApiParam({ name: 'id', description: 'The ID of the user' })
   async reactivateUser(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,

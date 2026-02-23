@@ -5,6 +5,10 @@
     "strict": true,
     "moduleResolution": "node",
     "baseUrl": ".",
-    "rootDir": "."
+    "rootDir": ".",
+    "paths": {
+      "api-client": ["libs/api-client/src/index.ts"],
+      "@mentara-web/*": ["apps/web/*"]
+    }
   }
 }

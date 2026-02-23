@@ -12,6 +12,7 @@ import {
   HttpException,
   Logger,
 } from '@nestjs/common';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -22,6 +23,7 @@ import { ProfileService } from './profile.service';
 /**
  * Public profile controller for viewing user/therapist profiles
  */
+@ApiTags('profile')
 @Controller('profile')
 @UseGuards(JwtAuthGuard)
 export class ProfileController {
@@ -34,6 +36,7 @@ export class ProfileController {
    * Anyone can view public profiles
    */
   @Get(':id')
+  @ApiParam({ name: 'id', description: 'The user ID' })
   @HttpCode(HttpStatus.OK)
   async getPublicProfile(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
@@ -87,6 +90,7 @@ export class ProfileController {
    * Any authenticated user can report any profile (including their own)
    */
   @Post(':id/report')
+  @ApiParam({ name: 'id', description: 'The user ID to report' })
   @HttpCode(HttpStatus.OK)
   async reportUser(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,

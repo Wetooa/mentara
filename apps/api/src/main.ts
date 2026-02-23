@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as fs from 'fs';
@@ -175,6 +176,19 @@ async function bootstrap() {
 
   // Global prefix for all API routes
   app.setGlobalPrefix('api');
+
+  // Configure Swagger documentation
+  const config = new DocumentBuilder()
+    .setTitle('Mentara API')
+    .setDescription('The Mentara API documentation for the ecosystem')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+  
+  logger.log('Swagger documentation enabled at /api/docs');
 
   const preferredPort = parseInt(process.env.PORT ?? '3001', 10);
   let actualPort = preferredPort;
