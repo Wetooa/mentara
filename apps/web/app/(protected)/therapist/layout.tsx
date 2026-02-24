@@ -101,6 +101,12 @@ export default function TherapistLayout({
       icon: "/icons/worksheets.svg",
       id: "worksheets",
     },
+    {
+      name: "Packages",
+      path: "/therapist/packages",
+      icon: "/icons/dashboard.svg", // Reusing dashboard icon for now
+      id: "packages",
+    },
   ];
 
   return (

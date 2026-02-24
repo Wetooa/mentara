@@ -31,7 +31,7 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
   control,
   watchedValues,
 }) => {
-  const { professionalLicenseType, isPRCLicensed } = watchedValues;
+  const { professionalLicenseType } = watchedValues;
 
   return (
     <Card className="border border-blue-200 bg-blue-50">
@@ -128,46 +128,8 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
           />
         )}
 
-        <FormField
-          control={control}
-          name="isPRCLicensed"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-base font-semibold">
-                Are you PRC-licensed? <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <RadioGroup
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  className="flex gap-6"
-                >
-                  <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
-                    <RadioGroupItem value="yes" id="prc-yes" />
-                    <Label
-                      htmlFor="prc-yes"
-                      className="cursor-pointer font-medium"
-                    >
-                      Yes
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
-                    <RadioGroupItem value="no" id="prc-no" />
-                    <Label
-                      htmlFor="prc-no"
-                      className="cursor-pointer font-medium"
-                    >
-                      No
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        {isPRCLicensed === "yes" && (
+
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg space-y-4">
             <div className="flex items-center gap-2 mb-4">
               <Shield className="w-5 h-5 text-green-600" />
@@ -210,48 +172,7 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
                 )}
               />
             </div>
-
-            <FormField
-              control={control}
-              name="isLicenseActive"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">
-                    Is your license currently active and in good standing?{" "}
-                    <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      className="flex gap-6"
-                    >
-                      <div className="flex items-center space-x-3 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-50">
-                        <RadioGroupItem value="yes" id="active-yes" />
-                        <Label
-                          htmlFor="active-yes"
-                          className="cursor-pointer font-medium"
-                        >
-                          Yes
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-3 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-50">
-                        <RadioGroupItem value="no" id="active-no" />
-                        <Label
-                          htmlFor="active-no"
-                          className="cursor-pointer font-medium"
-                        >
-                          No
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
-        )}
 
         <FormField
           control={control}

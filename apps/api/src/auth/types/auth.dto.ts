@@ -135,10 +135,9 @@ export interface RegisterTherapistDto {
   mobile: string;
   province: string;
   timezone?: string;
-  providerType: string;
+  providerType: 'LICENSED_PSYCHOLOGIST' | 'LICENSED_GUIDANCE_COUNSELOR';
   professionalLicenseType: string;
   professionalLicenseType_specify?: string;
-  isPRCLicensed: string; 
   prcLicenseNumber: string;
   expirationDateOfLicense: string; // ISO date string
   practiceStartDate: string; // ISO date string
@@ -160,7 +159,7 @@ export interface RegisterTherapistDto {
   acceptedInsuranceTypes?: string[];
   
   areasOfExpertise?: string[];
-  assessmentTools?: string[];
+  otherAreaOfExpertise?: string;
   therapeuticApproachesUsedList?: string[];
   therapeuticApproachesUsedList_specify?: string[];
   
@@ -175,7 +174,6 @@ export interface RegisterTherapistDto {
   
   privateConfidentialSpace?: string;
   compliesWithDataPrivacyAct: string;
-  professionalLiabilityInsurance?: string;
   complaintsOrDisciplinaryActions?: string;
   willingToAbideByPlatformGuidelines: string;
   
@@ -187,6 +185,9 @@ export interface RegisterTherapistDto {
   treatmentSuccessRates?: any;
   sessionLength: string;
   hourlyRate: number;
+  preferOnlineOrOffline?: string;
+  willingToCaterOutsideCebu?: boolean;
+  preferredPayrollAccount?: string;
 }
 
 // Session management DTOs

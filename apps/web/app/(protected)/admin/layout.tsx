@@ -70,6 +70,12 @@ export default function AdminLayout({
       id: "reports",
     },
     {
+      name: "Packages",
+      path: "/admin/packages",
+      icon: "/icons/dashboard.svg", // Using dashboard icon for packages
+      id: "packages",
+    },
+    {
       name: "Content",
       path: "/admin/content",
       icon: "/icons/messages.svg", // Using messages icon for content

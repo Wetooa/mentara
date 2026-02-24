@@ -100,7 +100,7 @@ export function useTherapistApplicationForm(): UseTherapistApplicationFormReturn
       privateConfidentialSpace: formValues.privateConfidentialSpace || "",
       compliesWithDataPrivacyAct: formValues.compliesWithDataPrivacyAct || "",
       areasOfExpertise: formValues.areasOfExpertise || [],
-      assessmentTools: formValues.assessmentTools || [],
+      otherAreaOfExpertise: formValues.otherAreaOfExpertise || "",
       therapeuticApproachesUsedList:
         formValues.therapeuticApproachesUsedList || [],
       therapeuticApproachesUsedList_specify:
@@ -111,15 +111,14 @@ export function useTherapistApplicationForm(): UseTherapistApplicationFormReturn
       preferredSessionLength: formValues.preferredSessionLength || "",
       preferredSessionLength_specify:
         formValues.preferredSessionLength_specify || "",
-      accepts: formValues.accepts || [],
-      accepts_hmo_specify: formValues.accepts_hmo_specify || "",
+      preferOnlineOrOffline: formValues.preferOnlineOrOffline || "",
+      willingToCaterOutsideCebu: formValues.willingToCaterOutsideCebu || "",
+      preferredPayrollAccount: formValues.preferredPayrollAccount || "",
       hourlyRate: formValues.hourlyRate || undefined,
       acceptsInsurance: formValues.acceptsInsurance || undefined,
       acceptedInsuranceTypes: formValues.acceptedInsuranceTypes || undefined,
       sessionDuration: formValues.sessionDuration || undefined,
       bio: formValues.bio || "",
-      professionalLiabilityInsurance:
-        formValues.professionalLiabilityInsurance || "",
       complaintsOrDisciplinaryActions:
         formValues.complaintsOrDisciplinaryActions || "",
       complaintsOrDisciplinaryActions_specify:
@@ -284,7 +283,7 @@ export function useTherapistApplicationForm(): UseTherapistApplicationFormReturn
 
         // Areas and tools
         areasOfExpertise: values.areasOfExpertise,
-        assessmentTools: values.assessmentTools,
+        otherAreaOfExpertise: values.otherAreaOfExpertise,
         therapeuticApproachesUsedList: values.therapeuticApproachesUsedList,
         therapeuticApproachesUsedList_specify:
           values.therapeuticApproachesUsedList_specify,
@@ -299,7 +298,6 @@ export function useTherapistApplicationForm(): UseTherapistApplicationFormReturn
         compliesWithDataPrivacyAct: values.compliesWithDataPrivacyAct,
 
         // Compliance (keep as strings for unified registration)
-        professionalLiabilityInsurance: values.professionalLiabilityInsurance,
         complaintsOrDisciplinaryActions:
           values.complaintsOrDisciplinaryActions,
         complaintsOrDisciplinaryActions_specify:
@@ -311,8 +309,9 @@ export function useTherapistApplicationForm(): UseTherapistApplicationFormReturn
         weeklyAvailability: values.weeklyAvailability,
         preferredSessionLength: values.preferredSessionLength,
         preferredSessionLength_specify: values.preferredSessionLength_specify,
-        accepts: values.accepts,
-        accepts_hmo_specify: values.accepts_hmo_specify,
+        preferOnlineOrOffline: values.preferOnlineOrOffline,
+        willingToCaterOutsideCebu: values.willingToCaterOutsideCebu,
+        preferredPayrollAccount: values.preferredPayrollAccount,
 
         // Optional fields
         bio: values.bio || "",

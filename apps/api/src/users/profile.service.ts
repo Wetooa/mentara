@@ -19,7 +19,11 @@ export interface PublicProfileResponse {
     sessionLength?: string;
     hourlyRate?: number;
     areasOfExpertise?: string[];
+    otherAreaOfExpertise?: string;
     languages?: string[];
+    providerType?: string;
+    preferOnlineOrOffline?: string;
+    willingToCaterOutsideCebu?: boolean;
     availability?: Array<{
       id: string;
       dayOfWeek: string;
@@ -93,11 +97,15 @@ export class ProfileService {
             select: {
               userId: true,
               areasOfExpertise: true,
+              otherAreaOfExpertise: true,
               hourlyRate: true,
               status: true,
               yearsOfExperience: true,
               sessionLength: true,
               languagesOffered: true,
+              providerType: true,
+              preferOnlineOrOffline: true,
+              willingToCaterOutsideCebu: true,
             },
           },
         },
@@ -401,7 +409,11 @@ export class ProfileService {
           ? Number(user.therapist.hourlyRate)
           : undefined,
         areasOfExpertise: user.therapist.areasOfExpertise,
+        otherAreaOfExpertise: user.therapist.otherAreaOfExpertise ?? undefined,
         languages: user.therapist.languagesOffered,
+        providerType: user.therapist.providerType ?? undefined,
+        preferOnlineOrOffline: user.therapist.preferOnlineOrOffline ?? undefined,
+        willingToCaterOutsideCebu: user.therapist.willingToCaterOutsideCebu,
         availability: availabilityWithBookings,
       };
     }

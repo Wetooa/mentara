@@ -21,11 +21,8 @@ export const unifiedTherapistSchema = z
     professionalLicenseType: z
       .string()
       .min(1, "Please select your professional license type"),
-    professionalLicenseType_specify: z.string().optional(),
-    isPRCLicensed: z.string().min(1, "Please indicate if you are PRC-licensed"),
-    prcLicenseNumber: z.string().optional(),
-    expirationDateOfLicense: z.string().optional(),
-    isLicenseActive: z.string().optional(),
+    prcLicenseNumber: z.string().min(1, "PRC license number is required"),
+    expirationDateOfLicense: z.string().min(1, "Expiration date is required"),
 
     // Practice Information - NEW REQUIRED FIELDS
     practiceStartDate: z
@@ -60,9 +57,7 @@ export const unifiedTherapistSchema = z
     areasOfExpertise: z
       .array(z.string())
       .min(1, "Please select at least one area of expertise"),
-    assessmentTools: z
-      .array(z.string())
-      .min(1, "Please select at least one assessment tool"),
+    otherAreaOfExpertise: z.string().optional(),
     therapeuticApproachesUsedList: z
       .array(z.string())
       .min(1, "Please select at least one therapeutic approach"),
@@ -77,15 +72,17 @@ export const unifiedTherapistSchema = z
       .string()
       .min(1, "Please select your weekly availability"),
     preferredSessionLength: z
-      .string()
-      .min(1, "Please select your preferred session length"),
+      .array(z.string())
+      .min(1, "Please select at least one preferred session length"),
     preferredSessionLength_specify: z.string().optional(),
 
+    preferOnlineOrOffline: z.string().min(1, "Please select your preference"),
+    willingToCaterOutsideCebu: z.string().min(1, "Please indicate your willingness"),
+
     // Payment and Rates
-    accepts: z
-      .array(z.string())
-      .min(1, "Please select at least one payment method"),
-    accepts_hmo_specify: z.string().optional(),
+    preferredPayrollAccount: z
+      .string()
+      .min(1, "Please provide your preferred payroll account"),
     hourlyRate: z
       .number()
       .optional()
@@ -102,9 +99,6 @@ export const unifiedTherapistSchema = z
     bio: z.string().optional(),
 
     // Compliance - Flattened for backend compatibility
-    professionalLiabilityInsurance: z
-      .string()
-      .min(1, "Please answer regarding liability insurance"),
     complaintsOrDisciplinaryActions: z
       .string()
       .min(1, "Please answer regarding complaints history"),
@@ -142,32 +136,7 @@ export const unifiedTherapistSchema = z
       });
     }
 
-    if (val.isPRCLicensed === "yes") {
-      if (!val.prcLicenseNumber || !/^[0-9]{7}$/.test(val.prcLicenseNumber)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Please enter a valid 7-digit PRC license number",
-          path: ["prcLicenseNumber"],
-        });
-      }
-      if (
-        !val.expirationDateOfLicense ||
-        val.expirationDateOfLicense.length === 0
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Please enter the license expiration date",
-          path: ["expirationDateOfLicense"],
-        });
-      }
-      if (!val.isLicenseActive || val.isLicenseActive.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Please confirm the status of your license",
-          path: ["isLicenseActive"],
-        });
-      }
-    }
+
 
     if (
       val.therapeuticApproachesUsedList?.includes("other") &&
@@ -194,7 +163,7 @@ export const unifiedTherapistSchema = z
     }
 
     if (
-      val.preferredSessionLength === "other" &&
+      val.preferredSessionLength?.includes("other") &&
       (!val.preferredSessionLength_specify ||
         val.preferredSessionLength_specify.length === 0)
     ) {
@@ -205,16 +174,7 @@ export const unifiedTherapistSchema = z
       });
     }
 
-    if (
-      val.accepts?.includes("hmo") &&
-      (!val.accepts_hmo_specify || val.accepts_hmo_specify.length === 0)
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Please specify HMO providers",
-        path: ["accepts_hmo_specify"],
-      });
-    }
+
 
     if (
       val.complaintsOrDisciplinaryActions === "yes" &&

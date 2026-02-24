@@ -40,6 +40,7 @@ export const ProfessionalProfileSection = memo(function ProfessionalProfileSecti
   const {
     therapeuticApproachesUsedList,
     languagesOffered,
+    areasOfExpertise,
     complaintsOrDisciplinaryActions,
   } = watchedValues;
 
@@ -116,80 +117,29 @@ export const ProfessionalProfileSection = memo(function ProfessionalProfileSecti
               </FormItem>
             )}
           />
-        </CardContent>
-      </Card>
 
-      {/* Assessment Tools */}
-      <Card className="border border-indigo-200 bg-indigo-50">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Users className="w-5 h-5 text-indigo-600" />
-            Assessment Tools & Approaches
-          </CardTitle>
-          <p className="text-sm text-gray-600 mt-2">
-            Select all assessment tools and approaches you use. You must select
-            at least one.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <FormField
-            control={form.control}
-            name="assessmentTools"
-            render={({ field }) => (
-              <FormItem>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {therapistProfileFormFields.assessmentTools.options.map(
-                    (option) => (
-                      <Label
-                        key={option.value}
-                        className="flex items-center gap-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 cursor-pointer transition-colors group"
-                      >
-                        <Checkbox
-                          checked={field.value?.includes(option.value)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              field.onChange([...field.value, option.value]);
-                            } else {
-                              field.onChange(
-                                field.value.filter((v: string) => v !== option.value)
-                              );
-                            }
-                          }}
-                        />
-                        <span className="text-sm font-medium group-hover:text-indigo-700 transition-colors">
-                          {option.label}
-                        </span>
-                        {field.value?.includes(option.value) && (
-                          <CheckCircle className="w-4 h-4 text-indigo-600 ml-auto" />
-                        )}
-                      </Label>
-                    )
-                  )}
-                </div>
-                <div className="mt-4 p-3 bg-indigo-100 border border-indigo-200 rounded-lg">
-                  <p className="text-sm text-indigo-800">
-                    <strong>Selected:</strong> {field.value?.length || 0} tool
-                    {field.value?.length !== 1 ? "s" : ""}
-                    {field.value?.length > 0 && (
-                      <span className="ml-2 text-indigo-600">
-                        (
-                        {field.value
-                          .map(
-                            (val: string) =>
-                              therapistProfileFormFields.assessmentTools.options.find(
-                                (opt) => opt.value === val
-                              )?.label
-                          )
-                          .join(", ")}
-                        )
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {areasOfExpertise?.includes("other") && (
+            <FormField
+              control={form.control}
+              name="otherAreaOfExpertise"
+              render={({ field }) => (
+                <FormItem className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <FormLabel className="text-base font-semibold">
+                    Please specify other areas of expertise{" "}
+                    <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value || ""}
+                      placeholder="e.g., specific therapy types"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -353,66 +303,6 @@ export const ProfessionalProfileSection = memo(function ProfessionalProfileSecti
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <FormField
-            control={form.control}
-            name="professionalLiabilityInsurance"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-base font-semibold">
-                  Do you have professional liability insurance for online
-                  practice? <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="grid grid-cols-1 gap-3"
-                  >
-                    {[
-                      {
-                        value: "yes",
-                        label: "Yes",
-                        description:
-                          "I have active professional liability insurance",
-                      },
-                      {
-                        value: "no",
-                        label: "No",
-                        description: "I do not have liability insurance",
-                      },
-                      {
-                        value: "willing",
-                        label: "Not yet, but willing to secure",
-                        description:
-                          "I am willing to obtain insurance before starting practice",
-                      },
-                    ].map((option) => (
-                      <div
-                        key={option.value}
-                        className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-                      >
-                        <RadioGroupItem
-                          value={option.value}
-                          id={`liability-${option.value}`}
-                        />
-                        <Label
-                          htmlFor={`liability-${option.value}`}
-                          className="flex-1 cursor-pointer"
-                        >
-                          <div className="font-medium">{option.label}</div>
-                          <div className="text-sm text-gray-500">
-                            {option.description}
-                          </div>
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="complaintsOrDisciplinaryActions"

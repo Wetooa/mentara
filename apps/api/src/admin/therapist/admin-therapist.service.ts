@@ -71,10 +71,7 @@ export class AdminTherapistService {
 
       // Apply provider type filter
       if (providerType) {
-        where.providerType = {
-          contains: providerType,
-          mode: 'insensitive',
-        };
+        where.providerType = providerType.toUpperCase() as any;
       }
 
       const applications = await this.prisma.therapist.findMany({

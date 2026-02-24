@@ -11,10 +11,8 @@ export interface TherapistApplicationFormData {
   // License Info
   professionalLicenseType: string;
   professionalLicenseType_specify?: string;
-  isPRCLicensed: string;
-  prcLicenseNumber?: string;
-  expirationDateOfLicense?: string;
-  isLicenseActive?: string;
+  prcLicenseNumber: string;
+  expirationDateOfLicense: string;
   practiceStartDate: string;
   yearsOfExperience: number;
   educationBackground: string;
@@ -28,22 +26,22 @@ export interface TherapistApplicationFormData {
 
   // Professional Profile
   areasOfExpertise: string[];
-  assessmentTools: string[];
+  otherAreaOfExpertise?: string;
   therapeuticApproachesUsedList: string[];
   therapeuticApproachesUsedList_specify?: string;
   languagesOffered: string[];
   languagesOffered_specify?: string;
-  professionalLiabilityInsurance: string;
   complaintsOrDisciplinaryActions: string;
   complaintsOrDisciplinaryActions_specify?: string;
   willingToAbideByPlatformGuidelines: string;
 
   // Availability & Services
   weeklyAvailability: string;
-  preferredSessionLength: string;
+  preferredSessionLength: string[];
   preferredSessionLength_specify?: string;
-  accepts: string[];
-  accepts_hmo_specify?: string;
+  preferOnlineOrOffline: string;
+  willingToCaterOutsideCebu: string;
+  preferredPayrollAccount: string;
   hourlyRate?: number;
   bio?: string;
 
@@ -66,15 +64,17 @@ export interface TherapistApplicationWatchedValues {
   email?: string;
   mobile?: string;
   province?: string;
+  providerType?: string;
   professionalLicenseType?: string;
-  isPRCLicensed?: string;
+  professionalLicenseType_specify?: string;
   yearsOfExperience?: number;
   areasOfExpertise?: string[];
   therapeuticApproachesUsedList?: string[];
   languagesOffered?: string[];
   complaintsOrDisciplinaryActions?: string;
-  preferredSessionLength?: string;
-  accepts?: string[];
+  preferredSessionLength?: string[];
+  preferOnlineOrOffline?: string;
+  willingToCaterOutsideCebu?: string;
   practiceStartDate?: string;
   educationBackground?: string;
   practiceLocation?: string;

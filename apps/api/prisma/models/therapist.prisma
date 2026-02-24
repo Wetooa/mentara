@@ -1,5 +1,6 @@
 model Therapist {
-  userId                             String                            @id @unique
+  therapistId                        String                            @id @unique
+  userId                             String                            @unique
   mobile                             String
   province                           String
   timezone                           String                            @default("UTC")
@@ -7,9 +8,8 @@ model Therapist {
   submissionDate                     DateTime                          @default(now())
   processingDate                     DateTime                          @default(now())
   processedByAdminId                 String?
-  providerType                       String
+  providerType                       ProviderType
   professionalLicenseType            String
-  isPRCLicensed                      String
   prcLicenseNumber                   String
   expirationDateOfLicense            DateTime
   practiceStartDate                  DateTime
@@ -30,7 +30,7 @@ model Therapist {
   acceptsInsurance                   Boolean                           @default(false)
   acceptedInsuranceTypes             String[]
   areasOfExpertise                   String[]
-  assessmentTools                    String[]
+  otherAreaOfExpertise               String?
   therapeuticApproachesUsedList      String[]
   languagesOffered                   String[]
   providedOnlineTherapyBefore        Boolean
@@ -38,7 +38,6 @@ model Therapist {
   preferredSessionLength             Int[]
   privateConfidentialSpace           String?
   compliesWithDataPrivacyAct         Boolean
-  professionalLiabilityInsurance     String?
   complaintsOrDisciplinaryActions    String?
   willingToAbideByPlatformGuidelines Boolean
   expertise                          String[]
@@ -49,6 +48,9 @@ model Therapist {
   treatmentSuccessRates              Json
   sessionLength                      String
   hourlyRate                         Decimal                           @db.Decimal(10, 2)
+  preferOnlineOrOffline              String?
+  willingToCaterOutsideCebu          Boolean                           @default(false)
+  preferredPayrollAccount            String?
   createdAt                          DateTime                          @default(now())
   updatedAt                          DateTime                          @updatedAt
   assignedClients                    ClientTherapist[]
@@ -56,13 +58,13 @@ model Therapist {
   paymentsAsTherapist                Payment[]
   reviews                            Review[]
   processedByAdmin                   Admin?                            @relation(fields: [processedByAdminId], references: [userId])
-  user                               User                              @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
   therapistAvailabilities            TherapistAvailability[]
   worksheets                         Worksheet[]
   GroupSessionTherapistInvitation    GroupSessionTherapistInvitation[]
   performance                        TherapistPerformance?
+  packages                           Therapist_Packages[]
 
-  @@index([userId])
+  @@index([therapistId])
   @@index([status])
   @@index([timezone])
   @@index([status, createdAt])
@@ -78,4 +80,9 @@ enum TherapistApplicationStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum ProviderType {
+  LICENSED_PSYCHOLOGIST
+  LICENSED_GUIDANCE_COUNSELOR
 }

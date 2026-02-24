@@ -53,6 +53,8 @@ model User {
   createdGroupSessions       GroupTherapySession[]     @relation("GroupSessionCreator")
   groupSessionParticipations GroupSessionParticipant[] @relation("GroupSessionParticipant")
 
+  subscriptions              User_Subscriptions[]
+
   @@index([email])
   @@index([role])
   @@index([isActive])

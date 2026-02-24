@@ -9,9 +9,8 @@ export const CreateTherapistSchema = z.object({
   mobile: z.string().min(1, 'Mobile is required'),
   province: z.string().min(1, 'Province is required'),
   timezone: z.string().optional().default('UTC'),
-  providerType: z.string().min(1, 'Provider type is required'),
+  providerType: z.enum(['LICENSED_PSYCHOLOGIST', 'LICENSED_GUIDANCE_COUNSELOR']),
   professionalLicenseType: z.string().min(1, 'Professional license type is required'),
-  isPRCLicensed: z.string().min(1, 'Is PRC licensed is required'),
   prcLicenseNumber: z.string().min(1, 'PRC license number is required'),
   expirationDateOfLicense: z.union([z.string(), z.date()]),
   practiceStartDate: z.union([z.string(), z.date()]),
@@ -29,7 +28,7 @@ export const CreateTherapistSchema = z.object({
   acceptsInsurance: z.boolean().optional(),
   acceptedInsuranceTypes: z.array(z.string()).optional(),
   areasOfExpertise: z.array(z.string()).optional(),
-  assessmentTools: z.array(z.string()).optional(),
+  otherAreaOfExpertise: z.string().optional(),
   therapeuticApproachesUsedList: z.array(z.string()).optional(),
   languagesOffered: z.array(z.string()).optional(),
   providedOnlineTherapyBefore: z.boolean(),
@@ -37,7 +36,6 @@ export const CreateTherapistSchema = z.object({
   preferredSessionLength: z.array(z.number().int().positive()),
   privateConfidentialSpace: z.string().optional(),
   compliesWithDataPrivacyAct: z.boolean(),
-  professionalLiabilityInsurance: z.string().optional(),
   complaintsOrDisciplinaryActions: z.string().optional(),
   willingToAbideByPlatformGuidelines: z.boolean(),
   expertise: z.array(z.string()).optional(),
@@ -48,6 +46,9 @@ export const CreateTherapistSchema = z.object({
   treatmentSuccessRates: z.any(),
   sessionLength: z.string(),
   hourlyRate: z.number().positive(),
+  preferOnlineOrOffline: z.string().optional(),
+  willingToCaterOutsideCebu: z.boolean().default(false),
+  preferredPayrollAccount: z.string().optional(),
 }).strict();
 
 export const UpdateTherapistSchema = CreateTherapistSchema.partial()

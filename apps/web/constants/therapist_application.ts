@@ -21,51 +21,21 @@ export const therapistProfileFormFields = {
       errorMessage: "Please select your professional license type.",
     },
   },
-  isPRCLicensed: {
-    question: "Are you PRC-licensed?",
-    type: "radio",
-    options: [
-      { label: "Yes", value: "yes" },
-      { label: "No", value: "no" },
-    ],
-    validation: {
-      required: true,
-      errorMessage: "Please indicate if you are PRC-licensed.",
-    },
-  },
   prcLicenseNumber: {
     question: "PRC License Number",
     type: "input",
     placeholder: "Enter your PRC license number",
-    // Required only if PRC Licensed is Yes
     validation: {
-      requiredIf: { fieldKey: "isPRCLicensed", value: "yes" },
-      // Example pattern: Assuming a 7-digit number for PH PRC licenses
-      pattern: /^[0-9]{7}$/,
-      errorMessage: "Please enter a valid 7-digit PRC license number.", // Generic message, pattern mismatch might need specific one
-      requiredErrorMessage: "PRC License number is required.", // Specific message when required but empty
+      required: true,
+      errorMessage: "Please enter your PRC license number.",
     },
   },
   expirationDateOfLicense: {
     question: "Expiration Date of License",
     type: "date",
-    // Required only if PRC Licensed is Yes
     validation: {
-      requiredIf: { fieldKey: "isPRCLicensed", value: "yes" },
+      required: true,
       errorMessage: "Please enter the license expiration date.",
-    },
-  },
-  isLicenseActive: {
-    question: "Is your license currently active and in good standing?",
-    type: "radio",
-    options: [
-      { label: "Yes", value: "yes" },
-      { label: "No", value: "no" },
-    ],
-    // Required only if PRC Licensed is Yes
-    validation: {
-      requiredIf: { fieldKey: "isPRCLicensed", value: "yes" },
-      errorMessage: "Please confirm the status of your license.",
     },
   },
   // --- Group: Teletherapy Readiness ---
@@ -151,41 +121,7 @@ export const therapistProfileFormFields = {
       errorMessage: "Please select at least one area of expertise.",
     },
   },
-  assessmentTools: {
-    question: "Assessment Tools/Approaches Used (Check all that apply)",
-    subLabel:
-      "Check the tools and approaches you use for assessments or treatment planning.", // Added subLabel for clarity
-    type: "checkbox",
-    options: [
-      /* Many options... */
-      { label: "Perceived Stress Scale (PSS)", value: "pss" },
-      { label: "Generalized Anxiety Disorder-7 (GAD-7)", value: "gad7" },
-      { label: "Patient Health Questionnaire-9 (PHQ-9)", value: "phq9" },
-      { label: "Insomnia Severity Index (ISI)", value: "isi" },
-      { label: "Panic Disorder Severity Scale (PDSS)", value: "pdss" },
-      { label: "Mood Disorder Questionnaire (MDQ)", value: "mdq" },
-      {
-        label: "Obsessional Compulsive Inventory – Revised (OCI-R)",
-        value: "ocir",
-      },
-      { label: "PTSD Checklist for DSM-5 (PCL-5)", value: "pcl5" },
-      { label: "Social Phobia Inventory (SPIN)", value: "spin" },
-      { label: "Phobia Questionnaire (PHQ)", value: "phq" },
-      { label: "Maslach Burnout Inventory (MBI)", value: "mbi" },
-      { label: "Binge-Eating Scale (BES)", value: "bes" },
-      { label: "Adult ADHD Self-Report Scale v1.1 (ASRS)", value: "asrs" },
-      {
-        label: "Alcohol Use Disorders Identification Test (AUDIT)",
-        value: "audit",
-      },
-      { label: "Drug Abuse Screening Test (DAST-10)", value: "dast10" },
-    ],
-    validation: {
-      required: true,
-      minSelection: 1,
-      errorMessage: "Please select at least one assessment tool or approach.",
-    },
-  },
+
   yearsOfExperience: {
     question:
       "How many years of experience do you have as a licensed therapist?",
@@ -273,7 +209,7 @@ export const therapistProfileFormFields = {
     },
     preferredSessionLength: {
       question: "Preferred session length:",
-      type: "radio",
+      type: "checkbox",
       options: [
         /* 30, 45, 60 min, Other options */
         { label: "30 minutes", value: "30" },
@@ -282,45 +218,51 @@ export const therapistProfileFormFields = {
         { label: "Other: _______", value: "other", hasSpecify: true },
       ],
       specifyField: {
-        placeholder: "Specify other length (e.g., 50 minutes)",
+        placeholder: "Specify other length (e.g., 90 minutes)",
         type: "input", // Or 'number' if you want numeric input
         validation: {
-          requiredIf: { fieldKey: "preferredSessionLength", value: "other" },
+          requiredIf: { fieldKey: "preferredSessionLength", checkboxValue: "other" },
           errorMessage: "Please specify your preferred session length.",
         },
       },
       validation: {
         required: true,
-        errorMessage: "Please select a preferred session length.",
+        minSelection: 1,
+        errorMessage: "Please select at least one preferred session length.",
       },
     },
-    accepts: {
-      question: "Payment Methods Accepted:", // Updated question for clarity
-      type: "checkbox",
+    preferOnlineOrOffline: {
+      question: "Session Format Preference:",
+      type: "radio",
       options: [
-        /* Self-pay, HMO, PhilHealth, All options */
-        { label: "Self-pay", value: "self-pay" },
-        {
-          label: "HMO (please specify providers if applicable)",
-          value: "hmo",
-          hasSpecify: true,
-        },
-        { label: "PhilHealth", value: "philhealth" },
-        { label: "All of the above", value: "all" }, // Note: 'all' logic handled in component state change
+        { label: "Online Only", value: "ONLINE" },
+        { label: "Face-to-Face Only", value: "OFFLINE" },
+        { label: "Both Online and Face-to-Face", value: "BOTH" },
       ],
-      specifyField: {
-        // Specifically for HMO
-        placeholder: "Specify accredited HMO providers",
-        validation: {
-          // Required only if 'hmo' checkbox is checked
-          requiredIf: { fieldKey: "accepts", checkboxValue: "hmo" },
-          errorMessage: "Please specify the HMO providers you accept.",
-        },
-      },
       validation: {
         required: true,
-        minSelection: 1, // At least one actual payment method (or 'all') must be checked
-        errorMessage: "Please select at least one payment method.",
+        errorMessage: "Please select your preference.",
+      },
+    },
+    willingToCaterOutsideCebu: {
+      question: "Are you willing to cater to clients outside Cebu?",
+      type: "radio",
+      options: [
+        { label: "Yes", value: "true" },
+        { label: "No", value: "false" },
+      ],
+      validation: {
+        required: true,
+        errorMessage: "Please indicate your willingness.",
+      },
+    },
+    preferredPayrollAccount: {
+      question: "Preferred Payroll Account (e.g., Bank Name, Account Number, GCash):",
+      type: "input",
+      placeholder: "Enter details for your payouts",
+      validation: {
+        required: true,
+        errorMessage: "Please provide your preferred payroll account.",
       },
     },
     standardSessionRate: {
@@ -337,20 +279,7 @@ export const therapistProfileFormFields = {
   // --- End Group ---
   // --- Group: Compliance ---
   compliance: {
-    professionalLiabilityInsurance: {
-      question:
-        "Do you have professional liability insurance for online practice?",
-      type: "radio",
-      options: [
-        /* Yes, No, Willing options */ { label: "Yes", value: "yes" },
-        { label: "No", value: "no" },
-        { label: "Not yet, but willing to secure", value: "willing" },
-      ],
-      validation: {
-        required: true,
-        errorMessage: "Please answer regarding liability insurance.",
-      },
-    },
+
     complaintsOrDisciplinaryActions: {
       question:
         "Have you ever had complaints or disciplinary actions against your PRC license?",

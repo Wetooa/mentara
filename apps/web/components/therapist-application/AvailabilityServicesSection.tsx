@@ -37,7 +37,7 @@ export const AvailabilityServicesSection = memo(function AvailabilityServicesSec
   form,
   watchedValues,
 }: AvailabilityServicesSectionProps) {
-  const { preferredSessionLength, accepts } = watchedValues;
+  const { preferredSessionLength } = watchedValues;
 
   return (
     <div className="space-y-8">
@@ -112,38 +112,42 @@ export const AvailabilityServicesSection = memo(function AvailabilityServicesSec
                   <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
-                  <RadioGroup
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="grid grid-cols-1 gap-3"
-                  >
+                  <div className="grid grid-cols-1 gap-3">
                     {therapistProfileFormFields.availabilityAndPayment.preferredSessionLength.options.map(
                       (option) => (
-                        <div
+                        <Label
                           key={option.value}
-                          className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-blue-100"
+                          className="flex items-center gap-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 cursor-pointer transition-colors group"
                         >
-                          <RadioGroupItem
-                            value={option.value}
-                            id={`session-${option.value}`}
+                          <Checkbox
+                            checked={field.value?.includes(option.value)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                field.onChange([...(field.value || []), option.value]);
+                              } else {
+                                field.onChange(
+                                  (field.value || []).filter((v: string) => v !== option.value)
+                                );
+                              }
+                            }}
                           />
-                          <Label
-                            htmlFor={`session-${option.value}`}
-                            className="flex-1 cursor-pointer"
-                          >
-                            <div className="font-medium">{option.label}</div>
-                          </Label>
-                        </div>
+                          <span className="text-sm font-medium group-hover:text-blue-700 transition-colors">
+                            {option.label}
+                          </span>
+                          {field.value?.includes(option.value) && (
+                            <CheckCircle className="w-4 h-4 text-blue-600 ml-auto" />
+                          )}
+                        </Label>
                       )
                     )}
-                  </RadioGroup>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {preferredSessionLength === "other" && (
+          {preferredSessionLength?.includes("other") && (
             <FormField
               control={form.control}
               name="preferredSessionLength_specify"
@@ -164,6 +168,99 @@ export const AvailabilityServicesSection = memo(function AvailabilityServicesSec
         </CardContent>
       </Card>
 
+      {/* Online/Offline Preference */}
+      <Card className="border border-green-200 bg-green-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <User className="w-5 h-5 text-green-600" />
+            Session Handling
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FormField
+            control={form.control}
+            name="preferOnlineOrOffline"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Session Format Preference:{" "}
+                  <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    className="grid grid-cols-1 gap-3"
+                  >
+                    {therapistProfileFormFields.availabilityAndPayment.preferOnlineOrOffline.options.map(
+                      (option) => (
+                        <div
+                          key={option.value}
+                          className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-green-100"
+                        >
+                          <RadioGroupItem
+                            value={option.value}
+                            id={`format-${option.value}`}
+                          />
+                          <Label
+                            htmlFor={`format-${option.value}`}
+                            className="flex-1 cursor-pointer"
+                          >
+                            <div className="font-medium">{option.label}</div>
+                          </Label>
+                        </div>
+                      )
+                    )}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="willingToCaterOutsideCebu"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Are you willing to cater to clients outside Cebu?{" "}
+                  <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    className="grid grid-cols-1 gap-3"
+                  >
+                    {therapistProfileFormFields.availabilityAndPayment.willingToCaterOutsideCebu.options.map(
+                      (option) => (
+                        <div
+                          key={option.value}
+                          className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-green-100"
+                        >
+                          <RadioGroupItem
+                            value={option.value}
+                            id={`outside-cebu-${option.value}`}
+                          />
+                          <Label
+                            htmlFor={`outside-cebu-${option.value}`}
+                            className="flex-1 cursor-pointer"
+                          >
+                            <div className="font-medium">{option.label}</div>
+                          </Label>
+                        </div>
+                      )
+                    )}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
       {/* Payment Methods */}
       <Card className="border border-green-200 bg-green-50">
         <CardHeader className="pb-4">
@@ -175,69 +272,23 @@ export const AvailabilityServicesSection = memo(function AvailabilityServicesSec
         <CardContent className="space-y-6">
           <FormField
             control={form.control}
-            name="accepts"
+            name="preferredPayrollAccount"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-base font-semibold">
-                  Payment Methods Accepted:{" "}
+                  Preferred Payroll Account:{" "}
                   <span className="text-red-500">*</span>
                 </FormLabel>
-                <div className="grid grid-cols-1 gap-3">
-                  {therapistProfileFormFields.availabilityAndPayment.accepts.options.map(
-                    (option) => (
-                      <Label
-                        key={option.value}
-                        className="flex items-center gap-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-green-100 hover:border-green-300 cursor-pointer transition-colors group"
-                      >
-                        <Checkbox
-                          checked={field.value?.includes(option.value)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              field.onChange([...field.value, option.value]);
-                            } else {
-                              field.onChange(
-                                field.value.filter((v: string) => v !== option.value)
-                              );
-                            }
-                          }}
-                        />
-                        <span className="text-sm font-medium group-hover:text-green-700 transition-colors">
-                          {option.label}
-                        </span>
-                        {field.value?.includes(option.value) && (
-                          <CheckCircle className="w-4 h-4 text-green-600 ml-auto" />
-                        )}
-                      </Label>
-                    )
-                  )}
-                </div>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Enter details for your payouts (e.g., Bank Name, GCash number)"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          {accepts?.includes("hmo") && (
-            <FormField
-              control={form.control}
-              name="accepts_hmo_specify"
-              render={({ field }) => (
-                <FormItem className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <FormLabel className="text-base font-semibold">
-                    Please specify HMO providers{" "}
-                    <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Please list the HMO providers you accept..."
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
         </CardContent>
       </Card>
 

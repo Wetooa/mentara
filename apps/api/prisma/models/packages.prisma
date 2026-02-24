@@ -1,0 +1,57 @@
+model Therapist_Packages {
+  packageId     String               @id @default(uuid())
+  therapistId   String
+  title         String
+  description   String
+  sessionCount  Int
+  price         Decimal              @db.Decimal(10, 2)
+  validityDays  Int
+  features      Json?
+  status        PackageStatus        @default(PENDING_APPROVAL)
+  therapist     Therapist            @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  subscriptions User_Subscriptions[]
+
+  @@index([therapistId])
+  @@index([status])
+}
+
+model User_Subscriptions {
+  subscriptionId    String             @id @default(uuid())
+  userId            String
+  packageId         String
+  status            SubscriptionStatus @default(ACTIVE)
+  sessionsRemaining Int
+  purchasedAt       DateTime           @default(now())
+  expiresAt         DateTime?
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package           Therapist_Packages @relation(fields: [packageId], references: [packageId], onDelete: Cascade)
+  sessionLogs       Session_Logs[]
+
+  @@index([userId])
+  @@index([packageId])
+  @@index([status])
+}
+
+model Session_Logs {
+  logId           String             @id @default(uuid())
+  subscriptionId  String
+  appointmentId   String
+  deductedAt      DateTime           @default(now())
+  subscription    User_Subscriptions @relation(fields: [subscriptionId], references: [subscriptionId], onDelete: Cascade)
+  appointment     Meeting            @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([appointmentId])
+}
+
+enum PackageStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  FULLY_USED
+  EXPIRED
+}

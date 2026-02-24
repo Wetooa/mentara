@@ -150,8 +150,8 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                 <SelectContent>
                   <SelectGroup>
                     {PROVIDER_TYPE.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
                       </SelectItem>
                     ))}
                   </SelectGroup>

@@ -5,9 +5,8 @@ export interface CreateTherapistDto {
   mobile: string;
   province: string;
   timezone?: string;
-  providerType: string;
+  providerType: 'LICENSED_PSYCHOLOGIST' | 'LICENSED_GUIDANCE_COUNSELOR';
   professionalLicenseType: string;
-  isPRCLicensed: string;
   prcLicenseNumber: string;
   expirationDateOfLicense: Date | string;
   practiceStartDate: Date | string;
@@ -25,7 +24,7 @@ export interface CreateTherapistDto {
   acceptsInsurance?: boolean;
   acceptedInsuranceTypes?: string[];
   areasOfExpertise?: string[];
-  assessmentTools?: string[];
+  otherAreaOfExpertise?: string;
   therapeuticApproachesUsedList?: string[];
   languagesOffered?: string[];
   providedOnlineTherapyBefore: boolean;
@@ -33,7 +32,6 @@ export interface CreateTherapistDto {
   preferredSessionLength: number[];
   privateConfidentialSpace?: string;
   compliesWithDataPrivacyAct: boolean;
-  professionalLiabilityInsurance?: string;
   complaintsOrDisciplinaryActions?: string;
   willingToAbideByPlatformGuidelines: boolean;
   expertise?: string[];
@@ -44,6 +42,9 @@ export interface CreateTherapistDto {
   treatmentSuccessRates: any;
   sessionLength: string;
   hourlyRate: number;
+  preferOnlineOrOffline?: string;
+  willingToCaterOutsideCebu?: boolean;
+  preferredPayrollAccount?: string;
 }
 
 export interface UpdateTherapistDto extends Partial<Omit<CreateTherapistDto, 'userId'>> {

@@ -302,9 +302,8 @@ export class AuthService {
           status: 'PENDING',
           mobile: '',
           province: '',
-          providerType: '',
+          providerType: 'LICENSED_PSYCHOLOGIST' as any,
           professionalLicenseType: '',
-          isPRCLicensed: '',
           prcLicenseNumber: '',
           expirationDateOfLicense: new Date(),
           practiceStartDate: new Date(),
@@ -702,7 +701,7 @@ export class AuthService {
   async handleOAuthLogin(
     oauthUser: any,
     provider: string,
-    role: string = 'client',
+    role = 'client',
   ) {
     try {
       // Check if user exists
@@ -772,9 +771,8 @@ export class AuthService {
               status: 'PENDING',
               mobile: '',
               province: '',
-              providerType: '',
+              providerType: 'LICENSED_PSYCHOLOGIST' as any,
               professionalLicenseType: '',
-              isPRCLicensed: '',
               prcLicenseNumber: '',
               expirationDateOfLicense: new Date(),
               practiceStartDate: new Date(),

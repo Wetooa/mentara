@@ -33,6 +33,7 @@ import { JournalModule } from './journal/journal.module';
 import { JobsModule } from './jobs/jobs.module';
 import { PresenceModule } from './presence/presence.module';
 import { RecommendationsModule } from './recommendations/recommendations.module';
+import { PackagesModule } from './packages/packages.module';
 import { PrismaService } from './providers/prisma-client.provider';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -111,6 +112,7 @@ import { ResponseTransformInterceptor } from './common/interceptors/response-tra
     JobsModule,
     PresenceModule,
     RecommendationsModule,
+    PackagesModule,
   ],
   controllers: [AppController],
   providers: [
