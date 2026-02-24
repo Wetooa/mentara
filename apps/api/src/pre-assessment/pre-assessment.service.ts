@@ -158,7 +158,7 @@ export class PreAssessmentService {
 
       // Find the anonymous pre-assessment
       const anonymousAssessment = await this.prisma.preAssessment.findFirst({
-        where: { sessionId, clientId: null },
+        where: { id: sessionId, clientId: null },
       });
 
       if (!anonymousAssessment) {

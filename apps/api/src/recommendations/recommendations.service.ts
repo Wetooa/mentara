@@ -9,34 +9,23 @@ export class RecommendationsService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  private readonly questionnaireMap: Record<string, string> = {
-    // Acronyms
-    GAD7: 'Anxiety',
-    PHQ9: 'Depression',
-    ISI: 'Insomnia',
-    ASRS: 'ADHD',
-    AUDIT: 'Alcohol Use',
-    DAST10: 'Substance Use',
-    "PCL-5": 'PTSD',
-    MDQ: 'Bipolar Disorder',
-    EDEQ: 'Eating Disorders',
-    // Web IDs
-    adhd: 'ADHD',
-    alcohol: 'Alcohol Use',
-    'binge-eating': 'Eating Disorders',
-    burnout: 'Burnout',
-    'drug-abuse': 'Substance Use',
-    anxiety: 'Anxiety',
-    insomnia: 'Insomnia',
-    'mood-disorder': 'Bipolar Disorder',
-    'obsessional-compulsive': 'OCD',
-    'panic-disorder': 'Panic',
-    stress: 'Stress',
-    phobia: 'Phobia',
-    depression: 'Depression',
-    ptsd: 'PTSD',
-    'social-phobia': 'Social Anxiety',
-  };
+  private readonly questionnairePatterns: { pattern: RegExp; condition: string }[] = [
+  { pattern: /GAD7|anxiety/i, condition: 'anxiety' },
+  { pattern: /PHQ9|depression/i, condition: 'depression' },
+  { pattern: /ISI|insomnia/i, condition: 'insomnia' },
+  { pattern: /ASRS|adhd/i, condition: 'adhd' },
+  { pattern: /AUDIT|alcohol/i, condition: 'alcohol' },
+  { pattern: /DAST10|drug-abuse/i, condition: 'drug_abuse' },
+  { pattern: /PCL-5|ptsd/i, condition: 'ptsd' },
+  { pattern: /MDQ|mood-disorder|bipolar/i, condition: 'bipolar' },
+  { pattern: /EDEQ|binge-eating|eating-disorder/i, condition: 'eating_disorder' },
+  { pattern: /burnout/i, condition: 'burnout' },
+  { pattern: /obsessional-compulsive|ocd/i, condition: 'ocd' },
+  { pattern: /panic-disorder|panic/i, condition: 'panic' },
+  { pattern: /stress/i, condition: 'stress' },
+  { pattern: /social-phobia|social-anxiety/i, condition: 'social_anxiety' },
+  { pattern: /phobia/i, condition: 'phobia' },
+];
 
   private readonly conditionToEnumMap: Record<string, QuestionnaireType> = {
     Anxiety: QuestionnaireType.ANXIETY,
@@ -63,14 +52,17 @@ export class RecommendationsService {
     });
 
     const userConditions: string[] = [];
+
     if (preAssessment && preAssessment.data) {
       const data = preAssessment.data as Record<string, any>;
       const scores = (data.questionnaireScores || {}) as Record<string, any>;
 
       Object.entries(scores).forEach(([key, value]) => {
-        const condition = this.questionnaireMap[key];
+        const patternMatch = this.questionnairePatterns.find(p => p.pattern.test(key));
+        const condition = patternMatch?.condition;
+        
         if (condition && value.severity) {
-          userConditions.push(condition);
+          userConditions.push(condition.toUpperCase());
         }
       });
     }

@@ -1,76 +1,77 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useApi } from "@/lib/api";
-import { MentaraApiError } from "@/lib/api/errorHandler";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { 
+  usePreAssessmentControllerCreatePreAssessment,
+  preAssessmentControllerGetPreAssessment,
+  PreAssessmentDto
+} from "api-client";
+import { AxiosError } from "axios";
 import { queryKeys } from "@/lib/queryKeys";
 import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
-import {
-  CreatePreAssessmentDto,
-  PreAssessment
-} from "@/types/api/pre-assessment";
 
 /**
  * React Query hook for fetching user's pre-assessment
  * GET /pre-assessment
  */
 export function useUserPreAssessment() {
-  const api = useApi();
-
-  return useQuery({
+  return useQuery<PreAssessmentDto | null>({
     queryKey: queryKeys.preAssessment.responses({ user: true }),
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       try {
-        return await api.preAssessment.getUserAssessment();
+        return await preAssessmentControllerGetPreAssessment(signal);
       } catch (error: unknown) {
+        const axiosError = error as AxiosError;
         // If it's a 404, return null instead of throwing
-        // This allows React Query to cache the "no assessment" state as successful data
-        if (error instanceof MentaraApiError && error.status === 404) {
+        if (axiosError.response?.status === 404) {
           return null;
         }
-        // For other errors, throw so they can be handled/retried
         throw error;
       }
-    },
-    retry: (failureCount, error: unknown) => {
-      // Don't retry on 404 (no assessment exists yet)
-      if (error instanceof MentaraApiError && error.status === 404) {
-        return false;
-      }
-      // Don't retry on 500 errors either
-      if (error instanceof MentaraApiError && error.status === 500 && error.message?.includes('not found')) {
-        return false;
-      }
-      return failureCount < 3;
     },
     staleTime: STALE_TIME.SHORT, // 2 minutes
     gcTime: GC_TIME.SHORT, // 5 minutes
     refetchOnWindowFocus: false,
-    // Don't throw errors for 404 (already handled in queryFn)
-    throwOnError: false,
+    retry: (failureCount, error: unknown) => {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      const status = axiosError.response?.status;
+      
+      // Don't retry on 404 (no assessment exists yet)
+      if (status === 404) {
+        return false;
+      }
+      
+      // Don't retry on 500 errors if they indicate "not found" (common in some parts of this system)
+      if (status === 500 && axiosError.response?.data?.message?.includes('not found')) {
+        return false;
+      }
+
+      return failureCount < 3;
+    },
   });
 }
+
+
+
 
 /**
  * React Query hook for creating a pre-assessment
  * POST /pre-assessment
  */
 export function useCreatePreAssessment() {
-  const api = useApi();
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: CreatePreAssessmentDto) => api.preAssessment.create(data),
-    onSuccess: (data: PreAssessment) => {
-      // Update the user's pre-assessment cache
-      queryClient.setQueryData(queryKeys.preAssessment.responses({ user: true }), data);
-
-      // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.preAssessment.all });
-    },
-    onError: (error) => {
-      console.error("Failed to create pre-assessment:", error);
-    },
+  return usePreAssessmentControllerCreatePreAssessment({
+    mutation: {
+      onSuccess: () => {
+        // Invalidate related queries
+        queryClient.invalidateQueries({ queryKey: queryKeys.preAssessment.all });
+      },
+      onError: (error) => {
+        console.error("Failed to create pre-assessment:", error);
+      },
+    }
   });
 }
+
 
 
 /**
