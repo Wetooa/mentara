@@ -26,6 +26,7 @@ import { TherapistAuthService } from './therapist/therapist-auth.service';
 import { AdminAuthService } from './admin/admin-auth.service';
 import { ModeratorAuthService } from './moderator/moderator-auth.service';
 
+import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
 import { TherapistModule } from '../therapist/therapist.module';
 
 @Module({
@@ -39,6 +40,7 @@ import { TherapistModule } from '../therapist/therapist.module';
     }),
     EmailModule,
     TherapistModule,
+    PreAssessmentModule,
   ],
   controllers: [
     AuthHealthController,

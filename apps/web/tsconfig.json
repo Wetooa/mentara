@@ -1,5 +1,7 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "ES2017",
     "lib": [
       "dom",
@@ -26,6 +28,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "api-client": [
+        "../../libs/api-client/src/index.ts"
       ]
     }
   },

@@ -20,7 +20,6 @@ build/
 Thumbs.db
 
 # Mentara API
-apps/api/prisma/migrations/
 apps/api/.prisma/
 apps/api/.prisma/client/
 apps/api/uploads/
@@ -57,3 +56,6 @@ database/exports/*
 
 # Agent
 .agent
+
+# Orval
+generated/

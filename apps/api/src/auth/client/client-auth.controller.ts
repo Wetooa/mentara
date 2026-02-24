@@ -12,20 +12,16 @@ import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../core/decorators/current-user-id.decorator';
 import { Public } from '../core/decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-// Import types from local auth types
 import type {
   RegisterClientDto,
+  ClientAuthResponse,
+  EmailResponse,
   VerifyRegistrationOtpDto,
   ResendRegistrationOtpDto,
-  ClientAuthResponse,
-  ClientProfileResponse,
-  OnboardingStatusResponse,
-  EmailResponse,
 } from '../types';
-import type { SuccessResponse } from '../../types/global';
 
-// Import validation schemas from local validation
 import {
+  RegisterClientDtoSchema,
   VerifyRegistrationOtpDtoSchema,
   ResendRegistrationOtpDtoSchema,
 } from '../validation';
@@ -40,7 +36,7 @@ export class ClientAuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
-    @Body() registerDto: RegisterClientDto,
+    @Body(new ZodValidationPipe(RegisterClientDtoSchema)) registerDto: RegisterClientDto,
   ): Promise<ClientAuthResponse> {
     const result = await this.clientAuthService.registerClient(registerDto);
 
@@ -54,8 +50,11 @@ export class ClientAuthController {
         isEmailVerified: result.user.emailVerified ?? false,
         createdAt: result.user.createdAt,
         updatedAt: result.user.updatedAt,
+        client: {
+          hasSeenTherapistRecommendations: false,
+        },
       },
-      token: result.tokens.accessToken, // Single JWT token
+      token: result.tokens.accessToken,
       message: result.message,
     };
   }
@@ -64,26 +63,8 @@ export class ClientAuthController {
   @Get('profile')
   async getProfile(
     @CurrentUserId() userId: string,
-  ): Promise<ClientProfileResponse> {
+  ): Promise<any> {
     return this.clientAuthService.getClientProfile(userId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('first-sign-in-status')
-  @HttpCode(HttpStatus.OK)
-  async getFirstSignInStatus(
-    @CurrentUserId() userId: string,
-  ): Promise<OnboardingStatusResponse> {
-    return this.clientAuthService.getFirstSignInStatus(userId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('mark-recommendations-seen')
-  @HttpCode(HttpStatus.OK)
-  async markRecommendationsSeen(
-    @CurrentUserId() userId: string,
-  ): Promise<SuccessResponse> {
-    return this.clientAuthService.markRecommendationsSeen(userId);
   }
 
   @Public()
@@ -93,7 +74,7 @@ export class ClientAuthController {
   async verifyOtp(
     @Body(new ZodValidationPipe(VerifyRegistrationOtpDtoSchema))
     verifyDto: VerifyRegistrationOtpDto,
-  ): Promise<EmailResponse> {
+  ): Promise<ClientAuthResponse> {
     return this.clientAuthService.verifyRegistrationOtp(
       verifyDto.email,
       verifyDto.otpCode,

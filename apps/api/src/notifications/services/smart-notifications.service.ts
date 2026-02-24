@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { NotificationPriority, NotificationType } from '@prisma/client';
-import { CacheService } from '../../cache/cache.service';
 
 export interface NotificationPreferences {
   userId: string;
@@ -28,20 +27,12 @@ export class SmartNotificationsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cache: CacheService,
   ) {}
 
   /**
    * Get user notification preferences
    */
   async getPreferences(userId: string): Promise<NotificationPreferences> {
-    const cacheKey = this.cache.generateKey('notification-preferences', userId);
-    const cached = await this.cache.get<NotificationPreferences>(cacheKey);
-    
-    if (cached) {
-      return cached;
-    }
-
     // Get from database or use defaults
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -65,8 +56,6 @@ export class SmartNotificationsService {
       groupByTimeWindow: 5, // 5 minutes
     };
 
-    // Cache for 1 hour
-    await this.cache.set(cacheKey, defaultPreferences, 3600);
     return defaultPreferences;
   }
 
@@ -79,9 +68,6 @@ export class SmartNotificationsService {
   ): Promise<NotificationPreferences> {
     const current = await this.getPreferences(userId);
     const updated = { ...current, ...preferences, userId };
-
-    const cacheKey = this.cache.generateKey('notification-preferences', userId);
-    await this.cache.set(cacheKey, updated, 3600);
 
     this.logger.log(`Updated notification preferences for user ${userId}`);
     return updated;

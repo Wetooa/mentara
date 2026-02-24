@@ -13,10 +13,8 @@ import { Loader2 } from "lucide-react";
 export default function VerifyAccount() {
   const { details } = useSignUpStore();
   const { 
-    isLoading, 
-    isResending, 
-    resendVerificationEmail, 
-    verificationStatus 
+    isSending, 
+    handleResendCode, 
   } = useEmailVerification();
 
   // If no email details available, redirect or show error
@@ -84,12 +82,12 @@ export default function VerifyAccount() {
               Didn&apos;t receive an email?
             </p>
             <Button
-              onClick={resendVerificationEmail}
+              onClick={() => handleResendCode()}
               variant="outline"
               className="w-full mb-3"
-              disabled={isResending || isLoading}
+              disabled={isSending}
             >
-              {isResending ? (
+              {isSending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Resending...
@@ -98,11 +96,7 @@ export default function VerifyAccount() {
                 "Resend Email"
               )}
             </Button>
-            {verificationStatus === 'error' && (
-              <p className="text-xs text-red-600 mt-2">
-                Failed to send email. Please try again.
-              </p>
-            )}
+
           </div>
         </div>
       </div>
@@ -113,7 +107,7 @@ export default function VerifyAccount() {
             buttonVariants({ variant: "secondary", size: "lg" }),
             "w-full font-bold"
           )}
-          href="/"
+          href="/client/results"
         >
           Done
         </Link>

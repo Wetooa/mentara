@@ -4,29 +4,19 @@ model PreAssessment {
   updatedAt              DateTime            @updatedAt
   clientId               String?             // Made optional for anonymous assessments
   sessionId              String?             @unique // Added for tracking anonymous assessments
-  answers                Json // Flat array of 201 numeric responses
-  scores                 Json
-  severityLevels         Json
-  aiEstimate             Json
-  isProcessed            Boolean             @default(false)
-  processedAt            DateTime?
-  assessmentMethod       PreAssessmentMethod @default(CHECKLIST)
-  chatbotSessionId       String?             @unique
-  conversationInsights   Json? // Extracted insights from chatbot conversation
-  // Enhanced data collection fields
-  pastTherapyExperiences Json? // Array of past therapy experiences with details
-  medicationHistory      Json? // Current medications and history
-  accessibilityNeeds     Json? // Accessibility requirements
-  culturalConsiderations Json? // Cultural, religious, or identity considerations
-  familySupportSystem    Json? // Family and support system information
-  crisisSupportNeeds     Json? // Crisis support and safety planning needs
+  method                 PreAssessmentMethod @default(CHECKLIST)
+  data                   Json // { questionnaireScores: {...} }
+  pastTherapyExperiences String?
+  medicationHistory      String?
+  accessibilityNeeds     String?
+  soapAnalysisUrl        String?
+  conversationHistoryUrl String?
+  
   client                 Client?             @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-  chatbotSession         ChatbotSession?     @relation(fields: [chatbotSessionId], references: [id], onDelete: SetNull)
 
   @@index([clientId])
   @@index([sessionId])
-  @@index([chatbotSessionId])
-  @@index([assessmentMethod])
+  @@index([method])
 }
 
 enum PreAssessmentMethod {

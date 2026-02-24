@@ -12,6 +12,7 @@ import {
   ForbiddenException,
   ParseIntPipe,
 } from '@nestjs/common';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../auth/core/decorators/current-user-role.decorator';
@@ -32,6 +33,7 @@ import type {
   GetAvailableSlotsQueryDto,
 } from './types';
 
+@ApiTags('booking')
 @Controller('booking')
 @UseGuards(JwtAuthGuard)
 export class BookingController {
@@ -67,6 +69,7 @@ export class BookingController {
   }
 
   @Get('meetings/:id')
+  @ApiParam({ name: 'id', description: 'The meeting ID' })
   async getMeeting(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -77,6 +80,7 @@ export class BookingController {
   }
 
   @Put('meetings/:id')
+  @ApiParam({ name: 'id', description: 'The meeting ID' })
   async updateMeeting(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -93,6 +97,7 @@ export class BookingController {
   }
 
   @Delete('meetings/:id/cancel')
+  @ApiParam({ name: 'id', description: 'The meeting ID' })
   async cancelMeeting(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -103,6 +108,7 @@ export class BookingController {
   }
 
   @Post('meetings/:id/accept')
+  @ApiParam({ name: 'id', description: 'The meeting ID' })
   async acceptMeetingRequest(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -119,6 +125,7 @@ export class BookingController {
   }
 
   @Post('meetings/:id/start')
+  @ApiParam({ name: 'id', description: 'The meeting ID' })
   async startMeeting(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -129,6 +136,7 @@ export class BookingController {
   }
 
   @Post('meetings/:id/complete')
+  @ApiParam({ name: 'id', description: 'The meeting ID' })
   async completeMeeting(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -145,6 +153,7 @@ export class BookingController {
   }
 
   @Post('meetings/:id/no-show')
+  @ApiParam({ name: 'id', description: 'The meeting ID' })
   async markNoShow(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -155,6 +164,7 @@ export class BookingController {
   }
 
   @Put('meetings/:id/notes')
+  @ApiParam({ name: 'id', description: 'The meeting ID' })
   async saveMeetingNotes(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -202,6 +212,7 @@ export class BookingController {
   }
 
   @Put('availability/:id')
+  @ApiParam({ name: 'id', description: 'The availability ID' })
   async updateAvailability(
     @Param(new ZodValidationPipe(AvailabilityParamsDtoSchema))
     params: AvailabilityParamsDto,
@@ -222,6 +233,7 @@ export class BookingController {
   }
 
   @Delete('availability/:id')
+  @ApiParam({ name: 'id', description: 'The availability ID' })
   async deleteAvailability(
     @Param(new ZodValidationPipe(AvailabilityParamsDtoSchema))
     params: AvailabilityParamsDto,

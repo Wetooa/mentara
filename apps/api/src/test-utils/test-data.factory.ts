@@ -3,7 +3,7 @@ import { PrismaService } from '../providers/prisma-client.provider';
 import { v4 as uuidv4 } from 'uuid';
 
 export class TestDataFactory {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // User Factory
   createUserData(overrides: Partial<any> = {}) {
@@ -195,14 +195,21 @@ export class TestDataFactory {
 
   // Pre-assessment Factory
   async createPreAssessment(userId: string, overrides: Partial<any> = {}) {
+    const scores = this.generateAssessmentScores();
+    const severityLevels = this.generateSeverityLevels();
+
     const assessmentData = {
       clientId: userId,
-      questionnaires: this.generateQuestionnaires(),
       answers: this.generateAssessmentResponses(),
-      answerMatrix: this.generateAnswerMatrix(),
-      scores: this.generateAssessmentScores(),
-      severityLevels: this.generateSeverityLevels(),
-      aiEstimate: this.generateAiEstimate(),
+      data: {
+        questionnaireScores: Object.fromEntries(
+          Object.entries(scores).map(([key, value]) => [
+            key,
+            { score: value, severity: severityLevels[key.toLowerCase()] || 'Unknown' }
+          ])
+        ),
+        documents: {}
+      } as any,
       ...overrides,
     };
 

@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MessagingService } from '../messaging/messaging.service';
-import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class DashboardService {
@@ -15,18 +14,10 @@ export class DashboardService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly messagingService: MessagingService,
-    private readonly cache: CacheService,
   ) {}
 
   async getClientDashboardData(userId: string) {
     try {
-      // Check cache first
-      const cacheKey = this.cache.generateKey('dashboard', 'client', userId);
-      const cached = await this.cache.get(cacheKey);
-      if (cached) {
-        return cached;
-      }
-
       const client = await this.prisma.client.findUnique({
         where: { userId },
         include: {
@@ -148,8 +139,6 @@ export class DashboardService {
         hasPreAssessment: !!(client.preAssessments && client.preAssessments.length > 0),
       };
 
-      // Cache the result for 5 minutes
-      await this.cache.set(cacheKey, responseData, 300);
 
       return responseData;
     } catch (error) {
@@ -166,12 +155,6 @@ export class DashboardService {
     this.logger.debug(`Getting therapist dashboard data for userId: ${userId}`);
 
     try {
-      // Check cache first
-      const cacheKey = this.cache.generateKey('dashboard', 'therapist', userId);
-      const cached = await this.cache.get(cacheKey);
-      if (cached) {
-        return cached;
-      }
       // First, verify the user exists and check their role
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
@@ -561,9 +544,6 @@ export class DashboardService {
         `Successfully retrieved dashboard data for ${therapist.user.email}`,
       );
 
-      // Cache the result for 5 minutes
-      const therapistCacheKey = this.cache.generateKey('dashboard', 'therapist', userId);
-      await this.cache.set(therapistCacheKey, dashboardData, 300);
 
       return dashboardData;
     } catch (error) {

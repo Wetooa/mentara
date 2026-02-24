@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
-import { CacheService } from '../../cache/cache.service';
 
 export interface ClientInsights {
   userId: string;
@@ -47,7 +46,6 @@ export class ClientInsightsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cache: CacheService,
   ) {}
 
   /**
@@ -58,17 +56,6 @@ export class ClientInsightsService {
     startDate: Date,
     endDate: Date,
   ): Promise<ClientInsights> {
-    const cacheKey = this.cache.generateKey(
-      'client-insights',
-      userId,
-      startDate.toISOString().split('T')[0],
-      endDate.toISOString().split('T')[0],
-    );
-
-    const cached = await this.cache.get<ClientInsights>(cacheKey);
-    if (cached) {
-      return cached;
-    }
 
     // Fetch all data in parallel
     const [
@@ -219,9 +206,6 @@ export class ClientInsightsService {
         averageResponseTime: 0, // Would need to calculate from message timestamps
       },
     };
-
-    // Cache for 15 minutes
-    await this.cache.set(cacheKey, insights, 900);
 
     return insights;
   }

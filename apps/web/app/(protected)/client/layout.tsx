@@ -13,7 +13,6 @@ import { UserDisplay } from "@/components/common/UserDisplay";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 import { getSidebarStorageKey, getStorageItem } from "@/lib/config/storage";
-import { getDemoLoginConfig } from "@/lib/demo-config";
 
 // Lazy load heavy layout components
 const NotificationDropdown = dynamic(
@@ -140,22 +139,7 @@ export default function MainLayout({
     },
   ];
 
-  const demoConfig = useMemo(() => getDemoLoginConfig(), []);
-  const navItems = useMemo(
-    () =>
-      demoConfig.enabled
-        ? [
-            ...baseNavItems,
-            {
-              name: "Your Matches (demo)",
-              path: "/client/welcome?demo=1",
-              icon: "/icons/therapist.svg",
-              id: "welcome-demo",
-            },
-          ]
-        : baseNavItems,
-    [demoConfig.enabled]
-  );
+  const navItems = baseNavItems;
 
   return (
     <>
@@ -215,11 +199,10 @@ export default function MainLayout({
                         key={item.id}
                         href={item.path}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${
-                          isActive
+                        className={`relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${isActive
                             ? "bg-primary/15 text-primary"
                             : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                        }`}
+                          }`}
                       >
                         <Image
                           src={item.icon}
@@ -227,18 +210,16 @@ export default function MainLayout({
                           width={20}
                           height={20}
                           loading="lazy"
-                          className={`transition-all duration-300 ${
-                            isActive
+                          className={`transition-all duration-300 ${isActive
                               ? "text-primary scale-110"
                               : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
-                          }`}
+                            }`}
                         />
                         <span
-                          className={`font-medium transition-all duration-300 ${
-                            isActive
+                          className={`font-medium transition-all duration-300 ${isActive
                               ? "text-primary"
                               : "text-muted-foreground group-hover:text-primary"
-                          }`}
+                            }`}
                         >
                           {item.name}
                         </span>
@@ -389,11 +370,10 @@ export default function MainLayout({
                   <Link
                     key={item.id}
                     href={item.path}
-                    className={`relative group flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl transition-all duration-300 ${
-                      isActive
+                    className={`relative group flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl transition-all duration-300 ${isActive
                         ? "text-primary"
                         : "text-muted-foreground active:text-primary active:bg-primary/10"
-                    }`}
+                      }`}
                     aria-label={item.name}
                     aria-current={isActive ? "page" : undefined}
                   >
@@ -403,18 +383,16 @@ export default function MainLayout({
                       width={20}
                       height={20}
                       loading="lazy"
-                      className={`transition-all duration-300 ${
-                        isActive
+                      className={`transition-all duration-300 ${isActive
                           ? "text-primary scale-110"
                           : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
-                      }`}
+                        }`}
                     />
                     <span
-                      className={`text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300 ${
-                        isActive
+                      className={`text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300 ${isActive
                           ? "text-primary font-medium"
                           : "text-muted-foreground group-hover:text-primary"
-                      }`}
+                        }`}
                     >
                       {item.name}
                     </span>

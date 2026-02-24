@@ -4,6 +4,8 @@ model Community {
   slug                 String                @unique
   description          String
   imageUrl             String
+  category             String                @default("mental-health")
+  illnesses            QuestionnaireType[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   memberships          Membership[]
@@ -17,7 +19,26 @@ model Community {
   @@index([updatedAt])
 }
 
+enum QuestionnaireType {
+  STRESS
+  ANXIETY
+  DEPRESSION
+  DRUG_ABUSE
+  INSOMNIA
+  PANIC
+  BIPOLAR
+  OCD
+  PTSD
+  SOCIAL_ANXIETY
+  PHOBIA
+  BURNOUT
+  EATING_DISORDER
+  ADHD
+  ALCOHOL
+}
+
 model Membership {
+// ... existing models follow
   id          String    @id @default(uuid())
   joinedAt    DateTime  @default(now())
   communityId String

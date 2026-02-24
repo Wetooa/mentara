@@ -10,10 +10,8 @@ import { ConflictDetectionService } from './services/conflict-detection.service'
 import { AvailabilityValidatorService } from './services/availability-validator.service';
 import { PricingService } from './services/pricing.service';
 import { BillingService } from '../billing/billing.service';
-import { CacheModule } from '../cache/cache.module';
 
 @Module({
-  imports: [CacheModule],
   controllers: [BookingController, BookingHealthController],
   providers: [
     BookingService,

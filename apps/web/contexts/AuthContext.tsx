@@ -16,8 +16,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
 import { logger } from "@/lib/logger";
-const CLIENT_WELCOME_REDIRECT_DONE_KEY = "client_welcome_redirect_done";
-
 // Load auth debug utilities in development
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   import('@/lib/debug/auth-debug').catch(() => {
@@ -65,6 +63,7 @@ const publicRoutes = [
 
   "/therapist-application",
   "/pre-assessment",
+  "/pre-assessment/checklist",
   // Debug routes (only accessible in development)
   ...(process.env.NODE_ENV === 'development' ? ['/debug'] : []),
 ];
@@ -78,6 +77,11 @@ const roleBasePaths: Record<UserRole, string> = {
 
 // Utility functions
 const isPublicRoute = (pathname: string): boolean => {
+  // Chatbot is strictly protected and requires authentication
+  if (pathname === "/pre-assessment/chat" || pathname.startsWith("/pre-assessment/chat/")) {
+    return false;
+  }
+
   return publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
@@ -136,7 +140,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     if (isClient) {
       const tokenExists = hasAuthToken();
       setHasToken(tokenExists);
-      
+
       // For protected routes without token, allow optimistic navigation
       // but mark as needing auth redirect
       if (!tokenExists && shouldCheckAuth) {
@@ -419,7 +423,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         // Silently fail if WebSocket module can't be loaded
         logger.debug('Could not disconnect WebSocket on logout:', error);
       }
-      
+
       localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
     setHasToken(false);
@@ -434,7 +438,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   // Clear messaging cache when user changes to prevent cross-user contamination
   useEffect(() => {
     if (!isClient) return;
-    
+
     // Clear messaging queries when user changes or logs out
     // This prevents User A's data from appearing for User B
     const currentUserId = user?.id;
@@ -496,14 +500,14 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
           if (typeof window !== 'undefined' && (pathname === "/auth/register" || pathname === "/auth/sign-up")) {
             const searchParams = new URLSearchParams(window.location.search);
             const isFromPreAssessment = (searchParams.has('method') && searchParams.get('method') === 'chat') || searchParams.has('sessionId');
-            
+
             // Allow access to register/sign-up page when coming from pre-assessment
             if (isFromPreAssessment) {
               // Allow access - user may want to create new account after anonymous pre-assessment
               return;
             }
           }
-          
+
           const dashboardPath = getUserDashboardPath(userRole!);
           router.push(dashboardPath);
           return;
@@ -520,27 +524,17 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         return;
       }
 
-      // Client welcome: redirect to welcome only once per session when they haven't seen recommendations
+      // Client welcome: force redirect to welcome when they haven't seen recommendations
       // /client/welcome is always accessible; we never redirect away from it
       if (
         isAuthenticated &&
         userRole === "client"
       ) {
         if (pathname.startsWith("/client/welcome")) {
-          if (typeof window !== "undefined") {
-            sessionStorage.setItem(CLIENT_WELCOME_REDIRECT_DONE_KEY, "1");
-          }
+          // Allow access
         } else if (user?.hasSeenTherapistRecommendations === false) {
-          const alreadyRedirected =
-            typeof window !== "undefined" &&
-            sessionStorage.getItem(CLIENT_WELCOME_REDIRECT_DONE_KEY) === "1";
-          if (!alreadyRedirected) {
-            if (typeof window !== "undefined") {
-              sessionStorage.setItem(CLIENT_WELCOME_REDIRECT_DONE_KEY, "1");
-            }
-            router.push("/client/welcome");
-            return;
-          }
+          router.push("/client/welcome");
+          return;
         }
       }
 
@@ -594,7 +588,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   // Allow page to render immediately with loading states, verify auth in background
   // Only show blocking screen if we're absolutely sure there's no token on a protected route
   const shouldBlock = shouldCheckAuth && !isClient;
-  
+
   if (shouldBlock) {
     return (
       <AuthContext.Provider value={contextValue}>
