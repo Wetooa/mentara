@@ -1,6 +1,9 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ClipboardList, MessageSquare } from "lucide-react";
+import { ClipboardList, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { fadeUp } from "@/lib/animations";
 
 interface ModeSelectionFormProps {
   onSelectMode: (mode: 'checklist' | 'chatbot') => void;
@@ -10,66 +13,121 @@ export default function ModeSelectionForm({
   onSelectMode,
 }: ModeSelectionFormProps) {
   return (
-    <div className="w-full p-6 sm:p-8">
-      <div className="w-full mb-10 text-center">
-        <h4 className="text-3xl font-bold text-gray-900 mb-3">
-          Get Started with Your Assessment
-        </h4>
-        <p className="text-base text-gray-600 max-w-md mx-auto">
-          Complete the assessment using our structured questionnaire format
+    <div className="w-full p-6 sm:p-8 space-y-10">
+      <motion.div 
+        variants={fadeUp}
+        initial="initial"
+        animate="animate"
+        className="w-full text-center space-y-4"
+      >
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Sparkles className="h-6 w-6 text-primary" />
+          <h4 className="text-3xl font-bold text-gray-900">
+            How would you like to get started?
+          </h4>
+        </div>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Choose the assessment method that feels most comfortable for you. 
+          Both options will help us understand your needs and match you with the right therapist.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col gap-6" role="group" aria-label="Assessment method selection">
-        {/* Chatbot Option */}
-        <button
-          onClick={() => onSelectMode('chatbot')}
-          className={cn(
-            "group flex flex-col items-start p-6 sm:p-8 gap-4 bg-white hover:bg-primary/5 border-2 border-gray-200 hover:border-primary rounded-xl transition-all duration-200 shadow-sm hover:shadow-md text-left w-full min-h-[44px] touch-manipulation focus:outline-none focus:ring-4 focus:ring-primary/30 focus:ring-offset-2"
-          )}
-          aria-label="Select AI chatbot assessment method"
-        >
-          <div className="flex items-start gap-4 w-full">
-            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/30 transition-colors flex-shrink-0" aria-hidden="true">
-              <MessageSquare className="h-7 w-7 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h5 className="font-bold text-xl text-gray-900 mb-2">AI Chatbot Assessment</h5>
-              <p className="text-sm text-gray-600 mb-3">
-                Have a natural conversation with our AI assistant
-              </p>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                Engage in a personalized conversation where our AI will guide you through the assessment. 
-                Share your thoughts naturally, and we'll help identify areas where you might benefit from support.
-              </p>
-            </div>
-          </div>
-        </button>
-
+      <div className="grid md:grid-cols-2 gap-8 items-stretch" role="group" aria-label="Assessment method selection">
         {/* Traditional Checklist Option */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => onSelectMode('checklist')}
           className={cn(
-            "group flex flex-col items-start p-6 sm:p-8 gap-4 bg-white hover:bg-primary/5 border-2 border-gray-200 hover:border-primary rounded-xl transition-all duration-200 shadow-sm hover:shadow-md text-left w-full min-h-[44px] touch-manipulation focus:outline-none focus:ring-4 focus:ring-primary/30 focus:ring-offset-2"
+            "group flex flex-col items-stretch p-0 bg-white/50 backdrop-blur-sm border-2 border-primary/20 hover:border-primary rounded-3xl transition-all duration-300 shadow-sm hover:shadow-2xl text-left relative overflow-hidden focus:outline-none focus:ring-4 focus:ring-primary/30"
           )}
           aria-label="Select traditional checklist assessment method"
         >
-          <div className="flex items-start gap-4 w-full">
-            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/30 transition-colors flex-shrink-0" aria-hidden="true">
-              <ClipboardList className="h-7 w-7 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h5 className="font-bold text-xl text-gray-900 mb-2">Traditional Checklist</h5>
-              <p className="text-sm text-gray-600 mb-3">
-                Fill out questionnaires step by step
-              </p>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                Complete the assessment using our structured questionnaire format. 
-                Select the areas you'd like to assess and answer questions one by one.
-              </p>
-            </div>
+          <div className="absolute top-0 right-0 p-4">
+            <Badge className="bg-primary text-white">Quick & Easy</Badge>
           </div>
-        </button>
+          
+          <div className="p-8 space-y-6 flex-1 flex flex-col">
+            <div className="p-4 bg-primary/10 rounded-2xl w-fit group-hover:bg-primary/20 transition-colors" aria-hidden="true">
+              <ClipboardList className="h-10 w-10 text-primary" />
+            </div>
+            
+            <div className="space-y-2 flex-1">
+              <h5 className="font-bold text-2xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-foreground">Traditional Checklist</h5>
+              <p className="text-gray-600 leading-relaxed">
+                Complete a structured questionnaire with checklists and forms. 
+                This traditional method provides a comprehensive clinical assessment.
+              </p>
+            </div>
+
+            <ul className="space-y-3 text-sm text-gray-500">
+              <li className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-primary" />
+                Step-by-step format
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-primary" />
+                Immediate clinical insights
+              </li>
+            </ul>
+
+            <Button
+              className="w-full h-12 rounded-xl group-hover:bg-primary/90 transition-all pointer-events-none"
+              size="lg"
+            >
+              Start Checklist
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
+        </motion.button>
+
+        {/* Chatbot Option */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onSelectMode('chatbot')}
+          className={cn(
+            "group flex flex-col items-stretch p-0 bg-white/50 backdrop-blur-sm border-2 border-primary/20 hover:border-primary rounded-3xl transition-all duration-300 shadow-sm hover:shadow-2xl text-left relative overflow-hidden focus:outline-none focus:ring-4 focus:ring-primary/30"
+          )}
+          aria-label="Select AI chatbot assessment method"
+        >
+          <div className="absolute top-0 right-0 p-4">
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/30">Recommended</Badge>
+          </div>
+
+          <div className="p-8 space-y-6 flex-1 flex flex-col">
+            <div className="p-4 bg-primary/10 rounded-2xl w-fit group-hover:bg-primary/20 transition-colors" aria-hidden="true">
+              <MessageSquare className="h-10 w-10 text-primary" />
+            </div>
+            
+            <div className="space-y-2 flex-1">
+              <h5 className="font-bold text-2xl text-gray-900">AI Chatbot Assessment</h5>
+              <p className="text-gray-600 leading-relaxed">
+                Have a natural conversation with AURIS, our AI assistant. 
+                Answer questions naturally and deeply share your thoughts.
+              </p>
+            </div>
+
+            <ul className="space-y-3 text-sm text-gray-500">
+              <li className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-primary" />
+                Natural conversation flow
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-primary" />
+                Personalized experience
+              </li>
+            </ul>
+
+            <Button
+              className="w-full h-12 rounded-xl group-hover:bg-primary/90 transition-all pointer-events-none"
+              size="lg"
+            >
+              Start Chat Assessment
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
+        </motion.button>
       </div>
     </div>
   );

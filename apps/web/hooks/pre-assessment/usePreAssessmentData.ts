@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { MentaraApiError } from "@/lib/api/errorHandler";
 import { queryKeys } from "@/lib/queryKeys";
 import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import {
@@ -16,14 +17,26 @@ export function useUserPreAssessment() {
 
   return useQuery({
     queryKey: queryKeys.preAssessment.responses({ user: true }),
-    queryFn: () => api.preAssessment.getUserAssessment(),
-    retry: (failureCount, error: any) => {
-      // Don't retry on 404 (no assessment exists yet) - this is expected for new users
-      if (error?.response?.status === 404) {
+    queryFn: async () => {
+      try {
+        return await api.preAssessment.getUserAssessment();
+      } catch (error: unknown) {
+        // If it's a 404, return null instead of throwing
+        // This allows React Query to cache the "no assessment" state as successful data
+        if (error instanceof MentaraApiError && error.status === 404) {
+          return null;
+        }
+        // For other errors, throw so they can be handled/retried
+        throw error;
+      }
+    },
+    retry: (failureCount, error: unknown) => {
+      // Don't retry on 404 (no assessment exists yet)
+      if (error instanceof MentaraApiError && error.status === 404) {
         return false;
       }
-      // Don't retry on 500 errors either (backend should return 404, but handle gracefully)
-      if (error?.response?.status === 500 && error?.response?.data?.message?.includes('not found')) {
+      // Don't retry on 500 errors either
+      if (error instanceof MentaraApiError && error.status === 500 && error.message?.includes('not found')) {
         return false;
       }
       return failureCount < 3;
@@ -31,7 +44,7 @@ export function useUserPreAssessment() {
     staleTime: STALE_TIME.SHORT, // 2 minutes
     gcTime: GC_TIME.SHORT, // 5 minutes
     refetchOnWindowFocus: false,
-    // Don't throw errors for 404 - it's expected when user has no assessment
+    // Don't throw errors for 404 (already handled in queryFn)
     throwOnError: false,
   });
 }
@@ -65,15 +78,12 @@ export function useCreatePreAssessment() {
  * This hook is optimized to not throw errors when no assessment exists (404 is expected)
  */
 export function useHasPreAssessment() {
-  const { data, isLoading, error } = useUserPreAssessment();
-
-  // 404 errors are expected when user has no assessment - don't treat as error
-  const hasError = error && (error as any)?.response?.status !== 404;
+  const { data, isLoading, error, isFetching } = useUserPreAssessment();
 
   return {
     hasAssessment: !!data,
-    isLoading,
-    error: hasError ? error : null,
+    isLoading: isLoading || (isFetching && !data), // Maintain loading state while fetching initial state
+    error,
     assessment: data,
   };
 }

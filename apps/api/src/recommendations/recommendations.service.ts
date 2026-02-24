@@ -1,6 +1,7 @@
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { RecommendationResponseDto, RecommendedTherapistDto, RecommendedCommunityDto } from './types/recommendations.dto';
+import { RecommendedTherapistDto, RecommendedCommunityDto, TherapistRecommendationResponseDto, CommunityRecommendationResponseDto } from './types/recommendations.dto';
+import { Prisma, QuestionnaireType } from '@prisma/client';
 
 @Injectable()
 export class RecommendationsService {
@@ -37,54 +38,54 @@ export class RecommendationsService {
     'social-phobia': 'Social Anxiety',
   };
 
-  private readonly conditionToEnumMap: Record<string, any> = {
-    Anxiety: 'ANXIETY',
-    Depression: 'DEPRESSION',
-    Insomnia: 'INSOMNIA',
-    ADHD: 'ADHD',
-    'Alcohol Use': 'ALCOHOL',
-    'Substance Use': 'DRUG_ABUSE',
-    PTSD: 'PTSD',
-    'Bipolar Disorder': 'BIPOLAR',
-    'Eating Disorders': 'EATING_DISORDER',
-    OCD: 'OCD',
-    Panic: 'PANIC',
-    Stress: 'STRESS',
-    Phobia: 'PHOBIA',
-    'Social Anxiety': 'SOCIAL_ANXIETY',
-    Burnout: 'BURNOUT',
+  private readonly conditionToEnumMap: Record<string, QuestionnaireType> = {
+    Anxiety: QuestionnaireType.ANXIETY,
+    Depression: QuestionnaireType.DEPRESSION,
+    Insomnia: QuestionnaireType.INSOMNIA,
+    ADHD: QuestionnaireType.ADHD,
+    'Alcohol Use': QuestionnaireType.ALCOHOL,
+    'Substance Use': QuestionnaireType.DRUG_ABUSE,
+    PTSD: QuestionnaireType.PTSD,
+    'Bipolar Disorder': QuestionnaireType.BIPOLAR,
+    'Eating Disorders': QuestionnaireType.EATING_DISORDER,
+    OCD: QuestionnaireType.OCD,
+    Panic: QuestionnaireType.PANIC,
+    Stress: QuestionnaireType.STRESS,
+    Phobia: QuestionnaireType.PHOBIA,
+    'Social Anxiety': QuestionnaireType.SOCIAL_ANXIETY,
+    Burnout: QuestionnaireType.BURNOUT,
   };
 
-  async getRecommendations(userId: string): Promise<RecommendationResponseDto> {
-    try {
-      this.logger.log(`Fetching recommendations for user ${userId}`);
+  private async getUserAssessmentAndConditions(userId: string) {
+    const preAssessment = await this.prisma.preAssessment.findFirst({
+      where: { clientId: userId },
+      orderBy: { createdAt: 'desc' },
+    });
 
-      // 1. Get the latest pre-assessment
-      const preAssessment = await this.prisma.preAssessment.findFirst({
-        where: { clientId: userId },
-        orderBy: { createdAt: 'desc' },
+    const userConditions: string[] = [];
+    if (preAssessment && preAssessment.data) {
+      const data = preAssessment.data as Record<string, any>;
+      const scores = (data.questionnaireScores || {}) as Record<string, any>;
+
+      Object.entries(scores).forEach(([key, value]) => {
+        const condition = this.questionnaireMap[key];
+        if (condition && value.severity) {
+          userConditions.push(condition);
+        }
       });
+    }
 
-      console.log(JSON.stringify(preAssessment, null, 2))
+    return { preAssessment, userConditions };
+  }
 
-      // 2. Extract conditions from questionnaire scores
-      const userConditions: string[] = [];
-      if (preAssessment && preAssessment.data) {
-        const data = preAssessment.data as any;
-        const scores = data.questionnaireScores || {};
+  async getTherapistRecommendations(userId: string): Promise<TherapistRecommendationResponseDto> {
+    try {
+      this.logger.log(`Fetching therapist recommendations for user ${userId}`);
 
-        Object.entries(scores).forEach(([key, value]: [string, any]) => {
-          const condition = this.questionnaireMap[key];
-          if (condition && value.severity) {
-            userConditions.push(condition);
-          }
-        });
-      }
-
+      const { preAssessment, userConditions } = await this.getUserAssessmentAndConditions(userId);
       this.logger.log(`User conditions identified: ${userConditions.join(', ')}`);
 
-      // 3. Find therapists matching these conditions
-      const therapistWhere: any = {
+      const therapistWhere: Prisma.TherapistWhereInput = {
         status: 'APPROVED',
       };
 
@@ -113,7 +114,6 @@ export class RecommendationsService {
         },
       });
 
-      // 4. Transform and score therapists
       const recommendedTherapists: RecommendedTherapistDto[] = therapists.map((therapist) => {
         const reviews = therapist.reviews || [];
         const averageRating = reviews.length > 0
@@ -138,13 +138,8 @@ export class RecommendationsService {
         matchScore += averageRating * 2;
         matchScore += (therapist.yearsOfExperience || 0) * 0.5;
 
-        if (averageRating >= 4.5) {
-          matchReasons.push('Highly rated by clients');
-        }
-
-        if ((therapist.yearsOfExperience || 0) >= 10) {
-          matchReasons.push('Extensive clinical experience');
-        }
+        if (averageRating >= 4.5) matchReasons.push('Highly rated by clients');
+        if ((therapist.yearsOfExperience || 0) >= 10) matchReasons.push('Extensive clinical experience');
 
         const accessibility = preAssessment?.accessibilityNeeds?.toLowerCase() || '';
         if ((accessibility.includes('online') || accessibility.includes('video') || accessibility.includes('remote')) && therapist.comfortableUsingVideoConferencing) {
@@ -168,16 +163,35 @@ export class RecommendationsService {
         };
       });
 
-      // Sort and take top 3 therapists
       recommendedTherapists.sort((a, b) => b.matchScore - a.matchScore);
       const topTherapists = recommendedTherapists.slice(0, 3);
 
-      // 5. Find communities matching conditions
-      const targetEnums = userConditions
-        .map(c => this.conditionToEnumMap[c])
-        .filter(Boolean);
+      return {
+        success: true,
+        data: {
+          therapists: topTherapists,
+          total: topTherapists.length,
+          userConditions,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Error generating therapist recommendations: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to generate therapist recommendations');
+    }
+  }
 
-      const communityWhere: any = {};
+  async getCommunityRecommendations(userId: string): Promise<CommunityRecommendationResponseDto> {
+    try {
+      this.logger.log(`Fetching community recommendations for user ${userId}`);
+
+      const { userConditions } = await this.getUserAssessmentAndConditions(userId);
+      this.logger.log(`User conditions identified: ${userConditions.join(', ')}`);
+
+      const targetEnums: QuestionnaireType[] = userConditions
+        .map(c => this.conditionToEnumMap[c])
+        .filter((c): c is QuestionnaireType => !!c);
+
+      const communityWhere: Prisma.CommunityWhereInput = {};
       if (targetEnums.length > 0) {
         communityWhere.illnesses = {
           hasSome: targetEnums,
@@ -195,21 +209,19 @@ export class RecommendationsService {
         },
       });
 
-      // 6. Transform and score communities
       const recommendedCommunities: RecommendedCommunityDto[] = communities.map((community) => {
-        let matchScore = 60; // Slightly higher base for communities
+        let matchScore = 60;
         const matchReasons: string[] = [];
         const communityIllnesses = community.illnesses || [];
 
         userConditions.forEach((condition) => {
           const enumValue = this.conditionToEnumMap[condition];
-          if (enumValue && communityIllnesses.includes(enumValue)) {
+          if (enumValue && (communityIllnesses as QuestionnaireType[]).includes(enumValue)) {
             matchScore += 15;
             matchReasons.push(`Focuses on ${condition}`);
           }
         });
 
-        // Boost based on popularity
         const memberCount = community._count?.memberships || 0;
         if (memberCount > 50) {
           matchScore += 5;
@@ -228,27 +240,20 @@ export class RecommendationsService {
         };
       });
 
-      // Sort and take top 3 communities
       recommendedCommunities.sort((a, b) => b.matchScore - a.matchScore);
       const topCommunities = recommendedCommunities.slice(0, 3);
 
       return {
         success: true,
         data: {
-          therapists: topTherapists,
           communities: topCommunities,
-          total: topTherapists.length + topCommunities.length,
+          total: topCommunities.length,
           userConditions,
-          userContext: {
-            pastTherapyExperiences: preAssessment?.pastTherapyExperiences,
-            medicationHistory: preAssessment?.medicationHistory,
-            accessibilityNeeds: preAssessment?.accessibilityNeeds,
-          },
         },
       };
     } catch (error) {
-      this.logger.error(`Error generating recommendations: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Failed to generate recommendations');
+      this.logger.error(`Error generating community recommendations: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to generate community recommendations');
     }
   }
 }

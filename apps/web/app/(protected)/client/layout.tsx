@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,6 +13,10 @@ import { UserDisplay } from "@/components/common/UserDisplay";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 import { getSidebarStorageKey, getStorageItem } from "@/lib/config/storage";
+import { useQueryClient } from "@tanstack/react-query";
+import { useApi } from "@/lib/api";
+import { MentaraApiError } from "@/lib/api/errorHandler";
+import { queryKeys } from "@/lib/queryKeys";
 
 // Lazy load heavy layout components
 const NotificationDropdown = dynamic(
@@ -81,13 +85,37 @@ export default function MainLayout({
 }>) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { logout, user, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const api = useApi();
 
   // Load sidebar state synchronously to match sidebar's initial state
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
     return getStorageItem(getSidebarStorageKey("client"), false);
   });
+
+  // Prefetch pre-assessment status for smoother navigation to therapist page
+  useEffect(() => {
+    if (isAuthenticated && user?.role === "client") {
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.preAssessment.responses({ user: true }),
+        queryFn: async () => {
+          try {
+            return await api.preAssessment.getUserAssessment();
+          } catch (error: unknown) {
+            if (error instanceof MentaraApiError && error.status === 404) {
+              return null;
+            }
+            throw error;
+          }
+        },
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      }).catch(() => {
+        // Silently fail prefetch - it's just for optimization
+      });
+    }
+  }, [isAuthenticated, user?.role, queryClient, api]);
 
   const handleLogout = () => {
     logout();
