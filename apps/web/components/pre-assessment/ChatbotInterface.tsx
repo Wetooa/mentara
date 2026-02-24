@@ -141,7 +141,7 @@ export default function ChatbotInterface({
                 {/* Chat Column */}
                 <div className="flex-1 flex flex-col relative bg-dot-pattern overflow-hidden">
                     <ScrollArea className="flex-1 px-4 sm:px-10 py-8">
-                        <div className="w-full max-w-5xl mx-auto space-y-6">
+                        <div className="w-full max-w-7xl mx-auto space-y-6">
                             <AnimatePresence mode="popLayout">
                                 {!sessionId ? (
                                     <motion.div
@@ -201,7 +201,7 @@ export default function ChatbotInterface({
 
                     {/* Floating Input Area */}
                     <div className="p-4 sm:p-10 bg-gradient-to-t from-[#F8FAFC] via-[#F8FAFC]/90 to-transparent shrink-0">
-                        <div className="w-full max-w-5xl mx-auto">
+                        <div className="w-full max-w-7xl mx-auto">
                                 {sessionId ? (
                                     <div className="space-y-4">
                                         <div className="relative group">
@@ -258,7 +258,7 @@ export default function ChatbotInterface({
 
                 {/* Session Insights Sidebar — only visible when a session is active */}
                 {sessionId && (
-                    <aside className="hidden lg:flex flex-col w-72 shrink-0 border-l border-slate-200 bg-white px-5 py-6 overflow-y-auto gap-4">
+                    <aside className="hidden lg:flex flex-col w-72 shrink-0 border-l border-slate-200 bg-whi    te px-5 py-6 overflow-y-auto gap-4">
                         {/* Header */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">

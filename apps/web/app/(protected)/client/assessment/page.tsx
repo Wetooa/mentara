@@ -12,7 +12,8 @@ import { usePreAssessment } from "@/hooks/pre-assessment/usePreAssessment";
 import { useCreatePreAssessment } from "@/hooks/pre-assessment/usePreAssessmentData";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 import { calculateDetailedResults } from "@/lib/assessment-scoring";
-import { Loader2, Sparkles } from "lucide-react";
+import { Action, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type AssessmentMode = 'selection' | 'checklist' | 'chatbot';
 
@@ -140,9 +141,12 @@ function AssessmentPageContent() {
   };
 
   return (
-    <div className="bg-white h-[calc(100vh-64px)] w-full flex flex-col overflow-hidden">
+    <div className={cn(
+      "bg-gradient-to-b from-tertiary/10 to-transparent w-full flex flex-col overflow-hidden",
+      mode === 'chatbot' ? "h-[calc(100vh-64px)]" : "min-h-[calc(100vh-64px)]"
+    )}>
       {/* Integrated Navigation */}
-      <nav className="flex items-center justify-between p-4 px-6 border-b border-gray-200 bg-white shrink-0">
+      <nav className="flex items-center justify-between p-4 px-6 border-b border-gray-200 bg-white/50 backdrop-blur-md shrink-0 sticky top-0 z-10">
         <div className="flex items-center gap-4">
           <Button
             onClick={handleBack}
@@ -165,8 +169,13 @@ function AssessmentPageContent() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 w-full overflow-hidden flex flex-col">
-        {renderContent()}
+      <main className="flex-1 w-full overflow-hidden flex flex-col items-center">
+        <div className={cn(
+          "flex-1 flex flex-col overflow-hidden",
+          mode === 'chatbot' ? "w-full" : "w-full max-w-4xl"
+        )}>
+          {renderContent()}
+        </div>
       </main>
     </div>
   );

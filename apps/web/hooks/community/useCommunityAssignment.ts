@@ -1,9 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
 import { toast } from "sonner";
-import { MentaraApiError } from "@/lib/api/errorHandler";
+import { useRecommendationsControllerGetCommunityRecommendations } from "api-client";
+import type { CommunityRecommendationResponseDto } from "api-client";
+import { useMemo, useCallback } from "react";
 
 /**
  * Hook for managing community assignments and recommendations
@@ -14,79 +16,65 @@ export function useCommunityAssignment() {
 
   // Get recommended communities for current user
   const {
-    data: recommendedCommunities,
+    data: recommendationsResponse,
     isLoading: isLoadingRecommendations,
     error: recommendationsError,
     refetch: refetchRecommendations,
-  } = useQuery({
-    queryKey: [...queryKeys.communities.recommended(), 'assignment'],
-    queryFn: () => api.communities.getMyRecommendedCommunities(),
-    staleTime: STALE_TIME.STATIC, // 30 minutes
-    gcTime: GC_TIME.EXTENDED, // 1 hour
-    refetchOnWindowFocus: false,
+  } = useRecommendationsControllerGetCommunityRecommendations({
+    query: {
+      staleTime: STALE_TIME.STATIC, // 30 minutes
+      gcTime: GC_TIME.EXTENDED, // 1 hour
+      refetchOnWindowFocus: false,
+    }
   });
 
-  // Assign communities to current user
+  // Transform and memoize the data
+  const recommendedCommunities = useMemo(() => {
+    const data = (recommendationsResponse as CommunityRecommendationResponseDto)?.data;
+    return data?.communities || [];
+  }, [recommendationsResponse]);
+
+  // Assign recommended communities to current user
   const assignToMeMutation = useMutation({
-    mutationFn: () => api.communities.assignCommunitiesToMe(),
-    onSuccess: (data) => {
+    mutationFn: async () => {
+      const slugs = recommendedCommunities.map(c => c.slug);
+      if (slugs.length === 0) return { data: { successfulJoins: [], failedJoins: [] } };
+      return api.communities.joinCommunities(slugs);
+    },
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.communities.userMemberships() });
       queryClient.invalidateQueries({ queryKey: queryKeys.communities.recommended() });
-      toast.success(`Assigned to ${data.assignedCommunities.length} communities`);
+      toast.success(`Assigned to ${data.data.successfulJoins.length} communities`);
     },
-    onError: (error: MentaraApiError) => {
+    onError: () => {
       toast.error("Failed to assign communities");
     },
   });
 
-  // Assign communities to specific user (admin feature)
-  const assignToUserMutation = useMutation({
-    mutationFn: (userId: string) => api.communities.assignCommunitiesToUser(userId),
-    onSuccess: (data, userId) => {
-      queryClient.invalidateQueries({ 
-        queryKey: [...queryKeys.communities.all, 'memberships', 'byUser', userId] 
-      });
-      toast.success(`Assigned ${data.assignedCommunities.length} communities to user`);
+  // Assign specific communities to current user
+  const joinCommunitiesMutation = useMutation({
+    mutationFn: (slugs: string[]) => api.communities.joinCommunities(slugs),
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.userMemberships() });
+      toast.success(`Joined ${data.data.successfulJoins.length} communities`);
     },
-    onError: (error: MentaraApiError) => {
-      toast.error("Failed to assign communities to user");
-    },
-  });
-
-  // Bulk assign communities to multiple users (admin feature)
-  const bulkAssignMutation = useMutation({
-    mutationFn: (userIds: string[]) => api.communities.bulkAssignCommunities(userIds),
-    onSuccess: (data) => {
-      // Invalidate memberships for all affected users
-      Object.keys(data.results).forEach(userId => {
-        queryClient.invalidateQueries({ 
-          queryKey: ['communities', 'memberships', 'byUser', userId] 
-        });
-      });
-      const totalAssigned = Object.values(data.results).reduce(
-        (sum, assignments) => sum + assignments.length, 0
-      );
-      toast.success(`Bulk assigned ${totalAssigned} communities to ${Object.keys(data.results).length} users`);
-    },
-    onError: (error: MentaraApiError) => {
-      toast.error("Failed to bulk assign communities");
+    onError: () => {
+      toast.error("Failed to join communities");
     },
   });
 
   return {
-    recommendedCommunities: recommendedCommunities?.recommendedCommunities || [],
+    recommendedCommunities,
     isLoadingRecommendations,
     recommendationsError,
-    refetchRecommendations,
+    refetchRecommendations: useCallback(() => refetchRecommendations(), [refetchRecommendations]),
     
     // Assignment operations
     assignToMe: () => assignToMeMutation.mutate(),
-    assignToUser: (userId: string) => assignToUserMutation.mutate(userId),
-    bulkAssign: (userIds: string[]) => bulkAssignMutation.mutate(userIds),
+    joinCommunities: (slugs: string[]) => joinCommunitiesMutation.mutate(slugs),
     
     // Loading states
     isAssigningToMe: assignToMeMutation.isPending,
-    isAssigningToUser: assignToUserMutation.isPending,
-    isBulkAssigning: bulkAssignMutation.isPending,
+    isJoiningCommunities: joinCommunitiesMutation.isPending,
   };
 }

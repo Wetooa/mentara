@@ -1,8 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { STALE_TIME, GC_TIME } from "@/lib/constants/react-query";
-import type { TherapistRecommendation } from "@/types/api/therapist";
-import { TherapistCardData, transformTherapistForCard } from "@/types/therapist";
-import { useRecommendationsControllerGetRecommendations } from "api-client";
+import { transformTherapistForCard } from "@/types/therapist";
+import { 
+  useRecommendationsControllerGetTherapistRecommendations,
+  useRecommendationsControllerGetCommunityRecommendations 
+} from "api-client";
+import type { 
+  TherapistRecommendationResponseDto,
+  CommunityRecommendationResponseDto,
+  RecommendedTherapistDto,
+  RecommendedCommunityDto
+} from "api-client";
 
 export interface UseTherapistRecommendationsOptions {
   /** Maximum number of therapists to fetch */
@@ -17,7 +25,7 @@ export interface UseTherapistRecommendationsOptions {
 
 export interface UseTherapistRecommendationsReturn {
   /** Array of recommended therapists */
-  therapists: TherapistRecommendation[];
+  therapists: RecommendedTherapistDto[];
   /** Loading state */
   isLoading: boolean;
   /** Error state */
@@ -28,8 +36,6 @@ export interface UseTherapistRecommendationsReturn {
   totalCount: number;
   /** User conditions from assessment */
   userConditions?: string[];
-  /** Match criteria used for recommendations */
-  matchCriteria?: any;
   /** Average match score */
   averageMatchScore?: number;
 }
@@ -47,7 +53,7 @@ export interface UseWelcomeRecommendationsOptions {
 
 export interface UseWelcomeRecommendationsReturn {
   /** Array of recommended therapists */
-  therapists: TherapistRecommendation[];
+  therapists: RecommendedTherapistDto[];
   /** Loading state */
   isLoading: boolean;
   /** Error state */
@@ -60,10 +66,10 @@ export interface UseWelcomeRecommendationsReturn {
   averageMatchScore?: number;
   /** Welcome message for the user */
   welcomeMessage?: string;
-  /** Whether this is first time seeing recommendations */
-  isFirstTime?: boolean;
   /** Communities data for welcome page */
-  communities?: any[];
+  communities: RecommendedCommunityDto[];
+  /** Whether this is the first time the user is seeing recommendations */
+  isFirstTime?: boolean;
 }
 
 /**
@@ -71,15 +77,14 @@ export interface UseWelcomeRecommendationsReturn {
  * Best for: Recommendation sections, "Suggested for You" areas
  */
 export function useTherapistRecommendations(
-  options?: UseTherapistRecommendationsOptions
+  _options: UseTherapistRecommendationsOptions = {}
 ): UseTherapistRecommendationsReturn {
-
   const { 
     data: recommendationsResponse, 
     isLoading, 
     error,
     refetch 
-  } = useRecommendationsControllerGetRecommendations({
+  } = useRecommendationsControllerGetTherapistRecommendations({
     query: {
       staleTime: STALE_TIME.MEDIUM, // 5 minutes
       gcTime: GC_TIME.MEDIUM, // 10 minutes
@@ -95,38 +100,33 @@ export function useTherapistRecommendations(
         therapists: [],
         totalCount: 0,
         userConditions: [],
-        matchCriteria: undefined,
         averageMatchScore: 0,
       };
     }
 
-    // Handle the actual API response structure: { success, data: { therapists, totalCount, ... }, timestamp }
-    // @ts-expect-error - The generated orval client might return any/void, so we cast/access dynamically
-    const dataPayload = recommendationsResponse?.data || recommendationsResponse;
-    const therapists = dataPayload.therapists || [];
-    const totalCount = dataPayload.total || dataPayload.totalCount || 0;
-    const userConditions = dataPayload.userConditions || [];
-    const matchCriteria = dataPayload.matchCriteria;
+    const dataPayload = (recommendationsResponse as TherapistRecommendationResponseDto).data;
+    const therapists = dataPayload?.therapists || [];
+    const totalCount = dataPayload?.total || 0;
+    const userConditions = dataPayload?.userConditions || [];
     
     // Calculate average match score from actual API structure
     const averageMatchScore = therapists.length > 0
-      ? therapists.reduce((sum: number, therapist: any) => sum + (therapist.matchScore || 0), 0) / therapists.length
+      ? therapists.reduce((sum: number, therapist: RecommendedTherapistDto) => sum + (therapist.matchScore || 0), 0) / therapists.length
       : 0;
 
     return {
       therapists,
       totalCount,
       userConditions,
-      matchCriteria,
       averageMatchScore,
     };
   }, [recommendationsResponse]);
 
   return {
     ...transformedData,
-    isLoading,
+    isLoading: !!isLoading,
     error: error as Error | null,
-    refetch,
+    refetch: refetch as () => void,
   };
 }
 
@@ -135,62 +135,67 @@ export function useTherapistRecommendations(
  * Includes communities and additional welcome-specific data
  */
 export function useWelcomeRecommendations(
-  options?: UseWelcomeRecommendationsOptions
 ): UseWelcomeRecommendationsReturn {
-  const { 
-    data: recommendationsResponse, 
-    isLoading, 
-    error,
-    refetch 
-  } = useRecommendationsControllerGetRecommendations({
+  const {
+    data: therapistsResponse,
+    isLoading: isLoadingTherapists,
+    error: therapistsError,
+    refetch: refetchTherapists,
+  } = useRecommendationsControllerGetTherapistRecommendations({
     query: {
       staleTime: STALE_TIME.MEDIUM, // 5 minutes
       gcTime: GC_TIME.MEDIUM, // 10 minutes
       refetchOnWindowFocus: false,
-      enabled: true,
     }
   });
 
-  // Transform and memoize the data
-  const transformedData = useMemo(() => {
-    if (!recommendationsResponse) {
-      return {
-        therapists: [],
-        totalCount: 0,
-        averageMatchScore: 0,
-        welcomeMessage: undefined,
-        isFirstTime: false,
-        communities: [],
-      };
+  const {
+    data: communitiesResponse,
+    isLoading: isLoadingCommunities,
+    error: communitiesError,
+    refetch: refetchCommunities,
+  } = useRecommendationsControllerGetCommunityRecommendations({
+    query: {
+      staleTime: STALE_TIME.MEDIUM, // 5 minutes
+      gcTime: GC_TIME.MEDIUM, // 10 minutes
+      refetchOnWindowFocus: false,
     }
+  });
 
-    // @ts-expect-error - The generated orval client might return any/void, so we cast/access dynamically
-    const dataPayload = recommendationsResponse?.data || recommendationsResponse;
 
-    // Handle welcome page response format
-    const therapists = dataPayload.therapists || [];
-    const totalCount = dataPayload.total || dataPayload.totalCount || 0;
-    
-    // Calculate average match score
-    const averageMatchScore = therapists.length > 0
-      ? therapists.reduce((sum: number, therapist: any) => sum + (therapist.matchScore || therapist.score || 0), 0) / therapists.length
-      : 0;
 
-    return {
-      therapists,
-      totalCount,
-      averageMatchScore,
-      welcomeMessage: dataPayload.message || dataPayload.welcomeMessage,
-      isFirstTime: dataPayload.isFirstTime || false,
-      communities: dataPayload.communities || [],
-    };
-  }, [recommendationsResponse]);
+  const refetch = useCallback(() => {
+    refetchTherapists();
+    refetchCommunities();
+  }, [refetchTherapists, refetchCommunities]);
+
+  const memoizedTherapists = useMemo(() => {
+    const dataPayload = (therapistsResponse as TherapistRecommendationResponseDto)?.data;
+    return dataPayload?.therapists || [];
+  }, [therapistsResponse]);
+
+  const memoizedCommunities = useMemo(() => {
+    const dataPayload = (communitiesResponse as CommunityRecommendationResponseDto)?.data;
+    return dataPayload?.communities || [];
+  }, [communitiesResponse]);
+
+  // Calculate average match score
+  const averageMatchScore = useMemo(() => {
+    if (!memoizedTherapists.length) return 0;
+    const totalScore = memoizedTherapists.reduce((sum, t) => sum + (t.matchScore || 0), 0);
+    return Math.round(totalScore / memoizedTherapists.length);
+  }, [memoizedTherapists]);
 
   return {
-    ...transformedData,
-    isLoading,
-    error: error as Error | null,
+    therapists: memoizedTherapists,
+    communities: memoizedCommunities,
+    isLoading: isLoadingTherapists || isLoadingCommunities,
+    error: therapistsError || communitiesError,
     refetch,
+    welcomeMessage: "We've found some great matches for you based on your assessment.",
+    isFirstTime: true,
+    averageMatchScore,
+    totalCount: memoizedTherapists.length + memoizedCommunities.length,
   };
 }
 
@@ -198,32 +203,20 @@ export function useWelcomeRecommendations(
  * Hook specifically for recommendation carousel sections
  * Optimized for carousel display with proper card data transformation
  */
-export function useCarouselRecommendations(
-  options: UseTherapistRecommendationsOptions = {}
-): UseTherapistRecommendationsReturn & { 
-  therapistCards: TherapistCardData[]
-} {
-  const recommendationsData = useTherapistRecommendations({
-    limit: 6, // Good number for carousel display
-    ...options,
-  });
+export function useCarouselRecommendations() {
+  const { therapists, isLoading, error, refetch } = useTherapistRecommendations();
 
-  // Transform therapists to card format for UI compatibility using the correct API structure
+  // Pre-transform therapists for the card components used in the carousel
   const therapistCards = useMemo(() => {
-    try {
-      // Handle both the API response and the transformed therapists
-      const therapists = recommendationsData.therapists || [];
-      
-      // Use the unified transform function that handles both API formats
-      return therapists.map(transformTherapistForCard);
-    } catch (error) {
-      console.error('Error transforming therapist data for cards:', error);
-      return [];
-    }
-  }, [recommendationsData.therapists]);
+    if (!therapists) return [];
+    return therapists.map(transformTherapistForCard);
+  }, [therapists]);
 
   return {
-    ...recommendationsData,
+    therapists,
     therapistCards,
+    isLoading,
+    error,
+    refetch,
   };
 }
