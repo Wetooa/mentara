@@ -121,28 +121,19 @@ function AssessmentPageContent() {
         </div>
       );
     } else if (step === 2) {
-      return (
-        <div className="flex-1 flex flex-col items-center justify-center bg-white p-8 animate-in fade-in duration-500">
-          <div className="flex flex-col items-center gap-6 max-w-sm text-center">
-            <div className="relative">
-              <div className="p-5 rounded-full bg-primary/10 ring-8 ring-primary/5">
-                <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              </div>
-              <div className="absolute -top-1 -right-1">
-                <div className="p-1.5 rounded-lg bg-secondary shadow-sm">
-                  <Sparkles className="h-4 w-4 text-white" />
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900">Calculating Your Results</h2>
-              <p className="text-gray-500 font-medium">
-                Please wait while AURIS AI analyzes your responses to prepare your clinical profile.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
+        return (
+                  <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 p-8 animate-in fade-in duration-500">
+                      <div className="p-4 rounded-full bg-primary/10 ring-8 ring-primary/5">
+                          <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                      </div>
+                      <div className="text-center space-y-2">
+                          <h2 className="text-2xl font-bold text-gray-900">Finalizing Your Results</h2>
+                          <p className="text-gray-500 max-w-xs mx-auto">
+                              Please wait while we securely save your assessment data and prepare your profile.
+                          </p>
+                      </div>
+                  </div>
+              );
     }
 
     return null;

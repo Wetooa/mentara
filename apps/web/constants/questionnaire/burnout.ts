@@ -330,7 +330,7 @@ const MBI: QuestionnaireProps = {
       const dpLevel = dp <= 6 ? "Low" : (dp <= 12 ? "Moderate" : "High");
       const paLevel = pa >= 39 ? "High Accomplishment" : (pa >= 32 ? "Moderate" : "Low Accomplishment");
 
-      return `EE: ${eeLevel}, DP: ${dpLevel}, PA: ${paLevel}`;
+      return `Emotional Exhaustion: ${eeLevel}, Depersonalization: ${dpLevel}, Personal Accomplishment: ${paLevel}`;
     },
     subscales: {
       EE: [0, 1, 2, 3, 4, 5, 6],
