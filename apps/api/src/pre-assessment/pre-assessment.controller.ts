@@ -21,9 +21,8 @@ import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { PreAssessmentService } from './pre-assessment.service';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
-import { CreatePreAssessmentDto, AurisChatDto, PreAssessmentResponseDto } from './types/pre-assessment.dto';
+import { CreatePreAssessmentDto, AurisChatDto, PreAssessmentResponseDto, NewSessionResponseDto, AurisResponseDto, PreAssessmentDto } from './types/pre-assessment.dto';
 import { Public } from '../auth/core/decorators/public.decorator';
-import { PreAssessment } from '@prisma/client';
 import { AurisService } from './auris.service';
 
 @ApiTags('Pre-Assessment')
@@ -73,9 +72,11 @@ export class PreAssessmentController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getPreAssessment(@CurrentUserId() id: string): Promise<PreAssessment> {
+  @ApiOkResponse({ type: PreAssessmentDto })
+  async getPreAssessment(@CurrentUserId() id: string): Promise<PreAssessmentDto> {
     try {
-      return await this.preAssessmentService.getPreAssessmentByClientId(id);
+      const assessment = await this.preAssessmentService.getPreAssessmentByClientId(id);
+      return assessment as any as PreAssessmentDto;
     } catch (error) {
       // If it's already a NotFoundException, re-throw it (don't convert to 500)
       if (error instanceof NotFoundException) {
@@ -90,12 +91,14 @@ export class PreAssessmentController {
 
   @Post('session/new')
   @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: NewSessionResponseDto })
   async createSession(@CurrentUserId() userId: string) {
     return await this.aurisService.createSession(userId);
   }
 
   @Post('chat')
   @HttpCode(HttpStatus.OK)
+  @ApiCreatedResponse({ type: AurisResponseDto })
   async chat(
     @CurrentUserId() userId: string,
     @Body() body: AurisChatDto,
@@ -105,6 +108,7 @@ export class PreAssessmentController {
 
   @Post('session/:sessionId/end')
   @HttpCode(HttpStatus.OK)
+  @ApiCreatedResponse({ type: AurisResponseDto })
   async endSession(
     @CurrentUserId() userId: string,
     @Param('sessionId') sessionId: string,

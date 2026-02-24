@@ -8,7 +8,7 @@ const createLibClient = (): AxiosInstance => {
   return axios.create({
 
     baseURL,
-    timeout: 10000,
+    timeout: 90_000, // 90s — LLM inference can take 20-30s; give plenty of headroom
     withCredentials: true,
     headers: {
       'Content-Type': 'application/json',
@@ -29,6 +29,21 @@ libApiClient.interceptors.request.use((config) => {
     }
   }
   return config;
+});
+
+// Auto-unwrap NestJS global response envelope: { success, data, timestamp }
+// Raw pass-throughs (e.g. Flask body from chat/endSession) are returned as-is.
+libApiClient.interceptors.response.use((response) => {
+  const body = response.data;
+  if (
+    body !== null &&
+    typeof body === 'object' &&
+    'success' in body &&
+    'data' in body
+  ) {
+    response.data = body.data;
+  }
+  return response;
 });
 
 export const customInstance = <T>(

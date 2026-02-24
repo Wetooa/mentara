@@ -46,6 +46,8 @@ export function useAnonymousPreAssessment() {
         }
       });
 
+      console.log("Anonymous pre-assessment created successfully:", response);
+
       // 5. Update store with returned ID
       const result = response as PreAssessmentResponseDto;
       setSessionId(result.id || assessmentId);

@@ -13,7 +13,7 @@ import { useCreatePreAssessment } from "@/hooks/pre-assessment/usePreAssessmentD
 import { calculateDetailedResults } from "@/lib/assessment-scoring";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function SnapshotForm() {
+export default function SnapshotForm({ onComplete }: { onComplete?: () => void }) {
     const { isAuthenticated } = useAuth();
     const { mutateAsync: saveAssessment } = useCreatePreAssessment();
     const [hasSaved, setHasSaved] = React.useState(false);
@@ -71,6 +71,7 @@ export default function SnapshotForm() {
                 assessmentId: null,
             }).then(() => {
                 setHasSaved(true);
+                onComplete?.();
             }).catch((err) => {
                 console.error("Failed to auto-save pre-assessment", err);
             });
@@ -87,6 +88,23 @@ export default function SnapshotForm() {
             toast.error("An error occurred while saving your assessment. Please try again.");
         }
     };
+
+    // Show loading state while saving and redirecting for authenticated users
+    if (isAuthenticated && !hasSaved) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 p-8 animate-in fade-in duration-500">
+                <div className="p-4 rounded-full bg-primary/10 ring-8 ring-primary/5">
+                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                </div>
+                <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold text-gray-900">Finalizing Your Results</h2>
+                    <p className="text-gray-500 max-w-xs mx-auto">
+                        Please wait while we securely save your assessment data and prepare your profile.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col gap-6 p-6 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

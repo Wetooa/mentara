@@ -9,10 +9,13 @@ export default defineConfig({
       client: 'react-query',
       httpClient: 'axios',
       override: {
-
         mutator: {
           path: './libs/api-client/src/custom-instance.ts',
           name: 'customInstance',
+        },
+        fetch: {
+          includeHttpResponseReturnType: false,
+          forceSuccessResponse: true,
         },
       },
     },

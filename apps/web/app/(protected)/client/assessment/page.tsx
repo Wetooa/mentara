@@ -8,8 +8,11 @@ import ChatbotInterface from "@/components/pre-assessment/ChatbotInterface";
 import PreAssessmentInitialCheckList from "@/components/pre-assessment/forms/ChecklistForm";
 import ModeSelectionForm from "@/components/pre-assessment/forms/ModeSelectionForm";
 import QuestionnaireForm from "@/components/pre-assessment/forms/QuestionnaireForm";
-import SnapshotForm from "@/components/pre-assessment/forms/SnapshotForm";
 import { usePreAssessment } from "@/hooks/pre-assessment/usePreAssessment";
+import { useCreatePreAssessment } from "@/hooks/pre-assessment/usePreAssessmentData";
+import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
+import { calculateDetailedResults } from "@/lib/assessment-scoring";
+import { Loader2, Sparkles } from "lucide-react";
 
 type AssessmentMode = 'selection' | 'checklist' | 'chatbot';
 
@@ -17,6 +20,49 @@ function AssessmentPageContent() {
   const router = useRouter();
   const [mode, setMode] = useState<AssessmentMode>('selection');
   const { step, handleNextButtonOnClick } = usePreAssessment();
+  const { mutateAsync: saveAssessment } = useCreatePreAssessment();
+  const { questionnaires, flatAnswers, rapportAnswers } = usePreAssessmentChecklistStore();
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+
+  // Auto-save and redirect when reaching step 2 (Snapshot stage)
+  React.useEffect(() => {
+    if (mode === 'checklist' && step === 2 && !isAutoSaving) {
+      const performAutoSave = async () => {
+        setIsAutoSaving(true);
+        try {
+          const seed = rapportAnswers.join(",");
+          const results = calculateDetailedResults(questionnaires, flatAnswers, seed);
+          
+          const questionnaireScores: Record<string, { score: number; severity: string }> = {};
+          results.forEach(result => {
+            questionnaireScores[result.name] = {
+              score: result.score,
+              severity: result.severity,
+            };
+          });
+
+          await saveAssessment({
+            method: 'CHECKLIST',
+            completedAt: new Date().toISOString(),
+            data: { questionnaireScores },
+            pastTherapyExperiences: null,
+            medicationHistory: null,
+            accessibilityNeeds: null,
+            assessmentId: null,
+          });
+
+          router.push("/client/results");
+        } catch (error) {
+          console.error("Failed to auto-save assessment:", error);
+          // If save fails, we still want to let them see results or retry
+          // For now, redirecting anyway as results might be in state or they can refresh
+          router.push("/client/results");
+        }
+      };
+
+      performAutoSave();
+    }
+  }, [mode, step, isAutoSaving, questionnaires, flatAnswers, rapportAnswers, saveAssessment, router]);
 
   const handleBack = () => {
     if (mode === 'selection') {
@@ -46,7 +92,9 @@ function AssessmentPageContent() {
     if (mode === 'chatbot') {
       return (
         <ChatbotInterface
-          onComplete={() => router.push("/client/therapist")}
+          onComplete={() => {
+            router.push("/client/results");
+          }}
           onCancel={() => setMode('selection')}
           hideHeader={true}
         />
@@ -74,17 +122,23 @@ function AssessmentPageContent() {
       );
     } else if (step === 2) {
       return (
-        <div className="flex-1 overflow-y-auto pb-8">
-          <div className="max-w-3xl mx-auto w-full pt-8 px-4">
-            <SnapshotForm />
-            <div className="mt-8 flex justify-center pb-12">
-              <Button
-                onClick={() => router.push("/client/therapist")}
-                size="lg"
-                className="w-full max-w-md font-bold"
-              >
-                Find My Therapist
-              </Button>
+        <div className="flex-1 flex flex-col items-center justify-center bg-white p-8 animate-in fade-in duration-500">
+          <div className="flex flex-col items-center gap-6 max-w-sm text-center">
+            <div className="relative">
+              <div className="p-5 rounded-full bg-primary/10 ring-8 ring-primary/5">
+                <Loader2 className="h-10 w-10 text-primary animate-spin" />
+              </div>
+              <div className="absolute -top-1 -right-1">
+                <div className="p-1.5 rounded-lg bg-secondary shadow-sm">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold tracking-tight text-gray-900">Calculating Your Results</h2>
+              <p className="text-gray-500 font-medium">
+                Please wait while AURIS AI analyzes your responses to prepare your clinical profile.
+              </p>
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { PreAssessmentService } from './pre-assessment.service';
-import { AurisResponseDto } from './types/pre-assessment.dto';
+import { AurisResponseDto, NewSessionResponseDto } from './types/pre-assessment.dto';
 
 @Injectable()
 export class AurisService {
@@ -20,12 +20,17 @@ export class AurisService {
     this.flaskUrl = this.configService.get<string>('FLASK_MICROSERVICE_URL') || 'http://localhost:5000';
   }
 
-  async createSession(userId: string): Promise<any> {
+  async createSession(userId: string): Promise<NewSessionResponseDto> {
     try {
       this.logger.log(`User ${userId} creating new AURIS session`);
       const response: AxiosResponse = await firstValueFrom(
-        this.httpService.post(`${this.flaskUrl}/api/session/new`),
+        this.httpService.post(
+          `${this.flaskUrl}/api/session/new`,
+          {},
+          { timeout: 120_000 }, // 2 min — LLM session init can be slow
+        ),
       );
+
       return response.data;
     } catch (error) {
       this.logger.error(`Error creating Auris session: ${error.message}`);
@@ -33,14 +38,15 @@ export class AurisService {
     }
   }
 
-  async chat(userId: string, sessionId: string, message: string): Promise<any> {
+  async chat(userId: string, sessionId: string, message: string): Promise<AurisResponseDto> {
     try {
       this.logger.log(`User ${userId} sending chat to AURIS session ${sessionId}`);
       const response: AxiosResponse = await firstValueFrom(
-        this.httpService.post(`${this.flaskUrl}/api/chat`, {
-          session_id: sessionId,
-          message,
-        }),
+        this.httpService.post(
+          `${this.flaskUrl}/api/chat`,
+          { session_id: sessionId, message },
+          { timeout: 120_000 }, // 2 min — LLM inference can take 10-30s
+        ),
       );
       const result = response.data;
 
@@ -57,11 +63,15 @@ export class AurisService {
     }
   }
 
-  async endSession(userId: string, sessionId: string): Promise<any> {
+  async endSession(userId: string, sessionId: string): Promise<AurisResponseDto> {
     try {
       this.logger.log(`User ${userId} ending AURIS session ${sessionId}`);
       const response: AxiosResponse = await firstValueFrom(
-        this.httpService.post(`${this.flaskUrl}/api/session/${sessionId}/end`),
+        this.httpService.post(
+          `${this.flaskUrl}/api/session/${sessionId}/end`,
+          {},
+          { timeout: 120_000 },
+        ),
       );
       const result = response.data;
 
@@ -80,7 +90,7 @@ export class AurisService {
   private async saveAurisResults(userId: string, results: NonNullable<AurisResponseDto['results']>): Promise<void> {
     await this.preAssessmentService.createPreAssessment(userId, {
       assessmentId: results.assessmentId,
-      method: results.method,
+      method: "CHATBOT",
       completedAt: results.completedAt,
       data: results.data,
       pastTherapyExperiences: results.context.pastTherapyExperiences?.join(', ') || null,

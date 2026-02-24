@@ -16,7 +16,7 @@ export class RecommendationsService {
     ASRS: 'ADHD',
     AUDIT: 'Alcohol Use',
     DAST10: 'Substance Use',
-    PCL5: 'PTSD',
+    "PCL-5": 'PTSD',
     MDQ: 'Bipolar Disorder',
     EDEQ: 'Eating Disorders',
     // Web IDs
@@ -65,6 +65,8 @@ export class RecommendationsService {
         orderBy: { createdAt: 'desc' },
       });
 
+      console.log(JSON.stringify(preAssessment, null, 2))
+
       // 2. Extract conditions from questionnaire scores
       const userConditions: string[] = [];
       if (preAssessment && preAssessment.data) {
@@ -73,7 +75,7 @@ export class RecommendationsService {
 
         Object.entries(scores).forEach(([key, value]: [string, any]) => {
           const condition = this.questionnaireMap[key];
-          if (condition && (value.severity === 'Moderate' || value.severity === 'Moderately Severe' || value.severity === 'Severe' || value.severity === 'High')) {
+          if (condition && value.severity) {
             userConditions.push(condition);
           }
         });

@@ -12,8 +12,6 @@ import ModeSelectionForm from "@/components/pre-assessment/forms/ModeSelectionFo
 import ChatbotInterface from "@/components/pre-assessment/ChatbotInterface";
 import { fadeDown } from "@/lib/animations";
 import { usePreAssessment } from "@/hooks/pre-assessment/usePreAssessment";
-import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
-import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
 function PreAssessmentPageContentInner() {
@@ -30,7 +28,6 @@ function PreAssessmentPageContentInner() {
   };
 
   const [mode, setMode] = useState<'selection' | 'checklist' | 'chatbot' | 'registration'>(getInitialMode());
-  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -48,7 +45,7 @@ function PreAssessmentPageContentInner() {
   };
 
   const handleChatbotComplete = () => {
-    router.push('/client/therapist');
+    router.push('/client/results');
   };
 
   const handleChatbotCancel = () => {
@@ -84,7 +81,7 @@ function PreAssessmentPageContentInner() {
         <QuestionnaireForm handleNextButtonOnClick={handleNextButtonOnClick} />
       );
     } else if (step === 2) {
-      return <SnapshotForm />;
+      return <SnapshotForm onComplete={() => router.push('/client/results')} />;
     } else if (step === 3) {
       return <PreAssessmentSignUp />;
     } else {

@@ -29,7 +29,6 @@ export class PreAssessmentData {
   @ApiPropertyOptional({ type: PreAssessmentDocuments })
   documents?: PreAssessmentDocuments;
 }
-
 export class CreatePreAssessmentDto {
   @ApiPropertyOptional({ type: String, nullable: true })
   assessmentId!: string | null;
@@ -84,28 +83,86 @@ export class AurisChatDto {
   message!: string;
 }
 
+// ─── Auris State (mirrors Flask microservice response) ────────────────────────
+
+export class AurisStateDto {
+  @ApiProperty()
+  assessment_phase!: string;
+
+  @ApiProperty()
+  completion_reason!: string;
+
+  @ApiProperty()
+  total_questions_asked!: number;
+
+  @ApiProperty()
+  message_count!: number;
+
+  @ApiProperty()
+  is_complete!: boolean;
+
+  @ApiProperty()
+  requires_crisis_protocol!: boolean;
+
+  @ApiProperty({ type: 'object', additionalProperties: true })
+  extracted_data!: Record<string, unknown>;
+
+  @ApiProperty({ type: 'object', additionalProperties: { type: 'string' } })
+  identified_questionnaires!: Record<string, string>;
+
+  @ApiProperty({ type: [String] })
+  candidate_scales!: string[];
+}
+
+// ─── Auris Results (populated when assessment is complete) ────────────────────
+
+export class AurisResultContextDto {
+  @ApiProperty({ type: [String] })
+  pastTherapyExperiences!: string[];
+
+  @ApiProperty({ type: [String] })
+  medicationHistory!: string[];
+
+  @ApiProperty({ type: [String] })
+  accessibilityNeeds!: string[];
+}
+
+export class AurisResultDto {
+  @ApiProperty()
+  assessmentId!: string;
+
+  @ApiProperty({ enum: ['CHECKLIST', 'CHATBOT', 'HYBRID'] })
+  method!: PreAssessmentMethod;
+
+  @ApiProperty()
+  completedAt!: string;
+
+  @ApiProperty({ type: PreAssessmentData })
+  data!: PreAssessmentData;
+
+  @ApiProperty({ type: AurisResultContextDto })
+  context!: AurisResultContextDto;
+}
+
+// ─── Response DTOs ────────────────────────────────────────────────────────────
+
 export class AurisResponseDto {
   @ApiProperty()
   response!: string;
 
-  @ApiProperty()
-  state!: {
-    is_complete: boolean;
-    [key: string]: any;
-  };
+  @ApiProperty({ type: AurisStateDto })
+  state!: AurisStateDto;
 
-  @ApiPropertyOptional()
-  results?: {
-    assessmentId: string;
-    method: PreAssessmentMethod;
-    completedAt: string;
-    data: PreAssessmentData;
-    context: {
-      pastTherapyExperiences: string[];
-      medicationHistory: string[];
-      accessibilityNeeds: string[];
-    };
-  };
+  @ApiPropertyOptional({ type: AurisResultDto })
+  results?: AurisResultDto;
+}
+
+export class NewSessionResponseDto {
+  @ApiProperty()
+  session_id!: string;
+
+  @ApiProperty()
+  opening_message!: string;
 }
 
 export class PreAssessmentResponseDto {
@@ -114,4 +171,42 @@ export class PreAssessmentResponseDto {
 
   @ApiProperty()
   message!: string;
+}
+
+export class PreAssessmentDto {
+  @ApiProperty()
+  id!: string;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  clientId!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  sessionId!: string | null;
+
+  @ApiProperty({ enum: ['CHECKLIST', 'CHATBOT', 'HYBRID'] })
+  method!: PreAssessmentMethod;
+
+  @ApiProperty({ type: PreAssessmentData })
+  data!: PreAssessmentData;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  pastTherapyExperiences!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  medicationHistory!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  accessibilityNeeds!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  soapAnalysisUrl!: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  conversationHistoryUrl!: string | null;
 }

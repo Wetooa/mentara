@@ -1,31 +1,34 @@
-// Pre-assessment DTOs matching backend exactly
+export type PreAssessmentMethod = 'CHECKLIST' | 'CHATBOT' | 'HYBRID';
+
+export interface PreAssessmentData {
+  questionnaireScores: Record<string, { score: number; severity: string }>;
+  identified_questionnaires?: any[];
+  candidate_scales?: any[];
+}
 
 export interface CreatePreAssessmentDto {
-  answers: number[]; // Flat array of exactly 201 numeric responses
-  scores?: Record<string, number>;
-  severityLevels?: Record<string, string>;
+  method: PreAssessmentMethod;
+  completedAt: string;
+  data: PreAssessmentData;
+  pastTherapyExperiences?: string | null;
+  medicationHistory?: string | null;
+  accessibilityNeeds?: string | null;
+  assessmentId?: string | null;
 }
 
 export interface PreAssessment {
   id: string;
-  clientId: string;
-  answers: number[]; // Flat array of 201 numeric responses
-  scores: Record<string, number>;
-  severityLevels: Record<string, string>;
-  aiEstimate: Record<string, boolean>;
-  isProcessed: boolean;
-  processedAt?: string;
+  clientId: string | null;
+  sessionId: string | null;
+  method: PreAssessmentMethod;
+  data: PreAssessmentData;
+  pastTherapyExperiences: string | null;
+  medicationHistory: string | null;
+  accessibilityNeeds: string | null;
+  soapAnalysisUrl: string | null;
+  conversationHistoryUrl: string | null;
   createdAt: string;
   updatedAt: string;
-  client?: {
-    userId: string;
-    user: {
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-    };
-  };
 }
 
 export interface PreAssessmentAnalysis {
