@@ -29,30 +29,28 @@ export default function PreAssessmentInitialCheckList({
           <p className="text-base text-gray-600">Select the option that best resonates with you right now</p>
         </div>
 
-        {/* Scrollable checklist with max height */}
-        <div className="w-full max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-          <div className="flex flex-col gap-3">
-            {currentRapportQuestion.choices.map((choice, index) => {
-              const isSelected = currentRapportChoice === index;
+        {/* Choices list — fixed-height container keeps the card stable across questions */}
+        <div className="w-full min-h-[320px] flex flex-col gap-3">
+          {currentRapportQuestion.choices.map((choice, index) => {
+            const isSelected = currentRapportChoice === index;
 
-              return (
-                <button
-                  onClick={() => handleSelectRapportChoice(index)}
-                  key={index}
-                  className={cn(
-                    "flex flex-col items-start justify-center px-6 py-4 gap-2 bg-white hover:bg-primary/5 border-2 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md text-left",
-                    isSelected
-                      ? "border-primary bg-primary/10 shadow-md"
-                      : "border-gray-200 hover:border-primary"
-                  )}
-                >
-                  <span className="text-gray-900 font-medium text-base">
-                    {choice.text}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+            return (
+              <button
+                onClick={() => handleSelectRapportChoice(index)}
+                key={index}
+                className={cn(
+                  "w-full min-h-[64px] flex items-center px-6 py-4 bg-white hover:bg-primary/5 border-2 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md text-left",
+                  isSelected
+                    ? "border-primary bg-primary/10 shadow-md"
+                    : "border-gray-200 hover:border-primary"
+                )}
+              >
+                <span className="text-gray-900 font-medium text-base whitespace-normal break-words">
+                  {choice.text}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

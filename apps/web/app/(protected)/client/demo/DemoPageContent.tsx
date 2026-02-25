@@ -454,7 +454,7 @@ function ChecklistStep({ onComplete }: { onComplete: () => void }) {
       exit="exit"
       className="w-full max-w-2xl"
     >
-      <Card className="bg-white rounded-2xl border border-gray-200 shadow-xl overflow-visible">
+      <Card className="w-full bg-white rounded-2xl border border-gray-200 shadow-xl overflow-visible">
         {step === 0 ? (
           <>
             <PreAssessmentProgressBar />
@@ -742,46 +742,6 @@ function ResultsStep({ onReset }: { onReset: () => void }) {
           </div>
         )}
       </section>
-
-      {/* CTA */}
-      <div className="flex flex-col items-center py-4">
-        <Card className="w-full max-w-lg border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-violet-50 shadow-xl">
-          <CardContent className="pt-8 pb-8 text-center space-y-4">
-            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-              <Sparkles className="h-3 w-3" />
-              Ready to get started?
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900">
-              Create your free account
-            </h3>
-            <p className="text-gray-600 text-sm max-w-sm mx-auto">
-              Sign up to connect with your matched therapists and join communities. Your
-              assessment results will be saved automatically.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button
-                size="lg"
-                className="font-bold shadow-lg shadow-primary/20 gap-2"
-                asChild
-              >
-                <Link href="/auth/sign-up">
-                  Create Free Account
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="font-medium gap-2"
-                onClick={onReset}
-              >
-                <RefreshCcw className="h-4 w-4" />
-                Retake Assessment
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </motion.div>
   );
 }

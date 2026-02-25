@@ -105,7 +105,7 @@ export default function QuestionnaireForm({
             {question.question}
           </p>
         </div>
-        <div className="w-full flex flex-col gap-4">
+        <div className="w-full min-h-[380px] flex flex-col gap-4">
           {question.options.map((option, index) => {
             const isSelected = currentAnswer === index;
             return (
@@ -114,7 +114,7 @@ export default function QuestionnaireForm({
                 key={index}
                 onClick={() => handleSelectAnswer(index)}
                 className={cn(
-                  "h-auto py-4 px-6 text-base font-medium transition-all duration-200",
+                  "w-full h-auto min-h-[52px] py-4 px-6 text-base font-medium transition-all duration-200 whitespace-normal leading-snug",
                   isSelected
                     ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
                     : "bg-white hover:bg-primary/5 hover:border-primary border-2 border-gray-200 text-gray-900 shadow-sm hover:shadow-md"
