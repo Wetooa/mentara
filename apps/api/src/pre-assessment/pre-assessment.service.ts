@@ -35,18 +35,19 @@ export class PreAssessmentService {
         throw new NotFoundException('Client profile not found');
       }
 
-      // Prepare data for Prisma matching the flat schema
-      const prismaData = {
-        clientId: userId,
+      // Shared fields for both create and update
+      const sharedFields = {
         method: data.method,
         data: data.data as any,
         pastTherapyExperiences: data.pastTherapyExperiences,
         medicationHistory: data.medicationHistory,
         accessibilityNeeds: data.accessibilityNeeds,
-        soapAnalysisUrl: data.data.documents?.soapAnalysisUrl || null,
+        soapAnalysisUrl: (data.data as any)?.documents?.soapAnalysisUrl || null,
         conversationHistoryUrl:
-          data.data.documents?.conversationHistoryUrl || null,
+          (data.data as any)?.documents?.conversationHistoryUrl || null,
       };
+
+      this.logger.log(`Shared fields: ${JSON.stringify(sharedFields)}`);
 
       // Check if pre-assessment already exists for this client
       const existingAssessment = await this.prisma.preAssessment.findFirst({
@@ -56,15 +57,21 @@ export class PreAssessmentService {
 
       if (existingAssessment) {
         this.logger.log(`Updating existing pre-assessment for client ${userId}`);
+        // Do NOT include clientId in update payload — it's a relational FK
+        // that is already set and re-sending it can cause Prisma constraint errors
         return await this.prisma.preAssessment.update({
           where: { id: existingAssessment.id },
-          data: prismaData,
+          data: sharedFields,
         });
       }
 
       this.logger.log(`Creating new pre-assessment for client ${userId}`);
       return await this.prisma.preAssessment.create({
-        data: prismaData,
+        data: {
+          ...sharedFields,
+          clientId: userId,
+          sessionId: null,
+        },
       });
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -125,9 +132,9 @@ export class PreAssessmentService {
         pastTherapyExperiences: data.pastTherapyExperiences,
         medicationHistory: data.medicationHistory,
         accessibilityNeeds: data.accessibilityNeeds,
-        soapAnalysisUrl: data.data.documents?.soapAnalysisUrl || null,
+        soapAnalysisUrl: (data.data as any)?.documents?.soapAnalysisUrl || null,
         conversationHistoryUrl:
-          data.data.documents?.conversationHistoryUrl || null,
+          (data.data as any)?.documents?.conversationHistoryUrl || null,
       };
 
       this.logger.log('Creating new anonymous pre-assessment');

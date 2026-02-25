@@ -62,13 +62,15 @@ export default function SnapshotForm({ onComplete }: { onComplete?: () => void }
             });
 
             saveAssessment({
-                method: 'CHECKLIST',
-                completedAt: new Date().toISOString(),
-                data: { questionnaireScores },
-                pastTherapyExperiences: null,
-                medicationHistory: null,
-                accessibilityNeeds: null,
-                assessmentId: null,
+                data: {
+                    method: 'CHECKLIST',
+                    completedAt: new Date().toISOString(),
+                    data: { questionnaireScores },
+                    pastTherapyExperiences: null,
+                    medicationHistory: null,
+                    accessibilityNeeds: null,
+                    assessmentId: null,
+                }
             }).then(() => {
                 setHasSaved(true);
                 onComplete?.();

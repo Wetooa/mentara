@@ -1,145 +1,84 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { User, UserPlus, MessageSquare, Calendar, Heart } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { TherapistCardData } from "@/types/therapist";
+"use client";
+
+import React from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useFavorites } from "@/hooks/user/useFavorites";
-import StarRating from "@/components/reviews/StarRating";
-import { useTherapistReviewStats } from "@/hooks/reviews/useReviews";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Star, Clock, DollarSign, MapPin } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface TherapistCardProps {
-  therapist: TherapistCardData;
+  therapist: any; // Using any to handle the generated API DTOs which might vary
+  className?: string;
 }
 
-export default function TherapistCard({ therapist }: TherapistCardProps) {
-  const router = useRouter();
-  const nextAvailableTime = therapist.availableTimes?.[0];
-
-  // Fetch review stats for this therapist
-  const { data: reviewStats } = useTherapistReviewStats(therapist.id);
-
-  const handleViewProfile = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    router.push(`/client/profile/${therapist.id}`);
-  };
-
+export default function TherapistCard({
+  therapist,
+  className,
+}: TherapistCardProps) {
+  const firstName = therapist.user?.firstName || therapist.firstName || "";
+  const lastName = therapist.user?.lastName || therapist.lastName || "";
+  const fullName = `${firstName} ${lastName}`;
+  const initials = `${firstName[0] || ""}${lastName[0] || ""}`;
+  
   return (
-    <Card className="w-full h-full overflow-hidden shadow-sm hover:shadow-md border border-gray-200 bg-white border-t-4 border-primary transition-all duration-200 hover:border-primary/30 group flex flex-col">
-      <CardContent className="p-0 flex-1 flex flex-col">
-        <div className="p-6 flex flex-col h-full flex-1">
-          {/* Professional Status and Price Section */}
-          <div className="flex items-center mb-4 justify-between">
-            <div className="flex items-center">
-              <div
-                className={`w-2.5 h-2.5 rounded-full mr-2 ${
-                  therapist.isActive ? "bg-green-500" : "bg-gray-400"
-                }`}
-              ></div>
-              <span
-                className={`text-xs font-medium ${
-                  therapist.isActive ? "text-green-700" : "text-gray-500"
-                }`}
-              >
-                {therapist.isActive ? "Available Now" : "Currently Offline"}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
-                <span className="text-sm font-semibold text-gray-900">
-                  {therapist.sessionPrice}
-                </span>
-                <span className="text-xs text-gray-500 ml-1">
-                  / {therapist.sessionDuration}min
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Professional Therapist Info */}
-          <div className="flex flex-col flex-1">
-            <h3 className="font-bold text-xl text-gray-900 mb-1 leading-tight">
-              {therapist.name}
+    <Card className={cn("group h-full flex flex-col hover:shadow-md transition-all duration-200 border border-gray-200", className)}>
+      <CardContent className="pt-6 pb-2 flex-1 space-y-4">
+        <div className="flex items-start gap-4">
+          <Avatar className="h-14 w-14 border shadow-sm shrink-0">
+            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${therapist.id || therapist.userId}`} alt={fullName} />
+            <AvatarFallback className="bg-gray-100 text-gray-600 font-bold">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="space-y-1 overflow-hidden">
+            <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-primary transition-colors">
+              {fullName}
             </h3>
-            <p className="text-sm font-medium text-gray-600 mb-3 leading-relaxed">
-              {therapist.title}
+            <p className="text-sm text-gray-500 font-medium">
+              {therapist.professionalLicenseType || "Licensed Professional"}
             </p>
-
-            {/* Professional Rating Display */}
-            <div className="mb-4">
-              <div className="flex items-center gap-3">
-                <StarRating
-                  rating={reviewStats?.averageRating || 0}
-                  totalReviews={reviewStats?.totalReviews || 0}
-                  size="sm"
-                  showNumber={true}
-                  showReviewCount={true}
-                />
-                {(reviewStats?.averageRating || 0) > 4.5 && (
-                  <div className="bg-primary text-white px-2 py-0.5 rounded-md text-xs font-medium">
-                    ⭐ TOP RATED
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Professional Specialties */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {therapist.specialties?.map((specialty, index) => (
-                <Badge
-                  key={index}
-                  variant="outline"
-                  className="text-xs font-medium px-3 py-1 bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors duration-200"
-                >
-                  {specialty}
-                </Badge>
-              )) || (
-                <Badge
-                  variant="outline"
-                  className="text-xs bg-gray-50 text-gray-700 border-gray-200"
-                >
-                  General Therapy
-                </Badge>
-              )}
-            </div>
-
-            {/* Professional Available Time */}
-            {nextAvailableTime && (
-              <div className="flex items-center text-sm mb-3 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-                <Calendar size={14} className="text-green-600 mr-3" />
-                <div>
-                  <div className="font-medium text-green-800">
-                    Next Available
-                  </div>
-                  <div className="text-xs text-green-600">
-                    {nextAvailableTime.day}, {nextAvailableTime.time}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Professional Bio Section */}
-            <div className="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-100">
-              <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
-                {therapist.bio ||
-                  "Experienced therapist dedicated to helping you achieve your mental health goals."}
-              </p>
-            </div>
-
-            {/* Professional Action Buttons */}
-            <div className="flex flex-col gap-2 mt-auto">
-              <Button
-                variant="default"
-                className="w-full gap-2 bg-primary hover:bg-primary/90 text-white transition-colors duration-200 font-medium"
-                onClick={handleViewProfile}
-              >
-                <User size={16} />
-                View Profile
-              </Button>
+            <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
+              <Star className="h-3.5 w-3.5 fill-current" />
+              {(therapist.rating || 5).toFixed(1)} 
+              <span className="text-gray-400 font-normal ml-1">({therapist.reviewCount || 0} reviews)</span>
             </div>
           </div>
         </div>
+
+        {/* Specializations Tags */}
+        <div className="flex flex-wrap gap-1.5">
+          {(therapist.expertise || therapist.illnessSpecializations || []).slice(0, 3).map((spec: string, idx: number) => (
+            <Badge key={idx} variant="secondary" className="bg-gray-100 text-gray-600 hover:bg-gray-200 text-[10px] px-2 py-0">
+              {spec}
+            </Badge>
+          ))}
+          {(therapist.expertise?.length > 3) && (
+            <span className="text-[10px] text-gray-400 font-medium">+{(therapist.expertise || therapist.illnessSpecializations).length - 3}</span>
+          )}
+        </div>
+
+        {/* Quick Info Grid */}
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+            <Clock className="h-3.5 w-3.5 text-gray-400" />
+            <span>{therapist.yearsOfExperience || 0}y Experience</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+            <DollarSign className="h-3.5 w-3.5 text-gray-400" />
+            <span>₱{therapist.hourlyRate || 1500}/session</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-gray-600 col-span-2">
+            <MapPin className="h-3.5 w-3.5 text-gray-400" />
+            <span className="truncate">{therapist.province || "Mental Health Professional"}</span>
+          </div>
+        </div>
       </CardContent>
+
+      <CardFooter className="pt-2 pb-6 border-t mt-auto">
+        <Button variant="outline" className="w-full font-bold">
+          View Profile
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

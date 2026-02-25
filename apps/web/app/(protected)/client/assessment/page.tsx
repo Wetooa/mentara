@@ -12,7 +12,7 @@ import { usePreAssessment } from "@/hooks/pre-assessment/usePreAssessment";
 import { useCreatePreAssessment } from "@/hooks/pre-assessment/usePreAssessmentData";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 import { calculateDetailedResults } from "@/lib/assessment-scoring";
-import { Action, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type AssessmentMode = 'selection' | 'checklist' | 'chatbot';
@@ -43,13 +43,15 @@ function AssessmentPageContent() {
           });
 
           await saveAssessment({
-            method: 'CHECKLIST',
-            completedAt: new Date().toISOString(),
-            data: { questionnaireScores },
-            pastTherapyExperiences: null,
-            medicationHistory: null,
-            accessibilityNeeds: null,
-            assessmentId: null,
+            data: {
+              method: 'CHECKLIST',
+              completedAt: new Date().toISOString(),
+              data: { questionnaireScores },
+              pastTherapyExperiences: null,
+              medicationHistory: null,
+              accessibilityNeeds: null,
+              assessmentId: null,
+            }
           });
 
           router.push("/client/results");

@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent } from "@/components/ui/card";
+
+
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -140,7 +140,7 @@ export default function ChatbotInterface({
             <div className="flex-1 flex min-h-0 overflow-hidden">
                 {/* Chat Column */}
                 <div className="flex-1 flex flex-col relative bg-dot-pattern overflow-hidden">
-                    <ScrollArea className="flex-1 px-4 sm:px-10 py-8">
+                    <div className="flex-1 overflow-y-auto px-4 sm:px-10 py-8">
                         <div className="w-full max-w-7xl mx-auto space-y-6">
                             <AnimatePresence mode="popLayout">
                                 {!sessionId ? (
@@ -197,7 +197,7 @@ export default function ChatbotInterface({
                             )}
                             <div ref={messagesEndRef} className="h-12" />
                         </div>
-                    </ScrollArea>
+                    </div>
 
                     {/* Floating Input Area */}
                     <div className="p-4 sm:p-10 bg-gradient-to-t from-[#F8FAFC] via-[#F8FAFC]/90 to-transparent shrink-0">

@@ -6,8 +6,8 @@ import {
   useRecommendationsControllerGetCommunityRecommendations 
 } from "api-client";
 import type { 
-  TherapistRecommendationResponseDto,
-  CommunityRecommendationResponseDto,
+  TherapistRecommendationResponseDataDto,
+  CommunityRecommendationResponseDataDto,
   RecommendedTherapistDto,
   RecommendedCommunityDto
 } from "api-client";
@@ -94,6 +94,9 @@ export function useTherapistRecommendations(
   });
 
   // Transform and memoize the data - handle actual API response structure
+  // NOTE: customInstance auto-unwraps { success, data } envelopes, so
+  // recommendationsResponse is already TherapistRecommendationResponseDataDto
+  // (i.e. { therapists, total, userConditions }) — NOT the outer DTO.
   const transformedData = useMemo(() => {
     if (!recommendationsResponse) {
       return {
@@ -104,7 +107,7 @@ export function useTherapistRecommendations(
       };
     }
 
-    const dataPayload = (recommendationsResponse as TherapistRecommendationResponseDto).data;
+    const dataPayload = recommendationsResponse as unknown as TherapistRecommendationResponseDataDto;
     const therapists = dataPayload?.therapists || [];
     const totalCount = dataPayload?.total || 0;
     const userConditions = dataPayload?.userConditions || [];
@@ -170,12 +173,15 @@ export function useWelcomeRecommendations(
   }, [refetchTherapists, refetchCommunities]);
 
   const memoizedTherapists = useMemo(() => {
-    const dataPayload = (therapistsResponse as TherapistRecommendationResponseDto)?.data;
+    // customInstance has already unwrapped { success, data } → therapistsResponse
+    // is TherapistRecommendationResponseDataDto directly.
+    const dataPayload = therapistsResponse as unknown as TherapistRecommendationResponseDataDto;
     return dataPayload?.therapists || [];
   }, [therapistsResponse]);
 
   const memoizedCommunities = useMemo(() => {
-    const dataPayload = (communitiesResponse as CommunityRecommendationResponseDto)?.data;
+    // Same for communities.
+    const dataPayload = communitiesResponse as unknown as CommunityRecommendationResponseDataDto;
     return dataPayload?.communities || [];
   }, [communitiesResponse]);
 
@@ -205,6 +211,8 @@ export function useWelcomeRecommendations(
  */
 export function useCarouselRecommendations() {
   const { therapists, isLoading, error, refetch } = useTherapistRecommendations();
+
+  console.log("therapists", therapists);
 
   // Pre-transform therapists for the card components used in the carousel
   const therapistCards = useMemo(() => {
