@@ -4,6 +4,10 @@
     "version": "22.5.2"
   },
   "defaultBase": "master",
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "libs"
+  },
   "plugins": [
     {
       "plugin": "@nx/eslint/plugin",
