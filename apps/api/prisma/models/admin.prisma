@@ -1,11 +1,9 @@
 model Admin {
   userId              String      @id @unique
-  permissions         String[]
-  adminLevel          String      @default("admin")
+  user                User        @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
+  processedTherapists Therapist[] @relation("AdminProcessedTherapists")
+  permissions         String[]    @default([])
+  adminLevel          String      @default("SUPER_ADMIN")
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
-  user                User        @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
-  processedTherapists Therapist[]
-
-  @@index([userId])
 }

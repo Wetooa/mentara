@@ -12,7 +12,7 @@ model PreAssessment {
   soapAnalysisUrl        String?
   conversationHistoryUrl String?
   
-  client                 Client?             @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  client                 Client?             @relation("ClientPreAssessments", fields: [clientId], references: [userId], onDelete: Cascade)
 
   @@index([clientId])
   @@index([sessionId])

@@ -1,17 +1,17 @@
 model Client {
   userId                          String             @id @unique
   hasSeenTherapistRecommendations Boolean            @default(false)
-  birthdate                       DateTime?
+  birthDate                       DateTime?
   city                            String?
   country                         String?
   createdAt                       DateTime           @default(now())
-  updatedAt                       DateTime           @default(now())
+  updatedAt                       DateTime           @updatedAt
   user                            User               @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
-  assignedTherapists              ClientTherapist[]
+  assignedTherapists              ClientTherapist[]  @relation("ClientAssignedTherapists")
   meetings                        Meeting[]          @relation("ClientMeetings")
-  paymentsAsClient                Payment[]
-  preAssessments                  PreAssessment[]
-  reviews                         Review[]
+  paymentsAsClient                Payment[]          @relation("ClientPayments")
+  preAssessments                  PreAssessment[]    @relation("ClientPreAssessments")
+  reviews                         Review[]           @relation("ClientReviews")
   worksheets                      Worksheet[]
   preferences                     ClientPreferences?
   engagement                      ClientEngagement?

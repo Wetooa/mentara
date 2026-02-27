@@ -1,6 +1,28 @@
-import type { UserDto } from '../../modules/users/types';
 import type { AuthResponse } from '../../modules/auth/types';
 import { UserRole } from '../../common/types';
+
+// Define UserDto locally since the users module is missing
+export interface UserDto {
+  id: string;
+  email: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  birthDate?: string;
+  address?: string;
+  role: string;
+  bio?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
+  phoneNumber?: string;
+  timezone?: string;
+  language?: string;
+  theme?: string;
+  isActive: boolean;
+  isEmailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 // Define UserProfileResponse locally since it's only used here
 interface UserProfileResponse extends UserDto {

@@ -19,14 +19,9 @@ import { ResponseTransformInterceptor } from './common/interceptors/response-tra
 // Feature Modules
 import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { BillingModule } from './modules/billing/billing.module';
-import { BookingModule } from './modules/booking/booking.module';
 import { PreAssessmentModule } from './modules/pre-assessment/pre-assessment.module';
-import { PresenceModule } from './modules/presence/presence.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { TherapistModule } from './modules/therapist/therapist.module';
-import { UsersModule } from './modules/users/users.module';
-import { WorksheetsModule } from './modules/worksheets/worksheets.module';
 
 // App Root
 import { AppController } from './app.controller';
@@ -67,14 +62,9 @@ import { AppService } from './app.service';
     CommonModule,
     PrismaModule,
     AuthModule,
-    UsersModule,
     TherapistModule,
-    WorksheetsModule,
     PreAssessmentModule,
-    BookingModule,
     AdminModule,
-    BillingModule,
-    PresenceModule,
     RecommendationsModule,
   ],
   controllers: [AppController],

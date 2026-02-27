@@ -27,6 +27,7 @@ model UserSubscription {
   sessionsRemaining Int
   purchasedAt       DateTime           @default(now())
   expiresAt         DateTime
+  updatedAt         DateTime           @updatedAt
   user              User               @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
   package           TherapistPackage   @relation(fields: [packageId], references: [id], onDelete: Cascade)
   sessionLogs       SessionLog[]
@@ -40,7 +41,8 @@ model SessionLog {
   id             String           @id @default(uuid())
   subscriptionId String
   appointmentId  String
-  deductedAt     DateTime         @default(now())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   subscription   UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
   appointment    Meeting          @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
 

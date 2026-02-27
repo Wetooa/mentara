@@ -7,11 +7,21 @@ model Therapist {
   languagesSpoken         Language[]         @default([FILIPINO])
   cebuProvinceLocated     Boolean            @default(false)
   yearPracticeStarted     Int?
+  practiceStartDate       DateTime?
   specialization          ClinicalFocus[]
+  expertise               String[]
+  illnessSpecializations  String[]
+  areasOfExpertise        String[]
+  approaches              String[]
+  yearsOfExperience       Int?
+  hourlyRate              Float?
   therapyTypesOffered     String[]
   workWithAges            AgeGroup[]
   cv                      String?
+  status                  TherapistApplicationStatus @default(PENDING)
+  expirationDateOfLicense DateTime?
   accumulated200Hours     Boolean            @default(false)
+  treatmentSuccessRates   Json?
   additionalNotes         String?
   createdAt               DateTime           @default(now())
   updatedAt               DateTime           @updatedAt
@@ -21,14 +31,14 @@ model Therapist {
   qualifications           Qualification[]
   registrations            Registration[]
   packages                TherapistPackage[]
-  assignedClients         ClientTherapist[]
+  assignedClients         ClientTherapist[]  @relation("TherapistAssignedClients")
   meetings                Meeting[]          @relation("TherapistMeetings")
   availability            TherapistAvailability[]
-  paymentsAsTherapist     Payment[]
-  reviews                 Review[]
+  paymentsAsTherapist     Payment[]          @relation("TherapistPayments")
+  reviews                 Review[]           @relation("TherapistReviews")
   worksheets              Worksheet[]
   groupSessionInvitations GroupSessionTherapistInvitation[]
-  processedByAdmin        Admin?             @relation(fields: [processedBy], references: [userId])
+  processedByAdmin        Admin?             @relation("AdminProcessedTherapists", fields: [processedBy], references: [userId])
   processedBy             String?
 
   @@index([userId])
@@ -107,4 +117,11 @@ enum ClinicalFocus {
   EATING_DISORDERS
   ADHD
   ALCOHOL_USE
+}
+
+enum TherapistApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
 }

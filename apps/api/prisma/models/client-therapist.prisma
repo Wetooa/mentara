@@ -4,8 +4,9 @@ model ClientTherapist {
   therapistId String
   status     String   @default("active")
   assignedAt DateTime @default(now())
-  client     Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-  therapist  Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  updatedAt  DateTime @updatedAt
+  client     Client   @relation("ClientAssignedTherapists", fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist  Therapist @relation("TherapistAssignedClients", fields: [therapistId], references: [userId], onDelete: Cascade)
 
   @@index([clientId])
   @@index([therapistId])
