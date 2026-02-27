@@ -921,7 +921,7 @@ describe('BookingController', () => {
       expect(bookingService.getMeetings).toHaveBeenCalledTimes(2);
     });
 
-    it('should handle moderator and admin roles appropriately', async () => {
+    it('should handle admin roles appropriately', async () => {
       const mockMeetings = [TestDataGenerator.createMeeting()];
       bookingService.getMeetings.mockResolvedValue(mockMeetings as any);
 

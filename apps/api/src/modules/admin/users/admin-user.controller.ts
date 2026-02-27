@@ -12,8 +12,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
-import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
-import { CurrentUserId } from '../../auth/core/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../../auth/core/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
 import { AdminUserQuerySchema } from '../validation/admin.schemas';

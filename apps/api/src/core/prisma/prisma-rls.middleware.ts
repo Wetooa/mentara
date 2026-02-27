@@ -9,7 +9,7 @@ import { ForbiddenException } from '@nestjs/common';
 
 export interface RLSContext {
   userId: string;
-  role: 'client' | 'therapist' | 'moderator' | 'admin';
+  role: 'client' | 'therapist' | 'admin';
 }
 
 /**
@@ -219,8 +219,8 @@ export function createRLSMiddleware(getContext: () => RLSContext | null) {
     // =================================================================
     if (params.model === 'Post') {
       if (['update', 'delete'].includes(params.action)) {
-        // Only own posts or moderators
-        if (role !== 'moderator' && role !== 'admin') {
+        // Only own posts or admins
+        if (role !== 'admin') {
           params.args.where = {
             ...params.args.where,
             userId: userId,
@@ -234,8 +234,8 @@ export function createRLSMiddleware(getContext: () => RLSContext | null) {
     // =================================================================
     if (params.model === 'Comment') {
       if (['update', 'delete'].includes(params.action)) {
-        // Only own comments or moderators
-        if (role !== 'moderator' && role !== 'admin') {
+        // Only own comments or admins
+        if (role !== 'admin') {
           params.args.where = {
             ...params.args.where,
             userId: userId,

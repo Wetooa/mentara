@@ -415,7 +415,6 @@ export class AdminAnalyticsService {
         therapists: roleBreakdown.therapist || 0,
         clients: roleBreakdown.client || 0,
         admins: roleBreakdown.admin || 0,
-        moderators: roleBreakdown.moderator || 0,
       };
     } catch (error) {
       this.logger.error('Failed to get user stats:', error);

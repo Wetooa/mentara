@@ -28,11 +28,6 @@ export const SERVICE_SPLIT_RECOMMENDATIONS: ServiceSplitRecommendation[] = [
     currentLines: 1814,
     recommendedSplits: [
       {
-        name: 'NotificationDeliveryService',
-        responsibility: 'Handle delivery methods (WebSocket, email, push)',
-        estimatedLines: 400,
-      },
-      {
         name: 'NotificationTemplateService',
         responsibility: 'Manage notification templates and formatting',
         estimatedLines: 300,

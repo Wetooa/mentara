@@ -130,7 +130,6 @@ enum ConversationType {
 
 enum ParticipantRole {
   MEMBER
-  MODERATOR
   ADMIN
 }
 

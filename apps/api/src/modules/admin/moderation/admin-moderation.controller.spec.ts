@@ -7,7 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { AdminModerationController } from './admin-moderation.controller';
 import { AdminService } from '../admin.service';
-import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../auth/core/guards/admin-auth.guard';
 
 describe('AdminModerationController', () => {
@@ -42,7 +42,7 @@ describe('AdminModerationController', () => {
         communityId: 'community_123',
         communityName: 'Anxiety Support',
         flaggedAt: new Date('2024-02-14T10:00:00Z'),
-        flaggedBy: 'user_moderator_123',
+        flaggedBy: 'user_admin_123',
         flagReason: 'Inappropriate content',
         flagCount: 3,
         status: 'pending',

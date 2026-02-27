@@ -10,7 +10,7 @@ export interface UserRegisteredData {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'client' | 'therapist' | 'moderator' | 'admin';
+  role: 'client' | 'therapist' | 'admin';
   registrationMethod: 'email' | 'oauth' | 'invitation';
 }
 

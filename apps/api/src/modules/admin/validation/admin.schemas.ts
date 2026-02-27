@@ -57,7 +57,7 @@ export const CreateAdminAccountDtoSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  role: z.enum(['admin', 'moderator']),
+  role: z.enum(['admin']),
 });
 
 export const CreateAdminDtoSchema = z.object({
@@ -65,20 +65,20 @@ export const CreateAdminDtoSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  role: z.enum(['admin', 'moderator']),
+  role: z.enum(['admin']),
 });
 
 export const UpdateAdminDtoSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
   email: z.string().email().optional(),
-  role: z.enum(['admin', 'moderator']).optional(),
+  role: z.enum(['admin']).optional(),
   isActive: z.boolean().optional(),
 });
 
 export const AdminAccountQuerySchema = z.object({
   search: z.string().optional(),
-  role: z.enum(['admin', 'moderator']).optional(),
+  role: z.enum(['admin']).optional(),
   isActive: z.coerce.boolean().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),

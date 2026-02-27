@@ -64,7 +64,7 @@ export const UpdateUserRequestSchema = z
       .optional(),
     theme: z.enum(['light', 'dark', 'system']).optional(),
     isActive: z.boolean().optional(),
-    role: z.enum(['client', 'therapist', 'moderator', 'admin']).optional(),
+    role: z.enum(['client', 'therapist', 'admin']).optional(),
   })
   .strict();
 

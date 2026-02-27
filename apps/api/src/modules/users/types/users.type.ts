@@ -21,5 +21,5 @@ export interface CreateUserParams {
   password: string;
   firstName: string;
   lastName: string;
-  role?: 'client' | 'therapist' | 'admin' | 'moderator';
+  role?: 'client' | 'therapist' | 'admin';
 }

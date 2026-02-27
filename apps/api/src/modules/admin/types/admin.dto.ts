@@ -57,7 +57,7 @@ export interface CreateAdminAccountDto {
   password: string;
   firstName: string;
   lastName: string;
-  role: 'admin' | 'moderator';
+  role: 'admin';
 }
 
 export interface CreateAdminDto {
@@ -81,7 +81,7 @@ export interface AdminResponseDto {
 
 export interface AdminAccountQuery {
   search?: string;
-  role?: 'admin' | 'moderator';
+  role?: 'admin';
   isActive?: boolean;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

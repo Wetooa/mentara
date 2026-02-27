@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/core/guards/admin-auth.guard';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { RoleUtils } from '../../utils/role-utils';
@@ -293,7 +293,7 @@ describe('UsersController', () => {
     it('should allow admin to update any user with all fields', async () => {
       const adminUpdateData = {
         firstName: 'Admin Updated',
-        role: 'moderator',
+        role: 'admin',
         isActive: false,
       };
       const updatedUser = {
@@ -827,7 +827,7 @@ describe('UsersController', () => {
           client: false,
           therapist: false,
           admin: true,
-          moderator: false,
+          admin: false,
         },
       );
     });

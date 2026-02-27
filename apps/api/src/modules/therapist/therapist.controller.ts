@@ -11,7 +11,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/modules/auth/core/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import { TherapistService } from './therapist.service';
 import {

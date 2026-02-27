@@ -9,7 +9,6 @@ model Community {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   memberships          Membership[]
-  moderatorCommunities ModeratorCommunity[]
   roomGroups           RoomGroup[]
   groupSessions        GroupTherapySession[]
 
@@ -48,19 +47,6 @@ model Membership {
 
   @@unique([userId, communityId])
   @@index([userId])
-  @@index([communityId])
-}
-
-model ModeratorCommunity {
-  id          String    @id @default(uuid())
-  moderatorId String
-  communityId String
-  assignedAt  DateTime  @default(now())
-  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  moderator   Moderator @relation(fields: [moderatorId], references: [userId], onDelete: Cascade)
-
-  @@unique([moderatorId, communityId])
-  @@index([moderatorId])
   @@index([communityId])
 }
 

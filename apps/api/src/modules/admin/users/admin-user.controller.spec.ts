@@ -7,7 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException, ForbiddenException, HttpException, HttpStatus } from '@nestjs/common';
 import { AdminUserController } from './admin-user.controller';
 import { AdminService } from '../admin.service';
-import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../auth/core/guards/admin-auth.guard';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
 import { SecurityGuardTestUtils, RoleBasedTestUtils } from '../../test-utils/auth-testing-helpers';
@@ -102,7 +102,7 @@ describe('AdminUserController', () => {
       roleBreakdown: {
         client: 1,
         therapist: 1,
-        moderator: 0,
+        admin: 0,
         admin: 0,
       },
     },
@@ -223,7 +223,7 @@ describe('AdminUserController', () => {
     });
 
     it('should filter by role correctly', async () => {
-      const roleQueries = ['client', 'therapist', 'moderator', 'admin'] as const;
+      const roleQueries = ['client', 'therapist', 'admin'] as const;
       
       for (const role of roleQueries) {
         const query = { role };
@@ -322,7 +322,7 @@ describe('AdminUserController', () => {
       const emptyResult = {
         users: [],
         pagination: { page: 1, limit: 20, total: 0, totalPages: 0, hasNext: false, hasPrev: false },
-        summary: { totalUsers: 0, activeUsers: 0, suspendedUsers: 0, roleBreakdown: { client: 0, therapist: 0, moderator: 0, admin: 0 } },
+        summary: { totalUsers: 0, activeUsers: 0, suspendedUsers: 0, roleBreakdown: { client: 0, therapist: 0, admin: 0, admin: 0 } },
       };
       mockAdminService.getAllUsers.mockResolvedValue(emptyResult);
 
@@ -414,7 +414,7 @@ describe('AdminUserController', () => {
     });
 
     it('should handle different user roles', async () => {
-      const userRoles = ['client', 'therapist', 'moderator', 'admin'];
+      const userRoles = ['client', 'therapist', 'admin'];
       
       for (const role of userRoles) {
         const roleUser = { ...mockUser, role };
@@ -697,7 +697,7 @@ describe('AdminUserController', () => {
       expect(Array.isArray(result.users)).toBe(true);
       result.users.forEach((user) => {
         TestAssertions.expectValidEntity(user, ['id', 'email', 'firstName', 'lastName', 'role', 'status']);
-        expect(['client', 'therapist', 'moderator', 'admin']).toContain(user.role);
+        expect(['client', 'therapist', 'admin']).toContain(user.role);
         expect(['active', 'suspended', 'inactive']).toContain(user.status);
       });
     });

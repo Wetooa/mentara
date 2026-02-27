@@ -13,8 +13,8 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../auth/core/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { BookingService } from './booking.service';

@@ -3,7 +3,6 @@ export enum UserRole {
   CLIENT = 'client',
   THERAPIST = 'therapist',
   ADMIN = 'admin',
-  MODERATOR = 'moderator',
 }
 
 export interface PaginationQuery {

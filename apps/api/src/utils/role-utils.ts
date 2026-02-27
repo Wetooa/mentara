@@ -43,11 +43,6 @@ export class RoleUtils {
     return role === UserRole.THERAPIST;
   }
 
-  async isUserModerator(clerkId: string): Promise<boolean> {
-    const role = await this.getUserRole(clerkId);
-    return role === UserRole.MODERATOR;
-  }
-
   async isUserRegularUser(clerkId: string): Promise<boolean> {
     const role = await this.getUserRole(clerkId);
     return role === UserRole.USER;
@@ -63,15 +58,6 @@ export class RoleUtils {
           canModerateContent: true,
           canCreateWorksheets: true,
           canAssignWorksheets: true,
-        };
-      case UserRole.MODERATOR:
-        return {
-          canAccessAdminPanel: false,
-          canManageUsers: false,
-          canManageTherapists: false,
-          canModerateContent: true,
-          canCreateWorksheets: false,
-          canAssignWorksheets: false,
         };
       case UserRole.THERAPIST:
         return {
@@ -107,7 +93,6 @@ export class RoleUtils {
     const roleHierarchy = {
       [UserRole.USER]: 1,
       [UserRole.THERAPIST]: 2,
-      [UserRole.MODERATOR]: 3,
       [UserRole.ADMIN]: 4,
     };
 

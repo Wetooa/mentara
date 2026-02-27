@@ -7,7 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { AdminAccountController } from './admin-account.controller';
 import { AdminService } from '../admin.service';
-import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../auth/core/guards/admin-auth.guard';
 import {
   SecurityGuardTestUtils,

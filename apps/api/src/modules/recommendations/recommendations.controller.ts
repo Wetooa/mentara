@@ -1,8 +1,8 @@
 import { Controller, Get, UseGuards, InternalServerErrorException, Logger } from '@nestjs/common';
 import { RecommendationsService } from './recommendations.service';
 import { TherapistRecommendationResponseDto, CommunityRecommendationResponseDto } from './types/recommendations.dto';
-import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('recommendations')

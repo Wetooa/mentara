@@ -191,7 +191,6 @@ export class AdminService {
           client: true,
           therapist: true,
           admin: true,
-          moderator: true,
         },
       });
     } catch (error) {

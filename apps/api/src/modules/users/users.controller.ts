@@ -17,9 +17,9 @@ import {
 } from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/modules/auth/core/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/modules/auth/core/decorators/current-user-id.decorator';
-import { CurrentUserRole } from 'src/modules/auth/core/decorators/current-user-role.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
+import { CurrentUserRole } from 'src/common/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
   UserIdParamSchema,

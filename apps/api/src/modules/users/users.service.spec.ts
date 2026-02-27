@@ -139,7 +139,7 @@ describe('UsersService', () => {
         therapist: { id: 'therapist-123' },
         client: { id: 'client-123' },
         admin: { id: 'admin-123' },
-        moderator: { id: 'moderator-123' },
+        admin: { id: 'admin-123' },
       };
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
 
@@ -151,7 +151,7 @@ describe('UsersService', () => {
           therapist: true,
           client: true,
           admin: true,
-          moderator: true,
+          admin: true,
         },
       });
       expect(result).toEqual(mockUser);

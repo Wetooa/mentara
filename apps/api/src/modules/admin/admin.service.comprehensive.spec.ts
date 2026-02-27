@@ -844,7 +844,7 @@ describe('AdminService - Comprehensive Testing', () => {
           client: { id: 'client-123' },
           therapist: null,
           admin: null,
-          moderator: null,
+          admin: null,
         });
       });
 
@@ -857,7 +857,7 @@ describe('AdminService - Comprehensive Testing', () => {
             client: true,
             therapist: true,
             admin: true,
-            moderator: true,
+            admin: true,
           },
         });
 

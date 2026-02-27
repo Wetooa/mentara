@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PreAssessmentController } from './pre-assessment.controller';
 import { PreAssessmentService } from './pre-assessment.service';
-import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CreatePreAssessmentDto, PreAssessmentMethod } from './types/pre-assessment.dto';
 
 describe('PreAssessmentController', () => {

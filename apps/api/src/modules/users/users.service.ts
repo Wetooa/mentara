@@ -70,7 +70,6 @@ export class UsersService {
           therapist: true,
           client: true,
           admin: true,
-          moderator: true,
         },
       });
     } catch (error) {
@@ -275,7 +274,7 @@ export class UsersService {
           email: newUser.email,
           firstName: newUser.firstName,
           lastName: newUser.lastName,
-          role: newUser.role as 'client' | 'therapist' | 'moderator' | 'admin',
+          role: newUser.role as 'client' | 'therapist' | 'admin',
           registrationMethod: 'email', // Default, can be enhanced later
         }),
       );

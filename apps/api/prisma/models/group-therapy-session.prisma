@@ -10,7 +10,7 @@ model GroupTherapySession {
   communityId String
   community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
-  // Creator/Spearhead (Moderator)
+  // Creator/Spearhead
   createdById String
   createdBy   User   @relation("GroupSessionCreator", fields: [createdById], references: [id])
 

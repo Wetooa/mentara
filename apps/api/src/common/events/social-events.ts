@@ -117,7 +117,7 @@ export class PostReportedEvent extends BaseDomainEvent<PostReportedData> {
 
 export interface PostModerationData {
   postId: string;
-  moderatorId: string;
+  adminId: string;
   action: 'approved' | 'rejected' | 'flagged' | 'deleted';
   reason: string;
   moderatedAt: Date;

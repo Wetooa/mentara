@@ -19,8 +19,8 @@ import {
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { PreAssessmentService } from './pre-assessment.service';
-import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
-import { CurrentUserId } from '../auth/core/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
 import { CreatePreAssessmentDto, AurisChatDto, PreAssessmentResponseDto, NewSessionResponseDto, AurisResponseDto, PreAssessmentDto } from './types/pre-assessment.dto';
 import { Public } from '../auth/core/decorators/public.decorator';
 import { AurisService } from './auris.service';
