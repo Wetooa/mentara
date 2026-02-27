@@ -1,14 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
 import { Public } from './common/decorators/public.decorator';
 
 @ApiTags('app')
@@ -20,18 +12,21 @@ export class AppController {
   @Get()
   @ApiOperation({
     summary: 'Health check endpoint',
-    description:
-      'Basic health check endpoint that returns a welcome message to verify the API is running',
+    description: 'Basic health check endpoint to verify the API is running',
   })
   @ApiResponse({
     status: 200,
     description: 'API is running successfully',
     schema: {
-      type: 'string',
-      example: 'Hello World!',
+      type: 'object',
+      properties: {
+        status: { type: 'string', example: 'ok' },
+        message: { type: 'string', example: 'Mentara API is running' },
+        timestamp: { type: 'string', example: '2026-02-28T00:42:10Z' },
+      },
     },
   })
-  getHello(): string {
-    return this.appService.getHello();
+  getHealth() {
+    return this.appService.getHealth();
   }
 }

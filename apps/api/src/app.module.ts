@@ -3,28 +3,34 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { AuthModule } from './modules/auth/auth.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UsersModule } from './modules/users/users.module';
-import { TherapistModule } from './modules/therapist/therapist.module';
-import { WorksheetsModule } from './modules/worksheets/worksheets.module';
-import { PreAssessmentModule } from './modules/pre-assessment/pre-assessment.module';
-import { BookingModule } from './modules/booking/booking.module';
-import { AdminModule } from './modules/admin/admin.module';
-import { BillingModule } from './modules/billing/billing.module';
-import { PresenceModule } from './modules/presence/presence.module';
-import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { JwtService } from '@nestjs/jwt';
+
+// Core & Common
 import { PrismaModule } from './core/prisma/prisma.module';
 import { PrismaService } from './core/prisma/prisma.service';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { EventBusService } from './common/events/event-bus.service';
 import { CommonModule } from './common/common.module';
+import { EventBusService } from './common/events/event-bus.service';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { SecurityGuard } from './common/guards/security.guard';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
-import { JwtService } from '@nestjs/jwt';
 import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
+
+// Feature Modules
+import { AdminModule } from './modules/admin/admin.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { BillingModule } from './modules/billing/billing.module';
+import { BookingModule } from './modules/booking/booking.module';
+import { PreAssessmentModule } from './modules/pre-assessment/pre-assessment.module';
+import { PresenceModule } from './modules/presence/presence.module';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { TherapistModule } from './modules/therapist/therapist.module';
+import { UsersModule } from './modules/users/users.module';
+import { WorksheetsModule } from './modules/worksheets/worksheets.module';
+
+// App Root
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
