@@ -1,19 +1,15 @@
 model ClientEngagement {
   id                      String   @id @default(uuid())
   clientId                String   @unique
-  loginFrequency          Int      @default(0) // Logins per week
-  platformUsageScore      Float    @default(0.0) // 0-1 score based on feature usage
+  loginFrequency          Int      @default(0)
+  platformUsageScore      Float    @default(0.0)
   journalEntryCount       Int      @default(0)
-  worksheetCompletionRate Float    @default(0.0) // 0-1, completed/total assigned
-  meetingAttendanceRate   Float    @default(0.0) // 0-1, attended/scheduled
-  averageSessionRating    Float? // Average rating given to sessions (1-5)
-  engagementTrend         String   @default("stable") // "increasing" | "stable" | "decreasing"
+  worksheetCompletionRate Float    @default(0.0)
+  meetingAttendanceRate   Float    @default(0.0)
+  averageSessionRating    Float?
+  engagementTrend         String   @default("stable")
   lastCalculatedAt        DateTime @default(now())
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
   client                  Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-
-  @@index([clientId])
-  @@index([engagementTrend])
-  @@index([platformUsageScore])
 }

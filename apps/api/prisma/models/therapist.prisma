@@ -1,81 +1,110 @@
 model Therapist {
-  userId                             String                            @id @unique
-  mobile                             String
-  province                           String
-  timezone                           String                            @default("UTC")
-  status                             TherapistApplicationStatus        @default(PENDING)
-  submissionDate                     DateTime                          @default(now())
-  processingDate                     DateTime                          @default(now())
-  processedByAdminId                 String?
-  providerType                       String
-  professionalLicenseType            String
-  isPRCLicensed                      String
-  prcLicenseNumber                   String
-  expirationDateOfLicense            DateTime
-  practiceStartDate                  DateTime
-  licenseVerified                    Boolean                           @default(false)
-  licenseVerifiedAt                  DateTime?
-  licenseVerifiedBy                  String?
-  certifications                     Json?
-  certificateUrls                    String[]                          @default([])
-  certificateNames                   String[]                          @default([])
-  licenseUrls                        String[]                          @default([])
-  licenseNames                       String[]                          @default([])
-  documentUrls                       String[]                          @default([])
-  documentNames                      String[]                          @default([])
-  yearsOfExperience                  Int?
-  educationBackground                String?
-  specialCertifications              String[]
-  practiceLocation                   String?
-  acceptsInsurance                   Boolean                           @default(false)
-  acceptedInsuranceTypes             String[]
-  areasOfExpertise                   String[]
-  assessmentTools                    String[]
-  therapeuticApproachesUsedList      String[]
-  languagesOffered                   String[]
-  providedOnlineTherapyBefore        Boolean
-  comfortableUsingVideoConferencing  Boolean
-  preferredSessionLength             Int[]
-  privateConfidentialSpace           String?
-  compliesWithDataPrivacyAct         Boolean
-  professionalLiabilityInsurance     String?
-  complaintsOrDisciplinaryActions    String?
-  willingToAbideByPlatformGuidelines Boolean
-  expertise                          String[]
-  approaches                         String[]
-  languages                          String[]
-  illnessSpecializations             String[]
-  acceptTypes                        String[]
-  treatmentSuccessRates              Json
-  sessionLength                      String
-  hourlyRate                         Decimal                           @db.Decimal(10, 2)
-  createdAt                          DateTime                          @default(now())
-  updatedAt                          DateTime                          @updatedAt
-  assignedClients                    ClientTherapist[]
-  meetings                           Meeting[]                         @relation("TherapistMeetings")
-  paymentsAsTherapist                Payment[]
-  reviews                            Review[]
-  processedByAdmin                   Admin?                            @relation(fields: [processedByAdminId], references: [userId])
-  user                               User                              @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
-  therapistAvailabilities            TherapistAvailability[]
-  worksheets                         Worksheet[]
-  GroupSessionTherapistInvitation    GroupSessionTherapistInvitation[]
-  performance                        TherapistPerformance?
+  userId                  String             @id @unique
+  academicTitle           AcademicTitle?
+  therapistTitle          TherapistTitle?
+  therapistTitleOther     String?
+  describeYourself        String?
+  languagesSpoken         Language[]         @default([FILIPINO])
+  cebuProvinceLocated     Boolean            @default(false)
+  yearPracticeStarted     Int?
+  specialization          ClinicalFocus[]
+  therapyTypesOffered     String[]
+  workWithAges            AgeGroup[]
+  cv                      String?
+  accumulated200Hours     Boolean            @default(false)
+  additionalNotes         String?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  // Relations
+  user                    User               @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
+  qualifications           Qualification[]
+  registrations            Registration[]
+  packages                TherapistPackage[]
+  assignedClients         ClientTherapist[]
+  meetings                Meeting[]          @relation("TherapistMeetings")
+  availability            TherapistAvailability[]
+  paymentsAsTherapist     Payment[]
+  reviews                 Review[]
+  worksheets              Worksheet[]
+  groupSessionInvitations GroupSessionTherapistInvitation[]
+  processedByAdmin        Admin?             @relation(fields: [processedBy], references: [userId])
+  processedBy             String?
 
   @@index([userId])
-  @@index([status])
-  @@index([timezone])
-  @@index([status, createdAt])
-  @@index([status, hourlyRate])
-  @@index([province])
-  @@index([yearsOfExperience])
-  @@index([hourlyRate])
-  @@index([createdAt])
-  @@index([province, status])
+  @@index([specialization], type: Gin)
 }
 
-enum TherapistApplicationStatus {
-  PENDING
-  APPROVED
-  REJECTED
+model Qualification {
+  id                    String    @id @default(uuid())
+  therapistId           String
+  highestQualification  String
+  institution           String
+  from                  DateTime
+  to                    DateTime
+  therapist             Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@index([therapistId])
+}
+
+model Registration {
+  id                String    @id @default(uuid())
+  therapistId       String
+  professionalBody  String
+  registrationNumber String
+  description       String?
+  from              DateTime
+  to                DateTime
+  therapist         Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  @@index([therapistId])
+}
+
+
+enum AcademicTitle {
+  PHD
+  MA
+  MS
+  BACHELORS
+  OTHERS
+}
+
+enum TherapistTitle {
+  RPsy
+  RPm
+  LPT
+  MD_Psychiatrist
+}
+
+enum Language {
+  FILIPINO
+  ENGLISH
+  CEBUANO
+  ILOCANO
+  HILIGAYNON
+}
+
+enum AgeGroup {
+  CHILDREN
+  ADOLESCENTS
+  ADULTS
+  SENIORS
+}
+
+enum ClinicalFocus {
+  STRESS
+  ANXIETY
+  DEPRESSION
+  DRUG_ABUSE
+  INSOMNIA
+  PANIC
+  BIPOLAR_DISORDER
+  OCD
+  PTSD
+  SOCIAL_ANXIETY
+  PHOBIA
+  BURNOUT
+  EATING_DISORDERS
+  ADHD
+  ALCOHOL_USE
 }

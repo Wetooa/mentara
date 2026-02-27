@@ -17,6 +17,7 @@ model Meeting {
   meetingNotes MeetingNotes[]
   payments     Payment[]
   reviews      Review[]
+  sessionLogs  SessionLog[]
 
   @@index([clientId])
   @@index([therapistId])

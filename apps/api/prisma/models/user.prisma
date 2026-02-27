@@ -47,6 +47,7 @@ model User {
   blockedBy           UserBlock[]               @relation("UserBlocked")
   blocking            UserBlock[]               @relation("UserBlocking")
   journalEntries      JournalEntry[]            @relation("UserJournalEntries")
+  subscriptions       UserSubscription[]        @relation("UserSubscriptions")
 
   // Group Therapy Sessions
   createdGroupSessions       GroupTherapySession[]     @relation("GroupSessionCreator")

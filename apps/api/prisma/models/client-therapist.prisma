@@ -1,17 +1,12 @@
 model ClientTherapist {
-  id          String    @id @default(uuid())
-  clientId    String
+  id         String   @id @default(uuid())
+  clientId   String
   therapistId String
-  status      String    @default("active") // active, inactive
-  assignedAt  DateTime  @default(now())
-  client      Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-  therapist   Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  status     String   @default("active")
+  assignedAt DateTime @default(now())
+  client     Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist  Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
 
-  @@unique([clientId, therapistId])
   @@index([clientId])
   @@index([therapistId])
-  @@index([clientId, status])
-  @@index([therapistId, status])
-  @@index([status])
-  @@index([assignedAt])
 }
