@@ -1,4 +1,17 @@
+import { Outfit, Quicksand } from 'next/font/google';
 import './global.css';
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
+  display: 'swap',
+});
+
+const quicksand = Quicksand({
+  subsets: ['latin'],
+  variable: '--font-quicksand',
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'Welcome to web',
@@ -11,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${outfit.variable} ${quicksand.variable}`}>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }

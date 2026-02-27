@@ -11,17 +11,13 @@ import { PrismaService } from './core/prisma/prisma.service';
 import { CommonModule } from './common/common.module';
 import { EventBusService } from './common/events/event-bus.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';  
 import { SecurityGuard } from './common/guards/security.guard';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
 import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
 
 // Feature Modules
-import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { PreAssessmentModule } from './modules/pre-assessment/pre-assessment.module';
-import { RecommendationsModule } from './modules/recommendations/recommendations.module';
-import { TherapistModule } from './modules/therapist/therapist.module';
 
 // App Root
 import { AppController } from './app.controller';
@@ -62,10 +58,6 @@ import { AppService } from './app.service';
     CommonModule,
     PrismaModule,
     AuthModule,
-    TherapistModule,
-    PreAssessmentModule,
-    AdminModule,
-    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [

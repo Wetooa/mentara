@@ -17,7 +17,43 @@ module.exports = {
     //     ...createGlobPatternsForDependencies(__dirname)
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        mentara: {
+          surface: '#EDF1D6',
+          accent: '#9DC08B',
+          primary: '#609966',
+          deep: '#40513B',
+        },
+      },
+      backdropBlur: {
+        mentara: '12px',
+      },
+      borderRadius: {
+        mentara: '24px',
+      },
+      boxShadow: {
+        'mentara-glass': '0 8px 32px 0 rgba(64, 81, 59, 0.1)',
+      },
+      fontFamily: {
+        mentara: ['var(--font-outfit)', 'var(--font-quicksand)', 'sans-serif'],
+        sans: ['var(--font-outfit)', 'var(--font-quicksand)', 'ui-sans-serif', 'system-ui'],
+      },
+      animation: {
+        'slow-flow': 'slow-flow 60s ease infinite',
+        'pulse-mentara': 'pulse-mentara 3s ease-in-out infinite',
+      },
+      keyframes: {
+        'slow-flow': {
+          '0%, 100%': { 'background-position': '0% 50%' },
+          '50%': { 'background-position': '100% 50%' },
+        },
+        'pulse-mentara': {
+          '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+          '50%': { opacity: 0.8, transform: 'scale(1.05)', 'box-shadow': '0 0 20px #609966' },
+        },
+      },
+    },
   },
   plugins: [],
 };

@@ -5,18 +5,16 @@ model User {
   middleName          String?
   lastName            String
   birthDate           DateTime?
+  gender              Gender?
   address             String?
-  role                String                    @default("client")
-  createdAt           DateTime                  @default(now())
-  updatedAt           DateTime                  @updatedAt
+  role                Role                    @default(CLIENT)
   password            String?
   emailVerified       Boolean                   @default(false)
   emailVerifyToken    String?                   @unique
   emailVerifyTokenExp DateTime?
   resetToken          String?                   @unique
   resetTokenExpiry    DateTime?
-  isActive            Boolean                   @default(true)
-  failedLoginCount    Int                       @default(0)
+
   avatarUrl           String?
   coverImageUrl       String?
   bio                 String?
@@ -24,35 +22,16 @@ model User {
   suspendedBy         String?
   suspensionReason    String?
   deactivatedAt       DateTime?
-  deactivatedBy       String?
   deactivationReason  String?
   lastLoginAt         DateTime?
-  lockoutUntil        DateTime?
-  admin               Admin?                    @relation("UserAdmin")
-  client              Client?                   @relation("UserClient")
-  comments            Comment[]
-  commentHearts       CommentHeart[]
-  conversations       ConversationParticipant[] @relation("UserConversations")
-  memberships         Membership[]
-  sentMessages        Message[]                 @relation("UserMessages")
-  messageReactions    MessageReaction[]         @relation("UserMessageReactions")
-  messageReadReceipts MessageReadReceipt[]      @relation("UserReadReceipts")
-  notifications       Notification[]            @relation("UserNotifications")
-  paymentMethods      PaymentMethod[]           @relation("UserPaymentMethods")
-  posts               Post[]
-  postHearts          PostHeart[]
-  reports             Report[]                  @relation("UserReports")
-  reportsAgainstMe    Report[]                  @relation("UserBeingReported")
+
   therapist           Therapist?                @relation("UserTherapist")
-  blockedBy           UserBlock[]               @relation("UserBlocked")
-  blocking            UserBlock[]               @relation("UserBlocking")
-  journalEntries      JournalEntry[]            @relation("UserJournalEntries")
-  subscriptions       UserSubscription[]        @relation("UserSubscriptions")
+  client              Client?                   @relation("UserClient")
+  admin               Admin?                    @relation("UserAdmin")
 
-  // Group Therapy Sessions
-  createdGroupSessions       GroupTherapySession[]     @relation("GroupSessionCreator")
-  groupSessionParticipations GroupSessionParticipant[] @relation("GroupSessionParticipant")
-
+  isActive            Boolean                   @default(true)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
   @@index([email])
   @@index([role])
   @@index([isActive])
@@ -63,3 +42,16 @@ model User {
   @@index([emailVerified])
   @@index([lastLoginAt])
 }
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Role {
+  ADMIN
+  THERAPIST
+  CLIENT
+}
+
