@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface FileUploadResult {
@@ -12,19 +12,21 @@ export interface FileUploadResult {
 @Injectable()
 export class SupabaseStorageService {
   private readonly logger = new Logger(SupabaseStorageService.name);
+  private readonly supabase: SupabaseClient;
   private readonly supabaseUrl: string;
-  private readonly supabaseApiKey: string;
 
   constructor(private configService: ConfigService) {
     this.supabaseUrl = this.configService.get<string>('SUPABASE_URL') || '';
-    this.supabaseApiKey =
+    const supabaseApiKey =
       this.configService.get<string>('SUPABASE_API_KEY') || '';
 
-    if (!this.supabaseUrl || !this.supabaseApiKey) {
+    if (!this.supabaseUrl || !supabaseApiKey) {
       throw new Error(
         'Supabase configuration is missing. Please set SUPABASE_URL and SUPABASE_API_KEY environment variables.',
       );
     }
+
+    this.supabase = createClient(this.supabaseUrl, supabaseApiKey);
   }
 
   /**
@@ -47,16 +49,22 @@ export class SupabaseStorageService {
       const fileExtension = this.getFileExtension(originalFilename);
       const uniqueFilename = `${uuidv4()}${fileExtension}`;
 
-      // Upload to Supabase
-      await this.uploadToSupabase(
-        bucket,
-        uniqueFilename,
-        file.buffer,
-        file.mimetype,
-      );
+      // Upload to Supabase using the official SDK
+      const { data, error } = await this.supabase.storage
+        .from(bucket)
+        .upload(uniqueFilename, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false,
+        });
+
+      if (error) {
+        throw error;
+      }
 
       // Generate public URL
-      const publicUrl = `${this.supabaseUrl}/storage/v1/object/public/${bucket}/${uniqueFilename}`;
+      const {
+        data: { publicUrl },
+      } = this.supabase.storage.from(bucket).getPublicUrl(uniqueFilename);
 
       this.logger.log(
         `File uploaded successfully to Supabase: ${uniqueFilename}`,
@@ -123,24 +131,15 @@ export class SupabaseStorageService {
     );
 
     try {
-      const url = `${this.supabaseUrl}/storage/v1/object/${bucket}/${filename}`;
+      const { data, error } = await this.supabase.storage
+        .from(bucket)
+        .remove([filename]);
 
-      const response = await axios.delete(url, {
-        headers: {
-          Authorization: `Bearer ${this.supabaseApiKey}`,
-        },
-      });
-
-      if (response.status === 200) {
-        this.logger.log(`File deleted successfully from Supabase: ${filename}`);
-      } else {
-        this.logger.error(
-          `Failed to delete file from Supabase. Status: ${response.status}, Response: ${response.data}`,
-        );
-        throw new Error(
-          `Supabase delete failed with status: ${response.status}`,
-        );
+      if (error) {
+        throw error;
       }
+
+      this.logger.log(`File deleted successfully from Supabase: ${filename}`);
     } catch (error: any) {
       this.logger.error(
         `Error deleting file from Supabase: ${filename}`,
@@ -160,56 +159,6 @@ export class SupabaseStorageService {
   private getFileExtension(filename: string): string {
     const lastDotIndex = filename.lastIndexOf('.');
     return lastDotIndex === -1 ? '' : filename.substring(lastDotIndex);
-  }
-
-  /**
-   * Upload file content to Supabase Storage
-   * @param bucket - The storage bucket name
-   * @param path - The file path/name in the bucket
-   * @param fileBuffer - The file content as buffer
-   * @param mimeType - The MIME type of the file
-   */
-  private async uploadToSupabase(
-    bucket: string,
-    path: string,
-    fileBuffer: Buffer,
-    mimeType: string,
-  ): Promise<void> {
-    const url = `${this.supabaseUrl}/storage/v1/object/${bucket}/${path}`;
-
-    try {
-      const response = await axios.post(url, fileBuffer, {
-        headers: {
-          'Content-Type': mimeType,
-          Authorization: `Bearer ${this.supabaseApiKey}`,
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        this.logger.debug(`File uploaded successfully to Supabase: ${path}`);
-      } else {
-        this.logger.error(
-          `Failed to upload file to Supabase. Status: ${response.status}, Response: ${response.data}`,
-        );
-        throw new Error(
-          `Supabase upload failed with status: ${response.status}`,
-        );
-      }
-    } catch (error: any) {
-      if (error?.response) {
-        this.logger.error(
-          `Supabase API error: ${error.response.status} - ${error.response.data}`,
-        );
-        throw new Error(
-          `Supabase upload failed: ${error.response.data?.message || error.response.statusText}`,
-        );
-      } else {
-        this.logger.error(
-          `Network error during Supabase upload: ${error.message}`,
-        );
-        throw new Error(`Failed to upload to Supabase: ${error.message}`);
-      }
-    }
   }
 
   /**
@@ -253,14 +202,16 @@ export class SupabaseStorageService {
       };
     }
 
-    // Filename validation - prevent path traversal
-    // const safeFilename = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-    // if (safeFilename !== file.originalname) {
-    //   return {
-    //     isValid: false,
-    //     error: 'Filename contains invalid characters',
-    //   };
-    // }
+    // Filename validation - prevent path traversal and ensure safe filename
+    // We already generate a unique UUID filename for upload, so original filename safety
+    // is secondary for storage pathing but good for metadata if we stored it.
+    const invalidChars = /[<>:"/\\|?*]/;
+    if (invalidChars.test(file.originalname)) {
+      return {
+        isValid: false,
+        error: 'Filename contains invalid characters',
+      };
+    }
 
     return { isValid: true };
   }
