@@ -6,7 +6,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as fs from 'fs';
 import helmet from 'helmet';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as net from 'net';
 // import {
 //   validateEnvironmentVariables,
@@ -60,11 +59,6 @@ async function bootstrap() {
     rawBody: true,
   });
 
-  // Configure Socket.io adapter for WebSocket support
-  app.useWebSocketAdapter(new IoAdapter(app));
-
-  // Enable graceful shutdown hooks for WebSocket connections
-  app.enableShutdownHooks();
 
   // Enable CORS FIRST - before Helmet to prevent conflicts
   const allowedOrigins =
@@ -213,8 +207,6 @@ async function bootstrap() {
   try {
     await app.listen(actualPort);
     logger.log(`Application is running on: ${await app.getUrl()}`);
-    logger.log('WebSocket (Socket.io) support enabled');
-    logger.log(`WebSocket server listening on port: ${actualPort}`);
 
     if (actualPort !== preferredPort) {
       logger.log(`Note: Using port ${actualPort} instead of preferred port ${preferredPort}`);
