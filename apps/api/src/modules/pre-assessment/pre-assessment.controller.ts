@@ -22,7 +22,7 @@ import { PreAssessmentService } from './pre-assessment.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
 import { CreatePreAssessmentDto, AurisChatDto, PreAssessmentResponseDto, NewSessionResponseDto, AurisResponseDto, PreAssessmentDto } from './types/pre-assessment.dto';
-import { Public } from '../auth/core/decorators/public.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { AurisService } from './auris.service';
 
 @ApiTags('Pre-Assessment')

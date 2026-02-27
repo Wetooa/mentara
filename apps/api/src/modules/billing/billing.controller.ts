@@ -12,9 +12,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { BillingService } from './billing.service';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { CurrentUserRole } from 'src/common/decorators/current-user-role.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../../common/decorators/current-user-role.decorator';
 import { PaymentStatus } from '@prisma/client';
 import type {
   CreatePaymentMethodDto,

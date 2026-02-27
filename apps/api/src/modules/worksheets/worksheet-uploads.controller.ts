@@ -12,8 +12,8 @@ import {
   Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { WorksheetsService } from './worksheets.service';

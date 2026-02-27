@@ -17,10 +17,10 @@ import {
 } from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { CurrentUserRole } from 'src/common/decorators/current-user-role.decorator';
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../../common/decorators/current-user-role.decorator';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
   UserIdParamSchema,
   DeactivateUserDtoSchema,
@@ -33,9 +33,9 @@ import type {
   UserDto,
 } from './types';
 import { UsersService } from './users.service';
-import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
+import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { RoleUtils } from 'src/utils/role-utils';
-import { UserResponseDto, SuccessMessageDto } from 'src/common/dto';
+import { UserResponseDto, SuccessMessageDto } from '../../common/dto';
 
 @ApiTags('users')
 @Controller('users')

@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { BookingHealthController } from './booking-health.controller';
 import { BookingController } from './booking.controller';
 import { BookingService } from './booking.service';
 import { SmartSchedulingService } from './services/smart-scheduling.service';
@@ -12,7 +11,7 @@ import { PricingService } from './services/pricing.service';
 import { BillingService } from '../billing/billing.service';
 
 @Module({
-  controllers: [BookingController, BookingHealthController],
+  controllers: [BookingController],
   providers: [
     BookingService,
     SmartSchedulingService,

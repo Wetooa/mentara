@@ -10,7 +10,7 @@ import type {
   WorksheetUpdateInputDto,
 } from './types';
 
-import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
+import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 
 @Injectable()
 export class WorksheetsService {

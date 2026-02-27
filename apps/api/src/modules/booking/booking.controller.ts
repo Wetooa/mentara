@@ -15,7 +15,7 @@ import {
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../auth/core/decorators/current-user-role.decorator';
+import { CurrentUserRole } from '../../common/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { BookingService } from './booking.service';
 import {

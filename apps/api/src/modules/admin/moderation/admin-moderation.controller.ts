@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUserId } from '../../common/decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../../auth/core/decorators/current-user-role.decorator';
+import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../../../common/decorators/current-user-role.decorator';
 
 @Controller('admin/moderation')
 @UseGuards(JwtAuthGuard)

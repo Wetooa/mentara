@@ -8,7 +8,7 @@ import { BadRequestException, NotFoundException, ForbiddenException, HttpExcepti
 import { AdminUserController } from './admin-user.controller';
 import { AdminService } from '../admin.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../auth/core/guards/admin-auth.guard';
+import { AdminAuthGuard } from '../../../common/guards/admin-auth.guard';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe';
 import { SecurityGuardTestUtils, RoleBasedTestUtils } from '../../test-utils/auth-testing-helpers';
 import { MockBuilder, TestDataGenerator, TestAssertions } from '../../test-utils/enhanced-test-helpers';

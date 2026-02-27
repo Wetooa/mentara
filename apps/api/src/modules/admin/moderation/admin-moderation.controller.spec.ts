@@ -8,7 +8,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { AdminModerationController } from './admin-moderation.controller';
 import { AdminService } from '../admin.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../auth/core/guards/admin-auth.guard';
+import { AdminAuthGuard } from '../../../common/guards/admin-auth.guard';
 
 describe('AdminModerationController', () => {
   let controller: AdminModerationController;
