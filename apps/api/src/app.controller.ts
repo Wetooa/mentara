@@ -9,7 +9,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Public } from './auth/core/decorators/public.decorator';
+import { Public } from './modules/auth/core/decorators/public.decorator';
 
 @ApiTags('app')
 @Controller()

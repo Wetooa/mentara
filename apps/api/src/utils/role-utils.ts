@@ -1,12 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/providers/prisma-client.provider';
+import { PrismaService } from 'src/core/prisma/prisma.service';
 
-export enum UserRole {
-  USER = 'user',
-  THERAPIST = 'therapist',
-  ADMIN = 'admin',
-  MODERATOR = 'moderator',
-}
+import { UserRole } from '../common/types';
+export { UserRole };
 
 export interface RolePermissions {
   canAccessAdminPanel: boolean;

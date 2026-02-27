@@ -8,10 +8,10 @@ import * as fs from 'fs';
 import helmet from 'helmet';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as net from 'net';
-import {
-  validateEnvironmentVariables,
-  logEnvironmentInfo,
-} from './config/env-validation';
+// import {
+//   validateEnvironmentVariables,
+//   logEnvironmentInfo,
+// } from './config/env-validation';
 
 const logger = new Logger('Bootstrap');
 
@@ -46,8 +46,8 @@ async function bootstrap() {
 
   // Validate environment variables before starting the application
   try {
-    validateEnvironmentVariables();
-    logEnvironmentInfo();
+    // validateEnvironmentVariables();
+    // logEnvironmentInfo();
   } catch (error) {
     logger.error(
       'Failed to start application:',

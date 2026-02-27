@@ -7,8 +7,8 @@ export * from './user-response.dto';
 export type {
   UserResponse,
   AuthResponse,
-} from '../../auth/types';
+} from '../../modules/auth/types';
 
 export type {
   SuccessResponse,
-} from '../../types/global';
+} from '../types';

@@ -1,6 +1,6 @@
-import type { UserDto } from '../../users/types';
-import type { AuthResponse } from '../../auth/types';
-import { UserRole } from '../../types/global';
+import type { UserDto } from '../../modules/users/types';
+import type { AuthResponse } from '../../modules/auth/types';
+import { UserRole } from '../../common/types';
 
 // Define UserProfileResponse locally since it's only used here
 interface UserProfileResponse extends UserDto {
