@@ -63,3 +63,8 @@ generated/
 # Next.js
 .next
 out
+
+# AI SLOP
+.cursor
+.claude
+.agent
