@@ -10,6 +10,15 @@ const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
+  async redirects() {
+    return [
+      {
+        source: '/find-a-therapist',
+        destination: '/for-interested-users',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const plugins = [

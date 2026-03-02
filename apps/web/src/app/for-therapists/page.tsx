@@ -35,12 +35,12 @@ export default function ForTherapistsPage() {
             </div>
         </div>
 
-        <section className="glass-card p-12 bg-mentara-deep text-mentara-surface text-center space-y-8">
-            <h2 className="text-3xl font-bold">Ready to take your practice to the next level?</h2>
-            <p className="text-lg opacity-80 max-w-2xl mx-auto">
+        <section className="glass-card p-12 bg-mentara-deep text-white text-center space-y-8">
+            <h2 className="text-3xl md:text-5xl font-bold">Ready to take your practice to the next level?</h2>
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
                 Join hundreds of therapists who are already making a greater impact with Mentara.
             </p>
-            <button className="bg-mentara-accent text-mentara-deep px-10 py-4 rounded-full font-bold text-lg hover:bg-mentara-surface transition-colors shadow-lg">
+            <button className="bg-mentara-accent text-mentara-deep px-10 py-4 rounded-full font-bold text-lg hover:bg-mentara-surface transition-all shadow-lg hover:scale-105">
                 Apply to Join Mentara
             </button>
         </section>
