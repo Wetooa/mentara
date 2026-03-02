@@ -8,11 +8,6 @@ model Client {
   updatedAt                       DateTime           @updatedAt
   user                            User               @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
   assignedTherapists              ClientTherapist[]  @relation("ClientAssignedTherapists")
-  meetings                        Meeting[]          @relation("ClientMeetings")
-  paymentsAsClient                Payment[]          @relation("ClientPayments")
-  preAssessments                  PreAssessment[]    @relation("ClientPreAssessments")
-  reviews                         Review[]           @relation("ClientReviews")
-  worksheets                      Worksheet[]
   preferences                     ClientPreferences?
   engagement                      ClientEngagement?
 

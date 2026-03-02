@@ -38,7 +38,6 @@ model Therapist {
   reviews                 Review[]           @relation("TherapistReviews")
   worksheets              Worksheet[]
   groupSessionInvitations GroupSessionTherapistInvitation[]
-  processedByAdmin        Admin?             @relation("AdminProcessedTherapists", fields: [processedBy], references: [userId])
   processedBy             String?
 
   @@index([userId])

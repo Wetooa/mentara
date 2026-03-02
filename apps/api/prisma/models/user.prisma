@@ -27,7 +27,6 @@ model User {
 
   therapist           Therapist?                @relation("UserTherapist")
   client              Client?                   @relation("UserClient")
-  admin               Admin?                    @relation("UserAdmin")
 
   isActive            Boolean                   @default(true)
   createdAt           DateTime                  @default(now())
