@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { TherapistUser } from "@/lib/api/services/auth";
+import { TherapistUser, AvailabilitySchedule } from "@/types/auth";
 import type { Meeting } from "@/types/api/meetings";
 import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
@@ -10,11 +10,11 @@ export interface TherapistAuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Tokens
   accessToken: string | null;
   refreshToken: string | null;
-  
+
   // Application state
   applicationStatus: "pending" | "approved" | "rejected" | "suspended" | null;
   verificationStatus: {
@@ -23,15 +23,11 @@ export interface TherapistAuthState {
     backgroundCheckComplete: boolean;
     overallStatus: "verified" | "pending" | "rejected";
   } | null;
-  
+
   // Profile state
-  availability: Record<string, {
-    isAvailable: boolean;
-    startTime?: string;
-    endTime?: string;
-  }>;
+  availability: AvailabilitySchedule;
   isAcceptingNewClients: boolean;
-  
+
   // Dashboard data
   dashboardData: {
     upcomingAppointments: Meeting[];
@@ -39,7 +35,7 @@ export interface TherapistAuthState {
     todaySchedule: Meeting[];
     monthlyStats: Record<string, number>;
   } | null;
-  
+
   // Actions
   setUser: (user: TherapistUser | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -109,7 +105,7 @@ export const useTherapistAuthStore = create<TherapistAuthState>()(
 
       setApplicationStatus: (applicationStatus) => {
         set({ applicationStatus });
-        
+
         // Update user object if available
         const currentUser = get().user;
         if (currentUser) {
@@ -129,7 +125,7 @@ export const useTherapistAuthStore = create<TherapistAuthState>()(
 
       updateAvailability: (availability) => {
         set({ availability });
-        
+
         // Update user profile
         const currentUser = get().user;
         if (currentUser) {
@@ -167,11 +163,11 @@ export const useTherapistAuthStore = create<TherapistAuthState>()(
           isAcceptingNewClients: false,
           dashboardData: null,
         });
-        
+
         // Clear localStorage
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+          localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
         }
       },
     }),

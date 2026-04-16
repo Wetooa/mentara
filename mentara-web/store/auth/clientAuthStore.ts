@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { ClientUser } from "@/lib/api/services/auth";
+import { ClientUser, ClientPreferences } from "@/types/auth";
 import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 export interface ClientAuthState {
@@ -9,17 +9,17 @@ export interface ClientAuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Tokens
   accessToken: string | null;
   refreshToken: string | null;
-  
+
   // Onboarding state
   onboardingComplete: boolean;
   onboardingStep: string | null;
   selectedGoals: string[];
-  preferences: Record<string, any>;
-  
+  preferences: Partial<ClientPreferences>;
+
   // Actions
   setUser: (user: ClientUser | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -28,7 +28,7 @@ export interface ClientAuthState {
   updateProfile: (profile: Partial<ClientUser['profile']>) => void;
   updateOnboardingStep: (step: string) => void;
   setSelectedGoals: (goals: string[]) => void;
-  setPreferences: (preferences: Record<string, any>) => void;
+  setPreferences: (preferences: Partial<ClientPreferences>) => void;
   completeOnboarding: () => void;
   logout: () => void;
 }
@@ -114,7 +114,7 @@ export const useClientAuthStore = create<ClientAuthState>()(
               ...currentUser,
               profile: {
                 ...currentUser.profile,
-                preferences,
+                preferences: preferences as ClientPreferences,
               },
             },
           });
@@ -122,11 +122,11 @@ export const useClientAuthStore = create<ClientAuthState>()(
       },
 
       completeOnboarding: () => {
-        set({ 
-          onboardingComplete: true, 
-          onboardingStep: null 
+        set({
+          onboardingComplete: true,
+          onboardingStep: null
         });
-        
+
         // Update user object
         const currentUser = get().user;
         if (currentUser) {
@@ -152,11 +152,11 @@ export const useClientAuthStore = create<ClientAuthState>()(
           selectedGoals: [],
           preferences: {},
         });
-        
+
         // Clear localStorage
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+          localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
         }
       },
     }),

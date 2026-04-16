@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useRoleGuard } from "@/hooks/useRoleGuard";
 import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
 import Image from "next/image";
 import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
@@ -23,7 +23,20 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const { logout, user } = useAuth();
+  const { isLoading, isAuthenticated, user, logout } = useRoleGuard("admin");
+
+  // While waiting for guard effect, show spinner
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500" />
+      </div>
+    );
+  }
+
+  // If guard logic determines unauth, it redirects in useEffect.
+  // We return null here to prevent flashing.
+  if (!isAuthenticated || user?.role !== "admin") return null;
 
   const navItems = [
     {

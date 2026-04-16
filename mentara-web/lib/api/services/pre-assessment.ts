@@ -10,6 +10,7 @@ import {
 } from "@/types/api/pre-assessment";
 import { QuestionnaireDefinition } from "@/types/api/questionnaires";
 import { SuccessMessageResponse } from "@/types/auth";
+import { AI_OPERATION_TIMEOUT } from "../client";
 
 /**
  * Pre-Assessment Service
@@ -146,15 +147,8 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * POST /pre-assessment/chatbot/start
      */
     async startChatbotSession(): Promise<{ sessionId: string }> {
-      console.log('[API] Starting chatbot session...');
-      try {
       const response = await client.post("/pre-assessment/chatbot/start");
-        console.log('[API] Chatbot session started:', response.data);
       return response.data;
-      } catch (error) {
-        console.error('[API] Failed to start chatbot session:', error);
-        throw error;
-      }
     },
 
     /**
@@ -173,55 +167,16 @@ export function createPreAssessmentService(client: AxiosInstance) {
         options: Array<{ value: number; label: string }>;
       };
     }> {
-      const startTime = Date.now();
-      console.log('[API] 📤 Sending chatbot message:', { 
-        sessionId, 
-        messageLength: message.length,
-        messagePreview: message.substring(0, 100),
-        timestamp: new Date().toISOString(),
-      });
-      
       try {
-        // Use extended timeout for AI operations (60 seconds)
         const response = await client.post("/pre-assessment/chatbot/message", {
           sessionId,
           message,
         }, {
-          timeout: 60000, // 60 seconds for AI operations
+          timeout: AI_OPERATION_TIMEOUT,
         });
-        
-        const duration = Date.now() - startTime;
-        console.log('[API] ✅ Chatbot response received:', {
-          duration: `${duration}ms`,
-          responseLength: response.data?.response?.length || 0,
-          isComplete: response.data?.isComplete,
-          currentQuestionnaire: response.data?.currentQuestionnaire,
-          hasToolCall: !!response.data?.toolCall,
-          toolCallDetails: response.data?.toolCall ? JSON.stringify(response.data.toolCall, null, 2) : 'none',
-        });
-        
         return response.data;
       } catch (error: any) {
-        const duration = Date.now() - startTime;
         const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
-        const isNetworkError = !error.response && error.request;
-        
-        console.error('[API] ❌ Failed to send chatbot message:', {
-          errorType: isTimeout ? 'TIMEOUT' : isNetworkError ? 'NETWORK_ERROR' : 'API_ERROR',
-          duration: `${duration}ms`,
-          timeout: isTimeout ? 'Request exceeded 60s timeout' : undefined,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          message: error.message,
-          code: error.code,
-          url: error.config?.url,
-          baseURL: error.config?.baseURL,
-          fullUrl: `${error.config?.baseURL || ''}${error.config?.url || ''}`,
-          responseData: error.response?.data,
-          requestData: error.config?.data ? JSON.parse(error.config.data) : undefined,
-        });
-        
-        // Re-throw with more context
         if (isTimeout) {
           const timeoutError = new Error(
             `Request timeout: The AI response took longer than 60 seconds. This may indicate the backend is processing a complex request. Please try again.`
@@ -247,24 +202,12 @@ export function createPreAssessmentService(client: AxiosInstance) {
       success: boolean;
       acknowledged: string;
     }> {
-      console.log('[API] Submitting structured answer:', { sessionId, questionId, answer });
-      try {
-        const response = await client.post("/pre-assessment/chatbot/answer", {
-          sessionId,
-          questionId,
-          answer,
-        });
-        console.log('[API] Structured answer submitted:', response.data);
-        return response.data;
-      } catch (error) {
-        console.error('[API] Failed to submit structured answer:', error);
-        console.error('[API] Error details:', {
-          status: (error as any)?.response?.status,
-          data: (error as any)?.response?.data,
-          message: error instanceof Error ? error.message : String(error),
-        });
-        throw error;
-      }
+      const response = await client.post("/pre-assessment/chatbot/answer", {
+        sessionId,
+        questionId,
+        answer,
+      });
+      return response.data;
     },
 
     /**

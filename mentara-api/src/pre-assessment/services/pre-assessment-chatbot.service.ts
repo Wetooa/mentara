@@ -9,6 +9,7 @@ import {
   processPreAssessmentAnswers,
   type QuestionnaireScores,
 } from '../pre-assessment.utils';
+import { getQuestionnaireByName } from '../../constants/questionnaires';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { ChatbotMessageRole, Prisma } from '@prisma/client';
 
@@ -20,6 +21,7 @@ interface ChatbotSessionData {
     content: string;
   }>;
   currentQuestionnaire: string | null;
+  completedQuestionnaires: string[];
   collectedAnswers: Record<string, number[]>; // questionnaire -> answers
   structuredAnswers: Record<string, number>; // questionId -> answer for tool call questions
   currentQuestionIndex: number;
@@ -700,25 +702,17 @@ export class PreAssessmentChatbotService {
       };
     }
 
-    // Parse questionId to extract topic (format: topic_lowercase_qN)
-    const questionIdParts = questionId.split('_q');
-    const topic = questionIdParts[0]
-      ? questionIdParts[0]
-          .split('_')
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ')
-      : 'Unknown';
+    const parsedQuestion = this.parseStructuredQuestionId(questionId);
+    const topic = parsedQuestion.topic;
 
     // Get current collected answers
     const collectedAnswers = (session.collectedAnswers as Record<string, number[]>) || {};
 
-    // Initialize topic array if it doesn't exist
-    if (!collectedAnswers[topic]) {
-      collectedAnswers[topic] = [];
-    }
-
-    // Add the answer to the topic's array
-    collectedAnswers[topic].push(answer);
+    const existingAnswers = collectedAnswers[topic]
+      ? [...collectedAnswers[topic]]
+      : [];
+    existingAnswers[parsedQuestion.questionIndex] = answer;
+    collectedAnswers[topic] = existingAnswers;
 
     // Store structured answers separately for tracking
     const structuredAnswers = (session.structuredAnswers as Record<string, number>) || {};
@@ -866,6 +860,7 @@ export class PreAssessmentChatbotService {
       userId: session.userId ?? null,
       conversationHistory,
       currentQuestionnaire: session.currentQuestionnaire,
+      completedQuestionnaires: session.completedQuestionnaires || [],
       collectedAnswers,
       structuredAnswers,
       currentQuestionIndex: 0, // Will be calculated based on collected answers
@@ -1410,7 +1405,7 @@ Could you tell me more about what you're experiencing? For example:
 - How long have you been feeling this way?
 - What situations or triggers seem to make it better or worse?
 - How is this affecting your daily life and relationships?
-- On a scale of 0-4 (where 0 is "not at all" and 4 is "extremely"), how would you rate the intensity of what you're experiencing?
+- What situations or symptoms feel most important for us to understand next?
 
 Your responses will help me understand how to best support you. If you prefer, you can also complete the traditional checklist assessment instead.`;
   }
@@ -1425,30 +1420,19 @@ Your responses will help me understand how to best support you. If you prefer, y
     collectedAnswers: Record<string, number[]>,
     structuredAnswers: Record<string, number>,
   ): Record<string, number[]> {
-    // Create a copy to avoid mutating the original
-    const merged = { ...collectedAnswers };
+    const merged = Object.fromEntries(
+      Object.entries(collectedAnswers).map(([topic, answers]) => [topic, [...answers]]),
+    ) as Record<string, number[]>;
 
-    // Group structured answers by topic
     for (const [questionId, answer] of Object.entries(structuredAnswers)) {
-      // Parse questionId to extract topic (format: topic_lowercase_qN)
-      const questionIdParts = questionId.split('_q');
-      const topic = questionIdParts[0]
-        ? questionIdParts[0]
-            .split('_')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ')
-        : 'Unknown';
+      const parsedQuestion = this.parseStructuredQuestionId(questionId);
+      const topic = parsedQuestion.topic;
 
-      // Initialize topic array if it doesn't exist
       if (!merged[topic]) {
         merged[topic] = [];
       }
 
-      // Note: We already added these in submitStructuredAnswer,
-      // but this ensures they're present even if session state was lost
-      if (!merged[topic].includes(answer)) {
-        merged[topic].push(answer);
-      }
+      merged[topic][parsedQuestion.questionIndex] = answer;
     }
 
     return merged;
@@ -1458,34 +1442,78 @@ Your responses will help me understand how to best support you. If you prefer, y
     collectedAnswers: Record<string, number[]>,
     structuredAnswers: Record<string, number> = {},
   ): number[] {
-    // Merge structured answers into collected answers first
     const mergedAnswers = this.mergeStructuredAnswers(collectedAnswers, structuredAnswers);
-    
-    // This is a simplified conversion
-    // In production, you'd need to map answers to the correct indices
-    // based on QUESTIONNAIRE_INDEX_MAPPING
-    const allAnswers: number[] = [];
-    const questionnaires = LIST_OF_QUESTIONNAIRES;
+    const flatAnswers = Array.from({ length: 201 }, () => 0);
 
-    for (const questionnaire of questionnaires) {
-      const answers = mergedAnswers[questionnaire] || [];
-      // Pad with -1 for unanswered questions
-      const config = QUESTIONNAIRE_SCORING[questionnaire];
-      if (config) {
-        const expectedCount = Object.keys(config.severityLevels).length * 5; // Approximate
-        while (answers.length < expectedCount) {
-          answers.push(-1);
-        }
+    for (const questionnaire of LIST_OF_QUESTIONNAIRES) {
+      const metadata = getQuestionnaireByName(questionnaire);
+      if (!metadata) {
+        continue;
       }
-      allAnswers.push(...answers);
+
+      const answers = mergedAnswers[questionnaire] || [];
+      for (let localIndex = 0; localIndex < metadata.itemCount; localIndex++) {
+        const value = answers[localIndex];
+        flatAnswers[metadata.startIndex + localIndex] =
+          value === undefined || value === -1 ? 0 : value;
+      }
     }
 
-    // Ensure we have 201 answers total
-    while (allAnswers.length < 201) {
-      allAnswers.push(-1);
+    return flatAnswers;
+  }
+
+  private parseStructuredQuestionId(questionId: string): {
+    topic: string;
+    questionIndex: number;
+  } {
+    const questionIdMatch = questionId.match(/^(.*)_q(\d+)$/i);
+    const rawTopic = questionIdMatch?.[1] || questionId;
+    const normalizedTopic = this.normalizeQuestionnaireName(rawTopic);
+    const parsedIndex = Number.parseInt(questionIdMatch?.[2] || '1', 10);
+
+    return {
+      topic: normalizedTopic,
+      questionIndex: Number.isFinite(parsedIndex) && parsedIndex > 0 ? parsedIndex - 1 : 0,
+    };
+  }
+
+  private normalizeQuestionnaireName(rawTopic: string): string {
+    const normalizedInput = rawTopic.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const directMatch = LIST_OF_QUESTIONNAIRES.find(
+      (questionnaire) =>
+        questionnaire.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() === normalizedInput,
+    );
+
+    if (directMatch) {
+      return directMatch;
     }
 
-    return allAnswers.slice(0, 201);
+    const aliases: Record<string, string> = {
+      add: 'ADD / ADHD',
+      adhd: 'ADD / ADHD',
+      alcohol: 'Substance or Alcohol Use Issues',
+      substance: 'Substance or Alcohol Use Issues',
+      substance alcohol use issues: 'Substance or Alcohol Use Issues',
+      binge eating: 'Binge eating / Eating disorders',
+      eating disorders: 'Binge eating / Eating disorders',
+      burnout: 'Burnout',
+      depression: 'Depression',
+      anxiety: 'Anxiety',
+      stress: 'Stress',
+      insomnia: 'Insomnia',
+      panic: 'Panic',
+      bipolar: 'Bipolar disorder (BD)',
+      bipolar disorder: 'Bipolar disorder (BD)',
+      ocd: 'Obsessive compulsive disorder (OCD)',
+      obsessive compulsive disorder: 'Obsessive compulsive disorder (OCD)',
+      ptsd: 'Post-traumatic stress disorder (PTSD)',
+      post traumatic stress disorder: 'Post-traumatic stress disorder (PTSD)',
+      social anxiety: 'Social anxiety',
+      drug abuse: 'Drug Abuse',
+      drug issues: 'Drug Abuse',
+    };
+
+    return aliases[normalizedInput] || rawTopic;
   }
 
   /**

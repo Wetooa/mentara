@@ -69,11 +69,7 @@ async function bootstrap() {
           .map((url) => url.trim())
           .filter((url) => url.length > 0) || ['https://mentara.app']
       : [
-          'http://localhost:3000',
-          'http://localhost:3001',
-          'http://127.0.0.1:3000',
-          'http://127.0.0.1:3001',
-          'http://localhost:10001', // Docker compose port
+          'http://localhost:10001',
           'http://127.0.0.1:10001',
         ];
 
@@ -132,7 +128,7 @@ async function bootstrap() {
           styleSrc: ["'self'", "'unsafe-inline'"],
           scriptSrc: ["'self'"],
           imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: ["'self'", 'http://localhost:3000', 'http://localhost:3001', 'ws://localhost:3001', 'wss://'],
+          connectSrc: ["'self'", 'http://localhost:10000', 'http://localhost:10001', 'ws://localhost:10000', 'wss://'],
           fontSrc: ["'self'"],
           objectSrc: ["'none'"],
           mediaSrc: ["'self'"],
@@ -173,7 +169,7 @@ async function bootstrap() {
   // Global prefix for all API routes
   app.setGlobalPrefix('api');
 
-  const preferredPort = parseInt(process.env.PORT ?? '3001', 10);
+  const preferredPort = parseInt(process.env.PORT ?? '10000', 10);
   let actualPort = preferredPort;
   
   // In development, try to find an available port if the preferred one is busy

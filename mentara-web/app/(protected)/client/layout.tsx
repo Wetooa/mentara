@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Menu, X, LogOut } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useRoleGuard } from "@/hooks/useRoleGuard";
 import { getProfileUrl, cn } from "@/lib/utils";
 import { DashboardPageMetadata } from "@/components/metadata/SimplePageMetadata";
 import { UserDisplay } from "@/components/common/UserDisplay";
@@ -74,14 +74,27 @@ const FloatingMessagesButton = dynamic(
   }
 );
 
-export default function MainLayout({
+export default function ClientLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { isLoading, isAuthenticated, user, logout } = useRoleGuard("client");
+
+  // While waiting for guard effect, show spinner
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  // If guard logic determines unauth, it redirects in useEffect.
+  // We return null here to prevent flashing.
+  if (!isAuthenticated || user?.role !== "client") return null;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Load sidebar state synchronously to match sidebar's initial state
@@ -138,6 +151,23 @@ export default function MainLayout({
       id: "worksheets",
     },
   ];
+
+  const demoConfig = useMemo(() => getDemoLoginConfig(), []);
+  const navItems = useMemo(
+    () =>
+      demoConfig.enabled
+        ? [
+          ...baseNavItems,
+          {
+            name: "Your Matches (demo)",
+            path: "/client/welcome?demo=1",
+            icon: "/icons/therapist.svg",
+            id: "welcome-demo",
+          },
+        ]
+        : baseNavItems,
+    [demoConfig.enabled]
+  );
 
   return (
     <>
@@ -197,11 +227,10 @@ export default function MainLayout({
                         key={item.id}
                         href={item.path}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${
-                          isActive
-                            ? "bg-primary/15 text-primary"
-                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                        }`}
+                        className={`relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${isActive
+                          ? "bg-primary/15 text-primary"
+                          : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                          }`}
                       >
                         <Image
                           src={item.icon}
@@ -209,18 +238,16 @@ export default function MainLayout({
                           width={20}
                           height={20}
                           loading="lazy"
-                          className={`transition-all duration-300 ${
-                            isActive
-                              ? "text-primary scale-110"
-                              : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
-                          }`}
+                          className={`transition-all duration-300 ${isActive
+                            ? "text-primary scale-110"
+                            : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
+                            }`}
                         />
                         <span
-                          className={`font-medium transition-all duration-300 ${
-                            isActive
-                              ? "text-primary"
-                              : "text-muted-foreground group-hover:text-primary"
-                          }`}
+                          className={`font-medium transition-all duration-300 ${isActive
+                            ? "text-primary"
+                            : "text-muted-foreground group-hover:text-primary"
+                            }`}
                         >
                           {item.name}
                         </span>
@@ -373,11 +400,10 @@ export default function MainLayout({
                   <Link
                     key={item.id}
                     href={item.path}
-                    className={`relative group flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl transition-all duration-300 ${
-                      isActive
-                        ? "text-primary"
-                        : "text-muted-foreground active:text-primary active:bg-primary/10"
-                    }`}
+                    className={`relative group flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl transition-all duration-300 ${isActive
+                      ? "text-primary"
+                      : "text-muted-foreground active:text-primary active:bg-primary/10"
+                      }`}
                     aria-label={item.name}
                     aria-current={isActive ? "page" : undefined}
                   >
@@ -387,18 +413,16 @@ export default function MainLayout({
                       width={20}
                       height={20}
                       loading="lazy"
-                      className={`transition-all duration-300 ${
-                        isActive
-                          ? "text-primary scale-110"
-                          : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
-                      }`}
+                      className={`transition-all duration-300 ${isActive
+                        ? "text-primary scale-110"
+                        : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
+                        }`}
                     />
                     <span
-                      className={`text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300 ${
-                        isActive
-                          ? "text-primary font-medium"
-                          : "text-muted-foreground group-hover:text-primary"
-                      }`}
+                      className={`text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300 ${isActive
+                        ? "text-primary font-medium"
+                        : "text-muted-foreground group-hover:text-primary"
+                        }`}
                     >
                       {item.name}
                     </span>

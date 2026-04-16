@@ -570,6 +570,7 @@ export class PreAssessmentController {
   ): Promise<{
     sessionId: string;
     currentQuestionnaire: string | null;
+    completedQuestionnaires: string[];
     isComplete: boolean;
     startedAt: Date;
   }> {
@@ -582,6 +583,7 @@ export class PreAssessmentController {
       return {
         sessionId: session.sessionId,
         currentQuestionnaire: session.currentQuestionnaire,
+        completedQuestionnaires: session.completedQuestionnaires,
         isComplete: session.isComplete,
         startedAt: session.startedAt,
       };
@@ -649,6 +651,7 @@ export class PreAssessmentController {
   ): Promise<{
     sessionId: string;
     currentQuestionnaire: string | null;
+    completedQuestionnaires: string[];
     isComplete: boolean;
     startedAt: Date;
   }> {
@@ -661,6 +664,7 @@ export class PreAssessmentController {
       return {
         sessionId: session.sessionId,
         currentQuestionnaire: session.currentQuestionnaire,
+        completedQuestionnaires: session.completedQuestionnaires,
         isComplete: session.isComplete,
         startedAt: session.startedAt,
       };

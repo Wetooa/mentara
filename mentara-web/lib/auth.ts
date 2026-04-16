@@ -1,16 +1,3 @@
-// Types
-export type UserRole = "client" | "therapist" | "moderator" | "admin";
+// Re-export canonical types — single source of truth is types/auth.ts
+export type { UserRole, BaseUser as AuthUser } from "@/types/auth";
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  role: UserRole;
-  firstName?: string;
-  lastName?: string;
-  avatarUrl?: string;
-  bio?: string;
-  isActive?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  metadata?: Record<string, unknown>;
-}

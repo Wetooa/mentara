@@ -16,6 +16,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
 import { logger } from "@/lib/logger";
+import type { UserRole } from "@/types/auth";
+const CLIENT_WELCOME_REDIRECT_DONE_KEY = "client_welcome_redirect_done";
 
 // Load auth debug utilities in development
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
@@ -24,15 +26,15 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   });
 }
 
-// Types
-export type UserRole = "client" | "therapist" | "moderator" | "admin";
+// Re-export UserRole for consumers that import from AuthContext
+export type { UserRole };
 
 export interface User {
   id: string;
   role: UserRole;
   firstName?: string;
   lastName?: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   hasSeenTherapistRecommendations?: boolean;
 }
 
@@ -133,7 +135,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     if (isClient) {
       const tokenExists = hasAuthToken();
       setHasToken(tokenExists);
-      
+
       // For protected routes without token, allow optimistic navigation
       // but mark as needing auth redirect
       if (!tokenExists && shouldCheckAuth) {
@@ -290,7 +292,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     refetchOnMount: false, // Use cached data if available
     retry: (failureCount, error: unknown) => {
       // Don't retry on 401/403 errors (auth failures)
-      if (error?.response?.status === 401 || error?.response?.status === 403) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError?.response?.status === 401 || axiosError?.response?.status === 403) {
         return false;
       }
       return failureCount < 2;
@@ -406,6 +409,15 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     queryClient.clear();
 
     if (isClient) {
+      // Disconnect WebSocket before clearing token
+      try {
+        const { disconnectWebSocket } = require('@/lib/websocket');
+        disconnectWebSocket();
+      } catch (error) {
+        // Silently fail if WebSocket module can't be loaded
+        logger.debug('Could not disconnect WebSocket on logout:', error);
+      }
+
       localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
     setHasToken(false);
@@ -416,6 +428,29 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const refreshProfile = () => {
     refetchProfile();
   };
+
+  // Clear messaging cache when user changes to prevent cross-user contamination
+  useEffect(() => {
+    if (!isClient) return;
+
+    // Clear messaging queries when user changes or logs out
+    // This prevents User A's data from appearing for User B
+    const currentUserId = user?.id;
+    if (currentUserId) {
+      // User is logged in - ensure only their queries are cached
+      // Queries are already scoped by userId in query keys, but clear any orphaned queries
+      const previousUserId = (window as any).__lastMessagingUserId;
+      if (previousUserId && previousUserId !== currentUserId) {
+        // User changed - clear all messaging queries
+        queryClient.removeQueries({ queryKey: ['messaging'] });
+      }
+      (window as any).__lastMessagingUserId = currentUserId;
+    } else {
+      // User logged out - clear all messaging queries
+      queryClient.removeQueries({ queryKey: ['messaging'] });
+      delete (window as any).__lastMessagingUserId;
+    }
+  }, [user?.id, isClient, queryClient]);
 
   // Handle route protection and redirection
   // Optimized: Allow navigation first, verify auth in background
@@ -454,6 +489,18 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         // Authenticated user trying to access public auth routes - redirect to dashboard
         // (They're already signed in, no need for sign-in/sign-up pages)
         if (pathname.startsWith("/auth/")) {
+          // Check if coming from pre-assessment (has method=chat or sessionId query params)
+          if (typeof window !== 'undefined' && (pathname === "/auth/register" || pathname === "/auth/sign-up")) {
+            const searchParams = new URLSearchParams(window.location.search);
+            const isFromPreAssessment = (searchParams.has('method') && searchParams.get('method') === 'chat') || searchParams.has('sessionId');
+
+            // Allow access to register/sign-up page when coming from pre-assessment
+            if (isFromPreAssessment) {
+              // Allow access - user may want to create new account after anonymous pre-assessment
+              return;
+            }
+          }
+
           const dashboardPath = getUserDashboardPath(userRole!);
           router.push(dashboardPath);
           return;
@@ -541,7 +588,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   // Allow page to render immediately with loading states, verify auth in background
   // Only show blocking screen if we're absolutely sure there's no token on a protected route
   const shouldBlock = shouldCheckAuth && !isClient;
-  
+
   if (shouldBlock) {
     return (
       <AuthContext.Provider value={contextValue}>

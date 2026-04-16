@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
-import { AdminUser } from "@/lib/api/services/auth";
+import { AdminUser } from "@/types/auth";
 import type { AuditLog } from "@/types/api/audit-logs";
 
 export interface AdminAuthState {
@@ -10,16 +10,16 @@ export interface AdminAuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Tokens
   accessToken: string | null;
   refreshToken: string | null;
-  
+
   // Admin-specific state
   permissions: string[];
   isSuperAdmin: boolean;
   lastActivityAt: Date | null;
-  
+
   // Dashboard data
   dashboardData: {
     userMetrics: {
@@ -42,7 +42,7 @@ export interface AdminAuthState {
     };
     recentActivity: AuditLog[];
   } | null;
-  
+
   // Actions
   setUser: (user: AdminUser | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -111,7 +111,7 @@ export const useAdminAuthStore = create<AdminAuthState>()(
 
       setPermissions: (permissions) => {
         set({ permissions });
-        
+
         // Update user object if available
         const currentUser = get().user;
         if (currentUser) {
@@ -126,7 +126,7 @@ export const useAdminAuthStore = create<AdminAuthState>()(
 
       setSuperAdmin: (isSuperAdmin) => {
         set({ isSuperAdmin });
-        
+
         // Update user object if available
         const currentUser = get().user;
         if (currentUser) {
@@ -161,11 +161,11 @@ export const useAdminAuthStore = create<AdminAuthState>()(
           lastActivityAt: null,
           dashboardData: null,
         });
-        
+
         // Clear localStorage
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+          localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
         }
       },
     }),

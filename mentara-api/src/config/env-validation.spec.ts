@@ -699,6 +699,20 @@ describe('Environment Validation - Ultra-Comprehensive Test Suite', () => {
       expect(loggerSpy).toHaveBeenCalledWith('🔐 Microsoft OAuth: Not configured');
     });
 
+    it('should log cloud Ollama defaults and API key state', () => {
+      process.env.AI_PROVIDER = 'ollama';
+      delete process.env.OLLAMA_BASE_URL;
+      delete process.env.OLLAMA_MODEL;
+      process.env.OLLAMA_API_KEY = 'token-123';
+
+      logEnvironmentInfo();
+
+      expect(loggerSpy).toHaveBeenCalledWith('🤖 AI Provider: ollama');
+      expect(loggerSpy).toHaveBeenCalledWith('🤖 Ollama Base URL: https://ollama.com');
+      expect(loggerSpy).toHaveBeenCalledWith('🤖 Ollama Model: gemma4:31b-cloud');
+      expect(loggerSpy).toHaveBeenCalledWith('🤖 Ollama API Key: Configured');
+    });
+
     it('should handle missing NODE_ENV gracefully', () => {
       delete process.env.NODE_ENV;
 

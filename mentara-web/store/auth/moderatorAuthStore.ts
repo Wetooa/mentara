@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
-import { ModeratorUser } from "@/lib/api/services/auth";
+import { ModeratorUser } from "@/types/auth";
 import type { AuditLog } from "@/types/api/audit-logs";
 
 export interface ModeratorAuthState {
@@ -10,16 +10,16 @@ export interface ModeratorAuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Tokens
   accessToken: string | null;
   refreshToken: string | null;
-  
+
   // Moderator-specific state
   permissions: string[];
   assignedCommunities: string[];
   moderationLevel: "junior" | "senior" | "lead" | null;
-  
+
   // Dashboard data
   dashboardData: {
     moderationQueue: {
@@ -41,7 +41,7 @@ export interface ModeratorAuthState {
       userSatisfactionScore: number;
     };
   } | null;
-  
+
   // Actions
   setUser: (user: ModeratorUser | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -111,7 +111,7 @@ export const useModeratorAuthStore = create<ModeratorAuthState>()(
 
       setPermissions: (permissions) => {
         set({ permissions });
-        
+
         // Update user object if available
         const currentUser = get().user;
         if (currentUser) {
@@ -126,7 +126,7 @@ export const useModeratorAuthStore = create<ModeratorAuthState>()(
 
       setAssignedCommunities: (assignedCommunities) => {
         set({ assignedCommunities });
-        
+
         // Update user object if available
         const currentUser = get().user;
         if (currentUser) {
@@ -141,7 +141,7 @@ export const useModeratorAuthStore = create<ModeratorAuthState>()(
 
       setModerationLevel: (moderationLevel) => {
         set({ moderationLevel });
-        
+
         // Update user object if available
         const currentUser = get().user;
         if (currentUser) {
@@ -171,11 +171,11 @@ export const useModeratorAuthStore = create<ModeratorAuthState>()(
           moderationLevel: null,
           dashboardData: null,
         });
-        
+
         // Clear localStorage
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+          localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
         }
       },
     }),

@@ -28,11 +28,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
+import { useRoleGuard } from "@/hooks/useRoleGuard";
+import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 import Image from "next/image";
 import { UserDisplay } from "@/components/common/UserDisplay";
 import { IncomingCallNotificationContainer } from "@/components/video-calls/IncomingCallNotification";
-import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 
 
 export default function ModeratorLayout({
@@ -43,7 +43,20 @@ export default function ModeratorLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const { logout, user } = useAuth();
+  const { isLoading, isAuthenticated, user, logout } = useRoleGuard("moderator");
+
+  // While waiting for guard effect, show spinner
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500" />
+      </div>
+    );
+  }
+
+  // If guard logic determines unauth, it redirects in useEffect.
+  // We return null here to prevent flashing.
+  if (!isAuthenticated || user?.role !== "moderator") return null;
 
   // Load sidebar state from localStorage
   useEffect(() => {
@@ -220,7 +233,7 @@ export default function ModeratorLayout({
           {/* Desktop title */}
           <div className="hidden md:block">
             <h1 className="text-lg font-semibold text-gray-900">
-              {navItems.find(item => 
+              {navItems.find(item =>
                 pathname === item.path || pathname.startsWith(`${item.path}/`)
               )?.name || "Dashboard"}
             </h1>

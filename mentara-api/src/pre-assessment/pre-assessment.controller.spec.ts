@@ -8,6 +8,9 @@ import { InternalServerErrorException, HttpStatus } from '@nestjs/common';
 import { PreAssessmentController } from './pre-assessment.controller';
 import { PreAssessmentService } from './pre-assessment.service';
 import { AiServiceClient } from './services/ai-service.client';
+import { GeminiClientService } from './services/gemini-client.service';
+import { PreAssessmentChatbotService } from './services/pre-assessment-chatbot.service';
+import { QuestionnaireSelectorService } from './services/questionnaire-selector.service';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/core/guards/admin-auth.guard';
 import { PreAssessment } from '@prisma/client';
@@ -35,6 +38,22 @@ describe('PreAssessmentController', () => {
     getServiceInfo: jest.fn(),
     processAssessment: jest.fn(),
     getAssessmentResults: jest.fn(),
+  };
+
+  const mockGeminiClientService = {
+    healthCheck: jest.fn(),
+    getServiceInfo: jest.fn(),
+    getMetrics: jest.fn(),
+    chatCompletion: jest.fn(),
+  };
+
+  const mockChatbotService = {
+    getSession: jest.fn(),
+    resumeSession: jest.fn(),
+  };
+
+  const mockQuestionnaireSelector = {
+    suggestQuestionnaires: jest.fn(),
   };
 
   // Mock Guards
@@ -158,6 +177,18 @@ describe('PreAssessmentController', () => {
         {
           provide: AiServiceClient,
           useValue: mockAiServiceClient,
+        },
+        {
+          provide: GeminiClientService,
+          useValue: mockGeminiClientService,
+        },
+        {
+          provide: PreAssessmentChatbotService,
+          useValue: mockChatbotService,
+        },
+        {
+          provide: QuestionnaireSelectorService,
+          useValue: mockQuestionnaireSelector,
         },
       ],
     })
@@ -735,6 +766,32 @@ describe('PreAssessmentController', () => {
         expect(result.status).toBe('error');
         expect(result.healthy).toBe(false);
       }
+    });
+  });
+
+  describe('GET /pre-assessment/chatbot/session/:sessionId', () => {
+    it('should return chatbot session progress fields expected by the frontend', async () => {
+      mockChatbotService.getSession.mockResolvedValue({
+        sessionId: 'chatbot_123',
+        currentQuestionnaire: 'Anxiety',
+        completedQuestionnaires: ['Stress', 'Anxiety'],
+        isComplete: false,
+        startedAt: new Date('2024-02-14T09:00:00Z'),
+      });
+
+      const result = await controller.getChatbotSession('chatbot_123', TEST_USER_IDS.CLIENT);
+
+      expect(result).toEqual({
+        sessionId: 'chatbot_123',
+        currentQuestionnaire: 'Anxiety',
+        completedQuestionnaires: ['Stress', 'Anxiety'],
+        isComplete: false,
+        startedAt: new Date('2024-02-14T09:00:00Z'),
+      });
+      expect(mockChatbotService.getSession).toHaveBeenCalledWith(
+        'chatbot_123',
+        TEST_USER_IDS.CLIENT,
+      );
     });
   });
 

@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { UserRole } from "@/lib/auth";
+import type { UserRole } from "@/types/auth";
 
 /**
  * Return type for the useRole hook
@@ -78,7 +78,7 @@ export function useRole(): UseRoleReturn {
    * @returns True if user has the specified role
    */
   const hasRole = (role: UserRole): boolean => user?.role === role;
-  
+
   /**
    * Check if the current user has any of the provided roles
    * @param roles - Array of roles to check against

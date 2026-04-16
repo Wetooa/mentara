@@ -10,7 +10,7 @@ import {
   X,
   LogOut,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useRoleGuard } from "@/hooks/useRoleGuard";
 import { UnifiedSidebar } from "@/components/layout/UnifiedSidebar";
 
 // Lazy load heavy layout components
@@ -44,7 +44,20 @@ export default function TherapistLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { isLoading, isAuthenticated, user, logout } = useRoleGuard("therapist");
+
+  // While waiting for guard effect, show spinner
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-secondary" />
+      </div>
+    );
+  }
+
+  // If guard logic determines unauth, it redirects in useEffect.
+  // We return null here to prevent flashing.
+  if (!isAuthenticated || user?.role !== "therapist") return null;
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   // Handle logout
@@ -147,8 +160,10 @@ export default function TherapistLayout({
               <div className="space-y-2">
                 {navItems.map((item) => {
                   const isActive =
-                    pathname === item.path ||
-                    pathname.startsWith(`${item.path}/`);
+                    item.path === "/therapist"
+                      ? pathname === "/therapist" || pathname === "/therapist/"
+                      : pathname === item.path ||
+                      pathname.startsWith(`${item.path}/`);
                   return (
                     <Link
                       key={item.id}

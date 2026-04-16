@@ -10,7 +10,8 @@ import { useTherapistAuthStore } from "./therapistAuthStore";
 import { useAdminAuthStore } from "./adminAuthStore";
 import { useModeratorAuthStore } from "./moderatorAuthStore";
 
-export type UserRole = "client" | "therapist" | "admin" | "moderator";
+import type { UserRole } from "@/types/auth";
+export type { UserRole } from "@/types/auth";
 
 export function useRoleBasedAuthStore(role: UserRole) {
   switch (role) {

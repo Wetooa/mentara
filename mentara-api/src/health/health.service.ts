@@ -7,6 +7,8 @@ import * as process from 'process';
 export class HealthService {
   private readonly logger = new Logger(HealthService.name);
   private readonly startTime = Date.now();
+  private readonly apiBaseUrl =
+    process.env.API_BASE_URL || `http://localhost:${process.env.PORT || '10000'}`;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -238,7 +240,8 @@ export class HealthService {
     try {
       // Note: This would typically require access to the MessagingGateway
       // For now, we'll do a basic connectivity check
-      const response = await fetch('http://localhost:3001/socket.io/?EIO=4&transport=polling', {
+      const socketIoEndpoint = `${this.apiBaseUrl}/socket.io/?EIO=4&transport=polling`;
+      const response = await fetch(socketIoEndpoint, {
         method: 'GET',
         signal: AbortSignal.timeout(5000),
       }).catch(() => null);
@@ -249,7 +252,7 @@ export class HealthService {
         status: isHealthy ? 'healthy' : 'unhealthy',
         service: 'websocket',
         details: {
-          socketIoEndpoint: 'http://localhost:3001/socket.io/',
+          socketIoEndpoint: `${this.apiBaseUrl}/socket.io/`,
           messagingNamespace: '/messaging',
           isAccessible: isHealthy,
           timestamp: new Date().toISOString(),
@@ -266,7 +269,7 @@ export class HealthService {
         service: 'websocket',
         error: error instanceof Error ? error.message : 'Unknown error',
         details: {
-          socketIoEndpoint: 'http://localhost:3001/socket.io/',
+          socketIoEndpoint: `${this.apiBaseUrl}/socket.io/`,
           messagingNamespace: '/messaging',
           isAccessible: false,
           timestamp: new Date().toISOString(),

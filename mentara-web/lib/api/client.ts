@@ -23,7 +23,7 @@ export const AI_OPERATION_TIMEOUT = 60000; // 60 seconds
 export function createApiClient(): AxiosInstance {
   // Get API URL from environment variable
   // Ensure it ends with /api if not already present
-  let baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+  let baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000/api";
 
   // Ensure baseURL ends with /api
   if (!baseURL.endsWith("/api")) {
