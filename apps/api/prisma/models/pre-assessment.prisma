@@ -1,0 +1,26 @@
+model PreAssessment {
+  id                     String              @id @default(uuid())
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  clientId               String?             // Made optional for anonymous assessments
+  sessionId              String?             @unique // Added for tracking anonymous assessments
+  method                 PreAssessmentMethod @default(CHECKLIST)
+  data                   Json // { questionnaireScores: {...} }
+  pastTherapyExperiences String?
+  medicationHistory      String?
+  accessibilityNeeds     String?
+  soapAnalysisUrl        String?
+  conversationHistoryUrl String?
+  
+  client                 Client?             @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([sessionId])
+  @@index([method])
+}
+
+enum PreAssessmentMethod {
+  CHECKLIST
+  CHATBOT
+  HYBRID
+}

@@ -1,0 +1,133 @@
+{
+  "scale_id": "ISI",
+  "full_name": "Insomnia Severity Index",
+  "domain": "Sleep Disorders",
+  "items": [
+    {
+      "id": "1a",
+      "clinical_text": "Please rate the current (i.e., last 2 weeks) SEVERITY of your insomnia problem(s): Difficulty falling asleep",
+      "hooks": [
+        "trouble falling asleep",
+        "taking a long time to sleep",
+        "can't get to sleep",
+        "sleep onset issues"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "None",
+        "1": "Mild",
+        "2": "Moderate",
+        "3": "Severe",
+        "4": "Very Severe"
+      }
+    },
+    {
+      "id": "1b",
+      "clinical_text": "Please rate the current (i.e., last 2 weeks) SEVERITY of your insomnia problem(s): Difficulty staying asleep",
+      "hooks": [
+        "waking up during the night",
+        "tossing and turning",
+        "fragmented sleep",
+        "can't stay asleep"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "None",
+        "1": "Mild",
+        "2": "Moderate",
+        "3": "Severe",
+        "4": "Very Severe"
+      }
+    },
+    {
+      "id": "1c",
+      "clinical_text": "Please rate the current (i.e., last 2 weeks) SEVERITY of your insomnia problem(s): Problem waking up too early",
+      "hooks": [
+        "waking up before my alarm",
+        "early morning awakening",
+        "can't get back to sleep in the morning",
+        "terminal insomnia"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "None",
+        "1": "Mild",
+        "2": "Moderate",
+        "3": "Severe",
+        "4": "Very Severe"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "How SATISFIED/dissatisfied are you with your current sleep pattern?",
+      "hooks": [
+        "unhappy with my sleep",
+        "satisfaction with rest",
+        "feeling tired of my sleep routine",
+        "dissatisfied with sleep quality"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Very Satisfied",
+        "1": "Satisfied",
+        "2": "Moderately Satisfied",
+        "3": "Dissatisfied",
+        "4": "Very Dissatisfied"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "To what extent do you consider your sleep problem to INTERFERE with your daily functioning (e.g. daytime fatigue, ability to function at work/daily chores, concentration, memory, mood, etc.)",
+      "hooks": [
+        "sleep affecting my work",
+        "daytime fatigue",
+        "trouble concentrating because of sleep",
+        "mood issues from lack of sleep"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all Interfering",
+        "1": "A Little",
+        "2": "Somewhat",
+        "3": "Much",
+        "4": "Very Much Interfering"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "How NOTICEABLE to others do you think your sleeping problem is in terms of impairing the quality of your life?",
+      "hooks": [
+        "people notice I'm tired",
+        "sleep problems visible to others",
+        "my exhaustion is obvious",
+        "others concerned about my sleep"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all Noticeable",
+        "1": "Barely",
+        "2": "Somewhat",
+        "3": "Much",
+        "4": "Very Much Noticeable"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "How WORRIED/distressed are you about your current sleep problem?",
+      "hooks": [
+        "anxious about my sleep",
+        "worried I won't sleep",
+        "stressing over insomnia",
+        "distressed by my sleep problems"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A Little",
+        "2": "Somewhat",
+        "3": "Much",
+        "4": "Very Much"
+      }
+    }
+  ]
+}

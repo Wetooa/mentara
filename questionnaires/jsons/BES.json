@@ -1,0 +1,271 @@
+{
+  "scale_id": "BES",
+  "full_name": "Binge-Eating Scale",
+  "domain": "Eating Disorders",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "Body image and self-consciousness regarding weight and size in social settings.",
+      "hooks": [
+        "feeling self-conscious about my size",
+        "embarrassed by my weight around others",
+        "intense shame about how I look",
+        "avoiding people because of my weight"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I don't feel self-conscious about my weight or body size when I'm with others or I feel concerned but not disappointed with myself.",
+        "1": "I do get self-conscious about my appearance and weight which makes me feel disappointed in myself.",
+        "3": "I feel very self-conscious about my weight and frequently feel intense shame and disgust for myself; I try to avoid social contacts."
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "Eating speed and resulting physical sensations of fullness.",
+      "hooks": [
+        "eating too fast",
+        "gobbling down food",
+        "bolting down food without chewing",
+        "feeling uncomfortably stuffed after eating"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I don't have any difficulty eating slowly in the proper manner.",
+        "1": "I seem to 'gobble down' foods but don't end up feeling stuffed.",
+        "2": "I tend to eat quickly and feel uncomfortably full afterwards.",
+        "3": "I have the habit of bolting down my food without really chewing it and feel uncomfortably stuffed."
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "Perceived control over eating urges and level of desperation.",
+      "hooks": [
+        "losing control of my eating",
+        "feeling helpless with eating urges",
+        "desperate to get in control of my appetite",
+        "failed to control my eating"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I feel capable to control my eating urges when I want to.",
+        "1": "I feel like I have failed to control my eating more than the average person.",
+        "3": "I feel utterly helpless or desperate about trying to get in control of my eating urges."
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "Habitual eating in response to boredom.",
+      "hooks": [
+        "eating because I'm bored",
+        "can't stop eating when there's nothing to do",
+        "using food to pass the time",
+        "boredom eating habit"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I don't have the habit of eating when I'm bored or I can use some other activity to get my mind off it.",
+        "2": "I have a strong habit of eating when I'm bored and nothing seems to help me break it."
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "Impulsive eating and 'mouth hunger' independent of physical hunger.",
+      "hooks": [
+        "eating when not hungry",
+        "mouth hunger",
+        "eating on impulse",
+        "spitting food out to avoid weight gain"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "I'm usually physically hungry when I eat something.",
+        "1": "Occasionally, I eat something on impulse even though I really am not hungry.",
+        "2": "I eat foods I might not enjoy just to satisfy a hungry feeling that isn't physical.",
+        "3": "I get a 'mouth hunger' that only sandwiches or filling foods satisfy; I sometimes spit food out."
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "Feelings of guilt or self-hate following episodes of overeating.",
+      "hooks": [
+        "feeling guilty after eating",
+        "hating myself for overeating",
+        "regret after a binge",
+        "shame after eating too much"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I don't feel any guilt or self-hate after I overeat.",
+        "1": "After I overeat, occasionally I feel guilt or self-hate.",
+        "3": "Almost all the time I experience strong guilt or self-hate after I overeat."
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "Effect of dieting on eating control and 'blown it' mentality.",
+      "hooks": [
+        "breaking my diet with a binge",
+        "life is feast or famine",
+        "eating more because I already broke my diet",
+        "forbidden foods"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I don't lose total control of my eating when dieting even after periods when I overeat.",
+        "2": "Eating a 'forbidden food' makes me feel like I 'blew it' and I eat even more.",
+        "3": "I have a habit of starting strict diets but breaking them with a binge; my life is 'feast or famine'."
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "Frequency and severity of feeling uncomfortably stuffed or nauseous.",
+      "hooks": [
+        "eating until I'm sick",
+        "feeling nauseous after eating",
+        "stuffed to the point of discomfort",
+        "eating large amounts of snacks"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I rarely eat so much food that I feel uncomfortably stuffed afterwards.",
+        "1": "Usually about once a month, I eat such a quantity of food, I end up feeling very stuffed.",
+        "2": "I have regular periods during the month when I eat large amounts of food.",
+        "3": "I regularly feel quite uncomfortable and sometimes nauseous from overeating."
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "Compensatory behaviors (starving) and nighttime overeating.",
+      "hooks": [
+        "starving myself after a binge",
+        "night eating habit",
+        "overeating in the evening",
+        "compensating for calories"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "My calorie intake does not go up very high or go down very low on a regular basis.",
+        "1": "Sometimes I try to reduce my caloric intake to almost nothing to compensate for overeating.",
+        "2": "I have a regular habit of overeating during the night.",
+        "3": "I have week-long periods where I practically starve myself following periods of overeating."
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "Capacity to stop eating voluntarily and fear of loss of control.",
+      "hooks": [
+        "can't stop eating",
+        "fear of not being able to stop",
+        "compulsion to eat",
+        "urges I can't control"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I usually am able to stop eating when I want to; I know when 'enough is enough'.",
+        "1": "Every so often, I experience a compulsion to eat which I can't seem to control.",
+        "2": "Frequently I experience strong urges I can't control, but at other times I can.",
+        "3": "I feel incapable of controlling urges and fear not being able to stop eating voluntarily."
+      }
+    },
+    {
+      "id": "11",
+      "clinical_text": "Ability to stop when full and use of induced vomiting.",
+      "hooks": [
+        "can't stop even when full",
+        "making myself throw up",
+        "inducing vomiting to relieve fullness",
+        "feeling uncomfortably stuffed"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "I don't have any problem stopping eating when I feel full.",
+        "1": "I usually can stop when full but occasionally overeat until I'm uncomfortably stuffed.",
+        "2": "I have a problem stopping once I start and usually feel uncomfortably stuffed.",
+        "3": "I sometimes have to induce vomiting to relieve my stuffed feeling."
+      }
+    },
+    {
+      "id": "12",
+      "clinical_text": "Social eating habits and 'closet eating'.",
+      "hooks": [
+        "eating in secret",
+        "closet eater",
+        "embarrassed to eat around people",
+        "eating less when others are watching"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I seem to eat just as much when I'm with others as when I'm by myself.",
+        "1": "I don't eat as much with others because I'm self-conscious.",
+        "2": "I eat only a small amount when others are present because I'm very embarrassed.",
+        "3": "I pick times to overeat when no one will see me because I'm ashamed; I am a 'closet eater'."
+      }
+    },
+    {
+      "id": "13",
+      "clinical_text": "Daily meal patterns and heavy snacking habits.",
+      "hooks": [
+        "continually eating with no meals",
+        "skipping meals to snack",
+        "heavy snacking",
+        "no planned meals"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I eat three meals a day with only occasional or normal snacks.",
+        "2": "When I am snacking heavily, I get in the habit of skipping regular meals.",
+        "3": "There are regular periods when I seem to be continually eating, with no planned meals."
+      }
+    },
+    {
+      "id": "14",
+      "clinical_text": "Mental preoccupation with controlling eating urges.",
+      "hooks": [
+        "constantly struggling not to eat",
+        "thinking about eating all day",
+        "pre-occupied with food thoughts",
+        "struggling with urges"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I don't think much about trying to control unwanted eating urges.",
+        "1": "At least some of the time, my thoughts are pre-occupied with trying to control urges.",
+        "2": "I frequently spend much time thinking about how much I ate or trying not to eat.",
+        "3": "Most of my waking hours are pre-occupied by thoughts about eating or not eating."
+      }
+    },
+    {
+      "id": "15",
+      "clinical_text": "General preoccupation with food and cravings.",
+      "hooks": [
+        "living to eat",
+        "thinking about food all the time",
+        "strong food cravings",
+        "obsessed with food"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I don't think about food a great deal.",
+        "1": "I have strong cravings for food but they last only for brief periods of time.",
+        "2": "I have days when I can't seem to think about anything else but food.",
+        "3": "Most of my days seem to be pre-occupied with thoughts about food; I live to eat."
+      }
+    },
+    {
+      "id": "16",
+      "clinical_text": "Awareness of physical hunger cues and normal portion sizes.",
+      "hooks": [
+        "not knowing what a normal portion is",
+        "don't know if I'm hungry",
+        "confused about hunger cues",
+        "don't know how much to eat"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "I usually know whether or not I'm physically hungry and take the right portion.",
+        "1": "Occasionally I feel uncertain about knowing whether or not I'm physically hungry.",
+        "2": "I don't have any idea what is a 'normal' amount of food for me."
+      }
+    }
+  ]
+}

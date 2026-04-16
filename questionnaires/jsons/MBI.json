@@ -1,0 +1,447 @@
+{
+  "scale_id": "MBI",
+  "full_name": "Maslach Burnout Inventory",
+  "domain": "Burnout",
+  "items": [
+    {
+      "id": "A1",
+      "clinical_text": "I feel emotionally drained by my work.",
+      "hooks": [
+        "exhausted at work",
+        "emotionally spent",
+        "work is draining me",
+        "feeling empty after work"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "A2",
+      "clinical_text": "Working with people all day long requires a great deal of effort.",
+      "hooks": [
+        "people are exhausting",
+        "effort to talk to clients",
+        "strained by social interaction",
+        "struggle to work with others"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "A3",
+      "clinical_text": "I feel like my work is breaking me down.",
+      "hooks": [
+        "work is crushing me",
+        "feeling broken by job",
+        "job is destructive",
+        "wearing thin at work"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "A4",
+      "clinical_text": "I feel frustrated by my work.",
+      "hooks": [
+        "annoyed with my job",
+        "work frustration",
+        "feeling stuck at work",
+        "unmet expectations at work"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "A5",
+      "clinical_text": "I feel I work too hard at my job.",
+      "hooks": [
+        "overworked",
+        "working too many hours",
+        "pushing too hard",
+        "excessive workload"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "A6",
+      "clinical_text": "It stresses me too much to work in direct contact with people.",
+      "hooks": [
+        "scared of meetings",
+        "direct contact is stressful",
+        "anxious around patients",
+        "hating face-to-face work"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "A7",
+      "clinical_text": "I feel like I'm at the end of my rope.",
+      "hooks": [
+        "can't take it anymore",
+        "breaking point",
+        "ready to quit",
+        "giving up on work"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "B1",
+      "clinical_text": "I feel I look after certain patients/clients impersonally, as if they are objects.",
+      "hooks": [
+        "dehumanizing patients",
+        "clients as numbers",
+        "robotic care",
+        "lack of personal connection"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "B2",
+      "clinical_text": "I feel tired when I get up in the morning and have to face another day at work.",
+      "hooks": [
+        "dreading the morning",
+        "morning fatigue",
+        "can't get out of bed for work",
+        "exhausted before starting"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "B3",
+      "clinical_text": "I have the impression that my patients/clients make me responsible for some of their problems.",
+      "hooks": [
+        "being blamed by clients",
+        "carrying client burdens",
+        "held responsible for failures",
+        "client pressure"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "B4",
+      "clinical_text": "I am at the end of my patience at the end of my work day.",
+      "hooks": [
+        "running out of patience",
+        "short fuse after work",
+        "snapping after shifts",
+        "patience is gone"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "B5",
+      "clinical_text": "I really don't care about what happens to some of my patients/clients.",
+      "hooks": [
+        "don't care about clients",
+        "indifferent to patients",
+        "lost concern for others",
+        "lack of empathy"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "B6",
+      "clinical_text": "I have become more insensitive to people since I've been working.",
+      "hooks": [
+        "becoming cold",
+        "lost my kindness",
+        "more calloused",
+        "hardened by work"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "B7",
+      "clinical_text": "I'm afraid that this job is making me uncaring.",
+      "hooks": [
+        "fear of being heartless",
+        "losing my humanity",
+        "worrying about cynicism",
+        "becoming uncaring"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "C1",
+      "clinical_text": "I accomplish many worthwhile things in this job.",
+      "hooks": [
+        "feeling productive",
+        "making a difference",
+        "doing good work",
+        "worthwhile tasks"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "C2",
+      "clinical_text": "I feel full of energy.",
+      "hooks": [
+        "energetic at work",
+        "vibrant",
+        "ready to go",
+        "high energy levels"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "C3",
+      "clinical_text": "I am easily able to understand what my patients/clients feel.",
+      "hooks": [
+        "understanding others",
+        "intuitive with clients",
+        "knowing client feelings",
+        "empathetic understanding"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "C4",
+      "clinical_text": "I look after my patients'/clients' problems very effectively.",
+      "hooks": [
+        "effective care",
+        "solving client issues",
+        "good at my job",
+        "competent service"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "C5",
+      "clinical_text": "In my work, I handle emotional problems very calmly.",
+      "hooks": [
+        "calm under pressure",
+        "handling crises well",
+        "emotional stability",
+        "composure at work"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "C6",
+      "clinical_text": "Through my work, I feel that I have a positive influence on people.",
+      "hooks": [
+        "helping others",
+        "positive impact",
+        "influencing lives",
+        "making things better"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "C7",
+      "clinical_text": "I am easily able to create a relaxed atmosphere with my patients/clients.",
+      "hooks": [
+        "good vibes with clients",
+        "calming presence",
+        "relaxed environment",
+        "comforting others"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    },
+    {
+      "id": "C8",
+      "clinical_text": "I feel refreshed when I have been close to my patients/clients at work.",
+      "hooks": [
+        "refreshed by interaction",
+        "energized by clients",
+        "happy helping people",
+        "positive connection"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "A Few Times per Year",
+        "2": "Once a Month",
+        "3": "A Few Times per Month",
+        "4": "Once a Week",
+        "5": "A Few Times per Week",
+        "6": "Every Day"
+      }
+    }
+  ]
+}

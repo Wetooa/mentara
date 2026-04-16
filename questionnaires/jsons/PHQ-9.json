@@ -1,0 +1,169 @@
+{
+    "scale_id": "PHQ-9",
+    "full_name": "Patient Health Questionnaire-9",
+    "domain": "Depression",
+    "items": [
+        {
+            "id": "1",
+            "clinical_text": "Little interest or pleasure in doing things",
+            "hooks": [
+                "loss of interest",
+                "anhedonia",
+                "not enjoying hobbies",
+                "lack of pleasure",
+                "lack of interest"
+            ],
+            "is_critical": false,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        },
+        {
+            "id": "2",
+            "clinical_text": "Feeling down, depressed, or hopeless",
+            "hooks": [
+                "feeling sad",
+                "hopelessness",
+                "feeling blue",
+                "low mood",
+                "depression feelings"
+            ],
+            "is_critical": false,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        },
+        {
+            "id": "3",
+            "clinical_text": "Trouble falling or staying asleep, or sleeping too much",
+            "hooks": [
+                "insomnia",
+                "sleeping too much",
+                "waking up in the middle of the night",
+                "trouble sleeping",
+                "hypersomnia"
+            ],
+            "is_critical": false,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        },
+        {
+            "id": "4",
+            "clinical_text": "Feeling tired or having little energy",
+            "hooks": [
+                "fatigue",
+                "lack of energy",
+                "feeling drained",
+                "tired all the time",
+                "exhaustion"
+            ],
+            "is_critical": false,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        },
+        {
+            "id": "5",
+            "clinical_text": "Poor appetite or overeating",
+            "hooks": [
+                "eating too much",
+                "loss of appetite",
+                "changes in eating habits",
+                "emotional eating",
+                "not wanting to eat"
+            ],
+            "is_critical": false,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        },
+        {
+            "id": "6",
+            "clinical_text": "Feeling bad about yourself — or that you are a failure or have let yourself or your family down",
+            "hooks": [
+                "low self-esteem",
+                "feeling like a failure",
+                "guilt",
+                "letting people down",
+                "self-loathing"
+            ],
+            "is_critical": false,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        },
+        {
+            "id": "7",
+            "clinical_text": "Trouble concentrating on things, such as reading the newspaper or watching television",
+            "hooks": [
+                "cannot focus",
+                "concentration problems",
+                "mind wandering",
+                "difficulty concentrating",
+                "focus issues"
+            ],
+            "is_critical": false,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        },
+        {
+            "id": "8",
+            "clinical_text": "Moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual",
+            "hooks": [
+                "psychomotor retardation",
+                "psychomotor agitation",
+                "feeling restless",
+                "moving slowly",
+                "fidgety"
+            ],
+            "is_critical": false,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        },
+        {
+            "id": "9",
+            "clinical_text": "Thoughts that you would be better off dead or of hurting yourself in some way",
+            "hooks": [
+                "suicidal ideation",
+                "self-harm thoughts",
+                "wanting to die",
+                "thoughts of death",
+                "hurting myself"
+            ],
+            "is_critical": true,
+            "scoring": {
+                "0": "Not at all",
+                "1": "Several days",
+                "2": "More than half the days",
+                "3": "Nearly every day"
+            }
+        }
+    ]
+}

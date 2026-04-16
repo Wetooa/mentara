@@ -1,0 +1,367 @@
+{
+  "scale_id": "PCL-5",
+  "full_name": "PTSD Checklist 5",
+  "domain": "Post-Traumatic Stress Disorder",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "Repeated, disturbing, and unwanted memories of the stressful experience?",
+      "hooks": [
+        "intrusive memories",
+        "flashbacks",
+        "remembering the trauma",
+        "unwanted thoughts about the event"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "Repeated, disturbing dreams of the stressful experience?",
+      "hooks": [
+        "nightmares",
+        "bad dreams about the event",
+        "trauma dreams",
+        "sleep disturbance from dreams"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "Suddenly feeling or acting as if the stressful experience were actually happening again (as if you were actually back there reliving it)?",
+      "hooks": [
+        "dissociation",
+        "reliving the event",
+        "flashback episodes",
+        "losing touch with the present"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "Feeling very upset when something reminded you of the stressful experience?",
+      "hooks": [
+        "emotional reactivity",
+        "triggered by reminders",
+        "distress from cues",
+        "emotional upset"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "Having strong physical reactions when something reminded you of the stressful experience (for example, heart pounding, trouble breathing, sweating)?",
+      "hooks": [
+        "physiological arousal",
+        "panic symptoms",
+        "sweating and shaking",
+        "racing heart"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "Avoiding memories, thoughts, or feelings related to the stressful experience?",
+      "hooks": [
+        "internal avoidance",
+        "suppressing thoughts",
+        "not wanting to think about it",
+        "blocking out emotions"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "Avoiding external reminders of the stressful experience (for example, people, places, conversations, activities, objects, or situations)?",
+      "hooks": [
+        "external avoidance",
+        "avoiding people",
+        "avoiding places",
+        "staying away from triggers"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "Trouble remembering important parts of the stressful experience?",
+      "hooks": [
+        "dissociative amnesia",
+        "memory gaps",
+        "blocked memories",
+        "forgetting trauma details"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "Having strong negative beliefs about yourself, other people, or the world (for example, having thoughts such as: I am bad, there is something seriously wrong with me, no one can be trusted, the world is completely dangerous)?",
+      "hooks": [
+        "negative cognitions",
+        "self-blame",
+        "lack of trust",
+        "pessimistic worldview"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "Blaming yourself or someone else for the stressful experience or what happened after it?",
+      "hooks": [
+        "guilt",
+        "external blame",
+        "feeling responsible",
+        "unfair blame"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "11",
+      "clinical_text": "Having strong negative feelings such as fear, horror, anger, guilt, or shame?",
+      "hooks": [
+        "negative affect",
+        "pervasive fear",
+        "constant anger",
+        "feeling ashamed"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "12",
+      "clinical_text": "Loss of interest in activities that you used to enjoy?",
+      "hooks": [
+        "anhedonia",
+        "losing interest",
+        "not wanting to do hobbies",
+        "apathy"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "13",
+      "clinical_text": "Feeling distant or cut off from other people?",
+      "hooks": [
+        "detachment",
+        "isolation",
+        "social withdrawal",
+        "loneliness"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "14",
+      "clinical_text": "Trouble experiencing positive feelings (for example, being unable to feel happiness or have loving feelings for people close to you)?",
+      "hooks": [
+        "emotional numbing",
+        "unable to feel joy",
+        "restricted affect",
+        "difficulty loving others"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "15",
+      "clinical_text": "Irritable behaviour, angry outbursts, or acting aggressively?",
+      "hooks": [
+        "anger issues",
+        "irritability",
+        "snapping at people",
+        "aggression"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "16",
+      "clinical_text": "Taking too many risks or doing things that could cause you harm?",
+      "hooks": [
+        "reckless behavior",
+        "self-destructive behavior",
+        "taking risks",
+        "dangerous activity"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "17",
+      "clinical_text": "Being 'superalert' or watchful or on guard?",
+      "hooks": [
+        "hypervigilance",
+        "feeling unsafe",
+        "constantly scanning",
+        "watching my back"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "18",
+      "clinical_text": "Feeling jumpy or easily startled?",
+      "hooks": [
+        "exaggerated startle response",
+        "easily spooked",
+        "feeling on edge",
+        "jumpiness"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "19",
+      "clinical_text": "Having difficulty concentrating?",
+      "hooks": [
+        "concentration problems",
+        "brain fog",
+        "can't focus",
+        "distracted"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    },
+    {
+      "id": "20",
+      "clinical_text": "Trouble falling or staying asleep?",
+      "hooks": [
+        "insomnia",
+        "sleep issues",
+        "waking up at night",
+        "restless sleep"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "A little bit",
+        "2": "Moderately",
+        "3": "Quite a bit",
+        "4": "Extremely"
+      }
+    }
+  ]
+}

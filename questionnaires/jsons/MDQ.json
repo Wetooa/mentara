@@ -1,0 +1,234 @@
+{
+  "scale_id": "MDQ",
+  "full_name": "Mood Disorder Questionnaire",
+  "domain": "Bipolar Spectrum Disorder",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you felt so good or so hyper that other people thought you were not your normal self or you were so hyper that you got into trouble?",
+      "hooks": [
+        "feeling hyper",
+        "too good",
+        "manic behavior",
+        "acting abnormal"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you were so irritable that you shouted at people or started fights or arguments?",
+      "hooks": [
+        "irritable",
+        "shouting at people",
+        "starting fights",
+        "arguments"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you felt much more self-confident than usual?",
+      "hooks": [
+        "high self-confidence",
+        "invincible",
+        "overconfident",
+        "inflated ego"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you got much less sleep than usual and found you didn't really miss it?",
+      "hooks": [
+        "decreased need for sleep",
+        "energetic without sleep",
+        "staying up all night",
+        "insomnia without fatigue"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you were much more talkative or spoke faster than usual?",
+      "hooks": [
+        "talking fast",
+        "more talkative",
+        "pressured speech",
+        "rambling"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... thoughts raced through your head or you couldn't slow your mind down?",
+      "hooks": [
+        "racing thoughts",
+        "mind won't stop",
+        "speeding mind",
+        "thought flight"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you were so easily distracted by things around you that you had trouble concentrating or staying on track?",
+      "hooks": [
+        "distracted",
+        "can't focus",
+        "concentration problems",
+        "off-track"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you had much more energy than usual?",
+      "hooks": [
+        "high energy",
+        "burst of energy",
+        "intense energy",
+        "overactive"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you were much more active or did many more things than usual?",
+      "hooks": [
+        "doing too much",
+        "overly active",
+        "taking on many projects",
+        "hyperactive"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you were much more social or outgoing than usual, for example, you telephoned friends in the middle of the night?",
+      "hooks": [
+        "more social",
+        "outgoing",
+        "calling people at night",
+        "excessive socializing"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "11",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you were much more interested in sex than usual?",
+      "hooks": [
+        "high sex drive",
+        "increased libido",
+        "hypersexuality",
+        "sexual interest"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "12",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... you did things that were unusual for you or that other people might have thought were excessive, foolish, or risky?",
+      "hooks": [
+        "risky behavior",
+        "reckless",
+        "foolish actions",
+        "excessive behavior"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "13",
+      "clinical_text": "Has there ever been a period of time when you were not your usual self and... spending money got you or your family into trouble?",
+      "hooks": [
+        "spending spree",
+        "financial trouble",
+        "buying too much",
+        "money problems"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "14",
+      "clinical_text": "If you checked YES to more than one of the above, have several of these ever happened during the same period of time?",
+      "hooks": [
+        "simultaneous symptoms",
+        "happening at once",
+        "same time period",
+        "grouped symptoms"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "1": "Yes",
+        "0": "No"
+      }
+    },
+    {
+      "id": "15",
+      "clinical_text": "How much of a problem did any of these cause you - like being unable to work; having family, money, or legal troubles; getting into arguments or fights?",
+      "hooks": [
+        "functional impairment",
+        "severity of impact",
+        "problems at work",
+        "legal or family issues"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No problem",
+        "1": "Minor problem",
+        "2": "Moderate problem",
+        "3": "Serious problem"
+      }
+    }
+  ]
+}

@@ -1,0 +1,428 @@
+{
+  "scale_id": "ASRS-v1.1",
+  "full_name": "Adult ADHD Self-Report Scale v1.1",
+  "domain": "ADHD",
+  "items": [
+    {
+      "id": "1",
+      "part": "A",
+      "clinical_text": "How often do you have trouble wrapping up the final details of a project, once the challenging parts have been done?",
+      "hooks": [
+        "struggling to finish tasks",
+        "leaving projects incomplete",
+        "difficulty with final details",
+        "finishing the last 10 percent"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "2",
+      "part": "A",
+      "clinical_text": "How often do you have difficulty getting things in order when you have to do a task that requires organisation?",
+      "hooks": [
+        "feeling disorganized",
+        "struggling with planning",
+        "tasks are a mess",
+        "difficulty with order"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "3",
+      "part": "A",
+      "clinical_text": "How often do you have problems remembering appointments or obligations?",
+      "hooks": [
+        "forgetting meetings",
+        "missing appointments",
+        "bad memory for dates",
+        "forgetting what I have to do"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "4",
+      "part": "A",
+      "clinical_text": "When you have a task that requires a lot of thought, how often do you avoid or delay getting started?",
+      "hooks": [
+        "procrastinating on hard tasks",
+        "avoiding mental effort",
+        "putting off thinking tasks",
+        "delaying work"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "5",
+      "part": "A",
+      "clinical_text": "How often do you fidget or squirm with your hands or feet when you have to sit down for a long time?",
+      "hooks": [
+        "fidgeting",
+        "tapping feet",
+        "can't sit still",
+        "squirming"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "6",
+      "part": "A",
+      "clinical_text": "How often do you feel overly active and compelled to do things, like you were driven by a motor?",
+      "hooks": [
+        "feeling driven by a motor",
+        "constantly on the go",
+        "can't relax",
+        "overly active"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "7",
+      "part": "B",
+      "clinical_text": "How often do you make careless mistakes when you have to work on a boring or difficult project?",
+      "hooks": [
+        "careless errors",
+        "missing small details",
+        "mistakes on boring work",
+        "sloppy mistakes"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "8",
+      "part": "B",
+      "clinical_text": "How often do you have difficulty keeping your attention when you are doing boring or repetitive work?",
+      "hooks": [
+        "losing focus",
+        "mind wandering during work",
+        "can't pay attention",
+        "distracted by boredom"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "9",
+      "part": "B",
+      "clinical_text": "How often do you have difficulty concentrating on what people say to you, even when they are speaking to you directly?",
+      "hooks": [
+        "zoning out during talk",
+        "not listening",
+        "difficulty following conversation",
+        "tuning people out"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "10",
+      "part": "B",
+      "clinical_text": "How often do you misplace or have difficulty finding things at home or at work?",
+      "hooks": [
+        "losing my keys",
+        "misplacing phone",
+        "can't find my stuff",
+        "losing items constantly"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "11",
+      "part": "B",
+      "clinical_text": "How often are you distracted by activity or noise around you?",
+      "hooks": [
+        "easily distracted",
+        "noise bothers my focus",
+        "distracted by background activity",
+        "tuning into every sound"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "12",
+      "part": "B",
+      "clinical_text": "How often do you leave your seat in meetings or other situations in which you are expected to remain seated?",
+      "hooks": [
+        "getting up during meetings",
+        "leaving seat",
+        "can't stay seated",
+        "walking around when I should sit"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "13",
+      "part": "B",
+      "clinical_text": "How often do you feel restless or fidgety?",
+      "hooks": [
+        "internal restlessness",
+        "feeling fidgety",
+        "uneasy staying still",
+        "restless feeling"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "14",
+      "part": "B",
+      "clinical_text": "How often do you have difficulty unwinding and relaxing when you have time to yourself?",
+      "hooks": [
+        "can't unwind",
+        "difficulty relaxing",
+        "feeling wound up",
+        "struggling to chill out"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "15",
+      "part": "B",
+      "clinical_text": "How often do you find yourself talking too much when you are in social situations?",
+      "hooks": [
+        "talking too much",
+        "oversharing",
+        "rambling",
+        "monopolizing conversation"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "16",
+      "part": "B",
+      "clinical_text": "When you’re in a conversation, how often do you find yourself finishing the sentences of the people you are talking to, before they can finish them themselves?",
+      "hooks": [
+        "interrupting sentences",
+        "finishing others' words",
+        "blurting out the end of a sentence",
+        "not waiting for people to finish"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "17",
+      "part": "B",
+      "clinical_text": "How often do you have difficulty waiting your turn in situations when turn taking is required?",
+      "hooks": [
+        "impatient in lines",
+        "can't wait my turn",
+        "difficulty with turn taking",
+        "rushing ahead"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "18",
+      "part": "B",
+      "clinical_text": "How often do you interrupt others when they are busy?",
+      "hooks": [
+        "interrupting work",
+        "butting in",
+        "disturbing busy people",
+        "breaking into conversation"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Rarely",
+        "2": "Sometimes",
+        "3": "Often",
+        "4": "Very Often"
+      },
+      "shaded_values": [
+        2,
+        3,
+        4
+      ]
+    }
+  ]
+}

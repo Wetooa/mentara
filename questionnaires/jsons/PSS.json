@@ -1,0 +1,187 @@
+{
+  "scale_id": "PSS",
+  "full_name": "Perceived Stress Scale",
+  "domain": "Stress",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "In the last month, how often have you been upset because of something that happened unexpectedly?",
+      "hooks": [
+        "upset by surprises",
+        "unexpected events stressing me out",
+        "feeling rattled by sudden changes",
+        "unplanned events causing distress"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "never",
+        "1": "almost never",
+        "2": "sometimes",
+        "3": "fairly often",
+        "4": "very often"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "In the last month, how often have you felt that you were unable to control the important things in your life?",
+      "hooks": [
+        "loss of control",
+        "feeling powerless",
+        "life feels out of my hands",
+        "unable to manage life events"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "never",
+        "1": "almost never",
+        "2": "sometimes",
+        "3": "fairly often",
+        "4": "very often"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "In the last month, how often have you felt nervous and stressed?",
+      "hooks": [
+        "feeling stressed",
+        "feeling nervous",
+        "anxious and under pressure",
+        "general stress levels"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "never",
+        "1": "almost never",
+        "2": "sometimes",
+        "3": "fairly often",
+        "4": "very often"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "In the last month, how often have you felt confident about your ability to handle your personal problems?",
+      "hooks": [
+        "confident in problem solving",
+        "handling my issues well",
+        "belief in self-efficacy",
+        "coping with personal problems"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "4": "never",
+        "3": "almost never",
+        "2": "sometimes",
+        "1": "fairly often",
+        "0": "very often"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "In the last month, how often have you felt that things were going your way?",
+      "hooks": [
+        "things going well",
+        "life is on track",
+        "feeling successful lately",
+        "positive momentum"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "4": "never",
+        "3": "almost never",
+        "2": "sometimes",
+        "1": "fairly often",
+        "0": "very often"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "In the last month, how often have you found that you could not cope with all the things that you had to do?",
+      "hooks": [
+        "unable to cope",
+        "feeling overwhelmed",
+        "too much on my plate",
+        "failing to manage tasks"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "never",
+        "1": "almost never",
+        "2": "sometimes",
+        "3": "fairly often",
+        "4": "very often"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "In the last month, how often have you been able to control irritations in your life?",
+      "hooks": [
+        "managing annoyances",
+        "controlling irritations",
+        "staying calm through frustration",
+        "keeping cool with small problems"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "4": "never",
+        "3": "almost never",
+        "2": "sometimes",
+        "1": "fairly often",
+        "0": "very often"
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "In the last month, how often have you felt that you were on top of things?",
+      "hooks": [
+        "staying on top of things",
+        "feeling in command",
+        "managing everything well",
+        "control over daily life"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "4": "never",
+        "3": "almost never",
+        "2": "sometimes",
+        "1": "fairly often",
+        "0": "very often"
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "In the last month, how often have you been angered because of things that happened that were outside of your control?",
+      "hooks": [
+        "angry at external events",
+        "frustrated by lack of control",
+        "anger from unforeseen events",
+        "uncontrolled circumstances causing rage"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "never",
+        "1": "almost never",
+        "2": "sometimes",
+        "3": "fairly often",
+        "4": "very often"
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?",
+      "hooks": [
+        "insurmountable problems",
+        "difficulties piling up",
+        "at the end of my rope",
+        "feeling defeated by problems"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "never",
+        "1": "almost never",
+        "2": "sometimes",
+        "3": "fairly often",
+        "4": "very often"
+      }
+    }
+  ]
+}

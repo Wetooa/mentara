@@ -1,0 +1,110 @@
+model User {
+  id                  String                    @id @unique @default(uuid())
+  email               String                    @unique
+  firstName           String
+  middleName          String?
+  lastName            String
+  birthDate           DateTime?
+  address             String?
+  role                String                    @default("client")
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  password            String?
+  emailVerified       Boolean                   @default(false)
+  emailVerifyToken    String?                   @unique
+  emailVerifyTokenExp DateTime?
+  resetToken          String?                   @unique
+  resetTokenExpiry    DateTime?
+  isActive            Boolean                   @default(true)
+  failedLoginCount    Int                       @default(0)
+  avatarUrl           String?
+  coverImageUrl       String?
+  bio                 String?
+  suspendedAt         DateTime?
+  suspendedBy         String?
+  suspensionReason    String?
+  deactivatedAt       DateTime?
+  deactivatedBy       String?
+  deactivationReason  String?
+  lastLoginAt         DateTime?
+  lockoutUntil        DateTime?
+  admin               Admin?                    @relation("UserAdmin")
+  client              Client?                   @relation("UserClient")
+  comments            Comment[]
+  commentHearts       CommentHeart[]
+  conversations       ConversationParticipant[] @relation("UserConversations")
+  memberships         Membership[]
+  sentMessages        Message[]                 @relation("UserMessages")
+  messageReactions    MessageReaction[]         @relation("UserMessageReactions")
+  messageReadReceipts MessageReadReceipt[]      @relation("UserReadReceipts")
+  moderator           Moderator?                @relation("UserModerator")
+  notifications       Notification[]            @relation("UserNotifications")
+  paymentMethods      PaymentMethod[]           @relation("UserPaymentMethods")
+  posts               Post[]
+  postHearts          PostHeart[]
+  reports             Report[]                  @relation("UserReports")
+  reportsAgainstMe    Report[]                  @relation("UserBeingReported")
+  therapist           Therapist?                @relation("UserTherapist")
+  blockedBy           UserBlock[]               @relation("UserBlocked")
+  blocking            UserBlock[]               @relation("UserBlocking")
+  journalEntries      JournalEntry[]            @relation("UserJournalEntries")
+
+  // Group Therapy Sessions
+  createdGroupSessions       GroupTherapySession[]     @relation("GroupSessionCreator")
+  groupSessionParticipations GroupSessionParticipant[] @relation("GroupSessionParticipant")
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([role, isActive])
+  @@index([role, isActive, createdAt])
+  @@index([email, isActive])
+  @@index([createdAt])
+  @@index([emailVerified])
+  @@index([lastLoginAt])
+}
+
+model Client {
+  userId                          String             @id @unique
+  hasSeenTherapistRecommendations Boolean            @default(false)
+  birthdate                       DateTime?
+  city                            String?
+  country                         String?
+  createdAt                       DateTime           @default(now())
+  updatedAt                       DateTime           @default(now())
+  user                            User               @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
+  assignedTherapists              ClientTherapist[]
+  meetings                        Meeting[]          @relation("ClientMeetings")
+  paymentsAsClient                Payment[]
+  preAssessments                  PreAssessment[]
+  reviews                         Review[]
+  worksheets                      Worksheet[]
+  preferences                     ClientPreferences?
+  engagement                      ClientEngagement?
+
+  @@index([userId])
+}
+
+model Moderator {
+  userId               String               @id @unique
+  permissions          String[]
+  assignedCommunities  Json?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  user                 User                 @relation("UserModerator", fields: [userId], references: [id], onDelete: Cascade)
+  moderatorCommunities ModeratorCommunity[]
+
+  @@index([userId])
+}
+
+model Admin {
+  userId              String      @id @unique
+  permissions         String[]
+  adminLevel          String      @default("admin")
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  user                User        @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
+  processedTherapists Therapist[]
+
+  @@index([userId])
+}

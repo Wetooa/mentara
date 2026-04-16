@@ -1,0 +1,135 @@
+// Group Therapy Session Models
+// Community-based group therapy sessions with therapist invitations
+
+model GroupTherapySession {
+  id String @id @default(cuid())
+
+  // Basic Info
+  title       String
+  description String?   @db.Text
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  // Creator/Spearhead (Moderator)
+  createdById String
+  createdBy   User   @relation("GroupSessionCreator", fields: [createdById], references: [id])
+
+  // Session Details
+  sessionType     SessionType
+  sessionFormat   String? // 'group-therapy' | 'webinar'; null = group-therapy for backward compat
+  scheduledAt     DateTime
+  duration        Int // Duration in minutes
+  maxParticipants Int // Max number of participants
+
+  // Location/Link (based on type)
+  virtualLink     String? // For virtual sessions
+  location        String? // For in-person sessions (short name)
+  locationAddress String? // Full address for in-person
+
+  // Status
+  status GroupSessionStatus @default(PENDING_APPROVAL)
+
+  // Cancellation
+  cancelledAt        DateTime?
+  cancellationReason String?   @db.Text
+
+  // Completion
+  completedAt DateTime?
+
+  // Relationships
+  therapistInvitations GroupSessionTherapistInvitation[]
+  participants         GroupSessionParticipant[]
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([communityId])
+  @@index([createdById])
+  @@index([status])
+  @@index([scheduledAt])
+  @@map("GroupTherapySessions")
+}
+
+model GroupSessionTherapistInvitation {
+  id String @id @default(cuid())
+
+  // Session
+  sessionId String
+  session   GroupTherapySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Therapist
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+  // Invitation Status
+  status      InvitationStatus @default(PENDING)
+  invitedAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  // Response Message (optional)
+  message String? @db.Text
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sessionId, therapistId])
+  @@index([therapistId, status])
+  @@map("GroupSessionTherapistInvitations")
+}
+
+model GroupSessionParticipant {
+  id String @id @default(cuid())
+
+  // Session
+  sessionId String
+  session   GroupTherapySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Participant (can be client or any user)
+  userId String
+  user   User   @relation("GroupSessionParticipant", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Participation
+  joinedAt         DateTime         @default(now())
+  attendanceStatus AttendanceStatus @default(REGISTERED)
+
+  // If user leaves before session
+  leftAt DateTime?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sessionId, userId])
+  @@index([userId])
+  @@index([sessionId, attendanceStatus])
+  @@map("GroupSessionParticipants")
+}
+
+// Enums
+enum SessionType {
+  VIRTUAL
+  IN_PERSON
+}
+
+enum GroupSessionStatus {
+  PENDING_APPROVAL // Waiting for therapists to accept
+  APPROVED // All therapists accepted, members can join
+  CANCELLED // Session cancelled
+  IN_PROGRESS // Session currently happening
+  COMPLETED // Session finished
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum AttendanceStatus {
+  REGISTERED // Joined but session not started
+  ATTENDED // Marked as attended
+  NO_SHOW // Registered but didn't attend
+  CANCELLED // User cancelled their registration
+}

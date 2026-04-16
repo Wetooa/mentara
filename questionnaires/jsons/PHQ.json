@@ -1,0 +1,337 @@
+{
+  "scale_id": "PHQ",
+  "full_name": "Personal Health Questionnaire",
+  "domain": "Phobias and Anxiety",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "Injections or minor surgery",
+      "hooks": [
+        "fear of needles",
+        "getting a shot",
+        "minor medical procedures",
+        "surgery anxiety"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "Eating or drinking with other people",
+      "hooks": [
+        "social eating",
+        "fear of eating in public",
+        "drinking with others",
+        "messing up while eating"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "Hospitals",
+      "hooks": [
+        "visiting hospitals",
+        "fear of medical centers",
+        "being in a clinical setting",
+        "nosocomephobia"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "Traveling alone on public transportation (e.g. bus or train)",
+      "hooks": [
+        "riding the bus alone",
+        "train travel anxiety",
+        "public transit fear",
+        "solo commuting"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "Walking alone in busy streets",
+      "hooks": [
+        "fear of crowds",
+        "busy sidewalks",
+        "walking alone downtown",
+        "street anxiety"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "Being watched or stared at",
+      "hooks": [
+        "feeling observed",
+        "people looking at me",
+        "self-consciousness",
+        "center of attention fear"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "Going in to crowded shops",
+      "hooks": [
+        "busy grocery stores",
+        "crowded mall fear",
+        "shopping anxiety",
+        "fear of stores"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "Talking to people in authority",
+      "hooks": [
+        "speaking to a boss",
+        "police interaction",
+        "talking to teachers",
+        "scared of authority figures"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "Sight of blood",
+      "hooks": [
+        "seeing blood",
+        "blood phobia",
+        "bleeding anxiety",
+        "hemophobia"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "Being criticized",
+      "hooks": [
+        "fear of judgment",
+        "negative feedback",
+        "others being mean",
+        "verbal criticism"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "11",
+      "clinical_text": "Going alone far from home",
+      "hooks": [
+        "traveling far alone",
+        "leaving safety of home",
+        "distanced travel",
+        "agoraphobic feelings"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "12",
+      "clinical_text": "Thought of injury or illness",
+      "hooks": [
+        "worrying about getting sick",
+        "health anxiety",
+        "thoughts of being hurt",
+        "illness intrusive thoughts"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "13",
+      "clinical_text": "Speaking or acting to an audience",
+      "hooks": [
+        "public speaking",
+        "stage fright",
+        "presentations",
+        "performing for people"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "14",
+      "clinical_text": "Large open spaces",
+      "hooks": [
+        "wide open areas",
+        "agoraphobia",
+        "empty fields or parks",
+        "fear of open ground"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    },
+    {
+      "id": "15",
+      "clinical_text": "Going to the dentist",
+      "hooks": [
+        "dentist fear",
+        "dental procedures",
+        "tooth checkups",
+        "odontophobia"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Would not avoid it",
+        "1": "Slightly avoid it",
+        "2": "Slightly avoid it",
+        "3": "Slightly avoid it",
+        "4": "Definitely avoid it",
+        "5": "Definitely avoid it",
+        "6": "Markedly avoid it",
+        "7": "Markedly avoid it",
+        "8": "Always avoid"
+      }
+    }
+  ]
+}

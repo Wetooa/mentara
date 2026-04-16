@@ -1,0 +1,183 @@
+{
+  "scale_id": "AUDIT",
+  "full_name": "Alcohol Use Disorders Identification Test",
+  "domain": "Alcohol Consumption and Related Problems",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "How often do you have a drink containing alcohol?",
+      "hooks": [
+        "drinking frequency",
+        "how often I drink",
+        "days spent drinking",
+        "regularity of alcohol use"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Monthly or less",
+        "2": "2 to 4 times a month",
+        "3": "2 to 3 times a week",
+        "4": "4 or more times a week"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "How many drinks containing alcohol do you have on a typical day when you are drinking?",
+      "hooks": [
+        "amount of alcohol",
+        "typical number of drinks",
+        "drinking volume",
+        "standard drinks per day"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "1 or 2",
+        "1": "3 or 4",
+        "2": "5 or 6",
+        "3": "7, 8, or 9",
+        "4": "10 or more"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "How often do you have six or more drinks on one occasion?",
+      "hooks": [
+        "binge drinking frequency",
+        "drinking heavily at once",
+        "six or more drinks",
+        "excessive drinking sessions"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Less than monthly",
+        "2": "Monthly",
+        "3": "Weekly",
+        "4": "Daily or almost daily"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "How often during the last year have you found that you were not able to stop drinking once you had started?",
+      "hooks": [
+        "losing control of drinking",
+        "inability to stop",
+        "drinking more than planned",
+        "loss of control"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Less than monthly",
+        "2": "Monthly",
+        "3": "Weekly",
+        "4": "Daily or almost daily"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "How often during the last year have you failed to do what was normally expected from you because of drinking?",
+      "hooks": [
+        "neglecting responsibilities",
+        "missing work or school",
+        "failing obligations",
+        "drinking interfering with duties"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Less than monthly",
+        "2": "Monthly",
+        "3": "Weekly",
+        "4": "Daily or almost daily"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "How often during the last year have you needed a first drink in the morning to get yourself going after a heavy drinking session?",
+      "hooks": [
+        "morning drinking",
+        "eye-opener",
+        "drinking to stop shakes",
+        "needing a drink to start the day"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Less than monthly",
+        "2": "Monthly",
+        "3": "Weekly",
+        "4": "Daily or almost daily"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "How often during the last year have you had a feeling of guilt or remorse after drinking?",
+      "hooks": [
+        "feeling bad about drinking",
+        "remorse after a binge",
+        "guilt regarding alcohol use",
+        "shame after drinking"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Less than monthly",
+        "2": "Monthly",
+        "3": "Weekly",
+        "4": "Daily or almost daily"
+      }
+    },
+    {
+      "id": "8",
+      "clinical_text": "How often during the last year have you been unable to remember what happened the night before because you had been drinking?",
+      "hooks": [
+        "blackouts",
+        "memory loss from alcohol",
+        "forgetting the night before",
+        "alcoholic amnesia"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Never",
+        "1": "Less than monthly",
+        "2": "Monthly",
+        "3": "Weekly",
+        "4": "Daily or almost daily"
+      }
+    },
+    {
+      "id": "9",
+      "clinical_text": "Have you or someone else been injured as a result of your drinking?",
+      "hooks": [
+        "alcohol-related injury",
+        "hurting someone while drunk",
+        "accidents while drinking",
+        "physical harm from alcohol"
+      ],
+      "is_critical": true,
+      "scoring": {
+        "0": "No",
+        "2": "Yes, but not in the last year",
+        "4": "Yes, during the last year"
+      }
+    },
+    {
+      "id": "10",
+      "clinical_text": "Has a relative or friend or a doctor or another health worker been concerned about your drinking or suggested you cut down?",
+      "hooks": [
+        "others concerned about my drinking",
+        "suggested to cut down",
+        "doctor advice on alcohol",
+        "family worried about drinking"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "No",
+        "2": "Yes, but not in the last year",
+        "4": "Yes, during the last year"
+      }
+    }
+  ]
+}

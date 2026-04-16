@@ -1,0 +1,126 @@
+{
+  "scale_id": "GAD-7",
+  "full_name": "Generalized Anxiety Disorder 7-item scale",
+  "domain": "Anxiety",
+  "items": [
+    {
+      "id": "1",
+      "clinical_text": "Feeling nervous, anxious, or on edge",
+      "hooks": [
+        "feeling jittery",
+        "anxious feelings",
+        "nerves are shot",
+        "feeling on edge"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "Several days",
+        "2": "More than half the days",
+        "3": "Nearly every day"
+      }
+    },
+    {
+      "id": "2",
+      "clinical_text": "Not being able to stop or control worrying",
+      "hooks": [
+        "uncontrollable worry",
+        "can't stop thinking about problems",
+        "spiraling thoughts",
+        "unable to shut off my brain"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "Several days",
+        "2": "More than half the days",
+        "3": "Nearly every day"
+      }
+    },
+    {
+      "id": "3",
+      "clinical_text": "Worrying too much about different things",
+      "hooks": [
+        "worrying about everything",
+        "excessive concern",
+        "overthinking various problems",
+        "too many worries"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "Several days",
+        "2": "More than half the days",
+        "3": "Nearly every day"
+      }
+    },
+    {
+      "id": "4",
+      "clinical_text": "Trouble relaxing",
+      "hooks": [
+        "can't relax",
+        "feeling keyed up",
+        "unable to settle down",
+        "restlessness"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "Several days",
+        "2": "More than half the days",
+        "3": "Nearly every day"
+      }
+    },
+    {
+      "id": "5",
+      "clinical_text": "Being so restless that it is hard to sit still",
+      "hooks": [
+        "pacing around",
+        "can't sit still",
+        "feeling physically restless",
+        "fidgeting constantly"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "Several days",
+        "2": "More than half the days",
+        "3": "Nearly every day"
+      }
+    },
+    {
+      "id": "6",
+      "clinical_text": "Becoming easily annoyed or irritable",
+      "hooks": [
+        "short fuse",
+        "getting annoyed quickly",
+        "irritable with others",
+        "snapping at people"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "Several days",
+        "2": "More than half the days",
+        "3": "Nearly every day"
+      }
+    },
+    {
+      "id": "7",
+      "clinical_text": "Feeling afraid, as if something awful might happen",
+      "hooks": [
+        "sense of impending doom",
+        "feeling scared without reason",
+        "dreading the future",
+        "afraid of the worst"
+      ],
+      "is_critical": false,
+      "scoring": {
+        "0": "Not at all",
+        "1": "Several days",
+        "2": "More than half the days",
+        "3": "Nearly every day"
+      }
+    }
+  ]
+}

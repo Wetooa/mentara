@@ -360,8 +360,6 @@ pytest             # Run tests
 - **[Software Design Description](docs/SOFTWARE_DESIGN_DESCRIPTION.md)** - System architecture and design
 - **[Software Project Management Plan](docs/SOFTWARE_PROJECT_MANAGEMENT_PLAN.md)** - Project planning and management
 - **[Software Test Document](docs/SOFTWARE_TEST_DOCUMENT.md)** - Testing strategy and procedures
-- **[Supabase Deployment Guide](docs/SUPABASE_DEPLOYMENT_GUIDE.md)** - Database deployment instructions
-- **[WebRTC Deployment](docs/WEBRTC_DEPLOYMENT.md)** - Video call setup guide
 - **[Research Paper](docs/research-paper/)** - Academic research documentation
 
 ### Service-Specific Documentation
