@@ -35,6 +35,13 @@
                 "command": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
                 "cwd": "apps/landing"
             }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "apps/landing/jest.config.ts"
+            }
         }
     }
 }

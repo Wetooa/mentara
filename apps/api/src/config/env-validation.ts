@@ -275,7 +275,7 @@ export function logEnvironmentInfo(): void {
         `🤖 Ollama Base URL: ${process.env.OLLAMA_BASE_URL || 'http://localhost:11434'}`,
       );
       logger.log(
-        `🤖 Ollama Model: ${process.env.OLLAMA_MODEL || 'deepseek-r1:1.5b'}`,
+        `🤖 Ollama Model: ${process.env.OLLAMA_MODEL || 'gemma4:31b-cloud'}`,
       );
       break;
   }

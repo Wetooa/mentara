@@ -152,13 +152,13 @@ function PreAssessmentChoicePageContent() {
                     <MessageSquare className={`h-10 w-10 ${isAuthenticated ? "text-primary" : "text-gray-400"}`} />
                   </div>
                   <Badge variant="secondary" className={`${isAuthenticated ? "bg-primary/10 text-primary border-primary/30" : "bg-gray-200 text-gray-500"}`}>
-                    AURIS AI
+                    Mentara AI
                   </Badge>
                 </div>
                 <div>
                   <CardTitle className="text-2xl font-bold">AI Chatbot Assessment</CardTitle>
                   <CardDescription className="text-base mt-2">
-                    Have a conversation with AURIS, our AI assistant. Answer questions naturally 
+                    Have a conversation with Mentara's AI assistant. Answer questions naturally 
                     through chat. Time varies depending on the depth of your details.
                   </CardDescription>
                 </div>

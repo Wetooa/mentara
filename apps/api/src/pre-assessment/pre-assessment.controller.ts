@@ -89,28 +89,31 @@ export class PreAssessmentController {
     }
   }
 
+  @Public()
   @Post('session/new')
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: NewSessionResponseDto })
-  async createSession(@CurrentUserId() userId: string) {
+  async createSession(@CurrentUserId() userId?: string) {
     return await this.aurisService.createSession(userId);
   }
 
+  @Public()
   @Post('chat')
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ type: AurisResponseDto })
   async chat(
-    @CurrentUserId() userId: string,
+    @CurrentUserId() userId: string | undefined,
     @Body() body: AurisChatDto,
   ) {
     return await this.aurisService.chat(userId, body.sessionId, body.message);
   }
 
+  @Public()
   @Post('session/:sessionId/end')
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ type: AurisResponseDto })
   async endSession(
-    @CurrentUserId() userId: string,
+    @CurrentUserId() userId: string | undefined,
     @Param('sessionId') sessionId: string,
   ) {
     return await this.aurisService.endSession(userId, sessionId);

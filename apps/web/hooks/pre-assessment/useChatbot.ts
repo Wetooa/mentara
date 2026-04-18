@@ -40,7 +40,7 @@ export interface UseChatbotReturn {
     startSession: () => Promise<void>;
 }
 
-/** Returns true when the AURIS microservice considers the assessment done */
+/** Returns true when the chatbot assessment has reached its summary phase */
 function isSessionComplete(state?: AurisStateDto | null): boolean {
     if (!state) return false;
     return state.is_complete || state.assessment_phase === "SNAPSHOT";
@@ -82,7 +82,7 @@ export function useChatbot(): UseChatbotReturn {
         if (isInitializing.current || sessionIdRef.current) return;
 
         if (!isAuthenticated) {
-            console.warn("[useChatbot] Attempted to start session without authentication.");
+            toast.error("Please sign in to start the chat assessment.");
             return;
         }
 
@@ -93,12 +93,10 @@ export function useChatbot(): UseChatbotReturn {
             // createSession returns { session_id, opening_message } directly
             const payload = await createSessionMutation.mutateAsync();
 
-            console.log("Payload", payload);
-
             const newSessionId = payload.session_id ?? null;
             const openingMessage =
                 payload.opening_message ??
-                "Hi! I'm AURIS, your clinical assessment assistant. How have you been feeling lately?";
+                "Hi! I'm Mentara's AI pre-assessment assistant. What feels most important for you to share today?";
 
             setSessionId(newSessionId);
             sessionIdRef.current = newSessionId;
@@ -117,14 +115,16 @@ export function useChatbot(): UseChatbotReturn {
             setIsLoading(false);
             isInitializing.current = false;
         }
-    }, [sessionId, isAuthenticated]);
+    }, [createSessionMutation, isAuthenticated]);
 
     // ─── Send message ──────────────────────────────────────────────────────────
 
     const sendMessage = async (content: string) => {
+        const activeSessionId = sessionIdRef.current;
+
         // isSending.current flips synchronously so concurrent calls are blocked
         // even before isLoading state has had a chance to re-render.
-        if (!content.trim() || !sessionId || isSending.current || isComplete) return;
+        if (!content.trim() || !activeSessionId || isSending.current || isComplete) return;
         isSending.current = true;
 
         const userMessage: Message = {
@@ -138,10 +138,9 @@ export function useChatbot(): UseChatbotReturn {
         setIsLoading(true);
 
         try {
-            // The chat endpoint returns the raw Flask payload (AurisResponseDto) directly —
-            // AurisService passes the Flask body through as-is (no NestJS envelope).
+            // The chat endpoint returns the chatbot payload directly with no NestJS envelope.
             const chatPayload = await chatMutation.mutateAsync({
-                data: { sessionId, message: content },
+                data: { sessionId: activeSessionId, message: content },
             });
 
             const responseText = chatPayload.response ?? "I didn't quite catch that, could you repeat?";
@@ -176,12 +175,14 @@ export function useChatbot(): UseChatbotReturn {
     // ─── End session ───────────────────────────────────────────────────────────
 
     const endSession = async () => {
-        if (!sessionId) return;
+        const activeSessionId = sessionIdRef.current;
+
+        if (!activeSessionId) return;
 
         setIsLoading(true);
         try {
-            // endSession also returns the raw AurisResponseDto — no NestJS envelope
-            const endPayload = await endSessionMutation.mutateAsync({ sessionId });
+            // endSession returns the chatbot payload directly — no NestJS envelope
+            const endPayload = await endSessionMutation.mutateAsync({ sessionId: activeSessionId });
             const state = endPayload.state ?? null;
 
             if (endPayload.response) {
