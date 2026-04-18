@@ -20,7 +20,7 @@ export default defineConfig({
       },
     },
     input: {
-      target: 'http://localhost:3001/api/docs-json',
+      target: './swagger.json',
     },
 
   },

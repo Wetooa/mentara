@@ -22,7 +22,7 @@ export default function ChatbotPage() {
     return (
         <Suspense fallback={
             <div className="flex items-center justify-center min-h-screen bg-white">
-                <div className="text-gray-600">Initializing AURIS...</div>
+                <div className="text-gray-600">Initializing Mentara AI...</div>
             </div>
         }>
             <ChatbotPageContent />

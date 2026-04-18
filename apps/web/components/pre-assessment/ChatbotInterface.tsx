@@ -157,7 +157,7 @@ export default function ChatbotInterface({
                                             Ready to start your assessment?
                                         </h2>
                                         <p className="text-muted-foreground max-w-lg mx-auto text-lg leading-relaxed">
-                                            AURIS, your AI clinical assistant, will ask you a few questions
+                                            Mentara's AI assistant will ask you a few questions
                                             to understand your needs and match you with the best care.
                                         </p>
                                         <Button
@@ -191,7 +191,7 @@ export default function ChatbotInterface({
                                         <Loader2 className="h-4 w-4 text-primary animate-spin" />
                                     </div>
                                     <div className="bg-white border border-gray-100 px-4 py-2 rounded-2xl shadow-sm text-xs font-medium text-muted-foreground italic">
-                                        AURIS is analyzing...
+                                        Mentara AI is analyzing...
                                     </div>
                                 </motion.div>
                             )}

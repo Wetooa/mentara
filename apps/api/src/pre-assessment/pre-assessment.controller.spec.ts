@@ -2,12 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PreAssessmentController } from './pre-assessment.controller';
 import { PreAssessmentService } from './pre-assessment.service';
+import { AurisService } from './auris.service';
 import { JwtAuthGuard } from '../auth/core/guards/jwt-auth.guard';
-import { CreatePreAssessmentDto, PreAssessmentMethod } from './types/pre-assessment.dto';
+import {
+  AurisChatDto,
+  CreatePreAssessmentDto,
+  PreAssessmentMethod,
+} from './types/pre-assessment.dto';
 
 describe('PreAssessmentController', () => {
   let controller: PreAssessmentController;
   let service: PreAssessmentService;
+  let aurisService: {
+    createSession: jest.Mock;
+    chat: jest.Mock;
+    endSession: jest.Mock;
+  };
 
   const mockPreAssessment = {
     id: 'assessment-123',
@@ -32,6 +42,12 @@ describe('PreAssessmentController', () => {
   };
 
   beforeEach(async () => {
+    aurisService = {
+      createSession: jest.fn(),
+      chat: jest.fn(),
+      endSession: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PreAssessmentController],
       providers: [
@@ -42,6 +58,10 @@ describe('PreAssessmentController', () => {
             createAnonymousPreAssessment: jest.fn(),
             getPreAssessmentByClientId: jest.fn(),
           },
+        },
+        {
+          provide: AurisService,
+          useValue: aurisService,
         },
       ],
     })
@@ -122,6 +142,79 @@ describe('PreAssessmentController', () => {
       (service.getPreAssessmentByClientId as jest.Mock).mockRejectedValue(new Error('Unknown Error'));
 
       await expect(controller.getPreAssessment('user-123')).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('chatbot endpoints', () => {
+    it('should create a chatbot session', async () => {
+      aurisService.createSession.mockResolvedValue({
+        session_id: 'session-123',
+        opening_message: 'Welcome to Mentara.',
+      });
+
+      await expect(controller.createSession('user-123')).resolves.toEqual({
+        session_id: 'session-123',
+        opening_message: 'Welcome to Mentara.',
+      });
+      expect(aurisService.createSession).toHaveBeenCalledWith('user-123');
+    });
+
+    it('should send a chatbot message', async () => {
+      const payload: AurisChatDto = {
+        sessionId: 'session-123',
+        message: 'I feel overwhelmed lately.',
+      };
+
+      aurisService.chat.mockResolvedValue({
+        response: 'Thanks for telling me that.',
+        state: {
+          assessment_phase: 'ASSESSMENT',
+          completion_reason: 'collecting_context',
+          total_questions_asked: 1,
+          message_count: 2,
+          is_complete: false,
+          requires_crisis_protocol: false,
+          extracted_data: {},
+          identified_questionnaires: {},
+          candidate_scales: [],
+        },
+      });
+
+      await expect(controller.chat('user-123', payload)).resolves.toMatchObject({
+        response: 'Thanks for telling me that.',
+      });
+      expect(aurisService.chat).toHaveBeenCalledWith(
+        'user-123',
+        'session-123',
+        'I feel overwhelmed lately.',
+      );
+    });
+
+    it('should end a chatbot session', async () => {
+      aurisService.endSession.mockResolvedValue({
+        response: 'Your assessment is complete.',
+        state: {
+          assessment_phase: 'COMPLETE',
+          completion_reason: 'session_ended_by_user',
+          total_questions_asked: 3,
+          message_count: 6,
+          is_complete: true,
+          requires_crisis_protocol: false,
+          extracted_data: {},
+          identified_questionnaires: {},
+          candidate_scales: ['PHQ-9'],
+        },
+      });
+
+      await expect(
+        controller.endSession('user-123', 'session-123'),
+      ).resolves.toMatchObject({
+        response: 'Your assessment is complete.',
+      });
+      expect(aurisService.endSession).toHaveBeenCalledWith(
+        'user-123',
+        'session-123',
+      );
     });
   });
 });
