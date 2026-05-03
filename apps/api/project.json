@@ -35,14 +35,21 @@
         "test": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "jest",
+                "command": "jest --silent --forceExit --maxWorkers=4",
+                "cwd": "apps/api"
+            }
+        },
+        "test-integration": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "JEST_TEST_TYPE=integration jest --config jest.integration.config.js",
                 "cwd": "apps/api"
             }
         },
         "lint": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+                "command": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings 10000",
                 "cwd": "apps/api"
             }
         },

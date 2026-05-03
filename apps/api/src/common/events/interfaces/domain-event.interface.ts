@@ -37,7 +37,7 @@ export abstract class BaseDomainEvent<T = any> implements DomainEvent<T> {
     aggregateType: string,
     eventData: T,
     metadata: EventMetadata = {},
-    version: number = 1,
+    version = 1,
   ) {
     this.eventId = this.generateEventId();
     this.eventType = this.constructor.name;

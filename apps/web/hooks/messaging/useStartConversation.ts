@@ -183,7 +183,7 @@ export function useStartConversation(options: StartConversationOptions = {}) {
    */
   const startConversation = (
     targetUserId: string,
-    navigateOnSuccess: boolean = true
+    navigateOnSuccess = true
   ) => {
     startConversationMutation.mutate({ targetUserId, navigateOnSuccess });
   };

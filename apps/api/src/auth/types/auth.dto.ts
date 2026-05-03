@@ -103,7 +103,7 @@ export interface RegisterClientDto {
   address?: string;
   avatarUrl?: string;
   hasSeenTherapistRecommendations?: boolean;
-  preassessmentAnswers?: any; // Pre-assessment responses
+  preassessmentAnswers?: any; // Pre-assessment responses (Prisma JSON / PreAssessmentData)
   sessionId?: string; // For linking anonymous assessments
 }
 

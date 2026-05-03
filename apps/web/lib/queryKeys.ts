@@ -74,26 +74,26 @@ const createQueryKeys = () => {
   return {
     auditLogs: {
       ...base.auditLogs,
-      list: (params?: any) => [...base.auditLogs.all, 'list', params] as const,
+      list: (params?: unknown) => [...base.auditLogs.all, 'list', params] as const,
     },
     therapists: {
       ...base.therapists,
-      recommendations: (params?: any) => [...base.therapists.all, 'recommendations', params] as const,
+      recommendations: (params?: unknown) => [...base.therapists.all, 'recommendations', params] as const,
       therapistRecommendations: () => [...base.therapists.all, 'therapist-recommendations'] as const,
-      list: (params?: any) => [...base.therapists.all, 'list', params] as const,
+      list: (params?: unknown) => [...base.therapists.all, 'list', params] as const,
       byId: (id: string) => [...base.therapists.all, 'byId', id] as const,
       detail: (id: string) => [...base.therapists.all, 'detail', id] as const,
       applications: {
-        list: (params?: any) => [...base.therapists.applications, 'list', params] as const,
+        list: (params?: unknown) => [...base.therapists.applications, 'list', params] as const,
         byId: (id: string) => [...base.therapists.applications, 'detail', id] as const,
         my: () => [...base.therapists.applications, 'detail', 'me'] as const,
       },
       availability: {
         byId: (id: string) => [...base.therapists.availability, 'byId', id] as const,
-        slots: (therapistId: string, params?: any) => [...base.therapists.availability, 'slots', therapistId, params] as const,
+        slots: (therapistId: string, params?: unknown) => [...base.therapists.availability, 'slots', therapistId, params] as const,
       },
       patients: {
-        list: (params?: any) => [...base.therapists.patients, 'list', params] as const,
+        list: (params?: unknown) => [...base.therapists.patients, 'list', params] as const,
         matched: () => [...base.therapists.patients, 'matched'] as const,
       },
     },
@@ -102,13 +102,13 @@ const createQueryKeys = () => {
       dashboard: () => [...base.therapist.all, 'dashboard'] as const,
       stats: () => [...base.therapist.all, 'dashboard', 'stats'] as const,
       appointments: () => [...base.therapist.all, 'dashboard', 'appointments'] as const,
-      meetings: (params?: any) => [...base.therapist.all, 'meetings', params] as const,
+      meetings: (params?: unknown) => [...base.therapist.all, 'meetings', params] as const,
       meeting: (meetingId: string) => [...base.therapist.all, 'meetings', meetingId] as const,
       availability: () => [...base.therapists.availability, 'current'] as const,
     },
     sessions: {
       ...base.sessions,
-      list: (params?: any) => [...base.sessions.all, 'list', params] as const,
+      list: (params?: unknown) => [...base.sessions.all, 'list', params] as const,
       upcoming: (limit?: number) => [...base.sessions.all, 'upcoming', limit] as const,
       completed: (limit?: number) => [...base.sessions.all, 'completed', limit] as const,
       cancelled: (limit?: number) => [...base.sessions.all, 'cancelled', limit] as const,
@@ -121,13 +121,13 @@ const createQueryKeys = () => {
     booking: {
       ...base.booking,
       slots: (therapistId: string, date?: string) => [...base.booking.all, 'slots', therapistId, date] as const,
-      appointments: (params?: any) => [...base.booking.all, 'appointments', params] as const,
+      appointments: (params?: unknown) => [...base.booking.all, 'appointments', params] as const,
     },
     users: {
       ...base.users,
       current: () => [...base.users.all, 'current'] as const,
       byId: (id: string) => [...base.users.all, 'byId', id] as const,
-      list: (params?: any) => [...base.users.all, 'list', params] as const,
+      list: (params?: unknown) => [...base.users.all, 'list', params] as const,
       search: (query: string) => [...base.users.all, 'search', query] as const,
       favorites: (userId?: string) => [...base.users.all, 'favorites', userId || 'current'] as const,
     },
@@ -148,21 +148,21 @@ const createQueryKeys = () => {
       dashboard: () => [...base.admin.all, 'dashboard'] as const,
       checkAdmin: () => [...base.admin.all, 'checkAdmin'] as const,
       users: {
-        list: (params?: any) => [...base.admin.all, 'users', 'list', params] as const,
+        list: (params?: unknown) => [...base.admin.all, 'users', 'list', params] as const,
         byId: (id: string) => [...base.admin.all, 'users', 'detail', id] as const,
       },
       stats: () => [...base.admin.all, 'stats'] as const,
       reports: {
-        list: (filters?: any) => [...base.admin.all, 'reports', 'list', filters] as const,
+        list: (filters?: unknown) => [...base.admin.all, 'reports', 'list', filters] as const,
         detail: (id: string) => [...base.admin.all, 'reports', 'detail', id] as const,
         overview: () => [...base.admin.all, 'reports', 'overview'] as const,
       },
       therapistApplications: {
-        list: (params?: any) => [...base.admin.all, 'therapistApplications', 'list', params] as const,
+        list: (params?: unknown) => [...base.admin.all, 'therapistApplications', 'list', params] as const,
         byId: (id: string) => [...base.admin.all, 'therapistApplications', 'detail', id] as const,
       },
       moderation: {
-        flaggedContent: (params?: any) => [...base.admin.all, 'moderation', 'flaggedContent', params] as const,
+        flaggedContent: (params?: unknown) => [...base.admin.all, 'moderation', 'flaggedContent', params] as const,
       },
       config: {
         system: () => [...base.admin.all, 'config', 'system'] as const,
@@ -172,27 +172,27 @@ const createQueryKeys = () => {
     moderator: {
       ...base.moderator,
       dashboard: () => [...base.moderator.all, 'dashboard'] as const,
-      contentQueue: (params?: any) => [...base.moderator.all, 'contentQueue', params] as const,
-      auditLogs: (params?: any) => [...base.moderator.all, 'auditLogs', params] as const,
-      users: (params?: any) => [...base.moderator.all, 'users', params] as const,
+      contentQueue: (params?: unknown) => [...base.moderator.all, 'contentQueue', params] as const,
+      auditLogs: (params?: unknown) => [...base.moderator.all, 'auditLogs', params] as const,
+      users: (params?: unknown) => [...base.moderator.all, 'users', params] as const,
     },
     billing: {
       ...base.billing,
       subscription: () => [...base.billing.all, 'subscription'] as const,
-      invoices: (params?: any) => [...base.billing.all, 'invoices', params] as const,
+      invoices: (params?: unknown) => [...base.billing.all, 'invoices', params] as const,
       paymentMethods: () => [...base.billing.all, 'payment-methods'] as const,
       stats: (period?: string) => [...base.billing.all, 'stats', period] as const,
     },
     notifications: {
       ...base.notifications,
-      list: (params?: any) => [...base.notifications.all, 'list', params] as const,
+      list: (params?: unknown) => [...base.notifications.all, 'list', params] as const,
       unread: () => [...base.notifications.all, 'unread'] as const,
       unreadCount: () => [...base.notifications.all, 'unreadCount'] as const,
     },
     preAssessment: {
       ...base.preAssessment,
       questionnaires: () => [...base.preAssessment.all, 'questionnaires'] as const,
-      responses: (params?: any) => [...base.preAssessment.all, 'responses', params] as const,
+      responses: (params?: unknown) => [...base.preAssessment.all, 'responses', params] as const,
     },
     favorites: {
       ...base.favorites,
@@ -201,13 +201,13 @@ const createQueryKeys = () => {
     },
     reporting: {
       ...base.reporting,
-      content: (params?: any) => [...base.reporting.all, 'content', params] as const,
+      content: (params?: unknown) => [...base.reporting.all, 'content', params] as const,
       reports: () => [...base.reporting.all, 'reports'] as const,
     },
     reviews: {
       ...base.reviews,
-      list: (params?: any) => [...base.reviews.all, 'list', params] as const,
-      byTherapist: (therapistId: string, params?: any) => [...base.reviews.all, 'byTherapist', therapistId, params] as const,
+      list: (params?: unknown) => [...base.reviews.all, 'list', params] as const,
+      byTherapist: (therapistId: string, params?: unknown) => [...base.reviews.all, 'byTherapist', therapistId, params] as const,
       therapistStats: (therapistId: string) => [...base.reviews.all, 'therapistStats', therapistId] as const,
     },
     communities: {
@@ -244,8 +244,8 @@ const createQueryKeys = () => {
       my: () => [...base.worksheets.all, 'my'] as const,
       assigned: () => [...base.worksheets.all, 'assigned'] as const,
       byId: (id: string) => [...base.worksheets.all, 'byId', id] as const,
-      list: (params?: any) => [...base.worksheets.all, 'list', params] as const,
-      stats: (params?: any) => [...base.worksheets.all, 'stats', params] as const,
+      list: (params?: unknown) => [...base.worksheets.all, 'list', params] as const,
+      stats: (params?: unknown) => [...base.worksheets.all, 'stats', params] as const,
     },
     client: {
       ...base.client,

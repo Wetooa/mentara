@@ -216,12 +216,13 @@ export class LoadTestFramework extends EventEmitter {
           requestOptions.headers['X-API-Key'] =
             this.config.authentication.apiKey;
           break;
-        case 'basic':
+        case 'basic': {
           const auth = Buffer.from(
             `${this.config.authentication.username}:${this.config.authentication.password}`,
           ).toString('base64');
           requestOptions.headers['Authorization'] = `Basic ${auth}`;
           break;
+        }
       }
     }
 

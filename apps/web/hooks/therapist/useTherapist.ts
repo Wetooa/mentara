@@ -168,7 +168,7 @@ export function useAssignedTherapists() {
 /**
  * Hook for getting therapist profile by ID
  */
-export function useTherapistProfile(therapistId: string, enabled: boolean = true) {
+export function useTherapistProfile(therapistId: string, enabled = true) {
   const api = useApi();
 
   return useQuery({

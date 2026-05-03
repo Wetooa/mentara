@@ -40,7 +40,7 @@ class ConnectionHealthMonitor {
   /**
    * Start continuous health monitoring
    */
-  startMonitoring(intervalMs: number = 30000): void {
+  startMonitoring(intervalMs = 30000): void {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
     }
@@ -149,7 +149,7 @@ class ConnectionHealthMonitor {
   /**
    * Get health summary for the last N minutes
    */
-  getHealthSummary(minutes: number = 10): {
+  getHealthSummary(minutes = 10): {
     averageLatency: number;
     connectionStability: number; // percentage of time connected
     errorRate: number; // errors per minute

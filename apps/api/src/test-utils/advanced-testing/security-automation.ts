@@ -91,7 +91,9 @@ export class SecurityAutomationFramework {
   private prisma!: PrismaService;
   private moduleRef!: TestingModule;
 
-  constructor() {}
+  constructor() {
+    void 0;
+  }
 
   /**
    * Initialize security testing framework

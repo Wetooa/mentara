@@ -23,19 +23,19 @@ export const RequirePermissions = (...permissions: string[]) =>
 
 // Resource ownership decorator
 export const RESOURCE_OWNER_KEY = 'resource_owner';
-export const AllowResourceOwner = (paramName: string = 'id') =>
+export const AllowResourceOwner = (paramName = 'id') =>
   SetMetadata(RESOURCE_OWNER_KEY, paramName);
 
 // Combined decorators for common scenarios
 export const AdminOrResourceOwner =
-  (paramName: string = 'id') =>
+  (paramName = 'id') =>
   (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     SetMetadata(ROLES_KEY, ['admin'])(target, propertyKey, descriptor);
     SetMetadata(RESOURCE_OWNER_KEY, paramName)(target, propertyKey, descriptor);
   };
 
 export const TherapistOrResourceOwner =
-  (paramName: string = 'id') =>
+  (paramName = 'id') =>
   (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     SetMetadata(ROLES_KEY, ['therapist', 'admin'])(
       target,

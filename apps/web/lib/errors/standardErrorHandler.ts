@@ -77,7 +77,9 @@ export class StandardErrorHandler {
   private errorCounts: Map<string, number> = new Map();
   private lastErrorTime: Map<string, number> = new Map();
 
-  private constructor() {}
+  private constructor() {
+    void 0;
+  }
 
   public static getInstance(): StandardErrorHandler {
     if (!StandardErrorHandler.instance) {

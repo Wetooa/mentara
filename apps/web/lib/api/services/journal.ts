@@ -31,7 +31,7 @@ export function createJournalService(axios: AxiosInstance) {
       return response;
     },
 
-    async getEntries(page: number = 1, limit: number = 20): Promise<JournalEntriesResponse> {
+    async getEntries(page = 1, limit = 20): Promise<JournalEntriesResponse> {
       const { data } = await axios.get("/journal/entries", {
         params: { page, limit },
       });

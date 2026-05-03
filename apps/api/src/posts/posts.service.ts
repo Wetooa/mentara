@@ -432,7 +432,7 @@ export class PostsService {
   async attachFilesToPost(
     postId: string,
     fileIds: string[],
-    purpose: string = 'MEDIA',
+    purpose = 'MEDIA',
   ) {
     // Stub implementation - files system removed
     return { count: 0 };

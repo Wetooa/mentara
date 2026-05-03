@@ -6,10 +6,7 @@ export * from './event-bus.service';
 export * from './user-events';
 export * from './booking-events';
 export * from './messaging-events';
-export * from './assessment-events';
 export * from './social-events';
-export * from './billing-events';
-export * from './system-events';
 
 // Event type unions for better type safety
 export type UserEventType =

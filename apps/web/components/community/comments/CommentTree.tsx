@@ -123,7 +123,7 @@ export function CommentTree({
   // };
 
   // Enhanced recursive comment rendering with infinite nesting support
-  const renderComment = React.useCallback((comment: Comment, depth: number = 0): React.ReactNode => {
+  const renderComment = React.useCallback((comment: Comment, depth = 0): React.ReactNode => {
     const isCollapsed = collapsedComments.has(comment.id);
     const hasChildren = comment.children && comment.children.length > 0;
     const childrenCount = hasChildren ? comment.children!.length : 0;

@@ -117,10 +117,11 @@ export function SessionsList({
           );
         case "popularity":
           return b.currentParticipants - a.currentParticipants;
-        case "capacity":
+        case "capacity": {
           const aCapacity = (a.currentParticipants / a.maxParticipants) * 100;
           const bCapacity = (b.currentParticipants / b.maxParticipants) * 100;
           return bCapacity - aCapacity;
+        }
         default:
           return 0;
       }

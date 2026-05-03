@@ -61,7 +61,7 @@ export function TherapistAnalyticsDashboard({ className }: TherapistAnalyticsDas
     const now = new Date();
 
     switch (dateRange) {
-      case "week":
+      case "week": {
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
         const endOfWeek = new Date(startOfWeek);
@@ -70,6 +70,7 @@ export function TherapistAnalyticsDashboard({ className }: TherapistAnalyticsDas
           start: format(startOfWeek, "yyyy-MM-dd"),
           end: format(endOfWeek, "yyyy-MM-dd"),
         };
+      }
       case "year":
         return {
           start: format(new Date(now.getFullYear(), 0, 1), "yyyy-MM-dd"),

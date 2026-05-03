@@ -313,7 +313,6 @@ export function PostDetail({
                           className="relative group cursor-pointer overflow-hidden rounded-xl border border-border shadow-sm hover:shadow-md transition-all"
                           onClick={() => window.open(url, '_blank')}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={url}
                             alt={fileName}

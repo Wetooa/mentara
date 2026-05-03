@@ -14,8 +14,6 @@ import {
   Heart, 
   MessageCircle, 
   Reply,
-  Edit3,
-  Trash2,
   MoreHorizontal,
   Flag,
   Award,
@@ -34,17 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import type { Comment } from '@/types/api/comments';
 
 interface CommentItemProps {
@@ -240,38 +227,7 @@ export function CommentItem({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {/* TODO: Add isOwner logic based on current user */}
-              {false && (
-                <>
-                  <DropdownMenuItem onClick={() => setIsEditing(!isEditing)}>
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    Edit
-                  </DropdownMenuItem>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Comment</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this comment? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete?.(comment.id)}>
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <DropdownMenuSeparator />
-                </>
-              )}
+              {/* TODO: Owner edit/delete menu — wire isOwner before enabling */}
               <DropdownMenuItem onClick={() => setIsReportModalOpen(true)}>
                 <Flag className="h-4 w-4 mr-2" />
                 Report
@@ -344,7 +300,6 @@ export function CommentItem({
                         className="relative group cursor-pointer overflow-hidden rounded border bg-muted max-w-xs"
                         onClick={() => window.open(url, '_blank')}
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={url}
                           alt={fileName}

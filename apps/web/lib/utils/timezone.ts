@@ -14,7 +14,7 @@ export function getCurrentUTCTime(): Date {
  */
 export function formatUTCDate(
   date: Date | string,
-  format: string = "yyyy-MM-dd"
+  format = "yyyy-MM-dd"
 ): string {
   const dateObj = typeof date === "string" ? new Date(date) : date;
 
@@ -66,7 +66,7 @@ export function isPastUTC(date: Date | string): boolean {
  */
 export function canBookInAdvanceUTC(
   date: Date | string,
-  minAdvanceHours: number = 24
+  minAdvanceHours = 24
 ): boolean {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
@@ -82,7 +82,7 @@ export function canBookInAdvanceUTC(
  * Default: 0.5 hours from now (matching backend slot-generator.service.ts minAdvanceBooking)
  */
 export function getMinimumAdvanceBookingDate(
-  minAdvanceHours: number = 0.5
+  minAdvanceHours = 0.5
 ): Date {
   const now = new Date();
   return new Date(now.getTime() + minAdvanceHours * 60 * 60 * 1000);

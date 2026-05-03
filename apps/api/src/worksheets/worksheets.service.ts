@@ -187,8 +187,8 @@ export class WorksheetsService {
       this.validateDueDate(data.dueDate);
     }
     
-    let materialUrls: string[] = [];
-    let materialNames: string[] = [];
+    const materialUrls: string[] = [];
+    const materialNames: string[] = [];
 
     // If files are provided, upload them first
     if (files && files.length > 0) {

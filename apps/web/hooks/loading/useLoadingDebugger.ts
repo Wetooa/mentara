@@ -45,7 +45,7 @@ export const useLoadingDebugger = () => {
     return unsubscribe;
   }, [store]);
 
-  const testAuthLoading = useCallback((duration: number = 3000) => {
+  const testAuthLoading = useCallback((duration = 3000) => {
     if (process.env.NODE_ENV !== 'development') {
       console.warn('useLoadingDebugger: testAuthLoading is only available in development');
       return;
@@ -79,7 +79,7 @@ export const useLoadingDebugger = () => {
     };
   }, [store]);
 
-  const testNavigationLoading = useCallback((duration: number = 2000) => {
+  const testNavigationLoading = useCallback((duration = 2000) => {
     if (process.env.NODE_ENV !== 'development') {
       console.warn('useLoadingDebugger: testNavigationLoading is only available in development');
       return;
@@ -113,7 +113,7 @@ export const useLoadingDebugger = () => {
     };
   }, [store]);
 
-  const testApiLoading = useCallback((duration: number = 4000) => {
+  const testApiLoading = useCallback((duration = 4000) => {
     if (process.env.NODE_ENV !== 'development') {
       console.warn('useLoadingDebugger: testApiLoading is only available in development');
       return;

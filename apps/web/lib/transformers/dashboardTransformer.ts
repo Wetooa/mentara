@@ -260,7 +260,7 @@ function safeDateTimeFormat(dateTime: any): string {
  * Fallback data for when backend data is unavailable
  */
 export function createFallbackDashboardData(
-  userId: string = "unknown"
+  userId = "unknown"
 ): UserDashboardData {
   return {
     user: {

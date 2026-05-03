@@ -45,7 +45,7 @@ export class DatabaseTestSetup {
     this.prismaService = module.get<PrismaService>(PrismaService);
 
     // Run migrations
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const { execSync } = require('child_process');
     execSync('npx prisma migrate deploy', {
       env: { ...process.env, DATABASE_URL: container.getConnectionUri() },

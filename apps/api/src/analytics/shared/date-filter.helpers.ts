@@ -18,7 +18,7 @@ export interface DateRange {
 export function buildDateFilter(
   startDate?: Date,
   endDate?: Date,
-  field: string = 'createdAt',
+  field = 'createdAt',
 ): Record<string, any> {
   const dateFilter: DateRange = {};
 
@@ -42,7 +42,7 @@ export function buildDateFilter(
 export function buildNestedDateFilter(
   startDate?: Date,
   endDate?: Date,
-  field: string = 'createdAt',
+  field = 'createdAt',
 ): Record<string, any> {
   if (!startDate && !endDate) {
     return {};

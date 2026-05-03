@@ -23,7 +23,7 @@ export interface IntegrationTestSetup {
 }
 
 export class IntegrationTestHelper {
-  static setupTestHeaders(userId: string, role: string = 'client') {
+  static setupTestHeaders(userId: string, role = 'client') {
     return {
       'x-user-id': userId,
       'x-user-role': role,
@@ -31,13 +31,13 @@ export class IntegrationTestHelper {
     };
   }
 
-  static async waitForAsync(ms: number = 100) {
+  static async waitForAsync(ms = 100) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   static async retryRequest(
     requestFn: () => Promise<any>,
-    maxRetries: number = 3,
+    maxRetries = 3,
   ) {
     let lastError;
 

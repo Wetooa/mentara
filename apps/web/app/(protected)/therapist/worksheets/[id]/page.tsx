@@ -65,9 +65,10 @@ function WorksheetDetailClient({ worksheetId }: { worksheetId: string }) {
         const transformedTask: Task = {
           id: data.id,
           title: data.title,
-          patientName:
-            `${data.client.user.firstName} ${data.client.user.lastName}` ||
-            "Unassigned",
+          patientName: [data.client.user.firstName, data.client.user.lastName]
+            .filter(Boolean)
+            .join(" ")
+            .trim() || "Unassigned",
           date: data.dueDate,
           status: mapWorksheetStatusToTaskStatus(data.status),
           isCompleted:

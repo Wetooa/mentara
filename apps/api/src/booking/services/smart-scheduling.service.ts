@@ -36,7 +36,7 @@ export class SmartSchedulingService {
     therapistId: string,
     clientId: string,
     preferredTimes?: Array<{ start: Date; end: Date }>,
-    duration: number = 60,
+    duration = 60,
   ): Promise<SchedulingSuggestion> {
 
     // Get therapist availability

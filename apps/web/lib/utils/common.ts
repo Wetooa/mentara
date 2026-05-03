@@ -9,7 +9,7 @@
  * @param decimals Number of decimal places (default: 2)
  * @returns Formatted file size string
  */
-export function formatFileSize(bytes: number, decimals: number = 2): string {
+export function formatFileSize(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   
   const k = 1024;
@@ -25,7 +25,7 @@ export function formatFileSize(bytes: number, decimals: number = 2): string {
  * @param maxLength Maximum number of initials to return (default: 2)
  * @returns Uppercase initials string
  */
-export function getInitials(name: string, maxLength: number = 2): string {
+export function getInitials(name: string, maxLength = 2): string {
   if (!name) return "";
   
   return name
@@ -43,7 +43,7 @@ export function getInitials(name: string, maxLength: number = 2): string {
  * @param suffix Suffix to add when truncated (default: "...")
  * @returns Truncated text with suffix if needed
  */
-export function truncateText(text: string, maxLength: number, suffix: string = "..."): string {
+export function truncateText(text: string, maxLength: number, suffix = "..."): string {
   if (!text || text.length <= maxLength) return text;
   return text.slice(0, maxLength - suffix.length) + suffix;
 }
@@ -53,7 +53,7 @@ export function truncateText(text: string, maxLength: number, suffix: string = "
  * @param length Length of the ID (default: 8)
  * @returns Random alphanumeric string
  */
-export function generateId(length: number = 8): string {
+export function generateId(length = 8): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
   for (let i = 0; i < length; i++) {

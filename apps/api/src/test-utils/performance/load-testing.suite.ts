@@ -254,26 +254,22 @@ export class LoadTestingSuite {
       );
     }
 
-    try {
-      await requestBuilder.expect((res) => {
-        // Accept 2xx and 3xx status codes as successful
-        if (res.status >= 200 && res.status < 400) {
-          return;
-        }
-        // Accept 401/403 for auth endpoints as they might be testing invalid tokens
-        if (
-          (res.status === 401 || res.status === 403) &&
-          endpoint.requiresAuth
-        ) {
-          return;
-        }
-        throw new Error(`Unexpected status: ${res.status}`);
-      });
+    await requestBuilder.expect((res) => {
+      // Accept 2xx and 3xx status codes as successful
+      if (res.status >= 200 && res.status < 400) {
+        return;
+      }
+      // Accept 401/403 for auth endpoints as they might be testing invalid tokens
+      if (
+        (res.status === 401 || res.status === 403) &&
+        endpoint.requiresAuth
+      ) {
+        return;
+      }
+      throw new Error(`Unexpected status: ${res.status}`);
+    });
 
-      return performance.now() - startTime;
-    } catch (error) {
-      throw error;
-    }
+    return performance.now() - startTime;
   }
 
   /**

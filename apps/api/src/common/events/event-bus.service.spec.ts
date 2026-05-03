@@ -1179,7 +1179,9 @@ describe('EventBusService', () => {
           
           // Simulate some processing time
           const startTime = Date.now();
-          while (Date.now() - startTime < 1) {} // Brief processing
+          while (Date.now() - startTime < 1) {
+            void startTime;
+          }
           
           // Cleanup half the subscriptions
           for (let i = 0; i < subscriptionsPerCycle / 2; i++) {

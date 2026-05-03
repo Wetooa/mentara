@@ -68,7 +68,7 @@ export function ModerationQueue({
     }
   };
 
-  const truncateContent = (content: string, maxLength: number = 100) => {
+  const truncateContent = (content: string, maxLength = 100) => {
     if (content.length <= maxLength) return content;
     return content.slice(0, maxLength) + "...";
   };

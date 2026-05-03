@@ -7,7 +7,7 @@ export interface CreateCommunityDto {
   illnesses?: string[];
 }
 
-export interface UpdateCommunityDto extends Partial<CreateCommunityDto> {}
+export type UpdateCommunityDto = Partial<CreateCommunityDto>
 
 export interface CommunityIdParamDto {
   id: string;

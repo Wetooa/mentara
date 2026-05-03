@@ -115,7 +115,7 @@ export const RequireRole = (role: keyof typeof ROLE_HIERARCHY) =>
   Reflect.defineMetadata('min_role', role, Reflect);
 
 // Decorator to allow resource owner access
-export const AllowResourceOwner = (resourceIdParam: string = 'id') =>
+export const AllowResourceOwner = (resourceIdParam = 'id') =>
   Reflect.defineMetadata('resource_owner_param', resourceIdParam, Reflect);
 
 @Injectable()

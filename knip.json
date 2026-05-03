@@ -1,0 +1,52 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "apps/api/src/main.ts",
+    "apps/api/src/health-check.ts",
+    "apps/web/app/**/*.{ts,tsx}",
+    "apps/web/middleware.ts",
+    "apps/landing/src/routes/**/*.{ts,svelte}",
+    "libs/api-client/src/index.ts"
+  ],
+  "project": [
+    "{apps,libs}/**/*.{ts,tsx}",
+    "apps/landing/**/*.{ts,svelte}"
+  ],
+  "ignoreFiles": [
+    "apps/api/src/constants/questionnaires/**",
+    "apps/api/src/test-utils/**",
+    "apps/web/components/**",
+    "apps/web/hooks/**",
+    "apps/landing/src/lib/**",
+    "**/*.{d.ts,config.ts,config.js}",
+    "apps/web/test/**",
+    "apps/landing/test/**"
+  ],
+  "ignoreDependencies": [
+    "@aws-sdk/client-s3",
+    "@emailjs/browser",
+    "@fortawesome/fontawesome-svg-core",
+    "@fortawesome/free-solid-svg-icons",
+    "@fortawesome/react-fontawesome",
+    "@nestjs/cache-manager",
+    "@radix-ui/react-aspect-ratio",
+    "@radix-ui/react-context-menu",
+    "@radix-ui/react-hover-card",
+    "@radix-ui/react-icons",
+    "@radix-ui/react-menubar",
+    "@radix-ui/react-navigation-menu",
+    "@radix-ui/react-toggle",
+    "@radix-ui/react-toggle-group",
+    "@supabase/supabase-js",
+    "@types/multer",
+    "date-fns-tz",
+    "embla-carousel-react",
+    "emoji-picker-react",
+    "multer",
+    "next-client-cookies",
+    "react-error-boundary",
+    "react-icons"
+  ],
+  "nest": true,
+  "next": true
+}

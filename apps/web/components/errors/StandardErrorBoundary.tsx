@@ -68,7 +68,7 @@ const DEFAULT_ERROR_MESSAGES: Record<ErrorContext, string> = {
 
 export class StandardErrorBoundary extends Component<StandardErrorBoundaryProps, ErrorBoundaryState> {
   private errorHandler: StandardErrorHandler;
-  private maxRetries: number = 3;
+  private maxRetries = 3;
 
   constructor(props: StandardErrorBoundaryProps) {
     super(props);

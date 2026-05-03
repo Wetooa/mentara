@@ -221,7 +221,7 @@ export class RealTimeEventManager {
     // Update unread count
     this.queryClient.setQueryData(
       ['notifications', 'unreadCount'],
-      (oldCount: number = 0) => oldCount + 1
+      (oldCount = 0) => oldCount + 1
     );
 
     // Show toast notification
@@ -284,7 +284,7 @@ export class RealTimeEventManager {
         if (notification && !notification.isRead) {
           this.queryClient.setQueryData(
             ['notifications', 'unreadCount'],
-            (oldCount: number = 0) => Math.max(0, oldCount - 1)
+            (oldCount = 0) => Math.max(0, oldCount - 1)
           );
         }
         

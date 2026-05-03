@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { io, Socket } from 'socket.io-client';
 import { AppModule } from '../app.module';
 import { ConnectionManagerService } from './services/connection-manager.service';
-import { WebSocketAuthService } from './services/websocket-auth.service';
+import { WebSocketAuthService } from '../messaging/services/websocket-auth.service';
 
 describe('WebSocket Tests', () => {
   let app: INestApplication;

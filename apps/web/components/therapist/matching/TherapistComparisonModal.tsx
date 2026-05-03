@@ -117,7 +117,7 @@ export function TherapistComparisonModal({
     selectedTherapists.length === 0 || selectedTherapists.includes(t.id)
   );
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
+  const formatCurrency = (amount: number, currency = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,

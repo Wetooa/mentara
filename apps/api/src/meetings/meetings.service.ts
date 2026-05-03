@@ -322,7 +322,10 @@ export class MeetingsService {
    * Generate WebRTC meeting URL
    */
   private generateMeetingUrl(meetingId: string): string {
-    const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3000';
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      process.env.APP_URL ||
+      'http://localhost:10001';
     return `${frontendUrl}/meeting/${meetingId}`;
   }
 

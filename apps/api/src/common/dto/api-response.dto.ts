@@ -51,7 +51,7 @@ export class ApiResponseDto<T> implements ApiResponse<T> {
   path?: string;
   statusCode?: number;
 
-  constructor(data?: T, message?: string, success: boolean = true) {
+  constructor(data?: T, message?: string, success = true) {
     this.success = success;
     this.data = data;
     this.message = message;
@@ -103,7 +103,7 @@ export class PaginatedResponseDto<T> implements PaginatedResponse<T> {
     data: T[],
     meta: PaginationMeta,
     message?: string,
-    success: boolean = true
+    success = true
   ) {
     this.success = success;
     this.data = data;
@@ -164,7 +164,7 @@ export function createPaginationMeta(
  * Success response DTO for endpoints that only return a message
  */
 export class SuccessMessageDto implements ApiResponse<never> {
-  success: boolean = true;
+  success = true;
   message: string;
   timestamp: string;
 

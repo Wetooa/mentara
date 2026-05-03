@@ -354,7 +354,7 @@ export class AuthController {
       const { token } = result;
 
       // Determine frontend redirect URL based on environment
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:10001';
       const redirectUrl = `${frontendUrl}/sso-callback?token=${token}&role=${role}`;
 
       // Redirect to frontend with tokens in URL parameters
@@ -363,7 +363,7 @@ export class AuthController {
       console.error('Google OAuth callback error:', error);
 
       // Redirect to frontend with error
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:10001';
       const errorUrl = `${frontendUrl}/auth/sign-in?error=oauth_failed&provider=google`;
       return res.redirect(errorUrl);
     }
@@ -396,7 +396,7 @@ export class AuthController {
       const { token } = result;
 
       // Determine frontend redirect URL based on environment
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:10001';
       const redirectUrl = `${frontendUrl}/sso-callback?token=${token}&role=${role}`;
 
       // Redirect to frontend with tokens in URL parameters
@@ -405,7 +405,7 @@ export class AuthController {
       console.error('Microsoft OAuth callback error:', error);
 
       // Redirect to frontend with error
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:10001';
       const errorUrl = `${frontendUrl}/auth/sign-in?error=oauth_failed&provider=microsoft`;
       return res.redirect(errorUrl);
     }

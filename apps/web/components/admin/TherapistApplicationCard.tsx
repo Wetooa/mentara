@@ -23,14 +23,16 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ApprovalDialog } from './ApprovalDialog';
 import { RejectionDialog } from './RejectionDialog';
+import type { TherapistApplication } from '@/types/api/admin';
+import type { ApproveTherapistDto, RejectTherapistDto } from '@/types/api/admin';
 
 interface TherapistApplicationCardProps {
-  therapist: Record<string, unknown>;
+  therapist: TherapistApplication;
   isSelected: boolean;
   onSelect: (id: string, selected: boolean) => void;
   onViewDetails: () => void;
-  onApprove: (data: Record<string, unknown>) => void;
-  onReject: (data: Record<string, unknown>) => void;
+  onApprove: (data: ApproveTherapistDto) => void;
+  onReject: (data: RejectTherapistDto) => void;
   isProcessing?: boolean;
 }
 

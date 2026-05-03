@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { SITE_CONFIG } from '@/lib/metadata';
 
 // Skip API routes during static export
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {

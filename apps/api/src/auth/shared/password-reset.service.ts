@@ -219,7 +219,7 @@ export class PasswordResetService {
     }
 
     // Check for at least one special character
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (!/[!@#$%^&*()_+\-=\u005B\u005D{};':"\\|,.<>/]/.test(password)) {
       throw new BadRequestException(
         'Password must contain at least one special character',
       );

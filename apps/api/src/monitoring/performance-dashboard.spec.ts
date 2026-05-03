@@ -15,8 +15,6 @@ describe('PerformanceDashboard', () => {
   let dashboard: PerformanceDashboard;
   let originalSetInterval: typeof setInterval;
   let originalClearInterval: typeof clearInterval;
-  let mockDate: Date;
-
   // Mock data structures
   const mockDate = new Date('2024-01-15T10:00:00Z');
 

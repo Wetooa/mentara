@@ -32,7 +32,7 @@ export class PricingService {
   async calculateSessionPrice(
     therapistId: string,
     duration: number,
-    isInitialConsultation: boolean = false,
+    isInitialConsultation = false,
     txClient?: any,
   ): Promise<number> {
     const client = txClient ?? this.prisma;

@@ -65,9 +65,11 @@ interface MeetingControlData {
   namespace: '/meetings',
   cors: {
     origin: [
-      process.env.FRONTEND_URL || 'http://localhost:3000',
-      'http://localhost:3000',  // Explicit fallback
-      'http://127.0.0.1:3000',  // Alternative localhost
+      ...(process.env.FRONTEND_URL?.split(',')
+        .map((s) => s.trim())
+        .filter(Boolean) ?? []),
+      'http://localhost:10001',
+      'http://127.0.0.1:10001',
     ],
     methods: ['GET', 'POST'],
     credentials: true,

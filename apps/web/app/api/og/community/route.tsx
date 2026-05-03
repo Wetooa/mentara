@@ -2,8 +2,8 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { SITE_CONFIG } from '@/lib/metadata';
 
-// Skip API routes during static export
-export const dynamic = 'force-static';
+// Avoid static prerender at build time (Satori layout constraints on nested divs).
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
             height: '100%',
             width: '100%',
             display: 'flex',
+            flexDirection: 'column',
             background: theme.bg,
             position: 'relative',
             fontFamily: 'system-ui, sans-serif',
@@ -190,7 +191,13 @@ export async function GET(request: NextRequest) {
                 }}
               >
                 <span style={{ fontSize: '32px' }}>👥</span>
-                <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <div
                     style={{
                       fontSize: '32px',

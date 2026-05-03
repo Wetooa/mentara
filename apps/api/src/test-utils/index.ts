@@ -131,8 +131,8 @@ export const expectToThrowAsync = async (
 
 export const waitForCondition = async (
   condition: () => boolean,
-  timeoutMs: number = 5000,
-  intervalMs: number = 100,
+  timeoutMs = 5000,
+  intervalMs = 100,
 ): Promise<void> => {
   const startTime = Date.now();
   while (!condition()) {

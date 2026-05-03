@@ -109,7 +109,7 @@ export class AuthResponseDto implements AuthResponse {
   token: string;
   message: string;
 
-  constructor(user: any, token: string, message: string = 'Authentication successful') {
+  constructor(user: any, token: string, message = 'Authentication successful') {
     // Create AuthUser object with required fields
     this.user = {
       id: user.id,

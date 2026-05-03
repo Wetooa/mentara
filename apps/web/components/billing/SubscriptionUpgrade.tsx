@@ -102,7 +102,7 @@ export function SubscriptionUpgrade({
   const currentPlan = subscription?.plan;
   const selectedPlanData = filteredPlans.find(plan => plan.id === selectedPlan);
 
-  const formatCurrency = (amount: number, currency: string = "USD") => {
+  const formatCurrency = (amount: number, currency = "USD") => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: currency,

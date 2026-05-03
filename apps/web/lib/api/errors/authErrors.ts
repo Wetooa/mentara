@@ -53,6 +53,6 @@ export const createAuthError = {
   otpExpired: (details?: any) => 
     new AuthError(AuthErrorType.OTP_EXPIRED, 'OTP code has expired', details),
   
-  unknown: (message: string = 'An unknown error occurred', details?: any) => 
+  unknown: (message = 'An unknown error occurred', details?: any) => 
     new AuthError(AuthErrorType.UNKNOWN_ERROR, message, details),
 };

@@ -128,7 +128,7 @@ export const useCancelSubscription = () => {
   const queryClient = useQueryClient();
 
   return useBillingMutation(
-    (immediately: boolean = false) =>
+    (immediately = false) =>
       api.billing.cancelSubscription(immediately),
     {
       errorMessage: "Failed to cancel subscription",

@@ -12,7 +12,7 @@ export const GetUser = createParamDecorator(
     const request: Request = ctx.switchToHttp().getRequest();
     const user = request.user as Record<string, unknown> | undefined;
     if (data === undefined) {
-      return request.user as AuthenticatedUser;
+      return request.user as unknown as AuthenticatedUser;
     }
     if (data === 'id' || data === 'userId') {
       return user?.userId as string;
@@ -20,6 +20,6 @@ export const GetUser = createParamDecorator(
     if (typeof data === 'string') {
       return user?.[data];
     }
-    return request.user as AuthenticatedUser;
+    return request.user as unknown as AuthenticatedUser;
   },
 );

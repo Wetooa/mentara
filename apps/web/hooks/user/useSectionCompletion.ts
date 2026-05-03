@@ -37,7 +37,7 @@ export function useSectionCompletion(
       let total = section.fields.length;
 
       switch (section.id) {
-        case "basicInfo":
+        case "basicInfo": {
           const basicFields = [
             "firstName",
             "lastName", 
@@ -51,8 +51,9 @@ export function useSectionCompletion(
           }).length;
           total = basicFields.length;
           break;
+        }
 
-        case "licenseInfo":
+        case "licenseInfo": {
           const licenseRequiredFields = [
             "professionalLicenseType",
             "isPRCLicensed",
@@ -100,8 +101,9 @@ export function useSectionCompletion(
 
           completed = licenseCompleted;
           break;
+        }
 
-        case "teletherapy":
+        case "teletherapy": {
           const teletherapyFields = [
             "providedOnlineTherapyBefore",
             "comfortableUsingVideoConferencing",
@@ -113,8 +115,9 @@ export function useSectionCompletion(
           ).length;
           total = teletherapyFields.length;
           break;
+        }
 
-        case "professionalProfile":
+        case "professionalProfile": {
           const professionalRequiredFields = [
             "areasOfExpertise",
             "assessmentTools",
@@ -145,8 +148,9 @@ export function useSectionCompletion(
           completed = profCompleted;
           total = professionalRequiredFields.length;
           break;
+        }
 
-        case "availability":
+        case "availability": {
           const availabilityRequiredFields = [
             "weeklyAvailability",
             "preferredSessionLength",
@@ -166,8 +170,9 @@ export function useSectionCompletion(
           completed = availCompleted;
           total = availabilityRequiredFields.length;
           break;
+        }
 
-        case "documents":
+        case "documents": {
           const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"];
           const uploadedDocs = requiredDocs.filter(
             (doc) => documents[doc]?.length > 0
@@ -176,6 +181,7 @@ export function useSectionCompletion(
           completed = uploadedDocs;
           total = requiredDocs.length;
           break;
+        }
 
         case "review":
           completed = values.consentChecked ? 1 : 0;

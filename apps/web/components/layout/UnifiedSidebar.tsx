@@ -53,7 +53,6 @@ export function UnifiedSidebar({
   useEffect(() => {
     const initialExpanded = getStorageItem(key, defaultExpanded);
     onToggle?.(initialExpanded);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
   // Save sidebar state to localStorage

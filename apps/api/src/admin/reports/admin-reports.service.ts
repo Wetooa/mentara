@@ -474,7 +474,7 @@ export class AdminReportsService {
         }
 
         const reportedUserId = report.post?.userId || report.comment?.userId || report.reportedUserId;
-        let actionResult: any = { success: true, action };
+        const actionResult: any = { success: true, action };
 
         switch (action) {
           case 'ban_user':

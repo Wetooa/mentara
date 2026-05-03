@@ -61,7 +61,7 @@ export class EmailService {
     name: string,
     subject: string,
     otpCode?: string,
-    expiresIn: string = '10 minutes',
+    expiresIn = '10 minutes',
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
@@ -211,7 +211,7 @@ export class EmailService {
     email: string,
     name: string,
     subject: string,
-    password: string = '',
+    password = '',
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
@@ -1031,7 +1031,7 @@ export class EmailService {
   /**
    * Generate OTP code
    */
-  generateOtp(length: number = 6): string {
+  generateOtp(length = 6): string {
     const digits = '0123456789';
     let otp = '';
     for (let i = 0; i < length; i++) {

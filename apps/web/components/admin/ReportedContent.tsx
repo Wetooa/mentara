@@ -49,9 +49,43 @@ import {
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
 
+interface AdminModerationReport {
+  id: string;
+  type?: string;
+  reporterName?: string;
+  reportedUserName?: string;
+  reportedUserIsTherapist?: boolean;
+  reason?: string;
+  dateReported?: string;
+  status?: string;
+  postTitle?: string;
+  commentContent?: string;
+}
+
+function parseReportsList(data: unknown): AdminModerationReport[] {
+  if (
+    data &&
+    typeof data === "object" &&
+    "reports" in data &&
+    Array.isArray((data as { reports: unknown }).reports)
+  ) {
+    return (data as { reports: AdminModerationReport[] }).reports;
+  }
+  return [];
+}
+
+function getReportsTotalCount(data: unknown): number {
+  if (data && typeof data === "object" && "pagination" in data) {
+    const p = (data as { pagination?: { total?: number } }).pagination;
+    return p?.total ?? 0;
+  }
+  return 0;
+}
+
 export function ReportedContent() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [selectedReport, setSelectedReport] =
+    useState<AdminModerationReport | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<
@@ -74,8 +108,8 @@ export function ReportedContent() {
     isLoading: isActionLoading,
   } = useReportActions();
 
-  const reports = (reportsData && typeof reportsData === 'object' && 'reports' in reportsData) ? (reportsData as any).reports : [];
-  const totalCount = reportsData?.pagination?.total || 0;
+  const reports = parseReportsList(reportsData);
+  const totalCount = getReportsTotalCount(reportsData);
 
   const formatDate = (dateString: string) => {
     try {
@@ -90,7 +124,7 @@ export function ReportedContent() {
 
     const searchLower = searchTerm.toLowerCase();
     return reports.filter(
-      (report: any) =>
+      (report: AdminModerationReport) =>
         report.reportedUserName?.toLowerCase().includes(searchLower) ||
         report.reporterName?.toLowerCase().includes(searchLower) ||
         report.reason?.toLowerCase().includes(searchLower) ||
@@ -216,7 +250,7 @@ export function ReportedContent() {
             <h3 className="text-2xl font-bold mt-1">
               {isLoading
                 ? "..."
-                : reports.filter((r: any) => r.status === "pending").length}
+                : reports.filter((r: AdminModerationReport) => r.status === "pending").length}
             </h3>
           </CardContent>
         </Card>
@@ -227,7 +261,7 @@ export function ReportedContent() {
               {isLoading
                 ? "..."
                 : reports.filter(
-                    (r: any) =>
+                    (r: AdminModerationReport) =>
                       r.status === "resolved" || r.status === "reviewed"
                   ).length}
             </h3>
@@ -240,7 +274,7 @@ export function ReportedContent() {
               {isLoading
                 ? "..."
                 : reports.filter(
-                    (r: any) =>
+                    (r: AdminModerationReport) =>
                       r.reason?.toLowerCase().includes("harassment") ||
                       r.reason?.toLowerCase().includes("impersonation")
                   ).length}
@@ -286,7 +320,7 @@ export function ReportedContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredReports.map((report: any) => (
+                    {filteredReports.map((report: AdminModerationReport) => (
                       <TableRow key={report.id}>
                         <TableCell>
                           <Badge variant="outline" className="capitalize">
@@ -360,8 +394,8 @@ export function ReportedContent() {
                   </TableHeader>
                   <TableBody>
                     {filteredReports
-                      .filter((r: any) => r.type === "post")
-                      .map((report: any) => (
+                      .filter((r: AdminModerationReport) => r.type === "post")
+                      .map((report: AdminModerationReport) => (
                         <TableRow key={report.id}>
                           <TableCell>{report.reporterName}</TableCell>
                           <TableCell>{report.reportedUserName}</TableCell>
@@ -411,8 +445,8 @@ export function ReportedContent() {
                   </TableHeader>
                   <TableBody>
                     {filteredReports
-                      .filter((r: any) => r.type === "comment")
-                      .map((report: any) => (
+                      .filter((r: AdminModerationReport) => r.type === "comment")
+                      .map((report: AdminModerationReport) => (
                         <TableRow key={report.id}>
                           <TableCell>{report.reporterName}</TableCell>
                           <TableCell>{report.reportedUserName}</TableCell>
@@ -462,8 +496,8 @@ export function ReportedContent() {
                   </TableHeader>
                   <TableBody>
                     {filteredReports
-                      .filter((r: any) => r.type === "user")
-                      .map((report: any) => (
+                      .filter((r: AdminModerationReport) => r.type === "user")
+                      .map((report: AdminModerationReport) => (
                         <TableRow key={report.id}>
                           <TableCell>{report.reporterName}</TableCell>
                           <TableCell>{report.reportedUserName}</TableCell>
@@ -513,8 +547,8 @@ export function ReportedContent() {
                   </TableHeader>
                   <TableBody>
                     {filteredReports
-                      .filter((r: any) => r.type === "therapist")
-                      .map((report: any) => (
+                      .filter((r: AdminModerationReport) => r.type === "therapist")
+                      .map((report: AdminModerationReport) => (
                         <TableRow key={report.id}>
                           <TableCell>{report.reporterName}</TableCell>
                           <TableCell>{report.reportedUserName}</TableCell>

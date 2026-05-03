@@ -448,7 +448,7 @@ export class BillingService {
     }
 
     // Handle insurance payment with coverage calculation
-    let paymentAmount = data.amount;
+    const paymentAmount = data.amount;
     let insuranceAmount = 0;
     let clientAmount = 0;
     let coverageBreakdown: any = null;
@@ -481,11 +481,12 @@ export class BillingService {
           clientAmount = coverageDetails.copayAmount || 0;
           insuranceAmount = paymentAmount - clientAmount;
           break;
-        case 'PERCENTAGE':
+        case 'PERCENTAGE': {
           const coveragePct = coverageDetails.coveragePercentage || 0;
           insuranceAmount = (paymentAmount * coveragePct) / 100;
           clientAmount = paymentAmount - insuranceAmount;
           break;
+        }
         default:
           throw new BadRequestException('Invalid coverage type');
       }

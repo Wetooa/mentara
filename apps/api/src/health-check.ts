@@ -137,7 +137,8 @@ class HealthCheckService {
 
   private async checkServerHealth(): Promise<boolean> {
     return new Promise((resolve) => {
-      const req = http.get('http://localhost:3000/health', (res) => {
+      const port = process.env.PORT || '10000';
+      const req = http.get(`http://127.0.0.1:${port}/api/health`, (res) => {
         resolve(res.statusCode === 200);
       });
 

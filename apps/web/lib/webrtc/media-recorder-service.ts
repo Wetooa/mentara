@@ -235,7 +235,7 @@ export class MediaRecorderService {
   /**
    * Download the recorded video
    */
-  static downloadRecording(blob: Blob, filename: string = 'meeting-recording.webm'): void {
+  static downloadRecording(blob: Blob, filename = 'meeting-recording.webm'): void {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

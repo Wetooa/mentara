@@ -56,8 +56,20 @@ export default function ReportedPostsPage() {
   });
   const { banUser, restrictUser, deleteContent, dismissReport, isLoading: isActionLoading } = useReportActions();
 
-  const reports = (reportsData && typeof reportsData === 'object' && 'reports' in reportsData) ? (reportsData as any).reports : [];
-  const totalCount = reportsData?.pagination?.total || 0;
+  const reports =
+    reportsData &&
+    typeof reportsData === "object" &&
+    "reports" in reportsData &&
+    Array.isArray((reportsData as { reports: unknown }).reports)
+      ? (reportsData as { reports: Record<string, unknown>[] }).reports
+      : [];
+  const totalCount =
+    reportsData &&
+    typeof reportsData === "object" &&
+    "pagination" in reportsData
+      ? (reportsData as { pagination?: { total?: number } }).pagination?.total ??
+        0
+      : 0;
 
   const formatDate = (dateString: string) => {
     try {

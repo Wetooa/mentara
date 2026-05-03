@@ -24,7 +24,7 @@ export class AdminAuthService {
     password: string,
     firstName: string,
     lastName: string,
-    adminLevel: string = 'admin',
+    adminLevel = 'admin',
     permissions: string[] = [],
   ) {
     // Check if email is available

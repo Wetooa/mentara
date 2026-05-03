@@ -135,7 +135,7 @@ export function isSameSender(message1: Message, message2: Message): boolean {
 export function shouldGroupMessages(
   message1: Message, 
   message2: Message, 
-  maxGapMinutes: number = 5
+  maxGapMinutes = 5
 ): boolean {
   if (!isSameSender(message1, message2)) {
     return false;

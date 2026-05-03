@@ -35,8 +35,8 @@ import { useRef, useEffect, useState } from "react";
 // Custom hook for animated counter
 const useAnimatedCounter = (
   end: number,
-  duration: number = 2000,
-  start: number = 0
+  duration = 2000,
+  start = 0
 ) => {
   const [count, setCount] = useState(start);
   const [isVisible, setIsVisible] = useState(false);

@@ -43,7 +43,7 @@ export class MockBuilder {
   /**
    * Creates mock authentication context
    */
-  static createAuthContext(role: string = 'client', userId?: string) {
+  static createAuthContext(role = 'client', userId?: string) {
     return {
       userId:
         userId ||
@@ -58,7 +58,7 @@ export class MockBuilder {
   /**
    * Creates mock request object with authentication
    */
-  static createMockRequest(role: string = 'client', userId?: string) {
+  static createMockRequest(role = 'client', userId?: string) {
     const authContext = this.createAuthContext(role, userId);
     return {
       user: authContext,
@@ -286,7 +286,7 @@ export class PerformanceTestUtils {
    */
   static async benchmarkFunction<T>(
     fn: () => Promise<T>,
-    iterations: number = 10,
+    iterations = 10,
   ): Promise<{
     averageDuration: number;
     minDuration: number;
@@ -340,7 +340,7 @@ export class IntegrationTestHelpers {
   /**
    * Creates a full request context for integration tests
    */
-  static createFullRequestContext(role: string = 'client') {
+  static createFullRequestContext(role = 'client') {
     return {
       user: MockBuilder.createAuthContext(role),
       request: MockBuilder.createMockRequest(role),
@@ -355,7 +355,7 @@ export class IntegrationTestHelpers {
   /**
    * Simulates a complete authentication flow
    */
-  static async simulateAuthFlow(role: string = 'client') {
+  static async simulateAuthFlow(role = 'client') {
     const authContext = MockBuilder.createAuthContext(role);
 
     // Mock the authentication process

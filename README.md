@@ -31,37 +31,33 @@ Mentara is a comprehensive mental health platform that connects patients with th
 - **Real-time**: Socket.io Client 4.8.1
 - **Video**: Simple Peer 9.11.1 (WebRTC)
 
-### Backend (mentara-api)
+### Backend (`apps/api` — mentara-api)
+- **Monorepo tooling**: Nx 22.x
 - **Framework**: NestJS 11.0.1
-- **Language**: TypeScript 5.7.3
+- **Language**: TypeScript
 - **Database ORM**: Prisma 6.19.0
 - **Database**: PostgreSQL (via Supabase)
 - **Authentication**: JWT (Passport.js 0.7.0)
 - **Real-time**: Socket.io 4.8.1
 - **File Upload**: Multer 1.4.5
 - **Validation**: class-validator 0.14.2, Zod 4.1.13
-- **Caching**: Redis 5.10.0
-- **Payment**: Stripe 18.3.0
+- **Billing**: in-app module (legacy Stripe integration removed from the codebase; add `STRIPE_*` env vars only if you reintroduce processing)
 
-### AI Service (ml-patient-evaluator-api)
-- **Framework**: Flask 3.1.1
-- **Language**: Python 3.11+
-- **ML Framework**: PyTorch 2.7.1
-- **Scientific Computing**: NumPy 2.2.6
-- **Testing**: pytest 8.0.0
+### AI / pre-assessment
+- The API integrates **Ollama**, **SambaNova**, or **Gemini** via environment variables (see [`.env.example`](.env.example)). There is **no** Flask microservice in this repository; a separate ML repo can be added later and called via `AI_SERVICE_URL` if you proxy features through the backend.
 
 ### Infrastructure
 - **Database**: Supabase PostgreSQL
 - **File Storage**: Supabase Storage
-- **Caching**: Redis
-- **Containerization**: Docker & Docker Compose
+- **Optional**: Redis, Docker (not required for local dev)
+- **Containerization**: Docker (optional; compose files may live per-app)
 
 ## 🚀 Quick Start (Development)
 
 ### Prerequisites
 
-- Node.js 18+ and npm/bun
-- Python 3.11+ with pip
+- Node.js 18+ and npm (or pnpm/bun)
+- Python 3.11+ (optional; only for scripts under `questionnaires/`)
 - Docker and Docker Compose (optional)
 - PostgreSQL client tools (for database exports)
 - Supabase account (for database)
@@ -74,66 +70,53 @@ git clone <repository-url>
 cd mentara
 ```
 
-2. **Install dependencies**
+2. **Install dependencies (once, at the repo root)**
 
 ```bash
-# Backend API
-cd mentara-api
+cd mentara
 npm install
-
-# Frontend
-cd ../mentara-web
-npm install
-
-# AI Service
-cd ../ml-patient-evaluator-api
-pip install -r requirements.txt
 ```
+
+`postinstall` runs `prisma generate` for `apps/api/prisma`. If `libs/api-client` types are missing, run `npm run generate:api` (Orval) so `mentara-web` and `api-client` builds can resolve generated modules.
 
 3. **Configure environment variables**
 
 ```bash
-# Backend - Copy and configure .env
-cd mentara-api
 cp .env.example .env
-# Edit .env with your Supabase credentials
+# Edit .env: DATABASE_URL, JWT_SECRET, OAuth, Supabase, and Next public URLs (see comments in .env.example)
 
-# Frontend - Copy and configure .env.local
-cd ../mentara-web
-cp .env.example .env.local
-# Edit .env.local with API endpoints
+# Optional: override only the web app
+# cp .env.example apps/web/.env.local
 ```
 
 4. **Setup database**
 
 ```bash
-cd mentara-api
-npm run db:generate  # Generate Prisma client
-npm run db:migrate   # Run migrations
-npm run db:seed      # Seed with test data
+npm run db:generate
+npm run db:migrate
+npm run db:seed   # optional test data
 ```
 
 5. **Start development servers**
 
 ```bash
-# Terminal 1: Backend API (port 10000)
-cd mentara-api
-npm run start:dev
+# Terminal 1: Nest API (default http://localhost:10000, /api prefix)
+npm run api
 
-# Terminal 2: Frontend (port 10001)
-cd mentara-web
-npm run dev
+# Terminal 2: Next.js app (http://localhost:10001)
+npm run web
 
-# Terminal 3: AI Service (port 10002)
-cd ml-patient-evaluator-api
-python api.py
+# Terminal 3 (optional): marketing landing (SvelteKit)
+npm run landing
 ```
+
+Set `PORT=10000` for the API and `NEXT_PUBLIC_API_URL=http://localhost:10000/api` for the web app unless you change ports.
 
 ### Service Endpoints
 
-- **Web Frontend**: http://localhost:10001
-- **Backend API**: http://localhost:10000
-- **AI Patient Evaluation**: http://localhost:10002
+- **Web app**: http://localhost:10001
+- **API (REST + Swagger)**: http://localhost:10000/api and http://localhost:10000/api/docs
+- **Pre-assessment / LLM**: configure `OLLAMA_BASE_URL` or cloud keys; optional external service URL in `AI_SERVICE_URL`
 
 ## 🧪 Test Credentials
 
@@ -168,9 +151,9 @@ All test accounts use the password: **`password123`**
 #### Production Build
 
 ```bash
-cd mentara-web
-npm run build
-npm run start
+cd mentara   # repository root
+npm run build:web
+npx nx start mentara-web
 ```
 
 #### Environment Variables
@@ -186,11 +169,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 #### Docker Deployment
 
-```bash
-cd mentara-web
-docker build -t mentara-web .
-docker run -p 10001:3000 --env-file .env.production mentara-web
-```
+Use the `apps/web` Dockerfile if present, from the repository root, and pass the same `NEXT_PUBLIC_*` variables as in local dev.
 
 #### Platform-Specific Deployment
 
@@ -203,38 +182,36 @@ docker run -p 10001:3000 --env-file .env.production mentara-web
 #### Production Build
 
 ```bash
-cd mentara-api
-npm run build
-npm run start:prod
+cd mentara
+npm run build:api
+npx nx start mentara-api
 ```
 
 #### Environment Variables
 
-Ensure `.env` contains:
+Ensure `.env` at the repo root (or your host’s secret store) matches [`apps/api/src/config/env-validation.ts`](apps/api/src/config/env-validation.ts). Example keys:
 
 ```bash
 DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
-DIRECT_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
-JWT_SECRET=your-jwt-secret
+JWT_SECRET=your-jwt-secret-at-least-32-chars
 JWT_EXPIRES_IN=7d
-REDIS_URL=redis://localhost:6379
 PORT=10000
 NODE_ENV=production
+FRONTEND_URL=https://your-frontend-origin
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_API_KEY=your-key
+# Plus Google/Microsoft OAuth secrets — see .env.example
 ```
 
 #### Docker Deployment
 
-```bash
-cd mentara-api
-docker build -t mentara-api .
-docker run -p 10000:10000 --env-file .env mentara-api
-```
+Build from `apps/api` if a Dockerfile exists there, publish port `10000`, and pass the same environment variables as locally.
 
 #### Database Migrations
 
 ```bash
-cd mentara-api
-npm run db:migrate  # Run migrations before starting server
+cd mentara
+npm run db:migrate
 ```
 
 #### Platform-Specific Deployment
@@ -244,57 +221,30 @@ npm run db:migrate  # Run migrations before starting server
 - **AWS/GCP**: Use Docker containers with ECS/Cloud Run
 - **Self-hosted**: Use Docker Compose or PM2 for process management
 
-### AI Service Deployment (ml-patient-evaluator-api)
+### Optional external AI service
 
-#### Production Run
-
-```bash
-cd ml-patient-evaluator-api
-pip install -r requirements.txt
-gunicorn -w 4 -b 0.0.0.0:10002 api:app
-```
-
-#### Docker Deployment
-
-```bash
-cd ml-patient-evaluator-api
-docker build -t ml-patient-evaluator-api .
-docker run -p 10002:10002 ml-patient-evaluator-api
-```
-
-#### Environment Variables
-
-```bash
-FLASK_ENV=production
-PORT=10002
-MODEL_PATH=models/mental_model_config2.pt
-```
+If you deploy a separate HTTP service (e.g. Flask or FastAPI), point the backend at it with `AI_SERVICE_URL` and ensure `FRONTEND_URL` / CORS allow your browser origin. This repository does not ship that service.
 
 ## 🏗️ Architecture
 
-### Microservices Structure
+### Repository layout (Nx monorepo)
 
 ```
 mentara/
-├── mentara-api/             # NestJS 11.x Backend (TypeScript)
-│   ├── docker-compose.yml   # Service-specific Docker setup
-│   ├── Dockerfile          # Container build configuration
-│   └── README.md          # Backend service documentation
-├── mentara-web/             # Next.js 16.0.10 Web Frontend (TypeScript)
-│   ├── docker-compose.yml   # Service-specific Docker setup
-│   ├── Dockerfile          # Container build configuration
-│   └── README.md          # Frontend service documentation
-├── ml-patient-evaluator-api/ # Flask ML Service (Python/PyTorch)
-│   ├── docker-compose.yml   # Service-specific Docker setup
-│   ├── Dockerfile          # Container build configuration
-│   └── README.md          # AI evaluation service documentation
-└── README.md              # Project overview and setup guide
+├── apps/
+│   ├── api/           # NestJS API (mentara-api)
+│   ├── web/           # Next.js app (mentara-web)
+│   └── landing/       # SvelteKit marketing site (optional)
+├── libs/
+│   └── api-client/    # Generated / shared API client (Orval)
+├── apps/api/prisma/   # Prisma schema & migrations
+├── .env.example       # Documented environment variables
+└── package.json       # Root scripts: npm run api | web | landing
 ```
 
 ### Database & Infrastructure
 
 - **Database**: Supabase PostgreSQL (Database as a Service)
-- **Caching**: Redis for session management and performance optimization
 - **File Storage**: Supabase Storage for file uploads and asset management
 - **Authentication**: JWT-based local authentication system
 - **Real-time**: WebSocket integration for messaging and live features
@@ -317,41 +267,23 @@ Exports are stored in `database/exports/` with timestamps.
 
 **Requirements:**
 - PostgreSQL client tools (`pg_dump`, `psql`)
-- `DATABASE_URL` configured in `mentara-api/.env`
+- `DATABASE_URL` configured in the root `.env`
 
 See [database/README.md](database/README.md) for detailed instructions.
 
 ## 🔧 Development Commands
 
-### Backend (mentara-api)
+Run from the **repository root** (`mentara/`):
 
 ```bash
-cd mentara-api
-npm run start:dev    # Start development server
-npm run build       # Build for production
-npm run start:prod  # Start production server
-npm run test        # Run tests
-npm run db:migrate  # Run database migrations
-npm run db:seed     # Seed database with test data
-```
-
-### Frontend (mentara-web)
-
-```bash
-cd mentara-web
-npm run dev         # Start development server
-npm run build       # Production build
-npm run start       # Start production server
-npm run lint        # Run ESLint
-npm run test        # Run tests
-```
-
-### AI Service (ml-patient-evaluator-api)
-
-```bash
-cd ml-patient-evaluator-api
-python api.py       # Start Flask server
-pytest             # Run tests
+npm run api          # NestJS watch mode (mentara-api)
+npm run web          # Next.js dev server on port 10001
+npm run landing      # SvelteKit landing app (optional)
+npm run build        # Build API + web
+npm run test         # Nx tests across projects
+npm run lint         # ESLint via Nx
+npm run db:migrate   # Prisma migrate (schema in apps/api/prisma)
+npm run db:seed      # Seed database
 ```
 
 ## 📚 Documentation
@@ -364,9 +296,7 @@ pytest             # Run tests
 
 ### Service-Specific Documentation
 
-- [Backend API Documentation](mentara-api/README.md)
-- [Frontend Documentation](mentara-web/README.md)
-- [AI Service Documentation](ml-patient-evaluator-api/README.md)
+- API and web share this README; Prisma schema lives under `apps/api/prisma/`.
 
 ## 🔒 Security & Privacy
 

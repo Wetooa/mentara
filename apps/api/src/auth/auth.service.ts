@@ -702,7 +702,7 @@ export class AuthService {
   async handleOAuthLogin(
     oauthUser: any,
     provider: string,
-    role: string = 'client',
+    role = 'client',
   ) {
     try {
       // Check if user exists

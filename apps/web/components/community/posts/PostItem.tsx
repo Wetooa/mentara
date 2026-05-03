@@ -213,7 +213,7 @@ export function PostItem({
     }
   };
 
-  const truncateContent = (content: string, maxLength: number = 300) => {
+  const truncateContent = (content: string, maxLength = 300) => {
     if (content.length <= maxLength) return content;
     return content.substring(0, maxLength) + '...';
   };
@@ -470,7 +470,6 @@ export function PostItem({
                             className="relative group cursor-pointer overflow-hidden rounded-lg border bg-muted"
                             onClick={() => window.open(url, '_blank')}
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={url}
                               alt={fileName}

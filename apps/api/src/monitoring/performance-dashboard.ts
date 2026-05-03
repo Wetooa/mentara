@@ -176,7 +176,7 @@ export class PerformanceDashboard extends EventEmitter {
     method: string,
     responseTime: number,
     statusCode: number,
-    databaseConnections: number = 0,
+    databaseConnections = 0,
   ): void {
     const metric: PerformanceMetrics = {
       timestamp: Date.now(),
@@ -233,7 +233,7 @@ export class PerformanceDashboard extends EventEmitter {
   /**
    * Get recent performance alerts
    */
-  getRecentAlerts(limit: number = 20): PerformanceAlert[] {
+  getRecentAlerts(limit = 20): PerformanceAlert[] {
     return this.alerts.slice(-limit);
   }
 
@@ -467,8 +467,8 @@ export class PerformanceDashboard extends EventEmitter {
     type: PerformanceAlert['type'],
     message: string,
     endpoint?: string,
-    value: number = 0,
-    threshold: number = 0,
+    value = 0,
+    threshold = 0,
   ): void {
     const alert: PerformanceAlert = {
       severity,

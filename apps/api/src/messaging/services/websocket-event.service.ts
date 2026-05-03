@@ -591,7 +591,7 @@ export class WebSocketEventService implements OnModuleInit {
    * Safely ensure a value is an array for iteration
    * Prevents "not iterable" errors by normalizing input to array format
    */
-  private ensureArray(value: any, fieldName: string = 'value'): string[] {
+  private ensureArray(value: any, fieldName = 'value'): string[] {
     try {
       // Handle null or undefined
       if (value == null) {

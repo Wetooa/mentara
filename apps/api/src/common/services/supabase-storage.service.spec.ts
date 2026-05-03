@@ -29,10 +29,10 @@ describe('SupabaseStorageService', () => {
   const mockUniqueFilename = 'unique-id-123.jpg';
 
   const createMockFile = (
-    originalname: string = 'test-file.jpg',
+    originalname = 'test-file.jpg',
     buffer: Buffer = Buffer.from('test file content'),
-    mimetype: string = 'image/jpeg',
-    size: number = 1024,
+    mimetype = 'image/jpeg',
+    size = 1024,
   ): Express.Multer.File => ({
     fieldname: 'file',
     originalname,

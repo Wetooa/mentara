@@ -8,7 +8,7 @@ export class MentaraApiError extends Error {
   public code?: string;
   public details?: unknown;
 
-  constructor(message: string, status: number = 500, code?: string, details?: unknown) {
+  constructor(message: string, status = 500, code?: string, details?: unknown) {
     super(message);
     this.name = 'MentaraApiError';
     this.status = status;

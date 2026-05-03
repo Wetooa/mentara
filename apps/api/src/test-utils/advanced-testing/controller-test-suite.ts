@@ -58,7 +58,9 @@ export class AdvancedControllerTestSuite {
   private prisma!: PrismaService;
   private moduleRef!: TestingModule;
 
-  constructor() {}
+  constructor() {
+    void 0;
+  }
 
   /**
    * Initialize the test suite

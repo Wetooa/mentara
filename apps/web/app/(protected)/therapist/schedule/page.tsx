@@ -113,12 +113,13 @@ export default function TherapistSchedulePage() {
 
   const getTabBadgeCount = (tab: string) => {
     switch (tab) {
-      case "requests":
+      case "requests": {
         const waitingMeetings = meetingsArray.filter(
-          (meeting) => meeting.status === "WAITING"
+          (meeting) => meeting.status === "WAITING",
         );
         return waitingMeetings.length;
-      case "overview":
+      }
+      case "overview": {
         const todayMeetings = meetingsArray.filter((meeting) => {
           try {
             const today = new Date();
@@ -132,6 +133,7 @@ export default function TherapistSchedulePage() {
           }
         });
         return todayMeetings.length;
+      }
       default:
         return null;
     }

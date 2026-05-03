@@ -186,7 +186,7 @@ export async function deleteFile(
 export async function getSignedUrl(
   bucket: string,
   path: string,
-  expiresIn: number = 3600
+  expiresIn = 3600
 ): Promise<string> {
   const config = await getSupabaseConfig();
   const url = `${config.url}/storage/v1/object/sign/${bucket}/${path}`;

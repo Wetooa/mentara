@@ -15,6 +15,37 @@ import {
 
 const logger = new Logger('Bootstrap');
 
+/** CSP connect-src entries derived from PORT, FRONTEND_URL, and local dev defaults */
+function getHelmetConnectSrc(): string[] {
+  const port = process.env.PORT || '10000';
+  const origins = new Set<string>([
+    "'self'",
+    `http://localhost:${port}`,
+    `ws://localhost:${port}`,
+    'wss://',
+  ]);
+  const addOrigin = (raw: string) => {
+    const u = raw.trim();
+    if (!u) return;
+    try {
+      const parsed = new URL(u);
+      origins.add(`${parsed.protocol}//${parsed.host}`);
+    } catch {
+      /* ignore invalid URLs */
+    }
+  };
+  if (process.env.FRONTEND_URL) {
+    for (const part of process.env.FRONTEND_URL.split(',')) {
+      addOrigin(part);
+    }
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    addOrigin('http://localhost:10001');
+    addOrigin('http://127.0.0.1:10001');
+  }
+  return [...origins];
+}
+
 /**
  * Check if a port is available
  */
@@ -132,7 +163,7 @@ async function bootstrap() {
           styleSrc: ["'self'", "'unsafe-inline'"],
           scriptSrc: ["'self'"],
           imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: ["'self'", 'http://localhost:10000', 'http://localhost:10001', 'ws://localhost:10000', 'wss://'],
+          connectSrc: getHelmetConnectSrc(),
           fontSrc: ["'self'"],
           objectSrc: ["'none'"],
           mediaSrc: ["'self'"],
@@ -186,7 +217,7 @@ async function bootstrap() {
   
   logger.log('Swagger documentation enabled at /api/docs');
 
-  const preferredPort = parseInt(process.env.PORT ?? '3001', 10);
+  const preferredPort = parseInt(process.env.PORT ?? '10000', 10);
   let actualPort = preferredPort;
   
   // In development, try to find an available port if the preferred one is busy

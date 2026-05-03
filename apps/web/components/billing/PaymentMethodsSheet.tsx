@@ -152,13 +152,15 @@ export function PaymentMethodsSheet({
         return method.bankName || "Bank Account";
       case "DIGITAL_WALLET":
         return method.walletAccountName || "Digital Wallet";
-      case "GCASH":
+      case "GCASH": {
         const gcashStatus = method.isVerified ? "Verified" : "Unverified";
         return `${method.gcashName} • ${gcashStatus}`;
-      case "MAYA":
+      }
+      case "MAYA": {
         const mayaStatus = method.mayaVerified ? "Verified" : "Unverified";
         return `${method.mayaName} • ${mayaStatus}`;
-      case "INSURANCE":
+      }
+      case "INSURANCE": {
         const insuranceStatus = method.insuranceVerified ? "Verified" : "Unverified";
         const policyDisplay = method.policyNumber ? `Policy: ${method.policyNumber.slice(-4)}` : "";
         const coverageInfo = method.coverageDetails?.coverageType === 'FULL' 
@@ -169,6 +171,7 @@ export function PaymentMethodsSheet({
           ? `${method.coverageDetails.coveragePercentage}% Coverage`
           : '';
         return `${policyDisplay}${policyDisplay && coverageInfo ? ' • ' : ''}${coverageInfo} • ${insuranceStatus}`;
+      }
       default:
         return "Payment Method";
     }

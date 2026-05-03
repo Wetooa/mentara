@@ -16,14 +16,12 @@ export interface JwtPayload {
   exp?: number;
 }
 
-// Extended Express Request interface
-declare global {
-  namespace Express {
-    interface Request {
-      userId?: string;
-      userRole?: string;
-      user?: User | undefined;
-    }
+// Extended Express Request interface (module augmentation avoids `namespace` lint rule)
+declare module 'express-serve-static-core' {
+  interface Request {
+    userId?: string;
+    userRole?: string;
+    user?: User | undefined;
   }
 }
 

@@ -180,7 +180,7 @@ export function createClientService(client: AxiosInstance) {
       locationPreference?: string;
       availabilityPreference?: string[];
       specialConsiderations?: string;
-    }): Promise<{ preferences: any }> {
+    }): Promise<{ preferences: Record<string, unknown> }> {
       const response = await client.post("/client/preferences", data);
       return response.data;
     },
@@ -200,7 +200,7 @@ export function createClientService(client: AxiosInstance) {
       locationPreference?: string;
       availabilityPreference?: string[];
       specialConsiderations?: string;
-    }): Promise<{ preferences: any }> {
+    }): Promise<{ preferences: Record<string, unknown> }> {
       const response = await client.put("/client/preferences", data);
       return response.data;
     },
@@ -209,7 +209,7 @@ export function createClientService(client: AxiosInstance) {
      * Get client preferences
      * GET /client/preferences
      */
-    async getPreferences(): Promise<{ preferences: any | null }> {
+    async getPreferences(): Promise<{ preferences: Record<string, unknown> | null }> {
       const response = await client.get("/client/preferences");
       return response.data;
     },
@@ -219,8 +219,8 @@ export function createClientService(client: AxiosInstance) {
      * This is a convenience method that saves preferences from onboarding
      */
     async completeOnboarding(data: {
-      profile?: any;
-      goals?: any;
+      profile?: Record<string, unknown>;
+      goals?: Record<string, unknown>;
       preferences?: {
         genderPreference?: string;
         agePreference?: string;

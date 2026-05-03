@@ -1,9 +1,19 @@
 import axios, { AxiosRequestConfig, AxiosError, AxiosInstance } from 'axios';
 
 // Minimalist client for the library to avoid forbidden app-to-lib imports
+export function normalizeApiBaseURL(raw: string): string {
+  let base = raw.replace(/\/$/, '');
+  if (!base.endsWith('/api')) {
+    base = base.endsWith('/') ? `${base}api` : `${base}/api`;
+  }
+  return base;
+}
+
 const createLibClient = (): AxiosInstance => {
-  // Orval generates paths with the /api prefix already, so we strip it from the baseURL
-  const baseURL = process.env['NEXT_PUBLIC_API_URL'] || 'http://localhost:10000';
+  // Match apps/web: NEXT_PUBLIC_API_URL should end with /api (Nest global prefix).
+  const baseURL = normalizeApiBaseURL(
+    process.env['NEXT_PUBLIC_API_URL'] || 'http://localhost:10000/api',
+  );
 
   return axios.create({
 

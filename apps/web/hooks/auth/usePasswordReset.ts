@@ -19,10 +19,7 @@ export function usePasswordReset() {
 
     try {
       const requestData: RequestPasswordResetDto = { email };
-      const response = await api.auth.requestPasswordReset(requestData);
-      return response;
-    } catch (error) {
-      throw error;
+      return await api.auth.requestPasswordReset(requestData);
     } finally {
       setIsLoading(false);
     }
@@ -35,10 +32,7 @@ export function usePasswordReset() {
     setIsValidatingToken(true);
 
     try {
-      const response = await api.auth.validateResetToken(token);
-      return response;
-    } catch (error) {
-      throw error;
+      return await api.auth.validateResetToken(token);
     } finally {
       setIsValidatingToken(false);
     }
@@ -56,10 +50,7 @@ export function usePasswordReset() {
         newPassword,
         confirmPassword,
       };
-      const response = await api.auth.resetPassword(resetData);
-      return response;
-    } catch (error) {
-      throw error;
+      return await api.auth.resetPassword(resetData);
     } finally {
       setIsLoading(false);
     }

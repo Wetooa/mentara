@@ -702,11 +702,12 @@ export function ClientBookingInterface({
                               clientAmount = coverageDetails.copayAmount || 0;
                               insuranceAmount = totalAmount - clientAmount;
                               break;
-                            case 'PERCENTAGE':
+                            case 'PERCENTAGE': {
                               const coveragePct = coverageDetails.coveragePercentage || 0;
                               insuranceAmount = (totalAmount * coveragePct) / 100;
                               clientAmount = totalAmount - insuranceAmount;
                               break;
+                            }
                           }
                         }
 

@@ -26,7 +26,7 @@ export class RateLimitGuard implements CanActivate {
   private readonly windowMs: number;
   private readonly maxRequests: number;
 
-  constructor(windowMs: number = 60000, maxRequests: number = 100) {
+  constructor(windowMs = 60000, maxRequests = 100) {
     this.windowMs = windowMs;
     this.maxRequests = maxRequests;
   }

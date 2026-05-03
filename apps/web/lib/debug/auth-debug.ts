@@ -115,7 +115,7 @@ export function clearAuthTokens(): void {
 /**
  * Test API request with current token
  */
-export async function testApiRequest(url: string = '/api/pre-assessment/chatbot/start'): Promise<{
+export async function testApiRequest(url = '/api/pre-assessment/chatbot/start'): Promise<{
   success: boolean;
   status: number;
   message: string;
@@ -133,8 +133,12 @@ export async function testApiRequest(url: string = '/api/pre-assessment/chatbot/
   }
   
   try {
-    const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const fullURL = url.startsWith('http') ? url : `${baseURL}${url}`;
+    const apiRoot =
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000/api';
+    const origin = apiRoot.replace(/\/api\/?$/, '');
+    const fullURL = url.startsWith('http')
+      ? url
+      : `${origin}${url.startsWith('/') ? url : `/${url}`}`;
     
     const response = await fetch(fullURL, {
       method: 'POST',

@@ -200,7 +200,6 @@ class SimpleWebSocket {
    */
   emit(event: string, data?: any): void {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:200',message:'emit() called',data:{event,hasSocket:!!this.socket,isConnected:this.socket?.connected,dataKeys:data?Object.keys(data):[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
     // #endregion
     if (!this.socket?.connected) {
       console.warn('⚠️ [WEBSOCKET DEBUG] Cannot emit event - WebSocket not connected:', event, data);
@@ -211,7 +210,6 @@ class SimpleWebSocket {
     console.log('📤 [WEBSOCKET DEBUG] Emitting event:', event, data);
     this.socket.emit(event, data);
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:209',message:'Event emitted successfully',data:{event},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
     // #endregion
   }
 
@@ -221,7 +219,6 @@ class SimpleWebSocket {
   on(event: string, callback: (...args: any[]) => void): () => void {
     // #region agent log
     const existingListenersForEvent = this.eventListeners.filter(l => l.event === event).length;
-    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:220',message:'on() called - registering event listener',data:{event,hasSocket:!!this.socket,isConnected:this.socket?.connected,listenerCount:this.eventListeners.length,existingListenersForEvent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
     // #endregion
       // Create wrapper function that we can properly remove later
       const wrapper = (...args: any[]) => {
@@ -231,7 +228,6 @@ class SimpleWebSocket {
         const conversationId = event === 'new_message' ? (args[0]?.message?.conversationId || args[0]?.conversationId) : undefined;
         const hasMessageProperty = event === 'new_message' ? !!args[0]?.message : undefined;
         const arg0Keys = args[0] ? Object.keys(args[0]) : [];
-        fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:227',message:'Event received on socket - calling callback',data:{event,argsCount:args.length,arg0Type:args[0]?.constructor?.name,listenersForThisEvent,messageId,conversationId,hasMessageProperty,arg0Keys,socketId:this.socket?.id,isConnected:this.socket?.connected,rawPayload:JSON.stringify(args[0])?.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'J'})}).catch(()=>{});
         // #endregion
         console.log('📨 [WEBSOCKET DEBUG] Event received:', event, args);
         if (event === 'new_message') {
@@ -244,7 +240,6 @@ class SimpleWebSocket {
         }
         callback(...args);
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:232',message:'Callback executed',data:{event,messageId,conversationId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'J'})}).catch(()=>{});
         // #endregion
       };
     
@@ -256,12 +251,10 @@ class SimpleWebSocket {
 
     if (this.socket?.connected) {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:235',message:'Socket exists and connected - attaching listener immediately',data:{event,socketId:this.socket.id,connected:this.socket.connected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       // #endregion
       this.socket.on(event, wrapper);
     } else {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:238',message:'Socket not available or not connected - listener will be attached on connect',data:{event},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       // #endregion
     }
 
@@ -383,7 +376,6 @@ class SimpleWebSocket {
     this.socket.on('connect', () => {
       // #region agent log
       const newMessageListeners = this.eventListeners.filter(l => l.event === 'new_message').length;
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:339',message:'Socket connected',data:{socketId:this.socket?.id,listenerCount:this.eventListeners.length,newMessageListenerCount:newMessageListeners,recovered:(this.socket as any).recovered,rooms:Array.from((this.socket as any).rooms||[])},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
       // #endregion
       console.log('✅ [WEBSOCKET DEBUG] Connected successfully to:', this.config.url + this.config.namespace);
       console.log('✅ [WEBSOCKET DEBUG] Socket ID:', this.socket?.id);
@@ -395,7 +387,6 @@ class SimpleWebSocket {
       }
       
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:351',message:'Re-attaching event listeners after connect',data:{listenerCount:this.eventListeners.length,events:this.eventListeners.map(l=>l.event)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       // #endregion
       // Re-attach existing event listeners when socket connects
       // Attach listeners that have wrappers but weren't attached yet (registered before connection)
@@ -406,12 +397,11 @@ class SimpleWebSocket {
           // Multiple attachments are safe - Socket.IO will call all listeners
           // #region agent log
           const existingListenersForEvent = this.eventListeners.filter(l => l.event === listener.event).length;
-          fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:356',message:'Re-attaching listener on connect',data:{event:listener.event,hasWrapper:!!listener.wrapper,existingListenersForEvent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
           // #endregion
           this.socket.on(listener.event, listener.wrapper);
           // #region agent log
           if (listener.event === 'new_message') {
-            fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:362',message:'new_message listener re-attached on connect',data:{socketId:this.socket.id,hasWrapper:!!listener.wrapper},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
+            void existingListenersForEvent;
           }
           // #endregion
         }
@@ -429,7 +419,6 @@ class SimpleWebSocket {
       // #region agent log
       // Check if this is a reconnection (had listeners before)
       const hadListenersBeforeConnect = this.eventListeners.length > 0;
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:357',message:'Socket connected - connection state updated',data:{socketId:this.socket?.id,hadListenersBeforeConnect,listenerCount:this.eventListeners.length,isReconnection:hadListenersBeforeConnect},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
       // #endregion
     });
 
@@ -585,14 +574,12 @@ export const createSocket = getNamespacedSocket;
  */
 export const connectSocket = (namespace?: string, token?: string): Promise<Socket> => {
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:542',message:'connectSocket() called',data:{namespace:namespace||'default',hasToken:!!token},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
   // #endregion
   const socketInstance = namespace ? getSocketInstance(namespace) : getMainSocket();
   
   return socketInstance.connect(token).then(() => {
     // #region agent log
     const state = socketInstance.getState();
-    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:546',message:'connectSocket() resolved',data:{namespace:namespace||'default',isConnected:state.isConnected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
     return socketInstance.getSocket() as Socket;
   });
@@ -636,7 +623,6 @@ export const getMeetingsSocket = (token?: string) => getNamespacedSocket('/meeti
 
 export const connectMessagingSocket = (token?: string) => {
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:586',message:'connectMessagingSocket() called',data:{hasToken:!!token},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
   // #endregion
   return connectSocket('/messaging', token);
 };
@@ -646,7 +632,7 @@ export const isMessagingConnected = () => isSocketConnected('/messaging');
 export const isMeetingsConnected = () => isSocketConnected('/meetings');
 
 // Enhanced reconnection with backoff strategy
-export const smartReconnect = async (namespace?: string, maxRetries: number = 5): Promise<boolean> => {
+export const smartReconnect = async (namespace?: string, maxRetries = 5): Promise<boolean> => {
   let attempt = 0;
   
   while (attempt < maxRetries) {
@@ -748,7 +734,6 @@ export const monitorConnectionHealth = (namespace?: string, callback?: (stats: a
 // Legacy compatibility exports for existing useMessaging hook
 export const connectWebSocket = (token?: string) => {
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:693',message:'connectWebSocket() called',data:{hasToken:!!token,namespace:'/messaging'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
   // #endregion
   return connectMessagingSocket(token);
 };
@@ -758,18 +743,15 @@ export const emitEvent = (event: string, data?: any) => {
   const socketInstance = getSocketInstance('/messaging');
   const state = socketInstance.getState();
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:726',message:'emitEvent called',data:{event,isConnected:state.isConnected,isConnecting:state.isConnecting,hasSocket:!!socketInstance.getSocket(),socketConnected:socketInstance.getSocket()?.connected,dataKeys:data?Object.keys(data):[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
   // #endregion
   // Check both the state and the actual socket connection
   // Use state.isConnected as primary check since it's more reliable
   if (state.isConnected || socketInstance.getSocket()?.connected) {
     socketInstance.emit(event, data);
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:731',message:'emitEvent - event emitted',data:{event},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
     // #endregion
   } else {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:734',message:'emitEvent - socket not connected, cannot emit',data:{event,stateIsConnected:state.isConnected,socketConnected:socketInstance.getSocket()?.connected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
     // #endregion
   }
 };
@@ -801,12 +783,10 @@ export const emitEventWithResponse = (event: string, data?: any, timeout = 10000
 };
 export const onEvent = (event: string, callback: (...args: any[]) => void) => {
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:727',message:'onEvent() called',data:{event,namespace:'/messaging'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
   // #endregion
   const socketInstance = getSocketInstance('/messaging');
   // #region agent log
   const state = socketInstance.getState();
-  fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'websocket.ts:730',message:'onEvent() - socket instance state',data:{event,isConnected:state.isConnected,isConnecting:state.isConnecting,hasSocket:!!socketInstance.getSocket()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
   // #endregion
   return socketInstance.on(event, callback);
 };

@@ -161,7 +161,10 @@ export class BookingService {
 
         // Generate meeting URL for video meetings (WebRTC)
         if (meeting.meetingType === 'video') {
-          const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3000';
+          const frontendUrl =
+            process.env.FRONTEND_URL ||
+            process.env.APP_URL ||
+            'http://localhost:10001';
           const meetingUrl = `${frontendUrl}/meeting/${meeting.id}`;
           
           // Update meeting with generated URL

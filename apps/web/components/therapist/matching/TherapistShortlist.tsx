@@ -94,7 +94,7 @@ export function TherapistShortlist({
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [therapistToRemove, setTherapistToRemove] = useState<string | null>(null);
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
+  const formatCurrency = (amount: number, currency = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,

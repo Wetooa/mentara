@@ -127,7 +127,7 @@ export class GroupSessionNotificationService {
   /**
    * Send reminder notifications (can be called via cron job)
    */
-  async sendSessionReminders(hoursBeforeSession: number = 24): Promise<void> {
+  async sendSessionReminders(hoursBeforeSession = 24): Promise<void> {
     const reminderTime = new Date(
       Date.now() + hoursBeforeSession * 60 * 60 * 1000,
     );

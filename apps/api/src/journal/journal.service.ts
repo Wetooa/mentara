@@ -33,8 +33,8 @@ export class JournalService {
 
   async findAll(
     userId: string,
-    page: number = 1,
-    limit: number = 20,
+    page = 1,
+    limit = 20,
   ): Promise<PaginatedResponseDto<ReturnType<typeof this.formatEntry>>> {
     const skip = (page - 1) * limit;
 

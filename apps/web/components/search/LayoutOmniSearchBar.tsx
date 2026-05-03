@@ -120,7 +120,7 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
       const userRole = user?.role || "client";
 
       switch (type) {
-        case "users":
+        case "users": {
           const userId = result.id || result.userId;
           if (userId) {
             if (userRole === "therapist") {
@@ -132,7 +132,8 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
             logger.error("LayoutOmniSearchBar", "User ID not found", { result });
           }
           break;
-        case "therapists":
+        }
+        case "therapists": {
           if (userRole === "client") {
             // Therapist search returns userId (therapist's userId) or user.id
             const therapistId = result.userId || result.user?.id || result.id;
@@ -143,7 +144,8 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
             }
           }
           break;
-        case "posts":
+        }
+        case "posts": {
           const postId = result.id;
           if (postId) {
             router.push(`/${userRole}/community/posts/${postId}`);
@@ -151,10 +153,11 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
             logger.error("LayoutOmniSearchBar", "Post ID not found", { result });
           }
           break;
+        }
         case "communities":
           router.push(`/${userRole}/community`);
           break;
-        case "worksheets":
+        case "worksheets": {
           const worksheetId = result.id;
           if (worksheetId) {
             if (userRole === "therapist") {
@@ -166,6 +169,7 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
             logger.error("LayoutOmniSearchBar", "Worksheet ID not found", { result });
           }
           break;
+        }
         default:
           logger.debug("LayoutOmniSearchBar", "Selected result", { result, type });
       }
@@ -340,13 +344,14 @@ export const LayoutOmniSearchBar: React.FC<LayoutOmniSearchBarProps> = ({
     
     switch (type) {
       case "users":
-      case "therapists":
+      case "therapists": {
         const name = type === "therapists" 
           ? `${item.user?.firstName || ''} ${item.user?.lastName || ''}`.toLowerCase()
           : `${item.firstName || ''} ${item.lastName || ''}`.toLowerCase();
         if (name.includes(lowerQuery)) return "name";
         if (item.email?.toLowerCase().includes(lowerQuery)) return "email";
         break;
+      }
       case "posts":
         if (item.title?.toLowerCase().includes(lowerQuery)) return "title";
         if (item.content?.toLowerCase().includes(lowerQuery)) return "content";

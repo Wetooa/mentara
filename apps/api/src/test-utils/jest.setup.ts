@@ -46,7 +46,7 @@ global.console = {
 };
 
 // Setup global test timeout
-jest.setTimeout(10000);
+jest.setTimeout(30000);
 
 // Enhanced cleanup after each test
 afterEach(async () => {

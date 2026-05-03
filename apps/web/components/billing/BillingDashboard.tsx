@@ -122,14 +122,14 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
+  const formatCurrency = (amount: number, currency = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
     }).format(amount / 100); // Stripe amounts are in cents
   };
 
-  const handleCancelSubscription = async (immediately: boolean = false) => {
+  const handleCancelSubscription = async (immediately = false) => {
     try {
       await cancelSubscriptionMutation.mutateAsync(immediately);
     } catch {

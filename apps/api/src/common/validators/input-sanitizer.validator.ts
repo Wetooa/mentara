@@ -22,8 +22,9 @@ export class InputSanitizerPipe implements PipeTransform {
     // Remove null bytes
     let sanitized = input.replace(/\0/g, '');
 
-    // Remove control characters except newlines and tabs
-    sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+    // Remove control characters except newlines and tabs (null bytes already stripped above)
+    // eslint-disable-next-line no-control-regex -- intentional removal of C0 control characters
+    sanitized = sanitized.replace(/[\x01-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
 
     // Trim whitespace
     sanitized = sanitized.trim();

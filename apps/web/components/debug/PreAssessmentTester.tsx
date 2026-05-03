@@ -115,7 +115,7 @@ export default function PreAssessmentTester() {
   }) => {
     try {
       // Get conversation insights if available
-      let conversationInsights = null;
+      const conversationInsights = null;
       const store = usePreAssessmentChecklistStore.getState();
       // Try to get session insights
       try {

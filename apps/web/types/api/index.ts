@@ -69,12 +69,14 @@ export * from './analytics';
 export * from './audit-logs';
 
 // Moderator types (from services)
+/* eslint-disable @nx/enforce-module-boundaries -- type re-exports mirror API client shapes */
 export {
   ModeratorDashboardStats,
   ContentModerationParams,
   UserModerationParams,
   AuditLogParams,
 } from '../../../lib/api/services/moderator';
+/* eslint-enable @nx/enforce-module-boundaries */
 
 // Filter types (eliminates Record<string, any> usage)
 export * from './filters';

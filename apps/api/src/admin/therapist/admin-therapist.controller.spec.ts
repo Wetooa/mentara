@@ -6,7 +6,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException, ForbiddenException, HttpException, HttpStatus } from '@nestjs/common';
 import { AdminTherapistController } from './admin-therapist.controller';
-import { AdminTherapistService } from '../services/admin-therapist.service';
+import { AdminTherapistService } from './admin-therapist.service';
 import { JwtAuthGuard } from '../../auth/core/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../auth/core/guards/admin-auth.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';

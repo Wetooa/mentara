@@ -50,8 +50,8 @@ export function BillingIntegration({
     isLoading: subscriptionLoading
   } = useSubscriptionStatus();
 
-  const { } = usePaymentMethods();
-  const { } = useInvoices({ limit: 5 });
+  usePaymentMethods();
+  useInvoices({ limit: 5 });
   
   const {
     defaultPaymentMethod,
@@ -63,7 +63,7 @@ export function BillingIntegration({
   const payInvoiceMutation = usePayInvoice();
   const createPortalSessionMutation = useCreatePortalSession();
 
-  const formatCurrency = (amount: number, currency: string = "USD") => {
+  const formatCurrency = (amount: number, currency = "USD") => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: currency,

@@ -79,8 +79,7 @@ const nextConfig: NextConfig = {
   // },
   devIndicators: false,
 
-  // Ignore TypeScript errors during build for production readiness
-  // Note: TypeScript errors should be fixed in future iterations
+  // Re-enable after resolving remaining admin/therapist detail response narrowings (see `nx run mentara-web:build` with this false).
   typescript: {
     ignoreBuildErrors: true,
   },

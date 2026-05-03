@@ -99,7 +99,7 @@ export default function AdminTherapistManagementPage() {
     }));
   };
 
-  const handleBulkApprove = () => {
+  const handleBulkApprove = async (): Promise<void> => {
     bulkApproveMutation.mutate(
       {
         therapistIds: selectedTherapists,
@@ -111,11 +111,14 @@ export default function AdminTherapistManagementPage() {
     );
   };
 
-  const handleBulkReject = () => {
+  const handleBulkReject = async (): Promise<void> => {
     bulkRejectMutation.mutate(
       {
         therapistIds: selectedTherapists,
-        data: { rejectionReason: "incomplete_documentation" },
+        data: {
+          reason: "Incomplete documentation",
+          rejectionReason: "incomplete_documentation",
+        },
       },
       {
         onSuccess: () => setSelectedTherapists([]),
@@ -327,7 +330,10 @@ export default function AdminTherapistManagementPage() {
                   } else if (status === "REJECTED") {
                     rejectMutation.mutate({
                       therapistId: id,
-                      data: { rejectionReason: "incomplete_documentation" },
+                      data: {
+          reason: "Incomplete documentation",
+          rejectionReason: "incomplete_documentation",
+        },
                     });
                   }
                   setDetailsTherapistId(null);

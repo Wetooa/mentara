@@ -33,8 +33,8 @@ export class SecurityGuard implements CanActivate {
     // Path traversal patterns
     /\.\.\//,
     /\.\.\\\\\\\\\\\\\\\\w+/,
-    /\.\.\%2f/i,
-    /\.\.\%5c/i,
+    /\.\.%2f/i,
+    /\.\.%5c/i,
   ];
 
   private readonly maxRequestSize = 10 * 1024 * 1024; // 10MB

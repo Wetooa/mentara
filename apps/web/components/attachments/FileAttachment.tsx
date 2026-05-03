@@ -399,7 +399,6 @@ export function FileAttachment({
                   <div className="flex-shrink-0">
                     {showPreview && isImage && file.url ? (
                       <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={file.url}
                           alt={file.name}

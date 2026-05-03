@@ -74,8 +74,8 @@ export function useAllTherapists() {
  * This version loads ALL therapists and then filters them on the client side
  */
 export function useAllTherapistsWithClientFilters(
-  searchQuery: string = "",
-  selectedFilter: string = "All"
+  searchQuery = "",
+  selectedFilter = "All"
 ) {
   // Get ALL therapists first
   const { therapists: allTherapists, isLoading, error, refetch } = useAllTherapists();

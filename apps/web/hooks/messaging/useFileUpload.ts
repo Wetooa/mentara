@@ -11,7 +11,7 @@ export interface UseFileUploadReturn {
   error: Error | null;
 }
 
-export function useFileUpload(bucket: string = "message-attachments"): UseFileUploadReturn {
+export function useFileUpload(bucket = "message-attachments"): UseFileUploadReturn {
   const { user } = useAuth();
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<Error | null>(null);

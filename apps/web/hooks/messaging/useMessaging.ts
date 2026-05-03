@@ -189,7 +189,6 @@ export function useMessaging(options: UseMessagingOptions = {}) {
       messageData: SendMessageDto; 
     }) => {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:190',message:'sendMessage mutationFn called',data:{conversationId,contentLength:messageData.content?.length,isConnected,hasJoinedRoom:false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
       // #endregion
       return api.messaging.sendMessage(conversationId, messageData);
     },
@@ -251,7 +250,6 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     },
     onSuccess: (newMessage, { conversationId }) => {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:245',message:'sendMessage onSuccess - message sent to backend',data:{messageId:newMessage.id,conversationId,isConnected,expectingWebSocketEvent:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
       // #endregion
       // Replace temp message with real message
       if (user?.id) {
@@ -300,11 +298,9 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   // This ensures we re-join rooms after reconnection
   useEffect(() => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:294',message:'useEffect for joinConversation triggered',data:{enableRealtime,conversationId,isConnected,connectionState:JSON.stringify(connectionState)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
     // #endregion
     if (!enableRealtime || !conversationId || !isConnected) {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:298',message:'Skipping join - conditions not met',data:{enableRealtime,conversationId,isConnected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
       // #endregion
       return;
     }
@@ -313,7 +309,6 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     // This is especially important after reconnection
     const joinTimeout = setTimeout(() => {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:305',message:'Calling joinConversationWS after delay',data:{conversationId,isConnected,delay:100},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
       // #endregion
       console.log('🚪 Joining conversation room:', conversationId);
       joinConversationWS(conversationId);
@@ -329,11 +324,9 @@ export function useMessaging(options: UseMessagingOptions = {}) {
   // Setup event listeners using subscription functions
   useEffect(() => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:301',message:'useEffect for event listeners triggered',data:{enableRealtime,conversationId,isConnected},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
     // #endregion
     if (!enableRealtime) {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:302',message:'Skipping event listeners - realtime disabled',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       // #endregion
       return;
     }
@@ -343,7 +336,6 @@ export function useMessaging(options: UseMessagingOptions = {}) {
     // Subscribe to new messages using the specific subscription function
     const unsubscribeMessages = subscribeToMessages((message: MessagingMessage) => {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:307',message:'subscribeToMessages callback executed - NEW MESSAGE RECEIVED',data:{messageId:message.id,conversationId:message.conversationId,currentConversationId:conversationId,matches:message.conversationId===conversationId,senderId:message.senderId,currentUserId:user?.id,isOwnMessage:message.senderId===user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
       // #endregion
       try {
         console.log('📨 New message received:', message);
@@ -456,14 +448,12 @@ export function useMessaging(options: UseMessagingOptions = {}) {
         // Add to current conversation messages (avoid duplicates)
         if (message.conversationId === conversationId && user?.id) {
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:313',message:'Updating query client with new message',data:{messageId:message.id,conversationId:message.conversationId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
           // #endregion
           queryClient.setQueryData<MessagingMessage[]>(
             queryKeys.messaging.messages(user.id, message.conversationId),
             old => {
               if (!old) {
                 // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:316',message:'Query data was empty - creating new array',data:{messageId:message.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
                 // #endregion
                 return [message];
               }
@@ -471,13 +461,11 @@ export function useMessaging(options: UseMessagingOptions = {}) {
               const messageExists = old.some(existingMsg => existingMsg.id === message.id);
               if (messageExists) {
                 // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:320',message:'Message already exists - skipping duplicate',data:{messageId:message.id,oldCount:old.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
                 // #endregion
                 console.log('📝 Message already exists, skipping:', message.id);
                 return old;
               }
               // #region agent log
-              fetch('http://127.0.0.1:7242/ingest/755596a4-5d31-43d8-9b12-1f1909f7098b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useMessaging.ts:323',message:'Adding new message to query data',data:{messageId:message.id,oldCount:old.length,newCount:old.length+1},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
               // #endregion
               return [...old, message];
             }

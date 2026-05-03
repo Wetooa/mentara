@@ -1,5 +1,5 @@
 import emailjs from '@emailjs/nodejs';
-import { env } from '../../../../test/stubs/private-env';
+import { env } from './stubs/private-env';
 
 jest.mock('@emailjs/nodejs', () => ({
   __esModule: true,
@@ -14,7 +14,7 @@ describe('POST /api/submit-demo', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    Object.keys(env).forEach((key) => delete env[key]);
+    Object.keys(env).forEach((key) => delete env[key as keyof typeof env]);
     jest.clearAllMocks();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
   });
@@ -24,7 +24,7 @@ describe('POST /api/submit-demo', () => {
   });
 
   it('rejects invalid email addresses', async () => {
-    const { POST } = await import('./+server');
+    const { POST } = await import('../src/routes/api/submit-demo/+server');
 
     const response = await POST({
       request: new Request('http://localhost/api/submit-demo', {
@@ -48,7 +48,7 @@ describe('POST /api/submit-demo', () => {
   it('returns a configuration error when EmailJS is missing', async () => {
     env.NODE_ENV = 'production';
 
-    const { POST } = await import('./+server');
+    const { POST } = await import('../src/routes/api/submit-demo/+server');
 
     const response = await POST({
       request: new Request('http://localhost/api/submit-demo', {

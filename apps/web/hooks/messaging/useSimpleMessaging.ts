@@ -109,7 +109,7 @@ export function useSimpleMessaging(params: {
   const sendMessage = async (content: string, attachments?: File[]) => {
     if (!params.conversationId) return;
 
-    let attachmentData: { url: string; fileName: string; fileSize: number; mimeType: string }[] = [];
+    const attachmentData: { url: string; fileName: string; fileSize: number; mimeType: string }[] = [];
     
     // Upload files if provided
     if (attachments && attachments.length > 0) {
